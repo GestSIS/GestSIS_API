@@ -20,32 +20,32 @@ class CreateSapeursTable extends Migration
             $table->string('nom');
             $table->string('prenom');
             $table->string('suffixe', 50);
-            $tabel->string('rue');
-            $tabel->string('no_rue');
-            $tabel->date('date_naissance');
-            // $tabel->date('date_inco'); // TODO: vérifier si nécessaire
-            // $tabel->date('date_sortie'); //TODO: vérifier si nécessaire
-            $tabel->string('no_avs');
+            $table->string('rue');
+            $table->string('no_rue');
+            $table->date('date_naissance');
+            // $table->date('date_inco'); // TODO: vérifier si nécessaire
+            // $table->date('date_sortie'); //TODO: vérifier si nécessaire
+            $table->string('no_avs');
 
             $table->string('profession');
-            $tabel->string('employeur');
-            $tabel->string('lieu_de_travail');
+            $table->string('employeur');
+            $table->string('lieu_de_travail');
             
-            // $tabel->integer('Nip'); // TODO: vérifier a quoi ça sert
+            // $table->integer('Nip'); // TODO: vérifier a quoi ça sert
             
-            $tabel->string('tel_portable');
-            $tabel->string('tel_prive');
-            $tabel->string('tel_professionnel');
-            $tabel->string('email');
-            $tabel->integer('actif');
+            $table->string('tel_portable');
+            $table->string('tel_prive');
+            $table->string('tel_professionnel');
+            $table->string('email');
+            $table->integer('actif');
             
-            $tabel->integer('tel_portable_rta');
-            $tabel->integer('tel_prive_rta');
-            $tabel->integer('tel_proffesionnel_rta');
+            $table->integer('tel_portable_rta');
+            $table->integer('tel_prive_rta');
+            $table->integer('tel_proffesionnel_rta');
 
-            $tabel->integer('tel_portable_prio');
-            $tabel->integer('tel_prive_prio');
-            $tabel->integer('tel_proffesionnel_prio');
+            $table->integer('tel_portable_prio');
+            $table->integer('tel_prive_prio');
+            $table->integer('tel_proffesionnel_prio');
 
             //Banque
             // CptBan
@@ -59,8 +59,8 @@ class CreateSapeursTable extends Migration
             $table->integer('porteur');
 
             // Foreign keys
-            $table->bigInteger('localite_id')->unsigned();
-            $table->foreign('localite_id')->references('id')->on('localite');
+            $table->unsignedBigInteger('localite_id');
+            $table->foreign('localite_id')->references('id')->on('localites');
         });
     }
 

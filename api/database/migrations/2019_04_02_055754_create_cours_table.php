@@ -16,15 +16,18 @@ class CreateCoursTable extends Migration
         Schema::create('cours', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
+            
             $table->unsignedBigInteger('precedent')->nullable();
+            $table->foreign('precedent')->references('id')->on('cours');
+
             $table->unsignedBigInteger('grade')->nullable();
+            $table->foreign('grade')->references('id')->on('grades');
+
             $table->string('abreviation');
             $table->string('designation');
             $table->integer('tri');
-            $table->integer('status', 1);
-
-            $table->foreign('precedent')->references('id')->on('cours');
-            $table->foreign('grade')->references('id')->on('grades');
+            $table->smallInteger('status');
+            
         });
     }
 
