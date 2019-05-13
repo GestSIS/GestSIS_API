@@ -24,7 +24,7 @@ class SapeurController extends Controller
         
         $sapeurs = Sapeur::all();
 
-        return response()->json($sapeurs);
+        return response()->json(['data' => $sapeurs]);
 
         // $start = $request->input('start');
         // $limit = $request->input('limit');
