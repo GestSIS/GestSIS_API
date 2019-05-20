@@ -11,6 +11,7 @@ before_script:
   - composer install --no-interaction
   - php artisan key:generate
   - php artisan migrate --step
+  - php artisan db:seed
 
 script:
   - vendor/bin/phpunit
