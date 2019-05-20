@@ -4,6 +4,7 @@
 namespace App\Repository;
 
 
+use App\Models\SapeursTelephone;
 use App\Models\Sapeur;
 use App\Models\Permis;
 
@@ -29,11 +30,6 @@ class SapeurBusiness
     public static function get($sapeur_id)
     {
         return new SapeurBusiness(Sapeur::findOrFail($sapeur_id));
-    }
-
-    public function id()
-    {
-        return $this->sapeur->id;
     }
 
     /**
@@ -103,16 +99,136 @@ class SapeurBusiness
         // localite_id
     }
 
-    public function mutate()
+    public function addCours()
     {
 
     }
 
+    /**
+     * Add a Telephone
+     *
+     * @param array $data
+     * @throws Exception
+     */
+    public function addTelephone($data)
+    {
+        //TODO
+        $validation = Validator::make($data,
+            array(
+                'telephone_id'      => 'required|numeric|min:1',
+                'telephone_type_id' => 'required|numeric',
+                'numero'            => 'required|string|min:2',
+                'order'             => 'required|numeric',
+                'rta'               => 'required|boolean',
+            )
+        );
+
+        if($validation->fails()) {
+            throw new Exception($validation->messages());
+        }
+
+        //TODO: Check if this numero already exist
+
+        //Create permis
+        $telephone = new SapeursTelephone();
+        $telephone->fill($data);
+
+        //Ajout du permis au sapeur
+        $this->sapeur->telephones()->save($telephone);
+    }
+
+    /**
+     * Update a Telephone informations
+     *
+     * @param array $data
+     * @throws Exception
+     */
+    public function updateTelephone($data)
+    {
+        //TODO
+        $validation = Validator::make($data,
+            array(
+                'telephone_id'      => 'required|numeric|min:1',
+                'telephone_type_id' => 'numeric',
+                'numero'            => 'string|min:2',
+                'order'             => 'numeric',
+                'rta'               => 'boolean',
+            )
+        );
+
+        if($validation->fails()) {
+            throw new Exception($validation->messages());
+        }
+
+        $telephone = $this->sapeur->telephones()->where('telephone_id', $data['telephone_id'])->first();
+
+        //Search for the telephone
+        if($telephone === null) {
+            throw new Exception("Unable to find telephone");
+        } else {
+            //Update telephone
+            $telephone->update($data);
+            $telephone->save();
+        }
+    }
+
+    /**
+     * Remove a Telephone
+     *
+     * @param int $permis_id
+     */
+    public function removeTelephone($telephone_id)
+    {
+        $this->sapeur->telephones()->where('telephone_id', $telephone_id)->delete();
+    }
+
+    /**
+     * Add a permis
+     *
+     * @param array $data
+     * @throws Exception
+     */
+    public function addPermis($data)
+    {
+        $validation = Validator::make($data,
+            array(
+                'permis_type_id'    => 'required|numeric|min:1',
+                'date'              => 'required|date',
+            )
+        );
+
+        if($validation->fails()) {
+            throw new Exception($validation->messages());
+        }
+
+        $permis = $this->sapeur->permis()->where('permis_type_id', $data['permis_type_id'])->first();
+
+        //Check si sapeur as déjà ce permis
+        if($permis !== null) {
+            throw new Exception("Unable to find permis");
+
+        } else {
+            //Create permis
+            $permis = new Permis();
+            $permis->date = $data['date'];
+            $permis->permis_type_id = $data['permis_type_id'];
+
+            //Ajout du permis au sapeur
+            $this->sapeur->permis()->save($permis);
+        }
+    }
+
+    /**
+     * Update a permis informations
+     *
+     * @param array $data
+     * @throws Exception
+     */
     public function updatePermis($data)
     {
         $validation = Validator::make($data,
             array(
-                'permis_id' => 'required|date',
+                'permis_id' => 'required|numeric|min:1',
                 'date'      => 'required|date',
             )
         );
@@ -133,43 +249,13 @@ class SapeurBusiness
         }
     }
 
-    public function addPermis($data)
-    {
-        $validation = Validator::make($data,
-            array(
-                'permis_type_id'    => 'numeric|min:2',
-                'date'              => 'required|date',
-            )
-        );
-
-        if($validation->fails()) {
-            throw new Exception($validation->messages());
-        }
-
-        $permis = $this->sapeur->permis()->where('permis_type_id', $data['permis_type_id'])->first();
-
-        //Check si sapeur as déjà ce permis
-        if($permis !== null) {
-            throw new Exception("Duplicated permis type for sapeur");
-        } else {
-
-            //Create permis
-            $permis = new Permis();
-            $permis->date = $data['date'];
-            $permis->permis_type_id = $data['permis_type_id'];
-
-            //Ajout du permis au sapeur
-            $this->sapeur->permis()->save($permis);
-        }
-    }
-
+    /**
+     * Remove a Permis
+     *
+     * @param int $permis_id
+     */
     public function removePermis($permis_id)
     {
         $this->sapeur->permis()->where('permis_id', $permis_id)->delete();
-    }
-
-    public function addCours()
-    {
-
     }
 }

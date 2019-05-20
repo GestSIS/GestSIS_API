@@ -17,7 +17,7 @@ class CorsMiddleware
     {
         //TODO Update allowed origins
         $headers = [
-            'Access-Control-Allow-Origin'      => 'localhost:8080',
+            'Access-Control-Allow-Origin'      => '*',
             'Access-Control-Allow-Methods'     => 'POST, GET, OPTIONS, PUT, DELETE',
             'Access-Control-Allow-Credentials' => 'true',
             'Access-Control-Max-Age'           => '86400',
@@ -36,6 +36,5 @@ class CorsMiddleware
         }
 
         return $response;
-        return $next($request);
     }
 }

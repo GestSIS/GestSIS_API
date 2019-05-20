@@ -21,7 +21,7 @@ class SapeursTableSeeder extends Seeder
             'prenom' => Str::random(10),
             'suffixe' => '',
             'rue' => Str::random(7),
-            'no_rue' => 12,
+            'no_rue' => '12a',
             'date_naissance' => Carbon::parse('1958-01-01'),
             'no_avs' => '756.5634.1212.12',
             'profession' => 'Artisan',
@@ -47,7 +47,7 @@ class SapeursTableSeeder extends Seeder
             'prenom' => Str::random(10),
             'suffixe' => '',
             'rue' => Str::random(7),
-            'no_rue' => 12,
+            'no_rue' => '12',
             'date_naissance' => Carbon::parse('1958-01-01'),
             'no_avs' => '756.5634.1212.12',
             'profession' => 'Artisan',
@@ -72,7 +72,7 @@ class SapeursTableSeeder extends Seeder
             'prenom' => Str::random(10),
             'suffixe' => '',
             'rue' => Str::random(7),
-            'no_rue' => 12,
+            'no_rue' => '123',
             'date_naissance' => Carbon::parse('1958-01-01'),
             'no_avs' => '756.5634.1212.12',
             'profession' => 'Artisan',
@@ -124,6 +124,7 @@ class SapeursTableSeeder extends Seeder
             'numero' => '032 453 34 67',
             'order' => 1,
             'telephone_type_id' => 1,
+            'rta' => false
         ]);
         DB::table('sapeurs_telephones')->insert([
             'created_at' => now(),
@@ -133,6 +134,7 @@ class SapeursTableSeeder extends Seeder
             'order' => 2,
             'numero' => '078 752 14 25',
             'telephone_type_id' => 2,
+            'rta' => true
         ]);
     }
 }
