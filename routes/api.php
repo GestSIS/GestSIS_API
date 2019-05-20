@@ -37,6 +37,9 @@ Route::group(['prefix' => 'v2'], function(){
         Route::get('sapeurs', 'SapeurController@index')->name('api.v2.sapeur.index');//->middleware('role:effectif_read');
         Route::get('sapeurs/{id}', 'SapeurController@show')->name('api.v2.sapeur.show');//->middleware('role:effectif_read');
 
+        Route::get('sapeurs/{id}/permis', 'SapeurPermisController@index')->name('api.v2.sapeur.permis');
+        Route::get('sapeurs/{id}/telephones', 'SapeurTelephoneController@index')->name('api.v2.sapeur.telephones');
+
         // // Exercices
         // Route::get('excusestypes', 'ExerciceApiController@excusesTypes')->name('api.v2.exercice.excusesTypes')->middleware('role:exercice_read');
         // Route::get('exercices', 'ExerciceApiController@index')->name('api.v2.exercice.index')->middleware('role:exercice_read');

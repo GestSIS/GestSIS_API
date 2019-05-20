@@ -27,19 +27,9 @@ class SapeursTableSeeder extends Seeder
             'profession' => 'Artisan',
             'employeur' => 'Canton du Jura',
             'lieu_de_travail' => 'Delémont',
-             
-            'tel_portable' => '032 442 21 21',
-            'tel_prive' => '032 442 21 32',
-            'tel_professionnel' => '032 442 21 43',
+
             'email' => Str::random(10).'@gmail.com',
             'actif' => 1,
-
-            'tel_portable_rta' => 1,
-            'tel_prive_rta' => 1,
-            'tel_proffesionnel_rta' => 0,
-            'tel_portable_prio' => 0,
-            'tel_prive_prio' => 1,
-            'tel_proffesionnel_prio' => 1,
 
             'iban' => 'CH65 82000 53636 75756 7',
             'iban_status' => 1,
@@ -63,19 +53,9 @@ class SapeursTableSeeder extends Seeder
             'profession' => 'Artisan',
             'employeur' => 'Canton du Jura',
             'lieu_de_travail' => 'Delémont',
-             
-            'tel_portable' => '032 442 21 21',
-            'tel_prive' => '032 442 21 32',
-            'tel_professionnel' => '032 442 21 43',
+
             'email' => Str::random(10).'@gmail.com',
             'actif' => 1,
-
-            'tel_portable_rta' => 1,
-            'tel_prive_rta' => 1,
-            'tel_proffesionnel_rta' => 0,
-            'tel_portable_prio' => 0,
-            'tel_prive_prio' => 1,
-            'tel_proffesionnel_prio' => 1,
 
             'iban' => 'CH65 82000 53636 75756 7',
             'iban_status' => 1,
@@ -98,25 +78,61 @@ class SapeursTableSeeder extends Seeder
             'profession' => 'Artisan',
             'employeur' => 'Canton du Jura',
             'lieu_de_travail' => 'Delémont',
-             
-            'tel_portable' => '032 442 21 21',
-            'tel_prive' => '032 442 21 32',
-            'tel_professionnel' => '032 442 21 43',
+
             'email' => Str::random(10).'@gmail.com',
             'actif' => 1,
-
-            'tel_portable_rta' => 1,
-            'tel_prive_rta' => 1,
-            'tel_proffesionnel_rta' => 0,
-            'tel_portable_prio' => 0,
-            'tel_prive_prio' => 1,
-            'tel_proffesionnel_prio' => 1,
 
             'iban' => 'CH65 82000 53636 75756 7',
             'iban_status' => 1,
             'remarque' => 'Diverses remarques',
             'porteur' => 0,
             'localite_id' => 2,
+        ]);
+
+        // permis
+        DB::table('permis')->insert([
+            'created_at' => now(),
+            'updated_at' => now(),
+
+            'permis_type_id' => '6',
+            'sapeur_id' => '2',
+            'date' => Carbon::parse('1958-01-01'),
+        ]);
+        DB::table('permis')->insert([
+            'created_at' => now(),
+            'updated_at' => now(),
+
+            'permis_type_id' => '2',
+            'sapeur_id' => '1',
+            'date' => Carbon::parse('1958-01-01'),
+        ]);
+        DB::table('permis')->insert([
+            'created_at' => now(),
+            'updated_at' => now(),
+
+            'permis_type_id' => '3',
+            'sapeur_id' => '1',
+            'date' => Carbon::parse('1958-01-01'),
+        ]);
+
+        //Telephones
+        DB::table('sapeurs_telephones')->insert([
+            'created_at' => now(),
+            'updated_at' => now(),
+
+            'sapeur_id' => 1,
+            'numero' => '032 453 34 67',
+            'order' => 1,
+            'telephone_type_id' => 1,
+        ]);
+        DB::table('sapeurs_telephones')->insert([
+            'created_at' => now(),
+            'updated_at' => now(),
+
+            'sapeur_id' => 1,
+            'order' => 2,
+            'numero' => '078 752 14 25',
+            'telephone_type_id' => 2,
         ]);
     }
 }

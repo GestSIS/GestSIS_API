@@ -32,20 +32,11 @@ class CreateSapeursTable extends Migration
             $table->string('lieu_de_travail');
             
             // $table->integer('Nip'); // TODO: vérifier a quoi ça sert
-            
-            $table->string('tel_portable');
-            $table->string('tel_prive');
-            $table->string('tel_professionnel');
+
             $table->string('email');
             $table->integer('actif');
-            
-            $table->integer('tel_portable_rta');
-            $table->integer('tel_prive_rta');
-            $table->integer('tel_proffesionnel_rta');
 
-            $table->integer('tel_portable_prio');
-            $table->integer('tel_prive_prio');
-            $table->integer('tel_proffesionnel_prio');
+            //TODO: Add telephone table
 
             //Banque
             // CptBan

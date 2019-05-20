@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Sapeur;
+use App\Models\Sapeur;
 
 class SapeurController extends Controller
 {
