@@ -4,7 +4,11 @@
 namespace App\Repository;
 
 
-use mysql_xdevapi\Exception;
+use App\Models\Sapeur;
+use App\Models\Permis;
+
+use Validator;
+use Exception;
 
 class SapeurBusiness
 {
@@ -20,11 +24,16 @@ class SapeurBusiness
      * Get's a sapeur by it's ID
      *
      * @param int
-     * @return sapeur
+     * @return SapeurBusiness
      */
     public static function get($sapeur_id)
     {
         return new SapeurBusiness(Sapeur::findOrFail($sapeur_id));
+    }
+
+    public function id()
+    {
+        return $this->sapeur->id;
     }
 
     /**
