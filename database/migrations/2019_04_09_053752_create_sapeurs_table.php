@@ -52,6 +52,9 @@ class CreateSapeursTable extends Migration
             // Foreign keys
             $table->unsignedBigInteger('localite_id');
             $table->foreign('localite_id')->references('id')->on('localites');
+
+            $table->unsignedBigInteger('civilite_id');
+            $table->foreign('civilite_id')->references('id')->on('civilites');
         });
     }
 

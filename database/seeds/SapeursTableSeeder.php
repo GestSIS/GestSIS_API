@@ -36,6 +36,7 @@ class SapeursTableSeeder extends Seeder
             'remarque' => 'Diverses remarques',
             'porteur' => 1,
             'localite_id' => 1,
+            'civilite_id' => 1
 
         ]);
         DB::table('sapeurs')->insert([
@@ -62,6 +63,7 @@ class SapeursTableSeeder extends Seeder
             'remarque' => 'Diverses remarques',
             'porteur' => 1,
             'localite_id' => 1,
+            'civilite_id' => 2
         ]);
         DB::table('sapeurs')->insert([
             'created_at' => now(),
@@ -87,6 +89,7 @@ class SapeursTableSeeder extends Seeder
             'remarque' => 'Diverses remarques',
             'porteur' => 0,
             'localite_id' => 2,
+            'civilite_id' => 1
         ]);
 
         // permis

@@ -9,7 +9,7 @@ class Sapeur extends Model
     //TODO: Code métier
 
     protected $fillable = ['nom', 'prenom', 'suffixe', 'rue', 'no_rue', 'date_naissance', 'no_avs', 'profession', 'employeur',
-                 'lieu_de_travail', 'email', 'actif', 'iban', 'iban_status', 'remarque','porteur'];
+                 'lieu_de_travail', 'email', 'actif', 'iban', 'iban_status', 'remarque','porteur', 'localite_id'];
 
     /**
      * The cours that belong to the user.

@@ -74,7 +74,7 @@ class SapeurController extends Controller
     {
         $sapeur = Sapeur::findOrFail($id);
 
-        return response()->json($sapeur);
+        return response()->json(['data' => $sapeur]);
     }
 
     /**

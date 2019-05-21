@@ -69,7 +69,9 @@ Route::group(['prefix' => 'v2'], function(){
         // Route::post('transfert/{slug}', 'TransfertApiController@create')->name('api.v2.transfert.create')->middleware('role:transfert_all');
         // Route::put('transfert/{id}/recu', 'TransfertApiController@received')->name('api.v2.transfert.received')->middleware('role:transfert_all');
 
-        // // Données de bases
+        // Données de bases
+        Route::get('permis', 'PermisController@index')->name('api.v2.permis');
+        Route::get('civilites', 'CiviliteController@index')->name('api.v2.civilites');
         // Route::get('statfederal', 'BaseDataApiController@statfederal')->name('api.v2.basedata.statfederal');
         // Route::get('typeintervention', 'BaseDataApiController@typeintervention')->name('api.v2.basedata.typeintervention');
         // Route::get('grade', 'BaseDataApiController@grade')->name('api.v2.basedata.grade');

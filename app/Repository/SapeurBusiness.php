@@ -40,15 +40,40 @@ class SapeurBusiness
      */
     public static function createSapeur($data)
     {
+        $validation = Validator::make($data,
+            array(
+                'nom' 	    	    => 'string|min:2',
+                'prenom'    	    => 'string|min:2',
+                'suffixe' 		    => 'string|min:3',
+                'rue'               => 'string|min:3',
+                'no_rue'		    => 'string',
+                'date_naissance'	=> 'date',
+                'no_avs'		    => 'string',
+                'profession'	    => 'string|max:80',
+                'employeur'	        => 'string|max:150',
+                'lieu_de_travail'	=> 'string|max:100',
+                'email'	            => 'email',
+                'actif' 	        => 'numeric',
+                'iban'	            => 'string|max:100',
+                'iban_status'	    => 'numeric',
+                'remarque'	        => 'string|max:300',
+                'porteur'	        => 'boolean',
+                'localite_id'       => 'numeric|min:0'
+            ));
+
+        if($validation->fails()) {
+            throw new Exception($validation->messages());
+        }
+
         $sapeur = new Sapeur();
-        $sapeur->update($data);
+        $sapeur->fill($data);
         $sapeur->save();
 
         return new SapeurBusiness($sapeur);
     }
 
     /**
-     * Deletes a sapeur.
+     * Delete a sapeur.
      *
      * @param int
      */
@@ -87,6 +112,7 @@ class SapeurBusiness
                 'iban_status'	    => 'numeric',
                 'remarque'	        => 'string|max:300',
                 'porteur'	        => 'boolean',
+                'localite_id'       => 'numeric|min:0'
             ));
 
         if($validation->fails()) {
@@ -101,6 +127,9 @@ class SapeurBusiness
 
     public function addCours()
     {
+        //Add Grade
+
+        //Add Fonction
 
     }
 
