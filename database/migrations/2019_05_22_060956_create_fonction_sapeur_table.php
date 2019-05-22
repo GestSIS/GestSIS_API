@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateFonctionsSapeursTable extends Migration
+class CreateFonctionSapeurTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateFonctionsSapeursTable extends Migration
      */
     public function up()
     {
-        Schema::create('fonctions_sapeurs', function (Blueprint $table) {
+        Schema::create('fonction_sapeur', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 

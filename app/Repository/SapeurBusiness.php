@@ -4,7 +4,7 @@
 namespace App\Repository;
 
 
-use App\Models\SapeursTelephone;
+use App\Models\SapeurTelephone;
 use App\Models\Sapeur;
 use App\Models\Permis;
 
@@ -131,7 +131,30 @@ class SapeurBusiness
 
         //Add Fonction
 
+        //Add Cours
     }
+
+
+    public function editMutation($data)
+    {
+
+    }
+
+    public function addMutation($data)
+    {
+        //Param:
+        // date mutation
+        // motif
+
+        // Ajoute une nouvelle mutation
+    }
+
+    public function removeMutation($data)
+    {
+        //Param
+        // id mutation
+    }
+
 
     /**
      * Add a Telephone
@@ -159,7 +182,7 @@ class SapeurBusiness
         //TODO: Check if this numero already exist
 
         //Create permis
-        $telephone = new SapeursTelephone();
+        $telephone = new SapeurTelephone();
         $telephone->fill($data);
 
         //Ajout du permis au sapeur

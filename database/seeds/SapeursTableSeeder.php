@@ -119,7 +119,7 @@ class SapeursTableSeeder extends Seeder
         ]);
 
         //Telephones
-        DB::table('sapeurs_telephones')->insert([
+        DB::table('sapeur_telephone')->insert([
             'created_at' => now(),
             'updated_at' => now(),
 
@@ -129,7 +129,7 @@ class SapeursTableSeeder extends Seeder
             'telephone_type_id' => 1,
             'rta' => false
         ]);
-        DB::table('sapeurs_telephones')->insert([
+        DB::table('sapeur_telephone')->insert([
             'created_at' => now(),
             'updated_at' => now(),
 
@@ -138,6 +138,60 @@ class SapeursTableSeeder extends Seeder
             'numero' => '078 752 14 25',
             'telephone_type_id' => 2,
             'rta' => true
+        ]);
+
+        DB::table('mutations')->insert([
+            'created_at' => now(),
+            'updated_at' => now(),
+
+            'sapeur_id' => 1,
+            'localite_id' => 5,
+            'incorporation' => Carbon::parse('1998-01-01'),
+            'sortie' => Carbon::parse('2000-05-05'),
+            'motif' => 'Déménagement',
+        ]);
+
+        DB::table('mutations')->insert([
+            'created_at' => now(),
+            'updated_at' => now(),
+
+            'sapeur_id' => 1,
+            'localite_id' => 1,
+            'incorporation' => Carbon::parse('2000-05-06'),
+            'sortie' => NULL,
+            'motif' => '',
+        ]);
+
+        DB::table('mutations')->insert([
+            'created_at' => now(),
+            'updated_at' => now(),
+
+            'sapeur_id' => 2,
+            'localite_id' => 1,
+            'incorporation' => Carbon::parse('2000-01-01'),
+            'sortie' => NULL,
+            'motif' => '',
+        ]);
+
+        DB::table('mutations')->insert([
+            'created_at' => now(),
+            'updated_at' => now(),
+
+            'sapeur_id' => 3,
+            'localite_id' => 2,
+            'incorporation' => Carbon::parse('2010-01-01'),
+            'sortie' => NULL,
+            'motif' => '',
+        ]);
+
+        DB::table('cours_sapeur')->insert([
+            'created_at' => now(),
+            'updated_at' => now(),
+
+            'sapeur_id' => 1,
+            'cours_id' => 1,
+            'date' => Carbon::parse('2010-01-28'),
+            'lieu' => 'Balsthal',
         ]);
     }
 }

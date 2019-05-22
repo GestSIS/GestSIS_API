@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateCoursSapeursTable extends Migration
+class CreateMutationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,18 +13,19 @@ class CreateCoursSapeursTable extends Migration
      */
     public function up()
     {
-        Schema::create('cours_sapeurs', function (Blueprint $table) {
+        Schema::create('mutations', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->bigInteger('cours_id')->unsigned()->nullable();
-            $table->foreign('cours_id')->references('id')->on('cours');
+            $table->bigInteger('localite_id')->unsigned()->nullable();
+            $table->foreign('localite_id')->references('id')->on('localites');
 
             $table->bigInteger('sapeur_id')->unsigned()->nullable();
             $table->foreign('sapeur_id')->references('id')->on('sapeurs');
 
-            $table->date('date');
-            $table->string('lieu');//TODO: Check if can be changed to localite_id
+            $table->date('incorporation');
+            $table->date('sortie')->nullable();
+            $table->string('motif');
         });
     }
 
@@ -35,6 +36,6 @@ class CreateCoursSapeursTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cours_sapeurs');
+        Schema::dropIfExists('mutations');
     }
 }

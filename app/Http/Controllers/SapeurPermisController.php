@@ -7,14 +7,16 @@ use App\Models\Sapeur;
 
 class SapeurPermisController extends Controller
 {
+
     /**
-     * Display a listing of the resource.
+     * Return the permis
      *
-     * @return \Illuminate\Http\Response
+     * @param int $sapeur_id
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index($sapeur_id)
+    public function index(int $sapeur_id)
     {
-        $permis = Sapeur::find($sapeur_id)->first()->permis()->with('PermisType')->get();
+        $permis = Sapeur::find($sapeur_id)->permis()->with('PermisType')->get();
 
         return response()->json(['data' => $permis]);
     }

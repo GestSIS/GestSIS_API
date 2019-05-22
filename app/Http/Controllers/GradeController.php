@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Civilite;
+use App\Models\Grade;
 
-class CiviliteController extends Controller
+class GradeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,8 +14,8 @@ class CiviliteController extends Controller
      */
     public function index()
     {
-        $civilites = Civilite::all();
+        $grades = Grade::all();
 
-        return response()->json(['data' => $civilites]);
+        return response()->json(['data' => $grades]);
     }
 }

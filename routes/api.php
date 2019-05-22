@@ -39,6 +39,10 @@ Route::group(['prefix' => 'v2'], function(){
 
         Route::get('sapeurs/{id}/permis', 'SapeurPermisController@index')->name('api.v2.sapeur.permis');
         Route::get('sapeurs/{id}/telephones', 'SapeurTelephoneController@index')->name('api.v2.sapeur.telephones');
+        Route::get('sapeurs/{id}/mutations', 'SapeurMutationController@index')->name('api.v2.sapeur.mutations');
+        Route::get('sapeurs/{id}/cours', 'SapeurCoursController@index')->name('api.v2.sapeur.cours');
+        Route::get('sapeurs/{id}/grades', 'SapeurGradeController@index')->name('api.v2.sapeur.cours');
+        Route::get('sapeurs/{id}/fonctions', 'SapeurFonctionController@index')->name('api.v2.sapeur.cours');
 
         // // Exercices
         // Route::get('excusestypes', 'ExerciceApiController@excusesTypes')->name('api.v2.exercice.excusesTypes')->middleware('role:exercice_read');
@@ -72,10 +76,13 @@ Route::group(['prefix' => 'v2'], function(){
         // Données de bases
         Route::get('permis', 'PermisController@index')->name('api.v2.permis');
         Route::get('civilites', 'CiviliteController@index')->name('api.v2.civilites');
+        Route::get('grades', 'GradeController@index')->name('api.v2.grades');
+        Route::get('fonctions', 'FonctionController@index')->name('api.v2.fonctions');
+        Route::get('cours', 'CoursController@index')->name('api.v2.cours');
+        Route::get('localites', 'LocaliteController@index')->name('api.v2.localites');
+        Route::get('telephone-types', 'TelephoneTypeController@index')->name('api.v2.telephones-type');
         // Route::get('statfederal', 'BaseDataApiController@statfederal')->name('api.v2.basedata.statfederal');
         // Route::get('typeintervention', 'BaseDataApiController@typeintervention')->name('api.v2.basedata.typeintervention');
-        // Route::get('grade', 'BaseDataApiController@grade')->name('api.v2.basedata.grade');
-        // Route::get('cours', 'BaseDataApiController@cours')->name('api.v2.basedata.cours');
         // Route::get('districtlocality', 'BaseDataApiController@districtlocality')->name('api.v2.basedata.districtlocality');
         // Route::get('cmedtype', 'BaseDataApiController@cmedtype')->name('api.v2.basedata.cmedtype');
     // });

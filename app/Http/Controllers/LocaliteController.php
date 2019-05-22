@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Civilite;
+use App\Models\Localite;
 
-class CiviliteController extends Controller
+class LocaliteController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,8 +14,8 @@ class CiviliteController extends Controller
      */
     public function index()
     {
-        $civilites = Civilite::all();
+        $localites = Localite::all();
 
-        return response()->json(['data' => $civilites]);
+        return response()->json(['data' => $localites]);
     }
 }

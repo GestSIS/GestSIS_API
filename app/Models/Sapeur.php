@@ -10,15 +10,31 @@ class Sapeur extends Model
                  'lieu_de_travail', 'email', 'actif', 'iban', 'iban_status', 'remarque','porteur', 'localite_id'];
 
     /**
-     * The cours that belong to the user.
+     * The cours that belong to the sapeur.
      */
     public function cours()
     {
-        return $this->belongsToMany('App\Models\Cours');
+        return $this->hasMany('App\Models\CoursSapeur');
     }
 
     /**
-     * The Permis that belong to the user.
+     * The cours that belong to the sapeur.
+     */
+    public function grades()
+    {
+        return $this->hasMany('App\Models\GradeSapeur');
+    }
+
+    /**
+     * The cours that belong to the sapeur.
+     */
+    public function fonctions()
+    {
+        return $this->hasMany('App\Models\FonctionSapeur');
+    }
+
+    /**
+     * The Permis that belong to the sapeur.
      */
     public function permis()
     {
@@ -26,13 +42,24 @@ class Sapeur extends Model
     }
 
     /**
-     * The Telephones that belong to the user.
+     * The Telephones that belong to the sapeur.
      */
     public function telephones()
     {
-        return $this->hasMany('App\Models\SapeursTelephone');
+        return $this->hasMany('App\Models\SapeurTelephone');
     }
 
+    /**
+     * The Mutations that belong to the sapeur.
+     */
+    public function mutations()
+    {
+        return $this->hasMany('App\Models\Mutation');
+    }
+
+    /**
+     * The localite where the sapeur lives
+     */
     public function localite()
     {
         return $this->belongsTo('App\Models\Localite');

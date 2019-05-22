@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateGradesSapeursTable extends Migration
+class CreateSapeurTelephoneTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,18 +13,20 @@ class CreateGradesSapeursTable extends Migration
      */
     public function up()
     {
-        Schema::create('grades_sapeurs', function (Blueprint $table) {
+        Schema::create('sapeur_telephone', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->bigInteger('grade_id')->unsigned()->nullable();
-            $table->foreign('grade_id')->references('id')->on('grades');
-
-            $table->bigInteger('sapeur_id')->unsigned()->nullable();
+            $table->bigInteger('sapeur_id')->unsigned();
             $table->foreign('sapeur_id')->references('id')->on('sapeurs');
 
-            $table->date('date');
-            $table->string('remarque');
+            $table->bigInteger('telephone_type_id')->unsigned();
+            $table->foreign('telephone_type_id')->references('id')->on('telephone_types');
+
+            $table->string('numero');
+
+            $table->integer('tri', false);
+            $table->boolean('rta')->default(false);
         });
     }
 
@@ -35,6 +37,6 @@ class CreateGradesSapeursTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('grades_sapeurs');
+        Schema::dropIfExists('sapeurs_telephones');
     }
 }

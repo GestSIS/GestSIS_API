@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cours;
 use Illuminate\Http\Request;
-use App\Models\Civilite;
 
-class CiviliteController extends Controller
+class CoursController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,8 +14,8 @@ class CiviliteController extends Controller
      */
     public function index()
     {
-        $civilites = Civilite::all();
+        $cours = Cours::all();
 
-        return response()->json(['data' => $civilites]);
+        return response()->json(['data' => $cours]);
     }
 }
