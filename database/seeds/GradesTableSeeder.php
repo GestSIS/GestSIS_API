@@ -11,18 +11,22 @@ class GradesTableSeeder extends Seeder
      */
     public function run()
     {
-        $Grade = array(
-            array('GRA_ID' => '1','GRA_Designation' => 'Capitaine','GRA_Abr' => 'Cap','GRA_Grp' => '1','GRA_Tri' => '98'),
-            array('GRA_ID' => '2','GRA_Designation' => 'Premier-Lieutenant','GRA_Abr' => 'Plt','GRA_Grp' => '1','GRA_Tri' => '95'),
-            array('GRA_ID' => '3','GRA_Designation' => 'Lieutenant','GRA_Abr' => 'Lt','GRA_Grp' => '1','GRA_Tri' => '90'),
-            array('GRA_ID' => '4','GRA_Designation' => 'Fourrier','GRA_Abr' => 'Four','GRA_Grp' => '2','GRA_Tri' => '85'),
-            array('GRA_ID' => '5','GRA_Designation' => 'Sergent','GRA_Abr' => 'Sgt','GRA_Grp' => '2','GRA_Tri' => '80'),
-            array('GRA_ID' => '6','GRA_Designation' => 'Caporal','GRA_Abr' => 'Cpl','GRA_Grp' => '2','GRA_Tri' => '75'),
-            array('GRA_ID' => '7','GRA_Designation' => 'Appointé','GRA_Abr' => 'App','GRA_Grp' => '3','GRA_Tri' => '70'),
-            array('GRA_ID' => '8','GRA_Designation' => 'Sergent-major','GRA_Abr' => 'Sgtm','GRA_Grp' => '2','GRA_Tri' => '82'),
-            array('GRA_ID' => '9','GRA_Designation' => 'Major','GRA_Abr' => 'Maj','GRA_Grp' => '1','GRA_Tri' => '99'),
-            array('GRA_ID' => '10','GRA_Designation' => 'Soldat','GRA_Abr' => 'Sdt','GRA_Grp' => '3','GRA_Tri' => '65'),
-            array('GRA_ID' => '11','GRA_Designation' => 'Candidats','GRA_Abr' => 'Cand','GRA_Grp' => '3','GRA_Tri' => '60')
+        $grades = array(
+            array('id' => '1',  'designation' => 'Capitaine',           'abreviation' => 'Cap',     'groupe' => '1',   'tri' => '98'),
+            array('id' => '2',  'designation' => 'Premier-Lieutenant',  'abreviation' => 'Plt',     'groupe' => '1',   'tri' => '95'),
+            array('id' => '3',  'designation' => 'Lieutenant',          'abreviation' => 'Lt',      'groupe' => '1',   'tri' => '90'),
+            array('id' => '4',  'designation' => 'Fourrier',            'abreviation' => 'Four',    'groupe' => '2',   'tri' => '85'),
+            array('id' => '5',  'designation' => 'Sergent',             'abreviation' => 'Sgt',     'groupe' => '2',   'tri' => '80'),
+            array('id' => '6',  'designation' => 'Caporal',             'abreviation' => 'Cpl',     'groupe' => '2',   'tri' => '75'),
+            array('id' => '7',  'designation' => 'Appointé',            'abreviation' => 'App',     'groupe' => '3',   'tri' => '70'),
+            array('id' => '8',  'designation' => 'Sergent-major',       'abreviation' => 'Sgtm',    'groupe' => '2',   'tri' => '82'),
+            array('id' => '9',  'designation' => 'Major',               'abreviation' => 'Maj',     'groupe' => '1',   'tri' => '99'),
+            array('id' => '10', 'designation' => 'Soldat',              'abreviation' => 'Sdt',     'groupe' => '3',   'tri' => '65'),
+            array('id' => '11', 'designation' => 'Candidats',           'abreviation' => 'Cand',    'groupe' => '3',   'tri' => '60')
         );
+
+        foreach ($grades as $grade){
+            DB::table('grades')->insert($grade);
+        }
     }
 }
