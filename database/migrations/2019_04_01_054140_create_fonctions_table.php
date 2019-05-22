@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateLocalitesTable extends Migration
+class CreateFonctionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,13 @@ class CreateLocalitesTable extends Migration
      */
     public function up()
     {
-        Schema::create('localites', function (Blueprint $table) {
+        Schema::create('fonctions', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
-            $table->string('npa');
-            $table->string('designation');
 
-            $table->unsignedBigInteger('commune_id')->nullable();
-            $table->foreign('commune_id')->references('id')->on('communes');
+            $table->string('nom');
+            $table->string('abr');
+            $table->integer('tri');
         });
     }
 
@@ -31,6 +30,6 @@ class CreateLocalitesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('localites');
+        Schema::dropIfExists('fonctions');
     }
 }

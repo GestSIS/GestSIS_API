@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateLocalitesTable extends Migration
+class CreateGroupesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,18 @@ class CreateLocalitesTable extends Migration
      */
     public function up()
     {
-        Schema::create('localites', function (Blueprint $table) {
+        Schema::create('groupes', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
-            $table->string('npa');
-            $table->string('designation');
 
-            $table->unsignedBigInteger('commune_id')->nullable();
-            $table->foreign('commune_id')->references('id')->on('communes');
+            $table->integer('type');
+            $table->integer('no');
+            $table->string('designation');
+            $table->string('info');
+            $table->integer('tri');
+
+            $table->bigInteger('pere_id')->unsigned()->nullable();
+            $table->foreign('pere_id')->references('id')->on('groupes');
         });
     }
 
@@ -31,6 +35,6 @@ class CreateLocalitesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('localites');
+        Schema::dropIfExists('groupes');
     }
 }

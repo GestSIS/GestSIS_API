@@ -19,6 +19,7 @@ class CreatePermisTable extends Migration
 
             $table->bigInteger('sapeur_id')->unsigned();
             $table->foreign('sapeur_id')->references('id')->on('sapeurs');
+
             $table->bigInteger('permis_type_id')->unsigned();
             $table->foreign('permis_type_id')->references('id')->on('permis_types');
 

@@ -17,8 +17,8 @@ class SapeursTableSeeder extends Seeder
             'updated_at' => now(),
             
             'id' => '1',
-            'nom' => Str::random(10),
-            'prenom' => Str::random(10),
+            'nom' => 'Dutoit',
+            'prenom' => 'Sarah',
             'suffixe' => '',
             'rue' => Str::random(7),
             'no_rue' => '12a',
@@ -44,8 +44,8 @@ class SapeursTableSeeder extends Seeder
             'updated_at' => now(),
 
             'id' => '2',
-            'nom' => Str::random(10),
-            'prenom' => Str::random(10),
+            'nom' => 'Wermeille',
+            'prenom' => 'Benoit',
             'suffixe' => '',
             'rue' => Str::random(7),
             'no_rue' => '12',
@@ -70,8 +70,8 @@ class SapeursTableSeeder extends Seeder
             'updated_at' => now(),
 
             'id' => '3',
-            'nom' => Str::random(10),
-            'prenom' => Str::random(10),
+            'nom' => 'Desboeufs',
+            'prenom' => 'Antoine',
             'suffixe' => '',
             'rue' => Str::random(7),
             'no_rue' => '123',
@@ -125,7 +125,7 @@ class SapeursTableSeeder extends Seeder
 
             'sapeur_id' => 1,
             'numero' => '032 453 34 67',
-            'order' => 1,
+            'tri' => 1,
             'telephone_type_id' => 1,
             'rta' => false
         ]);
@@ -134,7 +134,7 @@ class SapeursTableSeeder extends Seeder
             'updated_at' => now(),
 
             'sapeur_id' => 1,
-            'order' => 2,
+            'tri' => 2,
             'numero' => '078 752 14 25',
             'telephone_type_id' => 2,
             'rta' => true

@@ -17,17 +17,19 @@ class CreateCoursTable extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
             
-            $table->unsignedBigInteger('precedent')->nullable();
-            $table->foreign('precedent')->references('id')->on('cours');
+            $table->unsignedBigInteger('precedent_id')->nullable();
+            $table->foreign('precedent_id')->references('id')->on('cours');
 
-            $table->unsignedBigInteger('grade')->nullable();
-            $table->foreign('grade')->references('id')->on('grades');
+            $table->unsignedBigInteger('grade_id')->nullable();
+            $table->foreign('grade_id')->references('id')->on('grades');
+
+            $table->unsignedBigInteger('fonction_id')->nullable();
+            $table->foreign('fonction_id')->references('id')->on('fonctions');
 
             $table->string('abreviation');
             $table->string('designation');
             $table->integer('tri');
             $table->smallInteger('status');
-            
         });
     }
 

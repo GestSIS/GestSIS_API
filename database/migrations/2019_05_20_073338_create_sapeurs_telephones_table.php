@@ -25,7 +25,7 @@ class CreateSapeursTelephonesTable extends Migration
 
             $table->string('numero');
 
-            $table->integer('order', false);
+            $table->integer('tri', false);
             $table->boolean('rta')->default(false);
         });
     }
