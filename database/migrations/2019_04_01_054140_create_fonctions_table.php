@@ -18,8 +18,9 @@ class CreateFonctionsTable extends Migration
             $table->timestamps();
 
             $table->string('nom');
-            $table->string('abr');
+            $table->string('abreviation');
             $table->integer('tri');
+            $table->boolean('cumulable');
         });
     }
 

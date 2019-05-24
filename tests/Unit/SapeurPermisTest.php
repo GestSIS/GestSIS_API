@@ -15,7 +15,7 @@ use Exception;
 class SapeurPermisTest extends TestCase
 {
     /**
-     * A basic feature test example.
+     * Test add permis
      *
      * @return void
      */
@@ -35,7 +35,7 @@ class SapeurPermisTest extends TestCase
     }
 
     /**
-     * A basic feature test example.
+     * Test duplicated permis add
      *
      * @return void
      */
@@ -59,4 +59,8 @@ class SapeurPermisTest extends TestCase
         $permis = Sapeur::find($id)->permis()->where('permis_type_id',$permis_type)->first();
         $this->assertTrue($permis !== null);
     }
+
+    //TODO Edit permis test
+
+    //TODO Remove permis test
 }

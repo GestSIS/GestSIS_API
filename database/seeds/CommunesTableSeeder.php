@@ -11,7 +11,6 @@ class CommunesTableSeeder extends Seeder
      */
     public function run()
     {
-
         $communes = array(
             array('id' => '2', 'designation' => 'Boécourt'),
             array('id' => '5', 'designation' => 'Saulcy'),
@@ -75,7 +74,7 @@ class CommunesTableSeeder extends Seeder
             array('id' => '69', 'designation' => 'Balsthal'),
         );
 
-        foreach ($communes as $commune){
+        foreach ($communes as $commune) {
             DB::table('communes')->insert($commune);
         }
     }

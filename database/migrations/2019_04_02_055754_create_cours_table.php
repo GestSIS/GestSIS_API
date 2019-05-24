@@ -29,7 +29,8 @@ class CreateCoursTable extends Migration
             $table->string('abreviation');
             $table->string('designation');
             $table->integer('tri');
-            $table->smallInteger('status');
+            $table->date('validite_debut')->nullable();
+            $table->date('validite_fin')->nullable();
         });
     }
 
