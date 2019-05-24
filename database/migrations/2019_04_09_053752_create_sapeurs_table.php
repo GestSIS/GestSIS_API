@@ -19,7 +19,7 @@ class CreateSapeursTable extends Migration
 
             $table->string('nom');
             $table->string('prenom');
-            $table->string('suffixe', 50);
+            $table->string('suffixe', 50)->nullable();
             $table->string('rue');
             $table->string('no_rue');
             $table->date('date_naissance');

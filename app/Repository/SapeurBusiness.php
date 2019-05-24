@@ -98,7 +98,7 @@ class SapeurBusiness
             array(
                 'nom' 	    	    => 'string|min:2',
                 'prenom'    	    => 'string|min:2',
-                'suffixe' 		    => 'string',
+                'suffixe' 		    => 'string|nullable',
                 'rue'               => 'string|min:3',
                 'no_rue'		    => 'string',
                 'date_naissance'	=> 'date',
@@ -112,7 +112,7 @@ class SapeurBusiness
                 'iban_status'	    => 'numeric',
                 'remarque'	        => 'string|max:300',
                 'porteur'	        => 'boolean',
-                'localite_id'       => 'numeric|min:0'
+                'localite_id'       => 'numeric|min:1'
             ));
 
         if($validation->fails()) {
