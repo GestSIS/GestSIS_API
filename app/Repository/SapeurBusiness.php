@@ -44,7 +44,7 @@ class SapeurBusiness
             array(
                 'nom' 	    	    => 'string|min:2',
                 'prenom'    	    => 'string|min:2',
-                'suffixe' 		    => 'string|min:3',
+                'suffixe' 		    => 'string',
                 'rue'               => 'string|min:3',
                 'no_rue'		    => 'string',
                 'date_naissance'	=> 'date',
@@ -98,7 +98,7 @@ class SapeurBusiness
             array(
                 'nom' 	    	    => 'string|min:2',
                 'prenom'    	    => 'string|min:2',
-                'suffixe' 		    => 'string|min:3',
+                'suffixe' 		    => 'string',
                 'rue'               => 'string|min:3',
                 'no_rue'		    => 'string',
                 'date_naissance'	=> 'date',
@@ -289,11 +289,11 @@ class SapeurBusiness
             throw new Exception($validation->messages());
         }
 
-        $permis = $this->sapeur->permis()->where('permis_type_id', $data['permis_id'])->first();
+        $permis = $this->sapeur->permis()->where('id', $data['permis_id'])->first();
 
         //Check si sapeur as déjà ce permis
         if($permis === null) {
-            throw new Exception("Duplicated permis type for sapeur");
+            throw new Exception("Unknown permis");
         } else {
             //Update permis
             $permis->date = $data['date'];
@@ -308,6 +308,6 @@ class SapeurBusiness
      */
     public function removePermis($permis_id)
     {
-        $this->sapeur->permis()->where('permis_id', $permis_id)->delete();
+        $this->sapeur->permis()->where('permis.id', $permis_id)->delete();
     }
 }

@@ -44,6 +44,13 @@ Route::group(['prefix' => 'v2'], function(){
         Route::get('sapeurs/{id}/grades', 'SapeurGradeController@index')->name('api.v2.sapeur.cours');
         Route::get('sapeurs/{id}/fonctions', 'SapeurFonctionController@index')->name('api.v2.sapeur.cours');
 
+        Route::post('sapeurs', 'SapeurController@store')->name('api.v2.sapeur.store');//->middleware('role:effectif_read');
+        Route::put('sapeurs/{id}', 'SapeurController@update')->name('api.v2.sapeur.update');//->middleware('role:effectif_read');
+
+        Route::post('sapeurs/{id}/permis', 'SapeurPermisController@store')->name('api.v2.sapeur.permis.store');//->middleware('role:effectif_read');
+        Route::put('sapeurs/{id}/permis/{permisId}', 'SapeurPermisController@update')->name('api.v2.sapeur.permis.update');//->middleware('role:effectif_read');
+        Route::delete('sapeurs/{id}/permis/{permisId}', 'SapeurPermisController@destroy')->name('api.v2.sapeur.permis.destroy');//->middleware('role:effectif_read');
+
         // // Exercices
         // Route::get('excusestypes', 'ExerciceApiController@excusesTypes')->name('api.v2.exercice.excusesTypes')->middleware('role:exercice_read');
         // Route::get('exercices', 'ExerciceApiController@index')->name('api.v2.exercice.index')->middleware('role:exercice_read');
@@ -66,7 +73,7 @@ Route::group(['prefix' => 'v2'], function(){
         // Route::get('telephones', 'TelephoneApiController@index')->name('api.v2.telephone.index');
 
         // // Groupes
-        // Route::get('groupes', 'GroupeApiController@index')->name('api.v2.groupe.index');
+        Route::get('groupes', 'GroupeController@index')->name('api.v2.groupes');
 
         // // Transfert
         // Route::get('transfert', 'TransfertApiController@index')->name('api.v2.transfert.index')->middleware('role:transfert_all');

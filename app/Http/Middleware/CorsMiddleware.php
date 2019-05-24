@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Log;
 
 class CorsMiddleware
 {
@@ -24,9 +25,11 @@ class CorsMiddleware
             'Access-Control-Allow-Headers'     => 'Content-Type, Authorization, X-Requested-With'
         ];
 
+        Log::info("TEST");
         if ($request->isMethod('OPTIONS'))
         {
-            return response()->json('{"method":"OPTIONS"}', 200, $headers);
+            Log::info("TEST inside");
+            return response()->json('{"method":"OPTIONS"}', 200)->withHeaders($headers);
         }
 
         $response = $next($request);
