@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Permis extends Model
 {
+    protected $fillable = ['date'];
+
     /**
      * Get the post that owns the comment.
      */
