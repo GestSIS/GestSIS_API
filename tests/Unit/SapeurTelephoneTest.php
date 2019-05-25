@@ -14,6 +14,7 @@ class SapeurTelephoneTest extends TestCase
      * Test add telephone
      *
      * @return void
+     * @throws Exception
      */
     public function testAddTelephone()
     {

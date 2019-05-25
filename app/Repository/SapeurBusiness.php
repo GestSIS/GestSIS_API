@@ -4,6 +4,7 @@
 namespace App\Repository;
 
 
+use App\Models\Mutation;
 use App\Models\Permis;
 use App\Models\Sapeur;
 use App\Models\SapeurTelephone;
@@ -36,6 +37,7 @@ class SapeurBusiness
      *
      * @param $data
      * @return SapeurBusiness
+     * @throws Exception
      */
     public static function createSapeur($data)
     {
@@ -91,6 +93,7 @@ class SapeurBusiness
      *
      * @param int
      * @param array
+     * @throws Exception
      */
     public function update($data)
     {
@@ -334,6 +337,7 @@ class SapeurBusiness
      * Ajout d'une mutation
      *
      * @param $data
+     * @return Mutation
      * @throws Exception
      */
     public function addMutation($data)
@@ -342,8 +346,8 @@ class SapeurBusiness
         $validation = Validator::make($data,
             array(
                 'incorporation' => 'required|date',
-                'sortie' => 'required|date|nullable|after:incorporation',
-                'motif' => 'required|string|nullable',
+                'sortie' => 'date|nullable|after:incorporation',
+                'motif' => 'string|nullable',
                 'localite_id' => 'required|integer|exists:localites,id',
             )
         );
@@ -392,7 +396,7 @@ class SapeurBusiness
         }
 
         //Update mutation
-        $mutation = $this->sapeur->mutations()->where('mutation_id', $data['mutation_id'])->first();
+        $mutation = $this->sapeur->mutations()->where('mutations.id', $data['mutation_id'])->first();
 
         //Search for the mutation
         if ($mutation === null) {
@@ -411,13 +415,14 @@ class SapeurBusiness
      */
     public function removeMutation(int $mutation_id)
     {
-        $this->sapeur->mutations()->where('mutation.id', $mutation_id)->delete();
+        $this->sapeur->mutations()->where('mutations.id', $mutation_id)->delete();
     }
 
     /**
      * Add a Telephone
      *
      * @param array $data
+     * @return SapeurTelephone
      * @throws Exception
      */
     public function addTelephone($data)
@@ -496,6 +501,7 @@ class SapeurBusiness
      * Add a permis
      *
      * @param array $data
+     * @return Permis
      * @throws Exception
      */
     public function addPermis($data)
@@ -516,7 +522,6 @@ class SapeurBusiness
         //Check si sapeur as déjà ce permis
         if ($permis !== null) {
             throw new Exception("Unable to find permis");
-
         } else {
             //Create permis
             $permis = new Permis();
@@ -533,8 +538,8 @@ class SapeurBusiness
      * Update a permis informations
      *
      * @param array $data
+     * @return Permis
      * @throws Exception
-     * @return App\Models\Permis
      */
     public function updatePermis($data)
     {
