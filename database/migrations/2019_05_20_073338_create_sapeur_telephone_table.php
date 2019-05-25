@@ -25,7 +25,7 @@ class CreateSapeurTelephoneTable extends Migration
 
             $table->string('numero');
 
-            $table->integer('tri', false);
+            $table->integer('priorite', false);
             $table->boolean('rta')->default(false);
         });
     }

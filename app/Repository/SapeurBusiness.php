@@ -426,7 +426,7 @@ class SapeurBusiness
             array(
                 'telephone_type_id' => 'required|integer|exists:telephone_types,id',
                 'numero' => 'required|string|min:2',
-                'order' => 'required|integer',
+                'priorite' => 'required|integer',
                 'rta' => 'required|boolean',
             )
         );
@@ -461,7 +461,7 @@ class SapeurBusiness
                 'telephone_id' => 'required|integer|exists:sapeur_telephone,id',
                 'telephone_type_id' => 'integer|exists:telephone_types,id',
                 'numero' => 'string|min:2',
-                'order' => 'integer',
+                'priorite' => 'integer',
                 'rta' => 'boolean',
             )
         );

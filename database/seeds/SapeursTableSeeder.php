@@ -125,7 +125,7 @@ class SapeursTableSeeder extends Seeder
 
             'sapeur_id' => 1,
             'numero' => '032 453 34 67',
-            'tri' => 1,
+            'priorite' => 1,
             'telephone_type_id' => 1,
             'rta' => false
         ]);
@@ -134,7 +134,7 @@ class SapeursTableSeeder extends Seeder
             'updated_at' => now(),
 
             'sapeur_id' => 1,
-            'tri' => 2,
+            'priorite' => 2,
             'numero' => '078 752 14 25',
             'telephone_type_id' => 2,
             'rta' => true

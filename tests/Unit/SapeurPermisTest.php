@@ -87,7 +87,7 @@ class SapeurPermisTest extends TestCase
     }
 
     /**
-     * Test edit permis
+     * Test remove permis
      *
      * @return void
      * @throws \Exception
