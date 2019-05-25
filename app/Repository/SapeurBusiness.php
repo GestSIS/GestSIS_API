@@ -9,6 +9,7 @@ use App\Models\Mutation;
 use App\Models\Permis;
 use App\Models\Sapeur;
 use App\Models\GradeSapeur;
+use App\Models\FonctionSapeur;
 use App\Models\SapeurTelephone;
 use Exception;
 use Validator;
@@ -178,7 +179,7 @@ class SapeurBusiness
                 'fonction_id' => 'required|integer|exists:fonctions,id',
                 'debut' => 'required|date',
                 'fin' => 'date|nullable|after:debut',
-                'remarque' => 'required|string|nullable',
+                'remarque' => 'string|nullable',
             )
         );
 
