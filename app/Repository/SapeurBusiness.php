@@ -4,9 +4,11 @@
 namespace App\Repository;
 
 
+use App\Models\Fonction;
 use App\Models\Mutation;
 use App\Models\Permis;
 use App\Models\Sapeur;
+use App\Models\GradeSapeur;
 use App\Models\SapeurTelephone;
 use Exception;
 use Validator;
@@ -164,6 +166,7 @@ class SapeurBusiness
      * Ajout d'une mutation
      *
      * @param $data
+     * @return FonctionSapeur
      * @throws Exception
      */
     public function addFonction($data)
@@ -194,12 +197,15 @@ class SapeurBusiness
 
         //Ajout de la mutation au sapeur
         $this->sapeur->mutations()->save($fonction);
+
+        return $fonction;
     }
 
     /**
      * Modifie une mutation
      *
      * @param $data
+     * @return FonctionSapeur
      * @throws Exception
      */
     public function updateFonction($data)
@@ -232,6 +238,8 @@ class SapeurBusiness
             $fonction->update($data);
             $fonction->save();
         }
+
+        return $fonction;
     }
 
     /**
@@ -249,6 +257,7 @@ class SapeurBusiness
      * Ajout d'un grade
      *
      * @param $data
+     * @return GradeSapeur
      * @throws Exception
      */
     public function addGrade($data)
@@ -258,7 +267,7 @@ class SapeurBusiness
             array(
                 'grade_id' => 'required|integer|exists:grades,id',
                 'date' => 'required|date',
-                'remarque' => 'required|string|nullable',
+                'remarque' => 'string|nullable',
             )
         );
 
@@ -284,12 +293,15 @@ class SapeurBusiness
 
         //Ajout du grade au sapeur
         $this->sapeur->grades()->save($grade);
+
+        return $grade;
     }
 
     /**
      * Modifie un grade
      *
      * @param $data
+     * @return GradeSapeur
      * @throws Exception
      */
     public function updateGrade($data)
@@ -321,6 +333,8 @@ class SapeurBusiness
             $grade->update($data);
             $grade->save();
         }
+
+        return $grade;
     }
 
     /**
@@ -374,6 +388,7 @@ class SapeurBusiness
      * Modifie une mutation
      *
      * @param $data
+     * @return Mutation
      * @throws Exception
      */
     public function updateMutation($data)
@@ -406,6 +421,8 @@ class SapeurBusiness
             $mutation->update($data);
             $mutation->save();
         }
+
+        return $mutation;
     }
 
     /**
