@@ -362,6 +362,8 @@ class SapeurBusiness
 
         //Ajout de la mutation au sapeur
         $this->sapeur->mutations()->save($mutation);
+
+        return $mutation;
     }
 
     /**
@@ -441,6 +443,8 @@ class SapeurBusiness
 
         //Ajout du permis au sapeur
         $this->sapeur->telephones()->save($telephone);
+
+        return $telephone;
     }
 
     /**
@@ -522,6 +526,7 @@ class SapeurBusiness
             //Ajout du permis au sapeur
             $this->sapeur->permis()->save($permis);
         }
+        return $permis;
     }
 
     /**
@@ -529,12 +534,13 @@ class SapeurBusiness
      *
      * @param array $data
      * @throws Exception
+     * @return App\Models\Permis
      */
     public function updatePermis($data)
     {
         $validation = Validator::make($data,
             array(
-                'permis_id' => 'required|integer|exists:permis,id',
+                'permis_id' => 'required|integer',
                 'date' => 'required|date|before:tomorrow',
             )
         );
@@ -553,6 +559,7 @@ class SapeurBusiness
             $permis->update($data);
             $permis->save();
         }
+        return $permis;
     }
 
     /**

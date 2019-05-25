@@ -28,22 +28,24 @@ class SapeurPermisController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function store(Request $request, int $id)
     {
-        SapeurBusiness::get($id)->addPermis($request->all());
+        $permis = SapeurBusiness::get($id)->addPermis($request->all());
 
         //TODO Error messages
-        return response()->json(['data' => 'success']);
+        return response()->json(['data' => $permis]);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @param  int  $permisId
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
+     * @param int $permisId
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function update(Request $request, int $id, int $permisId)
     {
@@ -51,10 +53,10 @@ class SapeurPermisController extends Controller
             return response()->json(['error' => 'invalid permis id']);
         }
 
-        SapeurBusiness::get($id)->updatePermis($request->all());
+        $permis = SapeurBusiness::get($id)->updatePermis($request->all());
 
         //TODO Error messages
-        return response()->json(['data' => 'success']);
+        return response()->json(['data' => $permis]);
     }
 
     /**
