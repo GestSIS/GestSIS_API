@@ -17,14 +17,16 @@ class CreateCoursSapeurTable extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->bigInteger('cours_id')->unsigned()->nullable();
+            $table->bigInteger('cours_id')->unsigned();
             $table->foreign('cours_id')->references('id')->on('cours');
 
-            $table->bigInteger('sapeur_id')->unsigned()->nullable();
+            $table->bigInteger('sapeur_id')->unsigned();
             $table->foreign('sapeur_id')->references('id')->on('sapeurs');
 
+            $table->bigInteger('localite_id')->unsigned();
+            $table->foreign('localite_id')->references('id')->on('localites');
+
             $table->date('date');
-            $table->string('lieu');//TODO: Check if can be changed to localite_id
         });
     }
 

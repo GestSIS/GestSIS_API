@@ -17,14 +17,14 @@ class CreateFonctionSapeurTable extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->bigInteger('fonction_id')->unsigned()->nullable();
+            $table->bigInteger('fonction_id')->unsigned();
             $table->foreign('fonction_id')->references('id')->on('fonctions');
 
-            $table->bigInteger('sapeur_id')->unsigned()->nullable();
+            $table->bigInteger('sapeur_id')->unsigned();
             $table->foreign('sapeur_id')->references('id')->on('sapeurs');
 
             $table->date('debut');
-            $table->date('fin');
+            $table->date('fin')->nullable();
             $table->string('remarque');
         });
     }

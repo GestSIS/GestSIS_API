@@ -184,6 +184,27 @@ class SapeursTableSeeder extends Seeder
             'motif' => '',
         ]);
 
+        DB::table('fonction_sapeur')->insert([
+            'created_at' => now(),
+            'updated_at' => now(),
+
+            'sapeur_id' => 1,
+            'fonction_id' => 5,
+            'debut' => Carbon::parse('2010-01-28'),
+            'fin' => null,
+            'remarque' => ''
+        ]);
+
+        DB::table('grade_sapeur')->insert([
+            'created_at' => now(),
+            'updated_at' => now(),
+
+            'sapeur_id' => 1,
+            'grade_id' => 1,
+            'date' => Carbon::parse('2010-01-28'),
+            'remarque' => '',
+        ]);
+
         DB::table('cours_sapeur')->insert([
             'created_at' => now(),
             'updated_at' => now(),
@@ -191,7 +212,7 @@ class SapeursTableSeeder extends Seeder
             'sapeur_id' => 1,
             'cours_id' => 1,
             'date' => Carbon::parse('2010-01-28'),
-            'lieu' => 'Balsthal',
+            'localite_id' => 6,
         ]);
     }
 }

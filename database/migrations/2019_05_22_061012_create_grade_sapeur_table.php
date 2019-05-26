@@ -17,10 +17,10 @@ class CreateGradeSapeurTable extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->bigInteger('grade_id')->unsigned()->nullable();
+            $table->bigInteger('grade_id')->unsigned();
             $table->foreign('grade_id')->references('id')->on('grades');
 
-            $table->bigInteger('sapeur_id')->unsigned()->nullable();
+            $table->bigInteger('sapeur_id')->unsigned();
             $table->foreign('sapeur_id')->references('id')->on('sapeurs');
 
             $table->date('date');

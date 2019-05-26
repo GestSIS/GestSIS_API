@@ -140,7 +140,7 @@ class SapeurBusiness
         $validation = Validator::make($data,
             array(
                 'date' => 'required|date|before:tomorrow',
-                'lieu' => 'string|nullable', //TODO Check si localite
+                'localite_id' => 'integer|exists:localites,id',
                 'cours_id' => 'required|integer|exists:cours,id',
                 'fonction_sapeur_id' => 'integer|nullable',
                 'fonction_id' => 'integer|nullable',
@@ -151,28 +151,32 @@ class SapeurBusiness
             throw new Exception($validation->getMessage());
         }
 
-        if ($data['lieu'] === null) {
-            $data['lieu'] = '';
-        }
-
         //Add Cours
         $cours = new CoursSapeur();
         $cours->fill($data);
+        $cours->cours_id = $data['cours_id'];
+        $cours->localite_id = $data['localite_id'];
         $this->sapeur->cours()->save($cours);
 
         //Add Grade
-        if ($data['grade_id'] === null) {
-            $this->addGrade(array(
-                grade_id => $data['grade_id'],
-                date => $data['date']
-            ));
+        if ($data['grade_id'] !== null) {
+            //Add grade if not already there
+            $grade = $this->sapeur->grades()->where('grade_id', $data['grade_id'])->first();
+            if($grade === null){
+                $this->addGrade(array(
+                    'grade_id' => $data['grade_id'],
+                    'date' => $data['date'],
+                    'remarque' => ''
+                ));
+            }
         }
 
         //Edit old fonction
         if ($data['fonction_sapeur_id'] !== null) {
-            $this->editFonction(array(
+            $this->updateFonction(array(
                 'fonction_sapeur_id' => $data['fonction_sapeur_id'],
-                'fin' => $data['date']
+                'fin' => $data['date'],
+                'remarque' => ''
             ));
         }
 
@@ -181,7 +185,8 @@ class SapeurBusiness
             $this->addFonction(array(
                 'fonction_id' => $data['fonction_id'],
                 'debut' => $data['date'],
-                'fin' => null
+                'fin' => null,
+                'remarque' => null
             ));
         }
 
@@ -194,16 +199,12 @@ class SapeurBusiness
             array(
                 'cours_sapeur_id' => 'integer|exists:cours_sapeur,id',
                 'date' => 'date',
-                'lieu' => 'string|nullable',
+                'localite_id' => 'integer|exists:localites,id',
             )
         );
 
         if ($validation->fails()) {
             throw new Exception($validation->messages());
-        }
-
-        if ($data['lieu'] === null) {
-            $data['lieu'] = '';
         }
 
         //Update grade
