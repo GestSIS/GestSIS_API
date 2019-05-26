@@ -4,12 +4,12 @@
 namespace App\Repository;
 
 
-use App\Models\Fonction;
+use App\Models\CoursSapeur;
+use App\Models\FonctionSapeur;
+use App\Models\GradeSapeur;
 use App\Models\Mutation;
 use App\Models\Permis;
 use App\Models\Sapeur;
-use App\Models\GradeSapeur;
-use App\Models\FonctionSapeur;
 use App\Models\SapeurTelephone;
 use Exception;
 use Validator;
@@ -137,49 +137,64 @@ class SapeurBusiness
 
     public function addCours($data)
     {
-        //Add Grade
+        $validation = Validator::make($data,
+            array(
+                'date' => 'required|date|before:tomorrow',
+                'lieu' => 'string|nullable', //TODO Check si localite
+                'cours_id' => 'required|integer|exists:cours,id',
+                'fonction_sapeur_id' => 'integer|nullable',
+                'fonction_id' => 'integer|nullable',
+                'grade_id' => 'integer|nullable',
+            ));
 
-        //Add Fonction
+        if ($validation->fails()) {
+            throw new Exception($validation->getMessage());
+        }
+
+        if ($data['lieu'] === null) {
+            $data['lieu'] = '';
+        }
 
         //Add Cours
+        $cours = new CoursSapeur();
+        $cours->fill($data);
+        $this->sapeur->cours()->save($cours);
+
+        //Add Grade
+        if ($data['grade_id'] === null) {
+            $this->addGrade(array(
+                grade_id => $data['grade_id'],
+                date => $data['date']
+            ));
+        }
+
+        //Edit old fonction
+        if ($data['fonction_sapeur_id'] !== null) {
+            $this->editFonction(array(
+                'fonction_sapeur_id' => $data['fonction_sapeur_id'],
+                'fin' => $data['date']
+            ));
+        }
+
+        //Add Fonction
+        if($data['fonction_id'] !== null){
+            $this->addFonction(array(
+                'fonction_id' => $data['fonction_id'],
+                'debut' => $data['date'],
+                'fin' => null
+            ));
+        }
+
+        return $cours;
     }
 
     public function updateCours($data)
     {
-        //Add Grade
-
-        //Add Fonction
-
-        //Add Cours
-    }
-
-    public function removeCours(int $cours_id)
-    {
-        //Add Grade
-
-        //Add Fonction
-
-        //Add Cours
-    }
-
-
-    /**
-     * Ajout d'une mutation
-     *
-     * @param $data
-     * @return FonctionSapeur
-     * @throws Exception
-     */
-    public function addFonction($data)
-    {
-        //TODO
-        // Ajout d'une nouvelle mutation
         $validation = Validator::make($data,
             array(
-                'fonction_id' => 'required|integer|exists:fonctions,id',
-                'debut' => 'required|date',
-                'fin' => 'date|nullable|after:debut',
-                'remarque' => 'string|nullable',
+                'cours_sapeur_id' => 'integer|exists:cours_sapeur,id',
+                'date' => 'date',
+                'lieu' => 'string|nullable',
             )
         );
 
@@ -187,72 +202,34 @@ class SapeurBusiness
             throw new Exception($validation->messages());
         }
 
-        if ($data['remarque'] === null) {
-            $data['remarque'] = '';
+        if ($data['lieu'] === null) {
+            $data['lieu'] = '';
         }
 
-        //Create mutation
-        $fonction = new FonctionSapeur();
-        $fonction->fill($data);
-        $fonction->fonction_id = $data['fonction_id'];
+        //Update grade
+        $cours = $this->sapeur->cours()->where('cours_sapeur.id', $data['cours_sapeur_id'])->first();
 
-        //Ajout de la mutation au sapeur
-        $this->sapeur->mutations()->save($fonction);
-
-        return $fonction;
-    }
-
-    /**
-     * Modifie une mutation
-     *
-     * @param $data
-     * @return FonctionSapeur
-     * @throws Exception
-     */
-    public function updateFonction($data)
-    {
-        $validation = Validator::make($data,
-            array(
-                'fonction_sapeur_id' => 'required|integer|exists:fonction_sapeur,id',
-                'debut' => 'date',
-                'fin' => 'date|nullable|after:debut',
-                'remarque' => 'string|nullable',
-            )
-        );
-
-        if ($validation->fails()) {
-            throw new Exception($validation->messages());
-        }
-
-        if ($data['remarque'] === null) {
-            $data['remarque'] = '';
-        }
-
-        //Update fonction
-        $fonction = $this->sapeur->fonctions()->where('fonction_sapeur.id', $data['fonction_sapeur_id'])->first();
-
-        //Search for the fonction
-        if ($fonction === null) {
-            throw new Exception("Unable to find fonction");
+        //Search for the mutation
+        if ($cours === null) {
+            throw new Exception("Unable to find cours");
         } else {
-            //Update fonction
-            $fonction->update($data);
-            $fonction->save();
+            //Update mutation
+            $cours->update($data);
+            $cours->save();
         }
 
-        return $fonction;
+        return $cours;
     }
 
     /**
-     * Supppression d'une mutation
+     * Remove a cours
      *
-     * @param int $mutation_id
+     * @param int $cours_sapeur_id
      */
-    public function removeFonction(int $fonction_sapeur_id)
+    public function removeCours(int $cours_sapeur_id)
     {
-        $this->sapeur->fonctions()->where('fonction_sapeur.id', $fonction_sapeur_id)->delete();
+        $this->sapeur->cours()->where('cours_sapeur.id', $cours_sapeur_id)->delete();
     }
-
 
     /**
      * Ajout d'un grade
@@ -346,6 +323,96 @@ class SapeurBusiness
     public function removeGrade(int $grade_sapeur_id)
     {
         $this->sapeur->grades()->where('grade_sapeur.id', $grade_sapeur_id)->delete();
+    }
+
+    /**
+     * Ajout d'une mutation
+     *
+     * @param $data
+     * @return FonctionSapeur
+     * @throws Exception
+     */
+    public function addFonction($data)
+    {
+        //TODO
+        // Ajout d'une nouvelle mutation
+        $validation = Validator::make($data,
+            array(
+                'fonction_id' => 'required|integer|exists:fonctions,id',
+                'debut' => 'required|date',
+                'fin' => 'date|nullable|after:debut',
+                'remarque' => 'string|nullable',
+            )
+        );
+
+        if ($validation->fails()) {
+            throw new Exception($validation->messages());
+        }
+
+        if ($data['remarque'] === null) {
+            $data['remarque'] = '';
+        }
+
+        //Create mutation
+        $fonction = new FonctionSapeur();
+        $fonction->fill($data);
+        $fonction->fonction_id = $data['fonction_id'];
+
+        //Ajout de la mutation au sapeur
+        $this->sapeur->mutations()->save($fonction);
+
+        return $fonction;
+    }
+
+    /**
+     * Modifie une mutation
+     *
+     * @param $data
+     * @return FonctionSapeur
+     * @throws Exception
+     */
+    public function updateFonction($data)
+    {
+        $validation = Validator::make($data,
+            array(
+                'fonction_sapeur_id' => 'required|integer|exists:fonction_sapeur,id',
+                'debut' => 'date',
+                'fin' => 'date|nullable|after:debut',
+                'remarque' => 'string|nullable',
+            )
+        );
+
+        if ($validation->fails()) {
+            throw new Exception($validation->messages());
+        }
+
+        if ($data['remarque'] === null) {
+            $data['remarque'] = '';
+        }
+
+        //Update fonction
+        $fonction = $this->sapeur->fonctions()->where('fonction_sapeur.id', $data['fonction_sapeur_id'])->first();
+
+        //Search for the fonction
+        if ($fonction === null) {
+            throw new Exception("Unable to find fonction");
+        } else {
+            //Update fonction
+            $fonction->update($data);
+            $fonction->save();
+        }
+
+        return $fonction;
+    }
+
+    /**
+     * Supppression d'une mutation
+     *
+     * @param int $mutation_id
+     */
+    public function removeFonction(int $fonction_sapeur_id)
+    {
+        $this->sapeur->fonctions()->where('fonction_sapeur.id', $fonction_sapeur_id)->delete();
     }
 
     /**

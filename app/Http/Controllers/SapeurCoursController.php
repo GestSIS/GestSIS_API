@@ -18,4 +18,6 @@ class SapeurCoursController extends Controller
 
         return response()->json(['data' => $cours]);
     }
+
+    //TODO controller edit group
 }

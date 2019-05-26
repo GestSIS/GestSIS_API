@@ -41,8 +41,9 @@ Route::group(['prefix' => 'v2'], function(){
         Route::get('sapeurs/{id}/telephones', 'SapeurTelephoneController@index')->name('api.v2.sapeur.telephones');
         Route::get('sapeurs/{id}/mutations', 'SapeurMutationController@index')->name('api.v2.sapeur.mutations');
         Route::get('sapeurs/{id}/cours', 'SapeurCoursController@index')->name('api.v2.sapeur.cours');
-        Route::get('sapeurs/{id}/grades', 'SapeurGradeController@index')->name('api.v2.sapeur.cours');
-        Route::get('sapeurs/{id}/fonctions', 'SapeurFonctionController@index')->name('api.v2.sapeur.cours');
+        Route::get('sapeurs/{id}/grades', 'SapeurGradeController@index')->name('api.v2.sapeur.grades');
+        Route::get('sapeurs/{id}/fonctions', 'SapeurFonctionController@index')->name('api.v2.sapeur.fonctions');
+        Route::get('sapeurs/{id}/groupes', 'SapeurGroupeController@index')->name('api.v2.sapeur.groupes');
 
         Route::post('sapeurs', 'SapeurController@store')->name('api.v2.sapeur.store');//->middleware('role:effectif_read');
         Route::put('sapeurs/{id}', 'SapeurController@update')->name('api.v2.sapeur.update');//->middleware('role:effectif_read');

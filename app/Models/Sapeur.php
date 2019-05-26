@@ -34,6 +34,14 @@ class Sapeur extends Model
     }
 
     /**
+     * The cours that belong to the sapeur.
+     */
+    public function groupes()
+    {
+        return $this->hasMany('App\Models\GroupeSapeur');
+    }
+
+    /**
      * The Permis that belong to the sapeur.
      */
     public function permis()

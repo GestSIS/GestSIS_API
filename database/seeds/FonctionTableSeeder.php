@@ -11,31 +11,33 @@ class FonctionTableSeeder extends Seeder
      */
     public function run()
     {
-        //TODO Update fonctions liste
         $fonctions = array(
-            array('id' => '27', 'nom' => '0', 'abreviation' => 'BA', 'tri' => '10', 'cumulable' => 0),
-            array('id' => '2', 'nom' => '1', 'abreviation' => 'PAR', 'tri' => '65', 'cumulable' => 0),
-            array('id' => '3', 'nom' => '18', 'abreviation' => 'CG 1', 'tri' => '11', 'cumulable' => 0),
-            array('id' => '4', 'nom' => '3', 'abreviation' => 'CG 2', 'tri' => '12', 'cumulable' => 0),
-            array('id' => '5', 'nom' => '4', 'abreviation' => 'CI 1', 'tri' => '90', 'cumulable' => 0),
-            array('id' => '6', 'nom' => '5', 'abreviation' => 'CI 2', 'tri' => '95', 'cumulable' => 0),
-            array('id' => '7', 'nom' => '0', 'abreviation' => 'Cdt', 'tri' => '100', 'cumulable' => 0),
-            array('id' => '8', 'nom' => '3', 'abreviation' => 'Ech rem', 'tri' => '80', 'cumulable' => 0),
-            array('id' => '9', 'nom' => '18', 'abreviation' => 'MACH', 'tri' => '60', 'cumulable' => 0),
-            array('id' => '10', 'nom' => '0', 'abreviation' => 'Four', 'tri' => '45', 'cumulable' => 0),
-            array('id' => '11', 'nom' => '1', 'abreviation' => 'ELEC', 'tri' => '70', 'cumulable' => 0),
-            array('id' => '12', 'nom' => '1', 'abreviation' => 'GC', 'tri' => '50', 'cumulable' => 0),
-            array('id' => '13', 'nom' => '18', 'abreviation' => 'PAM', 'tri' => '55', 'cumulable' => 0),
-            array('id' => '14', 'nom' => '5', 'abreviation' => 'DCH', 'tri' => '92', 'cumulable' => 0),
-            array('id' => '15', 'nom' => '2', 'abreviation' => 'PAR', 'tri' => '66', 'cumulable' => 0),
-            array('id' => '16', 'nom' => '0', 'abreviation' => 'BLS', 'tri' => '41', 'cumulable' => 0),
-            array('id' => '17', 'nom' => '16', 'abreviation' => 'BA 1', 'tri' => '42', 'cumulable' => 0),
-            array('id' => '18', 'nom' => '17', 'abreviation' => 'BA 2', 'tri' => '43', 'cumulable' => 0),
-            array('id' => '19', 'nom' => '0', 'abreviation' => 'CG', 'tri' => '85', 'cumulable' => 0),
-            array('id' => '20', 'nom' => '0', 'abreviation' => 'PR', 'tri' => '45', 'cumulable' => 0),
-            array('id' => '21', 'nom' => '0', 'abreviation' => 'PR', 'tri' => '45', 'cumulable' => 0),
-            array('id' => '22', 'nom' => '0', 'abreviation' => 'CDT', 'tri' => '45', 'cumulable' => 0),
+            array('id' => '1', 'nom' => 'Commandant', 'abreviation' => 'Cdt', 'tri' => 100),
+            array('id' => '2', 'nom' => 'V - Cdt', 'abreviation' => 'RCdt', 'tri' => 98),
+            array('id' => '3', 'nom' => 'Resp . Instruction', 'abreviation' => 'RInst', 'tri' => 90),
+            array('id' => '4', 'nom' => 'Caissier', 'abreviation' => 'Caissier', 'tri' => 82),
+            array('id' => '5', 'nom' => 'Fourrier', 'abreviation' => 'Four', 'tri' => 80),
+            array('id' => '6', 'nom' => 'Resp. Matériel', 'abreviation' => 'RPAM', 'tri' => 72),
+            array('id' => '7', 'nom' => 'Resp. PAR', 'abreviation' => 'RPAR', 'tri' => 70),
+            array('id' => '8', 'nom' => 'Resp. Radio', 'abreviation' => 'RRadio', 'tri' => 68),
+            array('id' => '9', 'nom' => 'Resp. Mach.', 'abreviation' => 'RMACH', 'tri' => 66),
+            array('id' => '10', 'nom' => 'Resp. Echelle', 'abreviation' => 'REch', 'tri' => 64),
+            array('id' => '11', 'nom' => 'Resp. Section', 'abreviation' => 'RSect', 'tri' => 62),
+            array('id' => '12', 'nom' => 'CI2', 'abreviation' => 'CI2', 'tri' => 52),
+            array('id' => '13', 'nom' => 'CI1', 'abreviation' => 'CI1', 'tri' => 50),
+            array('id' => '14', 'nom' => 'CG2', 'abreviation' => 'CG2', 'tri' => 34),
+            array('id' => '15', 'nom' => 'CGER', 'abreviation' => 'CGER', 'tri' => 32),
+            array('id' => '16', 'nom' => 'CG1', 'abreviation' => 'CG1', 'tri' => 30),
+            array('id' => '17', 'nom' => 'Chef Mat', 'abreviation' => 'PAM', 'tri' => 40),
+            array('id' => '18', 'nom' => 'Machiniste', 'abreviation' => 'Mach', 'tri' => 18),
+            array('id' => '19', 'nom' => 'Porteur', 'abreviation' => 'PAR', 'tri' => 16),
+            array('id' => '20', 'nom' => 'Electricien', 'abreviation' => 'ELEC', 'tri' => 14),
+            array('id' => '21', 'nom' => 'Garde et circulation', 'abreviation' => 'GC', 'tri' => 12),
+            array('id' => '22', 'nom' => 'Sapeur', 'abreviation' => 'Sap', 'tri' => 10),
+            array('id' => '23', 'nom' => 'Fourrier auxiliaire', 'abreviation' => 'Four aux', 'tri' => 60),
+            array('id' => '24', 'nom' => 'Sanitaire', 'abreviation' => 'SAN', 'tri' => 11),
         );
+
 
         foreach ($fonctions as $fonction) {
             DB::table('fonctions')->insert($fonction);
