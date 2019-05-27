@@ -174,7 +174,7 @@ class SapeurBusiness
         //Edit old fonction
         if ($data['fonction_sapeur_id'] !== null) {
             $this->updateFonction(array(
-                'fonction_sapeur_id' => $data['fonction_sapeur_id'],
+                'id' => $data['fonction_sapeur_id'],
                 'fin' => $data['date'],
                 'remarque' => ''
             ));
@@ -207,10 +207,10 @@ class SapeurBusiness
             throw new Exception($validation->messages());
         }
 
-        //Update grade
+        //Update cours
         $cours = $this->sapeur->cours()->where('cours_sapeur.id', $data['cours_sapeur_id'])->first();
 
-        //Search for the mutation
+        //Search for the cours
         if ($cours === null) {
             throw new Exception("Unable to find cours");
         } else {
@@ -374,7 +374,7 @@ class SapeurBusiness
     {
         $validation = Validator::make($data,
             array(
-                'fonction_sapeur_id' => 'required|integer|exists:fonction_sapeur,id',
+                'id' => 'required|integer|exists:fonction_sapeur,id',
                 'debut' => 'date',
                 'fin' => 'date|nullable|after:debut',
                 'remarque' => 'string|nullable',
@@ -390,7 +390,7 @@ class SapeurBusiness
         }
 
         //Update fonction
-        $fonction = $this->sapeur->fonctions()->where('fonction_sapeur.id', $data['fonction_sapeur_id'])->first();
+        $fonction = $this->sapeur->fonctions()->where('fonction_sapeur.id', $data['id'])->first();
 
         //Search for the fonction
         if ($fonction === null) {

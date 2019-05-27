@@ -52,7 +52,7 @@ class SapeurFonctionController extends Controller
      */
     public function update(Request $request, int $id, int $fonctionId)
     {
-        if ($fonctionId !== $request->get('fonction_sapeur_id')) {
+        if ($fonctionId !== $request->get('id')) {
             return response()->json(['error' => 'invalid fonction id']);
         }
 

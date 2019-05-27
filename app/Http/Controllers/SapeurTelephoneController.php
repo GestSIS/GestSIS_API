@@ -47,7 +47,7 @@ class SapeurTelephoneController extends Controller
      *
      * @param Request $request
      * @param int $id
-     * @param $telephoneId
+     * @param int $telephoneId
      * @return Response
      * @throws Exception
      */

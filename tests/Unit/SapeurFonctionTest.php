@@ -91,7 +91,7 @@ class SapeurFonctionTest extends TestCase
         $fonction_id = $sapeur->addFonction($data)->id;
 
         $data = array(
-            'fonction_sapeur_id' => $fonction_id,
+            'id' => $fonction_id,
             'debut' => Carbon::createMidnightDate(1959, 5, 8),
             'fin' => Carbon::createMidnightDate(1960, 9, 17),
             'remarque' => 'Deserve it'
