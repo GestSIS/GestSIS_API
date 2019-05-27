@@ -48,9 +48,9 @@ Route::group(['prefix' => 'v2'], function(){
         Route::post('sapeurs', 'SapeurController@store')->name('api.v2.sapeur.store');//->middleware('role:effectif_read');
         Route::put('sapeurs/{id}', 'SapeurController@update')->name('api.v2.sapeur.update');//->middleware('role:effectif_read');
 
-        Route::post('sapeurs/{id}/permis', 'SapeurPermisController@store')->name('api.v2.sapeur.permis.store');//->middleware('role:effectif_read');
-        Route::put('sapeurs/{id}/permis/{permisId}', 'SapeurPermisController@update')->name('api.v2.sapeur.permis.update');//->middleware('role:effectif_read');
-        Route::delete('sapeurs/{id}/permis/{permisId}', 'SapeurPermisController@destroy')->name('api.v2.sapeur.permis.destroy');//->middleware('role:effectif_read');
+        Route::resource('sapeurs.permis', 'SapeurPermisController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('sapeurs.telephones', 'SapeurTelephoneController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('sapeurs.fonctions', 'SapeurFonctionController')->only(['index', 'store', 'update', 'destroy']);
 
         // // Exercices
         // Route::get('excusestypes', 'ExerciceApiController@excusesTypes')->name('api.v2.exercice.excusesTypes')->middleware('role:exercice_read');

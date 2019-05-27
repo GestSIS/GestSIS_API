@@ -96,13 +96,11 @@ class SapeurBusiness
      *
      * @param int
      * @param array
+     * @return Sapeur
      * @throws Exception
      */
     public function update($data)
     {
-        //Post::find($post_id)-&gt;update($post_data);
-        //TODO update sapeur data
-
         $validation = Validator::make($data,
             array(
                 'nom' => 'string|min:2',
@@ -133,6 +131,8 @@ class SapeurBusiness
         }
 
         $this->sapeur->update($data);
+
+        return $this->sapeur;
     }
 
     public function addCours($data)
@@ -335,8 +335,6 @@ class SapeurBusiness
      */
     public function addFonction($data)
     {
-        //TODO
-        // Ajout d'une nouvelle mutation
         $validation = Validator::make($data,
             array(
                 'fonction_id' => 'required|integer|exists:fonctions,id',
@@ -542,14 +540,15 @@ class SapeurBusiness
      * Update a Telephone informations
      *
      * @param array $data
+     * @return SapeurTelephone
      * @throws Exception
      */
     public function updateTelephone($data)
     {
-        //TODO
+        //TODO check duplicated number
         $validation = Validator::make($data,
             array(
-                'telephone_id' => 'required|integer|exists:sapeur_telephone,id',
+                'id' => 'required|integer|exists:sapeur_telephone,id',
                 'telephone_type_id' => 'integer|exists:telephone_types,id',
                 'numero' => 'string|min:2',
                 'priorite' => 'integer',
@@ -561,7 +560,7 @@ class SapeurBusiness
             throw new Exception($validation->messages());
         }
 
-        $telephone = $this->sapeur->telephones()->where('sapeur_telephone.id', $data['telephone_id'])->first();
+        $telephone = $this->sapeur->telephones()->where('sapeur_telephone.id', $data['id'])->first();
 
         //Search for the telephone
         if ($telephone === null) {
@@ -571,6 +570,7 @@ class SapeurBusiness
             $telephone->update($data);
             $telephone->save();
         }
+        return $telephone;
     }
 
     /**

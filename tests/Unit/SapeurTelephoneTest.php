@@ -61,7 +61,7 @@ class SapeurTelephoneTest extends TestCase
             'rta' => 0,
             'priorite' => 3
         );
-        $sapeur->updateTelephone(array_merge($data, ['telephone_id' => $telephone_id]));
+        $sapeur->updateTelephone(array_merge($data, ['id' => $telephone_id]));
 
         $telephone = Sapeur::find($id)->telephones()->where('sapeur_telephone.id', $telephone_id)->first();
 

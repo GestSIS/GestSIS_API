@@ -24,7 +24,6 @@ class SapeurTelephoneController extends Controller
         return response()->json(['data' => $telephones]);
     }
 
-
     /**
      * Store a newly created resource in storage.
      *
@@ -48,13 +47,13 @@ class SapeurTelephoneController extends Controller
      *
      * @param Request $request
      * @param int $id
-     * @param int $telephoneId
+     * @param $telephoneId
      * @return Response
      * @throws Exception
      */
     public function update(Request $request, int $id, int $telephoneId)
     {
-        if ($telephoneId !== $request->get('sapeur_telephone_id')) {
+        if ($telephoneId !== $request->get('id')) {
             return response()->json(['error' => 'invalid telephone id']);
         }
 

@@ -25,10 +25,8 @@ class CorsMiddleware
             'Access-Control-Allow-Headers'     => 'Content-Type, Authorization, X-Requested-With'
         ];
 
-        Log::info("TEST");
         if ($request->isMethod('OPTIONS'))
         {
-            Log::info("TEST inside");
             return response()->json('{"method":"OPTIONS"}', 200)->withHeaders($headers);
         }
 
