@@ -90,7 +90,7 @@ class SapeurGradeTest extends TestCase
         $grade_id = $sapeur->addGrade($data)->id;
 
         $data = array(
-            'grade_sapeur_id' => $grade_id,
+            'id' => $grade_id,
             'date' => Carbon::createMidnightDate(1959, 5, 8),
             'remarque' => 'Deserve it'
         );

@@ -51,6 +51,7 @@ Route::group(['prefix' => 'v2'], function(){
         Route::resource('sapeurs.permis', 'SapeurPermisController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('sapeurs.telephones', 'SapeurTelephoneController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('sapeurs.fonctions', 'SapeurFonctionController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('sapeurs.grades', 'SapeurGradeController')->only(['index', 'store', 'update', 'destroy']);
 
         // // Exercices
         // Route::get('excusestypes', 'ExerciceApiController@excusesTypes')->name('api.v2.exercice.excusesTypes')->middleware('role:exercice_read');

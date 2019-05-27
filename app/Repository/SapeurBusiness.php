@@ -289,7 +289,7 @@ class SapeurBusiness
             array(
                 'date' => 'date',
                 'remarque' => 'string|nullable',
-                'grade_sapeur_id' => 'required|integer|exists:grade_sapeur,id'
+                'id' => 'required|integer|exists:grade_sapeur,id'
             )
         );
 
@@ -302,7 +302,7 @@ class SapeurBusiness
         }
 
         //Update grade
-        $grade = $this->sapeur->grades()->where('grade_sapeur.id', $data['grade_sapeur_id'])->first();
+        $grade = $this->sapeur->grades()->where('grade_sapeur.id', $data['id'])->first();
 
         //Search for the mutation
         if ($grade === null) {

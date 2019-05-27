@@ -51,7 +51,7 @@ class SapeurGradeController extends Controller
      */
     public function update(Request $request, int $id, int $gradeId)
     {
-        if ($gradeId !== $request->get('grade_sapeur_id')) {
+        if ($gradeId !== $request->get('id')) {
             return response()->json(['error' => 'invalid grade id']);
         }
 
