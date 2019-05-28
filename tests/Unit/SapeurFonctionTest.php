@@ -27,6 +27,10 @@ class SapeurFonctionTest extends TestCase
         );
 
         $sapeur = SapeurBusiness::get($id);
+
+        //Remove potential pre-existant fonction
+        Sapeur::find($id)->fonctions()->where('fonction_sapeur.fonction_id', $data['fonction_id'])->delete();
+
         $fonction_id = $sapeur->addFonction($data)->id;
 
         $fonction = Sapeur::find($id)->fonctions()->where('fonction_sapeur.id', $fonction_id)->first();

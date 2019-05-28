@@ -162,7 +162,7 @@ class SapeurBusiness
         if ($data['grade_id'] !== null) {
             //Add grade if not already there
             $grade = $this->sapeur->grades()->where('grade_id', $data['grade_id'])->first();
-            if($grade === null){
+            if ($grade === null) {
                 $this->addGrade(array(
                     'grade_id' => $data['grade_id'],
                     'date' => $data['date'],
@@ -181,13 +181,16 @@ class SapeurBusiness
         }
 
         //Add Fonction
-        if($data['fonction_id'] !== null){
-            $this->addFonction(array(
-                'fonction_id' => $data['fonction_id'],
-                'debut' => $data['date'],
-                'fin' => null,
-                'remarque' => null
-            ));
+        if ($data['fonction_id'] !== null) {
+            $fonction = $this->sapeur->fonctions()->where('fonction_id', $data['fonction_id'])->first();
+            if ($fonction === null) {
+                $this->addFonction(array(
+                    'fonction_id' => $data['fonction_id'],
+                    'debut' => $data['date'],
+                    'fin' => null,
+                    'remarque' => null
+                ));
+            }
         }
 
         return $cours;
@@ -352,13 +355,19 @@ class SapeurBusiness
             $data['remarque'] = '';
         }
 
+        //TODO Check duplicate fonction
+        $fonction = $this->sapeur->fonctions()->where('fonction_id', $data['fonction_id'])->first();
+        if ($fonction !== null) {
+            throw new Exception("Duplicated fonction");
+        }
+
         //Create mutation
         $fonction = new FonctionSapeur();
         $fonction->fill($data);
         $fonction->fonction_id = $data['fonction_id'];
 
         //Ajout de la mutation au sapeur
-        $this->sapeur->mutations()->save($fonction);
+        $this->sapeur->fonctions()->save($fonction);
 
         return $fonction;
     }
