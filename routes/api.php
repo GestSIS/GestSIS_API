@@ -34,7 +34,7 @@ Route::group(['prefix' => 'v2'], function(){
         //TODO: Implement those route for retro compatibility
 
         // Sapeurs
-        Route::resource('sapeurs', 'SapeurController')->only(['index', 'store', 'update']);//, 'destroy']);//->middleware('role:effectif_read');
+        Route::resource('sapeurs', 'SapeurController')->only(['index', 'show', 'store', 'update']);//, 'destroy']);//->middleware('role:effectif_read');
 
         Route::resource('sapeurs.groupes', 'SapeurPermisController')->only(['index']);
         Route::resource('sapeurs.permis', 'SapeurPermisController')->only(['index', 'store', 'update', 'destroy']);
