@@ -214,5 +214,37 @@ class SapeursTableSeeder extends Seeder
             'date' => Carbon::parse('2010-01-28'),
             'localite_id' => 6,
         ]);
+
+        DB::table('cours_sapeur')->insert([
+            'created_at' => now(),
+            'updated_at' => now(),
+
+            'sapeur_id' => 1,
+            'cours_id' => 1,
+            'date' => Carbon::parse('2010-01-28'),
+            'localite_id' => 6,
+        ]);
+
+        $groupes_sapeurs = array(
+            array('id' => '4','groupe_id' => '1','sapeur_id' => '1'),
+            array('id' => '8','groupe_id' => '5','sapeur_id' => '2'),
+            array('id' => '14','groupe_id' => '5','sapeur_id' => '1'),
+            array('id' => '16','groupe_id' => '6','sapeur_id' => '1'),
+            array('id' => '22','groupe_id' => '2','sapeur_id' => '2'),
+            array('id' => '23','groupe_id' => '5','sapeur_id' => '2'),
+            array('id' => '28','groupe_id' => '4','sapeur_id' => '2'),
+            array('id' => '38','groupe_id' => '34','sapeur_id' => '2'),
+            array('id' => '40','groupe_id' => '34','sapeur_id' => '3'),
+            array('id' => '42','groupe_id' => '35','sapeur_id' => '3'),
+            array('id' => '45','groupe_id' => '36','sapeur_id' => '3'),
+            array('id' => '48','groupe_id' => '6','sapeur_id' => '3'),
+            array('id' => '50','groupe_id' => '5','sapeur_id' => '3'),
+            array('id' => '51','groupe_id' => '4','sapeur_id' => '3'),
+            array('id' => '56','groupe_id' => '37','sapeur_id' => '3'),
+        );
+
+        foreach($groupes_sapeurs as $groupes_sapeur){
+            DB::table('groupe_sapeur')->insert($groupes_sapeur);
+        }
     }
 }

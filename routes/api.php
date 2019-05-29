@@ -37,12 +37,6 @@ Route::group(['prefix' => 'v2'], function(){
         Route::get('sapeurs', 'SapeurController@index')->name('api.v2.sapeur.index');//->middleware('role:effectif_read');
         Route::get('sapeurs/{id}', 'SapeurController@show')->name('api.v2.sapeur.show');//->middleware('role:effectif_read');
 
-        Route::get('sapeurs/{id}/permis', 'SapeurPermisController@index')->name('api.v2.sapeur.permis');
-        Route::get('sapeurs/{id}/telephones', 'SapeurTelephoneController@index')->name('api.v2.sapeur.telephones');
-        Route::get('sapeurs/{id}/mutations', 'SapeurMutationController@index')->name('api.v2.sapeur.mutations');
-        Route::get('sapeurs/{id}/cours', 'SapeurCoursController@index')->name('api.v2.sapeur.cours');
-        Route::get('sapeurs/{id}/grades', 'SapeurGradeController@index')->name('api.v2.sapeur.grades');
-        Route::get('sapeurs/{id}/fonctions', 'SapeurFonctionController@index')->name('api.v2.sapeur.fonctions');
         Route::get('sapeurs/{id}/groupes', 'SapeurGroupeController@index')->name('api.v2.sapeur.groupes');
 
         Route::post('sapeurs', 'SapeurController@store')->name('api.v2.sapeur.store');//->middleware('role:effectif_read');
@@ -52,6 +46,8 @@ Route::group(['prefix' => 'v2'], function(){
         Route::resource('sapeurs.telephones', 'SapeurTelephoneController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('sapeurs.fonctions', 'SapeurFonctionController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('sapeurs.grades', 'SapeurGradeController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('sapeurs.mutations', 'SapeurMutationController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('sapeurs.cours', 'SapeurCoursController')->only(['index', 'store', 'update', 'destroy']);
 
         // // Exercices
         // Route::get('excusestypes', 'ExerciceApiController@excusesTypes')->name('api.v2.exercice.excusesTypes')->middleware('role:exercice_read');

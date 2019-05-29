@@ -89,7 +89,7 @@ class SapeurCoursTest extends TestCase
         $data = array(
             'date' => Carbon::createMidnightDate(1958, 1, 1),
             'localite_id' => 2,
-            'cours_sapeur_id' => $cours_id,
+            'id' => $cours_id,
         );
 
         $sapeur->updateCours($data);

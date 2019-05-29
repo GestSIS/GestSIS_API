@@ -18,7 +18,7 @@ class CreateGroupesTable extends Migration
             $table->timestamps();
 
             $table->integer('type');
-            $table->integer('no');
+            $table->integer('no')->nullable();
             $table->string('designation');
             $table->string('info');
             $table->integer('tri');

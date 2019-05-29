@@ -145,10 +145,11 @@ class SapeurBusiness
                 'fonction_sapeur_id' => 'integer|nullable',
                 'fonction_id' => 'integer|nullable',
                 'grade_id' => 'integer|nullable',
-            ));
+            )
+        );
 
         if ($validation->fails()) {
-            throw new Exception($validation->getMessage());
+            throw new Exception($validation->messages());
         }
 
         //Add Cours
@@ -182,15 +183,15 @@ class SapeurBusiness
 
         //Add Fonction
         if ($data['fonction_id'] !== null) {
-            $fonction = $this->sapeur->fonctions()->where('fonction_id', $data['fonction_id'])->first();
-            if ($fonction === null) {
-                $this->addFonction(array(
-                    'fonction_id' => $data['fonction_id'],
-                    'debut' => $data['date'],
-                    'fin' => null,
-                    'remarque' => null
-                ));
-            }
+//            $fonction = $this->sapeur->fonctions()->where('fonction_id', $data['fonction_id'])->first();
+//            if ($fonction === null) {
+            $this->addFonction(array(
+                'fonction_id' => $data['fonction_id'],
+                'debut' => $data['date'],
+                'fin' => null,
+                'remarque' => null
+            ));
+//            }
         }
 
         return $cours;
@@ -200,7 +201,7 @@ class SapeurBusiness
     {
         $validation = Validator::make($data,
             array(
-                'cours_sapeur_id' => 'integer|exists:cours_sapeur,id',
+                'id' => 'integer|exists:cours_sapeur,id',
                 'date' => 'date',
                 'localite_id' => 'integer|exists:localites,id',
             )
@@ -211,7 +212,7 @@ class SapeurBusiness
         }
 
         //Update cours
-        $cours = $this->sapeur->cours()->where('cours_sapeur.id', $data['cours_sapeur_id'])->first();
+        $cours = $this->sapeur->cours()->where('cours_sapeur.id', $data['id'])->first();
 
         //Search for the cours
         if ($cours === null) {
@@ -342,7 +343,7 @@ class SapeurBusiness
             array(
                 'fonction_id' => 'required|integer|exists:fonctions,id',
                 'debut' => 'required|date',
-                'fin' => 'date|nullable|after:debut',
+                'fin' => 'date|nullable|after_or_equal:debut',
                 'remarque' => 'string|nullable',
             )
         );
@@ -356,10 +357,10 @@ class SapeurBusiness
         }
 
         //TODO Check duplicate fonction
-        $fonction = $this->sapeur->fonctions()->where('fonction_id', $data['fonction_id'])->first();
-        if ($fonction !== null) {
-            throw new Exception("Duplicated fonction");
-        }
+//        $fonction = $this->sapeur->fonctions()->where('fonction_id', $data['fonction_id'])->first();
+//        if ($fonction !== null) {
+//            throw new Exception("Duplicated fonction");
+//        }
 
         //Create mutation
         $fonction = new FonctionSapeur();
