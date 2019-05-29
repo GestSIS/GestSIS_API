@@ -36,7 +36,7 @@ Route::group(['prefix' => 'v2'], function(){
         // Sapeurs
         Route::resource('sapeurs', 'SapeurController')->only(['index', 'show', 'store', 'update']);//, 'destroy']);//->middleware('role:effectif_read');
 
-        Route::resource('sapeurs.groupes', 'SapeurPermisController')->only(['index']);
+        Route::resource('sapeurs.groupes', 'SapeurGroupeController')->only(['index']);
         Route::resource('sapeurs.permis', 'SapeurPermisController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('sapeurs.telephones', 'SapeurTelephoneController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('sapeurs.fonctions', 'SapeurFonctionController')->only(['index', 'store', 'update', 'destroy']);
