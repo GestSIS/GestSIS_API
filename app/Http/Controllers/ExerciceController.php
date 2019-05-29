@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Sapeur;
-use App\Repository\SapeurBusiness;
+use App\Models\Exercice;
+use App\Repository\ExerciceBusiness;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class SapeurController extends Controller
+class ExerciceController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      *
@@ -17,9 +18,10 @@ class SapeurController extends Controller
      */
     public function index()
     {
-        $sapeurs = Sapeur::all();
+        //TODO Exercice comptable filter
+        $exercices = Exercice::all();
 
-        return response()->json(['data' => $sapeurs]);
+        return response()->json(['data' => $exercices]);
     }
 
     /**
@@ -57,13 +59,12 @@ class SapeurController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $sapeur = SapeurBusiness::get($id)->update($request->all());
+            $exercice = ExerciceBusiness::get($id)->update($request->all());
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
         }
 
-        //TODO Error messages
-        return response()->json(['data' => $sapeur]);
+        return response()->json(['data' => $exercice]);
     }
 
     /**
