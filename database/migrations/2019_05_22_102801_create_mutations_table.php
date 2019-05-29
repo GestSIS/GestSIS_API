@@ -20,7 +20,7 @@ class CreateMutationsTable extends Migration
             $table->bigInteger('localite_id')->unsigned()->nullable();
             $table->foreign('localite_id')->references('id')->on('localites');
 
-            $table->bigInteger('sapeur_id')->unsigned()->nullable();
+            $table->bigInteger('sapeur_id')->unsigned();
             $table->foreign('sapeur_id')->references('id')->on('sapeurs');
 
             $table->date('incorporation');
