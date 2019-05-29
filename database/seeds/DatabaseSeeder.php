@@ -24,6 +24,9 @@ class DatabaseSeeder extends Seeder
         $this->call(CoursTableSeeder::class);
         $this->call(GroupesTableSeeder::class);
 
+        $this->call(ExcuseTypeTableSeeder::class);
+        $this->call(ExerciceCategorieTableSeeder::class);
+
         //Données propres aux SIS de test
         $this->call(SapeursTableSeeder::class);
     }

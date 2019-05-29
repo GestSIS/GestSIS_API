@@ -93,12 +93,12 @@ Route::group(['prefix' => 'v2'], function(){
         Route::get('telephone-types', 'TelephoneTypeController@index')->name('api.v2.telephones-type');
 
         // Données de bases exercices
-        Route::get('exercice-categorie', 'ExerciceCategorieController@index')->name('api.v2.exercice-categorie');
+        Route::get('exercice-categories', 'ExerciceCategorieController@index')->name('api.v2.exercice-categorie');
         Route::get('excuses-types', 'ExcuseTypeController@index')->name('api.v2.excuse-type');
 
+        // Données de base intervention
         // Route::get('statfederal', 'BaseDataApiController@statfederal')->name('api.v2.basedata.statfederal');
         // Route::get('typeintervention', 'BaseDataApiController@typeintervention')->name('api.v2.basedata.typeintervention');
-        // Route::get('districtlocality', 'BaseDataApiController@districtlocality')->name('api.v2.basedata.districtlocality');
         // Route::get('cmedtype', 'BaseDataApiController@cmedtype')->name('api.v2.basedata.cmedtype');
     // });
 });
