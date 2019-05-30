@@ -31,6 +31,8 @@ class SapeurController extends Controller
     public function store(Request $request)
     {
         //TODO Create a new sapeur
+
+        return response()->json(['error' => 'not implemented yet']);
     }
 
     /**
@@ -62,7 +64,6 @@ class SapeurController extends Controller
             return response()->json(['error' => $e->getMessage()]);
         }
 
-        //TODO Error messages
         return response()->json(['data' => $sapeur]);
     }
 

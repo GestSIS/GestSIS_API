@@ -28,6 +28,8 @@ class DatabaseSeeder extends Seeder
         $this->call(ExerciceCategorieTableSeeder::class);
 
         //Données propres aux SIS de test
+        $this->call(ExerciceComptableTableSeeder::class);
         $this->call(SapeursTableSeeder::class);
+        $this->call(ExerciceTableSeeder::class);
     }
 }
