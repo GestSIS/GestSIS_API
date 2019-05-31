@@ -29,10 +29,17 @@ class ExerciceController extends Controller
      *
      * @param Request $request
      * @return Response
+     * @throws Exception
      */
     public function store(Request $request)
     {
-        //TODO Create a new exercice
+        try {
+            $exercice = ExerciceBusiness::createExercice($request->all());
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()]);
+        }
+
+        return $exercice->getData();
     }
 
     /**

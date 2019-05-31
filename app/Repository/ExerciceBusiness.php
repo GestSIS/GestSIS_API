@@ -32,6 +32,16 @@ class ExerciceBusiness
     }
 
     /**
+     * Return sapeur data
+     *
+     * @return Exercice
+     */
+    public function getData()
+    {
+        return $this->exercice;
+    }
+
+    /**
      * Create a exercice
      *
      * @param $data
@@ -43,14 +53,15 @@ class ExerciceBusiness
         $validation = Validator::make($data,
             array(
                 'date' => 'date',
-                'heure' => 'heure',
+                'heure' => 'date_format:H:i:s',
                 'lieu' => 'string|nullable',
                 'communication' => 'string',
                 'designation' => 'string|nullable',
                 'duree' => 'integer',
                 'status' => 'integer',
                 'exercice_categorie_id' => 'integer|exists:exercice_categories,id',
-                'localite_id' => 'integer|exists:localites,id'
+                'localite_id' => 'integer|exists:localites,id',
+                'exercice_comptable_id' => 'integer|exists:exercice_comptables,id'
             ));
 
         if ($validation->fails()) {
@@ -66,6 +77,7 @@ class ExerciceBusiness
 
         $exercice = new Exercice();
         $exercice->fill($data);
+        $exercice->exercice_comptable_id = $data['exercice_comptable_id'];
         $exercice->save();
 
         return new ExerciceBusiness($exercice);
@@ -164,14 +176,26 @@ class ExerciceBusiness
      *
      * @param $data
      * @return Collection
+     * @throws Exception
      */
     public function updateSapeurs($data)
     {
         $sapeurs = $data['sapeurs'];
 
         foreach ($sapeurs as $sapeur) {
-            //TODO Validate data
             $sap = $this->exercice->sapeurs()->where('exercice_sapeur.id', $sapeur['id'])->first();
+            $validation = Validator::make($sapeur,
+                array(
+                    'convoque' => 'required|boolean',
+                    'present' => 'required|boolean',
+                    'amende' => 'required|boolean',
+                    'excuse_type_id' => 'required|integer|exists:excuse_types,id',
+                ));
+
+            if ($validation->fails()) {
+                throw new Exception($validation->messages());
+            }
+
             $sap->update($sapeur);
             $sap->save();
         }

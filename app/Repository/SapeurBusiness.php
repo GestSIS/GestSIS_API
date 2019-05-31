@@ -36,6 +36,16 @@ class SapeurBusiness
     }
 
     /**
+     * Return sapeur data
+     *
+     * @return Sapeur
+     */
+    public function getData()
+    {
+        return $this->sapeur;
+    }
+
+    /**
      * Create a sapeur
      *
      * @param $data
