@@ -29,6 +29,8 @@ class CreateExerciceSapeurTable extends Migration
             $table->integer('convoque');
             $table->integer('present');
             $table->integer('amende');
+
+            $table->unique(['exercice_id', 'sapeur_id']);
         });
     }
 

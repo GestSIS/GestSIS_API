@@ -25,6 +25,8 @@ class CreateGradeSapeurTable extends Migration
 
             $table->date('date');
             $table->string('remarque');
+
+            $table->unique(['grade_id', 'sapeur_id']);
         });
     }
 

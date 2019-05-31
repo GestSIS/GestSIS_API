@@ -125,12 +125,26 @@ class ExerciceBusiness
      *
      * @param $data
      * @return Collection
+     * @throws Exception
      */
     public function addSapeurs($data)
     {
         $sapeurs = $data['sapeurs'];
 
         foreach ($sapeurs as $sapeur) {
+            $validation = Validator::make($data,
+                array(
+                    'convoque' => 'required|boolean',
+                    'present' => 'required|boolean',
+                    'absent' => 'required|boolean',
+                    'excuse' => 'required|boolean',
+                    'sapeur_id' => 'required|integer|exists:sapeurs,id',
+                ));
+
+            if ($validation->fails()) {
+                throw new Exception($validation->messages());
+            }
+
             //TODO Validate data
             $sap = new ExerciceSapeur();
             $sap->fill($sapeur);

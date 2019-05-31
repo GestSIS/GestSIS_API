@@ -22,6 +22,8 @@ class CreateGroupeSapeurTable extends Migration
 
             $table->bigInteger('sapeur_id')->unsigned();
             $table->foreign('sapeur_id')->references('id')->on('sapeurs');
+
+            $table->unique(['groupe_id', 'sapeur_id']);
         });
     }
 
