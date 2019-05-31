@@ -23,6 +23,9 @@ class CreateExerciceSapeurTable extends Migration
             $table->bigInteger('exercice_id')->unsigned();
             $table->foreign('exercice_id')->references('id')->on('exercices');
 
+            $table->bigInteger('excuse_type_id')->unsigned()->nullable();
+            $table->foreign('excuse_type_id')->references('id')->on('excuse_types');
+
             $table->integer('convoque');
             $table->integer('present');
             $table->integer('amende');

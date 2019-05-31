@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -17,7 +15,7 @@ use Illuminate\Http\Request;
 //     return $request->user();
 // });
 
-Route::group(['prefix' => 'v2'], function(){
+Route::group(['prefix' => 'v2'], function () {
 
     // Route::get('sis', 'SisApiController@index')->name('api.v2.sis.index');
 
@@ -30,7 +28,7 @@ Route::group(['prefix' => 'v2'], function(){
     // Route::post('user/signup', 'UserApiController@signup')->name('api.v2.user.signup');
 
     // // TODO: Authorization required
-    // Route::group(['middleware' => 'jwt.auth'], function(){
+        // Route::group(['middleware' => 'jwt.auth'], function(){
         //TODO: Implement those route for retro compatibility
 
         // Sapeurs
@@ -47,6 +45,10 @@ Route::group(['prefix' => 'v2'], function(){
         // Exercices
         Route::resource('exercices', 'ExerciceController')->only(['index', 'store', 'update']);//, 'destroy']);//->middleware('role:effectif_read');
         Route::resource('exercices.sapeurs', 'ExerciceSapeurController')->only(['index']);
+        Route::post('exercices/{id}/sapeurs', 'ExerciceSapeurController@create')->name('api.v2.exercices.sapeurs.create');
+        Route::put('exercices/{id}/sapeurs', 'ExerciceSapeurController@received')->name('api.v2.exercices.sapeurs.update');
+        Route::delete('exercices/{id}/sapeurs', 'ExerciceSapeurController@received')->name('api.v2.exercices.sapeurs.delete');
+
         //Route::resource('exercices', 'ExerciceSapeursController')->only(['store', 'update', 'destroy']);
 
         // Route::get('excusestypes', 'ExerciceApiController@excusesTypes')->name('api.v2.exercice.excusesTypes')->middleware('role:exercice_read');
@@ -54,25 +56,27 @@ Route::group(['prefix' => 'v2'], function(){
         // Route::get('exercices/{id}', 'ExerciceApiController@show')->name('api.v2.exercice.show')->middleware('role:exercice_read');
 
         // Exercices comptables
-        Route::get('exercice-comptables', 'ExerciceComptableController@index')->name('api.v2.exercice-categorie');
+        Route::resource('exercice-comptables', 'ExerciceComptableController@index')->only(['index']);
+        Route::resource('exercice-comptables.exercices', 'ExerciceComptableController@index')->only(['index']);
+        Route::resource('exercice-comptables.interventions', 'ExerciceComptableController@index')->only(['index']);
 
         // Interventions
         // Route::get('interventions', 'InterventionApiController@index')->name('api.v2.intervention.index')->middleware('role:intervention_read');
         // Route::get('interventions/{id}', 'InterventionApiController@show')->name('api.v2.intervention.show')->middleware('role:intervention_read');
 
-         // Vehicules
+        // Vehicules
         // Route::get('vehicule', 'VehiculeApiController@index')->name('api.v2.vehicule.index');
 
-         // Materiel
+        // Materiel
         // Route::get('materiel', 'MaterielApiController@index')->name('api.v2.materiel.index');
 
-         // Sis
+        // Sis
         // Route::get('localities', 'SisApiController@localities')->name('api.v2.sis.localities');
 
-         // Téléphones
+        // Téléphones
         // Route::get('telephones', 'TelephoneApiController@index')->name('api.v2.telephone.index');
 
-         // Groupes
+        // Groupes
         Route::get('groupes', 'GroupeController@index')->name('api.v2.groupes');
 
         // // Transfert

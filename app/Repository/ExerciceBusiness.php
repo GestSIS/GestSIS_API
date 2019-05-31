@@ -117,4 +117,46 @@ class ExerciceBusiness
 
         return $this->exercice;
     }
+
+    /**
+     * Ajout de sapeurs d'un exercice
+     *
+     * @param $data
+     */
+    public function addSapeurs($data)
+    {
+        $sapeurs = $data['sapeurs'];
+
+        foreach($sapeurs as $sapeur){
+            //TODO
+        }
+    }
+
+    /**
+     * Modification de sapeurs d'un exercice
+     *
+     * @param $data
+     */
+    public function updateSapeurs($data)
+    {
+        $sapeurs = $data['sapeurs'];
+
+        foreach($sapeurs as $sapeur){
+            $sap = $this->exercice->sapeurs()->where('id', $sapeur['id'])->get();
+            $sap->fill($sapeur);
+            $sap->save();
+        }
+    }
+
+    /**
+     * Suppression de sapeurs d'un exercice
+     *
+     * @param $data
+     */
+    public function removeSapeurs($data)
+    {
+        $ids = $data['sapeurs'];
+
+        $this->exercice->sapeurs()->whereIn('id', $ids)->delete();
+    }
 }

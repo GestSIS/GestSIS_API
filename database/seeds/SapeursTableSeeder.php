@@ -82,7 +82,7 @@ class SapeursTableSeeder extends Seeder
             'lieu_de_travail' => 'Delémont',
 
             'email' => Str::random(10).'@gmail.com',
-            'actif' => 1,
+            'actif' => 0,
 
             'iban' => 'CH65 82000 53636 75756 7',
             'iban_status' => 1,

@@ -18,7 +18,7 @@ class ExerciceController extends Controller
      */
     public function index()
     {
-        //TODO Exercice comptable filter
+        //TODO Exercice comptable filtrer
         $exercices = Exercice::all();
 
         return response()->json(['data' => $exercices]);
@@ -32,7 +32,7 @@ class ExerciceController extends Controller
      */
     public function store(Request $request)
     {
-        //TODO Create a new sapeur
+        //TODO Create a new exercice
     }
 
     /**
@@ -43,9 +43,9 @@ class ExerciceController extends Controller
      */
     public function show($id)
     {
-        $sapeur = Sapeur::findOrFail($id);
+        $exercice = Exercice::findOrFail($id);
 
-        return response()->json(['data' => $sapeur]);
+        return response()->json(['data' => $exercice]);
     }
 
     /**

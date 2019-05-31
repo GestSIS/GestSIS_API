@@ -31,5 +31,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ExerciceComptableTableSeeder::class);
         $this->call(SapeursTableSeeder::class);
         $this->call(ExerciceTableSeeder::class);
+        $this->call(ExerciceSapeurTableSeeder::class);
     }
 }
