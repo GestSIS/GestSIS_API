@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Sapeur;
+use App\Models\Exercice;
 use App\Repository\ExerciceBusiness;
 use Exception;
 use Illuminate\Http\Request;
@@ -17,7 +17,7 @@ class ExerciceSapeurController extends Controller
      */
     public function index($exercice_id)
     {
-        $sapeurs = Sapeur::find($exercice_id)->sapeurs()->get();
+        $sapeurs = Exercice::find($exercice_id)->sapeurs()->get();
 
         return response()->json(['data' => $sapeurs]);
     }

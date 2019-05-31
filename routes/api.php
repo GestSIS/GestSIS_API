@@ -45,9 +45,9 @@ Route::group(['prefix' => 'v2'], function () {
         // Exercices
         Route::resource('exercices', 'ExerciceController')->only(['index', 'store', 'update']);//, 'destroy']);//->middleware('role:effectif_read');
         Route::resource('exercices.sapeurs', 'ExerciceSapeurController')->only(['index']);
-        Route::post('exercices/{id}/sapeurs', 'ExerciceSapeurController@create')->name('api.v2.exercices.sapeurs.create');
-        Route::put('exercices/{id}/sapeurs', 'ExerciceSapeurController@received')->name('api.v2.exercices.sapeurs.update');
-        Route::delete('exercices/{id}/sapeurs', 'ExerciceSapeurController@received')->name('api.v2.exercices.sapeurs.delete');
+        Route::post('exercices/{id}/sapeurs', 'ExerciceSapeurController@store')->name('api.v2.exercices.sapeurs.store');
+        Route::put('exercices/{id}/sapeurs', 'ExerciceSapeurController@update')->name('api.v2.exercices.sapeurs.update');
+        Route::delete('exercices/{id}/sapeurs', 'ExerciceSapeurController@destroy')->name('api.v2.exercices.sapeurs.delete');
 
         //Route::resource('exercices', 'ExerciceSapeursController')->only(['store', 'update', 'destroy']);
 

@@ -5,7 +5,9 @@ namespace App\Repository;
 
 
 use App\Models\Exercice;
+use App\Models\ExerciceSapeur;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 
 class ExerciceBusiness
 {
@@ -122,30 +124,39 @@ class ExerciceBusiness
      * Ajout de sapeurs d'un exercice
      *
      * @param $data
+     * @return Collection
      */
     public function addSapeurs($data)
     {
         $sapeurs = $data['sapeurs'];
 
-        foreach($sapeurs as $sapeur){
-            //TODO
+        foreach ($sapeurs as $sapeur) {
+            //TODO Validate data
+            $sap = new ExerciceSapeur();
+            $sap->fill($sapeur);
+            $sap->sapeur_id = $sapeur['sapeur_id'];
+            $this->exercice->sapeurs()->save($sap);
         }
+        return $this->exercice->sapeurs()->get();
     }
 
     /**
      * Modification de sapeurs d'un exercice
      *
      * @param $data
+     * @return Collection
      */
     public function updateSapeurs($data)
     {
         $sapeurs = $data['sapeurs'];
 
-        foreach($sapeurs as $sapeur){
-            $sap = $this->exercice->sapeurs()->where('id', $sapeur['id'])->get();
-            $sap->fill($sapeur);
+        foreach ($sapeurs as $sapeur) {
+            //TODO Validate data
+            $sap = $this->exercice->sapeurs()->where('exercice_sapeur.id', $sapeur['id'])->first();
+            $sap->update($sapeur);
             $sap->save();
         }
+        return $this->exercice->sapeurs()->get();
     }
 
     /**
