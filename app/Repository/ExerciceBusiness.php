@@ -84,17 +84,6 @@ class ExerciceBusiness
     }
 
     /**
-     * Delete a exercice.
-     *
-     * @param int
-     */
-    public static function delete($exercice_id)
-    {
-        //TODO: Check
-        Exercice::destroy($exercice_id);
-    }
-
-    /**
      * Updates a post.
      *
      * @param int
@@ -107,7 +96,7 @@ class ExerciceBusiness
         $validation = Validator::make($data,
             array(
                 'date' => 'date',
-                'heure' => 'heure',
+                'heure' => 'date_format:H:i:s',
                 'lieu' => 'string|nullable',
                 'communication' => 'string',
                 'designation' => 'string|nullable',
@@ -131,6 +120,17 @@ class ExerciceBusiness
         $this->exercice->update($data);
 
         return $this->exercice;
+    }
+
+    /**
+     * Delete a exercice.
+     *
+     * @param int
+     */
+    public static function delete($exercice_id)
+    {
+        ExerciceSapeur::where('exercice_id', $exercice_id)->delete();
+        Exercice::destroy($exercice_id);
     }
 
     /**
