@@ -227,7 +227,6 @@ class SapeursTableSeeder extends Seeder
 
         $groupes_sapeurs = array(
             array('id' => '4','groupe_id' => '1','sapeur_id' => '1'),
-            array('id' => '8','groupe_id' => '5','sapeur_id' => '2'),
             array('id' => '14','groupe_id' => '5','sapeur_id' => '1'),
             array('id' => '16','groupe_id' => '6','sapeur_id' => '1'),
             array('id' => '22','groupe_id' => '2','sapeur_id' => '2'),
