@@ -8,6 +8,7 @@ use App\Models\Exercice;
 use App\Models\ExerciceSapeur;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use Validator;
 
 class ExerciceBusiness
 {
@@ -132,20 +133,24 @@ class ExerciceBusiness
         $sapeurs = $data['sapeurs'];
 
         foreach ($sapeurs as $sapeur) {
-            $validation = Validator::make($data,
+            $sapeurId = $sapeur['sapeur_id'];
+            $validation = Validator::make($sapeur,
                 array(
                     'convoque' => 'required|boolean',
                     'present' => 'required|boolean',
-                    'absent' => 'required|boolean',
-                    'excuse' => 'required|boolean',
-                    'sapeur_id' => 'required|integer|exists:sapeurs,id',
+                    'amende' => 'required|boolean',
+                    'excuse_type_id' => 'required|integer|exists:excuse_types,id',
+                    'sapeur_id' => 'required|integer|exists:sapeurs,id'
                 ));
 
             if ($validation->fails()) {
                 throw new Exception($validation->messages());
             }
 
-            //TODO Validate data
+            if ($this->exercice->sapeurs()->where('exercice_sapeur.sapeur_id', $sapeurId)->first() !== null) {
+                throw new Exception("Duplicated sapeur");
+            }
+
             $sap = new ExerciceSapeur();
             $sap->fill($sapeur);
             $sap->sapeur_id = $sapeur['sapeur_id'];
