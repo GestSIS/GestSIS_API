@@ -33,7 +33,9 @@ class SapeurCoursTest extends TestCase
         $fonction_id = $sapeur->addFonction($data)->id;
 
         $data = array(
-            'date' => Carbon::createMidnightDate(1958, 1, 1),
+            'date' => Carbon::createMidnightDate(1958, 2, 7),
+            'date_fonction' => Carbon::createMidnightDate(1960, 6, 5),
+            'date_grade' => Carbon::createMidnightDate(1965, 12, 29),
             'localite_id' => 1,
             'cours_id' => 2,
             'grade_id' => 5,
@@ -54,13 +56,13 @@ class SapeurCoursTest extends TestCase
         $this->assertTrue($data['cours_id'] === $cours->cours_id);
 
         //Validate new grade
-        $this->assertTrue($data['date']->diffInDays($grade->date) === 0);
+        $this->assertTrue($data['date_grade']->diffInDays($grade->date) === 0);
 
         //Validate old fonction
-        $this->assertTrue($data['date']->diffInDays($fonction_old->fin) === 0);
+        $this->assertTrue($data['date_fonction']->diffInDays($fonction_old->fin) === 0);
 
         //Validate new fonction
-        $this->assertTrue($data['date']->diffInDays($fonction_new->debut) === 0);
+        $this->assertTrue($data['date_fonction']->diffInDays($fonction_new->debut) === 0);
         $this->assertTrue($fonction_new->fin === null);
 
     }
@@ -76,6 +78,8 @@ class SapeurCoursTest extends TestCase
         $id = 2;
         $data = array(
             'date' => Carbon::createMidnightDate(1958, 1, 1),
+            'date_fonction' => Carbon::createMidnightDate(1960, 1, 1),
+            'date_grade' => Carbon::createMidnightDate(1965, 1, 1),
             'localite_id' => 1,
             'cours_id' => 2,
             'grade_id' => null,
@@ -110,6 +114,8 @@ class SapeurCoursTest extends TestCase
         $id = 2;
         $data = array(
             'date' => Carbon::createMidnightDate(1958, 1, 1),
+            'date_fonction' => Carbon::createMidnightDate(1960, 1, 1),
+            'date_grade' => Carbon::createMidnightDate(1965, 1, 1),
             'localite_id' => 1,
             'cours_id' => 2,
             'grade_id' => null,

@@ -149,12 +149,14 @@ class SapeurBusiness
     {
         $validation = Validator::make($data,
             array(
-                'date' => 'required|date|before:tomorrow',
+                'date' => 'required|date',
                 'localite_id' => 'integer|exists:localites,id',
                 'cours_id' => 'required|integer|exists:cours,id',
                 'fonction_sapeur_id' => 'integer|nullable',
                 'fonction_id' => 'integer|nullable',
                 'grade_id' => 'integer|nullable',
+                'date_fonction' => 'required|date',
+                'date_grade' => 'required|date'
             )
         );
 
@@ -176,7 +178,7 @@ class SapeurBusiness
             if ($grade === null) {
                 $this->addGrade(array(
                     'grade_id' => $data['grade_id'],
-                    'date' => $data['date'],
+                    'date' => $data['date_grade'],
                     'remarque' => ''
                 ));
             }
@@ -186,7 +188,7 @@ class SapeurBusiness
         if ($data['fonction_sapeur_id'] !== null) {
             $this->updateFonction(array(
                 'id' => $data['fonction_sapeur_id'],
-                'fin' => $data['date'],
+                'fin' => $data['date_fonction'],
                 'remarque' => ''
             ));
         }
@@ -197,7 +199,7 @@ class SapeurBusiness
 //            if ($fonction === null) {
             $this->addFonction(array(
                 'fonction_id' => $data['fonction_id'],
-                'debut' => $data['date'],
+                'debut' => $data['date_fonction'],
                 'fin' => null,
                 'remarque' => null
             ));
