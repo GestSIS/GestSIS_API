@@ -4,11 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Sapeur;
 use App\Repository\SapeurBusiness;
-use Carbon\Carbon;
-use Tests\TestCase;
+use Exception;
 use Illuminate\Support\Str;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class SapeurTest extends TestCase
 {
@@ -16,6 +14,7 @@ class SapeurTest extends TestCase
      * A basic feature test example.
      *
      * @return void
+     * @throws Exception
      */
     public function testUpdate()
     {
@@ -31,7 +30,7 @@ class SapeurTest extends TestCase
             'employeur' => 'Canton du Jura',
             'lieu_de_travail' => 'Delémont',
 
-            'email' => Str::random(10).'@gmail.com',
+            'email' => Str::random(10) . '@gmail.com',
             'actif' => 1,
 
             'iban' => 'CH65 82000 53636 75756 7',

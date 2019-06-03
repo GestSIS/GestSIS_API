@@ -77,6 +77,7 @@ class ExerciceBusiness
 
         $exercice = new Exercice();
         $exercice->fill($data);
+        $exercice->exercice_categorie_id = $data['exercice_categorie_id'];
         $exercice->exercice_comptable_id = $data['exercice_comptable_id'];
         $exercice->save();
 
