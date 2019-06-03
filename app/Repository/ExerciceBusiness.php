@@ -152,7 +152,7 @@ class ExerciceBusiness
                     'convoque' => 'required|boolean',
                     'present' => 'required|boolean',
                     'amende' => 'required|boolean',
-                    'excuse_type_id' => 'required|integer|exists:excuse_types,id',
+                    'excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
                     'sapeur_id' => 'required|integer|exists:sapeurs,id'
                 ));
 
@@ -184,13 +184,14 @@ class ExerciceBusiness
         $sapeurs = $data['sapeurs'];
 
         foreach ($sapeurs as $sapeur) {
+
             $sap = $this->exercice->sapeurs()->where('exercice_sapeur.id', $sapeur['id'])->first();
             $validation = Validator::make($sapeur,
                 array(
                     'convoque' => 'required|boolean',
                     'present' => 'required|boolean',
                     'amende' => 'required|boolean',
-                    'excuse_type_id' => 'required|integer|exists:excuse_types,id',
+                    'excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
                 ));
 
             if ($validation->fails()) {
@@ -212,6 +213,6 @@ class ExerciceBusiness
     {
         $ids = $data['sapeurs'];
 
-        $this->exercice->sapeurs()->whereIn('id', $ids)->delete();
+        $this->exercice->sapeurs()->whereIn('exercice_sapeur.id', $ids)->delete();
     }
 }

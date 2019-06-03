@@ -33,12 +33,12 @@ class ExerciceSapeurController extends Controller
     public function store(Request $request, int $exercice_id)
     {
         try {
-            $grade = ExerciceBusiness::get($exercice_id)->addSapeurs($request->all());
+            $sapeur = ExerciceBusiness::get($exercice_id)->addSapeurs($request->all());
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
         }
 
-        return response()->json(['data' => $grade]);
+        return response()->json(['data' => $sapeur]);
     }
 
     /**
@@ -52,12 +52,12 @@ class ExerciceSapeurController extends Controller
     public function update(Request $request, int $exercice_id)
     {
         try {
-            $grade = ExerciceBusiness::get($exercice_id)->updateSapeurs($request->all());
+            $sapeur = ExerciceBusiness::get($exercice_id)->updateSapeurs($request->all());
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
         }
 
-        return response()->json(['data' => $grade]);
+        return response()->json(['data' => $sapeur]);
     }
 
     /**
