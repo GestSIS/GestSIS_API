@@ -65,7 +65,7 @@ class SapeurMutationTest extends TestCase
             'motif' => '',
             'localite_id' => 2
         );
-        $sapeur->updateMutation(array_merge($data, ['mutation_id' => $mutation_id]));
+        $sapeur->updateMutation(array_merge($data, ['id' => $mutation_id]));
 
         $mutation = Sapeur::find($id)->mutations()->where('mutations.id', $mutation_id)->first();
 

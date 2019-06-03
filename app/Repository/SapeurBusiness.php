@@ -484,6 +484,7 @@ class SapeurBusiness
     {
         $validation = Validator::make($data,
             array(
+                'id' => 'required|integer|exists:mutations,id',
                 'incorporation' => 'date',
                 'sortie' => 'date|nullable|after:incorporation',
                 'motif' => 'string|nullable',
@@ -500,7 +501,7 @@ class SapeurBusiness
         }
 
         //Update mutation
-        $mutation = $this->sapeur->mutations()->where('mutations.id', $data['mutation_id'])->first();
+        $mutation = $this->sapeur->mutations()->where('mutations.id', $data['id'])->first();
 
         //Search for the mutation
         if ($mutation === null) {

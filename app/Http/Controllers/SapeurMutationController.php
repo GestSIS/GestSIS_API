@@ -51,7 +51,7 @@ class SapeurMutationController extends Controller
      */
     public function update(Request $request, int $id, int $mutationId)
     {
-        if ($mutationId !== $request->get('mutation_id')) {
+        if ($mutationId !== $request->get('id')) {
             return response()->json(['error' => 'invalid mutation id']);
         }
 
