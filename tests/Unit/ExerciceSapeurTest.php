@@ -26,6 +26,7 @@ class ExerciceSapeurTest extends TestCase
                     'convoque' => 1,
                     'present' => 1,
                     'amende' => 0,
+                    'remplace' => 0,
                     'excuse_type_id' => null
                 ),
                 array(
@@ -33,6 +34,7 @@ class ExerciceSapeurTest extends TestCase
                     'convoque' => 1,
                     'present' => 0,
                     'amende' => 1,
+                    'remplace' => 0,
                     'excuse_type_id' => 4
                 ),
                 array(
@@ -40,6 +42,7 @@ class ExerciceSapeurTest extends TestCase
                     'convoque' => 1,
                     'present' => 0,
                     'amende' => 0,
+                    'remplace' => 0,
                     'excuse_type_id' => null
                 ),
             )
@@ -59,6 +62,7 @@ class ExerciceSapeurTest extends TestCase
             $this->assertTrue($sapeur['convoque'] === $sap['convoque']);
             $this->assertTrue($sapeur['present'] === $sap['present']);
             $this->assertTrue($sapeur['amende'] === $sap['amende']);
+            $this->assertTrue($sapeur['remplace'] === $sap['remplace']);
             $this->assertTrue($sapeur['excuse_type_id'] === $sap['excuse_type_id']);
         }
     }
@@ -81,8 +85,9 @@ class ExerciceSapeurTest extends TestCase
                         'id' => $sapeur_exercice->id,
                         'sapeur_id' => $sapeur_id,
                         'convoque' => 1,
-                        'present' => 1,
+                        'present' => 0,
                         'amende' => 0,
+                        'remplace' => 1,
                         'excuse_type_id' => null,
                     ),
                 )
@@ -102,6 +107,7 @@ class ExerciceSapeurTest extends TestCase
             $this->assertTrue($sapeur['convoque'] === $sap['convoque']);
             $this->assertTrue($sapeur['present'] === $sap['present']);
             $this->assertTrue($sapeur['amende'] === $sap['amende']);
+            $this->assertTrue($sapeur['remplace'] === $sap['remplace']);
             $this->assertTrue($sapeur['excuse_type_id'] === $sap['excuse_type_id']);
         }
     }

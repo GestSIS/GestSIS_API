@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 class ExerciceSapeur extends Model
 {
     protected $table = 'exercice_sapeur';
-    protected $fillable = ['convoque', 'present', 'amende', 'excuse_type_id'];
+    protected $fillable = ['convoque', 'present', 'amende', 'remplace', 'excuse_type_id'];
 }

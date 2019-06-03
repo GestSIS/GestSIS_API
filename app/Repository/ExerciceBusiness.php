@@ -152,6 +152,7 @@ class ExerciceBusiness
                     'convoque' => 'required|boolean',
                     'present' => 'required|boolean',
                     'amende' => 'required|boolean',
+                    'remplace' => 'required|boolean',
                     'excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
                     'sapeur_id' => 'required|integer|exists:sapeurs,id'
                 ));
@@ -191,6 +192,7 @@ class ExerciceBusiness
                     'convoque' => 'required|boolean',
                     'present' => 'required|boolean',
                     'amende' => 'required|boolean',
+                    'remplace' => 'required|boolean',
                     'excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
                 ));
 
