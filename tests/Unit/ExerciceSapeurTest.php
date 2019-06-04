@@ -128,7 +128,8 @@ class ExerciceSapeurTest extends TestCase
 
         $sapeurs = ExerciceSapeur::where('exercice_id', $id)->get();
         foreach ($sapeurs as $sapeur) {
-            if($sapeur->sapeur_id < 3){
+            if($sapeur->sapeur_id < 3)
+            {
                 array_push($data['sapeurs'], $sapeur->id);
             }
         }
