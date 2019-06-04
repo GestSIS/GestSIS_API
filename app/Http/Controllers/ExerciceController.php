@@ -39,7 +39,7 @@ class ExerciceController extends Controller
             return response()->json(['error' => $e->getMessage()]);
         }
 
-        return $exercice->getData();
+        return response()->json(['data' => $exercice->getData()]);
     }
 
     /**
