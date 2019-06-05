@@ -28,7 +28,7 @@ Route::group(['prefix' => 'v2'], function () {
     // Route::post('user/signup', 'UserApiController@signup')->name('api.v2.user.signup');
 
     // // TODO: Authorization required
-        // Route::group(['middleware' => 'jwt.auth'], function(){
+    // Route::group(['middleware' => 'jwt.auth'], function(){
         //TODO: Implement those route for retro compatibility
 
         // Sapeurs
@@ -44,16 +44,11 @@ Route::group(['prefix' => 'v2'], function () {
 
         // Exercices
         Route::resource('exercices', 'ExerciceController')->only(['index', 'show', 'store', 'update']);//, 'destroy']);//->middleware('role:effectif_read');
+
         Route::resource('exercices.sapeurs', 'ExerciceSapeurController')->only(['index']);
         Route::post('exercices/{id}/sapeurs', 'ExerciceSapeurController@store')->name('api.v2.exercices.sapeurs.store');
         Route::put('exercices/{id}/sapeurs', 'ExerciceSapeurController@update')->name('api.v2.exercices.sapeurs.update');
         Route::delete('exercices/{id}/sapeurs', 'ExerciceSapeurController@destroy')->name('api.v2.exercices.sapeurs.delete');
-
-        //Route::resource('exercices', 'ExerciceSapeursController')->only(['store', 'update', 'destroy']);
-
-        // Route::get('excusestypes', 'ExerciceApiController@excusesTypes')->name('api.v2.exercice.excusesTypes')->middleware('role:exercice_read');
-        // Route::get('exercices', 'ExerciceApiController@index')->name('api.v2.exercice.index')->middleware('role:exercice_read');
-        // Route::get('exercices/{id}', 'ExerciceApiController@show')->name('api.v2.exercice.show')->middleware('role:exercice_read');
 
         // Exercices comptables
         Route::resource('exercice-comptables', 'ExerciceComptableController@index')->only(['index']);
@@ -61,28 +56,49 @@ Route::group(['prefix' => 'v2'], function () {
         Route::resource('exercice-comptables.interventions', 'ExerciceComptableController@index')->only(['index']);
 
         // Interventions
-        // Route::get('interventions', 'InterventionApiController@index')->name('api.v2.intervention.index')->middleware('role:intervention_read');
-        // Route::get('interventions/{id}', 'InterventionApiController@show')->name('api.v2.intervention.show')->middleware('role:intervention_read');
+        Route::resource('interventions', 'InterventionController')->only(['index', 'show']);
+
+        Route::resource('exercices.materiels', 'ExerciceSapeurController')->only(['index']);
+        Route::post('exercices/{id}/materiels', 'ExerciceSapeurController@store')->name('api.v2.exercices.sapeurs.store');
+        Route::put('exercices/{id}/materiels', 'ExerciceSapeurController@update')->name('api.v2.exercices.sapeurs.update');
+        Route::delete('exercices/{id}/materiels', 'ExerciceSapeurController@destroy')->name('api.v2.exercices.sapeurs.delete');
+
+        Route::resource('exercices.vehicules', 'ExerciceSapeurController')->only(['index']);
+        Route::post('exercices/{id}/vehicules', 'ExerciceSapeurController@store')->name('api.v2.exercices.sapeurs.store');
+        Route::put('exercices/{id}/vehicules', 'ExerciceSapeurController@update')->name('api.v2.exercices.sapeurs.update');
+        Route::delete('exercices/{id}/vehicules', 'ExerciceSapeurController@destroy')->name('api.v2.exercices.sapeurs.delete');
+
+        Route::resource('exercices.missions', 'ExerciceSapeurController')->only(['index']);
+        Route::post('exercices/{id}/missions', 'ExerciceSapeurController@store')->name('api.v2.exercices.sapeurs.store');
+        Route::put('exercices/{id}/missions', 'ExerciceSapeurController@update')->name('api.v2.exercices.sapeurs.update');
+        Route::delete('exercices/{id}/missions', 'ExerciceSapeurController@destroy')->name('api.v2.exercices.sapeurs.delete');
+
+        Route::resource('exercices.appels', 'ExerciceSapeurController')->only(['index']);
+        Route::post('exercices/{id}/appels', 'ExerciceSapeurController@store')->name('api.v2.exercices.sapeurs.store');
+        Route::put('exercices/{id}/appels', 'ExerciceSapeurController@update')->name('api.v2.exercices.sapeurs.update');
+        Route::delete('exercices/{id}/appels', 'ExerciceSapeurController@destroy')->name('api.v2.exercices.sapeurs.delete');
+
+        Route::resource('exercices.sapeurs', 'ExerciceSapeurController')->only(['index']);
+        Route::post('exercices/{id}/sapeurs', 'ExerciceSapeurController@store')->name('api.v2.exercices.sapeurs.store');
+        Route::put('exercices/{id}/sapeurs', 'ExerciceSapeurController@update')->name('api.v2.exercices.sapeurs.update');
+        Route::delete('exercices/{id}/sapeurs', 'ExerciceSapeurController@destroy')->name('api.v2.exercices.sapeurs.delete');
+
+        Route::resource('exercices.quittances', 'ExerciceSapeurController')->only(['index']);
+        Route::post('exercices/{id}/quittances', 'ExerciceSapeurController@store')->name('api.v2.exercices.sapeurs.store');
+        Route::put('exercices/{id}/quittances', 'ExerciceSapeurController@update')->name('api.v2.exercices.sapeurs.update');
+        Route::delete('exercices/{id}/quittances', 'ExerciceSapeurController@destroy')->name('api.v2.exercices.sapeurs.delete');
 
         // Vehicules
-        // Route::get('vehicule', 'VehiculeApiController@index')->name('api.v2.vehicule.index');
+        Route::get('vehicule', 'VehiculeController@index')->name('api.v2.vehicule.index');
 
         // Materiel
-        // Route::get('materiel', 'MaterielApiController@index')->name('api.v2.materiel.index');
-
-        // Sis
-        // Route::get('localities', 'SisApiController@localities')->name('api.v2.sis.localities');
+        Route::get('materiel', 'MaterielController@index')->name('api.v2.materiel.index');
 
         // Téléphones
-        // Route::get('telephones', 'TelephoneApiController@index')->name('api.v2.telephone.index');
+        Route::get('telephones', 'TelephoneController@index')->name('api.v2.telephone.index');
 
         // Groupes
         Route::get('groupes', 'GroupeController@index')->name('api.v2.groupes');
-
-        // // Transfert
-        // Route::get('transfert', 'TransfertApiController@index')->name('api.v2.transfert.index')->middleware('role:transfert_all');
-        // Route::post('transfert/{slug}', 'TransfertApiController@create')->name('api.v2.transfert.create')->middleware('role:transfert_all');
-        // Route::put('transfert/{id}/recu', 'TransfertApiController@received')->name('api.v2.transfert.received')->middleware('role:transfert_all');
 
         //Données de bases générales
         Route::get('localites', 'LocaliteController@index')->name('api.v2.localites');
@@ -101,9 +117,25 @@ Route::group(['prefix' => 'v2'], function () {
         Route::get('excuses-types', 'ExcuseTypeController@index')->name('api.v2.excuse-type');
 
         // Données de base intervention
-        // Route::get('statfederal', 'BaseDataApiController@statfederal')->name('api.v2.basedata.statfederal');
-        // Route::get('typeintervention', 'BaseDataApiController@typeintervention')->name('api.v2.basedata.typeintervention');
+        Route::get('stat-federal', 'StatFederalController@index')->name('api.v2.basedata.statfederal');
+        Route::get('type-intervention', 'TypeInterventionController@index')->name('api.v2.basedata.typeintervention');
+
+        // Controles médicaux
         // Route::get('cmedtype', 'BaseDataApiController@cmedtype')->name('api.v2.basedata.cmedtype');
+
+        //SUPPRIMER
+
+        // Sis
+        // Route::get('localities', 'SisApiController@localities')->name('api.v2.sis.localities');
+
+        // Route::get('excusestypes', 'ExerciceApiController@excusesTypes')->name('api.v2.exercice.excusesTypes')->middleware('role:exercice_read');
+        // Renommé en excuse-types
+
+        // // Transfert
+        // Route::get('transfert', 'TransfertApiController@index')->name('api.v2.transfert.index')->middleware('role:transfert_all');
+        // Route::post('transfert/{slug}', 'TransfertApiController@create')->name('api.v2.transfert.create')->middleware('role:transfert_all');
+        // Route::put('transfert/{id}/recu', 'TransfertApiController@received')->name('api.v2.transfert.received')->middleware('role:transfert_all');
+
     // });
 });
 
