@@ -51,9 +51,9 @@ Route::group(['prefix' => 'v2'], function () {
         Route::delete('exercices/{id}/sapeurs', 'ExerciceSapeurController@destroy')->name('api.v2.exercices.sapeurs.delete');
 
         // Exercices comptables
-        Route::resource('exercice-comptables', 'ExerciceComptableController@index')->only(['index']);
-        Route::resource('exercice-comptables.exercices', 'ExerciceComptableController@index')->only(['index']);
-        Route::resource('exercice-comptables.interventions', 'ExerciceComptableController@index')->only(['index']);
+        Route::resource('exercice-comptables', 'ExerciceComptableController')->only(['index']);
+//        Route::resource('exercice-comptables.exercices', 'ExerciceComptableController')->only(['index']);
+//        Route::resource('exercice-comptables.interventions', 'ExerciceComptableController')->only(['index']);
 
         // Interventions
         Route::resource('interventions', 'InterventionController')->only(['index', 'show']);
@@ -89,10 +89,10 @@ Route::group(['prefix' => 'v2'], function () {
         Route::delete('exercices/{id}/quittances', 'ExerciceSapeurController@destroy')->name('api.v2.exercices.sapeurs.delete');
 
         // Vehicules
-        Route::get('vehicule', 'VehiculeController@index')->name('api.v2.vehicule.index');
+        Route::get('vehicules', 'VehiculeController@index')->name('api.v2.vehicule.index');
 
         // Materiel
-        Route::get('materiel', 'MaterielController@index')->name('api.v2.materiel.index');
+        Route::get('materiels', 'MaterielController@index')->name('api.v2.materiel.index');
 
         // Téléphones
         Route::get('telephones', 'TelephoneController@index')->name('api.v2.telephone.index');
