@@ -20,8 +20,8 @@ class CreateTypeInterventionsTable extends Migration
             $table->string('designation');
             $table->integer('tri');
 
-            $table->bigInteger('type_intervention_id')->unsigned();
-            $table->foreign('type_intervention_id')->references('id')->on('type_intervention');
+            $table->bigInteger('stat_intervention_id')->unsigned();
+            $table->foreign('stat_intervention_id')->references('id')->on('stat_interventions');
         });
     }
 

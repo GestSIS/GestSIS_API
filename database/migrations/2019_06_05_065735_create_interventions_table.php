@@ -22,10 +22,9 @@ class CreateInterventionsTable extends Migration
             $table->string('lieu');
             $table->string('objet');
             $table->date('date_fin');
-            $table->heure('heure_fin');
+            $table->time('heure_fin');
             $table->boolean('rapport_police');
-            $table->smallInteger('degree');
-            $table->integer('degree');
+            $table->smallInteger('degre');
             $table->integer('sauve_personne');
             $table->integer('sauve_animaux');
             $table->text('description');
