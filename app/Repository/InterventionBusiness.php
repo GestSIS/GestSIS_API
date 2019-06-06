@@ -4,12 +4,134 @@
 namespace App\Repository;
 
 
-use App\Models\ExerciceSapeur;
+use App\Models\Intervention;
+use App\Models\InterventionSapeur;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 
 class InterventionBusiness
 {
+
+    protected $intervention;
+
+    public function __construct(Intervention $intervention)
+    {
+        $this->intervention = $intervention;
+    }
+
+    /**
+     * Get's a intervention by it's ID
+     *
+     * @param int
+     * @return InterventionBusiness
+     */
+    public static function get($intervention_id)
+    {
+        return new InterventionBusiness(Intervention::findOrFail($intervention_id));
+    }
+
+    /**
+     * Return sapeur data
+     *
+     * @return Intervention
+     */
+    public function getData()
+    {
+        return $this->intervention;
+    }
+
+    /**
+     * Create a intervention
+     *
+     * @param $data
+     * @return InterventionBusiness
+     * @throws Exception
+     */
+    public static function createIntervention($data)
+    {
+        $validation = Validator::make($data,
+            array(
+                'date' => 'date',
+                'heure' => 'date_format:H:i:s',
+                'lieu' => 'string|nullable',
+                'communication' => 'string',
+                'designation' => 'string|nullable',
+                'duree' => 'integer',
+                'status' => 'integer',
+                'exercice_categorie_id' => 'integer|exists:exercice_categories,id',
+                'localite_id' => 'integer|exists:localites,id',
+                'exercice_comptable_id' => 'integer|exists:exercice_comptables,id'
+            ));
+
+        if ($validation->fails()) {
+            throw new Exception($validation->messages());
+        }
+
+        if ($data['lieu'] === null) {
+            $data['lieu'] = '';
+        }
+        if ($data['designation'] === null) {
+            $data['designation'] = '';
+        }
+
+        $intervention = new Intervention();
+        $intervention->fill($data);
+        $intervention->exercice_categorie_id = $data['exercice_categorie_id'];
+        $intervention->exercice_comptable_id = $data['exercice_comptable_id'];
+        $intervention->save();
+
+        return new InterventionBusiness($intervention);
+    }
+
+    /**
+     * Updates a post.
+     *
+     * @param int
+     * @param array
+     * @return Intervention
+     * @throws Exception
+     */
+    public function update($data)
+    {
+        $validation = Validator::make($data,
+            array(
+                'date' => 'date',
+                'heure' => 'date_format:H:i:s',
+                'lieu' => 'string|nullable',
+                'communication' => 'string',
+                'designation' => 'string|nullable',
+                'duree' => 'integer',
+                'status' => 'integer',
+                'exercice_categorie_id' => 'integer|exists:exercice_categories,id',
+                'localite_id' => 'integer|exists:localites,id'
+            ));
+
+        if ($validation->fails()) {
+            throw new Exception($validation->messages());
+        }
+
+        if ($data['lieu'] === null) {
+            $data['lieu'] = '';
+        }
+        if ($data['designation'] === null) {
+            $data['designation'] = '';
+        }
+
+        $this->intervention->update($data);
+
+        return $this->intervention;
+    }
+
+    /**
+     * Delete a intervention.
+     *
+     * @param int
+     */
+    public static function delete($intervention_id)
+    {
+        InterventionSapeur::where('exercice_id', $intervention_id)->delete();
+        Intervention::destroy($intervention_id);
+    }
 
 
     /**
@@ -25,13 +147,12 @@ class InterventionBusiness
 
         foreach ($sapeurs as $sapeur) {
             $sapeurId = $sapeur['sapeur_id'];
+
             $validation = Validator::make($sapeur,
                 array(
-                    'convoque' => 'required|boolean',
-                    'present' => 'required|boolean',
-                    'amende' => 'required|boolean',
-                    'remplace' => 'required|boolean',
-                    'excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
+                    'debut' => 'required|date_format:Y-m-d H:i:s',
+                    'fin' => 'required|date_format:Y-m-d H:i:s|after:debut',
+                    'piquet' => 'required|boolean',
                     'sapeur_id' => 'required|integer|exists:sapeurs,id'
                 ));
 
@@ -43,7 +164,7 @@ class InterventionBusiness
                 throw new Exception("Duplicated sapeur");
             }
 
-            $sap = new ExerciceSapeur();
+            $sap = new InterventionSapeur();
             $sap->fill($sapeur);
             $sap->sapeur_id = $sapeur['sapeur_id'];
             $this->intervention->sapeurs()->save($sap);
@@ -67,11 +188,9 @@ class InterventionBusiness
             $sap = $this->intervention->sapeurs()->where('exercice_sapeur.id', $sapeur['id'])->first();
             $validation = Validator::make($sapeur,
                 array(
-                    'convoque' => 'required|boolean',
-                    'present' => 'required|boolean',
-                    'amende' => 'required|boolean',
-                    'remplace' => 'required|boolean',
-                    'excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
+                    'debut' => 'required|date_format:Y-m-d H:i:s',
+                    'fin' => 'required|date_format:Y-m-d H:i:s|after:debut',
+                    'piquet' => 'required|boolean',
                 ));
 
             if ($validation->fails()) {

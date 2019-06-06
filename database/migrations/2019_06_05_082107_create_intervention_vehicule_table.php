@@ -26,6 +26,8 @@ class CreateInterventionVehiculeTable extends Migration
 
             $table->bigInteger('vehicule_id')->unsigned();
             $table->foreign('vehicule_id')->references('id')->on('vehicules');
+
+            $table->unique(['vehicule_id', 'intervention_id']);
         });
     }
 
