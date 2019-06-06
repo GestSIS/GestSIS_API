@@ -28,8 +28,9 @@ class CreateInterventionsTable extends Migration
             $table->integer('sauve_personne');
             $table->integer('sauve_animaux');
             $table->text('description');
-            $table->text('propriétaire');
+            $table->text('proprietaire');
             $table->text('responsable');
+            $table->integer('stat_nb');
 
             $table->boolean('imputer');
 

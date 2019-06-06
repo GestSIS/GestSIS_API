@@ -8,7 +8,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class ExerciceSapeurController extends Controller
+class ExerciceSapeursController extends Controller
 {
     /**
      * Display a listing of the resource.

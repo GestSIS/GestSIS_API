@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Exercice;
-use App\Repository\ExerciceBusiness;
+use App\Models\Intervention;
+use App\Repository\InterventionBusiness;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -34,7 +34,7 @@ class InterventionController extends Controller
     public function store(Request $request)
     {
         try {
-            $intervention = ExerciceBusiness::createExercice($request->all());
+            $intervention = InterventionBusiness::createIntervention($request->all());
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
         }
@@ -50,7 +50,7 @@ class InterventionController extends Controller
      */
     public function show($id)
     {
-        $intervention = Exercice::findOrFail($id);
+        $intervention = Intervention::findOrFail($id);
 
         return response()->json(['data' => $intervention]);
     }
@@ -66,7 +66,7 @@ class InterventionController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $intervention = ExerciceBusiness::get($id)->update($request->all());
+            $intervention = InterventionBusiness::get($id)->update($request->all());
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
         }

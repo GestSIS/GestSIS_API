@@ -9,7 +9,7 @@ class Intervention extends Model
     protected $fillable = ['piquet', 'debut', 'fin'];
 
     /**
-     * The cours that belong to the sapeur.
+     * The sapeur that belong to the sapeur.
      */
     public function sapeurs()
     {
@@ -17,7 +17,7 @@ class Intervention extends Model
     }
 
     /**
-     * The cours that belong to the sapeur.
+     * The groupe that belong to the sapeur.
      */
     public function groupes()
     {
@@ -25,7 +25,7 @@ class Intervention extends Model
     }
 
     /**
-     * The cours that belong to the sapeur.
+     * The materiel that belong to the sapeur.
      */
     public function materiels()
     {
@@ -33,7 +33,7 @@ class Intervention extends Model
     }
 
     /**
-     * The cours that belong to the sapeur.
+     * The vehicule that belong to the sapeur.
      */
     public function vehicules()
     {
@@ -41,7 +41,7 @@ class Intervention extends Model
     }
 
     /**
-     * The cours that belong to the sapeur.
+     * The quittance that belong to the sapeur.
      */
     public function quittances()
     {
@@ -49,7 +49,7 @@ class Intervention extends Model
     }
 
     /**
-     * The cours that belong to the sapeur.
+     * The mission that belong to the sapeur.
      */
     public function missions()
     {
@@ -57,11 +57,19 @@ class Intervention extends Model
     }
 
     /**
-     * The cours that belong to the sapeur.
+     * The appel that belong to the sapeur.
      */
     public function appels()
     {
         return $this->hasMany('App\Models\InterventionAppel');
+    }
+
+    /**
+     * The phase that belong to the sapeur.
+     */
+    public function phases()
+    {
+        return $this->hasMany('App\Models\Phase');
     }
 
     /**
