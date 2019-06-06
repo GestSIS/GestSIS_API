@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateInterventionMaterielsTable extends Migration
+class CreateInterventionMaterielTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateInterventionMaterielsTable extends Migration
      */
     public function up()
     {
-        Schema::create('intervention_materiels', function (Blueprint $table) {
+        Schema::create('intervention_materiel', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
@@ -37,6 +37,6 @@ class CreateInterventionMaterielsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('intervention_materiels');
+        Schema::dropIfExists('intervention_materiel');
     }
 }

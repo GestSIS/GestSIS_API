@@ -16,12 +16,12 @@ class InterventionController extends Controller
      *
      * @return Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //TODO Exercice comptable filtrer
-        $exercices = Exercice::all();
+        $exercice_comptable_id = $request->get('exercice_comptable_id');
+        $interventions = Intervention::where('exercice_comptable_id', $exercice_comptable_id)->get();
 
-        return response()->json(['data' => $exercices]);
+        return response()->json(['data' => $interventions]);
     }
 
     /**
@@ -34,12 +34,12 @@ class InterventionController extends Controller
     public function store(Request $request)
     {
         try {
-            $exercice = ExerciceBusiness::createExercice($request->all());
+            $intervention = ExerciceBusiness::createExercice($request->all());
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
         }
 
-        return response()->json(['data' => $exercice->getData()]);
+        return response()->json(['data' => $intervention->getData()]);
     }
 
     /**
@@ -50,9 +50,9 @@ class InterventionController extends Controller
      */
     public function show($id)
     {
-        $exercice = Exercice::findOrFail($id);
+        $intervention = Exercice::findOrFail($id);
 
-        return response()->json(['data' => $exercice]);
+        return response()->json(['data' => $intervention]);
     }
 
     /**
@@ -66,12 +66,12 @@ class InterventionController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $exercice = ExerciceBusiness::get($id)->update($request->all());
+            $intervention = ExerciceBusiness::get($id)->update($request->all());
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
         }
 
-        return response()->json(['data' => $exercice]);
+        return response()->json(['data' => $intervention]);
     }
 
     /**

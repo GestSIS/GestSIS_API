@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateInterventionVehiculesTable extends Migration
+class CreateGroupeInterventionTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,19 +13,18 @@ class CreateInterventionVehiculesTable extends Migration
      */
     public function up()
     {
-        Schema::create('intervention_vehicules', function (Blueprint $table) {
+        Schema::create('groupe_intervention', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->decimal('forfait', 5, 2);
-            $table->decimal('utilisation', 5, 2);
-            $table->decimal('tarif_unite', 5, 2);
+            $table->bigInteger('groupe_id')->unsigned();
+            $table->foreign('groupe_id')->references('id')->on('groupes');
 
             $table->bigInteger('intervention_id')->unsigned();
             $table->foreign('intervention_id')->references('id')->on('interventions');
 
-            $table->bigInteger('vehicule_id')->unsigned();
-            $table->foreign('vehicule_id')->references('id')->on('vehicules');
+
+            $table->unique(['groupe_id', 'intervention_id']);
         });
     }
 
@@ -36,6 +35,6 @@ class CreateInterventionVehiculesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('intervention_vehicules');
+        Schema::dropIfExists('groupe_intervention');
     }
 }

@@ -13,7 +13,7 @@ class InterventionBusiness
 
 
     /**
-     * Ajout de sapeurs d'un exercice
+     * Ajout de sapeurs d'un intervention
      *
      * @param $data
      * @return Collection
@@ -39,20 +39,20 @@ class InterventionBusiness
                 throw new Exception($validation->messages());
             }
 
-            if ($this->exercice->sapeurs()->where('exercice_sapeur.sapeur_id', $sapeurId)->first() !== null) {
+            if ($this->intervention->sapeurs()->where('exercice_sapeur.sapeur_id', $sapeurId)->first() !== null) {
                 throw new Exception("Duplicated sapeur");
             }
 
             $sap = new ExerciceSapeur();
             $sap->fill($sapeur);
             $sap->sapeur_id = $sapeur['sapeur_id'];
-            $this->exercice->sapeurs()->save($sap);
+            $this->intervention->sapeurs()->save($sap);
         }
-        return $this->exercice->sapeurs()->get();
+        return $this->intervention->sapeurs()->get();
     }
 
     /**
-     * Modification de sapeurs d'un exercice
+     * Modification de sapeurs d'un intervention
      *
      * @param $data
      * @return Collection
@@ -64,7 +64,7 @@ class InterventionBusiness
 
         foreach ($sapeurs as $sapeur) {
 
-            $sap = $this->exercice->sapeurs()->where('exercice_sapeur.id', $sapeur['id'])->first();
+            $sap = $this->intervention->sapeurs()->where('exercice_sapeur.id', $sapeur['id'])->first();
             $validation = Validator::make($sapeur,
                 array(
                     'convoque' => 'required|boolean',
@@ -81,11 +81,11 @@ class InterventionBusiness
             $sap->update($sapeur);
             $sap->save();
         }
-        return $this->exercice->sapeurs()->get();
+        return $this->intervention->sapeurs()->get();
     }
 
     /**
-     * Suppression de sapeurs d'un exercice
+     * Suppression de sapeurs d'un intervention
      *
      * @param $data
      */
@@ -93,12 +93,12 @@ class InterventionBusiness
     {
         $ids = $data['sapeurs'];
 
-        $this->exercice->sapeurs()->whereIn('exercice_sapeur.id', $ids)->delete();
+        $this->intervention->sapeurs()->whereIn('exercice_sapeur.id', $ids)->delete();
     }
 
 
     /**
-     * Ajout d'appels d'un exercice
+     * Ajout d'appels d'un intervention
      *
      * @param $data
      * @return Collection
@@ -110,7 +110,7 @@ class InterventionBusiness
     }
 
     /**
-     * Modification d'appels d'un exercice
+     * Modification d'appels d'un intervention
      *
      * @param $data
      * @return Collection
@@ -122,7 +122,7 @@ class InterventionBusiness
     }
 
     /**
-     * Suppression d'appels d'un exercice
+     * Suppression d'appels d'un intervention
      *
      * @param $data
      */
@@ -132,7 +132,7 @@ class InterventionBusiness
     }
 
     /**
-     * Ajout de missions à un exercice
+     * Ajout de missions à un intervention
      *
      * @param $data
      * @return Collection
@@ -144,7 +144,7 @@ class InterventionBusiness
     }
 
     /**
-     * Modification de missions à un exercice
+     * Modification de missions à un intervention
      *
      * @param $data
      * @return Collection
@@ -156,7 +156,7 @@ class InterventionBusiness
     }
 
     /**
-     * Suppression de missions à un exercice
+     * Suppression de missions à un intervention
      *
      * @param $data
      */
@@ -166,7 +166,7 @@ class InterventionBusiness
     }
 
     /**
-     * Ajout de materiels à un exercice
+     * Ajout de materiels à un intervention
      *
      * @param $data
      * @return Collection
@@ -178,7 +178,7 @@ class InterventionBusiness
     }
 
     /**
-     * Modification de materiels à un exercice
+     * Modification de materiels à un intervention
      *
      * @param $data
      * @return Collection
@@ -190,7 +190,7 @@ class InterventionBusiness
     }
 
     /**
-     * Suppression de materiels à un exercice
+     * Suppression de materiels à un intervention
      *
      * @param $data
      */
@@ -200,7 +200,7 @@ class InterventionBusiness
     }
 
     /**
-     * Ajout de quittances à un exercice
+     * Ajout de quittances à un intervention
      *
      * @param $data
      * @return Collection
@@ -212,7 +212,7 @@ class InterventionBusiness
     }
 
     /**
-     * Modification de quittances à un exercice
+     * Modification de quittances à un intervention
      *
      * @param $data
      * @return Collection
@@ -224,7 +224,7 @@ class InterventionBusiness
     }
 
     /**
-     * Suppression de quittances à un exercice
+     * Suppression de quittances à un intervention
      *
      * @param $data
      */
@@ -234,7 +234,7 @@ class InterventionBusiness
     }
 
     /**
-     * Ajout de vehicules à un exercice
+     * Ajout de vehicules à un intervention
      *
      * @param $data
      * @return Collection
@@ -246,7 +246,7 @@ class InterventionBusiness
     }
 
     /**
-     * Modification de vehicules à un exercice
+     * Modification de vehicules à un intervention
      *
      * @param $data
      * @return Collection
@@ -258,11 +258,45 @@ class InterventionBusiness
     }
 
     /**
-     * Suppression de vehicules à un exercice
+     * Suppression de vehicules à un intervention
      *
      * @param $data
      */
     public function removeVehicules($data)
+    {
+        //TODO
+    }
+
+    /**
+     * Ajout de groupes à un intervention
+     *
+     * @param $data
+     * @return Collection
+     * @throws Exception
+     */
+    public function addGroupes($data)
+    {
+        //TODO
+    }
+
+    /**
+     * Modification de groupes à un intervention
+     *
+     * @param $data
+     * @return Collection
+     * @throws Exception
+     */
+    public function updateGroupes($data)
+    {
+        //TODO
+    }
+
+    /**
+     * Suppression de groupes à un intervention
+     *
+     * @param $data
+     */
+    public function removeGroupes($data)
     {
         //TODO
     }
