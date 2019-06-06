@@ -8,7 +8,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class InterventionGroupeController extends Controller
+class InterventionGroupesController extends Controller
 {
 
     /**

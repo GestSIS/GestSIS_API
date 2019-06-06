@@ -58,35 +58,40 @@ Route::group(['prefix' => 'v2'], function () {
         // Interventions
         Route::resource('interventions', 'InterventionController')->only(['index', 'show']);
 
-        Route::resource('exercices.materiels', 'ExerciceSapeurController')->only(['index']);
-        Route::post('exercices/{id}/materiels', 'ExerciceSapeurController@store')->name('api.v2.exercices.sapeurs.store');
-        Route::put('exercices/{id}/materiels', 'ExerciceSapeurController@update')->name('api.v2.exercices.sapeurs.update');
-        Route::delete('exercices/{id}/materiels', 'ExerciceSapeurController@destroy')->name('api.v2.exercices.sapeurs.delete');
+        Route::resource('exercices.materiels', 'ExerciceMaterielsController')->only(['index']);
+        Route::post('exercices/{id}/materiels', 'ExerciceMaterielsController@store')->name('api.v2.exercices.materiels.store');
+        Route::put('exercices/{id}/materiels', 'ExerciceMaterielsController@update')->name('api.v2.exercices.materiels.update');
+        Route::delete('exercices/{id}/materiels', 'ExerciceMaterielsController@destroy')->name('api.v2.exercices.materiels.delete');
 
-        Route::resource('exercices.vehicules', 'ExerciceSapeurController')->only(['index']);
-        Route::post('exercices/{id}/vehicules', 'ExerciceSapeurController@store')->name('api.v2.exercices.sapeurs.store');
-        Route::put('exercices/{id}/vehicules', 'ExerciceSapeurController@update')->name('api.v2.exercices.sapeurs.update');
-        Route::delete('exercices/{id}/vehicules', 'ExerciceSapeurController@destroy')->name('api.v2.exercices.sapeurs.delete');
+        Route::resource('exercices.vehicules', 'ExerciceVehiculesController')->only(['index']);
+        Route::post('exercices/{id}/vehicules', 'ExerciceVehiculesController@store')->name('api.v2.exercices.vehicules.store');
+        Route::put('exercices/{id}/vehicules', 'ExerciceVehiculesController@update')->name('api.v2.exercices.vehicules.update');
+        Route::delete('exercices/{id}/vehicules', 'ExerciceVehiculesController@destroy')->name('api.v2.exercices.vehicules.delete');
 
-        Route::resource('exercices.missions', 'ExerciceSapeurController')->only(['index']);
-        Route::post('exercices/{id}/missions', 'ExerciceSapeurController@store')->name('api.v2.exercices.sapeurs.store');
-        Route::put('exercices/{id}/missions', 'ExerciceSapeurController@update')->name('api.v2.exercices.sapeurs.update');
-        Route::delete('exercices/{id}/missions', 'ExerciceSapeurController@destroy')->name('api.v2.exercices.sapeurs.delete');
+        Route::resource('exercices.missions', 'ExerciceMissionsController')->only(['index']);
+        Route::post('exercices/{id}/missions', 'ExerciceMissionsController@store')->name('api.v2.exercices.missions.store');
+        Route::put('exercices/{id}/missions', 'ExerciceMissionsController@update')->name('api.v2.exercices.missions.update');
+        Route::delete('exercices/{id}/missions', 'ExerciceMissionsController@destroy')->name('api.v2.exercices.missions.delete');
 
-        Route::resource('exercices.appels', 'ExerciceSapeurController')->only(['index']);
-        Route::post('exercices/{id}/appels', 'ExerciceSapeurController@store')->name('api.v2.exercices.sapeurs.store');
-        Route::put('exercices/{id}/appels', 'ExerciceSapeurController@update')->name('api.v2.exercices.sapeurs.update');
-        Route::delete('exercices/{id}/appels', 'ExerciceSapeurController@destroy')->name('api.v2.exercices.sapeurs.delete');
+        Route::resource('exercices.appels', 'ExerciceAppelsController')->only(['index']);
+        Route::post('exercices/{id}/appels', 'ExerciceAppelsController@store')->name('api.v2.exercices.appels.store');
+        Route::put('exercices/{id}/appels', 'ExerciceAppelsController@update')->name('api.v2.exercices.appels.update');
+        Route::delete('exercices/{id}/appels', 'ExerciceAppelsController@destroy')->name('api.v2.exercices.appels.delete');
 
-        Route::resource('exercices.sapeurs', 'ExerciceSapeurController')->only(['index']);
-        Route::post('exercices/{id}/sapeurs', 'ExerciceSapeurController@store')->name('api.v2.exercices.sapeurs.store');
-        Route::put('exercices/{id}/sapeurs', 'ExerciceSapeurController@update')->name('api.v2.exercices.sapeurs.update');
-        Route::delete('exercices/{id}/sapeurs', 'ExerciceSapeurController@destroy')->name('api.v2.exercices.sapeurs.delete');
+        Route::resource('exercices.sapeurs', 'ExerciceSapeursController')->only(['index']);
+        Route::post('exercices/{id}/sapeurs', 'ExerciceSapeursController@store')->name('api.v2.exercices.sapeurs.store');
+        Route::put('exercices/{id}/sapeurs', 'ExerciceSapeursController@update')->name('api.v2.exercices.sapeurs.update');
+        Route::delete('exercices/{id}/sapeurs', 'ExerciceSapeursController@destroy')->name('api.v2.exercices.sapeurs.delete');
 
-        Route::resource('exercices.quittances', 'ExerciceSapeurController')->only(['index']);
-        Route::post('exercices/{id}/quittances', 'ExerciceSapeurController@store')->name('api.v2.exercices.sapeurs.store');
-        Route::put('exercices/{id}/quittances', 'ExerciceSapeurController@update')->name('api.v2.exercices.sapeurs.update');
-        Route::delete('exercices/{id}/quittances', 'ExerciceSapeurController@destroy')->name('api.v2.exercices.sapeurs.delete');
+        Route::resource('exercices.quittances', 'ExerciceQuittancesController')->only(['index']);
+        Route::post('exercices/{id}/quittances', 'ExerciceQuittancesController@store')->name('api.v2.exercices.quittances.store');
+        Route::put('exercices/{id}/quittances', 'ExerciceQuittancesController@update')->name('api.v2.exercices.quittances.update');
+        Route::delete('exercices/{id}/quittances', 'ExerciceQuittancesController@destroy')->name('api.v2.exercices.quittances.delete');
+
+        Route::resource('exercices.groupes', 'ExerciceGroupesController')->only(['index']);
+        Route::post('exercices/{id}/groupes', 'ExerciceGroupesController@store')->name('api.v2.exercices.groupes.store');
+        Route::put('exercices/{id}/groupes', 'ExerciceGroupesController@update')->name('api.v2.exercices.groupes.update');
+        Route::delete('exercices/{id}/groupes', 'ExerciceGroupesController@destroy')->name('api.v2.exercices.groupes.delete');
 
         // Vehicules
         Route::get('vehicules', 'VehiculeController@index')->name('api.v2.vehicule.index');
