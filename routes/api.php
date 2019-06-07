@@ -85,12 +85,10 @@ Route::group(['prefix' => 'v2'], function () {
 
         Route::resource('exercices.quittances', 'ExerciceQuittancesController')->only(['index']);
         Route::post('exercices/{id}/quittances', 'ExerciceQuittancesController@store')->name('api.v2.exercices.quittances.store');
-        Route::put('exercices/{id}/quittances', 'ExerciceQuittancesController@update')->name('api.v2.exercices.quittances.update');
         Route::delete('exercices/{id}/quittances', 'ExerciceQuittancesController@destroy')->name('api.v2.exercices.quittances.delete');
 
         Route::resource('exercices.groupes', 'ExerciceGroupesController')->only(['index']);
         Route::post('exercices/{id}/groupes', 'ExerciceGroupesController@store')->name('api.v2.exercices.groupes.store');
-        Route::put('exercices/{id}/groupes', 'ExerciceGroupesController@update')->name('api.v2.exercices.groupes.update');
         Route::delete('exercices/{id}/groupes', 'ExerciceGroupesController@destroy')->name('api.v2.exercices.groupes.delete');
 
         // Vehicules
@@ -122,8 +120,9 @@ Route::group(['prefix' => 'v2'], function () {
         Route::get('excuses-types', 'ExcuseTypeController@index')->name('api.v2.excuse-type');
 
         // Données de base intervention
-        Route::get('stat-federal', 'StatFederalController@index')->name('api.v2.basedata.statfederal');
-        Route::get('type-intervention', 'TypeInterventionController@index')->name('api.v2.basedata.typeintervention');
+        Route::resource('stat-federal', 'StatFederalController')->only(['index']);
+        Route::resource('type-intervention', 'TypeInterventionController')->only(['index']);
+        Route::resource('intervention-traitement', 'InterventionTraitementController')->only(['index']);
 
         // Controles médicaux
         // Route::get('cmedtype', 'BaseDataApiController@cmedtype')->name('api.v2.basedata.cmedtype');

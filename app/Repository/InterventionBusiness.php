@@ -5,7 +5,13 @@ namespace App\Repository;
 
 
 use App\Models\Intervention;
+use App\Models\GroupeIntervention;
+use App\Models\InterventionMateriel;
 use App\Models\InterventionSapeur;
+use App\Models\InterventionVehicule;
+use App\Models\Appel;
+use App\Models\Mission;
+use App\Models\Quittance;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -31,7 +37,7 @@ class InterventionBusiness
     }
 
     /**
-     * Return sapeur data
+     * Return intervention data
      *
      * @return Intervention
      */
@@ -49,42 +55,55 @@ class InterventionBusiness
      */
     public static function createIntervention($data)
     {
+        //TODO Vérifier exercice comptable
         $validation = Validator::make($data,
             array(
-                'date' => 'date',
-                'heure' => 'date_format:H:i:s',
+                'date_debut' => 'date',
+                'heure_debut' => 'date_format:H:i',
+                'date_fin' => 'date|after_or_equal:date_debut',
+                'heure_fin' => 'date_format:H:i',
                 'lieu' => 'string|nullable',
-                'communication' => 'string',
-                'designation' => 'string|nullable',
-                'duree' => 'integer',
-                'status' => 'integer',
-                'exercice_categorie_id' => 'integer|exists:exercice_categories,id',
+                'objet' => 'string',
+                'rapport_police' => 'boolean',
+                'degre' => 'integer|min:1|max:3',
+                'sauve_personne' => 'integer|min:0|max:50',
+                'sauve_animaux' => 'integer|min:0|max:50',
+                'description' => 'string|nullable',
+                'proprietaire' => 'string|nullable',
+                'responsable' => 'string|nullable',
+                'stat_nb' => 'integer|min:0',
+                'imputer' => 'boolean',
                 'localite_id' => 'integer|exists:localites,id',
-                'exercice_comptable_id' => 'integer|exists:exercice_comptables,id'
+                'exercice_comptable_id' => 'integer|exists:exercice_comptables,id',
+                'intervention_traitement_id' => 'integer|exists:intervention_traitements,id',
+                'stat_federal_id' => 'integer|exists:stat_federals,id',
+                'sapeur_id' => 'integer|exists:sapeurs,id',
+                'type_intervention_id' => 'integer|exists:type_interventions,id',
             ));
 
         if ($validation->fails()) {
             throw new Exception($validation->messages());
         }
 
-        if ($data['lieu'] === null) {
-            $data['lieu'] = '';
-        }
-        if ($data['designation'] === null) {
-            $data['designation'] = '';
-        }
+        if ($data['lieu'] === null) $data['lieu'] = '';
+        if ($data['description'] === null) $data['description'] = '';
+        if ($data['proprietaire'] === null) $data['proprietaire'] = '';
+        if ($data['responsable'] === null) $data['responsable'] = '';
+
 
         $intervention = new Intervention();
         $intervention->fill($data);
-        $intervention->exercice_categorie_id = $data['exercice_categorie_id'];
+
+        $intervention->imputer = false;
         $intervention->exercice_comptable_id = $data['exercice_comptable_id'];
+
         $intervention->save();
 
         return new InterventionBusiness($intervention);
     }
 
     /**
-     * Updates a post.
+     * Updates a intervention.
      *
      * @param int
      * @param array
@@ -110,12 +129,8 @@ class InterventionBusiness
             throw new Exception($validation->messages());
         }
 
-        if ($data['lieu'] === null) {
-            $data['lieu'] = '';
-        }
-        if ($data['designation'] === null) {
-            $data['designation'] = '';
-        }
+        if ($data['lieu'] === null) $data['lieu'] = '';
+        if ($data['designation'] === null) $data['designation'] = '';
 
         $this->intervention->update($data);
 
@@ -129,6 +144,20 @@ class InterventionBusiness
      */
     public static function delete($intervention_id)
     {
+        /* TODO Check:
+        - Pas imputé
+        */
+
+        /* TODO: Suppression:
+        - Sapeur
+        - Groupes
+        - Vehicules
+        - Matériel
+        - Quittances
+        - Missions
+        - Appels
+        */
+
         InterventionSapeur::where('exercice_id', $intervention_id)->delete();
         Intervention::destroy($intervention_id);
     }
@@ -143,6 +172,9 @@ class InterventionBusiness
      */
     public function addSapeurs($data)
     {
+        /* TODO Check:
+        - Pas imputé
+        */
         $sapeurs = $data['sapeurs'];
 
         foreach ($sapeurs as $sapeur) {
@@ -155,6 +187,8 @@ class InterventionBusiness
                     'piquet' => 'required|boolean',
                     'sapeur_id' => 'required|integer|exists:sapeurs,id'
                 ));
+
+            //Check période pas dupliquée
 
             if ($validation->fails()) {
                 throw new Exception($validation->messages());
@@ -181,11 +215,13 @@ class InterventionBusiness
      */
     public function updateSapeurs($data)
     {
+        /* TODO Check:
+        - Pas imputé
+        */
         $sapeurs = $data['sapeurs'];
 
         foreach ($sapeurs as $sapeur) {
 
-            $sap = $this->intervention->sapeurs()->where('exercice_sapeur.id', $sapeur['id'])->first();
             $validation = Validator::make($sapeur,
                 array(
                     'debut' => 'required|date_format:Y-m-d H:i:s',
@@ -197,6 +233,7 @@ class InterventionBusiness
                 throw new Exception($validation->messages());
             }
 
+            $sap = $this->intervention->sapeurs()->where('exercice_sapeur.id', $sapeur['id'])->first();
             $sap->update($sapeur);
             $sap->save();
         }
@@ -210,6 +247,9 @@ class InterventionBusiness
      */
     public function removeSapeurs($data)
     {
+        /* TODO Check:
+        - Pas imputé
+        */
         $ids = $data['sapeurs'];
 
         $this->intervention->sapeurs()->whereIn('exercice_sapeur.id', $ids)->delete();
@@ -225,7 +265,31 @@ class InterventionBusiness
      */
     public function addAppels($data)
     {
-        //TODO
+        /* TODO Check:
+        - Pas imputé
+        */
+        $appels = $data['$appels'];
+
+        foreach ($appels as $appel) {
+            $validation = Validator::make($appel,
+                array(
+                    'date' => 'required|date_format:Y-m-d H:i',
+                    'numero' => 'string',
+                    'nom' => 'string',
+                    'commentaire' => 'string|nullable'
+                ));
+
+            if ($validation->fails()) {
+                throw new Exception($validation->messages());
+            }
+
+            if ($data['commentaire'] === null) $data['commentaire'] = '';
+
+            $app = new Appel();
+            $app->fill($appel);
+            $this->intervention->appels()->save($app);
+        }
+        return $this->intervention->appels()->get();
     }
 
     /**
@@ -237,7 +301,32 @@ class InterventionBusiness
      */
     public function updateAppels($data)
     {
-        //TODO
+        /* TODO Check:
+        - Pas imputé
+        */
+        $appels = $data['appels'];
+
+        foreach ($appels as $appel) {
+
+            $validation = Validator::make($appel,
+                array(
+                    'date' => 'required|date_format:Y-m-d H:i',
+                    'numero' => 'string',
+                    'nom' => 'string',
+                    'commentaire' => 'string|nullable'
+                ));
+
+            if ($validation->fails()) {
+                throw new Exception($validation->messages());
+            }
+
+            if ($data['commentaire'] === null) $data['commentaire'] = '';
+
+            $app = $this->intervention->appels()->where('appel.id', $appel['id'])->first();
+            $app->update($appel);
+            $app->save();
+        }
+        return $this->intervention->appels()->get();
     }
 
     /**
@@ -247,7 +336,9 @@ class InterventionBusiness
      */
     public function removeAppels($data)
     {
-        //TODO
+        $ids = $data['appels'];
+
+        $this->intervention->sapeurs()->whereIn('appel.id', $ids)->delete();
     }
 
     /**
@@ -259,7 +350,31 @@ class InterventionBusiness
      */
     public function addMissions($data)
     {
-        //TODO
+        /* TODO Check:
+        - Pas imputé
+        */
+        $missions = $data['missions'];
+
+        foreach ($missions as $mission) {
+            $validation = Validator::make($mission,
+                array(
+                    'debut' => 'required|date_format:Y-m-d H:i',
+                    'fin' => 'required|date_format:Y-m-d H:i|after:debut',
+                    'titre' => 'string',
+                    'resume' => 'string|nullable'
+                ));
+
+            if ($validation->fails()) {
+                throw new Exception($validation->messages());
+            }
+
+            if ($data['resume'] === null) $data['resume'] = '';
+
+            $miss = new Mission();
+            $miss->fill($mission);
+            $this->intervention->missions()->save($miss);
+        }
+        return $this->intervention->missions()->get();
     }
 
     /**
@@ -271,7 +386,33 @@ class InterventionBusiness
      */
     public function updateMissions($data)
     {
-        //TODO
+        /* TODO Check:
+        - Pas imputé
+        */
+        $missions = $data['missions'];
+
+        foreach ($missions as $mission) {
+
+            $validation = Validator::make($mission,
+                array(
+                    'id' => 'exists|intervention_mission,id',
+                    'debut' => 'date_format:Y-m-d H:i',
+                    'fin' => 'date_format:Y-m-d H:i|after:debut',
+                    'titre' => 'string',
+                    'resume' => 'string|nullable'
+                ));
+
+            if ($validation->fails()) {
+                throw new Exception($validation->messages());
+            }
+
+            if ($data['resume'] === null) $data['resume'] = '';
+
+            $miss = $this->intervention->missions()->where('mission.id', $mission['id'])->first();
+            $miss->update($mission);
+            $miss->save();
+        }
+        return $this->intervention->missions()->get();
     }
 
     /**
@@ -281,7 +422,9 @@ class InterventionBusiness
      */
     public function removeMissions($data)
     {
-        //TODO
+        $ids = $data['missions'];
+
+        $this->intervention->missions()->whereIn('mission.id', $ids)->delete();
     }
 
     /**
@@ -293,7 +436,30 @@ class InterventionBusiness
      */
     public function addMateriels($data)
     {
-        //TODO
+        /* TODO Check:
+        - Pas imputé
+        */
+        $materiels = $data['materiels'];
+
+        foreach ($materiels as $materiel) {
+            $validation = Validator::make($materiel,
+                array(
+                    'materiel_id' => 'required|exists:materiels,id',
+                    'quantite' => 'required|integer|min:1',
+                    'utilisation' => 'required|integer|min:1',
+                ));
+
+            if ($validation->fails()) {
+                throw new Exception($validation->messages());
+            }
+
+            $mat = new InterventionMateriel();
+            $mat->fill($materiel);
+            $mat->forfait = 0;
+            $mat->unite = 0;
+            $this->intervention->materiels()->save($mat);
+        }
+        return $this->intervention->materiels()->get();
     }
 
     /**
@@ -305,7 +471,29 @@ class InterventionBusiness
      */
     public function updateMateriels($data)
     {
-        //TODO
+        /* TODO Check:
+        - Pas imputé
+        */
+        $materiels = $data['materiels'];
+
+        foreach ($materiels as $materiel) {
+
+            $validation = Validator::make($materiel,
+                array(
+                    'id' => 'exists|intervention_materiel,id',
+                    'quantite' => 'required|integer|min:1',
+                    'utilisation' => 'required|integer|min:1',
+                ));
+
+            if ($validation->fails()) {
+                throw new Exception($validation->messages());
+            }
+
+            $mat = $this->intervention->materiels()->where('materiel.id', $materiel['id'])->first();
+            $mat->update($materiel);
+            $mat->save();
+        }
+        return $this->intervention->materiels()->get();
     }
 
     /**
@@ -315,7 +503,9 @@ class InterventionBusiness
      */
     public function removeMateriels($data)
     {
-        //TODO
+        $ids = $data['materiels'];
+
+        $this->intervention->materiels()->whereIn('materiel.id', $ids)->delete();
     }
 
     /**
@@ -327,20 +517,28 @@ class InterventionBusiness
      */
     public function addQuittances($data)
     {
-        //TODO
+        /* TODO Check:
+        - Pas imputé
+        */
+        $quittances = $data['quittances'];
+
+        foreach ($quittances as $quittance) {
+            $validation = Validator::make($quittance,
+                array(
+                    'sapeur_id' => 'required|exists:sapeurs,id'
+                ));
+
+            if ($validation->fails()) {
+                throw new Exception($validation->messages());
+            }
+
+            $quit = new Quittance();
+            $quit->sapeur_id = $quittance['sapeur_id'];
+            $this->intervention->quittances()->save($quit);
+        }
+        return $this->intervention->quittances()->get();
     }
 
-    /**
-     * Modification de quittances à un intervention
-     *
-     * @param $data
-     * @return Collection
-     * @throws Exception
-     */
-    public function updateQuittances($data)
-    {
-        //TODO
-    }
 
     /**
      * Suppression de quittances à un intervention
@@ -349,7 +547,9 @@ class InterventionBusiness
      */
     public function removeQuittances($data)
     {
-        //TODO
+        $ids = $data['quittances'];
+
+        $this->intervention->quittances()->whereIn('quittance.id', $ids)->delete();
     }
 
     /**
@@ -361,7 +561,29 @@ class InterventionBusiness
      */
     public function addVehicules($data)
     {
-        //TODO
+        /* TODO Check:
+        - Pas imputé
+        */
+        $vehicules = $data['vehicules'];
+
+        foreach ($vehicules as $vehicule) {
+            $validation = Validator::make($vehicule,
+                array(
+                    'vehicule_id' => 'required|exists:vehicules,id',
+                    'utilisation' => 'required|integer|min:1',
+                ));
+
+            if ($validation->fails()) {
+                throw new Exception($validation->messages());
+            }
+
+            $veh = new InterventionVehicule();
+            $veh->fill($vehicule);
+            $veh->forfait = 0;
+            $veh->unite = 0;
+            $this->intervention->vehicules()->save($veh);
+        }
+        return $this->intervention->vehicules()->get();
     }
 
     /**
@@ -373,7 +595,28 @@ class InterventionBusiness
      */
     public function updateVehicules($data)
     {
-        //TODO
+        /* TODO Check:
+        - Pas imputé
+        */
+        $vehicules = $data['vehicules'];
+
+        foreach ($vehicules as $vehicule) {
+
+            $validation = Validator::make($vehicule,
+                array(
+                    'id' => 'exists|intervention_vehicule,id',
+                    'utilisation' => 'required|integer|min:1',
+                ));
+
+            if ($validation->fails()) {
+                throw new Exception($validation->messages());
+            }
+
+            $veh = $this->intervention->vehicules()->where('vehicule.id', $vehicule['id'])->first();
+            $veh->update($vehicule);
+            $veh->save();
+        }
+        return $this->intervention->vehicules()->get();
     }
 
     /**
@@ -383,8 +626,11 @@ class InterventionBusiness
      */
     public function removeVehicules($data)
     {
-        //TODO
+        $ids = $data['vehciules'];
+
+        $this->intervention->vehicules()->whereIn('vehicule.id', $ids)->delete();
     }
+
 
     /**
      * Ajout de groupes à un intervention
@@ -395,19 +641,26 @@ class InterventionBusiness
      */
     public function addGroupes($data)
     {
-        //TODO
-    }
+        /* TODO Check:
+        - Pas imputé
+        */
+        $groupes = $data['groupes'];
 
-    /**
-     * Modification de groupes à un intervention
-     *
-     * @param $data
-     * @return Collection
-     * @throws Exception
-     */
-    public function updateGroupes($data)
-    {
-        //TODO
+        foreach ($groupes as $groupe) {
+            $validation = Validator::make($groupe,
+                array(
+                    'groupe_id' => 'required|exists:groupes,id'
+                ));
+
+            if ($validation->fails()) {
+                throw new Exception($validation->messages());
+            }
+
+            $grp = new GroupeIntervention();
+            $grp->groupe_id = $groupe['gropupe_id'];
+            $this->intervention->groupes()->save($grp);
+        }
+        return $this->intervention->groupes()->get();
     }
 
     /**
@@ -417,6 +670,8 @@ class InterventionBusiness
      */
     public function removeGroupes($data)
     {
-        //TODO
+        $ids = $data['groupes'];
+
+        $this->intervention->groupes()->whereIn('groupe.id', $ids)->delete();
     }
 }

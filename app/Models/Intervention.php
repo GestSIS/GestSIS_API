@@ -6,7 +6,29 @@ use Illuminate\Database\Eloquent\Model;
 
 class Intervention extends Model
 {
-    protected $fillable = ['piquet', 'debut', 'fin'];
+
+    protected $fillable = [
+        'date_debut',
+        'heure_debut',
+        'date_fin',
+        'heure_fin',
+        'lieu',
+        'objet',
+        'rapport_police',
+        'degre',
+        'sauve_personne',
+        'sauve_animaux',
+        'description',
+        'proprietaire',
+        'responsable',
+        'stat_nb',
+
+        'localite_id',
+        'intervention_traitement_id',
+        'stat_federal_id',
+        'sapeur_id',
+        'type_intervention_id',
+    ];
 
     /**
      * The sapeur that belong to the sapeur.

@@ -50,6 +50,7 @@ class ExerciceBusiness
      */
     public static function createExercice($data)
     {
+        //TODO Vérifier exercice comptable
         $validation = Validator::make($data,
             array(
                 'date' => 'date',
