@@ -17,7 +17,6 @@ class CreateMissionsTable extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->string('designation');
             $table->dateTime('debut');
             $table->dateTime('fin');
             $table->string('titre');

@@ -19,7 +19,7 @@ class CreateInterventionVehiculeTable extends Migration
 
             $table->decimal('forfait', 5, 2);
             $table->decimal('utilisation', 5, 2);
-            $table->decimal('tarif_unite', 5, 2);
+            $table->decimal('unite', 5, 2);
 
             $table->bigInteger('intervention_id')->unsigned();
             $table->foreign('intervention_id')->references('id')->on('interventions');

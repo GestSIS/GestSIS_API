@@ -19,8 +19,8 @@ class CreateAppelsTable extends Migration
 
             $table->string('numero');
             $table->dateTime('date');
-            $table->dateTime('nom');
-            $table->dateTime('commentaire');
+            $table->string('nom');
+            $table->text('commentaire');
 
             $table->bigInteger('intervention_id')->unsigned();
             $table->foreign('intervention_id')->references('id')->on('interventions');

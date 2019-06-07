@@ -11,12 +11,15 @@ class QuittanceTableSeeder extends Seeder
      */
     public function run()
     {
-        throw(new Exception("TODO"));
+        $quittances = array(
+            array('id' => 1, 'sapeur_id' => 1, 'intervention_id' => 393),
+            array('id' => 2, 'sapeur_id' => 2, 'intervention_id' => 393),
+            array('id' => 3, 'sapeur_id' => 3, 'intervention_id' => 393)
+        );
 
 
-
-        foreach ($materiels as $item) {
-            DB::table('intervention_traitement')->insert($item);
+        foreach ($quittances as $item) {
+            DB::table('quittances')->insert($item);
         }
     }
 }
