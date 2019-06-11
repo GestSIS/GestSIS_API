@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Repository\SapeurBusiness;
-use Exception;
+use App\Exceptions\ArrayValidatorException;
 use Illuminate\Http\Request;
 use App\Models\Sapeur;
 use Illuminate\Http\Response;
@@ -29,14 +29,14 @@ class SapeurTelephoneController extends Controller
      *
      * @param Request $request
      * @return Response
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function store(Request $request, int $id)
     {
         try {
             $telephone = SapeurBusiness::get($id)->addTelephone($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $telephone]);
@@ -49,7 +49,7 @@ class SapeurTelephoneController extends Controller
      * @param int $id
      * @param int $telephoneId
      * @return Response
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function update(Request $request, int $id, int $telephoneId)
     {
@@ -59,8 +59,8 @@ class SapeurTelephoneController extends Controller
 
         try {
             $telephone = SapeurBusiness::get($id)->updateTelephone($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $telephone]);
@@ -77,8 +77,8 @@ class SapeurTelephoneController extends Controller
     {
         try {
             SapeurBusiness::get($id)->removeTelephone($telephoneId);
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => 'success']);

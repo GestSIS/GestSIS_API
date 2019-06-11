@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ArrayValidatorException;
 use App\Models\Sapeur;
 use App\Repository\SapeurBusiness;
+use Dotenv\Exception\ValidationException;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -60,8 +62,8 @@ class SapeurController extends Controller
     {
         try {
             $sapeur = SapeurBusiness::get($id)->update($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $sapeur]);

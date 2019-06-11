@@ -4,6 +4,7 @@
 namespace App\Repository;
 
 
+use App\Exceptions\ArrayValidatorException;
 use App\Models\Intervention;
 use App\Models\GroupeIntervention;
 use App\Models\InterventionMateriel;
@@ -12,7 +13,6 @@ use App\Models\InterventionVehicule;
 use App\Models\Appel;
 use App\Models\Mission;
 use App\Models\Quittance;
-use Exception;
 use Illuminate\Database\Eloquent\Collection;
 
 class InterventionBusiness
@@ -51,7 +51,7 @@ class InterventionBusiness
      *
      * @param $data
      * @return InterventionBusiness
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public static function createIntervention($data)
     {
@@ -82,7 +82,7 @@ class InterventionBusiness
             ));
 
         if ($validation->fails()) {
-            throw new Exception($validation->messages());
+            throw new ArrayValidatorException($validation->errors());
         }
 
         if ($data['lieu'] === null) $data['lieu'] = '';
@@ -108,7 +108,7 @@ class InterventionBusiness
      * @param int
      * @param array
      * @return Intervention
-     * @throws Exception
+     * @throws ArrayValidatorException(
      */
     public function update($data)
     {
@@ -126,7 +126,7 @@ class InterventionBusiness
             ));
 
         if ($validation->fails()) {
-            throw new Exception($validation->messages());
+            throw new ArrayValidatorException($validation->errors());
         }
 
         if ($data['lieu'] === null) $data['lieu'] = '';
@@ -168,7 +168,7 @@ class InterventionBusiness
      *
      * @param $data
      * @return Collection
-     * @throws Exception
+     * @throws ArrayValidatorException(
      */
     public function addSapeurs($data)
     {
@@ -191,11 +191,11 @@ class InterventionBusiness
             //Check période pas dupliquée
 
             if ($validation->fails()) {
-                throw new Exception($validation->messages());
+                throw new ArrayValidatorException($validation->errors());
             }
 
             if ($this->intervention->sapeurs()->where('exercice_sapeur.sapeur_id', $sapeurId)->first() !== null) {
-                throw new Exception("Duplicated sapeur");
+                throw new ArrayValidatorException(array('id' => "Duplicated sapeur"));
             }
 
             $sap = new InterventionSapeur();
@@ -211,7 +211,7 @@ class InterventionBusiness
      *
      * @param $data
      * @return Collection
-     * @throws Exception
+     * @throws ArrayValidatorException(
      */
     public function updateSapeurs($data)
     {
@@ -230,7 +230,7 @@ class InterventionBusiness
                 ));
 
             if ($validation->fails()) {
-                throw new Exception($validation->messages());
+                throw new ArrayValidatorException($validation->errors());
             }
 
             $sap = $this->intervention->sapeurs()->where('exercice_sapeur.id', $sapeur['id'])->first();
@@ -261,7 +261,7 @@ class InterventionBusiness
      *
      * @param $data
      * @return Collection
-     * @throws Exception
+     * @throws ArrayValidatorException(
      */
     public function addAppels($data)
     {
@@ -280,7 +280,7 @@ class InterventionBusiness
                 ));
 
             if ($validation->fails()) {
-                throw new Exception($validation->messages());
+                throw new ArrayValidatorException($validation->errors());
             }
 
             if ($data['commentaire'] === null) $data['commentaire'] = '';
@@ -297,7 +297,7 @@ class InterventionBusiness
      *
      * @param $data
      * @return Collection
-     * @throws Exception
+     * @throws ArrayValidatorException(
      */
     public function updateAppels($data)
     {
@@ -317,7 +317,7 @@ class InterventionBusiness
                 ));
 
             if ($validation->fails()) {
-                throw new Exception($validation->messages());
+                throw new ArrayValidatorException($validation->errors());
             }
 
             if ($data['commentaire'] === null) $data['commentaire'] = '';
@@ -346,7 +346,7 @@ class InterventionBusiness
      *
      * @param $data
      * @return Collection
-     * @throws Exception
+     * @throws ArrayValidatorException(
      */
     public function addMissions($data)
     {
@@ -365,7 +365,7 @@ class InterventionBusiness
                 ));
 
             if ($validation->fails()) {
-                throw new Exception($validation->messages());
+                throw new ArrayValidatorException($validation->errors());
             }
 
             if ($data['resume'] === null) $data['resume'] = '';
@@ -382,7 +382,7 @@ class InterventionBusiness
      *
      * @param $data
      * @return Collection
-     * @throws Exception
+     * @throws ArrayValidatorException(
      */
     public function updateMissions($data)
     {
@@ -403,7 +403,7 @@ class InterventionBusiness
                 ));
 
             if ($validation->fails()) {
-                throw new Exception($validation->messages());
+                throw new ArrayValidatorException($validation->errors());
             }
 
             if ($data['resume'] === null) $data['resume'] = '';
@@ -432,7 +432,7 @@ class InterventionBusiness
      *
      * @param $data
      * @return Collection
-     * @throws Exception
+     * @throws ArrayValidatorException(
      */
     public function addMateriels($data)
     {
@@ -450,7 +450,7 @@ class InterventionBusiness
                 ));
 
             if ($validation->fails()) {
-                throw new Exception($validation->messages());
+                throw new ArrayValidatorException($validation->errors());
             }
 
             $mat = new InterventionMateriel();
@@ -467,7 +467,7 @@ class InterventionBusiness
      *
      * @param $data
      * @return Collection
-     * @throws Exception
+     * @throws ArrayValidatorException(
      */
     public function updateMateriels($data)
     {
@@ -486,7 +486,7 @@ class InterventionBusiness
                 ));
 
             if ($validation->fails()) {
-                throw new Exception($validation->messages());
+                throw new ArrayValidatorException($validation->errors());
             }
 
             $mat = $this->intervention->materiels()->where('materiel.id', $materiel['id'])->first();
@@ -513,7 +513,7 @@ class InterventionBusiness
      *
      * @param $data
      * @return Collection
-     * @throws Exception
+     * @throws ArrayValidatorException(
      */
     public function addQuittances($data)
     {
@@ -529,7 +529,7 @@ class InterventionBusiness
                 ));
 
             if ($validation->fails()) {
-                throw new Exception($validation->messages());
+                throw new ArrayValidatorException($validation->errors());
             }
 
             $quit = new Quittance();
@@ -557,7 +557,7 @@ class InterventionBusiness
      *
      * @param $data
      * @return Collection
-     * @throws Exception
+     * @throws ArrayValidatorException(
      */
     public function addVehicules($data)
     {
@@ -574,7 +574,7 @@ class InterventionBusiness
                 ));
 
             if ($validation->fails()) {
-                throw new Exception($validation->messages());
+                throw new ArrayValidatorException($validation->errors());
             }
 
             $veh = new InterventionVehicule();
@@ -591,7 +591,7 @@ class InterventionBusiness
      *
      * @param $data
      * @return Collection
-     * @throws Exception
+     * @throws ArrayValidatorException(
      */
     public function updateVehicules($data)
     {
@@ -609,7 +609,7 @@ class InterventionBusiness
                 ));
 
             if ($validation->fails()) {
-                throw new Exception($validation->messages());
+                throw new ArrayValidatorException($validation->errors());
             }
 
             $veh = $this->intervention->vehicules()->where('vehicule.id', $vehicule['id'])->first();
@@ -631,13 +631,12 @@ class InterventionBusiness
         $this->intervention->vehicules()->whereIn('vehicule.id', $ids)->delete();
     }
 
-
     /**
      * Ajout de groupes à un intervention
      *
      * @param $data
      * @return Collection
-     * @throws Exception
+     * @throws ArrayValidatorException(
      */
     public function addGroupes($data)
     {
@@ -653,7 +652,7 @@ class InterventionBusiness
                 ));
 
             if ($validation->fails()) {
-                throw new Exception($validation->messages());
+                throw new ArrayValidatorException($validation->errors());
             }
 
             $grp = new GroupeIntervention();

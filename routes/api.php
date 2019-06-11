@@ -102,6 +102,7 @@ Route::group(['prefix' => 'v2'], function () {
 
         // Groupes
         Route::get('groupes', 'GroupeController@index')->name('api.v2.groupes');
+        Route::get('groupes-sapeurs', 'GroupeSapeursController@index')->name('api.v2.groupes-sapeurs');
 
         //Données de bases générales
         Route::get('localites', 'LocaliteController@index')->name('api.v2.localites');

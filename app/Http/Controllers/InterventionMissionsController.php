@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ArrayValidatorException;
 use App\Models\Intervention;
 use App\Repository\InterventionBusiness;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -17,7 +17,7 @@ class InterventionMissionsController extends Controller
      */
     public function index($intervention_id)
     {
-        $missions= Intervention::find($intervention_id)->missions()->get();
+        $missions = Intervention::find($intervention_id)->missions()->get();
 
         return response()->json(['data' => $missions]);
     }
@@ -28,14 +28,14 @@ class InterventionMissionsController extends Controller
      * @param Request $request
      * @param int $intervention_id
      * @return Response
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function store(Request $request, int $intervention_id)
     {
         try {
-            $missions= InterventionBusiness::get($intervention_id)->addMissions($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+            $missions = InterventionBusiness::get($intervention_id)->addMissions($request->all());
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $missions]);
@@ -47,14 +47,14 @@ class InterventionMissionsController extends Controller
      * @param Request $request
      * @param int $intervention_id
      * @return Response
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function update(Request $request, int $intervention_id)
     {
         try {
-            $missions= InterventionBusiness::get($intervention_id)->updateMissions($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+            $missions = InterventionBusiness::get($intervention_id)->updateMissions($request->all());
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $missions]);
@@ -71,8 +71,8 @@ class InterventionMissionsController extends Controller
     {
         try {
             InterventionBusiness::get($intervention_id)->removeMissions($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => 'success']);

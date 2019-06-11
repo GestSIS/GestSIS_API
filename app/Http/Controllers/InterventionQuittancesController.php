@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Intervention;
 use App\Repository\InterventionBusiness;
-use Exception;
+use App\Exceptions\ArrayValidatorException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -28,14 +28,14 @@ class InterventionQuittancesController extends Controller
      * @param Request $request
      * @param int $intervention_id
      * @return Response
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function store(Request $request, int $intervention_id)
     {
         try {
             $quittances = InterventionBusiness::get($intervention_id)->addQuittances($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $quittances]);
@@ -47,14 +47,14 @@ class InterventionQuittancesController extends Controller
      * @param Request $request
      * @param int $intervention_id
      * @return Response
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function update(Request $request, int $intervention_id)
     {
         try {
             $quittances = InterventionBusiness::get($intervention_id)->updateQuittances($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $quittances]);
@@ -71,8 +71,8 @@ class InterventionQuittancesController extends Controller
     {
         try {
             InterventionBusiness::get($intervention_id)->removeQuittances($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => 'success']);

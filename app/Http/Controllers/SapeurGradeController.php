@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Sapeur;
 use App\Repository\SapeurBusiness;
-use Exception;
+use App\Exceptions\ArrayValidatorException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -27,14 +27,14 @@ class SapeurGradeController extends Controller
      *
      * @param Request $request
      * @return Response
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function store(Request $request, int $id)
     {
         try {
             $grade = SapeurBusiness::get($id)->addGrade($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $grade]);
@@ -47,7 +47,7 @@ class SapeurGradeController extends Controller
      * @param int $id
      * @param int $gradeId
      * @return Response
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function update(Request $request, int $id, int $gradeId)
     {
@@ -57,8 +57,8 @@ class SapeurGradeController extends Controller
 
         try {
             $grade = SapeurBusiness::get($id)->updateGrade($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $grade]);
@@ -75,8 +75,8 @@ class SapeurGradeController extends Controller
     {
         try {
             SapeurBusiness::get($id)->removeGrade($gradeId);
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => 'success']);

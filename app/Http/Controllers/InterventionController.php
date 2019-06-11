@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ArrayValidatorException;
 use App\Models\Intervention;
 use App\Repository\InterventionBusiness;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -29,14 +29,14 @@ class InterventionController extends Controller
      *
      * @param Request $request
      * @return Response
-     * @throws Exception
+     * @throws ArrayValidatorExceptionn
      */
     public function store(Request $request)
     {
         try {
             $intervention = InterventionBusiness::createIntervention($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $intervention->getData()]);
@@ -61,14 +61,14 @@ class InterventionController extends Controller
      * @param Request $request
      * @param int $id
      * @return Response
-     * @throws Exception
+     * @throws ArrayValidatorExceptionn
      */
     public function update(Request $request, $id)
     {
         try {
             $intervention = InterventionBusiness::get($id)->update($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $intervention]);

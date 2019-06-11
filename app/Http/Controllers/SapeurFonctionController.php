@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Repository\SapeurBusiness;
-use Exception;
+use App\Exceptions\ArrayValidatorException;
 use Illuminate\Http\Request;
 use App\Models\Sapeur;
 use Illuminate\Http\Response;
@@ -28,14 +28,14 @@ class SapeurFonctionController extends Controller
      *
      * @param Request $request
      * @return Response
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function store(Request $request, int $id)
     {
         try {
             $fonction = SapeurBusiness::get($id)->addFonction($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $fonction]);
@@ -48,7 +48,7 @@ class SapeurFonctionController extends Controller
      * @param int $id
      * @param int $fonctionId
      * @return Response
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function update(Request $request, int $id, int $fonctionId)
     {
@@ -58,8 +58,8 @@ class SapeurFonctionController extends Controller
 
         try {
             $fonction = SapeurBusiness::get($id)->updateFonction($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $fonction]);
@@ -76,8 +76,8 @@ class SapeurFonctionController extends Controller
     {
         try {
             SapeurBusiness::get($id)->removeFonction($fonctionId);
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => 'success']);

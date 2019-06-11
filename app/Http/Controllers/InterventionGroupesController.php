@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ArrayValidatorException;
 use App\Models\Intervention;
 use App\Repository\InterventionBusiness;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -29,14 +29,14 @@ class InterventionGroupesController extends Controller
      * @param Request $request
      * @param int $intervention_id
      * @return Response
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function store(Request $request, int $intervention_id)
     {
         try {
             $groupes = InterventionBusiness::get($intervention_id)->addGroupes($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $groupes]);
@@ -48,14 +48,14 @@ class InterventionGroupesController extends Controller
      * @param Request $request
      * @param int $intervention_id
      * @return Response
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function update(Request $request, int $intervention_id)
     {
         try {
             $groupes = InterventionBusiness::get($intervention_id)->updateGroupes($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $groupes]);
@@ -72,8 +72,8 @@ class InterventionGroupesController extends Controller
     {
         try {
             InterventionBusiness::get($intervention_id)->removeGroupes($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => 'success']);

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ArrayValidatorException;
 use App\Models\Exercice;
 use App\Repository\ExerciceBusiness;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -35,8 +35,8 @@ class ExerciceController extends Controller
     {
         try {
             $exercice = ExerciceBusiness::createExercice($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $exercice->getData()]);
@@ -67,8 +67,8 @@ class ExerciceController extends Controller
     {
         try {
             $exercice = ExerciceBusiness::get($id)->update($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $exercice]);

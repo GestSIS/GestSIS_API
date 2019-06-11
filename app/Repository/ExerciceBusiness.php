@@ -6,7 +6,7 @@ namespace App\Repository;
 
 use App\Models\Exercice;
 use App\Models\ExerciceSapeur;
-use Exception;
+use ArrayValidatorException;
 use Illuminate\Database\Eloquent\Collection;
 use Validator;
 
@@ -46,7 +46,7 @@ class ExerciceBusiness
      *
      * @param $data
      * @return ExerciceBusiness
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public static function createExercice($data)
     {
@@ -66,7 +66,7 @@ class ExerciceBusiness
             ));
 
         if ($validation->fails()) {
-            throw new Exception($validation->messages());
+            throw new ArrayValidatorException($validation->errors());
         }
 
         if ($data['lieu'] === null) {
@@ -91,7 +91,7 @@ class ExerciceBusiness
      * @param int
      * @param array
      * @return Exercice
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function update($data)
     {
@@ -109,7 +109,7 @@ class ExerciceBusiness
             ));
 
         if ($validation->fails()) {
-            throw new Exception($validation->messages());
+            throw new ArrayValidatorException($validation->errors());
         }
 
         if ($data['lieu'] === null) {
@@ -140,7 +140,7 @@ class ExerciceBusiness
      *
      * @param $data
      * @return Collection
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function addSapeurs($data)
     {
@@ -159,11 +159,11 @@ class ExerciceBusiness
                 ));
 
             if ($validation->fails()) {
-                throw new Exception($validation->messages());
+                throw new ArrayValidatorException($validation->errors());
             }
 
             if ($this->exercice->sapeurs()->where('exercice_sapeur.sapeur_id', $sapeurId)->first() !== null) {
-                throw new Exception("Duplicated sapeur");
+                throw new ArrayValidatorException(array('id' => "Duplicated sapeur"));
             }
 
             $sap = new ExerciceSapeur();
@@ -179,7 +179,7 @@ class ExerciceBusiness
      *
      * @param $data
      * @return Collection
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function updateSapeurs($data)
     {
@@ -198,7 +198,7 @@ class ExerciceBusiness
                 ));
 
             if ($validation->fails()) {
-                throw new Exception($validation->messages());
+                throw new ArrayValidatorException($validation->errors());
             }
 
             $sap->update($sapeur);

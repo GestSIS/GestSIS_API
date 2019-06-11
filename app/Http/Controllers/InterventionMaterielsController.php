@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ArrayValidatorException;
 use App\Models\Intervention;
 use App\Repository\InterventionBusiness;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -17,7 +17,7 @@ class InterventionMaterielsController extends Controller
      */
     public function index($intervention_id)
     {
-        $materiels= Intervention::find($intervention_id)->materiels()->get();
+        $materiels = Intervention::find($intervention_id)->materiels()->get();
 
         return response()->json(['data' => $materiels]);
     }
@@ -28,14 +28,14 @@ class InterventionMaterielsController extends Controller
      * @param Request $request
      * @param int $intervention_id
      * @return Response
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function store(Request $request, int $intervention_id)
     {
         try {
-            $materiels= InterventionBusiness::get($intervention_id)->addMateriels($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+            $materiels = InterventionBusiness::get($intervention_id)->addMateriels($request->all());
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $materiels]);
@@ -47,14 +47,14 @@ class InterventionMaterielsController extends Controller
      * @param Request $request
      * @param int $intervention_id
      * @return Response
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function update(Request $request, int $intervention_id)
     {
         try {
-            $materiels= InterventionBusiness::get($intervention_id)->updateMateriels($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+            $materiels = InterventionBusiness::get($intervention_id)->updateMateriels($request->all());
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => $materiels]);
@@ -71,8 +71,8 @@ class InterventionMaterielsController extends Controller
     {
         try {
             InterventionBusiness::get($intervention_id)->removeMateriels($request->all());
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => 'success']);

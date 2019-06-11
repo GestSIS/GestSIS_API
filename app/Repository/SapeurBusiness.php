@@ -4,6 +4,7 @@
 namespace App\Repository;
 
 
+use App\Exceptions\ArrayValidatorException;
 use App\Models\CoursSapeur;
 use App\Models\FonctionSapeur;
 use App\Models\GradeSapeur;
@@ -11,7 +12,6 @@ use App\Models\Mutation;
 use App\Models\Permis;
 use App\Models\Sapeur;
 use App\Models\SapeurTelephone;
-use Exception;
 use Validator;
 
 class SapeurBusiness
@@ -50,7 +50,7 @@ class SapeurBusiness
      *
      * @param $data
      * @return SapeurBusiness
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public static function createSapeur($data)
     {
@@ -76,7 +76,7 @@ class SapeurBusiness
             ));
 
         if ($validation->fails()) {
-            throw new Exception($validation->messages());
+            throw new ArrayValidatorException($validation->errors());
         }
 
         if ($data['suffixe'] === null) {
@@ -107,7 +107,7 @@ class SapeurBusiness
      * @param int
      * @param array
      * @return Sapeur
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function update($data)
     {
@@ -133,10 +133,10 @@ class SapeurBusiness
             ));
 
         if ($validation->fails()) {
-            throw new Exception($validation->messages());
+            throw new ArrayValidatorException($validation->errors());
         }
 
-        if ($data['suffixe'] === null) {
+        if (array_key_exists('suffixe', $data) && $data['suffixe'] === null) {
             $data['suffixe'] = '';
         }
 
@@ -161,7 +161,7 @@ class SapeurBusiness
         );
 
         if ($validation->fails()) {
-            throw new Exception($validation->messages());
+            throw new ArrayValidatorException($validation->errors());
         }
 
         //Add Cours
@@ -220,7 +220,7 @@ class SapeurBusiness
         );
 
         if ($validation->fails()) {
-            throw new Exception($validation->messages());
+            throw new ArrayValidatorException($validation->errors());
         }
 
         //Update cours
@@ -228,7 +228,7 @@ class SapeurBusiness
 
         //Search for the cours
         if ($cours === null) {
-            throw new Exception("Unable to find cours");
+            throw new ArrayValidatorException(array('id' => "Unable to find cours"));
         } else {
             //Update mutation
             $cours->update($data);
@@ -253,7 +253,7 @@ class SapeurBusiness
      *
      * @param $data
      * @return GradeSapeur
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function addGrade($data)
     {
@@ -267,7 +267,7 @@ class SapeurBusiness
         );
 
         if ($validation->fails()) {
-            throw new Exception($validation->messages());
+            throw new ArrayValidatorException($validation->errors());
         }
 
         if ($data['remarque'] === null) {
@@ -278,7 +278,7 @@ class SapeurBusiness
         $grade = $this->sapeur->grades()->where('grade_id', $data['grade_id'])->first();
 
         if ($grade !== null) {
-            throw new Exception("Grade déjà existant");
+            throw new ArrayValidatorException(array('id' => "Grade déjà existant"));
         }
 
         //Creation du grade
@@ -289,6 +289,8 @@ class SapeurBusiness
         //Ajout du grade au sapeur
         $this->sapeur->grades()->save($grade);
 
+        $this->updateMainGrade();
+
         return $grade;
     }
 
@@ -297,7 +299,7 @@ class SapeurBusiness
      *
      * @param $data
      * @return GradeSapeur
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function updateGrade($data)
     {
@@ -310,7 +312,7 @@ class SapeurBusiness
         );
 
         if ($validation->fails()) {
-            throw new Exception($validation->messages());
+            throw new ArrayValidatorException($validation->errors());
         }
 
         if ($data['remarque'] === null) {
@@ -320,14 +322,16 @@ class SapeurBusiness
         //Update grade
         $grade = $this->sapeur->grades()->where('grade_sapeur.id', $data['id'])->first();
 
-        //Search for the mutation
+        //Search for the grade
         if ($grade === null) {
-            throw new Exception("Unable to find grade");
+            throw new ArrayValidatorException(array('id' => "Unable to find grade"));
         } else {
             //Update mutation
             $grade->update($data);
             $grade->save();
         }
+
+        $this->updateMainGrade();
 
         return $grade;
     }
@@ -340,6 +344,8 @@ class SapeurBusiness
     public function removeGrade(int $grade_sapeur_id)
     {
         $this->sapeur->grades()->where('grade_sapeur.id', $grade_sapeur_id)->delete();
+
+        $this->updateMainGrade();
     }
 
     /**
@@ -347,7 +353,7 @@ class SapeurBusiness
      *
      * @param $data
      * @return FonctionSapeur
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function addFonction($data)
     {
@@ -361,7 +367,7 @@ class SapeurBusiness
         );
 
         if ($validation->fails()) {
-            throw new Exception($validation->messages());
+            throw new ArrayValidatorException($validation->errors());
         }
 
         if ($data['remarque'] === null) {
@@ -371,7 +377,7 @@ class SapeurBusiness
         //TODO Check duplicate fonction
 //        $fonction = $this->sapeur->fonctions()->where('fonction_id', $data['fonction_id'])->first();
 //        if ($fonction !== null) {
-//            throw new Exception("Duplicated fonction");
+//            throw new ArrayValidatorException("Duplicated fonction");
 //        }
 
         //Create mutation
@@ -382,6 +388,8 @@ class SapeurBusiness
         //Ajout de la mutation au sapeur
         $this->sapeur->fonctions()->save($fonction);
 
+        $this->updateMainFonction();
+
         return $fonction;
     }
 
@@ -390,7 +398,7 @@ class SapeurBusiness
      *
      * @param $data
      * @return FonctionSapeur
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function updateFonction($data)
     {
@@ -404,7 +412,7 @@ class SapeurBusiness
         );
 
         if ($validation->fails()) {
-            throw new Exception($validation->messages());
+            throw new ArrayValidatorException($validation->errors());
         }
 
         if ($data['remarque'] === null) {
@@ -416,12 +424,14 @@ class SapeurBusiness
 
         //Search for the fonction
         if ($fonction === null) {
-            throw new Exception("Unable to find fonction");
+            throw new ArrayValidatorException(array('id' => "Unable to find fonction"));
         } else {
             //Update fonction
             $fonction->update($data);
             $fonction->save();
         }
+
+        $this->updateMainFonction();
 
         return $fonction;
     }
@@ -434,6 +444,43 @@ class SapeurBusiness
     public function removeFonction(int $fonction_sapeur_id)
     {
         $this->sapeur->fonctions()->where('fonction_sapeur.id', $fonction_sapeur_id)->delete();
+
+        $this->updateMainFonction();
+    }
+
+    /**
+     * Mets à jour la fonction principale d'un sapeur
+     */
+    private function updateMainFonction()
+    {
+        $maxTri = -1;
+        $maxId = -1;
+        foreach ($this->sapeur->fonctions()->where('fin', null)->with('fonction')->get() as $fonctionSapeur) {
+            if ($fonctionSapeur->fonction->tri > $maxTri) {
+                $maxId = $fonctionSapeur->fonction->id;
+                $maxTri = $fonctionSapeur->fonction->tri;
+            }
+        }
+        $this->sapeur->fonction_id = $maxId <= 0 ? null : $maxId;
+        $this->sapeur->save();
+    }
+
+
+    /**
+     * Mets à jour la grade principale d'un sapeur
+     */
+    private function updateMainGrade()
+    {
+        $maxTri = -1;
+        $maxId = -1;
+        foreach ($this->sapeur->grades()->with('grade')->get() as $gradeSapeur) {
+            if ($gradeSapeur->grade->tri > $maxTri) {
+                $maxId = $gradeSapeur->grade->id;
+                $maxTri = $gradeSapeur->grade->tri;
+            }
+        }
+        $this->sapeur->grade_id = $maxId <= 0 ? null : $maxId;
+        $this->sapeur->save();
     }
 
     /**
@@ -441,7 +488,7 @@ class SapeurBusiness
      *
      * @param $data
      * @return Mutation
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function addMutation($data)
     {
@@ -456,7 +503,7 @@ class SapeurBusiness
         );
 
         if ($validation->fails()) {
-            throw new Exception($validation->messages());
+            throw new ArrayValidatorException($validation->errors());
         }
 
         if ($data['motif'] === null) {
@@ -478,7 +525,7 @@ class SapeurBusiness
      *
      * @param $data
      * @return Mutation
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function updateMutation($data)
     {
@@ -493,7 +540,7 @@ class SapeurBusiness
         );
 
         if ($validation->fails()) {
-            throw new Exception($validation->messages());
+            throw new ArrayValidatorException($validation->errors());
         }
 
         if ($data['motif'] === null) {
@@ -505,7 +552,7 @@ class SapeurBusiness
 
         //Search for the mutation
         if ($mutation === null) {
-            throw new Exception("Unable to find mutation");
+            throw new ArrayValidatorException(array('id' => "Unable to find mutation"));
         } else {
             //Update mutation
             $mutation->update($data);
@@ -530,7 +577,7 @@ class SapeurBusiness
      *
      * @param array $data
      * @return SapeurTelephone
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function addTelephone($data)
     {
@@ -544,7 +591,7 @@ class SapeurBusiness
         );
 
         if ($validation->fails()) {
-            throw new Exception($validation->messages());
+            throw new ArrayValidatorException($validation->errors());
         }
 
         //TODO: Check if this numero already exist
@@ -564,7 +611,7 @@ class SapeurBusiness
      *
      * @param array $data
      * @return SapeurTelephone
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function updateTelephone($data)
     {
@@ -580,14 +627,14 @@ class SapeurBusiness
         );
 
         if ($validation->fails()) {
-            throw new Exception($validation->messages());
+            throw new ArrayValidatorException($validation->errors());
         }
 
         $telephone = $this->sapeur->telephones()->where('sapeur_telephone.id', $data['id'])->first();
 
         //Search for the telephone
         if ($telephone === null) {
-            throw new Exception("Unable to find telephone");
+            throw new ArrayValidatorException(array('id' => "Unable to find telephone"));
         } else {
             //Update telephone
             $telephone->update($data);
@@ -611,7 +658,7 @@ class SapeurBusiness
      *
      * @param array $data
      * @return Permis
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function addPermis($data)
     {
@@ -623,14 +670,14 @@ class SapeurBusiness
         );
 
         if ($validation->fails()) {
-            throw new Exception($validation->messages());
+            throw new ArrayValidatorException($validation->errors());
         }
 
         $permis = $this->sapeur->permis()->where('permis_type_id', $data['permis_type_id'])->first();
 
         //Check si sapeur as déjà ce permis
         if ($permis !== null) {
-            throw new Exception("Unable to find permis");
+            throw new ArrayValidatorException(array('id' => "Unable to find permis"));
         } else {
             //Create permis
             $permis = new Permis();
@@ -648,7 +695,7 @@ class SapeurBusiness
      *
      * @param array $data
      * @return Permis
-     * @throws Exception
+     * @throws ArrayValidatorException
      */
     public function updatePermis($data)
     {
@@ -660,14 +707,14 @@ class SapeurBusiness
         );
 
         if ($validation->fails()) {
-            throw new Exception($validation->messages());
+            throw new ArrayValidatorException($validation->errors());
         }
 
         $permis = $this->sapeur->permis()->where('permis.id', $data['permis_id'])->first();
 
         //Check si sapeur as déjà ce permis
         if ($permis === null) {
-            throw new Exception("Unknown permis");
+            throw new ArrayValidatorException(array('id' => "Unknown permis"));
         } else {
             //Update permis
             $permis->update($data);

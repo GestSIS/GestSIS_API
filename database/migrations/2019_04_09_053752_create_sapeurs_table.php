@@ -55,6 +55,12 @@ class CreateSapeursTable extends Migration
 
             $table->unsignedBigInteger('civilite_id');
             $table->foreign('civilite_id')->references('id')->on('civilites');
+
+            $table->unsignedBigInteger('fonction_id')->nullable();
+            $table->foreign('fonction_id')->references('id')->on('fonctions');
+
+            $table->unsignedBigInteger('grade_id')->nullable();
+            $table->foreign('grade_id')->references('id')->on('grades');
         });
     }
 
