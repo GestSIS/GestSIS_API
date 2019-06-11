@@ -155,8 +155,8 @@ class SapeurBusiness
                 'fonction_sapeur_id' => 'integer|nullable',
                 'fonction_id' => 'integer|nullable',
                 'grade_id' => 'integer|nullable',
-                'date_fonction' => 'required|date',
-                'date_grade' => 'required|date'
+                'date_fonction' => 'bail|required_with:fonction_id|date|nullable',
+                'date_grade' => 'bail|required_with:grade_id|date|nullable'
             )
         );
 
