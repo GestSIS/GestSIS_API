@@ -4,9 +4,9 @@
 namespace App\Repository;
 
 
+use App\Exceptions\ArrayValidatorException;
 use App\Models\Exercice;
 use App\Models\ExerciceSapeur;
-use ArrayValidatorException;
 use Illuminate\Database\Eloquent\Collection;
 use Validator;
 
@@ -58,7 +58,7 @@ class ExerciceBusiness
                 'lieu' => 'string|nullable',
                 'communication' => 'string',
                 'designation' => 'string|nullable',
-                'duree' => 'integer',
+                'duree' => 'integer|min:1|max:780',
                 'status' => 'integer',
                 'exercice_categorie_id' => 'integer|exists:exercice_categories,id',
                 'localite_id' => 'integer|exists:localites,id',
@@ -102,7 +102,7 @@ class ExerciceBusiness
                 'lieu' => 'string|nullable',
                 'communication' => 'string',
                 'designation' => 'string|nullable',
-                'duree' => 'integer',
+                'duree' => 'integer|min:1|max:780',
                 'status' => 'integer',
                 'exercice_categorie_id' => 'integer|exists:exercice_categories,id',
                 'localite_id' => 'integer|exists:localites,id'
