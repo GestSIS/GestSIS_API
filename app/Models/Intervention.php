@@ -75,7 +75,7 @@ class Intervention extends Model
      */
     public function missions()
     {
-        return $this->hasMany('App\Models\InterventionMission');
+        return $this->hasMany('App\Models\Mission');
     }
 
     /**
@@ -83,7 +83,7 @@ class Intervention extends Model
      */
     public function appels()
     {
-        return $this->hasMany('App\Models\InterventionAppel');
+        return $this->hasMany('App\Models\Appel');
     }
 
     /**

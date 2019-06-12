@@ -14,6 +14,7 @@ use App\Models\Appel;
 use App\Models\Mission;
 use App\Models\Quittance;
 use Illuminate\Database\Eloquent\Collection;
+use Validator;
 
 class InterventionBusiness
 {
@@ -85,10 +86,10 @@ class InterventionBusiness
             throw new ArrayValidatorException($validation->errors());
         }
 
-        if ($data['lieu'] === null) $data['lieu'] = '';
-        if ($data['description'] === null) $data['description'] = '';
-        if ($data['proprietaire'] === null) $data['proprietaire'] = '';
-        if ($data['responsable'] === null) $data['responsable'] = '';
+        if (array_key_exists('lieu', $data) && $data['lieu'] === null) $data['lieu'] = '';
+        if (array_key_exists('description', $data) && $data['description'] === null) $data['description'] = '';
+        if (array_key_exists('proprietaire', $data) && $data['proprietaire'] === null) $data['proprietaire'] = '';
+        if (array_key_exists('responsable', $data) && $data['responsable'] === null) $data['responsable'] = '';
 
 
         $intervention = new Intervention();
@@ -129,8 +130,8 @@ class InterventionBusiness
             throw new ArrayValidatorException($validation->errors());
         }
 
-        if ($data['lieu'] === null) $data['lieu'] = '';
-        if ($data['designation'] === null) $data['designation'] = '';
+        if (array_key_exists('lieu', $data) && $data['lieu'] === null) $data['lieu'] = '';
+        if (array_key_exists('designation', $data) && $data['designation'] === null) $data['designation'] = '';
 
         $this->intervention->update($data);
 
@@ -283,7 +284,7 @@ class InterventionBusiness
                 throw new ArrayValidatorException($validation->errors());
             }
 
-            if ($data['commentaire'] === null) $data['commentaire'] = '';
+            if (array_key_exists('commentaire', $data) && $data['commentaire'] === null) $data['commentaire'] = '';
 
             $app = new Appel();
             $app->fill($appel);
@@ -320,7 +321,7 @@ class InterventionBusiness
                 throw new ArrayValidatorException($validation->errors());
             }
 
-            if ($data['commentaire'] === null) $data['commentaire'] = '';
+            if (array_key_exists('commentaire', $data) && $data['commentaire'] === null) $data['commentaire'] = '';
 
             $app = $this->intervention->appels()->where('appel.id', $appel['id'])->first();
             $app->update($appel);
@@ -368,7 +369,7 @@ class InterventionBusiness
                 throw new ArrayValidatorException($validation->errors());
             }
 
-            if ($data['resume'] === null) $data['resume'] = '';
+            if (array_key_exists('resume', $data) && $data['resume'] === null) $data['resume'] = '';
 
             $miss = new Mission();
             $miss->fill($mission);
@@ -406,7 +407,7 @@ class InterventionBusiness
                 throw new ArrayValidatorException($validation->errors());
             }
 
-            if ($data['resume'] === null) $data['resume'] = '';
+            if (array_key_exists('resume', $data) && $data['resume'] === null) $data['resume'] = '';
 
             $miss = $this->intervention->missions()->where('mission.id', $mission['id'])->first();
             $miss->update($mission);
