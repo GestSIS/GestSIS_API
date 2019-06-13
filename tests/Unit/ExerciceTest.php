@@ -20,7 +20,7 @@ class ExerciceTest extends TestCase
     {
         $data = array(
             'date' => Carbon::createMidnightDate(2019, 1, 12),
-            'heure' => '19:30:00',
+            'heure' => '19:30',
             'lieu' => 'Hangar',
             'communication' => 'Exercice PR n°1',
             'designation' => '-',
@@ -57,7 +57,7 @@ class ExerciceTest extends TestCase
         $id = 2;
         $data = array(
             'date' => Carbon::createMidnightDate(2019, 1, 12),
-            'heure' => '19:30:00',
+            'heure' => '19:30',
             'lieu' => 'Hangar',
             'communication' => 'Exercice PR n°1',
             'designation' => '-',

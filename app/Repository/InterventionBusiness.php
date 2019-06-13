@@ -5,12 +5,12 @@ namespace App\Repository;
 
 
 use App\Exceptions\ArrayValidatorException;
-use App\Models\Intervention;
+use App\Models\Appel;
 use App\Models\GroupeIntervention;
+use App\Models\Intervention;
 use App\Models\InterventionMateriel;
 use App\Models\InterventionSapeur;
 use App\Models\InterventionVehicule;
-use App\Models\Appel;
 use App\Models\Mission;
 use App\Models\Quittance;
 use Illuminate\Database\Eloquent\Collection;
@@ -91,7 +91,6 @@ class InterventionBusiness
         if (array_key_exists('proprietaire', $data) && $data['proprietaire'] === null) $data['proprietaire'] = '';
         if (array_key_exists('responsable', $data) && $data['responsable'] === null) $data['responsable'] = '';
 
-
         $intervention = new Intervention();
         $intervention->fill($data);
 
@@ -115,15 +114,27 @@ class InterventionBusiness
     {
         $validation = Validator::make($data,
             array(
-                'date' => 'date',
-                'heure' => 'date_format:H:i:s',
+                'date_debut' => 'date',
+                'heure_debut' => 'date_format:H:i',
+                'date_fin' => 'date|after_or_equal:date_debut',
+                'heure_fin' => 'date_format:H:i',
                 'lieu' => 'string|nullable',
-                'communication' => 'string',
-                'designation' => 'string|nullable',
-                'duree' => 'integer',
-                'status' => 'integer',
-                'exercice_categorie_id' => 'integer|exists:exercice_categories,id',
-                'localite_id' => 'integer|exists:localites,id'
+                'objet' => 'string',
+                'rapport_police' => 'boolean',
+                'degre' => 'integer|min:0|max:3',
+                'sauve_personne' => 'integer|min:0|max:50',
+                'sauve_animaux' => 'integer|min:0|max:50',
+                'description' => 'string|nullable',
+                'proprietaire' => 'string|nullable',
+                'responsable' => 'string|nullable',
+                'stat_nb' => 'integer|min:0',
+                'imputer' => 'boolean',
+                'localite_id' => 'integer|exists:localites,id',
+                'exercice_comptable_id' => 'integer|exists:exercice_comptables,id',
+                'intervention_traitement_id' => 'integer|exists:intervention_traitements,id',
+                'stat_federal_id' => 'integer|exists:stat_federals,id',
+                'sapeur_id' => 'integer|exists:sapeurs,id',
+                'type_intervention_id' => 'integer|exists:type_interventions,id',
             ));
 
         if ($validation->fails()) {
@@ -131,7 +142,9 @@ class InterventionBusiness
         }
 
         if (array_key_exists('lieu', $data) && $data['lieu'] === null) $data['lieu'] = '';
-        if (array_key_exists('designation', $data) && $data['designation'] === null) $data['designation'] = '';
+        if (array_key_exists('description', $data) && $data['description'] === null) $data['description'] = '';
+        if (array_key_exists('proprietaire', $data) && $data['proprietaire'] === null) $data['proprietaire'] = '';
+        if (array_key_exists('responsable', $data) && $data['responsable'] === null) $data['responsable'] = '';
 
         $this->intervention->update($data);
 
@@ -183,8 +196,8 @@ class InterventionBusiness
 
             $validation = Validator::make($sapeur,
                 array(
-                    'debut' => 'required|date_format:Y-m-d H:i:s',
-                    'fin' => 'required|date_format:Y-m-d H:i:s|after:debut',
+                    'debut' => 'required|date_format:Y-m-d H:i',
+                    'fin' => 'required|date_format:Y-m-d H:i|after:debut',
                     'piquet' => 'required|boolean',
                     'sapeur_id' => 'required|integer|exists:sapeurs,id'
                 ));
@@ -225,8 +238,8 @@ class InterventionBusiness
 
             $validation = Validator::make($sapeur,
                 array(
-                    'debut' => 'required|date_format:Y-m-d H:i:s',
-                    'fin' => 'required|date_format:Y-m-d H:i:s|after:debut',
+                    'debut' => 'required|date_format:Y-m-d H:i',
+                    'fin' => 'required|date_format:Y-m-d H:i|after:debut',
                     'piquet' => 'required|boolean',
                 ));
 

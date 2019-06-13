@@ -54,7 +54,7 @@ class ExerciceBusiness
         $validation = Validator::make($data,
             array(
                 'date' => 'date',
-                'heure' => 'date_format:H:i:s',
+                'heure' => 'date_format:H:i',
                 'lieu' => 'string|nullable',
                 'communication' => 'string',
                 'designation' => 'string|nullable',
@@ -98,7 +98,7 @@ class ExerciceBusiness
         $validation = Validator::make($data,
             array(
                 'date' => 'date',
-                'heure' => 'date_format:H:i:s',
+                'heure' => 'date_format:H:i',
                 'lieu' => 'string|nullable',
                 'communication' => 'string',
                 'designation' => 'string|nullable',

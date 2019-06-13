@@ -18,9 +18,6 @@ class CreateInterventionMaterielTable extends Migration
             $table->timestamps();
 
             $table->decimal('quantite');
-            $table->decimal('forfait');
-            $table->decimal('utilisation');
-            $table->decimal('unite');
 
             $table->bigInteger('materiel_id')->unsigned();
             $table->foreign('materiel_id')->references('id')->on('materiels');

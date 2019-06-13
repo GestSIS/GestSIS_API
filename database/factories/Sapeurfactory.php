@@ -26,7 +26,7 @@ $factory->define(Sapeur::class, function (Faker $faker) {
         'iban_status' => 1,
         'remarque' => $faker->text,
         'porteur' => 0,
-        'localite_id' => $faker->numberBetween(1,147),
-        'civilite_id' => $faker->numberBetween(1,3)
+        'localite_id' => $faker->numberBetween(1,146),
+        'civilite_id' => $faker->numberBetween(1,2)
     ];
 });
