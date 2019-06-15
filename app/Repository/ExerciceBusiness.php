@@ -100,7 +100,7 @@ class ExerciceBusiness
                 'date' => 'date',
                 'heure' => 'date_format:H:i',
                 'lieu' => 'string|nullable',
-                'communication' => 'string|nullable',
+                'communications' => 'string|nullable',
                 'designation' => 'string',
                 'duree' => 'integer|min:1|max:780',
                 'status' => 'integer',
@@ -115,8 +115,8 @@ class ExerciceBusiness
         if ($data['lieu'] === null) {
             $data['lieu'] = '';
         }
-        if ($data['communication'] === null) {
-            $data['communication'] = '';
+        if ($data['communications'] === null) {
+            $data['communications'] = '';
         }
 
         $this->exercice->update($data);

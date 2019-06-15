@@ -22,8 +22,8 @@ class ExerciceTest extends TestCase
             'date' => Carbon::createMidnightDate(2019, 1, 12),
             'heure' => '19:30',
             'lieu' => 'Hangar',
-            'communication' => 'Exercice PR n°1',
-            'designation' => '-',
+            'designation' => 'Exercice PR n°1',
+            'communications' => '',
             'duree' => 120,
             'status' => '1',
             'exercice_categorie_id' => '1',
@@ -34,11 +34,11 @@ class ExerciceTest extends TestCase
         $exercice = ExerciceBusiness::createExercice($data)->getData();
 
         $this->assertTrue($exercice !== null);
+        $this->assertTrue($data['designation'] === $exercice->designation);
         $this->assertTrue($data['date']->diffInDays($exercice->date) === 0);
         $this->assertTrue($data['heure'] === $exercice->heure);
         $this->assertTrue($data['lieu'] === $exercice->lieu);
-        $this->assertTrue($data['communication'] === $exercice->communication);
-        $this->assertTrue($data['designation'] === $exercice->designation);
+        $this->assertTrue($data['communications'] === $exercice->communications);
         $this->assertTrue($data['duree'] === $exercice->duree);
         $this->assertTrue($data['status'] === $exercice->status);
         $this->assertTrue($data['exercice_categorie_id'] === $exercice->exercice_categorie_id);
@@ -59,8 +59,8 @@ class ExerciceTest extends TestCase
             'date' => Carbon::createMidnightDate(2019, 1, 12),
             'heure' => '19:30',
             'lieu' => 'Hangar',
-            'communication' => 'Exercice PR n°1',
-            'designation' => '-',
+            'designation' => 'Exercice PR n°1',
+            'communications' => '',
             'duree' => 120,
             'status' => '1',
             'exercice_categorie_id' => '1',
@@ -71,11 +71,11 @@ class ExerciceTest extends TestCase
         $exercice = $exercice->update($data);
 
         $this->assertTrue($exercice !== null);
+        $this->assertTrue($data['designation'] === $exercice->designation);
         $this->assertTrue($data['date']->diffInDays($exercice->date) === 0);
         $this->assertTrue($data['heure'] === $exercice->heure);
         $this->assertTrue($data['lieu'] === $exercice->lieu);
-        $this->assertTrue($data['communication'] === $exercice->communication);
-        $this->assertTrue($data['designation'] === $exercice->designation);
+        $this->assertTrue($data['communications'] === $exercice->communications);
         $this->assertTrue($data['duree'] === $exercice->duree);
         $this->assertTrue($data['status'] === $exercice->status);
         $this->assertTrue($data['exercice_categorie_id'] === $exercice->exercice_categorie_id);
