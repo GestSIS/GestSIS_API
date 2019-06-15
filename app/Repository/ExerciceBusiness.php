@@ -56,8 +56,8 @@ class ExerciceBusiness
                 'date' => 'date',
                 'heure' => 'date_format:H:i',
                 'lieu' => 'string|nullable',
-                'communication' => 'string',
-                'designation' => 'string|nullable',
+                'designation' => 'string',
+                'communications' => 'string|nullable',
                 'duree' => 'integer|min:1|max:780',
                 'status' => 'integer',
                 'exercice_categorie_id' => 'integer|exists:exercice_categories,id',
@@ -72,8 +72,8 @@ class ExerciceBusiness
         if ($data['lieu'] === null) {
             $data['lieu'] = '';
         }
-        if ($data['designation'] === null) {
-            $data['designation'] = '';
+        if ($data['communications'] === null) {
+            $data['communications'] = '';
         }
 
         $exercice = new Exercice();
@@ -100,8 +100,8 @@ class ExerciceBusiness
                 'date' => 'date',
                 'heure' => 'date_format:H:i',
                 'lieu' => 'string|nullable',
-                'communication' => 'string',
-                'designation' => 'string|nullable',
+                'communication' => 'string|nullable',
+                'designation' => 'string',
                 'duree' => 'integer|min:1|max:780',
                 'status' => 'integer',
                 'exercice_categorie_id' => 'integer|exists:exercice_categories,id',
@@ -115,8 +115,8 @@ class ExerciceBusiness
         if ($data['lieu'] === null) {
             $data['lieu'] = '';
         }
-        if ($data['designation'] === null) {
-            $data['designation'] = '';
+        if ($data['communication'] === null) {
+            $data['communication'] = '';
         }
 
         $this->exercice->update($data);

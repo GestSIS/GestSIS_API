@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Exercice extends Model
 {
-    protected $fillable = ['date', 'heure', 'lieu', 'communication', 'designation', 'duree', 'status', 'exercice_categorie_id', 'localite_id'];
+    protected $fillable = ['date', 'heure', 'lieu', 'designation', 'communications', 'duree', 'status', 'exercice_categorie_id', 'localite_id'];
 
     /**
      * The cours that belong to the sapeur.

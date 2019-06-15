@@ -29,7 +29,7 @@ class TelephoneTableSeeder extends Seeder
             array('id' => '18', 'numero' => '032 420 52 80', 'nom' => 'Vétérinaire Cantonal', 'tri' => '25'),
             array('id' => '19', 'numero' => '032 421 36 36', 'nom' => 'Clinique Vétérinaire', 'tri' => '26'),
             array('id' => '20', 'numero' => '032 420 51 32', 'nom' => 'Office de l\'environnement', 'tri' => '30'),
-            array('id' => '21', 'numero' => '117', 'nom' => 'Chimiste Catonal', 'tri' => '11')
+            array('id' => '21', 'numero' => '117', 'nom' => 'Chimiste Cantonal', 'tri' => '11')
         );
 
 

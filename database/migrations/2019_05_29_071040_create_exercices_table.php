@@ -26,11 +26,11 @@ class CreateExercicesTable extends Migration
             $table->bigInteger('exercice_comptable_id')->unsigned();
             $table->foreign('exercice_comptable_id')->references('id')->on('exercice_comptables');
 
+            $table->string('designation');
             $table->date('date');
             $table->time('heure');
             $table->string('lieu');
-            $table->string('communication');
-            $table->string('designation');
+            $table->text('communications');
             $table->integer('duree');
             $table->integer('status');
         });
