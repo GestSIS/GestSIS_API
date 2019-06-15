@@ -20,9 +20,9 @@ before_deploy:
   - chmod 600 id_rsa_gs
   - ssh-add id_rsa_gs
 
-deploy:
-  - provider: script
-    skip_cleanup: true
-    script: rsync -r -q --exclude-from 'exclude-list.txt' --delete-after . $PRODUCTION_SERVER_USER@$PRODUCTION_SERVER:$FOLDER_DEPLOY
-    on:
-      branch: master
+#deploy:
+#  - provider: script
+#    skip_cleanup: true
+#    script: rsync -r -q --exclude-from 'exclude-list.txt' --delete-after . $PRODUCTION_SERVER_USER@$PRODUCTION_SERVER:$FOLDER_DEPLOY
+#    on:
+#      branch: master
