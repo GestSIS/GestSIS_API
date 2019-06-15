@@ -66,7 +66,7 @@ class InterventionBusiness
                 'lieu' => 'string|nullable',
                 'objet' => 'string',
                 'rapport_police' => 'boolean',
-                'degre' => 'integer|min:1|max:3',
+                'degre' => 'integer|min:1|max:4',
                 'sauve_personne' => 'integer|min:0|max:50',
                 'sauve_animaux' => 'integer|min:0|max:50',
                 'description' => 'string|nullable',
@@ -121,7 +121,7 @@ class InterventionBusiness
                 'lieu' => 'string|nullable',
                 'objet' => 'string',
                 'rapport_police' => 'boolean',
-                'degre' => 'integer|min:0|max:3',
+                'degre' => 'integer|min:1|max:4',
                 'sauve_personne' => 'integer|min:0|max:50',
                 'sauve_animaux' => 'integer|min:0|max:50',
                 'description' => 'string|nullable',
@@ -282,7 +282,7 @@ class InterventionBusiness
         /* TODO Check:
         - Pas imputé
         */
-        $appels = $data['$appels'];
+        $appels = $data['appels'];
 
         foreach ($appels as $appel) {
             $validation = Validator::make($appel,
@@ -297,7 +297,7 @@ class InterventionBusiness
                 throw new ArrayValidatorException($validation->errors());
             }
 
-            if (array_key_exists('commentaire', $data) && $data['commentaire'] === null) $data['commentaire'] = '';
+            if (array_key_exists('commentaire', $appel) && $appel['commentaire'] === null) $appel['commentaire'] = '';
 
             $app = new Appel();
             $app->fill($appel);
@@ -334,9 +334,9 @@ class InterventionBusiness
                 throw new ArrayValidatorException($validation->errors());
             }
 
-            if (array_key_exists('commentaire', $data) && $data['commentaire'] === null) $data['commentaire'] = '';
+            if (array_key_exists('commentaire', $appel) && $appel['commentaire'] === null) $appel['commentaire'] = '';
 
-            $app = $this->intervention->appels()->where('appel.id', $appel['id'])->first();
+            $app = $this->intervention->appels()->where('appels.id', $appel['id'])->first();
             $app->update($appel);
             $app->save();
         }
@@ -352,7 +352,7 @@ class InterventionBusiness
     {
         $ids = $data['appels'];
 
-        $this->intervention->sapeurs()->whereIn('appel.id', $ids)->delete();
+        $this->intervention->appels()->whereIn('appels.id', $ids)->delete();
     }
 
     /**
@@ -372,6 +372,7 @@ class InterventionBusiness
         foreach ($missions as $mission) {
             $validation = Validator::make($mission,
                 array(
+                    'sapeur_id' => 'integer|exists:sapeurs,id',
                     'debut' => 'required|date_format:Y-m-d H:i',
                     'fin' => 'required|date_format:Y-m-d H:i|after:debut',
                     'titre' => 'string',
@@ -382,7 +383,7 @@ class InterventionBusiness
                 throw new ArrayValidatorException($validation->errors());
             }
 
-            if (array_key_exists('resume', $data) && $data['resume'] === null) $data['resume'] = '';
+            if (array_key_exists('resume', $mission) && $mission['resume'] === null) $mission['resume'] = '';
 
             $miss = new Mission();
             $miss->fill($mission);
@@ -409,7 +410,8 @@ class InterventionBusiness
 
             $validation = Validator::make($mission,
                 array(
-                    'id' => 'exists|intervention_mission,id',
+                    'id' => 'integer|exists:missions,id',
+                    'sapeur_id' => 'integer|exists:sapeurs,id',
                     'debut' => 'date_format:Y-m-d H:i',
                     'fin' => 'date_format:Y-m-d H:i|after:debut',
                     'titre' => 'string',
@@ -420,9 +422,9 @@ class InterventionBusiness
                 throw new ArrayValidatorException($validation->errors());
             }
 
-            if (array_key_exists('resume', $data) && $data['resume'] === null) $data['resume'] = '';
+            if (array_key_exists('resume', $mission) && $mission['resume'] === null) $mission['resume'] = '';
 
-            $miss = $this->intervention->missions()->where('mission.id', $mission['id'])->first();
+            $miss = $this->intervention->missions()->where('missions.id', $mission['id'])->first();
             $miss->update($mission);
             $miss->save();
         }
@@ -438,7 +440,7 @@ class InterventionBusiness
     {
         $ids = $data['missions'];
 
-        $this->intervention->missions()->whereIn('mission.id', $ids)->delete();
+        $this->intervention->missions()->whereIn('missions.id', $ids)->delete();
     }
 
     /**
@@ -459,8 +461,7 @@ class InterventionBusiness
             $validation = Validator::make($materiel,
                 array(
                     'materiel_id' => 'required|exists:materiels,id',
-                    'quantite' => 'required|integer|min:1',
-                    'utilisation' => 'required|integer|min:1',
+                    'quantite' => 'required|integer|min:1'
                 ));
 
             if ($validation->fails()) {
@@ -469,8 +470,7 @@ class InterventionBusiness
 
             $mat = new InterventionMateriel();
             $mat->fill($materiel);
-            $mat->forfait = 0;
-            $mat->unite = 0;
+            $mat->materiel_id = $materiel['materiel_id'];
             $this->intervention->materiels()->save($mat);
         }
         return $this->intervention->materiels()->get();
@@ -494,16 +494,15 @@ class InterventionBusiness
 
             $validation = Validator::make($materiel,
                 array(
-                    'id' => 'exists|intervention_materiel,id',
-                    'quantite' => 'required|integer|min:1',
-                    'utilisation' => 'required|integer|min:1',
+                    'id' => 'integer|exists:intervention_materiel,id',
+                    'quantite' => 'required|integer|min:1'
                 ));
 
             if ($validation->fails()) {
                 throw new ArrayValidatorException($validation->errors());
             }
 
-            $mat = $this->intervention->materiels()->where('materiel.id', $materiel['id'])->first();
+            $mat = $this->intervention->materiels()->where('intervention_materiel.id', $materiel['id'])->first();
             $mat->update($materiel);
             $mat->save();
         }
@@ -519,7 +518,7 @@ class InterventionBusiness
     {
         $ids = $data['materiels'];
 
-        $this->intervention->materiels()->whereIn('materiel.id', $ids)->delete();
+        $this->intervention->materiels()->whereIn('intervention_materiel.id', $ids)->delete();
     }
 
     /**
@@ -577,58 +576,22 @@ class InterventionBusiness
     {
         /* TODO Check:
         - Pas imputé
+        - FIXME Check pas de véhicules dupliqués
         */
-        $vehicules = $data['vehicules'];
+        $validation = Validator::make($data,
+            array(
+                'vehicules' => 'required|array',
+                'vehicules.*' => 'required|integer|exists:vehicules,id'
+            ));
 
-        foreach ($vehicules as $vehicule) {
-            $validation = Validator::make($vehicule,
-                array(
-                    'vehicule_id' => 'required|exists:vehicules,id',
-                    'utilisation' => 'required|integer|min:1',
-                ));
-
-            if ($validation->fails()) {
-                throw new ArrayValidatorException($validation->errors());
-            }
-
-            $veh = new InterventionVehicule();
-            $veh->fill($vehicule);
-            $veh->forfait = 0;
-            $veh->unite = 0;
-            $this->intervention->vehicules()->save($veh);
+        if ($validation->fails()) {
+            throw new ArrayValidatorException($validation->errors());
         }
-        return $this->intervention->vehicules()->get();
-    }
 
-    /**
-     * Modification de vehicules à un intervention
-     *
-     * @param $data
-     * @return Collection
-     * @throws ArrayValidatorException(
-     */
-    public function updateVehicules($data)
-    {
-        /* TODO Check:
-        - Pas imputé
-        */
-        $vehicules = $data['vehicules'];
-
-        foreach ($vehicules as $vehicule) {
-
-            $validation = Validator::make($vehicule,
-                array(
-                    'id' => 'exists|intervention_vehicule,id',
-                    'utilisation' => 'required|integer|min:1',
-                ));
-
-            if ($validation->fails()) {
-                throw new ArrayValidatorException($validation->errors());
-            }
-
-            $veh = $this->intervention->vehicules()->where('vehicule.id', $vehicule['id'])->first();
-            $veh->update($vehicule);
-            $veh->save();
+        foreach ($data['vehicules'] as $vehicule) {
+            $veh = new InterventionVehicule();
+            $veh->vehicule_id = $vehicule;
+            $this->intervention->vehicules()->save($veh);
         }
         return $this->intervention->vehicules()->get();
     }
@@ -640,9 +603,9 @@ class InterventionBusiness
      */
     public function removeVehicules($data)
     {
-        $ids = $data['vehciules'];
+        $ids = $data['vehicules'];
 
-        $this->intervention->vehicules()->whereIn('vehicule.id', $ids)->delete();
+        $this->intervention->vehicules()->whereIn('intervention_vehicule.id', $ids)->delete();
     }
 
     /**

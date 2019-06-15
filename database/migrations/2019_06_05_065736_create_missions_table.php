@@ -18,7 +18,7 @@ class CreateMissionsTable extends Migration
             $table->timestamps();
 
             $table->dateTime('debut');
-            $table->dateTime('fin');
+            $table->dateTime('fin')->nullable();
             $table->string('titre');
             $table->text('resume');
 

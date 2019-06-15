@@ -42,25 +42,6 @@ class InterventionVehiculesController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param int $intervention_id
-     * @return Response
-     * @throws ArrayValidatorException
-     */
-    public function update(Request $request, int $intervention_id)
-    {
-        try {
-            $vehicules = InterventionBusiness::get($intervention_id)->updateVehicules($request->all());
-        } catch (ArrayValidatorException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
-
-        return response()->json(['data' => $vehicules]);
-    }
-
-    /**
      * Remove the specified resource from storage.
      *
      * @param Request $request

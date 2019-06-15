@@ -43,7 +43,6 @@ class DatabaseSeeder extends Seeder
         $this->call(StatInterventionTableSeeder::class);
         $this->call(TypeInterventionTableSeeder::class);
         $this->call(InterventionTraitementTableSeeder::class);
-        $this->call(TelephoneTableSeeder::class);
 
         //Interventions
         $this->call(InterventionTableSeeder::class);
@@ -55,6 +54,8 @@ class DatabaseSeeder extends Seeder
         $this->call(AppelTableSeeder::class);
         $this->call(PhaseTableSeeder::class);
         $this->call(QuittanceTableSeeder::class);
+        $this->call(TelephoneTableSeeder::class);
+        $this->call(MissionTypeTableSeeder::class);
 
     }
 }

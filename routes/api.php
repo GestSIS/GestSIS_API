@@ -65,7 +65,6 @@ Route::group(['prefix' => 'v2'], function () {
 
         Route::resource('interventions.vehicules', 'InterventionVehiculesController')->only(['index']);
         Route::post('interventions/{id}/vehicules', 'InterventionVehiculesController@store')->name('api.v2.interventions.vehicules.store');
-        Route::put('interventions/{id}/vehicules', 'InterventionVehiculesController@update')->name('api.v2.interventions.vehicules.update');
         Route::delete('interventions/{id}/vehicules', 'InterventionVehiculesController@destroy')->name('api.v2.interventions.vehicules.delete');
 
         Route::resource('interventions.missions', 'InterventionMissionsController')->only(['index']);
@@ -114,7 +113,8 @@ Route::group(['prefix' => 'v2'], function () {
         Route::get('grades', 'GradeController@index')->name('api.v2.grades');
         Route::get('fonctions', 'FonctionController@index')->name('api.v2.fonctions');
         Route::get('cours', 'CoursController@index')->name('api.v2.cours');
-        Route::get('telephone-types', 'TelephoneTypeController@index')->name('api.v2.telephones-type');
+        Route::get('telephone-types', 'TelephoneTypeController@index')->name('api.v2.telephone-types');
+        Route::get('mission-types', 'MissionTypeController@index')->name('api.v2.mission-types');
 
         // Données de bases exercices
         Route::get('exercice-categories', 'ExerciceCategorieController@index')->name('api.v2.exercice-categorie');

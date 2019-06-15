@@ -24,6 +24,8 @@ class CreateInterventionMaterielTable extends Migration
 
             $table->bigInteger('intervention_id')->unsigned();
             $table->foreign('intervention_id')->references('id')->on('interventions');
+
+            $table->unique(['materiel_id', 'intervention_id']);
         });
     }
 
