@@ -20,3 +20,4 @@ $factory->define(Exercice::class, function (Faker $faker) {
         'localite_id' => $faker->numberBetween(1, 146),
     ];
 });
+

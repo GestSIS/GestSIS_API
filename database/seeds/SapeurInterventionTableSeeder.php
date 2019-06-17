@@ -12,9 +12,13 @@ class SapeurInterventionTableSeeder extends Seeder
     public function run()
     {
         $sapeurs = array(
-            array('id' => '1', 'sapeur_id' => '1', 'intervention_id' => '393', 'debut' => '2019-01-12', 'fin' => '2019-01-12', 'piquet' => false),
-            array('id' => '2', 'sapeur_id' => '2', 'intervention_id' => '393', 'debut' => '2019-01-12', 'fin' => '2019-01-12', 'piquet' => false),
-            array('id' => '3', 'sapeur_id' => '3', 'intervention_id' => '393', 'debut' => '2019-01-12', 'fin' => '2019-01-12', 'piquet' => false),
+            array('sapeur_id' => 1, 'intervention_id' => 393, 'debut' => '2019-01-01 12:00', 'fin' => '2019-01-01 12:15', 'piquet' => false),
+            array('sapeur_id' => 1, 'intervention_id' => 393, 'debut' => '2019-01-01 12:30', 'fin' => '2019-01-01 12:45', 'piquet' => false),
+            array('sapeur_id' => 2, 'intervention_id' => 393, 'debut' => '2019-01-01 12:15', 'fin' => '2019-01-01 12:45', 'piquet' => false),
+            array('sapeur_id' => 3, 'intervention_id' => 393, 'debut' => '2019-01-01 12:00', 'fin' => '2019-01-01 12:30', 'piquet' => false),
+
+            array('sapeur_id' => 2, 'intervention_id' => 393, 'debut' => '2019-01-01 13:00', 'fin' => '2019-01-01 13:30', 'piquet' => true),
+            array('sapeur_id' => 3, 'intervention_id' => 393, 'debut' => '2019-01-01 12:30', 'fin' => '2019-01-01 13:15', 'piquet' => true),
         );
 
 
