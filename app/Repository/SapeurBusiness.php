@@ -54,7 +54,7 @@ class SapeurBusiness
      */
     public static function createSapeur($data)
     {
-        if ($data['suffixe'] === null) {
+        if (array_key_exists('suffixe', $data) && $data['suffixe'] === null) {
             $data['suffixe'] = '';
         }
 
@@ -178,7 +178,7 @@ class SapeurBusiness
      */
     public function addGrade($data)
     {
-        if ($data['remarque'] === null) {
+        if (array_key_exists('remarque', $data) && $data['remarque'] === null) {
             $data['remarque'] = '';
         }
 
@@ -211,7 +211,7 @@ class SapeurBusiness
      */
     public function updateGrade($data)
     {
-        if ($data['remarque'] === null) {
+        if (array_key_exists('remarque', $data) && $data['remarque'] === null) {
             $data['remarque'] = '';
         }
 
@@ -253,15 +253,27 @@ class SapeurBusiness
      */
     public function addFonction($data)
     {
-        if ($data['remarque'] === null) {
+        if (array_key_exists('remarque', $data) && $data['remarque'] === null) {
             $data['remarque'] = '';
         }
 
-        //TODO Check duplicate fonction
-//        $fonction = $this->sapeur->fonctions()->where('fonction_id', $data['fonction_id'])->first();
-//        if ($fonction !== null) {
-//            throw new ArrayValidatorException("Duplicated fonction");
-//        }
+        $fonctions = $this->sapeur->fonctions()->where('fonction_id', $data['fonction_id'])->get();
+
+        $startDate = $data['debut'] !== null ? date($data['debut']) : null;
+        $endDate = $data['fin'] !== null ? date($data['fin']) : null;
+
+        //Check overlaps of a fonction
+        foreach ($fonctions as $fonction) {
+            $start = $fonction->debut;
+            $end = $fonction->fin;
+
+            if ($this->checkOverlappingPeriod($start, $end, $startDate, $endDate)) {
+                throw new ArrayValidatorException([
+                    'debut' => "Duplicated period",
+                    'fin' => 'Duplicated period',
+                ]);
+            }
+        }
 
         //Create mutation
         $fonction = new FonctionSapeur();
@@ -285,12 +297,35 @@ class SapeurBusiness
      */
     public function updateFonction($data)
     {
-        if ($data['remarque'] === null) {
+        if (array_key_exists('remarque', $data) && $data['remarque'] === null) {
             $data['remarque'] = '';
         }
 
+        $id = $data['id'];
+
         //Update fonction
-        $fonction = $this->sapeur->fonctions()->where('fonction_sapeur.id', $data['id'])->first();
+        $fonction = $this->sapeur->fonctions()->where('fonction_sapeur.id', $id)->first();
+
+        $fonctions = $this->sapeur->fonctions()
+            ->where('fonction_id', $data['fonction_id'])
+            ->where('fonction_sapeur.id', '!=', $id)
+            ->get();
+
+        $startDate = $data['debut'] !== null ? date($data['debut']) : null;
+        $endDate = $data['fin'] !== null ? date($data['fin']) : null;
+
+        //Check overlaps of a fonction
+        foreach ($fonctions as $fct) {
+            $start = $fct->debut;
+            $end = $fct->fin;
+
+            if ($this->checkOverlappingPeriod($start, $end, $startDate, $endDate)) {
+                throw new ArrayValidatorException([
+                    'debut' => "Duplicated period",
+                    'fin' => 'Duplicated period',
+                ]);
+            }
+        }
 
         //Search for the fonction
         if ($fonction === null) {
@@ -304,6 +339,18 @@ class SapeurBusiness
         $this->updateMainFonction();
 
         return $fonction;
+    }
+
+    private function checkOverlappingPeriod($start1, $end1, $start2, $end2)
+    {
+        return ($end1 === null && $end2 === null ||
+            $end1 === null && $start1 <= $end2 ||
+            $end2 === null && $end1 >= $start2 ||
+            $end1 !== null && $end2 !== null && !(
+                $end1 < $start2 || $end2 < $start1
+            )
+        );
+
     }
 
     /**
@@ -376,7 +423,7 @@ class SapeurBusiness
             throw new ArrayValidatorException($validation->errors());
         }
 
-        if ($data['motif'] === null) {
+        if (array_key_exists('motif', $data) && $data['motif'] === null) {
             $data['motif'] = '';
         }
 
@@ -413,7 +460,7 @@ class SapeurBusiness
             throw new ArrayValidatorException($validation->errors());
         }
 
-        if ($data['motif'] === null) {
+        if (array_key_exists('motif', $data) && $data['motif'] === null) {
             $data['motif'] = '';
         }
 

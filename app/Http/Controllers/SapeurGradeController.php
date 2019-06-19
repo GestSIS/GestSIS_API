@@ -7,6 +7,7 @@ use App\Models\Sapeur;
 use App\Repository\SapeurBusiness;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Validator;
 
 class SapeurGradeController extends Controller
 {
