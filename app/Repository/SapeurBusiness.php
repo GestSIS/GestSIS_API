@@ -307,12 +307,23 @@ class SapeurBusiness
         $fonction = $this->sapeur->fonctions()->where('fonction_sapeur.id', $id)->first();
 
         $fonctions = $this->sapeur->fonctions()
-            ->where('fonction_id', $data['fonction_id'])
+            ->where('fonction_id', $fonction->fonction_id)
             ->where('fonction_sapeur.id', '!=', $id)
             ->get();
 
-        $startDate = $data['debut'] !== null ? date($data['debut']) : null;
-        $endDate = $data['fin'] !== null ? date($data['fin']) : null;
+        $startDate = null;
+        $endDate = null;
+
+        if (array_key_exists('debut', $data)) {
+            $startDate = $data['debut'] !== null ? date($data['debut']) : null;
+        } else {
+            $endDate = $fonction->debut;
+        }
+        if (array_key_exists('fin', $data)) {
+            $startDate = $data['fin'] !== null ? date($data['fin']) : null;
+        } else {
+            $endDate = $fonction->fin;
+        }
 
         //Check overlaps of a fonction
         foreach ($fonctions as $fct) {
