@@ -54,31 +54,6 @@ class SapeurBusiness
      */
     public static function createSapeur($data)
     {
-        $validation = Validator::make($data,
-            array(
-                'nom' => 'string|min:2',
-                'prenom' => 'string|min:2',
-                'suffixe' => 'string|nullable',
-                'rue' => 'string|min:3',
-                'no_rue' => 'string',
-                'date_naissance' => 'date',
-                'no_avs' => 'string',
-                'profession' => 'string|max:80',
-                'employeur' => 'string|max:150',
-                'lieu_de_travail' => 'string|max:100',
-                'email' => 'email',
-                'actif' => 'integer',
-                'iban' => 'string|max:100',
-                'iban_status' => 'integer',
-                'remarque' => 'string|max:300',
-                'porteur' => 'boolean',
-                'localite_id' => 'integer|exists:localites,id'
-            ));
-
-        if ($validation->fails()) {
-            throw new ArrayValidatorException($validation->errors());
-        }
-
         if ($data['suffixe'] === null) {
             $data['suffixe'] = '';
         }
@@ -111,31 +86,6 @@ class SapeurBusiness
      */
     public function update($data)
     {
-        $validation = Validator::make($data,
-            array(
-                'nom' => 'string|min:2',
-                'prenom' => 'string|min:2',
-                'suffixe' => 'string|nullable',
-                'rue' => 'string|min:3',
-                'no_rue' => 'string',
-                'date_naissance' => 'date',
-                'no_avs' => 'string',
-                'profession' => 'string|max:80',
-                'employeur' => 'string|max:150',
-                'lieu_de_travail' => 'string|max:100',
-                'email' => 'email',
-                'actif' => 'integer',
-                'iban' => 'string|max:100',
-                'iban_status' => 'integer',
-                'remarque' => 'string|max:300',
-                'porteur' => 'boolean',
-                'localite_id' => 'integer|exists:localites,id'
-            ));
-
-        if ($validation->fails()) {
-            throw new ArrayValidatorException($validation->errors());
-        }
-
         if (array_key_exists('suffixe', $data) && $data['suffixe'] === null) {
             $data['suffixe'] = '';
         }
@@ -147,23 +97,6 @@ class SapeurBusiness
 
     public function addCours($data)
     {
-        $validation = Validator::make($data,
-            array(
-                'date' => 'required|date',
-                'localite_id' => 'integer|exists:localites,id',
-                'cours_id' => 'required|integer|exists:cours,id',
-                'fonction_sapeur_id' => 'integer|nullable',
-                'fonction_id' => 'integer|nullable',
-                'grade_id' => 'integer|nullable',
-                'date_fonction' => 'bail|required_with:fonction_id|date|nullable',
-                'date_grade' => 'bail|required_with:grade_id|date|nullable'
-            )
-        );
-
-        if ($validation->fails()) {
-            throw new ArrayValidatorException($validation->errors());
-        }
-
         //Add Cours
         $cours = new CoursSapeur();
         $cours->fill($data);
@@ -211,18 +144,6 @@ class SapeurBusiness
 
     public function updateCours($data)
     {
-        $validation = Validator::make($data,
-            array(
-                'id' => 'integer|exists:cours_sapeur,id',
-                'date' => 'date',
-                'localite_id' => 'integer|exists:localites,id',
-            )
-        );
-
-        if ($validation->fails()) {
-            throw new ArrayValidatorException($validation->errors());
-        }
-
         //Update cours
         $cours = $this->sapeur->cours()->where('cours_sapeur.id', $data['id'])->first();
 
@@ -257,19 +178,6 @@ class SapeurBusiness
      */
     public function addGrade($data)
     {
-        // Ajout d'un nouveau grade
-        $validation = Validator::make($data,
-            array(
-                'grade_id' => 'required|integer|exists:grades,id',
-                'date' => 'required|date',
-                'remarque' => 'string|nullable',
-            )
-        );
-
-        if ($validation->fails()) {
-            throw new ArrayValidatorException($validation->errors());
-        }
-
         if ($data['remarque'] === null) {
             $data['remarque'] = '';
         }
@@ -303,18 +211,6 @@ class SapeurBusiness
      */
     public function updateGrade($data)
     {
-        $validation = Validator::make($data,
-            array(
-                'date' => 'date',
-                'remarque' => 'string|nullable',
-                'id' => 'required|integer|exists:grade_sapeur,id'
-            )
-        );
-
-        if ($validation->fails()) {
-            throw new ArrayValidatorException($validation->errors());
-        }
-
         if ($data['remarque'] === null) {
             $data['remarque'] = '';
         }
@@ -357,19 +253,6 @@ class SapeurBusiness
      */
     public function addFonction($data)
     {
-        $validation = Validator::make($data,
-            array(
-                'fonction_id' => 'required|integer|exists:fonctions,id',
-                'debut' => 'required|date',
-                'fin' => 'date|nullable|after_or_equal:debut',
-                'remarque' => 'string|nullable',
-            )
-        );
-
-        if ($validation->fails()) {
-            throw new ArrayValidatorException($validation->errors());
-        }
-
         if ($data['remarque'] === null) {
             $data['remarque'] = '';
         }
@@ -402,19 +285,6 @@ class SapeurBusiness
      */
     public function updateFonction($data)
     {
-        $validation = Validator::make($data,
-            array(
-                'id' => 'required|integer|exists:fonction_sapeur,id',
-                'debut' => 'date',
-                'fin' => 'date|nullable|after:debut',
-                'remarque' => 'string|nullable',
-            )
-        );
-
-        if ($validation->fails()) {
-            throw new ArrayValidatorException($validation->errors());
-        }
-
         if ($data['remarque'] === null) {
             $data['remarque'] = '';
         }

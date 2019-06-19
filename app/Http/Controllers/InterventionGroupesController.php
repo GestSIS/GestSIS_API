@@ -43,25 +43,6 @@ class InterventionGroupesController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param int $intervention_id
-     * @return Response
-     * @throws ArrayValidatorException
-     */
-    public function update(Request $request, int $intervention_id)
-    {
-        try {
-            $groupes = InterventionBusiness::get($intervention_id)->updateGroupes($request->all());
-        } catch (ArrayValidatorException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
-
-        return response()->json(['data' => $groupes]);
-    }
-
-    /**
      * Remove the specified resource from storage.
      *
      * @param Request $request

@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\ArrayValidatorException;
 use App\Models\Sapeur;
 use App\Repository\SapeurBusiness;
-use Dotenv\Exception\ValidationException;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Validator;
 
 class SapeurController extends Controller
 {
@@ -32,9 +31,34 @@ class SapeurController extends Controller
      */
     public function store(Request $request)
     {
-        //TODO Create a new sapeur
+        $validation = Validator::make($request->all(),
+            array(
+                'nom' => 'string|min:2',
+                'prenom' => 'string|min:2',
+                'suffixe' => 'string|nullable',
+                'rue' => 'string|min:3',
+                'no_rue' => 'string',
+                'date_naissance' => 'date',
+                'no_avs' => 'string',
+                'profession' => 'string|max:80',
+                'employeur' => 'string|max:150',
+                'lieu_de_travail' => 'string|max:100',
+                'email' => 'email',
+                'actif' => 'integer',
+                'iban' => 'string|max:100',
+                'iban_status' => 'integer',
+                'remarque' => 'string|max:300',
+                'porteur' => 'boolean',
+                'localite_id' => 'integer|exists:localites,id'
+            ));
 
-        return response()->json(['error' => 'not implemented yet']);
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
+        $sapeur = SapeurBusiness::createSapeur($request->all())->getData();
+
+        return response()->json(['data' => $sapeur]);
     }
 
     /**
@@ -60,11 +84,32 @@ class SapeurController extends Controller
      */
     public function update(Request $request, $id)
     {
-        try {
-            $sapeur = SapeurBusiness::get($id)->update($request->all());
-        } catch (ArrayValidatorException $e) {
-            return response()->json(['error' => $e->getErrors()]);
+        $validation = Validator::make($request->all(),
+            array(
+                'nom' => 'string|min:2',
+                'prenom' => 'string|min:2',
+                'suffixe' => 'string|nullable',
+                'rue' => 'string|min:3',
+                'no_rue' => 'string',
+                'date_naissance' => 'date',
+                'no_avs' => 'string',
+                'profession' => 'string|max:80',
+                'employeur' => 'string|max:150',
+                'lieu_de_travail' => 'string|max:100',
+                'email' => 'email',
+                'actif' => 'integer',
+                'iban' => 'string|max:100',
+                'iban_status' => 'integer',
+                'remarque' => 'string|max:300',
+                'porteur' => 'boolean',
+                'localite_id' => 'integer|exists:localites,id',
+            ));
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
         }
+
+        $sapeur = SapeurBusiness::get($id)->update($request->all());
 
         return response()->json(['data' => $sapeur]);
     }

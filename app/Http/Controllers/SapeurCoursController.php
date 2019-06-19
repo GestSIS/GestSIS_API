@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ArrayValidatorException;
 use App\Models\Sapeur;
 use App\Repository\SapeurBusiness;
-use App\Exceptions\ArrayValidatorException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -13,7 +13,7 @@ class SapeurCoursController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function index($sapeur_id)
     {
@@ -31,12 +31,28 @@ class SapeurCoursController extends Controller
      */
     public function store(Request $request, int $id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'date' => 'required|date',
+                'localite_id' => 'integer|exists:localites,id',
+                'cours_id' => 'required|integer|exists:cours,id',
+                'fonction_sapeur_id' => 'integer|nullable',
+                'fonction_id' => 'integer|nullable',
+                'grade_id' => 'integer|nullable',
+                'date_fonction' => 'bail|required_with:fonction_id|date|nullable',
+                'date_grade' => 'bail|required_with:grade_id|date|nullable'
+            )
+        );
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
             $cours = SapeurBusiness::get($id)->addCours($request->all());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
-
         return response()->json(['data' => $cours]);
     }
 
@@ -55,12 +71,23 @@ class SapeurCoursController extends Controller
             return response()->json(['error' => 'invalid cours id']);
         }
 
+        $validation = Validator::make($request->all(),
+            array(
+                'id' => 'integer|exists:cours_sapeur,id',
+                'date' => 'date',
+                'localite_id' => 'integer|exists:localites,id',
+            )
+        );
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
             $cours = SapeurBusiness::get($id)->updateCours($request->all());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
-
         return response()->json(['data' => $cours]);
     }
 

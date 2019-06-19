@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ArrayValidatorException;
 use App\Models\Sapeur;
 use App\Repository\SapeurBusiness;
-use App\Exceptions\ArrayValidatorException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -13,7 +13,7 @@ class SapeurGradeController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function index($sapeur_id)
     {
@@ -31,6 +31,19 @@ class SapeurGradeController extends Controller
      */
     public function store(Request $request, int $id)
     {
+        // Ajout d'un nouveau grade
+        $validation = Validator::make($request->all(),
+            array(
+                'grade_id' => 'required|integer|exists:grades,id',
+                'date' => 'required|date',
+                'remarque' => 'string|nullable',
+            )
+        );
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
             $grade = SapeurBusiness::get($id)->addGrade($request->all());
         } catch (ArrayValidatorException $e) {
@@ -53,6 +66,18 @@ class SapeurGradeController extends Controller
     {
         if ($gradeId !== $request->get('id')) {
             return response()->json(['error' => 'invalid grade id']);
+        }
+
+        $validation = Validator::make($request->all(),
+            array(
+                'date' => 'date',
+                'remarque' => 'string|nullable',
+                'id' => 'required|integer|exists:grade_sapeur,id'
+            )
+        );
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
         }
 
         try {

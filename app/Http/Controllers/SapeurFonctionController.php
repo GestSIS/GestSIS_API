@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Repository\SapeurBusiness;
 use App\Exceptions\ArrayValidatorException;
-use Illuminate\Http\Request;
 use App\Models\Sapeur;
+use App\Repository\SapeurBusiness;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class SapeurFonctionController extends Controller
 {
- /**
- * Display a listing of the resource.
- *
- * @return \Illuminate\Http\Response
- */
+    /**
+     * Display a listing of the resource.
+     *
+     * @return Response
+     */
     public function index($sapeur_id)
     {
         $fonctions = Sapeur::find($sapeur_id)->fonctions()->get();
@@ -32,6 +32,19 @@ class SapeurFonctionController extends Controller
      */
     public function store(Request $request, int $id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'fonction_id' => 'required|integer|exists:fonctions,id',
+                'debut' => 'required|date',
+                'fin' => 'date|nullable|after_or_equal:debut',
+                'remarque' => 'string|nullable',
+            )
+        );
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
             $fonction = SapeurBusiness::get($id)->addFonction($request->all());
         } catch (ArrayValidatorException $e) {
@@ -54,6 +67,19 @@ class SapeurFonctionController extends Controller
     {
         if ($fonctionId !== $request->get('id')) {
             return response()->json(['error' => 'invalid fonction id']);
+        }
+
+        $validation = Validator::make($request->all(),
+            array(
+                'id' => 'required|integer|exists:fonction_sapeur,id',
+                'debut' => 'date',
+                'fin' => 'date|nullable|after:debut',
+                'remarque' => 'string|nullable',
+            )
+        );
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
         }
 
         try {

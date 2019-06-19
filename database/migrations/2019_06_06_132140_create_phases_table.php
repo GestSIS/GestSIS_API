@@ -18,12 +18,11 @@ class CreatePhasesTable extends Migration
             $table->timestamps();
 
             $table->dateTime('debut');
-            $table->dateTime('fin');
 
-            $table->bigInteger('phase_type_id')->unsigned();
+            $table->unsignedBigInteger('phase_type_id');
             $table->foreign('phase_type_id')->references('id')->on('phase_types');
 
-            $table->bigInteger('intervention_id')->unsigned();
+            $table->unsignedBigInteger('intervention_id');
             $table->foreign('intervention_id')->references('id')->on('interventions');
         });
     }

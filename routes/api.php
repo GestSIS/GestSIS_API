@@ -90,6 +90,11 @@ Route::group(['prefix' => 'v2'], function () {
         Route::post('interventions/{id}/groupes', 'InterventionGroupesController@store')->name('api.v2.interventions.groupes.store');
         Route::delete('interventions/{id}/groupes', 'InterventionGroupesController@destroy')->name('api.v2.interventions.groupes.delete');
 
+        Route::resource('interventions.phases', 'InterventionPhasesController')->only(['index']);
+        Route::post('interventions/{id}/phases', 'InterventionPhasesController@store')->name('api.v2.interventions.phases.store');
+        Route::put('interventions/{id}/phases', 'InterventionPhasesController@update')->name('api.v2.interventions.phases.update');
+        Route::delete('interventions/{id}/phases', 'InterventionPhasesController@destroy')->name('api.v2.interventions.phases.delete');
+
         // Vehicules
         Route::get('vehicules', 'VehiculeController@index')->name('api.v2.vehicule.index');
 
@@ -124,6 +129,7 @@ Route::group(['prefix' => 'v2'], function () {
         Route::resource('stat-federal', 'StatFederalController')->only(['index']);
         Route::resource('type-intervention', 'TypeInterventionController')->only(['index']);
         Route::resource('intervention-traitement', 'InterventionTraitementController')->only(['index']);
+        Route::resource('phase-types', 'PhaseTypeController')->only(['index']);
 
         // Controles médicaux
         // Route::get('cmedtype', 'BaseDataApiController@cmedtype')->name('api.v2.basedata.cmedtype');
