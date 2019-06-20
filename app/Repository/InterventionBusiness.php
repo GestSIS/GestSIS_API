@@ -56,7 +56,7 @@ class InterventionBusiness
      */
     public static function createIntervention($data)
     {
-        //TODO Vérifier exercice comptable
+        //TODO Vérifier intervention comptable
         $validation = Validator::make($data,
             array(
                 'date_debut' => 'date',
@@ -75,7 +75,7 @@ class InterventionBusiness
                 'stat_nb' => 'integer|min:0',
                 'imputer' => 'boolean',
                 'localite_id' => 'integer|exists:localites,id',
-                'exercice_comptable_id' => 'integer|exists:exercice_comptables,id',
+                'intervention_comptable_id' => 'integer|exists:intervention_comptables,id',
                 'intervention_traitement_id' => 'integer|exists:intervention_traitements,id',
                 'stat_federal_id' => 'integer|exists:stat_federals,id',
                 'sapeur_id' => 'integer|exists:sapeurs,id',
@@ -95,7 +95,7 @@ class InterventionBusiness
         $intervention->fill($data);
 
         $intervention->imputer = false;
-        $intervention->exercice_comptable_id = $data['exercice_comptable_id'];
+        $intervention->intervention_comptable_id = $data['intervention_comptable_id'];
 
         $intervention->save();
 
@@ -130,7 +130,7 @@ class InterventionBusiness
                 'stat_nb' => 'integer|min:0',
                 'imputer' => 'boolean',
                 'localite_id' => 'integer|exists:localites,id',
-                'exercice_comptable_id' => 'integer|exists:exercice_comptables,id',
+                'intervention_comptable_id' => 'integer|exists:intervention_comptables,id',
                 'intervention_traitement_id' => 'integer|exists:intervention_traitements,id',
                 'stat_federal_id' => 'integer|exists:stat_federals,id',
                 'sapeur_id' => 'integer|exists:sapeurs,id',
@@ -172,7 +172,7 @@ class InterventionBusiness
         - Appels
         */
 
-        InterventionSapeur::where('exercice_id', $intervention_id)->delete();
+        InterventionSapeur::where('intervention_id', $intervention_id)->delete();
         Intervention::destroy($intervention_id);
     }
 
@@ -208,9 +208,10 @@ class InterventionBusiness
                 throw new ArrayValidatorException($validation->errors());
             }
 
-            if ($this->intervention->sapeurs()->where('exercice_sapeur.sapeur_id', $sapeurId)->first() !== null) {
-                throw new ArrayValidatorException(array('id' => "Duplicated sapeur"));
-            }
+            //TODO Check duplicated period of time
+//            if ($this->intervention->sapeurs()->where('intervention_sapeur.sapeur_id', $sapeurId)->first() !== null) {
+//                throw new ArrayValidatorException(array('id' => "Duplicated sapeur"));
+//            }
 
             $sap = new InterventionSapeur();
             $sap->fill($sapeur);
@@ -247,7 +248,7 @@ class InterventionBusiness
                 throw new ArrayValidatorException($validation->errors());
             }
 
-            $sap = $this->intervention->sapeurs()->where('exercice_sapeur.id', $sapeur['id'])->first();
+            $sap = $this->intervention->sapeurs()->where('intervention_sapeur.id', $sapeur['id'])->first();
             $sap->update($sapeur);
             $sap->save();
         }
@@ -266,7 +267,7 @@ class InterventionBusiness
         */
         $ids = $data['sapeurs'];
 
-        $this->intervention->sapeurs()->whereIn('exercice_sapeur.id', $ids)->delete();
+        $this->intervention->sapeurs()->whereIn('intervention_sapeur.id', $ids)->delete();
     }
 
 

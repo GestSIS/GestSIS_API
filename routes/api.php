@@ -29,7 +29,6 @@ Route::group(['prefix' => 'v2'], function () {
 
     // // TODO: Authorization required
     // Route::group(['middleware' => 'jwt.auth'], function(){
-        //TODO: Implement those route for retro compatibility
 
         // Sapeurs
         Route::resource('sapeurs', 'SapeurController')->only(['index', 'show', 'store', 'update']);//, 'destroy']);//->middleware('role:effectif_read');
@@ -150,6 +149,7 @@ Route::group(['prefix' => 'v2'], function () {
     // });
 });
 
+//TODO: Implement those route for retro compatibility
 // Route::group(['prefix' => 'v1'], function(){
 
 //     Route::get('sis', 'SisApiController@index')->name('api.v1.sis.index');

@@ -36,8 +36,6 @@ class CreateSapeursTable extends Migration
             $table->string('email');
             $table->integer('actif');
 
-            //TODO: Add telephone table
-
             //Banque
             // CptBan
             // NoCPP

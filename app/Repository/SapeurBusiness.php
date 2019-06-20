@@ -522,7 +522,15 @@ class SapeurBusiness
             throw new ArrayValidatorException($validation->errors());
         }
 
-        //TODO: Check if this numero already exist
+        $telephones = $this->sapeur->telephones()->get();
+        foreach ($telephones as $tel) {
+            if (strcmp(
+                    trim(preg_replace('/\s+/', ' ', $tel->numero)),
+                    trim(preg_replace('/\s+/', ' ', $data['numero']))
+                ) === 0) {
+                throw new ArrayValidatorException(['numero' => 'Duplicated numero']);
+            }
+        }
 
         //Create permis
         $telephone = new SapeurTelephone();
@@ -543,7 +551,6 @@ class SapeurBusiness
      */
     public function updateTelephone($data)
     {
-        //TODO check duplicated number
         $validation = Validator::make($data,
             array(
                 'id' => 'required|integer|exists:sapeur_telephone,id',
@@ -559,6 +566,19 @@ class SapeurBusiness
         }
 
         $telephone = $this->sapeur->telephones()->where('sapeur_telephone.id', $data['id'])->first();
+
+        $telephones = $this->sapeur->telephones()
+            ->where('sapeur_telephone.id', '!=', $data['id'])
+            ->get();
+        
+        foreach ($telephones as $tel) {
+            if (strcmp(
+                    trim(preg_replace('/\s+/', ' ', $tel->numero)),
+                    trim(preg_replace('/\s+/', ' ', $data['numero']))
+                ) === 0) {
+                throw new ArrayValidatorException(['numero' => 'Duplicated numero']);
+            }
+        }
 
         //Search for the telephone
         if ($telephone === null) {
