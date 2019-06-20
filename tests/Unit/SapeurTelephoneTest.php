@@ -20,7 +20,7 @@ class SapeurTelephoneTest extends TestCase
     {
         $id = 2;
         $data = array(
-            'numero' => '032 546 54 76',
+            'numero' => '032 546 54 12',
             'telephone_type_id' => 1,
             'rta' => 0,
             'priorite' => 1
@@ -46,7 +46,7 @@ class SapeurTelephoneTest extends TestCase
     {
         $id = 2;
         $data = array(
-            'numero' => '032 546 54 76',
+            'numero' => '032 546 54 15',
             'telephone_type_id' => 1,
             'rta' => 0,
             'priorite' => 1
@@ -56,7 +56,7 @@ class SapeurTelephoneTest extends TestCase
         $telephone_id = $sapeur->addTelephone($data)->id;
 
         $data = array(
-            'numero' => '032 546 12 43',
+            'numero' => '032 546 12 18',
             'telephone_type_id' => 2,
             'rta' => 0,
             'priorite' => 3
@@ -80,7 +80,7 @@ class SapeurTelephoneTest extends TestCase
     {
         $id = 2;
         $data = array(
-            'numero' => '032 546 54 76',
+            'numero' => '032 546 54 79',
             'telephone_type_id' => 1,
             'rta' => 0,
             'priorite' => 1
