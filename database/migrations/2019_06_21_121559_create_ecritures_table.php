@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateComptesTable extends Migration
+class CreateEcrituresTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,13 @@ class CreateComptesTable extends Migration
      */
     public function up()
     {
-        Schema::create('comptes', function (Blueprint $table) {
+        Schema::create('ecritures', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->string('numero');
             $table->string('designation');
+            $table->decimal('montant');
+            $table->integer('type'); //1 Solde, 2 Indemnite, 3 Frais
         });
     }
 
@@ -29,6 +30,6 @@ class CreateComptesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('comptes');
+        Schema::dropIfExists('ecritures');
     }
 }

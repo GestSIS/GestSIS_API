@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateComptesTable extends Migration
+class CreateIndemniteExerciceTypesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,18 @@ class CreateComptesTable extends Migration
      */
     public function up()
     {
-        Schema::create('comptes', function (Blueprint $table) {
+        Schema::create('indemnite_exercice_types', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->string('numero');
             $table->string('designation');
+
+            $table->unsignedDecimal('solde');
+            $table->unsignedDecimal('indemnite');
+            $table->unsignedDecimal('solde_min')->nullable();
+            $table->unsignedDecimal('duree_min')->nullable();
+
+            $table->boolean('par_fonction');
         });
     }
 
@@ -29,6 +35,6 @@ class CreateComptesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('comptes');
+        Schema::dropIfExists('indemnite_exercice_types');
     }
 }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateIndemnitesTable extends Migration
+class CreateFraisAnnuelsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,18 +13,12 @@ class CreateIndemnitesTable extends Migration
      */
     public function up()
     {
-        Schema::create('indemnites', function (Blueprint $table) {
+        Schema::create('frais_annuels', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
             $table->string('designation');
-
-            $table->unsignedDecimal('frais');
-            $table->unsignedDecimal('solde');
-            $table->unsignedDecimal('indemnité');
-
-            $table->unsignedBigInteger('compte_id');
-            $table->foreign('compte_id')->references('id')->on('comptes');
+            $table->unsignedDecimal('montant');
 
             $table->unsignedBigInteger('fonction_id');
             $table->foreign('fonction_id')->references('id')->on('fonctions');
@@ -38,6 +32,6 @@ class CreateIndemnitesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('indemnites');
+        Schema::dropIfExists('frais_annuels');
     }
 }

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class CategorieFrais extends Model
+class IndemniteInterventionFonction extends Model
 {
     //
 }

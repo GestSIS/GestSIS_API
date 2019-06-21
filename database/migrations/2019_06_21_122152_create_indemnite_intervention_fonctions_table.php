@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTypeFraisTable extends Migration
+class CreateIndemniteInterventionFonctionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateTypeFraisTable extends Migration
      */
     public function up()
     {
-        Schema::create('type_frais', function (Blueprint $table) {
+        Schema::create('indemnite_intervention_fonctions', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
         });
@@ -26,6 +26,6 @@ class CreateTypeFraisTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('type_frais');
+        Schema::dropIfExists('indemnite_intervention_fonctions');
     }
 }

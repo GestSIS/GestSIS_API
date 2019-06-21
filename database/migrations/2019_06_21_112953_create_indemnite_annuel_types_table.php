@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateComptesTable extends Migration
+class CreateIndemniteAnnuelTypesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,17 @@ class CreateComptesTable extends Migration
      */
     public function up()
     {
-        Schema::create('comptes', function (Blueprint $table) {
+        Schema::create('indemnite_annuel_types', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->string('numero');
             $table->string('designation');
+
+            $table->unsignedDecimal('solde');
+            $table->unsignedDecimal('indemnite');
+
+            $table->unsignedBigInteger('fonction_id');
+            $table->foreign('fonction_id')->references('id')->on('fonctions');
         });
     }
 
@@ -29,6 +34,6 @@ class CreateComptesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('comptes');
+        Schema::dropIfExists('indemnite_annuel_types');
     }
 }
