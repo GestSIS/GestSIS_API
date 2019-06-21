@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateIndemniteInterventionFonctionsTable extends Migration
 {
@@ -16,6 +16,14 @@ class CreateIndemniteInterventionFonctionsTable extends Migration
         Schema::create('indemnite_intervention_fonctions', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
+
+            $table->unsignedDecimal('solde');
+
+            $table->unsignedBigInteger('fonction_id');
+            $table->foreign('fonction_id')->references('id')->on('fonctions');
+
+            $table->unsignedBigInteger('indemnite_int_id');
+            $table->foreign('indemnite_int_id')->references('id')->on('indemnite_intervention_types');
         });
     }
 

@@ -12,9 +12,9 @@ class TypeUniteTableSeeder extends Seeder
     public function run()
     {
         $unite = array(
-            array('id' => '1', 'unite' => 'franc/heure', 'abreviation' => 'CHF/h'),
-            array('id' => '2', 'unite' => 'franc/ckm', 'abreviation' => 'CHF/km'),
-            array('id' => '3', 'unite' => 'litre', 'abreviation' => 'l'),
+            array('id' => '1', 'unite' => 'Franc / Heure', 'abreviation' => 'CHF / h'),
+            array('id' => '2', 'unite' => 'Franc / Pièce', 'abreviation' => 'CHF / Pièce'),
+            array('id' => '3', 'unite' => 'Franc', 'abreviation' => 'CHF'),
         );
 
         foreach ($unite as $item) {

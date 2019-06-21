@@ -21,8 +21,15 @@ class CreateIndemniteExerciceTypesTable extends Migration
 
             $table->unsignedDecimal('solde');
             $table->unsignedDecimal('indemnite');
+
             $table->unsignedDecimal('solde_min')->nullable();
-            $table->unsignedDecimal('duree_min')->nullable();
+            $table->unsignedDecimal('solde_min_pour')->nullable();
+
+            $table->unsignedBigInteger('type_unite_id');
+            $table->foreign('type_unite_id')->references('id')->on('type_unites');
+
+            $table->unsignedBigInteger('compte_id');
+            $table->foreign('compte_id')->references('id')->on('comptes');
 
             $table->boolean('par_fonction');
         });

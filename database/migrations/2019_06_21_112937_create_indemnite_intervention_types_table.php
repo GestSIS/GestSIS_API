@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateIndemniteInterventionTypesTable extends Migration
 {
@@ -21,12 +21,19 @@ class CreateIndemniteInterventionTypesTable extends Migration
 
             $table->unsignedDecimal('solde');
             $table->unsignedDecimal('solde_min')->nullable();
-            $table->unsignedDecimal('duree_min')->nullable();
+            $table->unsignedDecimal('solde_min_pour')->nullable();
+            $table->unsignedInteger('solde_min_phase')->nullable();
 
-            $table->unsignedDecimal('tarif_weekend');
-            $table->unsignedDecimal('tarif_nuit');
+            $table->unsignedDecimal('taux_weekend');
+            $table->unsignedDecimal('taux_nuit');
             $table->time('debut');
             $table->time('fin');
+
+            $table->unsignedBigInteger('compte_id');
+            $table->foreign('compte_id')->references('id')->on('comptes');
+
+            $table->unsignedBigInteger('type_unite_id');
+            $table->foreign('type_unite_id')->references('id')->on('type_unites');
 
             $table->boolean('par_fonction');
         });

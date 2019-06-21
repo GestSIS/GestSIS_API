@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateFraisAnnuelsTable extends Migration
+class CreateFraisAnnuelTypesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateFraisAnnuelsTable extends Migration
      */
     public function up()
     {
-        Schema::create('frais_annuels', function (Blueprint $table) {
+        Schema::create('frais_annuel_types', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
@@ -22,6 +22,9 @@ class CreateFraisAnnuelsTable extends Migration
 
             $table->unsignedBigInteger('fonction_id');
             $table->foreign('fonction_id')->references('id')->on('fonctions');
+
+            $table->unsignedBigInteger('compte_id');
+            $table->foreign('compte_id')->references('id')->on('comptes');
         });
     }
 
@@ -32,6 +35,6 @@ class CreateFraisAnnuelsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('frais_annuels');
+        Schema::dropIfExists('frais_annuel_types');
     }
 }
