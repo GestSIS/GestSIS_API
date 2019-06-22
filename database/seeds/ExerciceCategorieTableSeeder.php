@@ -11,7 +11,6 @@ class ExerciceCategorieTableSeeder extends Seeder
      */
     public function run()
     {
-        //
         $categories = array(
             array('id' => 1, 'designation' => 'Exercice', 'amendable' => 0, 'duree_base' => 180, 'status' => 1, 'tri' => 1),
             array('id' => 2, 'designation' => 'Etat-major', 'amendable' => 0, 'duree_base' => 120, 'status' => 1, 'tri' => 2),

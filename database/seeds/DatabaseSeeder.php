@@ -35,7 +35,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ExerciceTableSeeder::class);
         $this->call(ExerciceSapeurTableSeeder::class);
 
-        $this->call(TypeUniteTableSeeder::class);
         $this->call(MaterielTableSeeder::class);
         $this->call(VehiculeTableSeeder::class);
         $this->call(PhaseTypeTableSeeder::class);
@@ -45,6 +44,7 @@ class DatabaseSeeder extends Seeder
         $this->call(InterventionTraitementTableSeeder::class);
 
         //Interventions
+        $this->call(TypeUniteTableSeeder::class);
         $this->call(InterventionTableSeeder::class);
         $this->call(GroupeInterventionTableSeeder::class);
         $this->call(MaterielInterventionTableSeeder::class);
@@ -56,6 +56,13 @@ class DatabaseSeeder extends Seeder
         $this->call(QuittanceTableSeeder::class);
         $this->call(TelephoneTableSeeder::class);
         $this->call(MissionTypeTableSeeder::class);
+
+        //Frais
+        $this->call(CompteTableSeeder::class);
+        $this->call(FraisAnnuelTypeTableSeeder::class);
+        $this->call(IndemniteAnnuelTypeTableSeeder::class);
+        $this->call(IndemniteExerciceTypeTableSeeder::class);
+        $this->call(IndemniteInterventionTypeTableSeeder::class);
 
     }
 }

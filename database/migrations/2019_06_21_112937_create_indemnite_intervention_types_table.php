@@ -22,15 +22,17 @@ class CreateIndemniteInterventionTypesTable extends Migration
             $table->unsignedDecimal('solde');
             $table->unsignedDecimal('solde_min')->nullable();
             $table->unsignedDecimal('solde_min_pour')->nullable();
-            $table->unsignedInteger('solde_min_phase')->nullable();
 
-            $table->unsignedDecimal('taux_weekend');
-            $table->unsignedDecimal('taux_nuit');
-            $table->time('debut');
-            $table->time('fin');
+            $table->unsignedDecimal('taux_weekend')->nullable();
+            $table->unsignedDecimal('taux_nuit')->nullable();
+            $table->time('debut')->nullable();
+            $table->time('fin')->nullable();
 
             $table->unsignedBigInteger('compte_id');
             $table->foreign('compte_id')->references('id')->on('comptes');
+
+            $table->unsignedBigInteger('phase_id')->nullable();
+            $table->foreign('phase_id')->references('id')->on('phases');
 
             $table->unsignedBigInteger('type_unite_id');
             $table->foreign('type_unite_id')->references('id')->on('type_unites');

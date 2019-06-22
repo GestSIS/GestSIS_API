@@ -19,8 +19,7 @@ class CreateIndemniteAnnuelTypesTable extends Migration
 
             $table->string('designation');
 
-            $table->unsignedDecimal('solde');
-            $table->unsignedDecimal('indemnite');
+            $table->unsignedDecimal('montant');
 
             $table->unsignedBigInteger('fonction_id');
             $table->foreign('fonction_id')->references('id')->on('fonctions');
