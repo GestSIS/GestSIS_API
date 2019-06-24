@@ -24,17 +24,9 @@ class IndemniteExerciceTypeRepositoryEloquent implements IndemniteExerciceTypeRe
      */
     public function create(array $data)
     {
-        if (array_key_exists('lieu', $data) && $data['lieu'] === null) {
-            $data['lieu'] = '';
-        }
-
-        if (array_key_exists('communications', $data) && $data['communications'] === null) {
-            $data['communications'] = '';
-        }
-
-        $exercice = new IndemniteExerciceType();
-        $exercice->fill($data);
-        $exercice->save();
+        $indemnite = new IndemniteExerciceType();
+        $indemnite->fill($data);
+        $indemnite->save();
     }
 
     /**
@@ -44,16 +36,8 @@ class IndemniteExerciceTypeRepositoryEloquent implements IndemniteExerciceTypeRe
      */
     public function update(array $data, $id)
     {
-        if (array_key_exists('lieu', $data) && $data['lieu'] === null) {
-            $data['lieu'] = '';
-        }
-
-        if (array_key_exists('communications', $data) && $data['communications'] === null) {
-            $data['communications'] = '';
-        }
-
-        $exercice = IndemniteExerciceType::find($id);
-        $exercice->update($data);
+        $indemnite = IndemniteExerciceType::find($id);
+        $indemnite->update($data);
     }
 
     /**
@@ -77,27 +61,27 @@ class IndemniteExerciceTypeRepositoryEloquent implements IndemniteExerciceTypeRe
     }
 
     /**
-     * @param $exercice
+     * @param $indemnite
      * @return StdClass|null
      */
-    protected function convertIndemnite($exercice)
+    protected function convertIndemnite($indemnite)
     {
-        if ($exercice == null) return null;
+        if ($indemnite == null) return null;
 
         $object = new StdClass();
 
-        $object->id = $exercice->id;
-        $object->designation = $exercice->designation;
-        $object->solde = $exercice->solde;
-        $object->indemnite = $exercice->indemnite;
-        $object->solde_min = $exercice->solde_min;
-        $object->solde_min_pour = $exercice->solde_min_pour;
-        $object->type_unite_id = $exercice->type_unite_id;
-        $object->compte_id = $exercice->compte_id;
-        $object->par_fonction = $exercice->par_fonction;
+        $object->id = $indemnite->id;
+        $object->designation = $indemnite->designation;
+        $object->solde = $indemnite->solde;
+        $object->indemnite = $indemnite->indemnite;
+        $object->solde_min = $indemnite->solde_min;
+        $object->solde_min_pour = $indemnite->solde_min_pour;
+        $object->type_unite_id = $indemnite->type_unite_id;
+        $object->compte_id = $indemnite->compte_id;
+        $object->par_fonction = $indemnite->par_fonction;
 
         $indemnites = array();
-        foreach ($exercice->fonctions() as $indemnite) {
+        foreach ($indemnite->fonctions() as $indemnite) {
             array_push($indemnites, $this->convertIndemniteFonction($indemnite));
         }
         $object->fonctions = $indemnites;
@@ -105,18 +89,21 @@ class IndemniteExerciceTypeRepositoryEloquent implements IndemniteExerciceTypeRe
         return $object;
     }
 
+    /**
+     * @param $indemnite
+     * @return StdClass|null
+     */
     protected function convertIndemniteFonction($indemnite)
     {
         if ($indemnite == null) return null;
 
         $object = new StdClass();
+
         $object->id = $indemnite->id;
-        $object->sapeur_id = $indemnite->sapeur_id;
-        $object->exercice_id = $indemnite->exercice_id;
-        $object->convoque = $indemnite->convoque;
-        $object->present = $indemnite->present;
-        $object->amende = $indemnite->amende;
-        $object->excuse_type_id = $indemnite->excuse_type_id;
+        $object->fonction_id = $indemnite->fonction_id;
+        $object->solde = $indemnite->solde;
+        $object->indemnite = $indemnite->indemnite;
+        $object->indemnite_int_id = $indemnite->indemnite_int_id;
 
         return $object;
     }

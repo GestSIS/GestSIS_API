@@ -16,7 +16,10 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
      */
     public function all($columns = array('*'))
     {
-        return array_map($this->convertExercice, Exercice::all($columns)->toArray());
+        $temp = $this;
+        return Exercice::all($columns)->map(function ($exercice) use ($temp) {
+            return $temp->convertExercice($exercice);
+        })->toArray();
     }
 
     /**
@@ -25,7 +28,10 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
      */
     public function getSapeurs(int $exercice_id)
     {
-        return array_map($this->convertSapeur, Exercice::find($exercice_id)->sapeurs()->get()->toArray());
+        $temp = $this;
+        return Exercice::find($exercice_id)->sapeurs->map(function ($sapeur) use ($temp) {
+            return $temp->convertSapeur($sapeur);
+        })->toArray();
     }
 
     /**
@@ -140,6 +146,10 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         return $object;
     }
 
+    /**
+     * @param $sapeur
+     * @return StdClass|null
+     */
     protected function convertSapeur($sapeur)
     {
         if ($sapeur == null) return null;

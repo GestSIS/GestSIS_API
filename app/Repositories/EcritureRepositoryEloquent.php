@@ -19,7 +19,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $temp = $this;
         return Ecriture::all($columns)->map(function ($ecriture) use ($temp) {
             return $temp->convertEcriture($ecriture);
-        });
+        })->toArray();
     }
 
     /**
