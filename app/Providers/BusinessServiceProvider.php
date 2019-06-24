@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Business\ImputationBusiness;
 use Illuminate\Support\ServiceProvider;
 
 class BusinessServiceProvider extends ServiceProvider
@@ -13,7 +14,9 @@ class BusinessServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->singleton('ImputationBusiness', function ($app) {
+            return new ImputationBusiness();
+        });
     }
 
     /**

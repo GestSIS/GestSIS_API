@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Intervention;
-use App\Repository\InterventionBusiness;
+use App\Business\InterventionBusiness;
 use App\Exceptions\ArrayValidatorException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;

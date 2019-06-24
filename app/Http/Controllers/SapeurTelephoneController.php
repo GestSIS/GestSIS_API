@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Repository\SapeurBusiness;
+use App\Business\SapeurBusiness;
 use App\Exceptions\ArrayValidatorException;
 use Illuminate\Http\Request;
 use App\Models\Sapeur;

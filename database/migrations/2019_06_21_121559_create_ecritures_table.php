@@ -26,9 +26,9 @@ class CreateEcrituresTable extends Migration
             $table->foreign('type_unite_id')->references('id')->on('type_unites');
 
             $table->unsignedInteger('quantite');
-            $table->unsignedInteger('solde_min');
-            $table->unsignedInteger('solde_min_pour');
-            $table->decimal('taux');
+            $table->unsignedInteger('solde_min')->nullable();
+            $table->unsignedInteger('solde_min_pour')->nullable();
+            $table->decimal('taux')->nullable();
 
             $table->decimal('solde');
             $table->decimal('indemnite');
@@ -36,6 +36,9 @@ class CreateEcrituresTable extends Migration
 
             $table->unsignedBigInteger('sapeur_id');
             $table->foreign('sapeur_id')->references('id')->on('sapeurs');
+
+            $table->unsignedBigInteger('exercice_comptable_id');
+            $table->foreign('exercice_comptable_id')->references('id')->on('exercice_comptables');
 
             $table->unsignedBigInteger('intervention_id')->nullable();
             $table->foreign('intervention_id')->references('id')->on('interventions');
@@ -48,6 +51,7 @@ class CreateEcrituresTable extends Migration
 
             $table->unsignedBigInteger('frais_annuel_type_id')->nullable();
             $table->foreign('frais_annuel_type_id')->references('id')->on('frais_annuel_types');
+
         });
     }
 

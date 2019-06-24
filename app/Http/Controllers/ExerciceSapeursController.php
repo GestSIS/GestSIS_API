@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Exercice;
-use App\Repository\ExerciceBusiness;
+use App\Business\ExerciceBusiness;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;

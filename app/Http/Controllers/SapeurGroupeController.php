@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sapeur;
-use App\Repository\SapeurBusiness;
+use App\Business\SapeurBusiness;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;

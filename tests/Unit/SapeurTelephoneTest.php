@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Sapeur;
-use App\Repository\SapeurBusiness;
+use App\Business\SapeurBusiness;
 use Exception;
 use Tests\TestCase;
 

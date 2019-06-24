@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Repository;
+namespace App\Business;
 
 
 use App\Exceptions\ArrayValidatorException;
@@ -14,36 +14,8 @@ use App\Models\Sapeur;
 use App\Models\SapeurTelephone;
 use Validator;
 
-class SapeurBusiness
+class SapeurBusinessV2
 {
-
-    protected $sapeur;
-
-    public function __construct(Sapeur $sapeur)
-    {
-        $this->sapeur = $sapeur;
-    }
-
-    /**
-     * Get's a sapeur by it's ID
-     *
-     * @param int
-     * @return SapeurBusiness
-     */
-    public static function get($sapeur_id)
-    {
-        return new SapeurBusiness(Sapeur::findOrFail($sapeur_id));
-    }
-
-    /**
-     * Return sapeur data
-     *
-     * @return Sapeur
-     */
-    public function getData()
-    {
-        return $this->sapeur;
-    }
 
     /**
      * Create a sapeur
@@ -54,6 +26,7 @@ class SapeurBusiness
      */
     public static function createSapeur($data)
     {
+        //TODO Create mutation de base if sapeur
         if (array_key_exists('suffixe', $data) && $data['suffixe'] === null) {
             $data['suffixe'] = '';
         }
@@ -63,36 +36,6 @@ class SapeurBusiness
         $sapeur->save();
 
         return new SapeurBusiness($sapeur);
-    }
-
-    /**
-     * Delete a sapeur.
-     *
-     * @param int
-     */
-    public static function delete($sapeur_id)
-    {
-        //TODO: Check
-        Sapeur::destroy($sapeur_id);
-    }
-
-    /**
-     * Updates a post.
-     *
-     * @param int
-     * @param array
-     * @return Sapeur
-     * @throws ArrayValidatorException
-     */
-    public function update($data)
-    {
-        if (array_key_exists('suffixe', $data) && $data['suffixe'] === null) {
-            $data['suffixe'] = '';
-        }
-
-        $this->sapeur->update($data);
-
-        return $this->sapeur;
     }
 
     public function addCours($data)
@@ -140,33 +83,6 @@ class SapeurBusiness
         }
 
         return $cours;
-    }
-
-    public function updateCours($data)
-    {
-        //Update cours
-        $cours = $this->sapeur->cours()->where('cours_sapeur.id', $data['id'])->first();
-
-        //Search for the cours
-        if ($cours === null) {
-            throw new ArrayValidatorException(array('id' => "Unable to find cours"));
-        } else {
-            //Update mutation
-            $cours->update($data);
-            $cours->save();
-        }
-
-        return $cours;
-    }
-
-    /**
-     * Remove a cours
-     *
-     * @param int $cours_sapeur_id
-     */
-    public function removeCours(int $cours_sapeur_id)
-    {
-        $this->sapeur->cours()->where('cours_sapeur.id', $cours_sapeur_id)->delete();
     }
 
     /**
@@ -420,6 +336,7 @@ class SapeurBusiness
      */
     public function addMutation($data)
     {
+        //TODO Check update actif status
         // Ajout d'une nouvelle mutation
         $validation = Validator::make($data,
             array(
@@ -497,6 +414,7 @@ class SapeurBusiness
      */
     public function removeMutation(int $mutation_id)
     {
+        //TODO Check not the last one
         $this->sapeur->mutations()->where('mutations.id', $mutation_id)->delete();
     }
 

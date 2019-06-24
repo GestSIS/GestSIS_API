@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\ArrayValidatorException;
 use App\Models\Sapeur;
-use App\Repository\SapeurBusiness;
+use App\Business\SapeurBusiness;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Validator;

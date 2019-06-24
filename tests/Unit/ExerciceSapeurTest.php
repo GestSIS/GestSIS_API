@@ -3,7 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\ExerciceSapeur;
-use App\Repository\ExerciceBusiness;
+use App\Business\ExerciceBusiness;
 use Exception;
 use Tests\TestCase;
 

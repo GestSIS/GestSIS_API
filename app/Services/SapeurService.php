@@ -6,11 +6,9 @@ namespace App\Services;
 
 class SapeurService
 {
-
-    static function getAll()
+    public function update()
     {
-        return Sapeur::all();
-    }
 
+    }
 
 }

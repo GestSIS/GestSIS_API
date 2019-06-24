@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Repository;
+namespace App\Business;
 
 
 use App\Exceptions\ArrayValidatorException;

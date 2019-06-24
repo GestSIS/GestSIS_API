@@ -1,0 +1,158 @@
+<?php
+
+
+namespace App\Repositories;
+
+use App\Contracts\ExerciceRepository;
+use App\Models\Exercice;
+use App\Models\ExerciceSapeur;
+use StdClass;
+
+class ExerciceRepositoryEloquent implements ExerciceRepository
+{
+    /**
+     * @param array $columns
+     * @return mixed
+     */
+    public function all($columns = array('*'))
+    {
+        return array_map($this->convertExercice, Exercice::all($columns)->toArray());
+    }
+
+    /**
+     * @param int $exercice_id
+     * @return mixed
+     */
+    public function getSapeurs(int $exercice_id)
+    {
+        return array_map($this->convertSapeur, Exercice::find($exercice_id)->sapeurs()->get()->toArray());
+    }
+
+    /**
+     * @param int $exercice_id
+     * @param $sapeur
+     */
+    public function addSapeur(int $exercice_id, $sapeur)
+    {
+        $sap = new ExerciceSapeur();
+        $sap->fill($sapeur);
+        $sap->exercice_id = $exercice_id;
+        $sap->save();
+    }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public function create(array $data)
+    {
+        if (array_key_exists('lieu', $data) && $data['lieu'] === null) {
+            $data['lieu'] = '';
+        }
+
+        if (array_key_exists('communications', $data) && $data['communications'] === null) {
+            $data['communications'] = '';
+        }
+
+        $exercice = new Exercice();
+        $exercice->fill($data);
+        $exercice->exercice_categorie_id = $data['exercice_categorie_id'];
+        $exercice->exercice_comptable_id = $data['exercice_comptable_id'];
+        $exercice->save();
+    }
+
+    /**
+     * @param array $data
+     * @param $id
+     * @return mixed
+     */
+    public function update(array $data, $id)
+    {
+        if (array_key_exists('lieu', $data) && $data['lieu'] === null) {
+            $data['lieu'] = '';
+        }
+
+        if (array_key_exists('communications', $data) && $data['communications'] === null) {
+            $data['communications'] = '';
+        }
+
+        $exercice = Exercice::find($id);
+        $exercice->update($data);
+    }
+
+    /**
+     * @param $id
+     * @return mixed
+     */
+    public function delete($id)
+    {
+        return Exercice::where('id')->destroy($id);
+    }
+
+    /**
+     * @param $id
+     * @param array $columns
+     * @return mixed
+     */
+    public function find($id, $columns = array('*'))
+    {
+        return $this->convertExercice(Exercice::find($id, $columns));
+    }
+
+    /**
+     * @param $id
+     * @param array $columns
+     * @return mixed
+     */
+    public function findWithSapeurs($id, $columns = array('*'))
+    {
+        return $this->convertExercice(Exercice::with('sapeurs')->find($id, $columns), true);
+    }
+
+    /**
+     * @param $exercice
+     * @return StdClass|null
+     */
+    protected function convertExercice($exercice, $withSapeurs = false)
+    {
+        if ($exercice == null) return null;
+
+        $object = new StdClass();
+        $object->id = $exercice->id;
+        $object->exercice_categorie_id = $exercice->exercice_categorie_id;
+        $object->designation = $exercice->designation;
+        $object->date = $exercice->date;
+        $object->heure = $exercice->heure;
+        $object->duree = $exercice->duree;
+        $object->lieu = $exercice->lieu;
+        $object->communications = $exercice->communications;
+        $object->designation = $exercice->designation;
+        $object->statut = $exercice->statut;
+        $object->localite_id = $exercice->localite_id;
+        $object->exercice_comptable_id = $exercice->exercice_comptable_id;
+
+        if ($withSapeurs) {
+            $temp = $this;
+            $object->sapeurs = $exercice->sapeurs->map(function ($sap) use ($temp) {
+                return $temp->convertSapeur($sap);
+            })->toArray();
+        }
+        return $object;
+    }
+
+    protected function convertSapeur($sapeur)
+    {
+        if ($sapeur == null) return null;
+
+        $object = new StdClass();
+        $object->id = $sapeur->id;
+        $object->sapeur_id = $sapeur->sapeur_id;
+        $object->exercice_id = $sapeur->exercice_id;
+        $object->convoque = $sapeur->convoque;
+        $object->present = $sapeur->present;
+        $object->amende = $sapeur->amende;
+        $object->excuse_type_id = $sapeur->excuse_type_id;
+
+        return $object;
+    }
+}

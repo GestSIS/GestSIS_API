@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\ArrayValidatorException;
 use App\Models\Exercice;
-use App\Repository\ExerciceBusiness;
+use App\Business\ExerciceBusiness;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
