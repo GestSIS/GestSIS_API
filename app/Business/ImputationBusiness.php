@@ -5,8 +5,9 @@ namespace App\Business;
 
 use App\Contracts\EcritureRepository;
 use App\Contracts\ExerciceRepository;
-use App\Contracts\InterventionRepository;
 use App\Contracts\IndemniteTypeRepository;
+use App\Contracts\InterventionRepository;
+use Carbon\Carbon;
 
 class ImputationBusiness
 {
@@ -85,15 +86,17 @@ class ImputationBusiness
         //TODO Fonction
         foreach ($sapeurs as $sapeur) {
             $dureeNuit = 0;
+            $debutNuit = null;
+            $finNuit = null;
 
             if ($indemniteType->taux_nuit !== null) {
-                $debutNuit = date_create($indemniteType->debut);
-                $finNuit = date_create($indemniteType->fin);
+                $debutNuit = Carbon::parse($indemniteType->debut);
+                $finNuit = Carbon::parse($indemniteType->fin);
 
                 if (!($finNuit > $debutNuit)) {
-                    $finNuit = $finNuit->add(new DateInterval("P1D"));
+                    $finNuit->addDays(1);
                 }
-                $dureeNuit += date_diff($debutNuit, $finNuit);
+                $dureeNuit += $debutNuit->floatDiffInHours($finNuit);
             }
 
             //Durées calculées en heures
@@ -106,54 +109,120 @@ class ImputationBusiness
             $tauxWeekend = $indemniteType->taux_weekend;
             $tauxNuit = $indemniteType->taux_nuit;
 
-            foreach ($sapeur as $presence) {
-                $debut = date_create($presence->debut);
-                $fin = date_create($presence->fin);
-                $duree = date_diff($debut, $fin);
+            $testWeekend = $tauxWeekend !== null;
+            $testNuit = $tauxNuit !== null;
 
-                if ($indemniteType->taux_weekend === null &&
-                    $indemniteType->taux_nuit === null) {
+            foreach ($sapeur as $presence) {
+                $debut = Carbon::parse($presence->debut);
+                $fin = Carbon::parse($presence->fin);
+                $duree = $debut->floatDiffInHours($fin);
+
+                if (!$testWeekend && !$testNuit) {
                     //Pas de taux
                     $dureeTarifStandard += $duree->days * 24 + $duree->h + $duree->m / 60;
-                } elseif ($indemniteType->taux_weekend !== null &&
-                    $indemniteType->taux_nuit === null) {
-                    //Durée d'une semaine
-                    if ($duree->days >= 7) {
-                        $quantite = ($duree->days - $duree->days % 7) / 2;
-                        $dureeTarifWeekend += 24 * 2 * $quantite;
-                        $dureeTarifStandard += 24 * 5 * $quantite;
+                } else {
+
+                    //Arrondir debut à la fin de la première journée
+                    //Arrondir fin à la fin de l'avant dernière journée
+                    $debutCarbon = $debut->copy()->floorDay();
+                    $finCarbon = $debut->copy()->ceilDay();
+
+                    $nbWeekend = 0;
+                    $nbWeek = 0;
+                    if ($debutCarbon->copy()->addDay(1) < $finCarbon) {
+                        $nbWeekend += $debutCarbon->diffInDaysFiltered(function (Carbon $date) {
+                            return $date->isWeekend();
+                        }, $finCarbon);
+                        $nbWeek += $debutCarbon->diffInDaysFiltered(function (Carbon $date) {
+                            return !$date->isWeekend();
+                        }, $finCarbon);
                     }
 
-                    //TODO Premiers jours
-
-                } elseif ($indemniteType->taux_nuit !== null &&
-                    $indemniteType->taux_weekend !== null) {
-                    //Durée d'une semaine
-                    if ($duree->days >= 7) {
-                        $quantite = ($duree->days - $duree->days % 7) / 2;
-                        $dureeTarifWeekend += 24 * 2 * $quantite;
-                        $dureeTarifStandard += (24 - $dureeNuit) * 5 * $quantite;
-                        $dureeTarifNuit += $dureeNuit * 5 * $quantite;
+                    //Dispatch full days to hours
+                    if ($testWeekend && $testNuit) {
+                        $dureeTarifStandard = $nbWeek * $dureeNuit;
+                        $dureeTarifWeekend = $nbWeekend * 24;
+                        $dureeTarifNuit = $nbWeek * (24 - $dureeNuit);
+                    } elseif ($testWeekend) {
+                        $dureeTarifWeekend = $nbWeekend * 24;
+                        $dureeTarifNuit = $nbWeek * 24;
+                    } elseif ($testNuit) {
+                        $dureeTarifStandard = ($nbWeek + $nbWeekend) * $dureeNuit;
+                        $dureeTarifNuit = ($nbWeek + $nbWeekend) * (24 - $dureeNuit);
+                    } else {
+                        $dureeTarifStandard = ($nbWeek + $nbWeekend) * 24;
                     }
 
-                    // TODO Tarif nuit & Tarif week-end
+                    //Définition des deux périodes de nuit qui peuvent potentiellement overlap sur la présence
+                    $nightPeriodOneStart = $debutCarbon->copy()->addDay($debutCarbon->diffInDays($debutNuit, false));
+                    $nightPeriodOneEnd = $debutCarbon->copy()->addDay($debutCarbon->diffInDays($debutNuit, false));
+                    $nightPeriodTwoStart = $nightPeriodOneStart->copy()->subDay(1);
+                    $nightPeriodTwoEnd = $nightPeriodOneEnd->copy()->subDay(1);
 
-                } elseif ($indemniteType->taux_nuit !== null) {
-                    //Tarif nuit only
+                    //Alternative 1
+                    if ($debutCarbon->roundDay()->copy()->addDay(1) === $finCarbon->roundDay()) {
+                        //Debut et fin la même journée
+                        if ($debutCarbon->isWeekend() && $testWeekend) {
+                            $dureeTarifWeekend += $duree;
+                        } elseif ($testNuit) {
+                            $overlapping = 0;
+                            $overlapping += min($debut->max($nightPeriodOneStart)->floatDiffInHours($fin->min($nightPeriodOneEnd)), 0);
+                            $overlapping += min($debut->max($nightPeriodTwoStart)->floatDiffInHours($fin->min($nightPeriodTwoEnd)), 0);
 
-                    //Full days
-                    $dureeTarifNuit += $duree->days * $dureeNuit;
-                    $dureeTarifStandard += $duree->days * (24 - $dureeNuit);
+                            $dureeTarifNuit += $overlapping;
+                            $dureeTarifStandard += $duree - $overlapping;
+                        } else {
+                            $dureeTarifStandard += $duree;
+                        }
 
-                    //Remaining <24hours
-                    $debut = new DateTime($presence->debut);
-                    $fin = $debut->add();
-                    $duree = date_diff($debut, $fin);
+                    } else {
+                        //Premier jour de la présence -> début
+                        if ($debutCarbon->isWeekend() && $testWeekend) {
+                            $dureeTarifWeekend += $duree;
+                        } elseif ($testNuit) {
+                            $overlapping = 0;
 
-                    //TODO Finalise last hours
+                            //Create period 1 start and end date
+                            $finJour = $debut->copy()->ceilDay();
+                            $overlapping += min($debut->max($nightPeriodOneStart)->floatDiffInHours($finJour->min($nightPeriodOneEnd)), 0);
+                            $overlapping += min($debut->max($nightPeriodTwoStart)->floatDiffInHours($finJour->min($nightPeriodTwoEnd)), 0);
 
+                            //Modification de la durée
+                            $duree = $debut->floatDiffInHours($finJour);
+                            $dureeTarifNuit += $overlapping;
+                            $dureeTarifStandard += $duree - $overlapping;
+                        } else {
+                            $dureeTarifStandard += $duree;
+                        }
+
+                        //Deuxième jour de la présence -> fin
+                        if ($debutCarbon->isWeekend() && $testWeekend) {
+                            $dureeTarifWeekend += $duree;
+                        } elseif ($testNuit) {
+                            $overlapping = 0;
+
+                            //Adaptation du debut de la journée
+                            $debutJour = $fin->copy()->floorDay();
+
+                            $nightPeriodOneStart = $debutCarbon->copy()->addDay($nightPeriodOneStart->diffInDays($debutJour, false));
+                            $nightPeriodOneEnd = $debutCarbon->copy()->addDay($nightPeriodOneStart->diffInDays($debutJour, false));
+                            $nightPeriodTwoStart = $nightPeriodOneStart->copy()->subDay(1);
+                            $nightPeriodTwoEnd = $nightPeriodOneEnd->copy()->subDay(1);
+
+                            $overlapping += min($debutJour->max($nightPeriodOneStart)->floatDiffInHours($fin->min($nightPeriodOneEnd)), 0);
+                            $overlapping += min($debutJour->max($nightPeriodTwoStart)->floatDiffInHours($fin->min($nightPeriodTwoEnd)), 0);
+
+                            //Modification de la durée
+                            $duree = $debutJour->floatDiffInHours($fin);
+                            $dureeTarifNuit += $overlapping;
+                            $dureeTarifStandard += $duree - $overlapping;
+                        } else {
+                            $dureeTarifStandard += $duree;
+                        }
+                    }
                 }
-            }
+            }//End boucle presences d'un sapeur
+
 
             $soldeStandard = $soldeTarif * $dureeTarifStandard;
             $soldeNuit = $dureeTarifNuit;
@@ -237,6 +306,11 @@ class ImputationBusiness
         }
 
         // TODO Changer le status de l'intervention
+    }
+
+    private function dureeOverlay($periode1, $periode2)
+    {
+
     }
 
     private function imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation)
