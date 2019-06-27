@@ -84,7 +84,7 @@ class ImputationBusiness
         };
 
         //TODO Fonction
-        foreach ($sapeurs as $sapeur) {
+        foreach ($sapeurs as $sapeur_id => $presences) {
             $dureeNuit = 0;
             $debutNuit = null;
             $finNuit = null;
@@ -112,14 +112,14 @@ class ImputationBusiness
             $testWeekend = $tauxWeekend !== null;
             $testNuit = $tauxNuit !== null;
 
-            foreach ($sapeur as $presence) {
+            foreach ($presences as $presence) {
                 $debut = Carbon::parse($presence->debut);
                 $fin = Carbon::parse($presence->fin);
                 $duree = $debut->floatDiffInHours($fin);
 
                 if (!$testWeekend && !$testNuit) {
                     //Pas de taux
-                    $dureeTarifStandard += $duree->days * 24 + $duree->h + $duree->m / 60;
+                    $dureeTarifStandard += $duree;
                 } else {
 
                     //Arrondir debut à la fin de la première journée
@@ -223,7 +223,6 @@ class ImputationBusiness
                 }
             }//End boucle presences d'un sapeur
 
-
             $soldeStandard = $soldeTarif * $dureeTarifStandard;
             $soldeNuit = $dureeTarifNuit;
             $soldeWeekend = $dureeTarifWeekend;
@@ -250,7 +249,7 @@ class ImputationBusiness
                     'solde_min' => null,
                     'solde_min_pour' => null,
                     'taux' => null,
-                    'sapeur_id' => $sapeur->sapeur_id,
+                    'sapeur_id' => $sapeur_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
                     'intervention_id' => $intervention->id
                 );
@@ -275,7 +274,7 @@ class ImputationBusiness
                     'solde_min' => null,
                     'solde_min_pour' => null,
                     'taux' => null,
-                    'sapeur_id' => $sapeur->sapeur_id,
+                    'sapeur_id' => $sapeur_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
                     'intervention_id' => $intervention->id
                 );
@@ -296,7 +295,7 @@ class ImputationBusiness
                     'solde_min' => null,
                     'solde_min_pour' => null,
                     'taux' => null,
-                    'sapeur_id' => $sapeur->sapeur_id,
+                    'sapeur_id' => $sapeur_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
                     'intervention_id' => $intervention->id
                 );

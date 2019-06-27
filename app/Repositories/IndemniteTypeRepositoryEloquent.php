@@ -5,6 +5,7 @@ namespace App\Repositories;
 
 use App\Contracts\IndemniteTypeRepository;
 use App\Models\IndemniteExerciceType;
+use App\Models\IndemniteInterventionType;
 use stdClass;
 
 class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
@@ -26,7 +27,7 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
 
     public function findIndemniteInterventionTypeById(int $id)
     {
-        return $this->convertIndemniteIntervention(IndemniteExerciceType::with('fonctions')->find($id));
+        return $this->convertIndemniteIntervention(IndemniteInterventionType::with('fonctions')->find($id));
     }
 
     /**
@@ -84,7 +85,6 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
     protected function convertIndemniteIntervention($intervention)
     {
         if ($intervention == null) return null;
-
         $object = new StdClass();
 
         $object->id = $intervention->id;
