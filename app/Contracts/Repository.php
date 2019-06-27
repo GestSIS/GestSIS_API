@@ -3,7 +3,7 @@
 
 namespace App\Contracts;
 
-
+//TODO Remove this class
 interface Repository {
 
     public function all($columns = array('*'));

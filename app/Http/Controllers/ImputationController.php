@@ -21,11 +21,11 @@ class ImputationController extends Controller
         return response()->json(['data' => $temp]);
     }
 
-    public function intervention()
+    public function intervention(Request $request, int $id)
     {
+        $temp = $this->service->generateIntervention($id, $request->all());
 
-
-        return response()->json(['data' => 'TODO']);
+        return response()->json(['data' => $temp]);
     }
 
     public function indemniteAnnuel()

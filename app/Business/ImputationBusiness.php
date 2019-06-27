@@ -4,18 +4,34 @@
 namespace App\Business;
 
 use App\Contracts\EcritureRepository;
+use App\Contracts\ExerciceRepository;
+use App\Contracts\InterventionRepository;
+use App\Contracts\IndemniteTypeRepository;
 
 class ImputationBusiness
 {
-    protected $repository;
+    protected $ecritureRepo;
+    protected $indemniteRepo;
+    protected $exerciceRepo;
+    protected $interventionRepo;
 
-    public function __construct(EcritureRepository $repository)
+    public function __construct(
+        EcritureRepository $ecriture,
+        ExerciceRepository $exercice,
+        InterventionRepository $intervention,
+        IndemniteTypeRepository $indemnite)
     {
-        $this->repository = $repository;
+        $this->ecritureRepo = $ecriture;
+        $this->exerciceRepo = $exercice;
+        $this->interventionRepo = $intervention;
+        $this->indemniteRepo = $indemnite;
     }
 
-    public function imputerExercice($exercice, $indemniteType)
+    public function imputerExercice($exerciceId, $data)
     {
+        $indemniteType = $this->indemniteRepo->findIndemniteExerciceTypeById($data['indemnite_exercice_type_id']);
+        $exercice = $this->exerciceRepo->findWithSapeurs($exerciceId);
+
         $unite = $indemniteType->type_unite_id;
         $designation = $exercice->designation;
         $sapeurs = array_filter($exercice->sapeurs, function ($sap) {
@@ -42,18 +58,17 @@ class ImputationBusiness
         return (date_create('N', strtotime($date)) >= 6);
     }
 
-    public function imputerIntervention($intervention, $indemniteType)
+    public function imputerIntervention($interventionId, $data)
     {
-        $unite = $indemniteType->type_unite_id;
-        $designation = $intervention->designation;
+        $indemniteType = $this->indemniteRepo->findIndemniteInterventionTypeById($data['indemnite_intervention_type_id']);
+        $intervention = $this->interventionRepo->findWith($interventionId, ['sapeurs', 'phases']);
 
-        $presences = array_filter($intervention->presences, function ($sap) {
-            return $sap->present;
-        });
+        $unite = $indemniteType->type_unite_id;
+        $designation = $intervention->lieu;
 
         //Grouper les présences par sapeurs
         $sapeurs = [];
-        foreach ($intervention->presences as $presence) {
+        foreach ($intervention->sapeurs as $presence) {
             if (!array_key_exists($presence->sapeur_id, $sapeurs)) {
                 $sapeurs[$presence->sapeur_id] = [];
             }
@@ -74,6 +89,10 @@ class ImputationBusiness
             if ($indemniteType->taux_nuit !== null) {
                 $debutNuit = date_create($indemniteType->debut);
                 $finNuit = date_create($indemniteType->fin);
+
+                if (!($finNuit > $debutNuit)) {
+                    $finNuit = $finNuit->add(new DateInterval("P1D"));
+                }
                 $dureeNuit += date_diff($debutNuit, $finNuit);
             }
 
@@ -87,7 +106,7 @@ class ImputationBusiness
             $tauxWeekend = $indemniteType->taux_weekend;
             $tauxNuit = $indemniteType->taux_nuit;
 
-            foreach ($sapeur->presences as $presence) {
+            foreach ($sapeur as $presence) {
                 $debut = date_create($presence->debut);
                 $fin = date_create($presence->fin);
                 $duree = date_diff($debut, $fin);
@@ -126,9 +145,9 @@ class ImputationBusiness
                     $dureeTarifNuit += $duree->days * $dureeNuit;
                     $dureeTarifStandard += $duree->days * (24 - $dureeNuit);
 
-                    //Remaining hours
+                    //Remaining <24hours
                     $debut = new DateTime($presence->debut);
-                    $fin = $debut->add(new DateInterval('P10D'));
+                    $fin = $debut->add();
                     $duree = date_diff($debut, $fin);
 
                     //TODO Finalise last hours
@@ -167,7 +186,7 @@ class ImputationBusiness
                     'intervention_id' => $intervention->id
                 );
 
-                $this->repository->create($ecriture);
+                $this->ecritureRepo->persisteNewEcriture($ecriture);
             }
 
             if ($indemniteType->taux_weekend === $indemniteType->taux_nuit) {
@@ -192,7 +211,7 @@ class ImputationBusiness
                     'intervention_id' => $intervention->id
                 );
 
-                $this->repository->create($ecriture);
+                $this->ecritureRepo->persisteNewEcriture($ecriture);
             }
 
             if ($soldeWeekend > 0) {
@@ -213,7 +232,7 @@ class ImputationBusiness
                     'intervention_id' => $intervention->id
                 );
 
-                $this->repository->create($ecriture);
+                $this->ecritureRepo->persisteNewEcriture($ecriture);
             }
         }
 
@@ -259,7 +278,7 @@ class ImputationBusiness
                 'exercice_id' => $exercice->id
             );
 
-            $this->repository->create($ecriture);
+            $this->ecritureRepo->persisteNewEcriture($ecriture);
         }
     }
 
@@ -307,7 +326,7 @@ class ImputationBusiness
                 'exercice_id' => $exercice->id
             );
 
-            $this->repository->create($ecriture);
+            $this->ecritureRepo->persisteNewEcriture($ecriture);
         }
     }
 
@@ -348,7 +367,7 @@ class ImputationBusiness
                 'exercice_id' => $exercice->id
             );
 
-            $this->repository->create($ecriture);
+            $this->ecritureRepo->persisteNewEcriture($ecriture);
         }
     }
 }

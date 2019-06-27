@@ -4,7 +4,12 @@
 namespace App\Contracts;
 
 
-interface EcritureRepository extends Repository
-{
+use App\Models\Ecriture;
 
+interface EcritureRepository
+{
+    public function listeEcritureForExercice($exercice_id);
+    public function listeEcritureForIntervention($intervention_id);
+
+    public function persisteNewEcriture($ecriture);
 }

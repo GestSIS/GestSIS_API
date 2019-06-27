@@ -26,12 +26,8 @@ class RepositoryServiceProvider extends ServiceProvider
             'App\Repositories\InterventionRepositoryEloquent'
         );
         $this->app->bind(
-            'App\Contracts\IndemniteExerciceTypeRepository',
-            'App\Repositories\IndemniteExerciceTypeRepositoryEloquent'
-        );
-        $this->app->bind(
-            'App\Contracts\IndemniteInterventionTypeRepository',
-            'App\Repositories\IndemniteInterventionTypeRepositoryEloquent'
+            'App\Contracts\IndemniteTypeRepository',
+            'App\Repositories\IndemniteTypeRepositoryEloquent'
         );
     }
 

@@ -69,11 +69,11 @@ class InterventionRepositoryEloquent implements InterventionRepository
      * @param $with
      * @return StdClass|null
      */
-    public function findWith($id, $with)
+    public function findWith($id, $with = array())
     {
         //TODO Check with allowed
-        $allowedWith = ['presences', 'phases'];
-        return $this->convertIntervention(Intervention::find($id, $with), $with);
+        $allowedWith = ['sapeurs', 'phases'];
+        return $this->convertIntervention(Intervention::with($with)->find($id), $with);
     }
 
     /**
@@ -90,7 +90,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
      * @param $intervention
      * @return StdClass|null
      */
-    protected function convertIntervention($intervention, $with = [])
+    protected function convertIntervention($intervention, $with = array())
     {
         if ($intervention == null) return null;
 
@@ -119,9 +119,9 @@ class InterventionRepositoryEloquent implements InterventionRepository
         $object->stat_federal_id = $intervention->stat_federal_id;
         $object->intervention_traitement_id = $intervention->intervention_traitement_id;
 
-        if (in_array('presences', $with)) {
+        if (in_array('sapeurs', $with)) {
             $temp = $this;
-            $object->presences = $intervention->presences->map(function ($sap) use ($temp) {
+            $object->sapeurs = $intervention->sapeurs->map(function ($sap) use ($temp) {
                 return $temp->convertPresence($sap);
             })->toArray();
         }

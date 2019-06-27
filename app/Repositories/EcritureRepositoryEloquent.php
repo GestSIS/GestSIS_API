@@ -10,70 +10,86 @@ use StdClass;
 
 class EcritureRepositoryEloquent implements EcritureRepository
 {
+
     /**
-     * @param array $columns
+     * @param $exercice_id
      * @return mixed
      */
-    public function all($columns = array('*'))
+    public function listeEcritureForExercice($exercice_id)
     {
         $temp = $this;
-        return Ecriture::all($columns)->map(function ($ecriture) use ($temp) {
-            return $temp->convertEcriture($ecriture);
-        })->toArray();
+        return Ecriture::where('exercice_id', $exercice_id)
+            ->get()
+            ->map(function ($ecriture) use ($temp) {
+                return $temp->convertEcriture($ecriture);
+            })->toArray();
     }
 
     /**
-     * @param array $data
+     * @param $intervention_id
      * @return mixed
      */
-    public function create(array $data)
+    public function listeEcritureForIntervention($intervention_id)
     {
-        if (!array_key_exists('solde_min', $data)) $data['solde_min'] = null;
-        if (!array_key_exists('solde_min_pour', $data)) $data['solde_min_pour'] = null;
-        if (!array_key_exists('taux', $data)) $data['taux'] = null;
-        if (!array_key_exists('solde', $data)) $data['solde'] = 0;
-        if (!array_key_exists('indemnite', $data)) $data['indemnite'] = 0;
-        if (!array_key_exists('frais', $data)) $data['frais'] = 0;
-        if (!array_key_exists('exercice_comptable_id', $data)) $data['exercice_comptable_id'] = null;
-        if (!array_key_exists('intervention_id', $data)) $data['intervention_id'] = null;
-        if (!array_key_exists('exercice_id', $data)) $data['exercice_id'] = null;
-        if (!array_key_exists('indemnite_annuel_type_id', $data)) $data['indemnite_annuel_type_id'] = null;
-        if (!array_key_exists('frais_annuel_type_id', $data)) $data['frais_annuel_type_id'] = null;
-
-        $ecriture = new Ecriture();
-        $ecriture->fill($data);
-        $ecriture->save();
+        $temp = $this;
+        return Ecriture::where('intervention_id', $intervention_id)
+            ->get()
+            ->map(function ($ecriture) use ($temp) {
+                return $temp->convertEcriture($ecriture);
+            })->toArray();
     }
 
     /**
-     * @param array $data
-     * @param $id
-     * @return mixed
+     *
      */
-    public function update(array $data, $id)
+    public function persisteNewEcriture($ecriture)
     {
-        $ecriture = Ecriture::find($id);
-        $ecriture->update($data);
+        if (!array_key_exists('solde_min', $ecriture)) $ecriture['solde_min'] = null;
+        if (!array_key_exists('solde_min_pour', $ecriture)) $ecriture['solde_min_pour'] = null;
+        if (!array_key_exists('taux', $ecriture)) $ecriture['taux'] = null;
+        if (!array_key_exists('solde', $ecriture)) $ecriture['solde'] = 0;
+        if (!array_key_exists('indemnite', $ecriture)) $ecriture['indemnite'] = 0;
+        if (!array_key_exists('frais', $ecriture)) $ecriture['frais'] = 0;
+        if (!array_key_exists('exercice_comptable_id', $ecriture)) $ecriture['exercice_comptable_id'] = null;
+        if (!array_key_exists('intervention_id', $ecriture)) $ecriture['intervention_id'] = null;
+        if (!array_key_exists('exercice_id', $ecriture)) $ecriture['exercice_id'] = null;
+        if (!array_key_exists('indemnite_annuel_type_id', $ecriture)) $ecriture['indemnite_annuel_type_id'] = null;
+        if (!array_key_exists('frais_annuel_type_id', $ecriture)) $ecriture['frais_annuel_type_id'] = null;
+
+        $model = new Ecriture();
+        $model->fill($ecriture);
+        $model->save();
     }
 
-    /**
-     * @param $id
-     * @return mixed
-     */
-    public function delete($id)
-    {
-        return Ecriture::where('id')->destroy($id);
-    }
-
-    /**
-     * @param $id
-     * @param array $columns
-     * @return mixed
-     */
-    public function find($id, $columns = array('*'))
-    {
-        return $this->convertEcriture(Ecriture::find($id, $columns));
-    }
+//    /**
+//     * @param array $data
+//     * @param $id
+//     * @return mixed
+//     */
+//    public function update(array $data, $id)
+//    {
+//        $ecriture = Ecriture::find($id);
+//        $ecriture->update($data);
+//    }
+//
+//    /**
+//     * @param $id
+//     * @return mixed
+//     */
+//    public function delete($id)
+//    {
+//        return Ecriture::where('id')->destroy($id);
+//    }
+//
+//    /**
+//     * @param $id
+//     * @param array $columns
+//     * @return mixed
+//     */
+//    public function find($id, $columns = array('*'))
+//    {
+//        return $this->convertEcriture(Ecriture::find($id, $columns));
+//    }
 
     /**
      * @param $ecriture
