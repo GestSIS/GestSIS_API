@@ -112,6 +112,8 @@ class ImputationBusiness
             $testWeekend = $tauxWeekend !== null;
             $testNuit = $tauxNuit !== null;
 
+            $trace = "";
+
             foreach ($presences as $presence) {
                 $debut = Carbon::parse($presence->debut);
                 $fin = Carbon::parse($presence->fin);
@@ -140,24 +142,25 @@ class ImputationBusiness
 
                     //Dispatch full days to hours
                     if ($testWeekend && $testNuit) {
-                        $dureeTarifStandard = $nbWeek * $dureeNuit;
-                        $dureeTarifWeekend = $nbWeekend * 24;
-                        $dureeTarifNuit = $nbWeek * (24 - $dureeNuit);
+                        $dureeTarifStandard += $nbWeek * $dureeNuit;
+                        $dureeTarifWeekend += $nbWeekend * 24;
+                        $dureeTarifNuit += $nbWeek * (24 - $dureeNuit);
                     } elseif ($testWeekend) {
-                        $dureeTarifWeekend = $nbWeekend * 24;
-                        $dureeTarifNuit = $nbWeek * 24;
+                        $dureeTarifWeekend += $nbWeekend * 24;
+                        $dureeTarifNuit += $nbWeek * 24;
                     } elseif ($testNuit) {
-                        $dureeTarifStandard = ($nbWeek + $nbWeekend) * $dureeNuit;
-                        $dureeTarifNuit = ($nbWeek + $nbWeekend) * (24 - $dureeNuit);
+                        $dureeTarifStandard += ($nbWeek + $nbWeekend) * $dureeNuit;
+                        $dureeTarifNuit += ($nbWeek + $nbWeekend) * (24 - $dureeNuit);
                     } else {
-                        $dureeTarifStandard = ($nbWeek + $nbWeekend) * 24;
+                        $dureeTarifStandard += ($nbWeek + $nbWeekend) * 24;
                     }
 
                     //Définition des deux périodes de nuit qui peuvent potentiellement overlap sur la présence
-                    $nightPeriodOneStart = $debutCarbon->copy()->addDay($debutCarbon->diffInDays($debutNuit, false));
-                    $nightPeriodOneEnd = $debutCarbon->copy()->addDay($debutCarbon->diffInDays($debutNuit, false));
-                    $nightPeriodTwoStart = $nightPeriodOneStart->copy()->subDay(1);
-                    $nightPeriodTwoEnd = $nightPeriodOneEnd->copy()->subDay(1);
+                    $diff = $debutNuit->diffInDays($debutCarbon, false);
+                    $nightPeriodOneStart = $debutNuit->copy()->addDays($diff);
+                    $nightPeriodOneEnd = $finNuit->copy()->addDays($diff);
+                    $nightPeriodTwoStart = $nightPeriodOneStart->copy()->subDay();
+                    $nightPeriodTwoEnd = $nightPeriodOneEnd->copy()->subDay();
 
                     //Alternative 1
                     if ($debutCarbon->roundDay()->copy()->addDay(1) === $finCarbon->roundDay()) {
@@ -176,6 +179,10 @@ class ImputationBusiness
                         }
 
                     } else {
+                        //Modification de la durée
+                        $finJour = $debut->copy()->ceilDay();
+                        $duree = $debut->floatDiffInHours($finJour);
+
                         //Premier jour de la présence -> début
                         if ($debutCarbon->isWeekend() && $testWeekend) {
                             $dureeTarifWeekend += $duree;
@@ -183,12 +190,9 @@ class ImputationBusiness
                             $overlapping = 0;
 
                             //Create period 1 start and end date
-                            $finJour = $debut->copy()->ceilDay();
-                            $overlapping += min($debut->max($nightPeriodOneStart)->floatDiffInHours($finJour->min($nightPeriodOneEnd)), 0);
-                            $overlapping += min($debut->max($nightPeriodTwoStart)->floatDiffInHours($finJour->min($nightPeriodTwoEnd)), 0);
+                            $overlapping += max($debut->max($nightPeriodOneStart)->floatDiffInHours($finJour->min($nightPeriodOneEnd), false), 0);
+                            $overlapping += max($debut->max($nightPeriodTwoStart)->floatDiffInHours($finJour->min($nightPeriodTwoEnd), false), 0);
 
-                            //Modification de la durée
-                            $duree = $debut->floatDiffInHours($finJour);
                             $dureeTarifNuit += $overlapping;
                             $dureeTarifStandard += $duree - $overlapping;
                         } else {
@@ -196,24 +200,24 @@ class ImputationBusiness
                         }
 
                         //Deuxième jour de la présence -> fin
+
+                        //Modification de la durée
+                        $debutJour = $fin->copy()->floorDay();
+                        $duree = $debutJour->floatDiffInHours($fin);
+
                         if ($debutCarbon->isWeekend() && $testWeekend) {
                             $dureeTarifWeekend += $duree;
                         } elseif ($testNuit) {
                             $overlapping = 0;
 
-                            //Adaptation du debut de la journée
-                            $debutJour = $fin->copy()->floorDay();
-
-                            $nightPeriodOneStart = $debutCarbon->copy()->addDay($nightPeriodOneStart->diffInDays($debutJour, false));
-                            $nightPeriodOneEnd = $debutCarbon->copy()->addDay($nightPeriodOneStart->diffInDays($debutJour, false));
+                            $nightPeriodOneStart = $nightPeriodOneStart->copy()->addDays($nightPeriodOneStart->diffInDays($debutJour, false));
+                            $nightPeriodOneEnd = $nightPeriodOneEnd->copy()->addDays($nightPeriodOneStart->diffInDays($debutJour, false));
                             $nightPeriodTwoStart = $nightPeriodOneStart->copy()->subDay(1);
                             $nightPeriodTwoEnd = $nightPeriodOneEnd->copy()->subDay(1);
 
-                            $overlapping += min($debutJour->max($nightPeriodOneStart)->floatDiffInHours($fin->min($nightPeriodOneEnd)), 0);
-                            $overlapping += min($debutJour->max($nightPeriodTwoStart)->floatDiffInHours($fin->min($nightPeriodTwoEnd)), 0);
+                            $overlapping += max($debutJour->max($nightPeriodOneStart)->floatDiffInHours($fin->min($nightPeriodOneEnd), false), 0);
+                            $overlapping += max($debutJour->max($nightPeriodTwoStart)->floatDiffInHours($fin->min($nightPeriodTwoEnd), false), 0);
 
-                            //Modification de la durée
-                            $duree = $debutJour->floatDiffInHours($fin);
                             $dureeTarifNuit += $overlapping;
                             $dureeTarifStandard += $duree - $overlapping;
                         } else {
@@ -224,14 +228,15 @@ class ImputationBusiness
             }//End boucle presences d'un sapeur
 
             $soldeStandard = $soldeTarif * $dureeTarifStandard;
-            $soldeNuit = $dureeTarifNuit;
-            $soldeWeekend = $dureeTarifWeekend;
+            $soldeNuit = $soldeTarif * $dureeTarifNuit;
+            $soldeWeekend = $soldeTarif * $dureeTarifWeekend;
+
 
             //Application des taux
-            if ($indemniteType->taux_weekend !== null) {
+            if ($testWeekend) {
                 $soldeWeekend *= $tauxWeekend;
             }
-            if ($indemniteType->taux_nuit !== null) {
+            if ($testNuit) {
                 $soldeNuit *= $tauxNuit;
             }
 
@@ -257,23 +262,19 @@ class ImputationBusiness
                 $this->ecritureRepo->persisteNewEcriture($ecriture);
             }
 
-            if ($indemniteType->taux_weekend === $indemniteType->taux_nuit) {
-                //TODO Un seul taux spécial
-            }
-
             if ($soldeNuit > 0) {
                 $ecriture = array(
                     'solde' => $soldeNuit,
                     'indemnite' => 0,
                     'frais' => 0,
                     'type_unite_id' => $indemniteType->type_unite_id,
-                    'designation' => $designation + " - Nuit",
+                    'designation' => $designation . " - Nuit",
                     'total' => $soldeNuit,
                     'tarif' => $soldeTarif,
                     'quantite' => 1,
                     'solde_min' => null,
                     'solde_min_pour' => null,
-                    'taux' => null,
+                    'taux' => $tauxNuit,
                     'sapeur_id' => $sapeur_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
                     'intervention_id' => $intervention->id
@@ -288,13 +289,13 @@ class ImputationBusiness
                     'indemnite' => 0,
                     'frais' => 0,
                     'type_unite_id' => $indemniteType->type_unite_id,
-                    'designation' => $designation + " - Weekend",
+                    'designation' => $designation . " - Weekend",
                     'total' => $soldeWeekend,
                     'tarif' => $soldeTarif,
                     'quantite' => 1,
                     'solde_min' => null,
                     'solde_min_pour' => null,
-                    'taux' => null,
+                    'taux' => $tauxWeekend,
                     'sapeur_id' => $sapeur_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
                     'intervention_id' => $intervention->id
