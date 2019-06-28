@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Intervention;
-use App\Business\InterventionBusiness;
 use App\Exceptions\ArrayValidatorException;
 use App\Services\InterventionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Validator;
 
 class InterventionSapeursController extends Controller
 {
@@ -27,7 +26,6 @@ class InterventionSapeursController extends Controller
     public function index($intervention_id)
     {
         $sapeurs = $this->service->getInterventionPresences($intervention_id);
-
         return response()->json(['data' => $sapeurs]);
     }
 
@@ -41,8 +39,20 @@ class InterventionSapeursController extends Controller
      */
     public function store(Request $request, int $intervention_id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'sapeurs.*.debut' => 'required|date_format:Y-m-d H:i',
+                'sapeurs.*.fin' => 'required|date_format:Y-m-d H:i|after:sapeurs.*.debut',
+                'sapeurs.*.piquet' => 'required|boolean',
+                'sapeurs.*.sapeur_id' => 'required|integer|exists:sapeurs,id'
+            ));
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            $sapeurs = InterventionBusiness::get($intervention_id)->addSapeurs($request->all());
+            $sapeurs = $this->service->addPresences($intervention_id, $request->get('sapeurs'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -60,8 +70,20 @@ class InterventionSapeursController extends Controller
      */
     public function update(Request $request, int $intervention_id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'sapeurs.*.debut' => 'required|date_format:Y-m-d H:i',
+                'sapeurs.*.fin' => 'required|date_format:Y-m-d H:i|after:sapeurs.*.debut',
+                'sapeurs.*.piquet' => 'required|boolean',
+            )
+        );
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            $sapeurs = InterventionBusiness::get($intervention_id)->updateSapeurs($request->all());
+            $sapeurs = $this->service->updatePresences($intervention_id, $request->get('sapeurs'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -78,12 +100,17 @@ class InterventionSapeursController extends Controller
      */
     public function destroy(Request $request, int $intervention_id)
     {
-        try {
-            InterventionBusiness::get($intervention_id)->removeSapeurs($request->all());
-        } catch (ArrayValidatorException $e) {
-            return response()->json(['error' => $e->getErrors()]);
+        $validation = Validator::make($request->all(),
+            array(
+                'sapeurs.*' => 'required|integer'
+            )
+        );
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
         }
 
+        $this->service->removePresences($intervention_id, $request->get('sapeurs'));
         return response()->json(['data' => 'success']);
     }
 }

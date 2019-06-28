@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ArrayValidatorException;
-use App\Models\Intervention;
-use App\Business\InterventionBusiness;
 use App\Services\InterventionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Validator;
 
 class InterventionPhasesController extends Controller
 {
@@ -41,8 +40,19 @@ class InterventionPhasesController extends Controller
      */
     public function store(Request $request, int $intervention_id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'phases.*.phase_type_id' => 'required|integer|exists:phase_type_id,id',
+                'phases.*.debut' => 'required|date_format:Y-m-d H:i'
+            )
+        );
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            $phases = InterventionBusiness::get($intervention_id)->addPhases($request->all());
+            $phases = $this->service->addPhases($intervention_id, $request->get('phases'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -60,8 +70,19 @@ class InterventionPhasesController extends Controller
      */
     public function update(Request $request, int $intervention_id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'phases.*.phase_type_id' => 'integer|exists:phase_type_id,id',
+                'phases.*.debut' => 'date_format:Y-m-d H:i'
+            )
+        );
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            $phases = InterventionBusiness::get($intervention_id)->updatePhases($request->all());
+            $phases = $this->service->updatePhases($intervention_id, $request->get('phases'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -79,7 +100,7 @@ class InterventionPhasesController extends Controller
     public function destroy(Request $request, int $intervention_id)
     {
         try {
-            InterventionBusiness::get($intervention_id)->removePhases($request->all());
+            $this->service->removePhases($intervention_id, $request->get('phases'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

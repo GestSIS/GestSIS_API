@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Intervention;
-use App\Business\InterventionBusiness;
 use App\Exceptions\ArrayValidatorException;
 use App\Services\InterventionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Validator;
 
 class InterventionQuittancesController extends Controller
 {
@@ -40,8 +39,17 @@ class InterventionQuittancesController extends Controller
      */
     public function store(Request $request, int $intervention_id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'quittances.*' => 'required|integer|min:1'
+            ));
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            $quittances = InterventionBusiness::get($intervention_id)->addQuittances($request->all());
+            $quittances = $this->service->addQuittances($intervention_id, $request->get('interventions'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -58,8 +66,17 @@ class InterventionQuittancesController extends Controller
      */
     public function destroy(Request $request, int $intervention_id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'quittances.*' => 'required|integer|min:1'
+            ));
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            InterventionBusiness::get($intervention_id)->removeQuittances($request->all());
+            $this->service->removeQuittances($intervention_id, $request->get('interventions'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

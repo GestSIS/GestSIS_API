@@ -3,13 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ArrayValidatorException;
-use App\Models\Intervention;
-use App\Business\InterventionBusiness;
+use App\Services\InterventionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Validator;
 
 class InterventionAppelsController extends Controller
 {
+    protected $service;
+
+    public function __construct(InterventionService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -17,8 +24,7 @@ class InterventionAppelsController extends Controller
      */
     public function index($intervention_id)
     {
-        $appels = Intervention::find($intervention_id)->appels()->get();
-
+        $appels = $this->service->getInterventionAppels($intervention_id);
         return response()->json(['data' => $appels]);
     }
 
@@ -32,8 +38,20 @@ class InterventionAppelsController extends Controller
      */
     public function store(Request $request, int $intervention_id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'appels.*.date' => 'required|date_format:Y-m-d H:i',
+                'appels.*.numero' => 'string',
+                'appels.*.nom' => 'string',
+                'appels.*.commentaire' => 'string|nullable'
+            ));
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            $appels = InterventionBusiness::get($intervention_id)->addAppels($request->all());
+            $appels = $this->service->addAppels($intervention_id, $request->get('appels'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -51,8 +69,20 @@ class InterventionAppelsController extends Controller
      */
     public function update(Request $request, int $intervention_id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'appels.*.date' => 'required|date_format:Y-m-d H:i',
+                'appels.*.numero' => 'string',
+                'appels.*.nom' => 'string',
+                'appels.*.commentaire' => 'string|nullable'
+            ));
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            $appels = InterventionBusiness::get($intervention_id)->updateAppels($request->all());
+            $appels = $this->service->updateAppels($intervention_id, $request->get('appels'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -69,8 +99,17 @@ class InterventionAppelsController extends Controller
      */
     public function destroy(Request $request, int $intervention_id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'appels.*' => 'integer'
+            ));
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            InterventionBusiness::get($intervention_id)->removeAppels($request->all());
+            $this->service->removeAppels($intervention_id, $request->get('appels'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\ArrayValidatorException;
-use App\Models\Intervention;
 use App\Business\InterventionBusiness;
+use App\Exceptions\ArrayValidatorException;
 use App\Services\InterventionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Validator;
 
 class InterventionMaterielsController extends Controller
 {
@@ -41,8 +41,19 @@ class InterventionMaterielsController extends Controller
      */
     public function store(Request $request, int $intervention_id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'materiels.*.materiel_id' => 'required|exists:materiels,id',
+                'materiels.*.quantite' => 'required|integer|min:1'
+            )
+        );
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            $materiels = InterventionBusiness::get($intervention_id)->addMateriels($request->all());
+            $materiels = $this->service->addMateriels($intervention_id, $request->get('materiels'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -60,8 +71,19 @@ class InterventionMaterielsController extends Controller
      */
     public function update(Request $request, int $intervention_id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'materiels.*.id' => 'required|exists:intervention_materiel,id',
+                'materiels.*.quantite' => 'required|integer|min:1'
+            )
+        );
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            $materiels = InterventionBusiness::get($intervention_id)->updateMateriels($request->all());
+            $materiels = $this->service->updateMateriels($intervention_id, $request->get('materiels'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -78,8 +100,18 @@ class InterventionMaterielsController extends Controller
      */
     public function destroy(Request $request, int $intervention_id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'materiels.*' => 'required|exists:intervention_materiel,id',
+            )
+        );
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            InterventionBusiness::get($intervention_id)->removeMateriels($request->all());
+            $this->service->removeMateriels($intervention_id, $request->get('materiels'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

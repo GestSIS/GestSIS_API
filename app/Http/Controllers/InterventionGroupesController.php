@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\ArrayValidatorException;
-use App\Models\Intervention;
 use App\Business\InterventionBusiness;
+use App\Exceptions\ArrayValidatorException;
 use App\Services\InterventionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Validator;
 
 class InterventionGroupesController extends Controller
 {
@@ -41,6 +41,15 @@ class InterventionGroupesController extends Controller
      */
     public function store(Request $request, int $intervention_id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'groupes.*.groupe_id' => 'required|exists:groupes,id'
+            ));
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
             $groupes = InterventionBusiness::get($intervention_id)->addGroupes($request->all());
         } catch (ArrayValidatorException $e) {
@@ -59,6 +68,15 @@ class InterventionGroupesController extends Controller
      */
     public function destroy(Request $request, int $intervention_id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'groupes.*.groupe_id' => 'required|exists:groupes,id'
+            ));
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
             InterventionBusiness::get($intervention_id)->removeGroupes($request->all());
         } catch (ArrayValidatorException $e) {

@@ -42,7 +42,7 @@ class InterventionVehiculesController extends Controller
     public function store(Request $request, int $intervention_id)
     {
         try {
-            $vehicules = InterventionBusiness::get($intervention_id)->addVehicules($request->all());
+            $vehicules = $this->service->addVehicules($intervention_id, $request->get('vehicules'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -60,7 +60,7 @@ class InterventionVehiculesController extends Controller
     public function destroy(Request $request, int $intervention_id)
     {
         try {
-            InterventionBusiness::get($intervention_id)->removeVehicules($request->all());
+            $this->service->removeVehicules($intervention_id, $request->get('vehicules'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

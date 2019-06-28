@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ArrayValidatorException;
-use App\Models\Intervention;
-use App\Business\InterventionBusiness;
 use App\Services\InterventionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Validator;
 
 class InterventionMissionsController extends Controller
 {
@@ -41,8 +40,21 @@ class InterventionMissionsController extends Controller
      */
     public function store(Request $request, int $intervention_id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'missions.*.sapeur_id' => 'integer|exists:sapeurs,id',
+                'missions.*.debut' => 'required|date_format:Y-m-d H:i',
+                'missions.*.fin' => 'required|date_format:Y-m-d H:i|after:missions.*.debut',
+                'missions.*.titre' => 'string',
+                'missions.*.resume' => 'string|nullable'
+            ));
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            $missions = InterventionBusiness::get($intervention_id)->addMissions($request->all());
+            $missions = $this->service->addMissions($intervention_id, $request->get('missions'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -60,8 +72,22 @@ class InterventionMissionsController extends Controller
      */
     public function update(Request $request, int $intervention_id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'missions.*.id' => 'integer|exists:missions,id',
+                'missions.*.sapeur_id' => 'integer|exists:sapeurs,id',
+                'missions.*.debut' => 'date_format:Y-m-d H:i',
+                'missions.*.fin' => 'date_format:Y-m-d H:i|after:debut',
+                'missions.*.titre' => 'string',
+                'missions.*.resume' => 'string|nullable'
+            ));
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            $missions = InterventionBusiness::get($intervention_id)->updateMissions($request->all());
+            $missions = $this->service->updateMissions($intervention_id, $request->get('missions'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -78,8 +104,17 @@ class InterventionMissionsController extends Controller
      */
     public function destroy(Request $request, int $intervention_id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'missions.*' => 'integer|exists:missions,id'
+            ));
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            InterventionBusiness::get($intervention_id)->removeMissions($request->all());
+            $this->service->removeMissions($intervention_id, $request->get('missions'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

@@ -10,7 +10,6 @@ use App\Models\Intervention;
 use App\Models\InterventionMateriel;
 use App\Models\InterventionSapeur;
 use App\Models\InterventionVehicule;
-use App\Models\Materiel;
 use App\Models\Mission;
 use App\Models\Phase;
 use App\Models\Quittance;
@@ -171,6 +170,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     public function addAppel($interventionId, $appel)
     {
+        if (array_key_exists('commentaire', $appel) && $appel['commentaire'] === null) $appel['commentaire'] = '';
+
         $app = new Appel();
         $app->fill($appel);
         $app->intervention_id = $interventionId;
@@ -179,6 +180,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     public function editAppelInfoById($interventionId, $appelId, $infos)
     {
+        if (array_key_exists('commentaire', $infos) && $infos['commentaire'] === null) $infos['commentaire'] = '';
+
         Appel::where('intervention_id', $interventionId)->where('id', $appelId)->update($infos);
     }
 
@@ -189,6 +192,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     public function addMission($interventionId, $mission)
     {
+        if (array_key_exists('resume', $mission) && $mission['resume'] === null) $mission['resume'] = '';
+
         $mis = new Mission();
         $mis->fill($mission);
         $mis->intervention_id = $interventionId;
@@ -197,6 +202,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     public function editMissionInfoById($interventionId, $missionId, $infos)
     {
+        if (array_key_exists('resume', $infos) && $infos['resume'] === null) $infos['resume'] = '';
+
         Mission::where('intervention_id', $interventionId)->where('id', $missionId)->update($infos);
     }
 
@@ -207,15 +214,16 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     public function addMateriel($interventionId, $materiel)
     {
-        $mis = new Materiel();
+        $mis = new InterventionMateriel();
         $mis->fill($materiel);
+        $mis->materiel_id = $materiel['materiel_id'];
         $mis->intervention_id = $interventionId;
         $mis->save();
     }
 
     public function editMaterielQuantiteById($interventionId, $materielId, $quantite)
     {
-        Materiel
+        InterventionMateriel
             ::where('intervention_id', $interventionId)
             ->where('id', $materielId)
             ->update(['quantite' => $quantite]);
