@@ -62,14 +62,14 @@ class ImputationBusiness
     public function imputerIntervention($interventionId, $data)
     {
         $indemniteType = $this->indemniteRepo->findIndemniteInterventionTypeById($data['indemnite_intervention_type_id']);
-        $intervention = $this->interventionRepo->findWith($interventionId, ['sapeurs', 'phases']);
+        $intervention = $this->interventionRepo->findWith($interventionId, ['presences', 'phases']);
 
         $unite = $indemniteType->type_unite_id;
         $designation = $intervention->lieu;
 
         //Grouper les présences par sapeurs
         $sapeurs = [];
-        foreach ($intervention->sapeurs as $presence) {
+        foreach ($intervention->presences as $presence) {
             if (!array_key_exists($presence->sapeur_id, $sapeurs)) {
                 $sapeurs[$presence->sapeur_id] = [];
             }
@@ -83,7 +83,6 @@ class ImputationBusiness
 
         };
 
-        //TODO Fonction
         foreach ($sapeurs as $sapeur_id => $presences) {
             $dureeNuit = 0;
             $debutNuit = null;
@@ -306,11 +305,7 @@ class ImputationBusiness
         }
 
         // TODO Changer le status de l'intervention
-    }
-
-    private function dureeOverlay($periode1, $periode2)
-    {
-
+        //$this->interventionRepo->setImputeStatus();
     }
 
     private function imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation)

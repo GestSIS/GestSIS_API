@@ -5,11 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Intervention;
 use App\Business\InterventionBusiness;
 use App\Exceptions\ArrayValidatorException;
+use App\Services\InterventionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class InterventionSapeursController extends Controller
 {
+
+    protected $service;
+
+    public function __construct(InterventionService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -17,7 +26,7 @@ class InterventionSapeursController extends Controller
      */
     public function index($intervention_id)
     {
-        $sapeurs = Intervention::find($intervention_id)->sapeurs()->get();
+        $sapeurs = $this->service->getInterventionPresences($intervention_id);
 
         return response()->json(['data' => $sapeurs]);
     }

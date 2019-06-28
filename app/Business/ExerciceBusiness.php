@@ -13,6 +13,7 @@ use Validator;
 class ExerciceBusiness
 {
 
+    protected $repository;
     protected $exercice;
 
     public function __construct(Exercice $exercice)

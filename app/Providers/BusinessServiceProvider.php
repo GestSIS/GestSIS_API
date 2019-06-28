@@ -17,6 +17,9 @@ class BusinessServiceProvider extends ServiceProvider
         $this->app->singleton('ImputationBusiness', function ($app) {
             return new ImputationBusiness();
         });
+        $this->app->singleton('InterventionBusiness', function ($app) {
+            return new InterventionBusiness();
+        });
     }
 
     /**

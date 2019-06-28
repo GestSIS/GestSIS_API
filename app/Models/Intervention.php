@@ -33,7 +33,7 @@ class Intervention extends Model
     /**
      * The sapeur that belong to the sapeur.
      */
-    public function sapeurs()
+    public function presences()
     {
         return $this->hasMany('App\Models\InterventionSapeur');
     }

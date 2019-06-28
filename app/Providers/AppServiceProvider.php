@@ -19,6 +19,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('FraisService', function ($app) {
             return new FraisService($app->make('EcritureRepository'));
         });
+        $this->app->singleton('InterventionService', function ($app) {
+            return new InterventionService(
+                $app->make('InterventionRepository'),
+                $app->make('InterventionBusiness')
+            );
+        });
     }
 
     /**
