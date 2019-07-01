@@ -144,6 +144,9 @@ Route::group(['prefix' => 'v2'], function () {
         Route::post('imputation/frais-annuel', 'ImputationController@frais-annuel');
         Route::post('imputation/indemnite-annuel', 'ImputationController@indemnite-annuel');
 
+        Route::get('indemnites-types', 'IdemniteTypeController@index');
+        Route::get('frais-types', 'FraisTypeController@index');
+
         //SUPPRIMER
 
         // Sis

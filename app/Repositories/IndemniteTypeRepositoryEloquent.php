@@ -6,18 +6,38 @@ namespace App\Repositories;
 use App\Contracts\IndemniteTypeRepository;
 use App\Models\IndemniteExerciceType;
 use App\Models\IndemniteInterventionType;
+use App\Models\IndemniteAnnuelType;
 use stdClass;
 
 class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
 {
     public function listeIndemniteExerciceType()
     {
-//FIXME
+        $temp = $this;
+        return IndemniteExerciceType::with('fonctions')
+            ->get()
+            ->map(function ($indemnite) use ($temp) {
+                return $temp->convertIndemniteExercice($indemnite);
+            })->toArray();
     }
 
     public function listeIndemniteInterventionType()
     {
-//FIXME
+        $temp = $this;
+        return IndemniteInterventionType::with('fonctions')
+            ->get()
+            ->map(function ($indemnite) use ($temp) {
+                return $temp->convertIndemniteIntervention($indemnite);
+            })->toArray();
+    }
+
+    public function listeIndemniteAnnuelType()
+    {
+        $temp = $this;
+        return IndemniteAnnuelType::all()
+            ->map(function ($indemnite) use ($temp) {
+                return $temp->convertIndemniteAnnuel($indemnite);
+            })->toArray();
     }
 
     public function findIndemniteExerciceTypeById(int $id)
@@ -28,6 +48,25 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
     public function findIndemniteInterventionTypeById(int $id)
     {
         return $this->convertIndemniteIntervention(IndemniteInterventionType::with('fonctions')->find($id));
+    }
+
+    /**
+     * @param $indemnite
+     * @return StdClass|null
+     */
+    protected function convertIndemniteAnnuel($indemnite)
+    {
+        if ($indemnite == null) return null;
+
+        $object = new StdClass();
+
+        $object->id = $indemnite->id;
+        $object->designation = $indemnite->designation;
+        $object->montant = $indemnite->montant;
+        $object->fonction_id = $indemnite->fonction_id;
+        $object->compte_id = $indemnite->compte_id;
+
+        return $object;
     }
 
     /**

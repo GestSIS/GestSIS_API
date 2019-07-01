@@ -4,7 +4,37 @@
 namespace App\Repositories;
 
 
-class FraisTypeRepositoryEloquent
-{
+use App\Contracts\FraisTypeRepository;
+use App\Models\FraisAnnuelType;
+use stdClass;
 
+class FraisTypeRepositoryEloquent implements FraisTypeRepository
+{
+    public function listeFraisAnnuelType()
+    {
+        $temp = $this;
+        return FraisAnnuelType::all()
+            ->map(function ($frais) use ($temp) {
+                return $temp->convertFraisAnnuel($frais);
+            })->toArray();
+    }
+
+    /**
+     * @param $frais
+     * @return StdClass|null
+     */
+    protected function convertFraisAnnuel($frais)
+    {
+        if ($frais == null) return null;
+
+        $object = new StdClass();
+
+        $object->id = $frais->id;
+        $object->designation = $frais->designation;
+        $object->montant = $frais->montant;
+        $object->fonction_id = $frais->fonction_id;
+        $object->compte_id = $frais->compte_id;
+
+        return $object;
+    }
 }
