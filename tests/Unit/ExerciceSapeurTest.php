@@ -2,13 +2,24 @@
 
 namespace Tests\Unit;
 
-use App\Models\ExerciceSapeur;
 use App\Business\ExerciceBusiness;
+use App\Models\Exercice;
+use App\Models\ExerciceSapeur;
 use Exception;
 use Tests\TestCase;
 
 class ExerciceSapeurTest extends TestCase
 {
+
+    protected $exerciceService;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->exerciceService = $this->app->make('App\Services\ExerciceService');
+    }
+
     /**
      * Test add grade
      *
@@ -17,9 +28,9 @@ class ExerciceSapeurTest extends TestCase
      */
     public function testAddExerciceSapeurs()
     {
-        $id = 649;
+        $exercice = factory(Exercice::class)->create();
 
-        $data = array(
+        $sapeurs = array(
             'sapeurs' => array(
                 array(
                     'sapeur_id' => 1,
@@ -47,24 +58,14 @@ class ExerciceSapeurTest extends TestCase
                 ),
             )
         );
-        ExerciceSapeur::where('exercice_id', $id)->delete();
 
-        $sapeurs = ExerciceBusiness::get($id)->addSapeurs($data);
+        $response = $this->json('POST', '/api/v2/exercices/' . $exercice->id . '/sapeurs', $sapeurs);
 
-        $this->assertTrue(count($sapeurs) === 3);
-        foreach ($data['sapeurs'] as $sapeur) {
-            $sap = array_values(array_filter(
-                $sapeurs->toArray(),
-                function ($e) use ($sapeur) {
-                    return $e['sapeur_id'] === $sapeur['sapeur_id'];
-                }
-            ))[0];
-            $this->assertTrue($sapeur['convoque'] === $sap['convoque']);
-            $this->assertTrue($sapeur['present'] === $sap['present']);
-            $this->assertTrue($sapeur['amende'] === $sap['amende']);
-            $this->assertTrue($sapeur['remplace'] === $sap['remplace']);
-            $this->assertTrue($sapeur['excuse_type_id'] === $sap['excuse_type_id']);
-        }
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'data' => true
+            ]);
     }
 
     /**
@@ -75,41 +76,48 @@ class ExerciceSapeurTest extends TestCase
      */
     public function testEditExerciceSapeurs()
     {
-        $id = 649;
-        $sapeur_id = 1;
-        $sapeur_exercice = ExerciceSapeur::where('exercice_id', 649)->where('sapeur_id', $sapeur_id)->first();
-        $data = array(
-            'sapeurs' =>
-                array(
-                    array(
-                        'id' => $sapeur_exercice->id,
-                        'sapeur_id' => $sapeur_id,
-                        'convoque' => 1,
-                        'present' => 0,
-                        'amende' => 0,
-                        'remplace' => 1,
-                        'excuse_type_id' => null,
-                    ),
-                )
-        );
+        $exercice = factory(Exercice::class)->make();
+        $exercice = $this->exerciceService->createExercice($exercice->toArray());
 
-        $exercice = ExerciceBusiness::get($id);
-        $sapeurs = $exercice->updateSapeurs($data);
+        $sapeurs = [
+            array(
+                'sapeur_id' => 1,
+                'convoque' => 1,
+                'present' => 1,
+                'amende' => 0,
+                'remplace' => 0,
+                'excuse_type_id' => null
+            ),
+            array(
+                'sapeur_id' => 2,
+                'convoque' => 1,
+                'present' => 0,
+                'amende' => 1,
+                'remplace' => 0,
+                'excuse_type_id' => 4
+            ),
+            array(
+                'sapeur_id' => 3,
+                'convoque' => 1,
+                'present' => 0,
+                'amende' => 0,
+                'remplace' => 0,
+                'excuse_type_id' => null
+            )
+        ];
 
-        $this->assertTrue(count($sapeurs) === 3);
-        foreach ($data['sapeurs'] as $sapeur) {
-            $sap = array_values(array_filter(
-                $sapeurs->toArray(),
-                function ($e) use ($sapeur) {
-                    return $e['sapeur_id'] === $sapeur['sapeur_id'];
-                }
-            ))[0];
-            $this->assertTrue($sapeur['convoque'] === $sap['convoque']);
-            $this->assertTrue($sapeur['present'] === $sap['present']);
-            $this->assertTrue($sapeur['amende'] === $sap['amende']);
-            $this->assertTrue($sapeur['remplace'] === $sap['remplace']);
-            $this->assertTrue($sapeur['excuse_type_id'] === $sap['excuse_type_id']);
-        }
+        $sapeurs = $this->exerciceService->addSapeurs($exercice->id, $sapeurs);
+
+        $sapeurs[1]->present = 0;
+        $sapeurs[1]->excuse_type_id = 1;
+
+        $response = $this->json('PUT', '/api/v2/exercices/' . $exercice->id . '/sapeurs/', array("sapeurs" => $sapeurs));
+
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'data' => true
+            ]);
     }
 
     /**
@@ -120,24 +128,47 @@ class ExerciceSapeurTest extends TestCase
      */
     public function testRemoveExerciceSapeurs()
     {
-        $id = 649;
+        $exercice = factory(Exercice::class)->make();
+        $exercice = $this->exerciceService->createExercice($exercice->toArray());
 
-        $data = array(
-            'sapeurs' => array()
-        );
+        $sapeurs = [
+            array(
+                'sapeur_id' => 1,
+                'convoque' => 1,
+                'present' => 1,
+                'amende' => 0,
+                'remplace' => 0,
+                'excuse_type_id' => null
+            ),
+            array(
+                'sapeur_id' => 2,
+                'convoque' => 1,
+                'present' => 0,
+                'amende' => 1,
+                'remplace' => 0,
+                'excuse_type_id' => 4
+            ),
+            array(
+                'sapeur_id' => 3,
+                'convoque' => 1,
+                'present' => 0,
+                'amende' => 0,
+                'remplace' => 0,
+                'excuse_type_id' => null
+            )
+        ];
 
-        $sapeurs = ExerciceSapeur::where('exercice_id', $id)->get();
-        foreach ($sapeurs as $sapeur) {
-            if($sapeur->sapeur_id < 3)
-            {
-                array_push($data['sapeurs'], $sapeur->id);
-            }
-        }
+        $sapeurs = $this->exerciceService->addSapeurs($exercice->id, $sapeurs);
 
-        ExerciceBusiness::get($id)->removeSapeurs($data);
+        $ids = array_map(function ($sap) {
+            return $sap->id;
+        }, $sapeurs);
 
-        $sapeurs = ExerciceSapeur::where('exercice_id', $id)->get();
-        $this->assertTrue(count($sapeurs->toArray()) === 1);
-        $this->assertTrue($sapeurs[0]['sapeur_id'] === 3);
+        $response = $this->json('DELETE', '/api/v2/exercices/' . $exercice->id . '/sapeurs/', array("sapeurs" => $ids));
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'data' => true
+            ]);
     }
 }

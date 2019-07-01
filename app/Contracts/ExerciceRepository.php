@@ -21,4 +21,8 @@ interface ExerciceRepository
     public function editSapeurOfExercice($exerciceId, $sapeurs);
 
     public function removeSapeursFromExercice($exerciceId, $ids);
+
+    public function getExerciceStatutById($exerciceId);
+
+    public function deleteExerciceById($exerciceId);
 }

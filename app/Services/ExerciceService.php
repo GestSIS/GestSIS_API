@@ -61,8 +61,13 @@ class ExerciceService
         return $this->repository->updateExercicebyId($exerciceId, $data);
     }
 
+    public function deleteExerciceById($exerciceId)
+    {
+        $this->business->deleteExerciceById($exerciceId);
+    }
+
     /**
-     * Ajout de sapeurs d'un exercice
+     * Ajout de sapeurs à un exercice
      *
      * @param $sapeurs
      * @return Collection

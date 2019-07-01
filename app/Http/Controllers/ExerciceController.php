@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Business\ExerciceBusiness;
 use App\Exceptions\ArrayValidatorException;
 use App\Models\Exercice;
 use App\Services\ExercicenService;
@@ -127,6 +126,12 @@ class ExerciceController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try {
+            $exercice = $this->service->deleteExerciceById($id);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
+        }
+
+        return response()->json(['data' => 'success']);
     }
 }

@@ -46,6 +46,16 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
             })->toArray();
     }
 
+    public function getExerciceStatutById($exerciceId)
+    {
+        return Exercice::findOrFail($exerciceId, 'statut')->statut;
+    }
+
+    public function deleteExerciceById($exerciceId)
+    {
+        Exercice::where('id', $exerciceId)->delete();
+    }
+
     /**
      * @param array $data
      * @return mixed
@@ -101,6 +111,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         $sapeur->fill($data);
         $sapeur->exercice_id = $exerciceId;
         $sapeur->sapeur_id = $data['sapeur_id'];
+
         $sapeur->save();
     }
 
@@ -201,6 +212,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         $object->exercice_id = $sapeur->exercice_id;
         $object->convoque = $sapeur->convoque;
         $object->present = $sapeur->present;
+        $object->remplace = $sapeur->remplace;
         $object->amende = $sapeur->amende;
         $object->excuse_type_id = $sapeur->excuse_type_id;
 

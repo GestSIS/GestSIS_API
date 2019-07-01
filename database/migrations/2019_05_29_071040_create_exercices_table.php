@@ -32,7 +32,7 @@ class CreateExercicesTable extends Migration
             $table->string('lieu');
             $table->text('communications');
             $table->integer('duree');
-            $table->integer('status');
+            $table->integer('statut');
         });
     }
 

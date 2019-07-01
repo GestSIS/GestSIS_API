@@ -42,7 +42,7 @@ Route::group(['prefix' => 'v2'], function () {
         Route::resource('sapeurs.cours', 'SapeurCoursController')->only(['index', 'store', 'update', 'destroy']);
 
         // Exercices
-        Route::resource('exercices', 'ExerciceController')->only(['index', 'show', 'store', 'update']);//, 'destroy']);//->middleware('role:effectif_read');
+        Route::resource('exercices', 'ExerciceController')->only(['index', 'show', 'store', 'update', 'destroy']);//->middleware('role:effectif_read');
 
         Route::resource('exercices.sapeurs', 'ExerciceSapeursController')->only(['index']);
         Route::post('exercices/{id}/sapeurs', 'ExerciceSapeursController@store')->name('api.v2.exercices.sapeurs.store');

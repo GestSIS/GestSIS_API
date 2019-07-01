@@ -3,8 +3,6 @@
 namespace Tests\Unit;
 
 use App\Models\Exercice;
-use App\Business\ExerciceBusiness;
-use Carbon\Carbon;
 use Exception;
 use Tests\TestCase;
 
@@ -18,32 +16,15 @@ class ExerciceTest extends TestCase
      */
     public function testAddExerciceOK()
     {
-        $data = array(
-            'date' => Carbon::createMidnightDate(2019, 1, 12),
-            'heure' => '19:30',
-            'lieu' => 'Hangar',
-            'designation' => 'Exercice PR n°1',
-            'communications' => '',
-            'duree' => 120,
-            'status' => '1',
-            'exercice_categorie_id' => '1',
-            'localite_id' => '7',
-            'exercice_comptable_id' => '1'
-        );
+        $exercice = factory(Exercice::class)->make();
 
-        $exercice = ExerciceBusiness::createExercice($data)->getData();
+        $response = $this->json('POST', '/api/v2/exercices', $exercice->toArray());
 
-        $this->assertTrue($exercice !== null);
-        $this->assertTrue($data['designation'] === $exercice->designation);
-        $this->assertTrue($data['date']->diffInDays($exercice->date) === 0);
-        $this->assertTrue($data['heure'] === $exercice->heure);
-        $this->assertTrue($data['lieu'] === $exercice->lieu);
-        $this->assertTrue($data['communications'] === $exercice->communications);
-        $this->assertTrue($data['duree'] === $exercice->duree);
-        $this->assertTrue($data['status'] === $exercice->status);
-        $this->assertTrue($data['exercice_categorie_id'] === $exercice->exercice_categorie_id);
-        $this->assertTrue($data['localite_id'] === $exercice->localite_id);
-        $this->assertTrue($data['exercice_comptable_id'] === $exercice->exercice_comptable_id);
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'data' => true
+            ]);
     }
 
     /**
@@ -54,32 +35,19 @@ class ExerciceTest extends TestCase
      */
     public function testEditExercice()
     {
-        $id = 2;
-        $data = array(
-            'date' => Carbon::createMidnightDate(2019, 1, 12),
-            'heure' => '19:30',
-            'lieu' => 'Hangar',
-            'designation' => 'Exercice PR n°1',
-            'communications' => '',
-            'duree' => 120,
-            'status' => '1',
-            'exercice_categorie_id' => '1',
-            'localite_id' => '7',
+        $exercice = factory(Exercice::class)->create();
+        $exerciceEdited = factory(Exercice::class)->make();
+
+        $response = $this->json(
+            'PUT',
+            '/api/v2/exercices/' . $exercice->id, $exerciceEdited->toArray()
         );
 
-        $exercice = ExerciceBusiness::get($id);
-        $exercice = $exercice->update($data);
-
-        $this->assertTrue($exercice !== null);
-        $this->assertTrue($data['designation'] === $exercice->designation);
-        $this->assertTrue($data['date']->diffInDays($exercice->date) === 0);
-        $this->assertTrue($data['heure'] === $exercice->heure);
-        $this->assertTrue($data['lieu'] === $exercice->lieu);
-        $this->assertTrue($data['communications'] === $exercice->communications);
-        $this->assertTrue($data['duree'] === $exercice->duree);
-        $this->assertTrue($data['status'] === $exercice->status);
-        $this->assertTrue($data['exercice_categorie_id'] === $exercice->exercice_categorie_id);
-        $this->assertTrue($data['localite_id'] === $exercice->localite_id);
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'data' => true
+            ]);
     }
 
     /**
@@ -90,11 +58,17 @@ class ExerciceTest extends TestCase
      */
     public function testRemoveExercice()
     {
-        $id = 6;
+        $exercice = factory(Exercice::class)->create();
 
-        ExerciceBusiness::delete($id);
-        $exercice = Exercice::find($id);
+        $response = $this->json(
+            'DELETE',
+            '/api/v2/exercices/' . $exercice->id
+        );
 
-        $this->assertTrue($exercice === null);
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'data' => 'success'
+            ]);
     }
 }
