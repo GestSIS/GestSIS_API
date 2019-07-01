@@ -12,15 +12,28 @@ use Illuminate\Database\Eloquent\Collection;
 
 class ExerciceService
 {
-    /**
-     * Get's a exercice by it's ID
-     *
-     * @param int
-     * @return ExerciceBusiness
-     */
-    public function get(ExerciceRepository $test, $exercice_id)
+    protected $repository;
+    protected $business;
+
+    public function __construct(ExerciceRepository $repository, ExerciceBusiness $business)
     {
-        return $test->find('$exercice_id');
+        $this->repository = $repository;
+        $this->business = $business;
+    }
+
+    public function getExerciceById($exerciceId)
+    {
+        return $this->repository->getExerciceWithSapeurById($exerciceId);
+    }
+
+    public function listeExercice()
+    {
+        return $this->repository->listExerciceLight();
+    }
+
+    public function listSapeurOfExerciceById($exerciceId)
+    {
+        return $this->repository->listSapeurOfExerciceById($exerciceId);
     }
 
     /**
@@ -32,7 +45,7 @@ class ExerciceService
      */
     public function createExercice($data)
     {
-
+        return $this->repository->createExercice($data);
     }
 
     /**
@@ -43,31 +56,22 @@ class ExerciceService
      * @return Exercice
      * @throws ArrayValidatorException
      */
-    public function update($data)
+    public function updatExercice($exerciceId, $data)
     {
-
-    }
-
-    /**
-     * Delete a exercice.
-     *
-     * @param int
-     */
-    public function delete($exercice_id)
-    {
-
+        return $this->repository->updateExercicebyId($exerciceId, $data);
     }
 
     /**
      * Ajout de sapeurs d'un exercice
      *
-     * @param $data
+     * @param $sapeurs
      * @return Collection
      * @throws ArrayValidatorException
      */
-    public function addSapeurs($data)
+    public function addSapeurs($exerciceId, $sapeurs)
     {
-
+        $this->business->addSapeurs($exerciceId, $sapeurs);
+        return $this->repository->listSapeurOfExerciceById($exerciceId);
     }
 
     /**
@@ -77,9 +81,10 @@ class ExerciceService
      * @return Collection
      * @throws ArrayValidatorException
      */
-    public function updateSapeurs($data)
+    public function updateSapeurs($exerciceId, $sapeurs)
     {
-
+        $this->business->updateSapeurs($exerciceId, $sapeurs);
+        return $this->repository->listSapeurOfExerciceById($exerciceId);
     }
 
     /**
@@ -87,8 +92,8 @@ class ExerciceService
      *
      * @param $data
      */
-    public function removeSapeurs($data)
+    public function removeSapeurs($exerciceId, $ids)
     {
-
+        $this->business->removeSapeurs($exerciceId, $ids);
     }
 }

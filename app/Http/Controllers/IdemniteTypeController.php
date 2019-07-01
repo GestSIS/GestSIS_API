@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\FraisService;
-use Illuminate\Http\Request;
+use App\Services\ComptabiliteService;
 use Illuminate\Http\Response;
 
 class IdemniteTypeController extends Controller
@@ -11,7 +10,7 @@ class IdemniteTypeController extends Controller
 
     protected $service;
 
-    public function __construct(FraisService $service)
+    public function __construct(ComptabiliteService $service)
     {
         $this->service = $service;
     }

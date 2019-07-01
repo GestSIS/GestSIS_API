@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Services\FraisService;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
@@ -16,14 +15,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('FraisService', function ($app) {
-            return new FraisService($app->make('EcritureRepository'));
+        $this->app->singleton('ComptabiliteService', function ($app) {
+            return new ComptabiliteService();
         });
         $this->app->singleton('InterventionService', function ($app) {
-            return new InterventionService(
-                $app->make('InterventionRepository'),
-                $app->make('InterventionBusiness')
-            );
+            return new InterventionService();
+        });
+        $this->app->singleton('ExerciceService', function ($app) {
+            return new ExerciceService();
+        });
+        $this->app->singleton('SapeurService', function ($app) {
+            return new SapeurService();
         });
     }
 

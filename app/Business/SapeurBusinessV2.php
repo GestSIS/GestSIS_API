@@ -18,6 +18,11 @@ class SapeurBusinessV2
 {
 
     /**
+     * FIXME THIS CLASS IS THE FIRST TO MAKE SapeurBusiness Class UPDATE TO DATE WITH NEW ARCHITECTURE MODEL
+     * DO NOT USE THIS CLASS UNTIL THE OTHER ONE IS FULLY REMOVED!
+     */
+
+    /**
      * Create a sapeur
      *
      * @param $data

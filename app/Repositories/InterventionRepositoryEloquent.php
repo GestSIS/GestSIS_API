@@ -21,9 +21,11 @@ class InterventionRepositoryEloquent implements InterventionRepository
     public function listeIntervention($exercice_comptable_id)
     {
         $temp = $this;
-        return Intervention::where('exercice_comptable_id', $exercice_comptable_id)->get()->map(function ($intervention) use ($temp) {
-            return $temp->convertIntervention($intervention);
-        })->toArray();
+        return Intervention::where('exercice_comptable_id', $exercice_comptable_id)
+            ->get()
+            ->map(function ($intervention) use ($temp) {
+                return $temp->convertIntervention($intervention);
+            })->toArray();
     }
 
     /**
@@ -330,7 +332,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
         if (in_array('presences', $with)) {
             $temp = $this;
-            $object->presences = $intervention->sapeurs->map(function ($sap) use ($temp) {
+            $object->presences = $intervention->presences->map(function ($sap) use ($temp) {
                 return $temp->convertPresence($sap);
             })->toArray();
         }

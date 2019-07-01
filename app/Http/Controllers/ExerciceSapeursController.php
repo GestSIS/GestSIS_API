@@ -2,22 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Exercice;
-use App\Business\ExerciceBusiness;
+use App\Exceptions\ArrayValidatorException;
+use App\Services\ExerciceService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Validator;
 
 class ExerciceSapeursController extends Controller
 {
+
+    protected $service;
+
+    public function __construct(ExerciceService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * Display a listing of the resource.
      *
      * @return Response
      */
-    public function index($exercice_id)
+    public function index($exerciceId)
     {
-        $sapeurs = Exercice::find($exercice_id)->sapeurs()->get();
+        $sapeurs = $this->service->listSapeurOfExerciceById($exerciceId);
 
         return response()->json(['data' => $sapeurs]);
     }
@@ -26,14 +35,28 @@ class ExerciceSapeursController extends Controller
      * Store a newly created resource in storage.
      *
      * @param Request $request
-     * @param int $exercice_id
+     * @param int $exerciceId
      * @return Response
      * @throws Exception
      */
-    public function store(Request $request, int $exercice_id)
+    public function store(Request $request, int $exerciceId)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'sapeurs.*.convoque' => 'required|boolean',
+                'sapeurs.*.present' => 'required|boolean',
+                'sapeurs.*.amende' => 'required|boolean',
+                'sapeurs.*.remplace' => 'required|boolean',
+                'sapeurs.*.excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
+                'sapeurs.*.sapeur_id' => 'required|integer|exists:sapeurs,id'
+            ));
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            $sapeur = ExerciceBusiness::get($exercice_id)->addSapeurs($request->all());
+            $sapeur = $this->service->addSapeurs($exerciceId, $request->get('sapeurs'));
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
         }
@@ -45,14 +68,27 @@ class ExerciceSapeursController extends Controller
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param int $exercice_id
+     * @param int $exerciceId
      * @return Response
      * @throws Exception
      */
-    public function update(Request $request, int $exercice_id)
+    public function update(Request $request, int $exerciceId)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'sapeurs.*.convoque' => 'required|boolean',
+                'sapeurs.*.present' => 'required|boolean',
+                'sapeurs.*.amende' => 'required|boolean',
+                'sapeurs.*.remplace' => 'required|boolean',
+                'sapeurs.*.excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
+            ));
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            $sapeur = ExerciceBusiness::get($exercice_id)->updateSapeurs($request->all());
+            $sapeur = $this->service->updateSapeurs($exerciceId, $request->get('sapeurs'));
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
         }
@@ -64,13 +100,22 @@ class ExerciceSapeursController extends Controller
      * Remove the specified resource from storage.
      *
      * @param Request $request
-     * @param int $exercice_id
+     * @param int $exerciceId
      * @return Response
      */
-    public function destroy(Request $request, int $exercice_id)
+    public function destroy(Request $request, int $exerciceId)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'sapeurs.*' => 'integer'
+            ));
+
+        if ($validation->fails()) {
+            throw new ArrayValidatorException($validation->errors());
+        }
+
         try {
-            ExerciceBusiness::get($exercice_id)->removeSapeurs($request->all());
+            $this->service->removeSapeurs($exerciceId, $request->get('sapeurs'));
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
         }

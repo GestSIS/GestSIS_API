@@ -2,14 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Business\ExerciceBusiness;
 use App\Exceptions\ArrayValidatorException;
 use App\Models\Exercice;
-use App\Business\ExerciceBusiness;
+use App\Services\ExercicenService;
+use App\Services\ExerciceService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Validator;
 
 class ExerciceController extends Controller
 {
+
+    protected $service;
+
+    public function __construct(ExerciceService $service)
+    {
+        $this->service = $service;
+    }
 
     /**
      * Display a listing of the resource.
@@ -33,13 +43,31 @@ class ExerciceController extends Controller
      */
     public function store(Request $request)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'date' => 'date',
+                'heure' => 'date_format:H:i',
+                'lieu' => 'string|nullable',
+                'designation' => 'string',
+                'communications' => 'string|nullable',
+                'duree' => 'integer|min:1|max:780',
+                'status' => 'integer',
+                'exercice_categorie_id' => 'integer|exists:exercice_categories,id',
+                'localite_id' => 'integer|exists:localites,id',
+                'exercice_comptable_id' => 'integer|exists:exercice_comptables,id'
+            ));
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            $exercice = ExerciceBusiness::createExercice($request->all());
+            $exercice = $this->service->createExercice($request->all());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
 
-        return response()->json(['data' => $exercice->getData()]);
+        return response()->json(['data' => $exercice]);
     }
 
     /**
@@ -50,7 +78,7 @@ class ExerciceController extends Controller
      */
     public function show($id)
     {
-        $exercice = Exercice::findOrFail($id);
+        $exercice = $this->service->getExerciceById($id);
 
         return response()->json(['data' => $exercice]);
     }
@@ -65,8 +93,25 @@ class ExerciceController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'date' => 'date',
+                'heure' => 'date_format:H:i',
+                'lieu' => 'string|nullable',
+                'communications' => 'string|nullable',
+                'designation' => 'string',
+                'duree' => 'integer|min:1|max:780',
+                'status' => 'integer',
+                'exercice_categorie_id' => 'integer|exists:exercice_categories,id',
+                'localite_id' => 'integer|exists:localites,id'
+            ));
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
-            $exercice = ExerciceBusiness::get($id)->update($request->all());
+            $exercice = $this->service->updatExercice($id, $request->all());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

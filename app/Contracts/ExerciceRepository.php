@@ -4,7 +4,21 @@
 namespace App\Contracts;
 
 
-interface ExerciceRepository extends Repository //TODO Remove extends
+interface ExerciceRepository
 {
-    public function findWithSapeurs($exercice_id);
+    public function listExerciceLight();
+
+    public function listSapeurOfExerciceById($exerciceId);
+
+    public function getExerciceWithSapeurById($exerciceId);
+
+    public function createExercice(array $data);
+
+    public function updateExercicebyId($exerciceId, $data);
+
+    public function addSapeurToExercice($exerciceId, $sapeurs);
+
+    public function editSapeurOfExercice($exerciceId, $sapeurs);
+
+    public function removeSapeursFromExercice($exerciceId, $ids);
 }

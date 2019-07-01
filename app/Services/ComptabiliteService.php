@@ -6,10 +6,10 @@ namespace App\Services;
 use App\Business\ImputationBusiness;
 use App\Contracts\EcritureRepository;
 use App\Contracts\ExerciceRepository;
-use App\Contracts\IndemniteTypeRepository;
 use App\Contracts\FraisTypeRepository;
+use App\Contracts\IndemniteTypeRepository;
 
-class FraisService
+class ComptabiliteService
 {
     protected $ecritureRepo;
     protected $exerciceRepo;
@@ -59,5 +59,10 @@ class FraisService
         $this->business->imputerIntervention($interventionId, $data);
 
         return $this->ecritureRepo->listeEcritureForIntervention($interventionId);
+    }
+
+    function generateIndemniteAnnuel($data)
+    {
+        //TODO See how to manage that
     }
 }

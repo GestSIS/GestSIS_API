@@ -10,6 +10,116 @@ use StdClass;
 
 class ExerciceRepositoryEloquent implements ExerciceRepository
 {
+    private const EXERCICE_LIGHT_COLUMNS = [
+        'id',
+        'exercice_categorie_id',
+        'designation',
+        'date',
+        'heure',
+        'duree',
+        'lieu',
+        'communications',
+        'designation',
+        'statut',
+        'localite_id',
+        'exercice_comptable_id',
+    ];
+
+    public function listExerciceLight()
+    {
+        $temp = $this;
+        return Exercice
+            ::all(self::EXERCICE_LIGHT_COLUMNS)
+            ->map(function ($exercice) use ($temp) {
+                return $temp->convertExercice($exercice);
+            })->toArray();
+    }
+
+    public function listSapeurOfExerciceById($exerciceId)
+    {
+        $temp = $this;
+        return ExerciceSapeur
+            ::where('exercice_id', $exerciceId)
+            ->get()
+            ->map(function ($sapeur) use ($temp) {
+                return $temp->convertSapeur($sapeur);
+            })->toArray();
+    }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public function createExercice(array $data)
+    {
+        if (array_key_exists('lieu', $data) && $data['lieu'] === null) {
+            $data['lieu'] = '';
+        }
+
+        if (array_key_exists('communications', $data) && $data['communications'] === null) {
+            $data['communications'] = '';
+        }
+
+        $exercice = new Exercice();
+        $exercice->fill($data);
+        $exercice->exercice_categorie_id = $data['exercice_categorie_id'];
+        $exercice->exercice_comptable_id = $data['exercice_comptable_id'];
+        $exercice->save();
+
+        return $this->convertExercice($exercice);
+    }
+
+    /**
+     * @param array $data
+     * @param $id
+     * @return mixed
+     */
+    public function updateExercicebyId($exerciceId, $data)
+    {
+        if (array_key_exists('lieu', $data) && $data['lieu'] === null) {
+            $data['lieu'] = '';
+        }
+
+        if (array_key_exists('communications', $data) && $data['communications'] === null) {
+            $data['communications'] = '';
+        }
+
+        $exercice = Exercice::find($exerciceId);
+        $exercice->update($data);
+
+        return $this->convertExercice($exercice);
+    }
+
+    public function getExerciceWithSapeurById($exerciceId)
+    {
+        return $this->convertExercice(Exercice::with($exerciceId)->find($exerciceId));
+    }
+
+    public function addSapeurToExercice($exerciceId, $data)
+    {
+        $sapeur = new ExerciceSapeur();
+        $sapeur->fill($data);
+        $sapeur->exercice_id = $exerciceId;
+        $sapeur->sapeur_id = $data['sapeur_id'];
+        $sapeur->save();
+    }
+
+    public function editSapeurOfExercice($exerciceId, $sapeurs)
+    {
+        ExerciceSapeur
+            ::where('exercice_id', $exerciceId)
+            ->where('id', $sapeurs['id'])
+            ->update($sapeurs);
+    }
+
+    public function removeSapeursFromExercice($exerciceId, $ids)
+    {
+        ExerciceSapeur
+            ::where('exercice_id', $exerciceId)
+            ->whereIn('id', $ids)
+            ->delete();
+    }
+
     /**
      * @param array $columns
      * @return mixed
@@ -44,75 +154,6 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         $sap->fill($sapeur);
         $sap->exercice_id = $exercice_id;
         $sap->save();
-    }
-
-    /**
-     * @param array $data
-     * @return mixed
-     */
-    public function create(array $data)
-    {
-        if (array_key_exists('lieu', $data) && $data['lieu'] === null) {
-            $data['lieu'] = '';
-        }
-
-        if (array_key_exists('communications', $data) && $data['communications'] === null) {
-            $data['communications'] = '';
-        }
-
-        $exercice = new Exercice();
-        $exercice->fill($data);
-        $exercice->exercice_categorie_id = $data['exercice_categorie_id'];
-        $exercice->exercice_comptable_id = $data['exercice_comptable_id'];
-        $exercice->save();
-    }
-
-    /**
-     * @param array $data
-     * @param $id
-     * @return mixed
-     */
-    public function update(array $data, $id)
-    {
-        if (array_key_exists('lieu', $data) && $data['lieu'] === null) {
-            $data['lieu'] = '';
-        }
-
-        if (array_key_exists('communications', $data) && $data['communications'] === null) {
-            $data['communications'] = '';
-        }
-
-        $exercice = Exercice::find($id);
-        $exercice->update($data);
-    }
-
-    /**
-     * @param $id
-     * @return mixed
-     */
-    public function delete($id)
-    {
-        return Exercice::where('id')->destroy($id);
-    }
-
-    /**
-     * @param $id
-     * @param array $columns
-     * @return mixed
-     */
-    public function find($id, $columns = array('*'))
-    {
-        return $this->convertExercice(Exercice::find($id, $columns));
-    }
-
-    /**
-     * @param $id
-     * @param array $columns
-     * @return mixed
-     */
-    public function findWithSapeurs($id, $columns = array('*'))
-    {
-        return $this->convertExercice(Exercice::with('sapeurs')->find($id, $columns), true);
     }
 
     /**
