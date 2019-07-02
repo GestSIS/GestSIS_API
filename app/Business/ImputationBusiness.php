@@ -7,6 +7,7 @@ use App\Contracts\EcritureRepository;
 use App\Contracts\ExerciceRepository;
 use App\Contracts\IndemniteTypeRepository;
 use App\Contracts\InterventionRepository;
+use App\Exceptions\ArrayValidatorException;
 use Carbon\Carbon;
 
 class ImputationBusiness
@@ -30,8 +31,13 @@ class ImputationBusiness
 
     public function imputerExercice($exerciceId, $data)
     {
+        $exercice = $this->exerciceRepo->getExerciceWithSapeurById($exerciceId);
+
+        if($exercice->statut > 3){
+            throw new ArrayValidatorException(array("message"=>"Exercice déjà imputé"));
+        }
+
         $indemniteType = $this->indemniteRepo->findIndemniteExerciceTypeById($data['indemnite_exercice_type_id']);
-        $exercice = $this->exerciceRepo->findWithSapeurs($exerciceId);
 
         $unite = $indemniteType->type_unite_id;
         $designation = $exercice->designation;
@@ -46,12 +52,12 @@ class ImputationBusiness
             $this->imputerExerciceParHeureEtSoldeMin($exercice, $sapeurs, $indemniteType, $designation);
         } else {
             dd("ERROR");
+            return false;
             //TODO WARNING IN LOGS
         }
 
-        // Changer le status de l'exercice
-        //TODO Changer statut
-
+        // Changer le statut de l'exercice
+        $this->exerciceRepo->updateExerciceById($exerciceId, ["statut"=>4]);
     }
 
     private function isWeekend($date)

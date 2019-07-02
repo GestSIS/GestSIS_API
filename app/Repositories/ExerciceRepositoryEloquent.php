@@ -84,7 +84,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
      * @param $id
      * @return mixed
      */
-    public function updateExercicebyId($exerciceId, $data)
+    public function updateExerciceById($exerciceId, $data)
     {
         if (array_key_exists('lieu', $data) && $data['lieu'] === null) {
             $data['lieu'] = '';
@@ -102,7 +102,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
 
     public function getExerciceWithSapeurById($exerciceId)
     {
-        return $this->convertExercice(Exercice::with($exerciceId)->find($exerciceId));
+        return $this->convertExercice(Exercice::with('sapeurs')->find($exerciceId), true);
     }
 
     public function addSapeurToExercice($exerciceId, $data)

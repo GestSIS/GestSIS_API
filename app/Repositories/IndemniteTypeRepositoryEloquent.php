@@ -4,9 +4,9 @@
 namespace App\Repositories;
 
 use App\Contracts\IndemniteTypeRepository;
+use App\Models\IndemniteAnnuelType;
 use App\Models\IndemniteExerciceType;
 use App\Models\IndemniteInterventionType;
-use App\Models\IndemniteAnnuelType;
 use stdClass;
 
 class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
@@ -90,7 +90,7 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
         $object->par_fonction = $indemnite->par_fonction;
 
         $indemnites = array();
-        foreach ($indemnite->fonctions() as $indemnite) {
+        foreach ($indemnite->fonctions as $indemnite) {
             array_push($indemnites, $this->convertIndemniteExerciceFonction($indemnite));
         }
         $object->fonctions = $indemnites;
@@ -142,7 +142,7 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
         $object->par_fonction = $intervention->par_fonction;
 
         $indemnites = array();
-        foreach ($intervention->fonctions() as $indemnite) {
+        foreach ($intervention->fonctions as $indemnite) {
             array_push($indemnites, $this->convertIndemniteInterventionFonction($indemnite));
         }
         $object->fonctions = $indemnites;

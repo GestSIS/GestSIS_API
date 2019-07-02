@@ -21,7 +21,9 @@ class IndemniteExerciceTypeTableSeeder extends Seeder
             array('designation' => 'Etat-major', 'compte_id' => 1, 'solde' => 0, 'indemnite' => 30, 'type_unite_id' => 2, 'solde_min' => null, 'solde_min_pour' => null, 'par_fonction' => false),
             array('designation' => 'Comission / Bureau', 'compte_id' => 1, 'solde' => 30, 'indemnite' => 0, 'type_unite_id' => 2, 'solde_min' => null, 'solde_min_pour' => null, 'par_fonction' => false),
             array('designation' => 'Séances externes', 'compte_id' => 1, 'solde' => 25, 'indemnite' => 0, 'type_unite_id' => 1, 'solde_min' => 30, 'solde_min_pour' => 1, 'par_fonction' => false),
-            array('designation' => 'Authorité de surveillance', 'compte_id' => 1, 'solde' => 0, 'indemnite' => 30, 'type_unite_id' => 2, 'solde_min' => null, 'solde_min_pour' => null, 'par_fonction' => false),
+            array('designation' => 'Autorité de surveillance', 'compte_id' => 1, 'solde' => 0, 'indemnite' => 30, 'type_unite_id' => 2, 'solde_min' => null, 'solde_min_pour' => null, 'par_fonction' => false),
+
+            array('designation' => 'Special fonction', 'compte_id' => 1, 'solde' => 0, 'indemnite' => 30, 'type_unite_id' => 2, 'solde_min' => null, 'solde_min_pour' => null, 'par_fonction' => true),
         );
 
         foreach ($indemnites as $item) {
