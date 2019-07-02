@@ -4,6 +4,7 @@
 namespace App\Business;
 
 use App\Contracts\EcritureRepository;
+use App\Contracts\SapeurRepository;
 use App\Contracts\ExerciceRepository;
 use App\Contracts\IndemniteTypeRepository;
 use App\Contracts\InterventionRepository;
@@ -19,12 +20,14 @@ class ImputationBusiness
 
     public function __construct(
         EcritureRepository $ecriture,
+        SapeurRepository $sapeur,
         ExerciceRepository $exercice,
         InterventionRepository $intervention,
         IndemniteTypeRepository $indemnite)
     {
         $this->ecritureRepo = $ecriture;
         $this->exerciceRepo = $exercice;
+        $this->sapeurRepo = $sapeur;
         $this->interventionRepo = $intervention;
         $this->indemniteRepo = $indemnite;
     }
@@ -34,7 +37,7 @@ class ImputationBusiness
         $exercice = $this->exerciceRepo->getExerciceWithSapeurById($exerciceId);
 
         if($exercice->statut > 3){
-            throw new ArrayValidatorException(array("message"=>"Exercice déjà imputé"));
+//            throw new ArrayValidatorException(array("message"=>"Exercice déjà imputé"));
         }
 
         $indemniteType = $this->indemniteRepo->findIndemniteExerciceTypeById($data['indemnite_exercice_type_id']);
@@ -320,7 +323,8 @@ class ImputationBusiness
 
         // Générer écritures
         foreach ($sapeurs as $sapeur) {
-            $id = $sapeur->id;
+            $id = $this->sapeurRepo->getSapeurDetailsById($sapeur->sapeur_id)->fonction_id;
+
             $fonction_tarif = array_filter($indemniteType->fonctions, function ($f) use ($id) {
                 return $f->fonction_id === $id;
             });
@@ -365,7 +369,8 @@ class ImputationBusiness
 
         // Générer écritures
         foreach ($sapeurs as $sapeur) {
-            $id = $sapeur->id;
+            $id = $this->sapeurRepo->getSapeurDetailsById($sapeur->sapeur_id)->fonction_id;
+
             $fonction_tarif = array_filter($indemniteType->fonctions, function ($f) use ($id) {
                 return $f->fonction_id === $id;
             });
@@ -407,7 +412,7 @@ class ImputationBusiness
 
     private function imputerExerciceParHeureEtSoldeMin($exercice, $sapeurs, $indemniteType, $designation)
     {
-        //TODO indemnite should be null
+        //TODO indemnite et par fonction should be null
         //En minutes
         $duree = $exercice->duree / 60;
 

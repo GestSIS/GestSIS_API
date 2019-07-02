@@ -14,6 +14,10 @@ class RepositoryServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind(
+            'App\Contracts\SapeurRepository',
+            'App\Repositories\SapeurRepositoryEloquent'
+        );
+        $this->app->bind(
             'App\Contracts\EcritureRepository',
             'App\Repositories\EcritureRepositoryEloquent'
         );

@@ -49,6 +49,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
         $object->nom = $sapeur->nom;
         $object->prenom = $sapeur->prenom;
+        $object->fonction_id = $sapeur->fonction_id;
         $object->actif = $sapeur->actif;
 
         return $object;
