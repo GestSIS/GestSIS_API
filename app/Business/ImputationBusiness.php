@@ -4,11 +4,10 @@
 namespace App\Business;
 
 use App\Contracts\EcritureRepository;
-use App\Contracts\SapeurRepository;
 use App\Contracts\ExerciceRepository;
 use App\Contracts\IndemniteTypeRepository;
 use App\Contracts\InterventionRepository;
-use App\Exceptions\ArrayValidatorException;
+use App\Contracts\SapeurRepository;
 use Carbon\Carbon;
 
 class ImputationBusiness
@@ -36,7 +35,7 @@ class ImputationBusiness
     {
         $exercice = $this->exerciceRepo->getExerciceWithSapeurById($exerciceId);
 
-        if($exercice->statut > 3){
+        if ($exercice->statut > 3) {
 //            throw new ArrayValidatorException(array("message"=>"Exercice déjà imputé"));
         }
 
@@ -60,7 +59,7 @@ class ImputationBusiness
         }
 
         // Changer le statut de l'exercice
-        $this->exerciceRepo->updateExerciceById($exerciceId, ["statut"=>4]);
+        $this->exerciceRepo->updateExerciceById($exerciceId, ["statut" => 4]);
     }
 
     private function isWeekend($date)

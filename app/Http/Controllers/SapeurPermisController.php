@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Sapeur;
 use App\Business\SapeurBusiness;
 use App\Exceptions\ArrayValidatorException;
+use App\Models\Sapeur;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -34,6 +34,17 @@ class SapeurPermisController extends Controller
      */
     public function store(Request $request, int $id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'permis_type_id' => 'required|integer|exists:permis_types,id',
+                'date' => 'required|date|before:tomorrow',
+            )
+        );
+
+        if ($validation->fails()) {
+            return response()->json(["error" => $validation->errors()]);
+        }
+
         try {
             $permis = SapeurBusiness::get($id)->addPermis($request->all());
         } catch (ArrayValidatorException $e) {
@@ -54,6 +65,17 @@ class SapeurPermisController extends Controller
      */
     public function update(Request $request, int $id, int $permisId)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'permis_id' => 'required|integer',
+                'date' => 'required|date|before:tomorrow',
+            )
+        );
+
+        if ($validation->fails()) {
+            return response()->json(["error" => $validation->errors()]);
+        }
+
         if ($permisId !== $request->get('permis_id')) {
             return response()->json(['error' => 'invalid permis id']);
         }

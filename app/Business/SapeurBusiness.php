@@ -3,113 +3,59 @@
 
 namespace App\Business;
 
-
+use App\Contracts\SapeurRepository;
 use App\Exceptions\ArrayValidatorException;
-use App\Models\CoursSapeur;
-use App\Models\FonctionSapeur;
-use App\Models\GradeSapeur;
-use App\Models\Mutation;
-use App\Models\Permis;
-use App\Models\Sapeur;
 use App\Models\SapeurTelephone;
 use Validator;
 
 class SapeurBusiness
 {
 
-    protected $sapeur;
+    protected $repository;
 
-    public function __construct(Sapeur $sapeur)
+    public function __construct(SapeurRepository $repository)
     {
-        $this->sapeur = $sapeur;
+        $this->repository = $repository;
     }
 
-    /**
-     * Get's a sapeur by it's ID
-     *
-     * @param int
-     * @return SapeurBusiness
-     */
-    public static function get($sapeur_id)
+    public function createSapeur($data)
     {
-        return new SapeurBusiness(Sapeur::findOrFail($sapeur_id));
+        $sapeur = $this->repository->createSapeur($data);
+
+        //FIXME Finalise add new sapeur mutation
+        $this->addMutation($sapeur->id, array(
+            "localite_id" => $sapeur->localite_id,
+            "debut" => $data['incorporation']
+    ));
     }
 
-    /**
-     * Return sapeur data
-     *
-     * @return Sapeur
-     */
-    public function getData()
+    public function updateSapeurById(int $sapeurId, $data)
     {
-        return $this->sapeur;
+        $this->repository->updateSapeurById($sapeurId, $data);
     }
 
-    /**
-     * Create a sapeur
-     *
-     * @param $data
-     * @return SapeurBusiness
-     * @throws ArrayValidatorException
-     */
-    public static function createSapeur($data)
+    public function deleteSapeurById(int $sapeurId)
     {
-        if (array_key_exists('suffixe', $data) && $data['suffixe'] === null) {
-            $data['suffixe'] = '';
-        }
-
-        $sapeur = new Sapeur();
-        $sapeur->fill($data);
-        $sapeur->save();
-
-        return new SapeurBusiness($sapeur);
+        //TODO Check si données liées
+        $this->repository->deleteSapeurById($sapeurId);
     }
 
-    /**
-     * Delete a sapeur.
-     *
-     * @param int
-     */
-    public static function delete($sapeur_id)
+    public function addCours(int $sapeurId, $data)
     {
-        //TODO: Check
-        Sapeur::destroy($sapeur_id);
-    }
+        $cours = $this->repository->addCours($sapeurId, $data);
 
-    /**
-     * Updates a post.
-     *
-     * @param int
-     * @param array
-     * @return Sapeur
-     * @throws ArrayValidatorException
-     */
-    public function update($data)
-    {
-        if (array_key_exists('suffixe', $data) && $data['suffixe'] === null) {
-            $data['suffixe'] = '';
-        }
-
-        $this->sapeur->update($data);
-
-        return $this->sapeur;
-    }
-
-    public function addCours($data)
-    {
-        //Add Cours
-        $cours = new CoursSapeur();
-        $cours->fill($data);
-        $cours->cours_id = $data['cours_id'];
-        $cours->localite_id = $data['localite_id'];
-        $this->sapeur->cours()->save($cours);
+        $gradeId = $data['grade_id'];
 
         //Add Grade
-        if ($data['grade_id'] !== null) {
+        if ($gradeId !== null) {
             //Add grade if not already there
-            $grade = $this->sapeur->grades()->where('grade_id', $data['grade_id'])->first();
-            if ($grade === null) {
-                $this->addGrade(array(
+            $result = array_filter($this->repository->getSapeurGradesById($sapeurId),
+                function ($f) use ($gradeId) {
+                    return $f->grade_id === $gradeId;
+                }
+            );
+            if (count($result) === 0) {
+                $this->addGrade($sapeurId, array(
                     'grade_id' => $data['grade_id'],
                     'date' => $data['date_grade'],
                     'remarque' => ''
@@ -119,145 +65,84 @@ class SapeurBusiness
 
         //Edit old fonction
         if ($data['fonction_sapeur_id'] !== null) {
-            $this->updateFonction(array(
-                'id' => $data['fonction_sapeur_id'],
-                'fin' => $data['date_fonction'],
-                'remarque' => ''
-            ));
+            $this->updateFonction($sapeurId,
+                array(
+                    'id' => $data['fonction_sapeur_id'],
+                    'fin' => $data['date_fonction'],
+                    'remarque' => ''
+                )
+            );
         }
 
         //Add Fonction
         if ($data['fonction_id'] !== null) {
-//            $fonction = $this->sapeur->fonctions()->where('fonction_id', $data['fonction_id'])->first();
-//            if ($fonction === null) {
-            $this->addFonction(array(
-                'fonction_id' => $data['fonction_id'],
-                'debut' => $data['date_fonction'],
-                'fin' => null,
-                'remarque' => null
-            ));
-//            }
+            $this->addFonction($sapeurId,
+                array(
+                    'fonction_id' => $data['fonction_id'],
+                    'debut' => $data['date_fonction'],
+                    'fin' => null,
+                    'remarque' => null
+                )
+            );
         }
 
         return $cours;
     }
 
-    public function updateCours($data)
+    public function updateCours(int $sapeurId, $data)
     {
-        //Update cours
-        $cours = $this->sapeur->cours()->where('cours_sapeur.id', $data['id'])->first();
-
-        //Search for the cours
-        if ($cours === null) {
-            throw new ArrayValidatorException(array('id' => "Unable to find cours"));
-        } else {
-            //Update mutation
-            $cours->update($data);
-            $cours->save();
-        }
-
-        return $cours;
+        $this->repository->updateCours($sapeurId, $data);
     }
 
-    /**
-     * Remove a cours
-     *
-     * @param int $cours_sapeur_id
-     */
-    public function removeCours(int $cours_sapeur_id)
+    public function removeCours(int $sapeurId, int $coursSapeurId)
     {
-        $this->sapeur->cours()->where('cours_sapeur.id', $cours_sapeur_id)->delete();
+        $this->repository->removeCours($sapeurId, $coursSapeurId);
     }
 
-    /**
-     * Ajout d'un grade
-     *
-     * @param $data
-     * @return GradeSapeur
-     * @throws ArrayValidatorException
-     */
-    public function addGrade($data)
+    public function addGrade(int $sapeurId, $data)
     {
-        if (array_key_exists('remarque', $data) && $data['remarque'] === null) {
-            $data['remarque'] = '';
-        }
+        $gradeId = $data['grade_id'];
 
         //Check si déjà présent
-        $grade = $this->sapeur->grades()->where('grade_id', $data['grade_id'])->first();
+        $res = array_filter($this->repository->getSapeurGradesById($sapeurId),
+            function ($grade) use ($gradeId) {
+                return $grade->grade_id === $gradeId;
+            }
+        );
 
-        if ($grade !== null) {
+        if (count($res) !== 0) {
             throw new ArrayValidatorException(array('id' => "Grade déjà existant"));
         }
 
-        //Creation du grade
-        $grade = new GradeSapeur();
-        $grade->fill($data);
-        $grade->grade_id = $data['grade_id'];
-
-        //Ajout du grade au sapeur
-        $this->sapeur->grades()->save($grade);
-
-        $this->updateMainGrade();
+        $grade = $this->repository->addGrade($sapeurId, $data);
+        $this->updateMainGrade($sapeurId);
 
         return $grade;
     }
 
-    /**
-     * Modifie un grade
-     *
-     * @param $data
-     * @return GradeSapeur
-     * @throws ArrayValidatorException
-     */
-    public function updateGrade($data)
+    public function updateGrade(int $sapeurId, $data)
     {
-        if (array_key_exists('remarque', $data) && $data['remarque'] === null) {
-            $data['remarque'] = '';
-        }
-
-        //Update grade
-        $grade = $this->sapeur->grades()->where('grade_sapeur.id', $data['id'])->first();
-
-        //Search for the grade
-        if ($grade === null) {
-            throw new ArrayValidatorException(array('id' => "Unable to find grade"));
-        } else {
-            //Update mutation
-            $grade->update($data);
-            $grade->save();
-        }
-
-        $this->updateMainGrade();
-
-        return $grade;
+        $this->repository->updateGrade($sapeurId, $data);
+        $this->updateMainGrade($sapeurId);
     }
 
-    /**
-     * Supppression d'un grade
-     *
-     * @param int $sapeur_grade_id
-     */
-    public function removeGrade(int $grade_sapeur_id)
+    public function removeGrade(int $sapeurId, int $gradeSapeurId)
     {
-        $this->sapeur->grades()->where('grade_sapeur.id', $grade_sapeur_id)->delete();
-
-        $this->updateMainGrade();
+        $this->repository->removeGrade($sapeurId, $gradeSapeurId);
+        $this->updateMainGrade($sapeurId);
     }
 
-    /**
-     * Ajout d'une mutation
-     *
-     * @param $data
-     * @return FonctionSapeur
-     * @throws ArrayValidatorException
-     */
-    public function addFonction($data)
+    public function addFonction(int $sapeurId, $data)
     {
-        if (array_key_exists('remarque', $data) && $data['remarque'] === null) {
-            $data['remarque'] = '';
-        }
+        //Check duplicated fonction during period of time
+        $fonctionId = $data['fonction_id'];
 
-        $fonctions = $this->sapeur->fonctions()->where('fonction_id', $data['fonction_id'])->get();
+        //Check si déjà présent
+        $fonctions = array_filter($this->repository->getSapeurFonctionsById($sapeurId),
+            function ($fonction) use ($fonctionId) {
+                return $fonction->fonction_id === $fonctionId;
+            }
+        );
 
         $startDate = $data['debut'] !== null ? date($data['debut']) : null;
         $endDate = $data['fin'] !== null ? date($data['fin']) : null;
@@ -269,48 +154,46 @@ class SapeurBusiness
 
             if ($this->checkOverlappingPeriod($start, $end, $startDate, $endDate)) {
                 throw new ArrayValidatorException([
-                    'debut' => "Duplicated period",
-                    'fin' => 'Duplicated period',
+                    "debut" => "Duplicated period",
+                    "fin" => "Duplicated period",
+                    "message" => "Fonction dupliquée durant une même période"
                 ]);
             }
         }
 
-        //Create mutation
-        $fonction = new FonctionSapeur();
-        $fonction->fill($data);
-        $fonction->fonction_id = $data['fonction_id'];
-
-        //Ajout de la mutation au sapeur
-        $this->sapeur->fonctions()->save($fonction);
-
-        $this->updateMainFonction();
+        $this->repository->addFonction($sapeurId, $data);
+        $this->updateMainFonction($sapeurId);
 
         return $fonction;
     }
 
-    /**
-     * Modifie une mutation
-     *
-     * @param $data
-     * @return FonctionSapeur
-     * @throws ArrayValidatorException
-     */
-    public function updateFonction($data)
+    public function updateFonction(int $sapeurId, $data)
     {
-        if (array_key_exists('remarque', $data) && $data['remarque'] === null) {
-            $data['remarque'] = '';
-        }
-
         $id = $data['id'];
+        $fonctionId = $data['fonction_id'];
+
+        //Check si déjà présent
+        $fonctions = array_filter($this->repository->getSapeurFonctionsById($sapeurId),
+            function ($f) use ($fonctionId) {
+                return $f->fonction_id === $fonctionId;
+            }
+        );
 
         //Update fonction
-        $fonction = $this->sapeur->fonctions()->where('fonction_sapeur.id', $id)->first();
+        $fonction = array_filter($fonctions,
+            function ($f) use ($id) {
+                return $f->id === $id;
+            }
+        )[0];
 
-        $fonctions = $this->sapeur->fonctions()
-            ->where('fonction_id', $fonction->fonction_id)
-            ->where('fonction_sapeur.id', '!=', $id)
-            ->get();
+        //Remove current updated fonction from the list of fonctions to compare with
+        $fonctions = array_filter($fonctions,
+            function ($f) use ($id) {
+                return $f->id === !$id;
+            }
+        );
 
+        //Check si déjà présent
         $startDate = null;
         $endDate = null;
 
@@ -338,190 +221,48 @@ class SapeurBusiness
             }
         }
 
-        //Search for the fonction
-        if ($fonction === null) {
-            throw new ArrayValidatorException(array('id' => "Unable to find fonction"));
-        } else {
-            //Update fonction
-            $fonction->update($data);
-            $fonction->save();
-        }
-
-        $this->updateMainFonction();
-
-        return $fonction;
+        //Update fonction
+        $this->repository->updateFonction($sapeurId, $data);
+        $this->updateMainFonction($sapeurId);
     }
 
-    private function checkOverlappingPeriod($start1, $end1, $start2, $end2)
+    public function removeFonction(int $sapeurId, int $fonctionSapeurId)
     {
-        return ($end1 === null && $end2 === null ||
-            $end1 === null && $start1 <= $end2 ||
-            $end2 === null && $end1 >= $start2 ||
-            $end1 !== null && $end2 !== null && !(
-                $end1 < $start2 || $end2 < $start1
-            )
-        );
-
+        $this->repository->removeFonction($sapeurId, $fonctionSapeurId);
+        $this->updateMainFonction($sapeurId);
     }
 
-    /**
-     * Supppression d'une mutation
-     *
-     * @param int $mutation_id
-     */
-    public function removeFonction(int $fonction_sapeur_id)
+    public function addMutation($sapeurId, $data)
     {
-        $this->sapeur->fonctions()->where('fonction_sapeur.id', $fonction_sapeur_id)->delete();
+        //TODO Check only one not ended Mutation
+        $mutation = $this->repository->addMutation($sapeurId, $data);
 
-        $this->updateMainFonction();
-    }
-
-    /**
-     * Mets à jour la fonction principale d'un sapeur
-     */
-    private function updateMainFonction()
-    {
-        $maxTri = -1;
-        $maxId = -1;
-        foreach ($this->sapeur->fonctions()->where('fin', null)->with('fonction')->get() as $fonctionSapeur) {
-            if ($fonctionSapeur->fonction->tri > $maxTri) {
-                $maxId = $fonctionSapeur->fonction->id;
-                $maxTri = $fonctionSapeur->fonction->tri;
-            }
-        }
-        $this->sapeur->fonction_id = $maxId <= 0 ? null : $maxId;
-        $this->sapeur->save();
-    }
-
-
-    /**
-     * Mets à jour la grade principale d'un sapeur
-     */
-    private function updateMainGrade()
-    {
-        $maxTri = -1;
-        $maxId = -1;
-        foreach ($this->sapeur->grades()->with('grade')->get() as $gradeSapeur) {
-            if ($gradeSapeur->grade->tri > $maxTri) {
-                $maxId = $gradeSapeur->grade->id;
-                $maxTri = $gradeSapeur->grade->tri;
-            }
-        }
-        $this->sapeur->grade_id = $maxId <= 0 ? null : $maxId;
-        $this->sapeur->save();
-    }
-
-    /**
-     * Ajout d'une mutation
-     *
-     * @param $data
-     * @return Mutation
-     * @throws ArrayValidatorException
-     */
-    public function addMutation($data)
-    {
-        // Ajout d'une nouvelle mutation
-        $validation = Validator::make($data,
-            array(
-                'incorporation' => 'required|date',
-                'sortie' => 'date|nullable|after:incorporation',
-                'motif' => 'string|nullable',
-                'localite_id' => 'required|integer|exists:localites,id',
-            )
-        );
-
-        if ($validation->fails()) {
-            throw new ArrayValidatorException($validation->errors());
-        }
-
-        if (array_key_exists('motif', $data) && $data['motif'] === null) {
-            $data['motif'] = '';
-        }
-
-        //Create mutation
-        $mutation = new Mutation();
-        $mutation->fill($data);
-
-        //Ajout de la mutation au sapeur
-        $this->sapeur->mutations()->save($mutation);
-
+        //TODO Update actif statut depending of end of all mutation
         return $mutation;
     }
 
-    /**
-     * Modifie une mutation
-     *
-     * @param $data
-     * @return Mutation
-     * @throws ArrayValidatorException
-     */
-    public function updateMutation($data)
+    public function updateMutation(int $sapeurId, $data)
     {
-        $validation = Validator::make($data,
-            array(
-                'id' => 'required|integer|exists:mutations,id',
-                'incorporation' => 'date',
-                'sortie' => 'date|nullable|after:incorporation',
-                'motif' => 'string|nullable',
-                'localite_id' => 'integer|exists:localites,id',
-            )
-        );
-
-        if ($validation->fails()) {
-            throw new ArrayValidatorException($validation->errors());
-        }
-
-        if (array_key_exists('motif', $data) && $data['motif'] === null) {
-            $data['motif'] = '';
-        }
-
         //Update mutation
-        $mutation = $this->sapeur->mutations()->where('mutations.id', $data['id'])->first();
+        $this->repository->updateMutation($sapeurId, $data);
 
-        //Search for the mutation
-        if ($mutation === null) {
-            throw new ArrayValidatorException(array('id' => "Unable to find mutation"));
-        } else {
-            //Update mutation
-            $mutation->update($data);
-            $mutation->save();
-        }
-
-        return $mutation;
+        //TODO Update actif statut depending of end of all mutation
     }
 
     /**
      * Supppression d'une mutation
      *
-     * @param int $mutation_id
+     * @param int $mutationId
      */
-    public function removeMutation(int $mutation_id)
+    public function removeMutation(int $sapeurId, int $mutationId)
     {
-        $this->sapeur->mutations()->where('mutations.id', $mutation_id)->delete();
+        $this->sapeur->mutations()->where('mutations.id', $mutationId)->delete();
+
+        //TODO Update actif statut depending of end of all mutation
     }
 
-    /**
-     * Add a Telephone
-     *
-     * @param array $data
-     * @return SapeurTelephone
-     * @throws ArrayValidatorException
-     */
-    public function addTelephone($data)
+    public function addTelephone(int $sapeurId, $data)
     {
-        $validation = Validator::make($data,
-            array(
-                'telephone_type_id' => 'required|integer|exists:telephone_types,id',
-                'numero' => 'required|string|min:2',
-                'priorite' => 'required|integer',
-                'rta' => 'required|boolean',
-            )
-        );
-
-        if ($validation->fails()) {
-            throw new ArrayValidatorException($validation->errors());
-        }
-
         $telephones = $this->sapeur->telephones()->get();
         foreach ($telephones as $tel) {
             if (strcmp(
@@ -542,35 +283,14 @@ class SapeurBusiness
         return $telephone;
     }
 
-    /**
-     * Update a Telephone informations
-     *
-     * @param array $data
-     * @return SapeurTelephone
-     * @throws ArrayValidatorException
-     */
-    public function updateTelephone($data)
+    public function updateTelephone(int $sapeurId, $data)
     {
-        $validation = Validator::make($data,
-            array(
-                'id' => 'required|integer|exists:sapeur_telephone,id',
-                'telephone_type_id' => 'integer|exists:telephone_types,id',
-                'numero' => 'string|min:2',
-                'priorite' => 'integer',
-                'rta' => 'boolean',
-            )
-        );
-
-        if ($validation->fails()) {
-            throw new ArrayValidatorException($validation->errors());
-        }
-
         $telephone = $this->sapeur->telephones()->where('sapeur_telephone.id', $data['id'])->first();
 
         $telephones = $this->sapeur->telephones()
             ->where('sapeur_telephone.id', '!=', $data['id'])
             ->get();
-        
+
         foreach ($telephones as $tel) {
             if (strcmp(
                     trim(preg_replace('/\s+/', ' ', $tel->numero)),
@@ -591,93 +311,100 @@ class SapeurBusiness
         return $telephone;
     }
 
-    /**
-     * Remove a Telephone
-     *
-     * @param int $permis_id
-     */
-    public function removeTelephone(int $telephone_id)
+    public function removeTelephone(int $sapeurId, int $telephoneId)
     {
-        $this->sapeur->telephones()->where('sapeur_telephone.id', $telephone_id)->delete();
+        $this->sapeur->telephones()->where('sapeur_telephone.id', $telephoneId)->delete();
     }
 
-    /**
-     * Add a permis
-     *
-     * @param array $data
-     * @return Permis
-     * @throws ArrayValidatorException
-     */
-    public function addPermis($data)
+    public function addPermis(int $sapeurId, $data)
     {
-        $validation = Validator::make($data,
-            array(
-                'permis_type_id' => 'required|integer|exists:permis_types,id',
-                'date' => 'required|date|before:tomorrow',
-            )
+        $permisId = $data['permis_id'];
+        $res = array_filter($this->repository->getSapeurPermisById($sapeurId),
+            function ($p) use ($permisId) {
+                return $p->permis_id === $permisId;
+            }
         );
 
-        if ($validation->fails()) {
-            throw new ArrayValidatorException($validation->errors());
-        }
-
-        $permis = $this->sapeur->permis()->where('permis_type_id', $data['permis_type_id'])->first();
-
         //Check si sapeur as déjà ce permis
-        if ($permis !== null) {
+        if (count(res) !== 0) {
             throw new ArrayValidatorException(array('id' => "Unable to find permis"));
-        } else {
-            //Create permis
-            $permis = new Permis();
-            $permis->fill($data);
-            $permis->permis_type_id = $data['permis_type_id'];
-
-            //Ajout du permis au sapeur
-            $this->sapeur->permis()->save($permis);
         }
+
+        $permis = $this->repository->addPermis($sapeurId, $data);
+
         return $permis;
     }
 
-    /**
-     * Update a permis informations
-     *
-     * @param array $data
-     * @return Permis
-     * @throws ArrayValidatorException
-     */
-    public function updatePermis($data)
+    public function updatePermis(int $sapeurId, $data)
     {
-        $validation = Validator::make($data,
-            array(
-                'permis_id' => 'required|integer',
-                'date' => 'required|date|before:tomorrow',
+        $this->repository->updatePermis($sapeurId, $data);
+    }
+
+    public function removePermis(int $sapeurId, int $permisId)
+    {
+        $this->repository->removePermis($sapeurId, $permisId);
+    }
+
+    /* ************************************************** *
+     *                  METHODES PRIVEES                  *
+     * ************************************************** */
+
+    private function checkOverlappingPeriod($start1, $end1, $start2, $end2)
+    {
+        return ($end1 === null && $end2 === null ||
+            $end1 === null && $start1 <= $end2 ||
+            $end2 === null && $end1 >= $start2 ||
+            $end1 !== null && $end2 !== null && !(
+                $end1 < $start2 || $end2 < $start1
             )
         );
-
-        if ($validation->fails()) {
-            throw new ArrayValidatorException($validation->errors());
-        }
-
-        $permis = $this->sapeur->permis()->where('permis.id', $data['permis_id'])->first();
-
-        //Check si sapeur as déjà ce permis
-        if ($permis === null) {
-            throw new ArrayValidatorException(array('id' => "Unknown permis"));
-        } else {
-            //Update permis
-            $permis->update($data);
-            $permis->save();
-        }
-        return $permis;
     }
 
-    /**
-     * Remove a Permis
-     *
-     * @param int $permis_id
-     */
-    public function removePermis(int $permis_id)
+    private function updateMainFonction($sapeurId)
     {
-        $this->sapeur->permis()->where('permis.id', $permis_id)->delete();
+        $maxTri = -1;
+        $maxId = -1;
+
+        //FIXME Recupérer avec fonctions pour le tri
+        $fonctions = array_filter($this->repository->getSapeurFonctionsById($sapeurId),
+            function ($fonction) {
+                return $fonction->fin === null;
+            }
+        );
+
+        foreach ($fonctions as $fonctionSapeur) {
+            if ($fonctionSapeur->fonction->tri > $maxTri) {
+                $maxId = $fonctionSapeur->fonction->id;
+                $maxTri = $fonctionSapeur->fonction->tri;
+            }
+        }
+
+        $this->repository->updateSapeurById($sapeurId, array(
+            "fonction_id" => $maxId <= 0 ? null : $maxId
+        ));
+    }
+
+    private function updateMainGrade($sapeurId)
+    {
+        $maxTri = -1;
+        $maxId = -1;
+
+        //FIXME Recupérer avec grades pour le tri
+        $grades = array_filter($this->repository->getSapeurGradesById($sapeurId),
+            function ($grade) {
+                return $grade->fin === null;
+            }
+        );
+
+        foreach ($grades as $gradeSapeur) {
+            if ($gradeSapeur->grade->tri > $maxTri) {
+                $maxId = $gradeSapeur->grade->id;
+                $maxTri = $gradeSapeur->grade->tri;
+            }
+        }
+
+        $this->repository->updateSapeurById($sapeurId, array(
+            "grade_id" => $maxId <= 0 ? null : $maxId
+        ));
     }
 }

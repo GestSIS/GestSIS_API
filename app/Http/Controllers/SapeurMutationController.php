@@ -7,6 +7,7 @@ use App\Business\SapeurBusiness;
 use App\Exceptions\ArrayValidatorException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Validator;
 
 class SapeurMutationController extends Controller
 {
@@ -31,6 +32,19 @@ class SapeurMutationController extends Controller
      */
     public function store(Request $request, int $id)
     {
+        $validation = Validator::make($data,
+            array(
+                'incorporation' => 'required|date',
+                'sortie' => 'date|nullable|after:incorporation',
+                'motif' => 'string|nullable',
+                'localite_id' => 'required|integer|exists:localites,id',
+            )
+        );
+
+        if ($validation->fails()) {
+            throw new ArrayValidatorException($validation->errors());
+        }
+
         try {
             $mutation = SapeurBusiness::get($id)->addMutation($request->all());
         } catch (ArrayValidatorException $e) {
@@ -51,6 +65,20 @@ class SapeurMutationController extends Controller
      */
     public function update(Request $request, int $id, int $mutationId)
     {
+        $validation = Validator::make($data,
+            array(
+                'id' => 'required|integer|exists:mutations,id',
+                'incorporation' => 'date',
+                'sortie' => 'date|nullable|after:incorporation',
+                'motif' => 'string|nullable',
+                'localite_id' => 'integer|exists:localites,id',
+            )
+        );
+
+        if ($validation->fails()) {
+            throw new ArrayValidatorException($validation->errors());
+        }
+
         if ($mutationId !== $request->get('id')) {
             return response()->json(['error' => 'invalid mutation id']);
         }

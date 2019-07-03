@@ -33,6 +33,19 @@ class SapeurTelephoneController extends Controller
      */
     public function store(Request $request, int $id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'telephone_type_id' => 'required|integer|exists:telephone_types,id',
+                'numero' => 'required|string|min:2',
+                'priorite' => 'required|integer',
+                'rta' => 'required|boolean',
+            )
+        );
+
+        if ($validation->fails()) {
+            return response()->json(["error"=>$validation->errors()]);
+        }
+
         try {
             $telephone = SapeurBusiness::get($id)->addTelephone($request->all());
         } catch (ArrayValidatorException $e) {
@@ -53,6 +66,20 @@ class SapeurTelephoneController extends Controller
      */
     public function update(Request $request, int $id, int $telephoneId)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'id' => 'required|integer|exists:sapeur_telephone,id',
+                'telephone_type_id' => 'integer|exists:telephone_types,id',
+                'numero' => 'string|min:2',
+                'priorite' => 'integer',
+                'rta' => 'boolean',
+            )
+        );
+
+        if ($validation->fails()) {
+            return response()->json(["error"=>$validation->errors()]);
+        }
+
         if ($telephoneId !== $request->get('id')) {
             return response()->json(['error' => 'invalid telephone id']);
         }
