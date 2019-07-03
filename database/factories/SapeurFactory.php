@@ -23,7 +23,7 @@ $factory->define(Sapeur::class, function (Faker $faker) {
         'actif' => 1,
 
         'iban' => $faker->iban('CH'),
-        'iban_status' => 1,
+        'iban_statut' => 1,
         'remarque' => $faker->text,
         'porteur' => 0,
         'localite_id' => $faker->numberBetween(1,146),

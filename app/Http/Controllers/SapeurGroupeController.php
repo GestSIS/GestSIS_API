@@ -21,7 +21,7 @@ class SapeurGroupeController extends Controller
      */
     public function index(int $sapeurId)
     {
-        $groupes = $this->service->getSapeurCoursById($sapeurId);
+        $groupes = $this->service->getSapeurGroupesById($sapeurId);
 
         return response()->json(['data' => $groupes]);
     }

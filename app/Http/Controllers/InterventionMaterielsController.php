@@ -53,7 +53,7 @@ class InterventionMaterielsController extends Controller
         }
 
         try {
-            $materiels = $this->service->addMateriels($intervention_id, $request->get('materiels'));
+            $materiels = $this->service->addMateriels($intervention_id, $validation->validated()['materiels']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -83,7 +83,7 @@ class InterventionMaterielsController extends Controller
         }
 
         try {
-            $materiels = $this->service->updateMateriels($intervention_id, $request->get('materiels'));
+            $materiels = $this->service->updateMateriels($intervention_id, $validation->validated()['materiels']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -111,7 +111,7 @@ class InterventionMaterielsController extends Controller
         }
 
         try {
-            $this->service->removeMateriels($intervention_id, $request->get('materiels'));
+            $this->service->removeMateriels($intervention_id, $validation->validated()['materiels']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

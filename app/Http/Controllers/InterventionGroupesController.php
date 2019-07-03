@@ -51,7 +51,7 @@ class InterventionGroupesController extends Controller
         }
 
         try {
-            $groupes = InterventionBusiness::get($intervention_id)->addGroupes($request->all());
+            $groupes = InterventionBusiness::get($intervention_id)->addGroupes($validation->validated()['groupes']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -78,7 +78,7 @@ class InterventionGroupesController extends Controller
         }
 
         try {
-            InterventionBusiness::get($intervention_id)->removeGroupes($request->all());
+            InterventionBusiness::get($intervention_id)->removeGroupes($validation->validated()['groupes']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

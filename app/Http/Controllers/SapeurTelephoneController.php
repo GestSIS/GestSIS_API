@@ -54,7 +54,7 @@ class SapeurTelephoneController extends Controller
         }
 
         try {
-            $telephone = $this->service->addTelephone($sapeurId, $request->all());
+            $telephone = $this->service->addTelephone($sapeurId, $validation->validated());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -92,7 +92,7 @@ class SapeurTelephoneController extends Controller
         }
 
         try {
-            $telephone = $this->service->updateTelephone($sapeurId, $request->all());
+            $telephone = $this->service->updateTelephone($sapeurId, $validation->validated());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

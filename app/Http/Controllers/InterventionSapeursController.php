@@ -23,9 +23,9 @@ class InterventionSapeursController extends Controller
      *
      * @return Response
      */
-    public function index($intervention_id)
+    public function index($interventionId)
     {
-        $sapeurs = $this->service->getInterventionPresences($intervention_id);
+        $sapeurs = $this->service->getInterventionPresences($interventionId);
         return response()->json(['data' => $sapeurs]);
     }
 
@@ -33,11 +33,11 @@ class InterventionSapeursController extends Controller
      * Store a newly created resource in storage.
      *
      * @param Request $request
-     * @param int $intervention_id
+     * @param int $interventionId
      * @return Response
      * @throws ArrayValidatorException
      */
-    public function store(Request $request, int $intervention_id)
+    public function store(Request $request, int $interventionId)
     {
         $validation = Validator::make($request->all(),
             array(
@@ -52,7 +52,7 @@ class InterventionSapeursController extends Controller
         }
 
         try {
-            $sapeurs = $this->service->addPresences($intervention_id, $request->get('sapeurs'));
+            $sapeurs = $this->service->addPresences($interventionId, $validation->validated()['sapeurs']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -64,11 +64,11 @@ class InterventionSapeursController extends Controller
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param int $intervention_id
+     * @param int $interventionId
      * @return Response
      * @throws ArrayValidatorException
      */
-    public function update(Request $request, int $intervention_id)
+    public function update(Request $request, int $interventionId)
     {
         $validation = Validator::make($request->all(),
             array(
@@ -83,7 +83,7 @@ class InterventionSapeursController extends Controller
         }
 
         try {
-            $sapeurs = $this->service->updatePresences($intervention_id, $request->get('sapeurs'));
+            $sapeurs = $this->service->updatePresences($interventionId, $validation->validated()['sapeurs']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -95,10 +95,10 @@ class InterventionSapeursController extends Controller
      * Remove the specified resource from storage.
      *
      * @param Request $request
-     * @param int $intervention_id
+     * @param int $interventionId
      * @return Response
      */
-    public function destroy(Request $request, int $intervention_id)
+    public function destroy(Request $request, int $interventionId)
     {
         $validation = Validator::make($request->all(),
             array(
@@ -110,7 +110,7 @@ class InterventionSapeursController extends Controller
             return response()->json(['error' => $validation->errors()]);
         }
 
-        $this->service->removePresences($intervention_id, $request->get('sapeurs'));
+        $this->service->removePresences($interventionId, $validation->validated()['sapeurs']);
         return response()->json(['data' => 'success']);
     }
 }

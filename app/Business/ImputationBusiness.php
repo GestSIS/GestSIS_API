@@ -59,6 +59,7 @@ class ImputationBusiness
         }
 
         // Changer le statut de l'exercice
+        //TODO Ajout date imputation
         $this->exerciceRepo->updateExerciceById($exerciceId, ["statut" => 4]);
     }
 
@@ -312,8 +313,11 @@ class ImputationBusiness
             }
         }
 
-        // TODO Changer le status de l'intervention
-        //$this->interventionRepo->setImputeStatus();
+        //Update statut
+        //TODO Ajout date imputation
+        $this->interventionRepo->editInterventionInformationsById($interventionId, [
+            "statut" => 3
+        ]);
     }
 
     private function imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation)

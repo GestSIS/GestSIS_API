@@ -70,8 +70,7 @@ class SapeurService
 
     public function editSapeurDetailsById($sapeurId, $data)
     {
-        $this->business->updateSapeurById($sapeurId, $data);
-        return $this->repository->getSapeurDetailsById($sapeurId);
+        return $this->business->updateSapeurById($sapeurId, $data);
     }
 
     public function deleteSapeurById($sapeurId)
@@ -86,8 +85,7 @@ class SapeurService
 
     public function updateCours($sapeurId, $cours)
     {
-        $this->business->updateCours($sapeurId, $cours);
-        //TODO Return
+        return $this->business->updateCours($sapeurId, $cours);
     }
 
     public function removeCours($sapeurId, $coursId)
@@ -102,8 +100,7 @@ class SapeurService
 
     public function updateGrade($sapeurId, $grade)
     {
-        $this->business->updateGrade($sapeurId, $grade);
-        //TODO Return
+        return $this->business->updateGrade($sapeurId, $grade);
     }
 
     public function removeGrade($sapeurId, $gradeId)
@@ -118,8 +115,7 @@ class SapeurService
 
     public function updateFonction($sapeurId, $fonction)
     {
-        $this->business->updateFonction($sapeurId, $fonction);
-        //TODO return
+        return $this->business->updateFonction($sapeurId, $fonction);
     }
 
     public function removeFonction($sapeurId, $fonctionId)
@@ -129,14 +125,12 @@ class SapeurService
 
     public function addMutation($sapeurId, $mutation)
     {
-        $this->business->addMutation($sapeurId, $mutation);
-        //TODO return
+        return $this->business->addMutation($sapeurId, $mutation);
     }
 
     public function updateMutation($sapeurId, $mutation)
     {
-        $this->business->updateMutation($sapeurId, $mutation);
-        //TODO return
+        return $this->business->updateMutation($sapeurId, $mutation);
     }
 
     public function removeMutation($sapeurId, $mutationId)
@@ -147,13 +141,11 @@ class SapeurService
     public function addTelephone($sapeurId, $telephone)
     {
         return $this->business->addTelephone($sapeurId, $telephone);
-        //TODO return
     }
 
     public function updateTelephone($sapeurId, $telephone)
     {
-        $this->business->updateTelephone($sapeurId, $telephone);
-        //TODO return
+        return $this->business->updateTelephone($sapeurId, $telephone);
     }
 
     public function removeTelephone($sapeurId, $telephoneId)
@@ -168,7 +160,7 @@ class SapeurService
 
     public function updatePermis($sapeurId, $permis)
     {
-        $this->business->updatePermis($sapeurId, $permis);
+        return $this->business->updatePermis($sapeurId, $permis);
     }
 
     public function removePermis($sapeurId, $permisId)

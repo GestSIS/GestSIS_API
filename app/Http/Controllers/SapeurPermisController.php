@@ -46,7 +46,7 @@ class SapeurPermisController extends Controller
         }
 
         try {
-            $permis = SapeurBusiness::get($id)->addPermis($request->all());
+            $permis = SapeurBusiness::get($id)->addPermis($validation->validated());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -81,7 +81,7 @@ class SapeurPermisController extends Controller
         }
 
         try {
-            $permis = SapeurBusiness::get($id)->updatePermis($request->all());
+            $permis = SapeurBusiness::get($id)->updatePermis($validation->validated());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

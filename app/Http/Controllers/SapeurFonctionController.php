@@ -53,7 +53,7 @@ class SapeurFonctionController extends Controller
         }
 
         try {
-            $fonction = $this->service->addFonction($sapeurId, $request->all());
+            $fonction = $this->service->addFonction($sapeurId, $validation->validated());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -90,7 +90,7 @@ class SapeurFonctionController extends Controller
         }
 
         try {
-            $fonction = $this->service->updateFonction($sapeurId, $request->all());
+            $fonction = $this->service->updateFonction($sapeurId, $validation->validated());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

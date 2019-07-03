@@ -32,7 +32,7 @@ class SapeurBusiness
 
     public function updateSapeurById(int $sapeurId, $data)
     {
-        $this->repository->updateSapeurById($sapeurId, $data);
+        return $this->repository->updateSapeurById($sapeurId, $data);
     }
 
     public function deleteSapeurById(int $sapeurId)
@@ -92,7 +92,7 @@ class SapeurBusiness
 
     public function updateCours(int $sapeurId, $data)
     {
-        $this->repository->updateCours($sapeurId, $data);
+        return $this->repository->updateCours($sapeurId, $data);
     }
 
     public function removeCours(int $sapeurId, int $coursSapeurId)
@@ -123,8 +123,9 @@ class SapeurBusiness
 
     public function updateGrade(int $sapeurId, $data)
     {
-        $this->repository->updateGrade($sapeurId, $data);
+        $grade = $this->repository->updateGrade($sapeurId, $data);
         $this->updateMainGrade($sapeurId);
+        return $grade;
     }
 
     public function removeGrade(int $sapeurId, int $gradeSapeurId)
@@ -162,7 +163,7 @@ class SapeurBusiness
             }
         }
 
-        $this->repository->addFonction($sapeurId, $data);
+        $fonction = $this->repository->addFonction($sapeurId, $data);
         $this->updateMainFonction($sapeurId);
 
         return $fonction;
@@ -171,26 +172,21 @@ class SapeurBusiness
     public function updateFonction(int $sapeurId, $data)
     {
         $id = $data['id'];
-        $fonctionId = $data['fonction_id'];
 
         //Check si déjà présent
-        $fonctions = array_filter($this->repository->getSapeurFonctionsById($sapeurId),
-            function ($f) use ($fonctionId) {
-                return $f->fonction_id === $fonctionId;
-            }
-        );
+        $fonctions = $this->repository->getSapeurFonctionsById($sapeurId);
 
-        //Update fonction
+        //Get fonction to update
         $fonction = array_filter($fonctions,
             function ($f) use ($id) {
                 return $f->id === $id;
             }
         )[0];
+        $fonctionId = $fonction->fonction_id;
 
-        //Remove current updated fonction from the list of fonctions to compare with
         $fonctions = array_filter($fonctions,
-            function ($f) use ($id) {
-                return $f->id === !$id;
+            function ($f) use ($fonctionId, $id) {
+                return $f->fonction_id === $fonctionId && $f->id !== $id;
             }
         );
 
@@ -223,8 +219,9 @@ class SapeurBusiness
         }
 
         //Update fonction
-        $this->repository->updateFonction($sapeurId, $data);
+        $fonction = $this->repository->updateFonction($sapeurId, $data);
         $this->updateMainFonction($sapeurId);
+        return $fonction;
     }
 
     public function removeFonction(int $sapeurId, int $fonctionSapeurId)
@@ -245,7 +242,7 @@ class SapeurBusiness
     public function updateMutation(int $sapeurId, $data)
     {
         //Update mutation
-        $this->repository->updateMutation($sapeurId, $data);
+        return $this->repository->updateMutation($sapeurId, $data);
 
         //TODO Update actif statut depending of end of all mutation
     }
@@ -338,7 +335,7 @@ class SapeurBusiness
 
     public function updatePermis(int $sapeurId, $data)
     {
-        $this->repository->updatePermis($sapeurId, $data);
+        return $this->repository->updatePermis($sapeurId, $data);
     }
 
     public function removePermis(int $sapeurId, int $permisId)
@@ -391,11 +388,7 @@ class SapeurBusiness
         $maxId = -1;
 
         //FIXME Recupérer avec grades pour le tri
-        $grades = array_filter($this->repository->getSapeurGradesById($sapeurId),
-            function ($grade) {
-                return $grade->fin === null;
-            }
-        );
+        $grades = $this->repository->getSapeurGradesById($sapeurId, true);
 
         foreach ($grades as $gradeSapeur) {
             if ($gradeSapeur->grade->tri > $maxTri) {

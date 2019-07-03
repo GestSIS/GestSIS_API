@@ -163,6 +163,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
     public function editPresenceInfoById($interventionId, $presenceId, $infos)
     {
         InterventionSapeur::where('intervention_id', $interventionId)->where('id', $presenceId)->update($infos);
+        return $this->convertPresence(InterventionSapeur::find($presenceId));
     }
 
     public function removePresencesById($interventionId, array $ids)
@@ -185,6 +186,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
         if (array_key_exists('commentaire', $infos) && $infos['commentaire'] === null) $infos['commentaire'] = '';
 
         Appel::where('intervention_id', $interventionId)->where('id', $appelId)->update($infos);
+        return $this->convertAppel(Appel::find($appelId));
     }
 
     public function removeAppelsById($interventionId, array $ids)
@@ -207,6 +209,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
         if (array_key_exists('resume', $infos) && $infos['resume'] === null) $infos['resume'] = '';
 
         Mission::where('intervention_id', $interventionId)->where('id', $missionId)->update($infos);
+        return $this->convertMission(Mission::find($missionId));
     }
 
     public function removeMissionsById($interventionId, array $ids)
@@ -229,6 +232,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
             ::where('intervention_id', $interventionId)
             ->where('id', $materielId)
             ->update(['quantite' => $quantite]);
+        return $this->convertMateriel(InterventionMateriel::find($materielId));
     }
 
     public function removeMaterielsById($interventionId, array $ids)
@@ -248,6 +252,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
     public function editPhaseInfosById($interventionId, $phaseId, $debut)
     {
         Phase::where('intervention_id', $interventionId)->where('id', $phaseId)->update(['debut' => $debut]);
+        return $this->convertPhase(Phase::find($phaseId));
     }
 
     public function removePhasesById($interventionId, array $ids)
@@ -322,7 +327,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
         $object->proprietaire = $intervention->proprietaire;
         $object->responsable = $intervention->responsable;
         $object->stat_nb = $intervention->stat_nb;
-        $object->imputer = $intervention->imputer;
+        $object->statut = $intervention->statut;
         $object->exercice_comptable_id = $intervention->exercice_comptable_id;
         $object->localite_id = $intervention->localite_id;
         $object->type_intervention_id = $intervention->type_intervention_id;

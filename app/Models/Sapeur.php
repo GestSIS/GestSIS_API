@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Sapeur extends Model
 {
     protected $fillable = ['nom', 'prenom', 'suffixe', 'rue', 'no_rue', 'date_naissance', 'no_avs', 'profession', 'employeur',
-                 'lieu_de_travail', 'email', 'actif', 'iban', 'iban_status', 'remarque','porteur', 'localite_id', 'civilite_id'];
+                 'lieu_de_travail', 'email', 'actif', 'iban', 'iban_statut', 'remarque','porteur', 'localite_id', 'civilite_id'];
 
     /**
      * The cours that belong to the sapeur.

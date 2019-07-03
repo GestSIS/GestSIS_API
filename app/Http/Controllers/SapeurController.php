@@ -62,7 +62,7 @@ class SapeurController extends Controller
         }
 
         try {
-            $sapeur = $this->service->createSapeur($request->all());
+            $sapeur = $this->service->createSapeur($validation->validated());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -117,7 +117,7 @@ class SapeurController extends Controller
             return response()->json(['error' => $validation->errors()]);
         }
         try {
-            $sapeur = $this->service->editSapeurDetailsById($id, $request->all());
+            $sapeur = $this->service->editSapeurDetailsById($id, $validation->validated());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

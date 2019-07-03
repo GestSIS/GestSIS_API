@@ -7,6 +7,7 @@ use App\Contracts\SapeurRepository;
 use App\Models\CoursSapeur;
 use App\Models\FonctionSapeur;
 use App\Models\GradeSapeur;
+use App\Models\GroupeSapeur;
 use App\Models\Mutation;
 use App\Models\Permis;
 use App\Models\Sapeur;
@@ -96,7 +97,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
     public function getSapeurGroupesbyId(int $sapeurId)
     {
         $temp = $this;
-        return Groupe::where('sapeur_id', $sapeurId)
+        return GroupeSapeur::where('sapeur_id', $sapeurId)
             ->get()
             ->map(function ($groupe) use ($temp) {
                 return $temp->convertSapeurGroupe($groupe);
@@ -123,6 +124,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         }
 
         Sapeur::where('id', $sapeurId)->limit(1)->update($data);
+        return $this->convertSapeur(Sapeur::find($sapeurId));
     }
 
     public function deleteSapeurById($sapeurId)
@@ -139,7 +141,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $cours->cours_id = $data['cours_id'];
         $cours->localite_id = $data['localite_id'];
         $cours->sapeur_id = $sapeurId;
-        $cours->save($cours);
+        $cours->save();
 
         return $this->convertSapeurCours($cours);
     }
@@ -147,6 +149,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
     public function updateCours(int $sapeurId, $data)
     {
         CoursSapeur::where('sapeur_id', $sapeurId)->where('id', $data['id'])->limit(1)->update($data);
+        return $this->convertSapeurCours(CoursSapeur::find($data['id']));
     }
 
     public function removeCours(int $sapeurId, int $coursId)
@@ -164,7 +167,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $grade = new GradeSapeur();
         $grade->fill($data);
         $grade->grade_id = $data['grade_id'];
-        $grade->sapeurId = $sapeurId;
+        $grade->sapeur_id = $sapeurId;
         $grade->save();
 
         return $this->convertSapeurGrade($grade);
@@ -183,6 +186,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         }
 
         GradeSapeur::where('sapeur_id', $sapeurId)->where('id', $data['id'])->limit(1)->update($data);
+        return $this->convertSapeurGrade(GradeSapeur::find($data['id']));
     }
 
     public function removeGrade(int $sapeurId, int $gradeId)
@@ -218,6 +222,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         }
 
         FonctionSapeur::where('sapeur_id', $sapeurId)->where('id', $data['id'])->limit(1)->update($data);
+        return $this->convertSapeurFonction(FonctionSapeur::find($data['id']));
     }
 
     public function removeFonction(int $sapeurId, int $fonctionId)
@@ -247,6 +252,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         }
 
         Mutation::where('sapeur_id', $sapeurId)->where('id', $data['id'])->limit(1)->update($data);
+        return $this->convertSapeurMutation(Mutation::find($data['id']));
     }
 
     public function removeMutation(int $sapeurId, int $mutationId)
@@ -267,6 +273,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
     public function updateTelephone(int $sapeurId, $data)
     {
         SapeurTelephone::where('sapeur_id', $sapeurId)->where('id', $data['id'])->limit(1)->update($data);
+        return $this->convertSapeurTelephone(SapeurTelephone::find($data['id']));
     }
 
     public function removeTelephone(int $sapeurId, int $telephoneId)
@@ -279,7 +286,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $permis = new Permis();
         $permis->fill($data);
         $permis->permis_type_id = $data['permis_type_id'];
-        $permis->sapeurId = $sapeurId;
+        $permis->sapeur_id = $sapeurId;
         $permis->save($permis);
 
         return $permis;
@@ -288,6 +295,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
     public function updatePermis(int $sapeurId, $data)
     {
         Permis::where('sapeur_id', $sapeurId)->where('id', $data['id'])->limit(1)->update($data);
+        return $this->convertSapeurPermis(Permis::find($data['id']));
     }
 
     public function removePermis(int $sapeurId, int $permisId)
@@ -343,7 +351,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
                 array_push($mutations, $this->convertSapeurMutation($mutation));
             }
             $object->mutations = $mutations;
-            mutations}
+        }
 
         if (in_array('groupes', $with)) {
             $groupes = array();
@@ -351,7 +359,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
                 array_push($groupes, $this->convertSapeurGroupe($groupe));
             }
             $object->groupes = $groupes;
-            groupes}
+        }
 
         if (in_array('grades', $with)) {
             $grades = array();
@@ -359,7 +367,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
                 array_push($grades, $this->convertSapeurGrade($grade));
             }
             $object->grades = $grades;
-            grades}
+        }
 
         if (in_array('permis', $with)) {
             $permis = array();
@@ -367,7 +375,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
                 array_push($permis, $this->convertSapeurPermis($p));
             }
             $object->permis = $permis;
-            permis}
+        }
 
         if (in_array('telephones', $with)) {
             $grades = array();
@@ -375,7 +383,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
                 array_push($telephones, $this->convertSapeurTelephone($telephone));
             }
             $object->telephones = $telephones;
-            telephones}
+        }
 
         if (in_array('fonctions', $with)) {
             $fonctions = array();
@@ -383,7 +391,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
                 array_push($fonctions, $this->convertSapeurFonction($fonction));
             }
             $object->fonctions = $fonctions;
-            fonctions}
+        }
 
         if (in_array('cours', $with)) {
             $cours = array();
@@ -391,7 +399,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
                 array_push($cours, $this->convertSapeurCours($c));
             }
             $object->cours = $cours;
-            cours}
+        }
 
         return $object;
     }
@@ -410,23 +418,23 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $object->remarque = $fonction->remarque;
 
         if ($withFonction) {
-            $object->grade = $this->convertFonction($fonction->fonction);
+            $object->fonction = $this->convertFonction($fonction->fonction);
         }
 
         return $object;
     }
 
-    protected function convertGrade($grade)
+    protected function convertFonction($fonction)
     {
-        if ($grade == null) return null;
+        if ($fonction == null) return null;
 
         $object = new StdClass();
-        $object->id = $grade->id;
+        $object->id = $fonction->id;
 
-        $object->nom = $grade->nom;
-        $object->abreviation = $grade->abreviation;
-        $object->tri = $grade->tri;
-        $object->cumulable = $grade->cumulable;
+        $object->nom = $fonction->nom;
+        $object->abreviation = $fonction->abreviation;
+        $object->tri = $fonction->tri;
+        $object->cumulable = $fonction->cumulable;
 
         return $object;
     }

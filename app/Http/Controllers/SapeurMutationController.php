@@ -52,7 +52,7 @@ class SapeurMutationController extends Controller
         }
 
         try {
-            $mutation = $this->service->addMutation($sapeurId, $request->all());
+            $mutation = $this->service->addMutation($sapeurId, $validation->validated());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -90,7 +90,7 @@ class SapeurMutationController extends Controller
         }
 
         try {
-            $mutation = $this->service->updateMutation($sapeurId, $request->all());
+            $mutation = $this->service->updateMutation($sapeurId, $validation->validated());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

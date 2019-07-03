@@ -56,7 +56,7 @@ class ExerciceSapeursController extends Controller
         }
 
         try {
-            $sapeur = $this->service->addSapeurs($exerciceId, $request->get('sapeurs'));
+            $sapeur = $this->service->addSapeurs($exerciceId, $validation->validated()['sapeurs']);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
         }
@@ -88,7 +88,7 @@ class ExerciceSapeursController extends Controller
         }
 
         try {
-            $sapeur = $this->service->updateSapeurs($exerciceId, $request->get('sapeurs'));
+            $sapeur = $this->service->updateSapeurs($exerciceId, $validation->validated()['sapeurs']);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
         }
@@ -115,7 +115,7 @@ class ExerciceSapeursController extends Controller
         }
 
         try {
-            $this->service->removeSapeurs($exerciceId, $request->get('sapeurs'));
+            $this->service->removeSapeurs($exerciceId, $validation->validated()['sapeurs']);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
         }

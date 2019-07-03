@@ -24,9 +24,9 @@ class InterventionVehiculesController extends Controller
      *
      * @return Response
      */
-    public function index($intervention_id)
+    public function index($interventionId)
     {
-        $vehicules = $this->service->getInterventionVehicules($intervention_id);
+        $vehicules = $this->service->getInterventionVehicules($interventionId);
 
         return response()->json(['data' => $vehicules]);
     }
@@ -35,14 +35,15 @@ class InterventionVehiculesController extends Controller
      * Store a newly created resource in storage.
      *
      * @param Request $request
-     * @param int $intervention_id
+     * @param int $interventionId
      * @return Response
      * @throws ArrayValidatorException
      */
-    public function store(Request $request, int $intervention_id)
+    public function store(Request $request, int $interventionId)
     {
+        //TODO Validation
         try {
-            $vehicules = $this->service->addVehicules($intervention_id, $request->get('vehicules'));
+            $vehicules = $this->service->addVehicules($interventionId, $request->get('vehicules'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -54,13 +55,13 @@ class InterventionVehiculesController extends Controller
      * Remove the specified resource from storage.
      *
      * @param Request $request
-     * @param int $intervention_id
+     * @param int $interventionId
      * @return Response
      */
-    public function destroy(Request $request, int $intervention_id)
+    public function destroy(Request $request, int $interventionId)
     {
         try {
-            $this->service->removeVehicules($intervention_id, $request->get('vehicules'));
+            $this->service->removeVehicules($interventionId, $request->get('vehicules'));
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

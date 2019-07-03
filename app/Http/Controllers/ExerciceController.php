@@ -61,7 +61,7 @@ class ExerciceController extends Controller
         }
 
         try {
-            $exercice = $this->service->createExercice($request->all());
+            $exercice = $this->service->createExercice($validation->validated());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -110,7 +110,7 @@ class ExerciceController extends Controller
         }
 
         try {
-            $exercice = $this->service->updatExercice($id, $request->all());
+            $exercice = $this->service->updatExercice($id, $validation->validated());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

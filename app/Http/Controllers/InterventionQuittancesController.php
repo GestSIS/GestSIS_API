@@ -49,7 +49,7 @@ class InterventionQuittancesController extends Controller
         }
 
         try {
-            $quittances = $this->service->addQuittances($intervention_id, $request->get('interventions'));
+            $quittances = $this->service->addQuittances($intervention_id, $validation->validated()['quittances']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -76,7 +76,7 @@ class InterventionQuittancesController extends Controller
         }
 
         try {
-            $this->service->removeQuittances($intervention_id, $request->get('interventions'));
+            $this->service->removeQuittances($intervention_id, $validation->validated()['quittances']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

@@ -32,7 +32,7 @@ class CreateInterventionsTable extends Migration
             $table->text('responsable');
             $table->integer('stat_nb');
 
-            $table->boolean('imputer');
+            $table->boolean('statut');
 
 //            $table->decimal('latitude');
 //            $table->decimal('longitude');

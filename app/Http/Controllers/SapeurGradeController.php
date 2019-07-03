@@ -52,7 +52,7 @@ class SapeurGradeController extends Controller
         }
 
         try {
-            $grade = $this->service->addGrade($sapeurId, $request->all());
+            $grade = $this->service->addGrade($sapeurId, $validation->validated());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -88,7 +88,7 @@ class SapeurGradeController extends Controller
         }
 
         try {
-            $grade = $this->service->updateGrade($sapeurId, $request->all());
+            $grade = $this->service->updateGrade($sapeurId, $validation->validated());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

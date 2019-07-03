@@ -22,6 +22,7 @@ class Intervention extends Model
         'proprietaire',
         'responsable',
         'stat_nb',
+        'statut',
 
         'localite_id',
         'intervention_traitement_id',

@@ -51,7 +51,7 @@ class InterventionAppelsController extends Controller
         }
 
         try {
-            $appels = $this->service->addAppels($intervention_id, $request->get('appels'));
+            $appels = $this->service->addAppels($intervention_id, $validation->validated()['appels']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -82,7 +82,7 @@ class InterventionAppelsController extends Controller
         }
 
         try {
-            $appels = $this->service->updateAppels($intervention_id, $request->get('appels'));
+            $appels = $this->service->updateAppels($intervention_id, $validation->validated()['appels']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -109,7 +109,7 @@ class InterventionAppelsController extends Controller
         }
 
         try {
-            $this->service->removeAppels($intervention_id, $request->get('appels'));
+            $this->service->removeAppels($intervention_id, $validation->validated()['appels']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

@@ -17,8 +17,14 @@ class ImputationController extends Controller
 
     public function exercice(Request $request, int $id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'indemnite_exercice_type_id' => 'integer'
+            )
+        );
+
         try {
-            $temp = $this->service->generateExercice($id, $request->all());
+            $temp = $this->service->generateExercice($id, $validation->validated());
         } catch (ArrayValidatorException $exception) {
             return response()->json(['error' => $exception->getErrors()]);
         }
@@ -28,8 +34,14 @@ class ImputationController extends Controller
 
     public function intervention(Request $request, int $id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'indemnite_intervention_type_id' => 'integer'
+            )
+        );
+
         try {
-            $temp = $this->service->generateIntervention($id, $request->all());
+            $temp = $this->service->generateIntervention($id, $validation->validated());
         } catch (ArrayValidatorException $exception) {
             return response()->json(['error' => $exception->getErrors()]);
         }

@@ -52,7 +52,7 @@ class InterventionPhasesController extends Controller
         }
 
         try {
-            $phases = $this->service->addPhases($intervention_id, $request->get('phases'));
+            $phases = $this->service->addPhases($intervention_id, $validation->validated()['phases']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -82,7 +82,7 @@ class InterventionPhasesController extends Controller
         }
 
         try {
-            $phases = $this->service->updatePhases($intervention_id, $request->get('phases'));
+            $phases = $this->service->updatePhases($intervention_id, $validation->validated()['phases']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -99,8 +99,14 @@ class InterventionPhasesController extends Controller
      */
     public function destroy(Request $request, int $intervention_id)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'phases.*' => 'integer'
+            )
+        );
+        //TODO Validation
         try {
-            $this->service->removePhases($intervention_id, $request->get('phases'));
+            $this->service->removePhases($intervention_id, $validation->validated()['phases']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

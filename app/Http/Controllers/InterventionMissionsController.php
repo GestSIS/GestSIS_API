@@ -54,7 +54,7 @@ class InterventionMissionsController extends Controller
         }
 
         try {
-            $missions = $this->service->addMissions($intervention_id, $request->get('missions'));
+            $missions = $this->service->addMissions($intervention_id, $validation->validated()['missions']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -87,7 +87,7 @@ class InterventionMissionsController extends Controller
         }
 
         try {
-            $missions = $this->service->updateMissions($intervention_id, $request->get('missions'));
+            $missions = $this->service->updateMissions($intervention_id, $validation->validated()['missions']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -114,7 +114,7 @@ class InterventionMissionsController extends Controller
         }
 
         try {
-            $this->service->removeMissions($intervention_id, $request->get('missions'));
+            $this->service->removeMissions($intervention_id, $validation->validated()['missions']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
