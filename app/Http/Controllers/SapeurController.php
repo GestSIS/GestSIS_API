@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Sapeur;
-use App\Business\SapeurBusiness;
+use App\Exceptions\ArrayValidatorException;
+use App\Services\SapeurService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -11,6 +11,13 @@ use Validator;
 
 class SapeurController extends Controller
 {
+    protected $service;
+
+    public function __construct(SapeurService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -18,9 +25,7 @@ class SapeurController extends Controller
      */
     public function index()
     {
-        $sapeurs = Sapeur::all();
-
-        return response()->json(['data' => $sapeurs]);
+        return response()->json(["data" => $this->service->listeSapeurs()]);
     }
 
     /**
@@ -56,7 +61,11 @@ class SapeurController extends Controller
             return response()->json(['error' => $validation->errors()]);
         }
 
-        $sapeur = SapeurBusiness::createSapeur($request->all())->getData();
+        try {
+            $sapeur = $this->service->createSapeur($request->all());
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
+        }
 
         return response()->json(['data' => $sapeur]);
     }
@@ -67,10 +76,9 @@ class SapeurController extends Controller
      * @param int $id
      * @return Response
      */
-    public function show($id)
+    public function show(int $id)
     {
-        $sapeur = Sapeur::findOrFail($id);
-
+        $sapeur = $this->service->getSapeurDetailsById($id);
         return response()->json(['data' => $sapeur]);
     }
 
@@ -82,7 +90,7 @@ class SapeurController extends Controller
      * @return Response
      * @throws Exception
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
         $validation = Validator::make($request->all(),
             array(
@@ -108,8 +116,11 @@ class SapeurController extends Controller
         if ($validation->fails()) {
             return response()->json(['error' => $validation->errors()]);
         }
-
-        $sapeur = SapeurBusiness::get($id)->update($request->all());
+        try {
+            $sapeur = $this->service->editSapeurDetailsById($id, $request->all());
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
+        }
 
         return response()->json(['data' => $sapeur]);
     }
@@ -120,8 +131,14 @@ class SapeurController extends Controller
      * @param int $id
      * @return Response
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
-        //
+        try {
+            $this->service->deleteSapeurById($id);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
+        }
+
+        return response()->json(['data' => "success"]);
     }
 }

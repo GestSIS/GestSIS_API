@@ -3,22 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ArrayValidatorException;
-use App\Models\Sapeur;
-use App\Business\SapeurBusiness;
+use App\Services\SapeurService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Validator;
 
 class SapeurFonctionController extends Controller
 {
+    protected $service;
+
+    public function __construct(SapeurService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * Display a listing of the resource.
      *
      * @return Response
      */
-    public function index($sapeur_id)
+    public function index(int $sapeurId)
     {
-        $fonctions = Sapeur::find($sapeur_id)->fonctions()->get();
+        $fonctions = $this->service->getSapeurFonctionsById($sapeurId);
 
         return response()->json(['data' => $fonctions]);
     }
@@ -31,7 +37,7 @@ class SapeurFonctionController extends Controller
      * @return Response
      * @throws ArrayValidatorException
      */
-    public function store(Request $request, int $id)
+    public function store(Request $request, int $sapeurId)
     {
         $validation = Validator::make($request->all(),
             array(
@@ -47,7 +53,7 @@ class SapeurFonctionController extends Controller
         }
 
         try {
-            $fonction = SapeurBusiness::get($id)->addFonction($request->all());
+            $fonction = $this->service->addFonction($sapeurId, $request->all());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -59,12 +65,12 @@ class SapeurFonctionController extends Controller
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param int $id
+     * @param int $sapeurId
      * @param int $fonctionId
      * @return Response
      * @throws ArrayValidatorException
      */
-    public function update(Request $request, int $id, int $fonctionId)
+    public function update(Request $request, int $sapeurId, int $fonctionId)
     {
         if ($fonctionId !== $request->get('id')) {
             return response()->json(['error' => 'invalid fonction id']);
@@ -84,7 +90,7 @@ class SapeurFonctionController extends Controller
         }
 
         try {
-            $fonction = SapeurBusiness::get($id)->updateFonction($request->all());
+            $fonction = $this->service->updateFonction($sapeurId, $request->all());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -95,14 +101,14 @@ class SapeurFonctionController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param int $id
+     * @param int $sapeurId
      * @param int $fonctionId
      * @return Response
      */
-    public function destroy(int $id, int $fonctionId)
+    public function destroy(int $sapeurId, int $fonctionId)
     {
         try {
-            SapeurBusiness::get($id)->removeFonction($fonctionId);
+            $this->service->removeFonction($sapeurId, $fonctionId);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

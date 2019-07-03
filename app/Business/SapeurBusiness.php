@@ -26,7 +26,8 @@ class SapeurBusiness
         $this->addMutation($sapeur->id, array(
             "localite_id" => $sapeur->localite_id,
             "debut" => $data['incorporation']
-    ));
+        ));
+        return $sapeur;
     }
 
     public function updateSapeurById(int $sapeurId, $data)
@@ -366,7 +367,7 @@ class SapeurBusiness
         $maxId = -1;
 
         //FIXME Recupérer avec fonctions pour le tri
-        $fonctions = array_filter($this->repository->getSapeurFonctionsById($sapeurId),
+        $fonctions = array_filter($this->repository->getSapeurFonctionsById($sapeurId, true),
             function ($fonction) {
                 return $fonction->fin === null;
             }

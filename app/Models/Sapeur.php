@@ -34,7 +34,7 @@ class Sapeur extends Model
     }
 
     /**
-     * The cours that belong to the sapeur.
+     * The groupes that belong to the sapeur.
      */
     public function groupes()
     {

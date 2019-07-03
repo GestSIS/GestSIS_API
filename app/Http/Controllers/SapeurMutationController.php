@@ -2,23 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Sapeur;
-use App\Business\SapeurBusiness;
 use App\Exceptions\ArrayValidatorException;
+use App\Services\SapeurService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Validator;
 
 class SapeurMutationController extends Controller
 {
+    protected $service;
+
+    public function __construct(SapeurService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function index($sapeur_id)
+    public function index(int $sapeurId)
     {
-        $mutations = Sapeur::find($sapeur_id)->mutations()->get();
+        $mutations = $this->service->getSapeurMutationsById($sapeurId);
 
         return response()->json(['data' => $mutations]);
     }
@@ -30,9 +36,9 @@ class SapeurMutationController extends Controller
      * @return Response
      * @throws ArrayValidatorException
      */
-    public function store(Request $request, int $id)
+    public function store(Request $request, int $sapeurId)
     {
-        $validation = Validator::make($data,
+        $validation = Validator::make($request->all(),
             array(
                 'incorporation' => 'required|date',
                 'sortie' => 'date|nullable|after:incorporation',
@@ -42,11 +48,11 @@ class SapeurMutationController extends Controller
         );
 
         if ($validation->fails()) {
-            throw new ArrayValidatorException($validation->errors());
+            return response()->json(['error' => $validation->errors()]);
         }
 
         try {
-            $mutation = SapeurBusiness::get($id)->addMutation($request->all());
+            $mutation = $this->service->addMutation($sapeurId, $request->all());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -58,14 +64,14 @@ class SapeurMutationController extends Controller
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param int $id
+     * @param int $sapeurId
      * @param int $mutationId
      * @return Response
      * @throws ArrayValidatorException
      */
-    public function update(Request $request, int $id, int $mutationId)
+    public function update(Request $request, int $sapeurId, int $mutationId)
     {
-        $validation = Validator::make($data,
+        $validation = Validator::make($request->all(),
             array(
                 'id' => 'required|integer|exists:mutations,id',
                 'incorporation' => 'date',
@@ -76,7 +82,7 @@ class SapeurMutationController extends Controller
         );
 
         if ($validation->fails()) {
-            throw new ArrayValidatorException($validation->errors());
+            return response()->json(['error' => $validation->errors()]);
         }
 
         if ($mutationId !== $request->get('id')) {
@@ -84,7 +90,7 @@ class SapeurMutationController extends Controller
         }
 
         try {
-            $mutation = SapeurBusiness::get($id)->updateMutation($request->all());
+            $mutation = $this->service->updateMutation($sapeurId, $request->all());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -95,14 +101,14 @@ class SapeurMutationController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param int $id
+     * @param int $sapeurId
      * @param int $mutationId
      * @return Response
      */
-    public function destroy(int $id, int $mutationId)
+    public function destroy(int $sapeurId, int $mutationId)
     {
         try {
-            SapeurBusiness::get($id)->removeMutation($mutationId);
+            $this->service->removeMutation($sapeurId, $mutationId);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

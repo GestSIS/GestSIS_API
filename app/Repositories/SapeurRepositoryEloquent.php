@@ -28,24 +28,28 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
     public function getSapeurDetailsById(int $sapeurId, $with = [])
     {
-        return $this->convertSapeur(Sapeur::with($with)->find($id), $with);
+        return $this->convertSapeur(Sapeur::with($with)->find($sapeurId), $with);
     }
 
-    public function getSapeurGradesById(int $sapeurId)
+    public function getSapeurGradesById(int $sapeurId, $withGrade = false)
     {
         $temp = $this;
         return GradeSapeur::where('sapeur_id', $sapeurId)
-            ->map(function ($sapeur) use ($temp) {
-                return $temp->convertGrade($sapeur);
+            ->with($withGrade ? ['grade'] : [])
+            ->get()
+            ->map(function ($grade) use ($temp, $withGrade) {
+                return $temp->convertSapeurGrade($grade, $withGrade);
             })->toArray();
     }
 
-    public function getSapeurFonctionsById(int $sapeurId)
+    public function getSapeurFonctionsById(int $sapeurId, $withFonction = false)
     {
         $temp = $this;
         return FonctionSapeur::where('sapeur_id', $sapeurId)
-            ->map(function ($sapeur) use ($temp) {
-                return $temp->convertFonction($sapeur);
+            ->with($withFonction ? ['fonction'] : [])
+            ->get()
+            ->map(function ($fonction) use ($temp, $withFonction) {
+                return $temp->convertSapeurFonction($fonction, $withFonction);
             })->toArray();
     }
 
@@ -53,8 +57,9 @@ class SapeurRepositoryEloquent implements SapeurRepository
     {
         $temp = $this;
         return CoursSapeur::where('sapeur_id', $sapeurId)
-            ->map(function ($sapeur) use ($temp) {
-                return $temp->convertCours($sapeur);
+            ->get()
+            ->map(function ($cours) use ($temp) {
+                return $temp->convertSapeurCours($cours);
             })->toArray();
     }
 
@@ -62,8 +67,9 @@ class SapeurRepositoryEloquent implements SapeurRepository
     {
         $temp = $this;
         return Permis::where('sapeur_id', $sapeurId)
-            ->map(function ($sapeur) use ($temp) {
-                return $temp->convertPermis($sapeur);
+            ->get()
+            ->map(function ($permis) use ($temp) {
+                return $temp->convertSapeurPermis($permis);
             })->toArray();
     }
 
@@ -71,8 +77,29 @@ class SapeurRepositoryEloquent implements SapeurRepository
     {
         $temp = $this;
         return Mutation::where('sapeur_id', $sapeurId)
-            ->map(function ($sapeur) use ($temp) {
-                return $temp->convertMutation($sapeur);
+            ->get()
+            ->map(function ($mutation) use ($temp) {
+                return $temp->convertSapeurMutation($mutation);
+            })->toArray();
+    }
+
+    public function getSapeurTelephonesById(int $sapeurId)
+    {
+        $temp = $this;
+        return SapeurTelephone::where('sapeur_id', $sapeurId)
+            ->get()
+            ->map(function ($telephone) use ($temp) {
+                return $temp->convertSapeurTelephone($telephone);
+            })->toArray();
+    }
+
+    public function getSapeurGroupesbyId(int $sapeurId)
+    {
+        $temp = $this;
+        return Groupe::where('sapeur_id', $sapeurId)
+            ->get()
+            ->map(function ($groupe) use ($temp) {
+                return $temp->convertSapeurGroupe($groupe);
             })->toArray();
     }
 
@@ -95,7 +122,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
             $data['suffixe'] = '';
         }
 
-        CoursSapeur::where('sapeur_id', $sapeurId)->limit(1)->update($data);
+        Sapeur::where('id', $sapeurId)->limit(1)->update($data);
     }
 
     public function deleteSapeurById($sapeurId)
@@ -114,7 +141,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $cours->sapeur_id = $sapeurId;
         $cours->save($cours);
 
-        return $this->convertCours($cours);
+        return $this->convertSapeurCours($cours);
     }
 
     public function updateCours(int $sapeurId, $data)
@@ -140,7 +167,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $grade->sapeurId = $sapeurId;
         $grade->save();
 
-        return $this->convertGrade($grade);
+        return $this->convertSapeurGrade($grade);
     }
 
     public function updateGrade(int $sapeurId, $data)
@@ -181,7 +208,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $fonction->sapeur_id = $sapeurId;
         $fonction->save();
 
-        return $this->convertFonction($fonction);
+        return $this->convertSapeurFonction($fonction);
     }
 
     public function updateFonction(int $sapeurId, $data)
@@ -210,7 +237,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $mutation->sapeur_id = $sapeurId;
         $mutation->save();
 
-        return $this->convertMutation($mutation);
+        return $this->convertSapeurMutation($mutation);
     }
 
     public function updateMutation(int $sapeurId, $data)
@@ -234,7 +261,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $telephone->sapeur_id = $sapeurId;
         $telephone->save();
 
-        return $this->convertTelephone($telephone);
+        return $this->convertSapeurTelephone($telephone);
     }
 
     public function updateTelephone(int $sapeurId, $data)
@@ -313,63 +340,63 @@ class SapeurRepositoryEloquent implements SapeurRepository
         if (in_array('mutations', $with)) {
             $mutations = array();
             foreach ($sapeur->mutations as $mutation) {
-                array_push($mutations, $this->convertMutation($mutation));
+                array_push($mutations, $this->convertSapeurMutation($mutation));
             }
             $object->mutations = $mutations;
-        }
+            mutations}
 
         if (in_array('groupes', $with)) {
             $groupes = array();
             foreach ($sapeur->groupes as $groupe) {
-                array_push($groupes, $this->convertGroupe($groupe));
+                array_push($groupes, $this->convertSapeurGroupe($groupe));
             }
             $object->groupes = $groupes;
-        }
+            groupes}
 
         if (in_array('grades', $with)) {
             $grades = array();
             foreach ($sapeur->grades as $grade) {
-                array_push($grades, $this->convertGrade($grade));
+                array_push($grades, $this->convertSapeurGrade($grade));
             }
             $object->grades = $grades;
-        }
+            grades}
 
         if (in_array('permis', $with)) {
             $permis = array();
             foreach ($sapeur->permis as $p) {
-                array_push($permis, $this->convertpermis($p));
+                array_push($permis, $this->convertSapeurPermis($p));
             }
             $object->permis = $permis;
-        }
+            permis}
 
         if (in_array('telephones', $with)) {
             $grades = array();
             foreach ($sapeur->telephones as $telephone) {
-                array_push($telephones, $this->convertTelephone($telephone));
+                array_push($telephones, $this->convertSapeurTelephone($telephone));
             }
             $object->telephones = $telephones;
-        }
+            telephones}
 
         if (in_array('fonctions', $with)) {
             $fonctions = array();
             foreach ($sapeur->fonctions as $fonction) {
-                array_push($fonctions, $this->convertFonction($fonction));
+                array_push($fonctions, $this->convertSapeurFonction($fonction));
             }
             $object->fonctions = $fonctions;
-        }
+            fonctions}
 
         if (in_array('cours', $with)) {
             $cours = array();
             foreach ($sapeur->cours as $c) {
-                array_push($cours, $this->convertcour($c));
+                array_push($cours, $this->convertSapeurCours($c));
             }
             $object->cours = $cours;
-        }
+            cours}
 
         return $object;
     }
 
-    protected function convertFonction($fonction)
+    protected function convertSapeurFonction($fonction, $withFonction = false)
     {
         if ($fonction == null) return null;
 
@@ -382,10 +409,29 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $object->fin = $fonction->fin;
         $object->remarque = $fonction->remarque;
 
+        if ($withFonction) {
+            $object->grade = $this->convertFonction($fonction->fonction);
+        }
+
         return $object;
     }
 
     protected function convertGrade($grade)
+    {
+        if ($grade == null) return null;
+
+        $object = new StdClass();
+        $object->id = $grade->id;
+
+        $object->nom = $grade->nom;
+        $object->abreviation = $grade->abreviation;
+        $object->tri = $grade->tri;
+        $object->cumulable = $grade->cumulable;
+
+        return $object;
+    }
+
+    protected function convertSapeurGrade($grade, $withGrade = false)
     {
         if ($grade == null) return null;
 
@@ -397,10 +443,29 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $object->date = $grade->date;
         $object->remarque = $grade->remarque;
 
+        if ($withGrade) {
+            $object->grade = $this->convertGrade($grade->grade);
+        }
+
         return $object;
     }
 
-    protected function convertCours($cours)
+    protected function convertGrade($grade)
+    {
+        if ($grade == null) return null;
+
+        $object = new StdClass();
+        $object->id = $grade->id;
+
+        $object->designation = $grade->designation;
+        $object->tri = $grade->tri;
+        $object->abreviation = $grade->abreviation;
+        $object->groupe = $grade->groupe;
+
+        return $object;
+    }
+
+    protected function convertSapeurCours($cours)
     {
         if ($cours == null) return null;
 
@@ -415,7 +480,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         return $object;
     }
 
-    protected function convertTelephone($telephone)
+    protected function convertSapeurTelephone($telephone)
     {
         if ($telephone == null) return null;
 
@@ -431,7 +496,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         return $object;
     }
 
-    protected function convertMutation($mutation)
+    protected function convertSapeurMutation($mutation)
     {
         if ($mutation == null) return null;
 
@@ -447,7 +512,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         return $object;
     }
 
-    protected function convertPermis($permis)
+    protected function convertSapeurPermis($permis)
     {
         if ($permis == null) return null;
 
@@ -461,7 +526,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         return $object;
     }
 
-    protected function convertGroupe($groupe)
+    protected function convertSapeurGroupe($groupe)
     {
         if ($groupe == null) return null;
 

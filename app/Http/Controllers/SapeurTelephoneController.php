@@ -2,24 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\Business\SapeurBusiness;
 use App\Exceptions\ArrayValidatorException;
+use App\Services\SapeurService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Models\Sapeur;
 use Illuminate\Http\Response;
 
 
 class SapeurTelephoneController extends Controller
 {
+    protected $service;
+
+    public function __construct(SapeurService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * Display a listing of the resource.
      *
-     * @param int $sapeur_id
-     * @return \Illuminate\Http\JsonResponse
+     * @param int $sapeurId
+     * @return JsonResponse
      */
-    public function index(int $sapeur_id)
+    public function index(int $sapeurId)
     {
-        $telephones = Sapeur::find($sapeur_id)->telephones()->get();
+        $telephones = $this->service->getSapeurTelephonesById($sapeurId);
 
         return response()->json(['data' => $telephones]);
     }
@@ -31,7 +38,7 @@ class SapeurTelephoneController extends Controller
      * @return Response
      * @throws ArrayValidatorException
      */
-    public function store(Request $request, int $id)
+    public function store(Request $request, int $sapeurId)
     {
         $validation = Validator::make($request->all(),
             array(
@@ -43,11 +50,11 @@ class SapeurTelephoneController extends Controller
         );
 
         if ($validation->fails()) {
-            return response()->json(["error"=>$validation->errors()]);
+            return response()->json(["error" => $validation->errors()]);
         }
 
         try {
-            $telephone = SapeurBusiness::get($id)->addTelephone($request->all());
+            $telephone = $this->service->addTelephone($sapeurId, $request->all());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -59,12 +66,12 @@ class SapeurTelephoneController extends Controller
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param int $id
+     * @param int $sapeurId
      * @param int $telephoneId
      * @return Response
      * @throws ArrayValidatorException
      */
-    public function update(Request $request, int $id, int $telephoneId)
+    public function update(Request $request, int $sapeurId, int $telephoneId)
     {
         $validation = Validator::make($request->all(),
             array(
@@ -77,7 +84,7 @@ class SapeurTelephoneController extends Controller
         );
 
         if ($validation->fails()) {
-            return response()->json(["error"=>$validation->errors()]);
+            return response()->json(["error" => $validation->errors()]);
         }
 
         if ($telephoneId !== $request->get('id')) {
@@ -85,7 +92,7 @@ class SapeurTelephoneController extends Controller
         }
 
         try {
-            $telephone = SapeurBusiness::get($id)->updateTelephone($request->all());
+            $telephone = $this->service->updateTelephone($sapeurId, $request->all());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -96,14 +103,14 @@ class SapeurTelephoneController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param int $id
+     * @param int $sapeurId
      * @param int $telephoneId
      * @return Response
      */
-    public function destroy(int $id, int $telephoneId)
+    public function destroy(int $sapeurId, int $telephoneId)
     {
         try {
-            SapeurBusiness::get($id)->removeTelephone($telephoneId);
+            $this->service->removeTelephone($sapeurId, $telephoneId);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

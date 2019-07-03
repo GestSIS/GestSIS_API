@@ -3,22 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ArrayValidatorException;
-use App\Models\Sapeur;
-use App\Business\SapeurBusiness;
+use App\Services\SapeurService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Validator;
 
 class SapeurGradeController extends Controller
 {
+    protected $service;
+
+    public function __construct(SapeurService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * Display a listing of the resource.
      *
      * @return Response
      */
-    public function index($sapeur_id)
+    public function index(int $sapeurId)
     {
-        $grades = Sapeur::find($sapeur_id)->grades()->get();
+        $grades = $this->service->getSapeurGradesById($sapeurId);
 
         return response()->json(['data' => $grades]);
     }
@@ -30,7 +36,7 @@ class SapeurGradeController extends Controller
      * @return Response
      * @throws ArrayValidatorException
      */
-    public function store(Request $request, int $id)
+    public function store(Request $request, int $sapeurId)
     {
         // Ajout d'un nouveau grade
         $validation = Validator::make($request->all(),
@@ -46,7 +52,7 @@ class SapeurGradeController extends Controller
         }
 
         try {
-            $grade = SapeurBusiness::get($id)->addGrade($request->all());
+            $grade = $this->service->addGrade($sapeurId, $request->all());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -58,12 +64,12 @@ class SapeurGradeController extends Controller
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param int $id
+     * @param int $sapeurId
      * @param int $gradeId
      * @return Response
      * @throws ArrayValidatorException
      */
-    public function update(Request $request, int $id, int $gradeId)
+    public function update(Request $request, int $sapeurId, int $gradeId)
     {
         if ($gradeId !== $request->get('id')) {
             return response()->json(['error' => 'invalid grade id']);
@@ -82,7 +88,7 @@ class SapeurGradeController extends Controller
         }
 
         try {
-            $grade = SapeurBusiness::get($id)->updateGrade($request->all());
+            $grade = $this->service->updateGrade($sapeurId, $request->all());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -93,14 +99,14 @@ class SapeurGradeController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param int $id
+     * @param int $sapeurId
      * @param int $gradeId
      * @return Response
      */
-    public function destroy(int $id, int $gradeId)
+    public function destroy(int $sapeurId, int $gradeId)
     {
         try {
-            SapeurBusiness::get($id)->removeGrade($gradeId);
+            $this->service->removeGrade($sapeurId, $gradeId);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

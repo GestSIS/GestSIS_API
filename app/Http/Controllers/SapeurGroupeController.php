@@ -2,22 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Sapeur;
-use App\Business\SapeurBusiness;
-use Exception;
-use Illuminate\Http\Request;
+use App\Services\SapeurService;
 use Illuminate\Http\Response;
 
 class SapeurGroupeController extends Controller
 {
+    protected $service;
+
+    public function __construct(SapeurService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function index($id)
+    public function index(int $sapeurId)
     {
-        $groupes = Sapeur::find($id)->groupes()->get();
+        $groupes = $this->service->getSapeurCoursById($sapeurId);
 
         return response()->json(['data' => $groupes]);
     }

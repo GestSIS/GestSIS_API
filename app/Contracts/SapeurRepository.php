@@ -10,15 +10,19 @@ interface SapeurRepository
 
     public function getSapeurDetailsById(int $sapeurId, $with = []);
 
-    public function getSapeurGradesById(int $sapeurId);
+    public function getSapeurGradesById(int $sapeurId, $withGrade = false);
 
-    public function getSapeurFonctionsById(int $sapeurId);
+    public function getSapeurFonctionsById(int $sapeurId, $withFonction = false);
 
-    public function getSapeurCourssById(int $sapeurId);
+    public function getSapeurCoursById(int $sapeurId);
 
     public function getSapeurPermisById(int $sapeurId);
 
     public function getSapeurMutationsById(int $sapeurId);
+
+    public function getSapeurTelephonesById(int $sapeurId);
+
+    public function getSapeurGroupesbyId(int $sapeurId);
 
     public function createSapeur($data);
 
