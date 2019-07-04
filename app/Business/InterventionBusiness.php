@@ -162,7 +162,6 @@ class InterventionBusiness
         /* TODO Check:
         - Pas imputé
         */
-
         foreach ($appels as $appel) {
             $this->repository->editAppelInfoById($intervention_id, $appel['id'], $appel);
         }

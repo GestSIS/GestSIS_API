@@ -71,6 +71,7 @@ class InterventionAppelsController extends Controller
     {
         $validation = Validator::make($request->all(),
             array(
+                'appels.*.id' => 'required|integer|exists:appels,id',
                 'appels.*.date' => 'required|date_format:Y-m-d H:i',
                 'appels.*.numero' => 'string',
                 'appels.*.nom' => 'string',
