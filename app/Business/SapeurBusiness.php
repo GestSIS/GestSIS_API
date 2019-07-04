@@ -5,7 +5,6 @@ namespace App\Business;
 
 use App\Contracts\SapeurRepository;
 use App\Exceptions\ArrayValidatorException;
-use App\Models\SapeurTelephone;
 use Validator;
 
 class SapeurBusiness
@@ -255,14 +254,13 @@ class SapeurBusiness
      */
     public function removeMutation(int $sapeurId, int $mutationId)
     {
-        $this->sapeur->mutations()->where('mutations.id', $mutationId)->delete();
-
         //TODO Update actif statut depending of end of all mutation
+        $this->repository->removeMutation($sapeurId, $mutationId);
     }
 
     public function addTelephone(int $sapeurId, $data)
     {
-        $telephones = $this->sapeur->telephones()->get();
+        $telephones = $this->repository->getSapeurTelephonesById($sapeurId);
         foreach ($telephones as $tel) {
             if (strcmp(
                     trim(preg_replace('/\s+/', ' ', $tel->numero)),
@@ -272,23 +270,25 @@ class SapeurBusiness
             }
         }
 
-        //Create permis
-        $telephone = new SapeurTelephone();
-        $telephone->fill($data);
-
-        //Ajout du permis au sapeur
-        $this->sapeur->telephones()->save($telephone);
-
-        return $telephone;
+        return $this->repository->addTelephone($sapeurId, $data);
     }
 
     public function updateTelephone(int $sapeurId, $data)
     {
-        $telephone = $this->sapeur->telephones()->where('sapeur_telephone.id', $data['id'])->first();
+        $telephones = $this->repository->getSapeurTelephonesById($sapeurId);
 
-        $telephones = $this->sapeur->telephones()
-            ->where('sapeur_telephone.id', '!=', $data['id'])
-            ->get();
+        $telephoneId = $data['id'];
+
+        $telephone = array_filter($telephones,
+            function ($t) use ($telephoneId) {
+                return $t->id === $telephoneId;
+            }
+        );
+        $telephones = array_filter($telephones,
+            function ($t) use ($telephoneId) {
+                return $t->id !== $telephoneId;
+            }
+        );
 
         foreach ($telephones as $tel) {
             if (strcmp(
@@ -299,33 +299,25 @@ class SapeurBusiness
             }
         }
 
-        //Search for the telephone
-        if ($telephone === null) {
-            throw new ArrayValidatorException(array('id' => "Unable to find telephone"));
-        } else {
-            //Update telephone
-            $telephone->update($data);
-            $telephone->save();
-        }
-        return $telephone;
+        return $this->repository->updateTelephone($sapeurId, $data);
     }
 
     public function removeTelephone(int $sapeurId, int $telephoneId)
     {
-        $this->sapeur->telephones()->where('sapeur_telephone.id', $telephoneId)->delete();
+        $this->repository->removeTelephone($sapeurId, $telephoneId);
     }
 
     public function addPermis(int $sapeurId, $data)
     {
-        $permisId = $data['permis_id'];
+        $permisId = $data['permis_type_id'];
         $res = array_filter($this->repository->getSapeurPermisById($sapeurId),
             function ($p) use ($permisId) {
-                return $p->permis_id === $permisId;
+                return $p->permis_type_id === $permisId;
             }
         );
 
         //Check si sapeur as déjà ce permis
-        if (count(res) !== 0) {
+        if (count($res) !== 0) {
             throw new ArrayValidatorException(array('id' => "Unable to find permis"));
         }
 

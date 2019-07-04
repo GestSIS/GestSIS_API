@@ -257,7 +257,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
     public function removeMutation(int $sapeurId, int $mutationId)
     {
-        FonctionSapeur::where('sapeur_id', $sapeurId)->where('id', $mutationId)->limit(1)->delete();
+        Mutation::where('sapeur_id', $sapeurId)->where('id', $mutationId)->limit(1)->delete();
     }
 
     public function addTelephone(int $sapeurId, $data)
@@ -287,7 +287,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $permis->fill($data);
         $permis->permis_type_id = $data['permis_type_id'];
         $permis->sapeur_id = $sapeurId;
-        $permis->save($permis);
+        $permis->save();
 
         return $permis;
     }
