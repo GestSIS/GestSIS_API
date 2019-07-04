@@ -25,7 +25,8 @@ class SapeurBusiness
         //FIXME Finalise add new sapeur mutation
         $this->addMutation($sapeur->id, array(
             "localite_id" => $sapeur->localite_id,
-            "debut" => $data['incorporation']
+            "incorporation" => $data['incorporation'],
+            "motif" => ""
         ));
         return $sapeur;
     }

@@ -34,7 +34,7 @@ class ExerciceBusiness
     public function createExercice($data)
     {
         $data['statut'] = 1;
-        $this->repository->createExercice($data);
+        return $this->repository->createExercice($data);
     }
 
     public function deleteExerciceById($exerciceId)

@@ -76,6 +76,7 @@ class ExerciceSapeursController extends Controller
     {
         $validation = Validator::make($request->all(),
             array(
+                'sapeurs.*.id' => 'required|integer',
                 'sapeurs.*.convoque' => 'required|boolean',
                 'sapeurs.*.present' => 'required|boolean',
                 'sapeurs.*.amende' => 'required|boolean',

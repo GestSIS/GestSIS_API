@@ -3,49 +3,59 @@
 namespace Tests\Feature;
 
 use App\Models\Sapeur;
-use App\Business\SapeurBusiness;
+use App\Services\SapeurService;
 use Exception;
-use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class SapeurTest extends TestCase
 {
+
+    protected $sapeurService;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->sapeurService = $this->app->make(SapeurService::class);
+    }
+
+    public function testCreateSapeur()
+    {
+        $data = factory(Sapeur::class)->make()->toArray();
+        $data['incorporation'] = "29.01.2019";
+
+        $sapeur = $this->sapeurService->createSapeur($data);
+
+        foreach ($data as $key => $value) {
+            if ($key !== "date_naissance" && $key !== "incorporation") {
+                $this->assertTrue(get_object_vars($sapeur)[$key] == $value);
+            }
+        }
+
+        $mutations = $this->sapeurService->getSapeurMutationsById($sapeur->id);
+        $this->assertTrue(count($mutations) === 1);
+    }
+
     /**
      * A basic feature test example.
      *
      * @return void
      * @throws Exception
      */
-    public function testUpdate()
+    public function testUpdateSapeur()
     {
-        $id = 1;
-        $data = [
-            'nom' => Str::random(10),
-            'prenom' => Str::random(10),
-            'suffixe' => '',
-            'rue' => Str::random(7),
-            'no_rue' => '12',
-            'no_avs' => '756.5634.1212.12',
-            'profession' => 'Artisan',
-            'employeur' => 'Canton du Jura',
-            'lieu_de_travail' => 'Delémont',
+        $data = factory(Sapeur::class)->make()->toArray();
+        $data['incorporation'] = "29.01.2019";
 
-            'email' => Str::random(10) . '@gmail.com',
-            'actif' => 1,
+        $sapeurId = $this->sapeurService->createSapeur($data)->id;
+        $data = factory(Sapeur::class)->make()->toArray();
 
-            'iban' => 'CH65 82000 53636 75756 7',
-            'iban_status' => 1,
-            'remarque' => 'Diverses remarques',
-            'porteur' => 1,
-        ];
-
-        $sapeur = SapeurBusiness::get($id);
-        $sapeur->update($data);
-
-        $sapeur = Sapeur::find($id)->firstOrFail();
+        $sapeur = $this->sapeurService->editSapeurDetailsById($sapeurId, $data);
 
         foreach ($data as $key => $value) {
-            $this->assertTrue($sapeur[$key] === $value);
+            if ($key !== "date_naissance") {
+                $this->assertTrue(get_object_vars($sapeur)[$key] == $value);
+            }
         }
     }
 }

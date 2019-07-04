@@ -2,9 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\Business\ExerciceBusiness;
 use App\Models\Exercice;
-use App\Models\ExerciceSapeur;
 use Exception;
 use Tests\TestCase;
 

@@ -45,7 +45,7 @@ class ExerciceService
      */
     public function createExercice($data)
     {
-        return $this->repository->createExercice($data);
+        return $this->business->createExercice($data);
     }
 
     /**
