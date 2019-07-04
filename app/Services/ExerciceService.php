@@ -66,6 +66,11 @@ class ExerciceService
         $this->business->deleteExerciceById($exerciceId);
     }
 
+    public function validateExercice($exerciceId)
+    {
+        $this->business->validateExercice($exerciceId);
+    }
+
     /**
      * Ajout de sapeurs à un exercice
      *

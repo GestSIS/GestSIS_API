@@ -50,9 +50,10 @@ class ImputationBusiness
             $this->imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation);
         } elseif ($unite === 1 && $indemniteType->par_fonction) {
             $this->imputerExerciceParHeureEtFonction($exercice, $sapeurs, $indemniteType, $designation);
-        } elseif ($unite === 1 && !$indemniteType->par_fonction) {
+        } elseif ($unite === 1 && $indemniteType->solde_min !== null) {
             $this->imputerExerciceParHeureEtSoldeMin($exercice, $sapeurs, $indemniteType, $designation);
         } else {
+            dd($indemniteType);
             dd("ERROR");
             return false;
             //TODO WARNING IN LOGS

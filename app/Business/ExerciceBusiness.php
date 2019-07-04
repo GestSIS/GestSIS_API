@@ -33,6 +33,11 @@ class ExerciceBusiness
      */
     public function createExercice($data)
     {
+        // Statut:
+        // 1 -> a saisir
+        // 2 -> a valider
+        // 3 -> a imputer
+        // 4 -> imputée
         $data['statut'] = 1;
         return $this->repository->createExercice($data);
     }
@@ -45,6 +50,13 @@ class ExerciceBusiness
         if ($statut < 3) {
             $this->repository->deleteExerciceById($exerciceId);
         }
+    }
+
+    public function validateExercice($exerciceId)
+    {
+        return $this->repository->updateExerciceById($exerciceId, [
+            "statut" => 3
+        ]);
     }
 
     /**
@@ -69,7 +81,7 @@ class ExerciceBusiness
 //            if (null !== null) {
 //                throw new ArrayValidatorException(array('id' => "Duplicated sapeur"));
 //            }
-            $test.=$exerciceId."-";
+            $test .= $exerciceId . "-";
 
             $this->repository->addSapeurToExercice($exerciceId, $sapeur);
         }
