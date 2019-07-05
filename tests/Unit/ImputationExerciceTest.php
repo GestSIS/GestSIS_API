@@ -37,7 +37,6 @@ class ImputationExerciceTest extends TestCase
         $this->sapeurThreeId = $sapeurService->createSapeur($data)->id;
 
         $this->exerciceId = $exerciceService->createExercice(factory(Exercice::class)->make()->toArray())->id;
-        $exerciceService->validateExercice($this->exerciceId);
 
         $exerciceService->addSapeurs($this->exerciceId, array(
             array(
@@ -65,6 +64,7 @@ class ImputationExerciceTest extends TestCase
                 'excuse_type_id' => null
             )
         ));
+        $exerciceService->validateExercice($this->exerciceId);
     }
 
     /**
