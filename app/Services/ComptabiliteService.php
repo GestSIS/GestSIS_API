@@ -47,6 +47,21 @@ class ComptabiliteService
         );
     }
 
+    function getEcrituresForExerciceById($exerciceId)
+    {
+        return $this->ecritureRepo->getEcrituresForExerciceById($exerciceId);
+    }
+
+    function getEcrituresForInterventionById($interventionId)
+    {
+        return $this->ecritureRepo->getEcrituresForInterventionById($interventionId);
+    }
+
+    function getEcrituresAnnuelsForExerciceComptableById($exerciceComptableId)
+    {
+        return $this->ecritureRepo->getEcrituresAnnuelsForExerciceComptableById($exerciceComptableId);
+    }
+
     function imputationExercice($exerciceId, $data)
     {
         $this->business->imputerExercice($exerciceId, $data);

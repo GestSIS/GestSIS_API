@@ -17,12 +17,10 @@ class EcritureRepositoryEloquent implements EcritureRepository
      */
     public function listeEcritureForExercice($exercice_id)
     {
-        $temp = $this;
-        return Ecriture::where('exercice_id', $exercice_id)
-            ->get()
-            ->map(function ($ecriture) use ($temp) {
-                return $temp->convertEcriture($ecriture);
-            })->toArray();
+        return $this->convertCollectionOfEcritures(
+            Ecriture::where('exercice_id', $exercice_id)
+                ->get()
+        );
     }
 
     /**
@@ -31,34 +29,59 @@ class EcritureRepositoryEloquent implements EcritureRepository
      */
     public function listeEcritureForIntervention($intervention_id)
     {
-        $temp = $this;
-        return Ecriture::where('intervention_id', $intervention_id)
-            ->get()
-            ->map(function ($ecriture) use ($temp) {
-                return $temp->convertEcriture($ecriture);
-            })->toArray();
+        return $this->convertCollectionOfEcritures(
+            Ecriture::where('intervention_id', $intervention_id)
+                ->get()
+        );
     }
 
     public function listeFraisAnnuelByExeComptableId($exerciceComptableId)
     {
-        $temp = $this;
-        return Ecriture::where('exercice_comptable_id', $exerciceComptableId)
-            ->whereNotNull('frais_annuel_type_id')
-            ->get()
-            ->map(function ($ecriture) use ($temp) {
-                return $temp->convertEcriture($ecriture);
-            })->toArray();
+        return $this->convertCollectionOfEcritures(
+            Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+                ->whereNotNull('frais_annuel_type_id')
+                ->get()
+        );
     }
 
     public function listeIndemniteAnnuelByExeComptableId($exerciceComptableId)
     {
-        $temp = $this;
-        return Ecriture::where('exercice_comptable_id', $exerciceComptableId)
-            ->whereNotNull('indemnite_annuel_type_id')
-            ->get()
-            ->map(function ($ecriture) use ($temp) {
-                return $temp->convertEcriture($ecriture);
-            })->toArray();
+        return $this->convertCollectionOfEcritures(
+            Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+                ->whereNotNull('indemnite_annuel_type_id')
+                ->get()
+        );
+    }
+
+    function getEcrituresForExerciceById($exerciceId)
+    {
+        return $this->convertCollectionOfEcritures(
+            Ecriture::where('exercice_id', $exerciceId)
+                ->whereNotNull('indemnite_annuel_type_id')
+                ->get()
+        );
+    }
+
+    function getEcrituresForInterventionById($interventionId)
+    {
+        return $this->convertCollectionOfEcritures(
+            Ecriture::where('intervention_id', $interventionId)
+                ->whereNotNull('indemnite_annuel_type_id')
+                ->get()
+        );
+    }
+
+    function getEcrituresAnnuelsForExerciceComptableById($exerciceComptableId)
+    {
+        return $this->convertCollectionOfEcritures(
+            Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+                ->where(function ($query) {
+                    $query
+                        ->whereNotNull('frais_annuel_type_id')
+                        ->orWhereNotNull('indemnite_annuel_type_id');
+                })
+                ->get()
+        );
     }
 
     /**
@@ -83,35 +106,14 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $model->save();
     }
 
-//    /**
-//     * @param array $data
-//     * @param $id
-//     * @return mixed
-//     */
-//    public function update(array $data, $id)
-//    {
-//        $ecriture = Ecriture::find($id);
-//        $ecriture->update($data);
-//    }
-//
-//    /**
-//     * @param $id
-//     * @return mixed
-//     */
-//    public function delete($id)
-//    {
-//        return Ecriture::where('id')->destroy($id);
-//    }
-//
-//    /**
-//     * @param $id
-//     * @param array $columns
-//     * @return mixed
-//     */
-//    public function find($id, $columns = array('*'))
-//    {
-//        return $this->convertEcriture(Ecriture::find($id, $columns));
-//    }
+    protected function convertCollectionOfEcritures($ecritures)
+    {
+        $temp = $this;
+        return $ecritures
+            ->map(function ($ecriture) use ($temp) {
+                return $temp->convertEcriture($ecriture);
+            })->toArray();
+    }
 
     /**
      * @param $ecriture

@@ -148,6 +148,10 @@ Route::group(['prefix' => 'v2'], function () {
         Route::get('indemnites-types', 'IdemniteTypeController@index');
         Route::get('frais-types', 'FraisTypeController@index');
 
+        Route::get('ecritures/annuel/{id}', 'EcritureController@annuel');
+        Route::get('ecritures/intervention/{id}', 'EcritureController@intervention');
+        Route::get('ecritures/exercice/{id}', 'EcritureController@exercice');
+
         //SUPPRIMER
 
         // Sis

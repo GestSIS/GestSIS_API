@@ -101,8 +101,8 @@ class ImputationBusiness
         $total = $fraisType->montant * $fraisType->quantite;
         $ecriture = array(
             'solde' => 0,
-            'indemnite' => $fraisType->montant,
-            'frais' => 0,
+            'indemnite' => 0,
+            'frais' => $fraisType->montant,
             'type_unite_id' => 1,
             'designation' => $fraisType->designation,
             'total' => $total,

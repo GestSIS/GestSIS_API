@@ -79,7 +79,7 @@ class ImputationExerciceTest extends TestCase
             "indemnite_exercice_type_id" => 1
         );
 
-        $ecritures = $this->comptabiliteService->generateExercice($this->exerciceId, $param);
+        $ecritures = $this->comptabiliteService->imputationExercice($this->exerciceId, $param);
         //$response = $this->json('POST', '/api/v2/imputation/exercice/' . $this->exerciceId, $param);
 
         $this->assertTrue(count($ecritures) === 2);
@@ -97,7 +97,7 @@ class ImputationExerciceTest extends TestCase
             "indemnite_exercice_type_id" => 10
         );
 
-        $ecritures = $this->comptabiliteService->generateExercice($this->exerciceId, $param);
+        $ecritures = $this->comptabiliteService->imputationExercice($this->exerciceId, $param);
         //$response = $this->json('POST', '/api/v2/imputation/exercice/' . $this->exerciceId, $param);
 
         $this->assertTrue(count($ecritures) === 2);
@@ -115,7 +115,7 @@ class ImputationExerciceTest extends TestCase
             "indemnite_exercice_type_id" => 2
         );
 
-        $ecritures = $this->comptabiliteService->generateExercice($this->exerciceId, $param);
+        $ecritures = $this->comptabiliteService->imputationExercice($this->exerciceId, $param);
         //$response = $this->json('POST', '/api/v2/imputation/exercice/' . $this->exerciceId, $param);
 
         $this->assertTrue(count($ecritures) === 2);
