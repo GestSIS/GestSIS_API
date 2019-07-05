@@ -18,8 +18,8 @@ class CreateIndemniteAnnuelTypesTable extends Migration
             $table->timestamps();
 
             $table->string('designation');
-
             $table->unsignedDecimal('montant');
+            $table->unsignedDecimal('quantite');
 
             $table->unsignedBigInteger('fonction_id');
             $table->foreign('fonction_id')->references('id')->on('fonctions');

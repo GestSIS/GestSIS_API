@@ -47,22 +47,27 @@ class ComptabiliteService
         );
     }
 
-    function generateExercice($exerciceId, $data)
+    function imputationExercice($exerciceId, $data)
     {
         $this->business->imputerExercice($exerciceId, $data);
 
         return $this->ecritureRepo->listeEcritureForExercice($exerciceId);
     }
 
-    function generateIntervention($interventionId, $data)
+    function imputationIntervention($interventionId, $data)
     {
         $this->business->imputerIntervention($interventionId, $data);
 
         return $this->ecritureRepo->listeEcritureForIntervention($interventionId);
     }
 
-    function generateIndemniteAnnuel($data)
+    function imputationAnnuel($exerciceComptableId)
     {
-        //TODO See how to manage that
+        $this->business->imputerAnnuel($exerciceComptableId);
+
+        return [
+            "frais" => $this->ecritureRepo->listeFraisAnnuelByExeComptableId($exerciceComptableId),
+            "indemnites" => $this->ecritureRepo->listeIndemniteAnnuelByExeComptableId($exerciceComptableId),
+        ];
     }
 }

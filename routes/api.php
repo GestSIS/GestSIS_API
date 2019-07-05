@@ -143,8 +143,7 @@ Route::group(['prefix' => 'v2'], function () {
 
         Route::post('imputation/intervention/{id}', 'ImputationController@intervention');
         Route::post('imputation/exercice/{id}', 'ImputationController@exercice');
-        Route::post('imputation/frais-annuel', 'ImputationController@frais-annuel');
-        Route::post('imputation/indemnite-annuel', 'ImputationController@indemnite-annuel');
+        Route::post('imputation/annuel/{id}', 'ImputationController@annuel');
 
         Route::get('indemnites-types', 'IdemniteTypeController@index');
         Route::get('frais-types', 'FraisTypeController@index');

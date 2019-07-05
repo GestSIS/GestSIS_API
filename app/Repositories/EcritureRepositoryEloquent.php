@@ -39,8 +39,30 @@ class EcritureRepositoryEloquent implements EcritureRepository
             })->toArray();
     }
 
+    public function listeFraisAnnuelByExeComptableId($exerciceComptableId)
+    {
+        $temp = $this;
+        return Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+            ->whereNotNull('frais_annuel_type_id')
+            ->get()
+            ->map(function ($ecriture) use ($temp) {
+                return $temp->convertEcriture($ecriture);
+            })->toArray();
+    }
+
+    public function listeIndemniteAnnuelByExeComptableId($exerciceComptableId)
+    {
+        $temp = $this;
+        return Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+            ->whereNotNull('indemnite_annuel_type_id')
+            ->get()
+            ->map(function ($ecriture) use ($temp) {
+                return $temp->convertEcriture($ecriture);
+            })->toArray();
+    }
+
     /**
-     *
+     * @param $ecriture
      */
     public function persisteNewEcriture($ecriture)
     {

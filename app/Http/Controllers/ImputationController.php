@@ -49,16 +49,13 @@ class ImputationController extends Controller
         return response()->json(['data' => $temp]);
     }
 
-    public function indemniteAnnuel()
+    public function annuel(Request $request, int $id)
     {
-
-        return response()->json(['data' => 'TODO']);
-    }
-
-    public function fraisAnnuel()
-    {
-
-
-        return response()->json(['data' => 'TODO']);
+        try {
+            $res = $this->service->imputationAnnuel($id);
+        } catch (ArrayValidatorException $exception) {
+            return response()->json(['error' => $exception->getErrors()]);
+        }
+        return response()->json(['data' => $res]);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Business;
 
 use App\Contracts\EcritureRepository;
 use App\Contracts\ExerciceRepository;
+use App\Contracts\FraisTypeRepository;
 use App\Contracts\IndemniteTypeRepository;
 use App\Contracts\InterventionRepository;
 use App\Contracts\SapeurRepository;
@@ -14,6 +15,7 @@ class ImputationBusiness
 {
     protected $ecritureRepo;
     protected $indemniteRepo;
+    protected $fraisRepo;
     protected $exerciceRepo;
     protected $interventionRepo;
 
@@ -22,13 +24,99 @@ class ImputationBusiness
         SapeurRepository $sapeur,
         ExerciceRepository $exercice,
         InterventionRepository $intervention,
-        IndemniteTypeRepository $indemnite)
+        IndemniteTypeRepository $indemnite,
+        FraisTypeRepository $frais)
     {
         $this->ecritureRepo = $ecriture;
         $this->exerciceRepo = $exercice;
         $this->sapeurRepo = $sapeur;
         $this->interventionRepo = $intervention;
         $this->indemniteRepo = $indemnite;
+        $this->fraisRepo = $frais;
+    }
+
+    public function imputerAnnuel(int $exerciceComptableId)
+    {
+        // TODO Check pas déjà imputée cette année
+
+        $indemnites = $this->indemniteRepo->listeIndemniteAnnuelType();
+        $frais = $this->fraisRepo->listeFraisAnnuelType();
+
+        $sapeurs = array_filter($this->sapeurRepo->listeSapeurLight(),
+            function ($s) {
+                return $s->actif;
+            }
+        );
+
+        //Génération des indemnités annuels
+        foreach ($indemnites as $i) {
+            array_map(
+                function ($s) use ($i, $exerciceComptableId) {
+                    $this->imputerIndemniteSapeur($i, $s, $exerciceComptableId);
+                },
+                array_filter($sapeurs, function ($s) use ($i) {
+                    return $i->fonction_id === $s->fonction_id;
+                })
+            );
+        }
+
+        //Générations des frais annuels
+        foreach ($frais as $f) {
+            array_map(
+                function ($s) use ($f, $exerciceComptableId) {
+                    $this->imputerFraisSapeur($f, $s, $exerciceComptableId);
+                },
+                array_filter($sapeurs, function ($s) use ($f) {
+                    return $f->fonction_id === $s->fonction_id;
+                })
+            );
+        }
+    }
+
+    private function imputerIndemniteSapeur($indemniteType, $sapeur, $exerciceComptableId)
+    {
+        $total = $indemniteType->montant * $indemniteType->quantite;
+        $ecriture = array(
+            'solde' => 0,
+            'indemnite' => $indemniteType->montant,
+            'frais' => 0,
+            'type_unite_id' => 1,
+            'designation' => $indemniteType->designation,
+            'total' => $total,
+            'tarif' => $indemniteType->montant,
+            'quantite' => $indemniteType->quantite,
+            'solde_min' => null,
+            'solde_min_pour' => null,
+            'taux' => null,
+            'sapeur_id' => $sapeur->id,
+            'exercice_comptable_id' => $exerciceComptableId,
+            'indemnite_annuel_type_id' => $indemniteType->id
+        );
+
+        $this->ecritureRepo->persisteNewEcriture($ecriture);
+    }
+
+    private function imputerFraisSapeur($fraisType, $sapeur, $exerciceComptableId)
+    {
+        $total = $fraisType->montant * $fraisType->quantite;
+        $ecriture = array(
+            'solde' => 0,
+            'indemnite' => $fraisType->montant,
+            'frais' => 0,
+            'type_unite_id' => 1,
+            'designation' => $fraisType->designation,
+            'total' => $total,
+            'tarif' => $fraisType->montant,
+            'quantite' => $fraisType->quantite,
+            'solde_min' => null,
+            'solde_min_pour' => null,
+            'taux' => null,
+            'sapeur_id' => $sapeur->id,
+            'exercice_comptable_id' => $exerciceComptableId,
+            'frais_annuel_type_id' => $fraisType->id
+        );
+
+        $this->ecritureRepo->persisteNewEcriture($ecriture);
     }
 
     public function imputerExercice($exerciceId, $data)

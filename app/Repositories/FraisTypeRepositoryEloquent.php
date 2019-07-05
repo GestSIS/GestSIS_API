@@ -4,6 +4,7 @@
 namespace App\Repositories;
 
 
+use App\Contracts\EcritureRepository;
 use App\Contracts\FraisTypeRepository;
 use App\Models\FraisAnnuelType;
 use stdClass;
@@ -31,10 +32,12 @@ class FraisTypeRepositoryEloquent implements FraisTypeRepository
 
         $object->id = $frais->id;
         $object->designation = $frais->designation;
+        $object->quantite = $frais->quantite;
         $object->montant = $frais->montant;
         $object->fonction_id = $frais->fonction_id;
         $object->compte_id = $frais->compte_id;
 
         return $object;
     }
+
 }
