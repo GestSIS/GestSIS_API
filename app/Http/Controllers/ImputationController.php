@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exceptions\ArrayValidatorException;
 use App\Services\ComptabiliteService;
 use Illuminate\Http\Request;
+use Validator;
 
 class ImputationController extends Controller
 {

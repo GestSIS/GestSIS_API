@@ -116,11 +116,11 @@ class ExerciceSapeursController extends Controller
         }
 
         try {
-            $this->service->removeSapeurs($exerciceId, $validation->validated()['sapeurs']);
+            $statut = $this->service->removeSapeurs($exerciceId, $validation->validated()['sapeurs']);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
         }
 
-        return response()->json(['data' => 'success']);
+        return response()->json(['data' => $statut]);
     }
 }

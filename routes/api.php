@@ -43,6 +43,7 @@ Route::group(['prefix' => 'v2'], function () {
 
         // Exercices
         Route::resource('exercices', 'ExerciceController')->only(['index', 'show', 'store', 'update', 'destroy']);//->middleware('role:effectif_read');
+        Route::post('exercices/{id}/valider', 'ExerciceController@valider')->name('api.v2.exercices.valider');
 
         Route::resource('exercices.sapeurs', 'ExerciceSapeursController')->only(['index']);
         Route::post('exercices/{id}/sapeurs', 'ExerciceSapeursController@store')->name('api.v2.exercices.sapeurs.store');
@@ -56,6 +57,7 @@ Route::group(['prefix' => 'v2'], function () {
 
         // Interventions
         Route::resource('interventions', 'InterventionController')->only(['index', 'show', 'store', 'update']);
+        Route::post('interventions/{id}/valider', 'InterventionController@valider')->name('api.v2.interventions.valider');
 
         Route::resource('interventions.materiels', 'InterventionMaterielsController')->only(['index']);
         Route::post('interventions/{id}/materiels', 'InterventionMaterielsController@store')->name('api.v2.interventions.materiels.store');

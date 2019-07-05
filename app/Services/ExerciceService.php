@@ -68,20 +68,23 @@ class ExerciceService
 
     public function validateExercice($exerciceId)
     {
-        $this->business->validateExercice($exerciceId);
+        return $this->business->validateExercice($exerciceId);
     }
 
     /**
      * Ajout de sapeurs à un exercice
      *
      * @param $sapeurs
-     * @return Collection
      * @throws ArrayValidatorException
+     * @return array
      */
     public function addSapeurs($exerciceId, $sapeurs)
     {
-        $this->business->addSapeurs($exerciceId, $sapeurs);
-        return $this->repository->listSapeurOfExerciceById($exerciceId);
+        $statut = $this->business->addSapeurs($exerciceId, $sapeurs);
+        return [
+            "statut" => $statut,
+            "sapeurs" => $this->repository->listSapeurOfExerciceById($exerciceId)
+        ];
     }
 
     /**
@@ -101,9 +104,10 @@ class ExerciceService
      * Suppression de sapeurs d'un exercice
      *
      * @param $data
+     * @return statut
      */
     public function removeSapeurs($exerciceId, $ids)
     {
-        $this->business->removeSapeurs($exerciceId, $ids);
+        return $this->business->removeSapeurs($exerciceId, $ids);
     }
 }

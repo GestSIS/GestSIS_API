@@ -7,7 +7,6 @@ use App\Models\Exercice;
 use App\Services\ExercicenService;
 use App\Services\ExerciceService;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Validator;
 
 class ExerciceController extends Controller
@@ -20,11 +19,6 @@ class ExerciceController extends Controller
         $this->service = $service;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
     public function index(Request $request)
     {
         //TODO Refactor to service
@@ -34,13 +28,6 @@ class ExerciceController extends Controller
         return response()->json(['data' => $exercices]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @return Response
-     * @throws Exception
-     */
     public function store(Request $request)
     {
         $validation = Validator::make($request->all(),
@@ -70,12 +57,6 @@ class ExerciceController extends Controller
         return response()->json(['data' => $exercice]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param int $id
-     * @return Response
-     */
     public function show($id)
     {
         $exercice = $this->service->getExerciceById($id);
@@ -83,14 +64,6 @@ class ExerciceController extends Controller
         return response()->json(['data' => $exercice]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param int $id
-     * @return Response
-     * @throws Exception
-     */
     public function update(Request $request, $id)
     {
         $validation = Validator::make($request->all(),
@@ -119,20 +92,25 @@ class ExerciceController extends Controller
         return response()->json(['data' => $exercice]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param int $id
-     * @return Response
-     */
     public function destroy($id)
     {
         try {
-            $exercice = $this->service->deleteExerciceById($id);
+            $this->service->deleteExerciceById($id);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
 
         return response()->json(['data' => 'success']);
+    }
+
+    public function valider($id)
+    {
+        try {
+            $exercice = $this->service->validateExercice($id);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
+        }
+
+        return response()->json(['data' => $exercice]);
     }
 }

@@ -140,6 +140,12 @@ class InterventionController extends Controller
         return response()->json(['data' => $intervention]);
     }
 
+    public function valider($id)
+    {
+        //TODO
+        //$this->service->validate
+    }
+
     /**
      * Remove the specified resource from storage.
      *
