@@ -5,6 +5,7 @@ namespace App\Repositories;
 
 use App\Contracts\InterventionRepository;
 use App\Models\Appel;
+use App\Models\Exercice;
 use App\Models\GroupeIntervention;
 use App\Models\Intervention;
 use App\Models\InterventionMateriel;
@@ -38,6 +39,11 @@ class InterventionRepositoryEloquent implements InterventionRepository
         //TODO Check with allowed
         $allowedWith = ['presences', 'phases'];
         return $this->convertIntervention(Intervention::with($with)->find($id), $with);
+    }
+
+    public function getInterventionStatutById($interventionId)
+    {
+        return Intervention::findOrFail($interventionId, 'statut')->statut;
     }
 
     public function findInterventionById($interventionId)

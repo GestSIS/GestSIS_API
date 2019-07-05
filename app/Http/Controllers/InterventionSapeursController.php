@@ -110,7 +110,7 @@ class InterventionSapeursController extends Controller
             return response()->json(['error' => $validation->errors()]);
         }
 
-        $this->service->removePresences($interventionId, $validation->validated()['sapeurs']);
-        return response()->json(['data' => 'success']);
+        $statut = $this->service->removePresences($interventionId, $validation->validated()['sapeurs']);
+        return response()->json(['data' => $statut]);
     }
 }

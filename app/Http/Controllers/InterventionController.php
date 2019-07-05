@@ -142,8 +142,13 @@ class InterventionController extends Controller
 
     public function valider($id)
     {
-        //TODO
-        //$this->service->validate
+        try {
+            $statut = $this->service->validerInterventionById($id);
+        } catch (ArrayValidatorException $e) {
+            return response()->json(['error' => $e->getErrors()]);
+        }
+
+        return response()->json(['data' => $statut]);
     }
 
     /**

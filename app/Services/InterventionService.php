@@ -83,32 +83,38 @@ class InterventionService
      * @return Intervention
      * @throws ArrayValidatorException(
      */
-    public function editInterventionInformationsById($intervention_id, $data)
+    public function editInterventionInformationsById($interventionId, $data)
     {
-        return $this->business->editInterventionInformationsById($intervention_id, $data);
+        return $this->business->editInterventionInformationsById($interventionId, $data);
     }
 
+    public function validerInterventionById($interventionId){
+        return $this->business->validerInterventionById($interventionId);
+    }
     /**
      * Delete a intervention.
      *
      * @param int
      */
-    public function deleteInterventionById($intervention_id)
+    public function deleteInterventionById($interventionId)
     {
-        $this->business->deleteInterventionById($intervention_id);
+        $this->business->deleteInterventionById($interventionId);
     }
 
     /**
      * Ajout de sapeurs d'un intervention
      *
      * @param $data
-     * @return Collection
+     * @return array
      * @throws ArrayValidatorException(
      */
-    public function addPresences($intervention_id, $sapeurs)
+    public function addPresences($interventionId, $sapeurs)
     {
-        $this->business->addPresences($intervention_id, $sapeurs);
-        return $this->repository->getInterventionPresences($intervention_id);
+        $statut = $this->business->addPresences($interventionId, $sapeurs);
+        return [
+            "statut" => $statut,
+            "sapeurs" => $this->repository->getInterventionPresences($interventionId)
+        ];
     }
 
     /**
@@ -118,10 +124,10 @@ class InterventionService
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function updatePresences($intervention_id, $sapeurs)
+    public function updatePresences($interventionId, $sapeurs)
     {
-        $this->business->updatePresences($intervention_id, $sapeurs);
-        return $this->repository->getInterventionPresences($intervention_id);
+        $this->business->updatePresences($interventionId, $sapeurs);
+        return $this->repository->getInterventionPresences($interventionId);
     }
 
     /**
@@ -131,7 +137,7 @@ class InterventionService
      */
     public function removePresences($interventionId, $ids)
     {
-        $this->business->removePresences($interventionId, $ids);
+        return $this->business->removePresences($interventionId, $ids);
     }
 
     /**
@@ -141,10 +147,10 @@ class InterventionService
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function addPhases($intervention_id, $phases)
+    public function addPhases($interventionId, $phases)
     {
-        $this->business->addPhases($intervention_id, $phases);
-        return $this->repository->getInterventionPhases($intervention_id);
+        $this->business->addPhases($interventionId, $phases);
+        return $this->repository->getInterventionPhases($interventionId);
     }
 
     /**
@@ -154,10 +160,10 @@ class InterventionService
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function updatePhases($intervention_id, $phases)
+    public function updatePhases($interventionId, $phases)
     {
-        $this->business->updatePhases($intervention_id, $phases);
-        return $this->repository->getInterventionPhases($intervention_id);
+        $this->business->updatePhases($interventionId, $phases);
+        return $this->repository->getInterventionPhases($interventionId);
     }
 
     /**
@@ -177,10 +183,10 @@ class InterventionService
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function addAppels($intervention_id, $appels)
+    public function addAppels($interventionId, $appels)
     {
-        $this->business->addAppels($intervention_id, $appels);
-        return $this->repository->getInterventionAppels($intervention_id);
+        $this->business->addAppels($interventionId, $appels);
+        return $this->repository->getInterventionAppels($interventionId);
     }
 
     /**
@@ -190,10 +196,10 @@ class InterventionService
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function updateAppels($intervention_id, $appels)
+    public function updateAppels($interventionId, $appels)
     {
-        $this->business->updateAppels($intervention_id, $appels);
-        return $this->repository->getInterventionAppels($intervention_id);
+        $this->business->updateAppels($interventionId, $appels);
+        return $this->repository->getInterventionAppels($interventionId);
     }
 
     /**
@@ -213,10 +219,10 @@ class InterventionService
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function addMissions($intervention_id, $missions)
+    public function addMissions($interventionId, $missions)
     {
-        $this->business->addMissions($intervention_id, $missions);
-        return $this->repository->getInterventionMissions($intervention_id);
+        $this->business->addMissions($interventionId, $missions);
+        return $this->repository->getInterventionMissions($interventionId);
     }
 
     /**
@@ -226,10 +232,10 @@ class InterventionService
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function updateMissions($intervention_id, $missions)
+    public function updateMissions($interventionId, $missions)
     {
-        $this->business->updateMissions($intervention_id, $missions);
-        return $this->repository->getInterventionMissions($intervention_id);
+        $this->business->updateMissions($interventionId, $missions);
+        return $this->repository->getInterventionMissions($interventionId);
     }
 
     /**
@@ -249,10 +255,10 @@ class InterventionService
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function addMateriels($intervention_id, $materiels)
+    public function addMateriels($interventionId, $materiels)
     {
-        $this->business->addMateriels($intervention_id, $materiels);
-        return $this->repository->getInterventionMateriels($intervention_id);
+        $this->business->addMateriels($interventionId, $materiels);
+        return $this->repository->getInterventionMateriels($interventionId);
     }
 
     /**
@@ -262,10 +268,10 @@ class InterventionService
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function updateMateriels($intervention_id, $materiels)
+    public function updateMateriels($interventionId, $materiels)
     {
-        $this->business->updateMateriels($intervention_id, $materiels);
-        return $this->repository->getInterventionMateriels($intervention_id);
+        $this->business->updateMateriels($interventionId, $materiels);
+        return $this->repository->getInterventionMateriels($interventionId);
     }
 
     /**
@@ -285,10 +291,10 @@ class InterventionService
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function addQuittances($intervention_id, $quittances)
+    public function addQuittances($interventionId, $quittances)
     {
-        $this->business->addQuittances($intervention_id, $quittances);
-        return $this->repository->getInterventionQuittances($intervention_id);
+        $this->business->addQuittances($interventionId, $quittances);
+        return $this->repository->getInterventionQuittances($interventionId);
     }
 
     /**
@@ -308,10 +314,10 @@ class InterventionService
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function addVehicules($intervention_id, $vehicules)
+    public function addVehicules($interventionId, $vehicules)
     {
-        $this->business->addVehicules($intervention_id, $vehicules);
-        return $this->repository->getInterventionVehicules($intervention_id);
+        $this->business->addVehicules($interventionId, $vehicules);
+        return $this->repository->getInterventionVehicules($interventionId);
     }
 
     /**
@@ -331,10 +337,10 @@ class InterventionService
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function addGroupes($intervention_id, $groupes)
+    public function addGroupes($interventionId, $groupes)
     {
-        $this->business->addGroupes($intervention_id, $groupes);
-        return $this->repository->getInterventionGroupes($intervention_id);
+        $this->business->addGroupes($interventionId, $groupes);
+        return $this->repository->getInterventionGroupes($interventionId);
     }
 
     /**

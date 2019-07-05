@@ -13,6 +13,11 @@ use Validator;
 class InterventionBusiness
 {
 
+    private const STATUT_EMPTY = 0;
+    private const STATUT_SAISI = 1;
+    private const STATUT_VALIDE = 2;
+    private const STATUT_IMPUTE = 3;
+
     protected $repository;
 
     public function __construct(InterventionRepository $repository)
@@ -35,9 +40,26 @@ class InterventionBusiness
         $intervention = $this->repository->createNewIntervention($data);
         $this->repository->addPhase($intervention->id, array(
             "debut" => $data['date_debut'] . ' ' . $data['heure_debut'],
-            "phase_type_id" => $phaseTypeIntervention
+            "phase_type_id" => $phaseTypeIntervention,
+            "statut" => self::STATUT_EMPTY
         ));
         return $intervention;
+    }
+
+    /**
+     * @param $interventionId
+     * @return mixed
+     * @throws ArrayValidatorException
+     */
+    public function validerInterventionById($interventionId)
+    {
+        $statut = $this->repository->getInterventionStatutById($interventionId);
+        if ($statut === self::STATUT_SAISI) {
+            return $this->repository->editInterventionInformationsById($interventionId, [
+                "statut" => self::STATUT_VALIDE
+            ])->statut;
+        }
+        throw new ArrayValidatorException(["message" => "Impossible de valider l'exercice."]);
     }
 
     /**
@@ -48,9 +70,9 @@ class InterventionBusiness
      * @return Intervention
      * @throws ArrayValidatorException(
      */
-    public function editInterventionInformationsById($intervention_id, $data)
+    public function editInterventionInformationsById($interventionId, $data)
     {
-        $intervention = $this->repository->editInterventionInformationsById($intervention_id, $data);
+        $intervention = $this->repository->editInterventionInformationsById($interventionId, $data);
         //TODO Update phase debut
         //TODO Check if date debut changed -> update first phase
 
@@ -62,7 +84,7 @@ class InterventionBusiness
      *
      * @param int
      */
-    public static function deleteInterventionById($intervention_id)
+    public static function deleteInterventionById($interventionId)
     {
         /* TODO Check:
         - Pas imputé
@@ -86,7 +108,7 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function addPresences($intervention_id, $sapeurs)
+    public function addPresences($interventionId, $sapeurs)
     {
         /* TODO Check:
         - Pas imputé
@@ -95,8 +117,14 @@ class InterventionBusiness
         foreach ($sapeurs as $sapeur) {
             //TODO Check duplicated period of time
 
-            $this->repository->addPresence($intervention_id, $sapeur);
+            $this->repository->addPresence($interventionId, $sapeur);
         }
+
+        $statut = $this->repository->getInterventionStatutById($interventionId);
+        if ($statut < self::STATUT_SAISI) {
+            $statut = $this->repository->editInterventionInformationsById($interventionId, ["statut" => self::STATUT_SAISI])->statut;
+        }
+        return $statut;
     }
 
     /**
@@ -105,7 +133,7 @@ class InterventionBusiness
      * @param $data
      * @return Collection
      */
-    public function updatePresences($intervention_id, $sapeurs)
+    public function updatePresences($interventionId, $sapeurs)
     {
         /* TODO Check:
         - Pas imputé
@@ -114,7 +142,7 @@ class InterventionBusiness
         foreach ($sapeurs as $sapeur) {
             //TODO Check period non dupliqué
 
-            $this->repository->editPresenceInfoById($intervention_id, $sapeur['sapeur_id'], $sapeur);
+            $this->repository->editPresenceInfoById($interventionId, $sapeur['sapeur_id'], $sapeur);
         }
     }
 
@@ -123,13 +151,19 @@ class InterventionBusiness
      *
      * @param $data
      */
-    public function removePresences($intervention_id, $ids)
+    public function removePresences($interventionId, $ids)
     {
         /* TODO Check:
         - Pas imputé
         */
 
-        $this->repository->removePresencesById($intervention_id, $ids);
+        $this->repository->removePresencesById($interventionId, $ids);
+        $statut = $this->repository->getInterventionStatutById($interventionId);
+
+        if (count($this->repository->getInterventionPresences($interventionId)) === 0) {
+            $statut = $this->repository->editInterventionInformationsById($interventionId, ["statut" => self::STATUT_EMPTY]);
+        }
+        return $statut;
     }
 
     /**
@@ -139,14 +173,14 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function addAppels($intervention_id, $appels)
+    public function addAppels($interventionId, $appels)
     {
         /* TODO Check:
         - Pas imputé
         */
 
         foreach ($appels as $appel) {
-            $this->repository->addAppel($intervention_id, $appel);
+            $this->repository->addAppel($interventionId, $appel);
         }
     }
 
@@ -157,18 +191,18 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function updateAppels($intervention_id, $appels)
+    public function updateAppels($interventionId, $appels)
     {
         /* TODO Check:
         - Pas imputé
         */
         foreach ($appels as $appel) {
-            $this->repository->editAppelInfoById($intervention_id, $appel['id'], $appel);
+            $this->repository->editAppelInfoById($interventionId, $appel['id'], $appel);
         }
     }
 
     /**
-     * Suppression d'appels d'un intervention
+     * Suppression d'appels d'une intervention
      *
      * @param $data
      */
@@ -187,14 +221,14 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function addMissions($intervention_id, $missions)
+    public function addMissions($interventionId, $missions)
     {
         /* TODO Check:
         - Pas imputé
         */
 
         foreach ($missions as $mission) {
-            $this->repository->addMission($intervention_id, $mission);
+            $this->repository->addMission($interventionId, $mission);
         }
     }
 
@@ -205,14 +239,14 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function updateMissions($intervention_id, $missions)
+    public function updateMissions($interventionId, $missions)
     {
         /* TODO Check:
         - Pas imputé
         */
 
         foreach ($missions as $mission) {
-            $this->repository->editMissionInfoById($intervention_id, $mission['id'], $mission);
+            $this->repository->editMissionInfoById($interventionId, $mission['id'], $mission);
         }
     }
 
@@ -221,13 +255,13 @@ class InterventionBusiness
      *
      * @param $data
      */
-    public function removeMissions($intervention_id, $ids)
+    public function removeMissions($interventionId, $ids)
     {
         /* TODO Check:
         - Pas imputé
         */
 
-        $this->repository->removeMissionsById($intervention_id, $ids);
+        $this->repository->removeMissionsById($interventionId, $ids);
     }
 
     /**
@@ -237,14 +271,14 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function addPhases($intervention_id, $phases)
+    public function addPhases($interventionId, $phases)
     {
         /* TODO Check:
         - Pas imputé
         */
 
         foreach ($phases as $phase) {
-            $this->repository->addPhase($intervention_id, $phase);
+            $this->repository->addPhase($interventionId, $phase);
         }
     }
 
@@ -255,14 +289,14 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function updatePhases($intervention_id, $phases)
+    public function updatePhases($interventionId, $phases)
     {
         /* TODO Check:
         - Pas imputé
         */
 
         foreach ($phases as $phase) {
-            $this->repository->editPhaseInfosById($intervention_id, $phase['id'], $phase);
+            $this->repository->editPhaseInfosById($interventionId, $phase['id'], $phase);
         }
     }
 
@@ -271,13 +305,13 @@ class InterventionBusiness
      *
      * @param $data
      */
-    public function removePhases($intervention_id, $ids)
+    public function removePhases($interventionId, $ids)
     {
         /* TODO Check:
         - Pas imputé
         */
 
-        $this->repository->removePhasesById($intervention_id, $ids);
+        $this->repository->removePhasesById($interventionId, $ids);
     }
 
     /**
@@ -287,14 +321,14 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function addMateriels($intervention_id, $materiels)
+    public function addMateriels($interventionId, $materiels)
     {
         /* TODO Check:
         - Pas imputé
         */
 
         foreach ($materiels as $materiel) {
-            $this->repository->addMateriel($intervention_id, $materiel);
+            $this->repository->addMateriel($interventionId, $materiel);
         }
     }
 
@@ -305,14 +339,14 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function updateMateriels($intervention_id, $materiels)
+    public function updateMateriels($interventionId, $materiels)
     {
         /* TODO Check:
         - Pas imputé
         */
 
         foreach ($materiels as $materiel) {
-            $this->repository->editMaterielQuantiteById($intervention_id, $materiel['id'], $materiel['quantite']);
+            $this->repository->editMaterielQuantiteById($interventionId, $materiel['id'], $materiel['quantite']);
         }
     }
 
@@ -321,13 +355,13 @@ class InterventionBusiness
      *
      * @param $data
      */
-    public function removeMateriels($intervention_id, $ids)
+    public function removeMateriels($interventionId, $ids)
     {
         /* TODO Check:
         - Pas imputé
         */
 
-        $this->repository->removeMaterielsById($intervention_id, $ids);
+        $this->repository->removeMaterielsById($interventionId, $ids);
     }
 
     /**
@@ -337,14 +371,14 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function addQuittances($intervention_id, $quittances)
+    public function addQuittances($interventionId, $quittances)
     {
         /* TODO Check:
         - Pas imputé
         */
 
         foreach ($quittances as $quittance) {
-            $this->repository->addQuittance($intervention_id, $quittance);
+            $this->repository->addQuittance($interventionId, $quittance);
         }
     }
 
@@ -353,13 +387,13 @@ class InterventionBusiness
      *
      * @param $data
      */
-    public function removeQuittances($intervention_id, $ids)
+    public function removeQuittances($interventionId, $ids)
     {
         /* TODO Check:
         - Pas imputé
         */
 
-        $this->repository->removeQuittancesById($intervention_id, $ids);
+        $this->repository->removeQuittancesById($interventionId, $ids);
     }
 
     /**
@@ -369,7 +403,7 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function addVehicules($intervention_id, $vehicules)
+    public function addVehicules($interventionId, $vehicules)
     {
         /* TODO Check:
         - Pas imputé
@@ -377,7 +411,7 @@ class InterventionBusiness
         */
 
         foreach ($vehicules as $vehicule) {
-            $this->repository->addVehicule($intervention_id, $vehicule);
+            $this->repository->addVehicule($interventionId, $vehicule);
         }
     }
 
@@ -386,13 +420,13 @@ class InterventionBusiness
      *
      * @param $data
      */
-    public function removeVehicules($intervention_id, $ids)
+    public function removeVehicules($interventionId, $ids)
     {
         /* TODO Check:
         - Pas imputé
         */
 
-        $this->repository->removeVehiculesById($intervention_id, $ids);
+        $this->repository->removeVehiculesById($interventionId, $ids);
     }
 
     /**
@@ -402,13 +436,13 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayValidatorException(
      */
-    public function addGroupes($intervention_id, $groupes)
+    public function addGroupes($interventionId, $groupes)
     {
         /* TODO Check:
         - Pas imputé
         */
         foreach ($groupes as $groupe) {
-            $this->repository->addGroupe($intervention_id, $groupe);
+            $this->repository->addGroupe($interventionId, $groupe);
         }
     }
 
@@ -417,12 +451,12 @@ class InterventionBusiness
      *
      * @param $data
      */
-    public function removeGroupes($intervention_id, $ids)
+    public function removeGroupes($interventionId, $ids)
     {
         /* TODO Check:
         - Pas imputé
         */
 
-        $this->repository->removeGroupesById($intervention_id, $ids);
+        $this->repository->removeGroupesById($interventionId, $ids);
     }
 }

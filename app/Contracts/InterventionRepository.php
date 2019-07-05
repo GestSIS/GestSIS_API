@@ -11,6 +11,8 @@ interface InterventionRepository
     public function listeIntervention($exercice_comptable_id);
     public function findInterventionById($interventionId);
 
+    public function getInterventionStatutById($interventionId);
+
     public function getInterventionAppels($interventionId);
     public function getInterventionMissions($interventionId);
     public function getInterventionVehicules($interventionId);
