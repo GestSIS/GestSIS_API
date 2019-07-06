@@ -16,11 +16,11 @@ class ExerciceBusiness
     // 2 -> En attente de validation
     // 3 -> Disponible pour imputation
     // 4 -> Imputée
-    private const STATUT_ANNULE = 0;
-    private const STATUT_EMPTY = 1;
-    private const STATUT_SAISI = 2;
-    private const STATUT_VALIDE = 3;
-    private const STATUT_IMPUTE = 4;
+    public const EXERCICE_STATUT_ANNULE = 0;
+    public const EXERCICE_STATUT_EMPTY = 1;
+    public const EXERCICE_STATUT_SAISI = 2;
+    public const EXERCICE_STATUT_VALIDE = 3;
+    public const EXERCICE_STATUT_IMPUTE = 4;
 
 
     protected $repository;
@@ -53,7 +53,7 @@ class ExerciceBusiness
         //TODO Check status
         $statut = $this->repository->getExerciceStatutById($exerciceId);
 
-        if ($statut < self::STATUT_VALIDE) {
+        if ($statut < self::EXERCICE_STATUT_VALIDE) {
             $this->repository->deleteExerciceById($exerciceId);
         }
     }
@@ -61,9 +61,9 @@ class ExerciceBusiness
     public function validateExercice($exerciceId)
     {
         $statut = $this->repository->getExerciceStatutById($exerciceId);
-        if ($statut === self::STATUT_SAISI) {
+        if ($statut === self::EXERCICE_STATUT_SAISI) {
             return $this->repository->updateExerciceById($exerciceId, [
-                "statut" => self::STATUT_VALIDE
+                "statut" => self::EXERCICE_STATUT_VALIDE
             ]);
         }
         throw new ArrayValidatorException(["message" => "Impossible de valider l'exercice."]);
@@ -97,7 +97,7 @@ class ExerciceBusiness
         }
 
         $statut = $this->repository->getExerciceStatutById($exerciceId);
-        $this->repository->updateExerciceById($exerciceId, array("statut" => max($statut, self::STATUT_SAISI)));
+        $this->repository->updateExerciceById($exerciceId, array("statut" => max($statut, self::EXERCICE_STATUT_SAISI)));
 
         return $statut;
     }
@@ -132,7 +132,7 @@ class ExerciceBusiness
         $statut = $this->repository->getExerciceStatutById($exerciceId);
 
         if (count($this->repository->listSapeurOfExerciceById($exerciceId)) === 0) {
-            $statut = $this->repository->updateExerciceById($exerciceId, ["statut" => self::STATUT_EMPTY])->statut;
+            $statut = $this->repository->updateExerciceById($exerciceId, ["statut" => self::EXERCICE_STATUT_EMPTY])->statut;
         }
 
         return $statut;

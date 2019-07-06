@@ -123,8 +123,8 @@ class ImputationBusiness
     {
         $exercice = $this->exerciceRepo->getExerciceWithSapeurById($exerciceId);
 
-        if ($exercice->statut > 3) {
-//            throw new ArrayValidatorException(array("message"=>"Exercice déjà imputé"));
+        if ($exercice->statut !== ExerciceBusiness::EXERCICE_STATUT_VALIDE) {
+            throw new ArrayValidatorException(array("message" => "Impossible d'imputre cet exercice"));
         }
 
         $indemniteType = $this->indemniteRepo->findIndemniteExerciceTypeById($data['indemnite_exercice_type_id']);
@@ -147,20 +147,20 @@ class ImputationBusiness
             //TODO WARNING IN LOGS
         }
 
-        // Changer le statut de l'exercice
         //TODO Ajout date imputation
-        $this->exerciceRepo->updateExerciceById($exerciceId, ["statut" => 4]);
-    }
 
-    private function isWeekend($date)
-    {
-        return (date_create('N', strtotime($date)) >= 6);
+        // Changer le statut de l'exercice
+        return $this->exerciceRepo->updateExerciceById($exerciceId, ["statut" => ExerciceBusiness::EXERCICE_STATUT_IMPUTE])->statut;
     }
 
     public function imputerIntervention($interventionId, $data)
     {
         $indemniteType = $this->indemniteRepo->findIndemniteInterventionTypeById($data['indemnite_intervention_type_id']);
         $intervention = $this->interventionRepo->findWith($interventionId, ['presences', 'phases']);
+
+        if ($intervention->statut !== InterventionBusiness::INTERVENTION_STATUT_VALIDE) {
+            throw new ArrayValidatorException(array("message" => "Impossible d'imputer cette intervention"));
+        }
 
         $unite = $indemniteType->type_unite_id;
         $designation = $intervention->lieu;
@@ -402,11 +402,12 @@ class ImputationBusiness
             }
         }
 
-        //Update statut
         //TODO Ajout date imputation
-        $this->interventionRepo->editInterventionInformationsById($interventionId, [
-            "statut" => 3
-        ]);
+
+        // Update statut
+        return $this->interventionRepo->editInterventionInformationsById($interventionId, [
+            "statut" => InterventionBusiness::INTERVENTION_STATUT_IMPUTE
+        ])->statut;
     }
 
     private function imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation)

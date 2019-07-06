@@ -25,12 +25,12 @@ class ImputationController extends Controller
         );
 
         try {
-            $temp = $this->service->generateExercice($id, $validation->validated());
+            $res = $this->service->imputationExercice($id, $validation->validated());
         } catch (ArrayValidatorException $exception) {
             return response()->json(['error' => $exception->getErrors()]);
         }
 
-        return response()->json(['data' => $temp]);
+        return response()->json(['data' => $res]);
     }
 
     public function intervention(Request $request, int $id)
@@ -42,11 +42,11 @@ class ImputationController extends Controller
         );
 
         try {
-            $temp = $this->service->generateIntervention($id, $validation->validated());
+            $res = $this->service->imputationIntervention($id, $validation->validated());
         } catch (ArrayValidatorException $exception) {
             return response()->json(['error' => $exception->getErrors()]);
         }
-        return response()->json(['data' => $temp]);
+        return response()->json(['data' => $res]);
     }
 
     public function annuel(Request $request, int $id)

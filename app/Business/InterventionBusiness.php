@@ -13,10 +13,10 @@ use Validator;
 class InterventionBusiness
 {
 
-    private const STATUT_EMPTY = 0;
-    private const STATUT_SAISI = 1;
-    private const STATUT_VALIDE = 2;
-    private const STATUT_IMPUTE = 3;
+    public const INTERVENTION_STATUT_EMPTY = 0;
+    public const INTERVENTION_STATUT_SAISI = 1;
+    public const INTERVENTION_STATUT_VALIDE = 2;
+    public const INTERVENTION_STATUT_IMPUTE = 3;
 
     protected $repository;
 
@@ -41,7 +41,7 @@ class InterventionBusiness
         $this->repository->addPhase($intervention->id, array(
             "debut" => $data['date_debut'] . ' ' . $data['heure_debut'],
             "phase_type_id" => $phaseTypeIntervention,
-            "statut" => self::STATUT_EMPTY
+            "statut" => self::INTERVENTION_STATUT_EMPTY
         ));
         return $intervention;
     }
@@ -54,9 +54,9 @@ class InterventionBusiness
     public function validerInterventionById($interventionId)
     {
         $statut = $this->repository->getInterventionStatutById($interventionId);
-        if ($statut === self::STATUT_SAISI) {
+        if ($statut === self::INTERVENTION_STATUT_SAISI) {
             return $this->repository->editInterventionInformationsById($interventionId, [
-                "statut" => self::STATUT_VALIDE
+                "statut" => self::INTERVENTION_STATUT_VALIDE
             ])->statut;
         }
         throw new ArrayValidatorException(["message" => "Impossible de valider l'exercice."]);
@@ -121,8 +121,8 @@ class InterventionBusiness
         }
 
         $statut = $this->repository->getInterventionStatutById($interventionId);
-        if ($statut < self::STATUT_SAISI) {
-            $statut = $this->repository->editInterventionInformationsById($interventionId, ["statut" => self::STATUT_SAISI])->statut;
+        if ($statut < self::INTERVENTION_STATUT_SAISI) {
+            $statut = $this->repository->editInterventionInformationsById($interventionId, ["statut" => self::INTERVENTION_STATUT_SAISI])->statut;
         }
         return $statut;
     }
@@ -161,7 +161,7 @@ class InterventionBusiness
         $statut = $this->repository->getInterventionStatutById($interventionId);
 
         if (count($this->repository->getInterventionPresences($interventionId)) === 0) {
-            $statut = $this->repository->editInterventionInformationsById($interventionId, ["statut" => self::STATUT_EMPTY]);
+            $statut = $this->repository->editInterventionInformationsById($interventionId, ["statut" => self::INTERVENTION_STATUT_EMPTY]);
         }
         return $statut;
     }

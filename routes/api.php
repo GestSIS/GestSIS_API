@@ -152,6 +152,7 @@ Route::group(['prefix' => 'v2'], function () {
         Route::get('ecritures/intervention/{id}', 'EcritureController@intervention');
         Route::get('ecritures/exercice/{id}', 'EcritureController@exercice');
 
+        Route::resource('comptes', 'CompteController')->only(['index']);
         //SUPPRIMER
 
         // Sis

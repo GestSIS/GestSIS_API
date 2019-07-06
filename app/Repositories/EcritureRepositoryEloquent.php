@@ -53,25 +53,23 @@ class EcritureRepositoryEloquent implements EcritureRepository
         );
     }
 
-    function getEcrituresForExerciceById($exerciceId)
+    public function getEcrituresForExerciceById($exerciceId)
     {
         return $this->convertCollectionOfEcritures(
             Ecriture::where('exercice_id', $exerciceId)
-                ->whereNotNull('indemnite_annuel_type_id')
                 ->get()
         );
     }
 
-    function getEcrituresForInterventionById($interventionId)
+    public function getEcrituresForInterventionById($interventionId)
     {
         return $this->convertCollectionOfEcritures(
             Ecriture::where('intervention_id', $interventionId)
-                ->whereNotNull('indemnite_annuel_type_id')
                 ->get()
         );
     }
 
-    function getEcrituresAnnuelsForExerciceComptableById($exerciceComptableId)
+    public function getEcrituresAnnuelsForExerciceComptableById($exerciceComptableId)
     {
         return $this->convertCollectionOfEcritures(
             Ecriture::where('exercice_comptable_id', $exerciceComptableId)

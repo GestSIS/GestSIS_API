@@ -14,11 +14,11 @@ interface EcritureRepository
 
     public function listeIndemniteAnnuelByExeComptableId($exerciceComptableId);
 
-    function getEcrituresForExerciceById($exerciceId);
+    public function getEcrituresForExerciceById($exerciceId);
 
-    function getEcrituresForInterventionById($interventionId);
+    public function getEcrituresForInterventionById($interventionId);
 
-    function getEcrituresAnnuelsForExerciceComptableById($exerciceComptableId);
+    public function getEcrituresAnnuelsForExerciceComptableById($exerciceComptableId);
 
     public function persisteNewEcriture($ecriture);
 }

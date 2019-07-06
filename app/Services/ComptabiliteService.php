@@ -7,6 +7,7 @@ use App\Business\ImputationBusiness;
 use App\Contracts\EcritureRepository;
 use App\Contracts\ExerciceRepository;
 use App\Contracts\FraisTypeRepository;
+use App\Contracts\CompteRepository;
 use App\Contracts\IndemniteTypeRepository;
 
 class ComptabiliteService
@@ -15,6 +16,7 @@ class ComptabiliteService
     protected $exerciceRepo;
     protected $indemniteRepo;
     protected $fraisRepo;
+    protected $compteRepo;
     protected $business;
 
     public function __construct(
@@ -22,13 +24,19 @@ class ComptabiliteService
         ExerciceRepository $exercice,
         IndemniteTypeRepository $indemnite,
         FraisTypeRepository $frais,
+        CompteRepository $comptes,
         ImputationBusiness $business)
     {
         $this->ecritureRepo = $ecriture;
         $this->exerciceRepo = $exercice;
         $this->indemniteRepo = $indemnite;
         $this->fraisRepo = $frais;
+        $this->compteRepo = $comptes;
         $this->business = $business;
+    }
+
+    function getComptes(){
+        return $this->compteRepo->listComptes();
     }
 
     function getIndemnitesTypes()
@@ -64,16 +72,22 @@ class ComptabiliteService
 
     function imputationExercice($exerciceId, $data)
     {
-        $this->business->imputerExercice($exerciceId, $data);
+        $statut = $this->business->imputerExercice($exerciceId, $data);
 
-        return $this->ecritureRepo->listeEcritureForExercice($exerciceId);
+        return [
+            "statut" => $statut,
+            "ecritures" => $this->ecritureRepo->listeEcritureForExercice($exerciceId)
+        ];
     }
 
     function imputationIntervention($interventionId, $data)
     {
-        $this->business->imputerIntervention($interventionId, $data);
+        $statut = $this->business->imputerIntervention($interventionId, $data);
 
-        return $this->ecritureRepo->listeEcritureForIntervention($interventionId);
+        return [
+            "statut" => $statut,
+            "ecritures" => $this->ecritureRepo->listeEcritureForIntervention($interventionId)
+        ];
     }
 
     function imputationAnnuel($exerciceComptableId)

@@ -37,6 +37,10 @@ class RepositoryServiceProvider extends ServiceProvider
             'App\Contracts\FraisTypeRepository',
             'App\Repositories\FraisTypeRepositoryEloquent'
         );
+        $this->app->bind(
+            'App\Contracts\CompteRepository',
+            'App\Repositories\CompteRepositoryEloquent'
+        );
     }
 
     /**
