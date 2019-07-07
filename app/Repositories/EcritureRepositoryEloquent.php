@@ -140,6 +140,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->exercice_id = $ecriture->exercice_id;
         $object->indemnite_annuel_type_id = $ecriture->indemnite_annuel_type_id;
         $object->frais_annuel_type_id = $ecriture->frais_annuel_type_id;
+        $object->compte_id = $ecriture->compte_id;
 
         return $object;
     }

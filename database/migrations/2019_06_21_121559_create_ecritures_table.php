@@ -37,6 +37,9 @@ class CreateEcrituresTable extends Migration
             $table->unsignedBigInteger('sapeur_id');
             $table->foreign('sapeur_id')->references('id')->on('sapeurs');
 
+            $table->unsignedBigInteger('compte_id');
+            $table->foreign('compte_id')->references('id')->on('comptes');
+
             $table->unsignedBigInteger('exercice_comptable_id');
             $table->foreign('exercice_comptable_id')->references('id')->on('exercice_comptables');
 

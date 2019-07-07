@@ -19,6 +19,7 @@ class Ecriture extends Model
         'indemnite',
         'frais',
         'sapeur_id',
+        'compte_id',
         'exercice_comptable_id',
         'intervention_id',
         'exercice_id',

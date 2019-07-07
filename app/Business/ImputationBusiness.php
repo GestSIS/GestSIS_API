@@ -89,6 +89,7 @@ class ImputationBusiness
             'solde_min_pour' => null,
             'taux' => null,
             'sapeur_id' => $sapeur->id,
+            'compte_id' => $indemniteType->compte_id,
             'exercice_comptable_id' => $exerciceComptableId,
             'indemnite_annuel_type_id' => $indemniteType->id
         );
@@ -112,6 +113,7 @@ class ImputationBusiness
             'solde_min_pour' => null,
             'taux' => null,
             'sapeur_id' => $sapeur->id,
+            'compte_id' => $fraisType->compte_id,
             'exercice_comptable_id' => $exerciceComptableId,
             'frais_annuel_type_id' => $fraisType->id
         );
@@ -352,6 +354,7 @@ class ImputationBusiness
                     'solde_min_pour' => null,
                     'taux' => null,
                     'sapeur_id' => $sapeur_id,
+                    'compte_id' => $indemniteType->compte_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
                     'intervention_id' => $intervention->id
                 );
@@ -373,6 +376,7 @@ class ImputationBusiness
                     'solde_min_pour' => null,
                     'taux' => $tauxNuit,
                     'sapeur_id' => $sapeur_id,
+                    'compte_id' => $indemniteType->compte_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
                     'intervention_id' => $intervention->id
                 );
@@ -394,6 +398,7 @@ class ImputationBusiness
                     'solde_min_pour' => null,
                     'taux' => $tauxWeekend,
                     'sapeur_id' => $sapeur_id,
+                    'compte_id' => $indemniteType->compte_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
                     'intervention_id' => $intervention->id
                 );
@@ -446,6 +451,7 @@ class ImputationBusiness
                 'solde_min_pour' => null,
                 'taux' => null,
                 'sapeur_id' => $sapeur->sapeur_id,
+                'compte_id' => $indemniteType->compte_id,
                 'exercice_comptable_id' => $exercice->exercice_comptable_id,
                 'exercice_id' => $exercice->id
             );
@@ -495,6 +501,7 @@ class ImputationBusiness
                 'solde_min_pour' => $indemniteType->solde_min_pour,
                 'taux' => null,
                 'sapeur_id' => $sapeur->sapeur_id,
+                'compte_id' => $indemniteType->compte_id,
                 'exercice_comptable_id' => $exercice->exercice_comptable_id,
                 'exercice_id' => $exercice->id
             );
@@ -536,6 +543,7 @@ class ImputationBusiness
                 'solde_min_pour' => $indemniteType->solde_min_pour,
                 'taux' => null,
                 'sapeur_id' => $sapeur->sapeur_id,
+                'compte_id' => $indemniteType->compte_id,
                 'exercice_comptable_id' => $exercice->exercice_comptable_id,
                 'exercice_id' => $exercice->id
             );
