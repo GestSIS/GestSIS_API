@@ -4,10 +4,10 @@
 namespace App\Services;
 
 use App\Business\ImputationBusiness;
+use App\Contracts\CompteRepository;
 use App\Contracts\EcritureRepository;
 use App\Contracts\ExerciceRepository;
 use App\Contracts\FraisTypeRepository;
-use App\Contracts\CompteRepository;
 use App\Contracts\IndemniteTypeRepository;
 
 class ComptabiliteService
@@ -35,8 +35,14 @@ class ComptabiliteService
         $this->business = $business;
     }
 
-    function getComptes(){
+    function getComptes()
+    {
         return $this->compteRepo->listComptes();
+    }
+
+    function getEcrituresByCompte($compteId, $exerciceComptableId)
+    {
+        return $this->ecritureRepo->listeEcritureForCompteAndExerciceComptableById($compteId, $exerciceComptableId);
     }
 
     function getIndemnitesTypes()
@@ -57,17 +63,17 @@ class ComptabiliteService
 
     function getEcrituresForExerciceById($exerciceId)
     {
-        return $this->ecritureRepo->getEcrituresForExerciceById($exerciceId);
+        return $this->ecritureRepo->listeEcritureForExercice($exerciceId);
     }
 
     function getEcrituresForInterventionById($interventionId)
     {
-        return $this->ecritureRepo->getEcrituresForInterventionById($interventionId);
+        return $this->ecritureRepo->listeEcritureForIntervention($interventionId);
     }
 
     function getEcrituresAnnuelsForExerciceComptableById($exerciceComptableId)
     {
-        return $this->ecritureRepo->getEcrituresAnnuelsForExerciceComptableById($exerciceComptableId);
+        return $this->ecritureRepo->listeEcrituresAnnuelsForExerciceComptableById($exerciceComptableId);
     }
 
     function imputationExercice($exerciceId, $data)

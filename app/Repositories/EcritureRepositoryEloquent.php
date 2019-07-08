@@ -11,26 +11,30 @@ use StdClass;
 class EcritureRepositoryEloquent implements EcritureRepository
 {
 
-    /**
-     * @param $exercice_id
-     * @return mixed
-     */
-    public function listeEcritureForExercice($exercice_id)
+    public function listeEcritureForCompteAndExerciceComptableById($compteId, $exerciceComptableId)
     {
         return $this->convertCollectionOfEcritures(
-            Ecriture::where('exercice_id', $exercice_id)
+            Ecriture
+                ::where('exercice_comptable_id', $exerciceComptableId)
+                ->where('compte_id', $compteId)
                 ->get()
         );
     }
 
-    /**
-     * @param $intervention_id
-     * @return mixed
-     */
+    public function listeEcritureForExercice($exercice_id)
+    {
+        return $this->convertCollectionOfEcritures(
+            Ecriture
+                ::where('exercice_id', $exercice_id)
+                ->get()
+        );
+    }
+
     public function listeEcritureForIntervention($intervention_id)
     {
         return $this->convertCollectionOfEcritures(
-            Ecriture::where('intervention_id', $intervention_id)
+            Ecriture
+                ::where('intervention_id', $intervention_id)
                 ->get()
         );
     }
@@ -38,7 +42,8 @@ class EcritureRepositoryEloquent implements EcritureRepository
     public function listeFraisAnnuelByExeComptableId($exerciceComptableId)
     {
         return $this->convertCollectionOfEcritures(
-            Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+            Ecriture
+                ::where('exercice_comptable_id', $exerciceComptableId)
                 ->whereNotNull('frais_annuel_type_id')
                 ->get()
         );
@@ -47,32 +52,18 @@ class EcritureRepositoryEloquent implements EcritureRepository
     public function listeIndemniteAnnuelByExeComptableId($exerciceComptableId)
     {
         return $this->convertCollectionOfEcritures(
-            Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+            Ecriture
+                ::where('exercice_comptable_id', $exerciceComptableId)
                 ->whereNotNull('indemnite_annuel_type_id')
                 ->get()
         );
     }
 
-    public function getEcrituresForExerciceById($exerciceId)
+    public function listeEcrituresAnnuelsForExerciceComptableById($exerciceComptableId)
     {
         return $this->convertCollectionOfEcritures(
-            Ecriture::where('exercice_id', $exerciceId)
-                ->get()
-        );
-    }
-
-    public function getEcrituresForInterventionById($interventionId)
-    {
-        return $this->convertCollectionOfEcritures(
-            Ecriture::where('intervention_id', $interventionId)
-                ->get()
-        );
-    }
-
-    public function getEcrituresAnnuelsForExerciceComptableById($exerciceComptableId)
-    {
-        return $this->convertCollectionOfEcritures(
-            Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+            Ecriture
+                ::where('exercice_comptable_id', $exerciceComptableId)
                 ->where(function ($query) {
                     $query
                         ->whereNotNull('frais_annuel_type_id')
