@@ -31,6 +31,16 @@ class Intervention extends Model
         'type_intervention_id',
     ];
 
+    public function localite()
+    {
+        return $this->belongsTo('App\Models\Localite');
+    }
+
+    public function typeIntervention()
+    {
+        return $this->belongsTo('App\Models\TypeIntervention');
+    }
+
     /**
      * The sapeur that belong to the sapeur.
      */

@@ -5,7 +5,6 @@ namespace App\Repositories;
 
 use App\Contracts\InterventionRepository;
 use App\Models\Appel;
-use App\Models\Exercice;
 use App\Models\GroupeIntervention;
 use App\Models\Intervention;
 use App\Models\InterventionMateriel;
@@ -37,7 +36,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
     public function findWith($id, $with = array()) //TODO IMPROVE THIS FUNCTION
     {
         //TODO Check with allowed
-        $allowedWith = ['presences', 'phases'];
+        $allowedWith = ['presences', 'phases', 'localite'];
         return $this->convertIntervention(Intervention::with($with)->find($id), $with);
     }
 
@@ -354,6 +353,39 @@ class InterventionRepositoryEloquent implements InterventionRepository
                 return $temp->convertPhase($sap);
             })->toArray();
         }
+
+        if (in_array('localite', $with)) {
+            $object->localite = $this->convertLocalite($intervention->localite);
+        }
+
+        if (in_array('typeIntervention', $with)) {
+            $object->type = $this->convertTypeIntervention($intervention->typeIntervention);
+        }
+
+        return $object;
+    }
+
+    protected function convertTypeIntervention($type)
+    {
+        if($type == null) return null;
+
+        $object = new StdClass();
+        $object->id = $type->id;
+
+        $object->designation = $type->designation;
+
+        return $object;
+    }
+
+    protected function convertLocalite($localite)
+    {
+        if($localite == null) return null;
+
+        $object = new StdClass();
+        $object->id = $localite->id;
+
+        $object->npa = $localite->npa;
+        $object->designation = $localite->designation;
 
         return $object;
     }

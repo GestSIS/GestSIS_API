@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\ComptabiliteService;
 use Illuminate\Http\Response;
+use PDF;
 
 class CompteController extends Controller
 {
@@ -22,5 +23,17 @@ class CompteController extends Controller
     public function index()
     {
         return response()->json(['data' => $this->service->getComptes()]);
+    }
+
+    public function generatePdf()
+    {
+        $exerciceComptableId = 1;
+
+
+
+//        $pdf->loadHTML('<h1>Test</h1>');
+        $pdf = PDF::loadView('decomptes-sapeurs', ["test"=>"bastien"]);
+        return $pdf->download('invoice.pdf');
+//        return $pdf->stream();
     }
 }

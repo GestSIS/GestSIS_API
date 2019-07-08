@@ -9,6 +9,7 @@ use App\Contracts\FraisTypeRepository;
 use App\Contracts\IndemniteTypeRepository;
 use App\Contracts\InterventionRepository;
 use App\Contracts\SapeurRepository;
+use App\Exceptions\ArrayValidatorException;
 use Carbon\Carbon;
 
 class ImputationBusiness
@@ -123,16 +124,16 @@ class ImputationBusiness
 
     public function imputerExercice($exerciceId, $data)
     {
-        $exercice = $this->exerciceRepo->getExerciceWithSapeurById($exerciceId);
+        $exercice = $this->exerciceRepo->getExerciceByIdWith($exerciceId, ['sapeurs', 'localite']);
 
         if ($exercice->statut !== ExerciceBusiness::EXERCICE_STATUT_VALIDE) {
-            throw new ArrayValidatorException(array("message" => "Impossible d'imputre cet exercice"));
+            throw new ArrayValidatorException(array("message" => "Impossible d'imputer cet exercice"));
         }
 
         $indemniteType = $this->indemniteRepo->findIndemniteExerciceTypeById($data['indemnite_exercice_type_id']);
 
         $unite = $indemniteType->type_unite_id;
-        $designation = $exercice->designation;
+        $designation = "{$exercice->localite->designation} ({$exercice->lieu}) $exercice->designation";
         $sapeurs = array_filter($exercice->sapeurs, function ($sap) {
             return $sap->present;
         });
@@ -143,7 +144,6 @@ class ImputationBusiness
         } elseif ($unite === 1 && $indemniteType->solde_min !== null) {
             $this->imputerExerciceParHeureEtSoldeMin($exercice, $sapeurs, $indemniteType, $designation);
         } else {
-            dd($indemniteType);
             dd("ERROR");
             return false;
             //TODO WARNING IN LOGS
@@ -158,14 +158,14 @@ class ImputationBusiness
     public function imputerIntervention($interventionId, $data)
     {
         $indemniteType = $this->indemniteRepo->findIndemniteInterventionTypeById($data['indemnite_intervention_type_id']);
-        $intervention = $this->interventionRepo->findWith($interventionId, ['presences', 'phases']);
+        $intervention = $this->interventionRepo->findWith($interventionId, ['presences', 'phases', 'localite', 'typeIntervention']);
 
         if ($intervention->statut !== InterventionBusiness::INTERVENTION_STATUT_VALIDE) {
             throw new ArrayValidatorException(array("message" => "Impossible d'imputer cette intervention"));
         }
 
         $unite = $indemniteType->type_unite_id;
-        $designation = $intervention->lieu;
+        $designation = "{$intervention->localite->designation} ({$intervention->type->designation}) $intervention->lieu";
 
         //Grouper les présences par sapeurs
         $sapeurs = [];
@@ -430,8 +430,9 @@ class ImputationBusiness
             $solde = 0;
             $indemnite = 0;
             if (count($fonction_tarif) > 0) {
-                $solde += $fonction_tarif[0]->solde;
-                $indemnite += $fonction_tarif[0]->indemnite;
+                $tarif = array_pop($fonction_tarif);
+                $solde += $tarif[0]->solde;
+                $indemnite += $tarif[0]->indemnite;
             } else {
                 $solde += $indemniteType->solde;
                 $indemnite += $indemniteType->indemnite;
@@ -477,8 +478,9 @@ class ImputationBusiness
             $soldeTarif = 0;
             $indemniteTarif = 0;
             if (count($fonction_tarif) > 0) {
-                $soldeTarif += $fonction_tarif[0]->solde;
-                $indemniteTarif += $fonction_tarif[0]->indemnite;
+                $tarif = array_pop($fonction_tarif);
+                $soldeTarif += $tarif->solde;
+                $indemniteTarif += $tarif->indemnite;
             } else {
                 $soldeTarif += $indemniteType->solde;
                 $indemniteTarif += $indemniteType->indemnite;

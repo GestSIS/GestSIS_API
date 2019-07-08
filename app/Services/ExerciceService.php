@@ -23,7 +23,7 @@ class ExerciceService
 
     public function getExerciceById($exerciceId)
     {
-        return $this->repository->getExerciceWithSapeurById($exerciceId);
+        return $this->repository->getExerciceByIdWith($exerciceId, ['sapeurs']);
     }
 
     public function listeExercice()

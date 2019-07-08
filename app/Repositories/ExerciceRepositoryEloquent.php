@@ -100,9 +100,11 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         return $this->convertExercice($exercice);
     }
 
-    public function getExerciceWithSapeurById($exerciceId)
+    public function getExerciceByIdWith($exerciceId, $with = [])
     {
-        return $this->convertExercice(Exercice::with('sapeurs')->find($exerciceId), true);
+        //TODO validate $with
+        $autorized = ['sapeurs', 'localite'];
+        return $this->convertExercice(Exercice::with($with)->find($exerciceId), $with);
     }
 
     public function addSapeurToExercice($exerciceId, $data)
@@ -171,7 +173,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
      * @param $exercice
      * @return StdClass|null
      */
-    protected function convertExercice($exercice, $withSapeurs = false)
+    protected function convertExercice($exercice, $with = [])
     {
         if ($exercice == null) return null;
 
@@ -189,12 +191,31 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         $object->localite_id = $exercice->localite_id;
         $object->exercice_comptable_id = $exercice->exercice_comptable_id;
 
-        if ($withSapeurs) {
+        if (in_array('sapeurs', $with)) {
             $temp = $this;
             $object->sapeurs = $exercice->sapeurs->map(function ($sap) use ($temp) {
                 return $temp->convertSapeur($sap);
             })->toArray();
         }
+
+        if (in_array('localite', $with)) {
+            $object->localite = $this->convertLocalite($exercice->localite);
+        }
+
+        return $object;
+    }
+
+    //TODO Externalise this code else-where
+    protected function convertLocalite($localite)
+    {
+        if ($localite == null) return null;
+
+        $object = new StdClass();
+        $object->id = $localite->id;
+
+        $object->npa = $localite->npa;
+        $object->designation = $localite->designation;
+
         return $object;
     }
 

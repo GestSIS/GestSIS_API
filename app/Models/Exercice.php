@@ -15,6 +15,11 @@ class Exercice extends Model
     // 3 -> Disponible pour imputation
     // 4 -> Imputée
 
+    public function localite()
+    {
+        return $this->belongsTo('App\Models\Localite');
+    }
+
     /**
      * The cours that belong to the sapeur.
      */

@@ -153,6 +153,8 @@ Route::group(['prefix' => 'v2'], function () {
         Route::get('ecritures/exercice/{id}', 'EcritureController@exercice');
 
         Route::resource('comptes', 'CompteController')->only(['index']);
+
+        Route::get('pdf-test', 'CompteController@generatePdf');
         //SUPPRIMER
 
         // Sis
