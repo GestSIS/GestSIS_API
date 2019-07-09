@@ -8,6 +8,7 @@ use App\Models\Intervention;
 use App\Services\InterventionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Validator;
 
 class InterventionVehiculesController extends Controller
 {
