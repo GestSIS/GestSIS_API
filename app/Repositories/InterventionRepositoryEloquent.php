@@ -59,7 +59,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
         $intervention = new Intervention();
         $intervention->fill($data);
-        $intervention->imputer = false;
+        $intervention->date_imputation = null;
         $intervention->exercice_comptable_id = $data['exercice_comptable_id'];
         $intervention->save();
 
@@ -254,9 +254,9 @@ class InterventionRepositoryEloquent implements InterventionRepository
         return $phase;
     }
 
-    public function editPhaseInfosById($interventionId, $phaseId, $debut)
+    public function editPhaseInfosById($interventionId, $phaseId, $phase)
     {
-        Phase::where('intervention_id', $interventionId)->where('id', $phaseId)->update(['debut' => $debut]);
+        Phase::where('intervention_id', $interventionId)->where('id', $phaseId)->update($phase);
         return $this->convertPhase(Phase::find($phaseId));
     }
 
@@ -333,6 +333,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
         $object->responsable = $intervention->responsable;
         $object->stat_nb = $intervention->stat_nb;
         $object->statut = $intervention->statut;
+        $object->date_imputation = $intervention->date_imputation;
         $object->exercice_comptable_id = $intervention->exercice_comptable_id;
         $object->localite_id = $intervention->localite_id;
         $object->type_intervention_id = $intervention->type_intervention_id;
@@ -367,7 +368,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     protected function convertTypeIntervention($type)
     {
-        if($type == null) return null;
+        if ($type == null) return null;
 
         $object = new StdClass();
         $object->id = $type->id;
@@ -379,7 +380,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     protected function convertLocalite($localite)
     {
-        if($localite == null) return null;
+        if ($localite == null) return null;
 
         $object = new StdClass();
         $object->id = $localite->id;

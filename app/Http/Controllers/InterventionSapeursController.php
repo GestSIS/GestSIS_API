@@ -72,9 +72,11 @@ class InterventionSapeursController extends Controller
     {
         $validation = Validator::make($request->all(),
             array(
+                'sapeurs.*.id' => 'required|integer',
                 'sapeurs.*.debut' => 'required|date_format:Y-m-d H:i',
                 'sapeurs.*.fin' => 'required|date_format:Y-m-d H:i|after:sapeurs.*.debut',
                 'sapeurs.*.piquet' => 'required|boolean',
+                'sapeurs.*.sapeur_id' => 'required|integer',
             )
         );
 

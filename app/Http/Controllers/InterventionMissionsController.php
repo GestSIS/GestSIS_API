@@ -77,7 +77,7 @@ class InterventionMissionsController extends Controller
                 'missions.*.id' => 'integer|exists:missions,id',
                 'missions.*.sapeur_id' => 'integer|exists:sapeurs,id',
                 'missions.*.debut' => 'date_format:Y-m-d H:i',
-                'missions.*.fin' => 'date_format:Y-m-d H:i|after:debut',
+                'missions.*.fin' => 'date_format:Y-m-d H:i|after:missions.*.debut',
                 'missions.*.titre' => 'string',
                 'missions.*.resume' => 'string|nullable'
             ));

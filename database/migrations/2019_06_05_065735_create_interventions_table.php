@@ -34,6 +34,8 @@ class CreateInterventionsTable extends Migration
 
             $table->boolean('statut');
 
+            $table->dateTime('date_imputation')->nullable();
+
 //            $table->decimal('latitude');
 //            $table->decimal('longitude');
 //            $table->string('gps_info');

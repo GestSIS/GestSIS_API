@@ -118,7 +118,6 @@ class InterventionController extends Controller
                 'proprietaire' => 'string|nullable',
                 'responsable' => 'string|nullable',
                 'stat_nb' => 'integer|min:0',
-                'imputer' => 'boolean',
                 'localite_id' => 'integer|exists:localites,id',
                 'intervention_comptable_id' => 'integer|exists:intervention_comptables,id',
                 'intervention_traitement_id' => 'integer|exists:intervention_traitements,id',

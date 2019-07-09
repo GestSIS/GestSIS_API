@@ -1,0 +1,92 @@
+<?php
+
+namespace Tests\Unit;
+
+use App\Models\Intervention;
+use App\Services\InterventionService;
+use Exception;
+use Tests\TestCase;
+
+class InterventionAppelTest extends TestCase
+{
+
+    protected $interventionService;
+    protected $interventionId;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->interventionService = $this->app->make(InterventionService::class);
+
+        $data = factory(Intervention::class)->make()->toArray();
+
+        $this->interventionId = $this->interventionService->createIntervention($data)->id;
+    }
+
+    /**
+     * Test add phase
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testAddInterventionAppels()
+    {
+        $appels = factory('App\Models\Appel', 3)->make();
+
+        $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/appels', ['appels' => $appels]);
+
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'data' => true
+            ]);
+    }
+
+    /**
+     * Test edit phase
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testEditInterventionAppels()
+    {
+        $appels = factory('App\Models\Appel', 3)->make()->toArray();
+
+        $res = $this->interventionService->addAppels($this->interventionId, $appels);
+        $res = array_map(function ($s) {
+            $s->date = substr($s->date, 0, 16);
+            return $s;
+        }, $res);
+
+        $response = $this->json('PUT', '/api/v2/interventions/' . $this->interventionId . '/appels', ['appels' => $res]);
+
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'data' => true
+            ]);
+    }
+
+    /**
+     * Test remove phase
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testRemoveInterventionAppels()
+    {
+        $appels = factory('App\Models\Appel', 3)->make()->toArray();
+
+        $ids = array_map(function ($s) {
+            return $s->id;
+        }, $this->interventionService->addAppels($this->interventionId, $appels));
+        $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/appels', ['appels' => $ids]);
+
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'data' => true
+            ]);
+    }
+}

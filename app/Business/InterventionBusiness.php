@@ -9,6 +9,7 @@ use App\Exceptions\ArrayValidatorException;
 use App\Models\Intervention;
 use Illuminate\Database\Eloquent\Collection;
 use Validator;
+use DateTime;
 
 class InterventionBusiness
 {
@@ -39,7 +40,7 @@ class InterventionBusiness
 
         $intervention = $this->repository->createNewIntervention($data);
         $this->repository->addPhase($intervention->id, array(
-            "debut" => $data['date_debut'] . ' ' . $data['heure_debut'],
+            "debut" => new DateTime($data['date_debut'] . ' ' . $data['heure_debut']),
             "phase_type_id" => $phaseTypeIntervention,
             "statut" => self::INTERVENTION_STATUT_EMPTY
         ));
@@ -142,7 +143,7 @@ class InterventionBusiness
         foreach ($sapeurs as $sapeur) {
             //TODO Check period non dupliqué
 
-            $this->repository->editPresenceInfoById($interventionId, $sapeur['sapeur_id'], $sapeur);
+            $this->repository->editPresenceInfoById($interventionId, $sapeur['id'], $sapeur);
         }
     }
 

@@ -44,7 +44,7 @@ class InterventionMaterielsController extends Controller
         $validation = Validator::make($request->all(),
             array(
                 'materiels.*.materiel_id' => 'required|exists:materiels,id',
-                'materiels.*.quantite' => 'required|integer|min:1'
+                'materiels.*.quantite' => 'required|numeric|min:1'
             )
         );
 
@@ -74,7 +74,7 @@ class InterventionMaterielsController extends Controller
         $validation = Validator::make($request->all(),
             array(
                 'materiels.*.id' => 'required|exists:intervention_materiel,id',
-                'materiels.*.quantite' => 'required|integer|min:1'
+                'materiels.*.quantite' => 'required|numeric|min:1'
             )
         );
 

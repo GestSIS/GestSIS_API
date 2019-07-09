@@ -42,7 +42,7 @@ class InterventionPhasesController extends Controller
     {
         $validation = Validator::make($request->all(),
             array(
-                'phases.*.phase_type_id' => 'required|integer|exists:phase_types,id',
+                'phases.*.phase_type_id' => 'required|integer',
                 'phases.*.debut' => 'required|date_format:Y-m-d H:i'
             )
         );
@@ -72,7 +72,8 @@ class InterventionPhasesController extends Controller
     {
         $validation = Validator::make($request->all(),
             array(
-                'phases.*.phase_type_id' => 'integer|exists:phase_type_id,id',
+                'phases.*.id' => 'required|integer',
+                'phases.*.phase_type_id' => 'integer',
                 'phases.*.debut' => 'date_format:Y-m-d H:i'
             )
         );

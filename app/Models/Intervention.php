@@ -23,6 +23,7 @@ class Intervention extends Model
         'responsable',
         'stat_nb',
         'statut',
+        'date_imputation',
 
         'localite_id',
         'intervention_traitement_id',
