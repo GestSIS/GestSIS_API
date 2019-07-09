@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Business\InterventionBusiness;
 use App\Exceptions\ArrayValidatorException;
 use App\Services\InterventionService;
 use Illuminate\Http\Request;
@@ -24,9 +23,9 @@ class InterventionGroupesController extends Controller
      *
      * @return Response
      */
-    public function index($intervention_id)
+    public function index($interventionId)
     {
-        $groupes = $this->service->getInterventionGroupes($intervention_id);
+        $groupes = $this->service->getInterventionGroupes($interventionId);
 
         return response()->json(['data' => $groupes]);
     }
@@ -35,15 +34,15 @@ class InterventionGroupesController extends Controller
      * Store a newly created resource in storage.
      *
      * @param Request $request
-     * @param int $intervention_id
+     * @param int $interventionId
      * @return Response
      * @throws ArrayValidatorException
      */
-    public function store(Request $request, int $intervention_id)
+    public function store(Request $request, int $interventionId)
     {
         $validation = Validator::make($request->all(),
             array(
-                'groupes.*.groupe_id' => 'required|exists:groupes,id'
+                'groupes.*' => 'required|integer'
             ));
 
         if ($validation->fails()) {
@@ -51,7 +50,7 @@ class InterventionGroupesController extends Controller
         }
 
         try {
-            $groupes = InterventionBusiness::get($intervention_id)->addGroupes($validation->validated()['groupes']);
+            $groupes = $this->service->addGroupes($interventionId, $validation->validated()['groupes']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -63,14 +62,14 @@ class InterventionGroupesController extends Controller
      * Remove the specified resource from storage.
      *
      * @param Request $request
-     * @param int $intervention_id
+     * @param int $interventionId
      * @return Response
      */
-    public function destroy(Request $request, int $intervention_id)
+    public function destroy(Request $request, int $interventionId)
     {
         $validation = Validator::make($request->all(),
             array(
-                'groupes.*.groupe_id' => 'required|exists:groupes,id'
+                'groupes.*' => 'required|integer'
             ));
 
         if ($validation->fails()) {
@@ -78,7 +77,7 @@ class InterventionGroupesController extends Controller
         }
 
         try {
-            InterventionBusiness::get($intervention_id)->removeGroupes($validation->validated()['groupes']);
+            $this->service->removeGroupes($interventionId, $validation->validated()['groupes']);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

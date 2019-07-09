@@ -41,7 +41,15 @@ class InterventionVehiculesController extends Controller
      */
     public function store(Request $request, int $interventionId)
     {
-        //TODO Validation
+        $validation = Validator::make($request->all(),
+        array(
+            'vehicules.*' => 'required|integer'
+        ));
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
             $vehicules = $this->service->addVehicules($interventionId, $request->get('vehicules'));
         } catch (ArrayValidatorException $e) {
@@ -60,6 +68,15 @@ class InterventionVehiculesController extends Controller
      */
     public function destroy(Request $request, int $interventionId)
     {
+        $validation = Validator::make($request->all(),
+            array(
+                'vehicules.*' => 'required|integer'
+            ));
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()]);
+        }
+
         try {
             $this->service->removeVehicules($interventionId, $request->get('vehicules'));
         } catch (ArrayValidatorException $e) {
