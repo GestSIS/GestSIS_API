@@ -25,10 +25,11 @@ class CreateEcrituresTable extends Migration
             $table->unsignedBigInteger('type_unite_id');
             $table->foreign('type_unite_id')->references('id')->on('type_unites');
 
-            $table->unsignedInteger('quantite');
-            $table->unsignedInteger('solde_min')->nullable();
-            $table->unsignedInteger('solde_min_pour')->nullable();
+            $table->decimal('quantite');
+            $table->decimal('solde_min')->nullable();
+            $table->decimal('solde_min_pour')->nullable();
             $table->decimal('taux')->nullable();
+            $table->string('taux_description')->nullable();
 
             $table->decimal('solde');
             $table->decimal('indemnite');

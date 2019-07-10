@@ -86,9 +86,6 @@ class ImputationBusiness
             'total' => $total,
             'tarif' => $indemniteType->montant,
             'quantite' => $indemniteType->quantite,
-            'solde_min' => null,
-            'solde_min_pour' => null,
-            'taux' => null,
             'sapeur_id' => $sapeur->id,
             'compte_id' => $indemniteType->compte_id,
             'exercice_comptable_id' => $exerciceComptableId,
@@ -110,9 +107,6 @@ class ImputationBusiness
             'total' => $total,
             'tarif' => $fraisType->montant,
             'quantite' => $fraisType->quantite,
-            'solde_min' => null,
-            'solde_min_pour' => null,
-            'taux' => null,
             'sapeur_id' => $sapeur->id,
             'compte_id' => $fraisType->compte_id,
             'exercice_comptable_id' => $exerciceComptableId,
@@ -161,7 +155,7 @@ class ImputationBusiness
         $intervention = $this->interventionRepo->findWith($interventionId, ['presences', 'phases', 'localite', 'typeIntervention']);
 
         if ($intervention->statut !== InterventionBusiness::INTERVENTION_STATUT_VALIDE) {
-            throw new ArrayValidatorException(array("message" => "Impossible d'imputer cette intervention"));
+//            throw new ArrayValidatorException(array("message" => "Impossible d'imputer cette intervention"));
         }
 
         $unite = $indemniteType->type_unite_id;
@@ -182,6 +176,8 @@ class ImputationBusiness
         $getPhases = function ($presence) use ($phases) {
 
         };
+
+        $id = 1;
 
         foreach ($sapeurs as $sapeur_id => $presences) {
             $dureeNuit = 0;
@@ -225,12 +221,13 @@ class ImputationBusiness
 
                     //Arrondir debut à la fin de la première journée
                     //Arrondir fin à la fin de l'avant dernière journée
-                    $debutCarbon = $debut->copy()->floorDay();
-                    $finCarbon = $debut->copy()->ceilDay();
+                    $debutCarbon = $debut->copy()->ceilDay();
+                    $finCarbon = $debut->copy()->floorDay();
 
                     $nbWeekend = 0;
                     $nbWeek = 0;
-                    if ($debutCarbon->copy()->addDay(1) < $finCarbon) {
+//                    dd($debutCarbon);
+                    if ($debutCarbon < $finCarbon) {
                         $nbWeekend += $debutCarbon->diffInDaysFiltered(function (Carbon $date) {
                             return $date->isWeekend();
                         }, $finCarbon);
@@ -238,7 +235,6 @@ class ImputationBusiness
                             return !$date->isWeekend();
                         }, $finCarbon);
                     }
-
                     //Dispatch full days to hours
                     if ($testWeekend && $testNuit) {
                         $dureeTarifStandard += $nbWeek * $dureeNuit;
@@ -261,8 +257,8 @@ class ImputationBusiness
                     $nightPeriodTwoStart = $nightPeriodOneStart->copy()->subDay();
                     $nightPeriodTwoEnd = $nightPeriodOneEnd->copy()->subDay();
 
-                    //Alternative 1
-                    if ($debutCarbon->roundDay()->copy()->addDay(1) === $finCarbon->roundDay()) {
+                    //Alternative 1 -> only one day
+                    if ($debutCarbon->copy()->subDay() <= $finCarbon) {
                         //Debut et fin la même journée
                         if ($debutCarbon->isWeekend() && $testWeekend) {
                             $dureeTarifWeekend += $duree;
@@ -278,6 +274,8 @@ class ImputationBusiness
                         }
 
                     } else {
+                        //Two days
+
                         //Modification de la durée
                         $finJour = $debut->copy()->ceilDay();
                         $duree = $debut->floatDiffInHours($finJour);
@@ -330,7 +328,6 @@ class ImputationBusiness
             $soldeNuit = $soldeTarif * $dureeTarifNuit;
             $soldeWeekend = $soldeTarif * $dureeTarifWeekend;
 
-
             //Application des taux
             if ($testWeekend) {
                 $soldeWeekend *= $tauxWeekend;
@@ -349,10 +346,9 @@ class ImputationBusiness
                     'designation' => $designation,
                     'total' => $soldeStandard,
                     'tarif' => $soldeTarif,
-                    'quantite' => 1,
+                    'quantite' => $dureeTarifStandard,
                     'solde_min' => null,
                     'solde_min_pour' => null,
-                    'taux' => null,
                     'sapeur_id' => $sapeur_id,
                     'compte_id' => $indemniteType->compte_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
@@ -371,10 +367,11 @@ class ImputationBusiness
                     'designation' => $designation . " - Nuit",
                     'total' => $soldeNuit,
                     'tarif' => $soldeTarif,
-                    'quantite' => 1,
+                    'quantite' => $dureeTarifNuit,
                     'solde_min' => null,
                     'solde_min_pour' => null,
                     'taux' => $tauxNuit,
+                    'taux_description' => 'Nuit',
                     'sapeur_id' => $sapeur_id,
                     'compte_id' => $indemniteType->compte_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
@@ -393,10 +390,11 @@ class ImputationBusiness
                     'designation' => $designation . " - Weekend",
                     'total' => $soldeWeekend,
                     'tarif' => $soldeTarif,
-                    'quantite' => 1,
+                    'quantite' => $dureeTarifWeekend,
                     'solde_min' => null,
                     'solde_min_pour' => null,
                     'taux' => $tauxWeekend,
+                    'taux_description' => 'Weekend',
                     'sapeur_id' => $sapeur_id,
                     'compte_id' => $indemniteType->compte_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
@@ -448,9 +446,6 @@ class ImputationBusiness
                 'total' => $solde + $indemnite,
                 'tarif' => $solde + $indemnite,
                 'quantite' => 1,
-                'solde_min' => null,
-                'solde_min_pour' => null,
-                'taux' => null,
                 'sapeur_id' => $sapeur->sapeur_id,
                 'compte_id' => $indemniteType->compte_id,
                 'exercice_comptable_id' => $exercice->exercice_comptable_id,
@@ -501,7 +496,6 @@ class ImputationBusiness
                 'quantite' => $exercice->duree / 60,
                 'solde_min' => $indemniteType->solde_min,
                 'solde_min_pour' => $indemniteType->solde_min_pour,
-                'taux' => null,
                 'sapeur_id' => $sapeur->sapeur_id,
                 'compte_id' => $indemniteType->compte_id,
                 'exercice_comptable_id' => $exercice->exercice_comptable_id,
@@ -543,7 +537,6 @@ class ImputationBusiness
                 'quantite' => $exercice->duree / 60,
                 'solde_min' => $indemniteType->solde_min,
                 'solde_min_pour' => $indemniteType->solde_min_pour,
-                'taux' => null,
                 'sapeur_id' => $sapeur->sapeur_id,
                 'compte_id' => $indemniteType->compte_id,
                 'exercice_comptable_id' => $exercice->exercice_comptable_id,

@@ -81,6 +81,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         if (!array_key_exists('solde_min', $ecriture)) $ecriture['solde_min'] = null;
         if (!array_key_exists('solde_min_pour', $ecriture)) $ecriture['solde_min_pour'] = null;
         if (!array_key_exists('taux', $ecriture)) $ecriture['taux'] = null;
+        if (!array_key_exists('taux_description', $ecriture)) $ecriture['taux_description'] = null;
         if (!array_key_exists('solde', $ecriture)) $ecriture['solde'] = 0;
         if (!array_key_exists('indemnite', $ecriture)) $ecriture['indemnite'] = 0;
         if (!array_key_exists('frais', $ecriture)) $ecriture['frais'] = 0;

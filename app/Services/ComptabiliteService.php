@@ -90,6 +90,8 @@ class ComptabiliteService
     {
         $statut = $this->business->imputerIntervention($interventionId, $data);
 
+        dd($this->ecritureRepo->listeEcritureForIntervention($interventionId));
+
         return [
             "statut" => $statut,
             "ecritures" => $this->ecritureRepo->listeEcritureForIntervention($interventionId)
