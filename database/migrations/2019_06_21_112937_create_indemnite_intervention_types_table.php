@@ -37,6 +37,9 @@ class CreateIndemniteInterventionTypesTable extends Migration
             $table->unsignedBigInteger('type_unite_id');
             $table->foreign('type_unite_id')->references('id')->on('type_unites');
 
+            $table->unsignedBigInteger('ecriture_categorie_id');
+            $table->foreign('ecriture_categorie_id')->references('id')->on('ecriture_categories');
+
             $table->boolean('par_fonction');
         });
     }

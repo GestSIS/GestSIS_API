@@ -11,27 +11,212 @@
         .page-break {
             page-break-after: always;
         }
+
+        .column-right {
+            text-align: right !important;
+            padding-right: 1rem !important;
+        }
     </style>
 
     <title>Décomptes sapeurs</title>
 </head>
 <body>
 <div class="container">
-    @foreach($sapeurs as $sapeur)
-        <sapeur>
-            <exercices>
-                <exercice>
-                    <ecritures>
-                        <ecriture></ecriture>
-                        <ecriture></ecriture>
-                        <ecriture></ecriture>
-                    </ecritures>
-                </exercice>
-            </exercices>
-        </sapeur>
-        <div class="row">Some test content</div>
+    <h1>Test</h1>
+    <?php
+    $previousEcriture = null;
+    $first = true;
+    $last = false;
+    $nbEcritures = count($ecritures);
+
+    $wasExercice = false;
+    $wasIntervention = false;
+    $wasAnnuel = false;
+
+    $categorieSousTotal = 0.0;
+    $interventionSousTotal = 0.0;
+
+    function isExercice($e)
+    {
+        return $e->exercice_id !== null;
+    }
+    function isIntervention($e)
+    {
+        return $e->intervention_id !== null;
+    }
+    function isAnnuel($e)
+    {
+        return $e->indemnite_annuel_type_id !== null || $e->frais_annuel_type_id !== null;
+    }
+
+    function formatNumber($value)
+    {
+        return number_format($value, 2, '.', "'");
+    }
+
+    function formatDate($value)
+    {
+        return str_replace('-','.', $value);
+    }
+
+    function formatTime($value)
+    {
+        return substr($value, 0, 5);
+    }
+
+    foreach ($ecritures as $index => $ecriture) {
+    $last = $index + 1 === $nbEcritures;
+    $nextEcriture = $last ? null : $ecritures[$index + 1];
+
+    $isIntervention = isIntervention($ecriture);
+    $isExercice = isExercice($ecriture);
+    $isAnnuel = isAnnuel($ecriture);
+
+    $newSapeur = $first || $previousEcriture->sapeur_id !== $ecriture->sapeur_id;
+    $newCategorie = $newSapeur || $previousEcriture->ecriture_categorie_id !== $ecriture->ecriture_categorie_id;
+
+    $debutSectionExercice = $isExercice && ($newCategorie || !$wasExercice);
+    $debutSectionIntervention = $isIntervention && ($newCategorie || !$wasIntervention);
+    $debutSectionAnnuel = $isAnnuel && ($newCategorie || !$wasAnnuel);
+
+    $newIntervention = $newSapeur || $previousEcriture->intervention_id !== $ecriture->intervention_id;
+
+    $endSapeur = $last || $nextEcriture->sapeur_id !== $ecriture->sapeur_id;
+    $endCategorie = $endSapeur || $nextEcriture->ecriture_categorie_id !== $ecriture->ecriture_categorie_id;
+
+    $finSectionExercice = $endCategorie || $isExercice && !isExercice($nextEcriture);
+    $finSectionIntervention = $endCategorie || $isIntervention && !isIntervention($nextEcriture);
+    $finSectionAnnuel = $endCategorie || $isAnnuel && !isAnnuel($nextEcriture);
+
+    $finIntervention = $endCategorie || $nextEcriture->intervention_id !== $ecriture->intervention_id;
+
+    $categorieSousTotal = $newCategorie ? 0.0 : $categorieSousTotal;
+    $categorieSousTotal += $ecriture->total;
+    $interventionSousTotal = $newIntervention ? 0.0 : $interventionSousTotal;
+    $interventionSousTotal += $ecriture->total;
+
+    ?>
+    @if ($newSapeur)
+        <h1 class="text-center">Décompte de frais</h1>
+        <div>{{ $ecriture->sapeur }}</div>
+    @endif
+
+    @if ($newCategorie)
+        <h2>{{ $ecriture->categorie }}</h2>
+        <table class="table table-sm table-striped">
+            @endif
+
+            @if ($isAnnuel)
+                @if ($debutSectionAnnuel)
+                    <thead>
+                    <td colspan="3">Nature du service</td>
+                    <td>Tarif</td>
+                    <td>Qté</td>
+                    <td>Date Solde</td>
+                    <td class="text-center">Total</td>
+                    </thead>
+                    <tbody>
+                    @endif
+                    <tr>
+                        <td colspan="3">{{ $ecriture->designation }}</td>
+                        <td>{{ formatNumber($ecriture->tarif) }} TODO Unité</td>
+                        <td>{{ formatNumber($ecriture->quantite) }}</td>
+                        <td>{{ $ecriture->date_paiement }} TODO SHOULD be null for now</td>
+                        <td class="column-right">{{ formatNumber($ecriture->total) }}</td>
+                    </tr>
+                    @if ($finSectionAnnuel)
+                    </tbody>
+                @endif
+            @endif
+
+            @if ($isExercice)
+                @if ($debutSectionExercice)
+                    <thead>
+                    <td>Date</td>
+                    <td>Heure</td>
+                    <td>Nature du service</td>
+                    <td>Tarif</td>
+                    <td>Qté</td>
+                    <td>Date Solde</td>
+                    <td class="text-center">Total</td>
+                    </thead>
+                    <tbody>
+                    @endif
+                    <tr>
+                        <td>{{ formatDate($ecriture->date) }}</td>
+                        <td>{{ formatTime($ecriture->heure) }}</td>
+                        <td>{{ $ecriture->designation }}</td>
+                        <td>{{ formatNumber($ecriture->tarif) }} TODO Unité</td>
+                        <td>{{ formatNumber($ecriture->quantite) }}</td>
+                        <td>{{ $ecriture->date_paiement }} TODO SHOULD be null for now</td>
+                        <td class="column-right">{{ formatNumber($ecriture->total) }}</td>
+                    </tr>
+                    @if ($finSectionExercice)
+                    </tbody>
+                @endif
+            @endif
+
+            @if ($isIntervention)
+                @if ($debutSectionIntervention)
+                    <thead>
+                    <td>Date</td>
+                    <td>Heure</td>
+                    <td>Intervention</td>
+                    <td>Tarif</td>
+                    <td>Qté</td>
+                    <td>Date Solde</td>
+                    <td>Total</td>
+                    </thead>
+                    <tbody>
+                    @endif
+
+                    @if ($newIntervention)
+                        <tr>
+                            <td>{{ formatDate($ecriture->date) }}</td>
+                            <td>{{ formatTime($ecriture->heure) }}</td>
+                            <td colspan="5">{{ $ecriture->designation }}</td>
+                        </tr>
+                    @endif
+                    <tr>
+                        <td colspan="2"></td>
+                        <td>TODO Sous-écriture</td>
+                        <td>{{ $ecriture->tarif }} TODO ADD UNITE</td>
+                        <td>{{ formatNumber($ecriture->quantite) }}</td>
+                        <td>{{ $ecriture->date_paiement }} SHOULD BE NULL</td>
+                        <td class="column-right">{{ $ecriture->total }}</td>
+                    </tr>
+                    @if($finIntervention)
+                        <tr>
+                            <td colspan="7"
+                                class="column-right">{{ formatNumber($interventionSousTotal) }}</td>
+                        </tr>
+                    @endif
+
+                    @if ($finSectionExercice)
+                    </tbody>
+                @endif
+            @endif
+
+            @if ($endCategorie)
+                <tbody>
+                <tr>
+                    <th colspan="6" class="column-right">Sous-total</th>
+                    <th colspan="7" class="column-right">{{ formatNumber($categorieSousTotal) }}</th>
+                </tr>
+                </tbody>
+        </table>
+    @endif
+    @if($endSapeur)
         <div class="page-break"></div>
-    @endforeach
+    @endif
+    <?php
+    $first = false;
+    $previousEcriture = $ecriture;
+    $wasExercice = $isExercice;
+    $wasIntervention = $isIntervention;
+    $wasAnnuel = $isAnnuel;
+    }
+    ?>
 </div>
 </body>
 </html>

@@ -5,8 +5,8 @@ namespace App\Repositories;
 
 use App\Contracts\EcritureRepository;
 use App\Models\Ecriture;
+use Illuminate\Support\Facades\DB;
 use StdClass;
-
 
 class EcritureRepositoryEloquent implements EcritureRepository
 {
@@ -73,6 +73,26 @@ class EcritureRepositoryEloquent implements EcritureRepository
         );
     }
 
+    public function computeEcritureForPersonalDecompte($exerciceComptableId)
+    {
+        $ecritures = DB::table('ecritures')
+            ->join('sapeurs', 'ecritures.sapeur_id', '=', 'sapeurs.id')
+            ->join('ecriture_categories', 'ecritures.ecriture_categorie_id', '=', 'ecriture_categories.id')
+            ->where('ecritures.exercice_comptable_id', $exerciceComptableId)
+            ->select('ecritures.*', DB::raw('concat(sapeurs.nom, " ", sapeurs.prenom) as sapeur'), 'ecriture_categories.tri', 'ecriture_categories.designation AS categorie')
+            ->orderBy('sapeur')
+            ->orderBy('ecriture_categories.tri', 'ASC')
+            ->orderBy('ecritures.date')
+            ->orderBy('ecritures.heure')
+            ->get();
+
+        $temp = $this;
+        return $ecritures
+            ->map(function ($ecriture) use ($temp) {
+                return $temp->convertEcritureForDecomptes($ecriture);
+            })->toArray();
+    }
+
     /**
      * @param $ecriture
      */
@@ -90,6 +110,10 @@ class EcritureRepositoryEloquent implements EcritureRepository
         if (!array_key_exists('exercice_id', $ecriture)) $ecriture['exercice_id'] = null;
         if (!array_key_exists('indemnite_annuel_type_id', $ecriture)) $ecriture['indemnite_annuel_type_id'] = null;
         if (!array_key_exists('frais_annuel_type_id', $ecriture)) $ecriture['frais_annuel_type_id'] = null;
+        if (!array_key_exists('paiement_id', $ecriture)) $ecriture['paiement_id'] = null;
+        if (!array_key_exists('date_paiement', $ecriture)) $ecriture['date_paiement'] = null;
+        if (!array_key_exists('date', $ecriture)) $ecriture['date'] = null;
+        if (!array_key_exists('heure', $ecriture)) $ecriture['heure'] = null;
 
         $model = new Ecriture();
         $model->fill($ecriture);
@@ -133,6 +157,49 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->indemnite_annuel_type_id = $ecriture->indemnite_annuel_type_id;
         $object->frais_annuel_type_id = $ecriture->frais_annuel_type_id;
         $object->compte_id = $ecriture->compte_id;
+        $object->ecriture_categorie_id = $ecriture->ecriture_categorie_id;
+        $object->date = $ecriture->date;
+        $object->heure = $ecriture->heure;
+        $object->date_paiement = $ecriture->date_paiement;
+
+        return $object;
+    }
+
+    /**
+     * @param $ecriture
+     * @return stdClass|null
+     */
+    protected function convertEcritureForDecomptes($ecriture)
+    {
+        if ($ecriture == null) return null;
+
+        $object = new StdClass();
+        $object->id = $ecriture->id;
+        $object->designation = $ecriture->designation;
+        $object->total = $ecriture->total;
+        $object->tarif = $ecriture->tarif;
+        $object->type_unite_id = $ecriture->type_unite_id;
+        $object->quantite = $ecriture->quantite;
+        $object->solde_min = $ecriture->solde_min;
+        $object->solde_min_pour = $ecriture->solde_min_pour;
+        $object->taux = $ecriture->taux;
+        $object->solde = $ecriture->solde;
+        $object->indemnite = $ecriture->indemnite;
+        $object->frais = $ecriture->frais;
+        $object->sapeur_id = $ecriture->sapeur_id;
+        $object->exercice_comptable_id = $ecriture->exercice_comptable_id;
+        $object->intervention_id = $ecriture->intervention_id;
+        $object->exercice_id = $ecriture->exercice_id;
+        $object->indemnite_annuel_type_id = $ecriture->indemnite_annuel_type_id;
+        $object->frais_annuel_type_id = $ecriture->frais_annuel_type_id;
+        $object->compte_id = $ecriture->compte_id;
+        $object->ecriture_categorie_id = $ecriture->ecriture_categorie_id;
+        $object->date = $ecriture->date;
+        $object->heure = $ecriture->heure;
+        $object->date_paiement = $ecriture->date_paiement;
+        $object->sapeur = $ecriture->sapeur;
+        $object->categorie = $ecriture->categorie;
+        $object->tri = $ecriture->tri;
 
         return $object;
     }

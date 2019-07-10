@@ -59,6 +59,7 @@ class DatabaseSeeder extends Seeder
 
         //Frais
         $this->call(CompteTableSeeder::class);
+        $this->call(EcritureCategorieTableSeeder::class);
         $this->call(FraisAnnuelTypeTableSeeder::class);
         $this->call(IndemniteAnnuelTypeTableSeeder::class);
         $this->call(IndemniteExerciceTypeTableSeeder::class);

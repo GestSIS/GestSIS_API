@@ -89,7 +89,8 @@ class ImputationBusiness
             'sapeur_id' => $sapeur->id,
             'compte_id' => $indemniteType->compte_id,
             'exercice_comptable_id' => $exerciceComptableId,
-            'indemnite_annuel_type_id' => $indemniteType->id
+            'indemnite_annuel_type_id' => $indemniteType->id,
+            'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id
         );
 
         $this->ecritureRepo->persisteNewEcriture($ecriture);
@@ -110,7 +111,8 @@ class ImputationBusiness
             'sapeur_id' => $sapeur->id,
             'compte_id' => $fraisType->compte_id,
             'exercice_comptable_id' => $exerciceComptableId,
-            'frais_annuel_type_id' => $fraisType->id
+            'frais_annuel_type_id' => $fraisType->id,
+            'ecriture_categorie_id' => $fraisType->ecriture_categorie_id,
         );
 
         $this->ecritureRepo->persisteNewEcriture($ecriture);
@@ -144,6 +146,7 @@ class ImputationBusiness
         }
 
         //TODO Ajout date imputation
+        // ou pas
 
         // Changer le statut de l'exercice
         return $this->exerciceRepo->updateExerciceById($exerciceId, ["statut" => ExerciceBusiness::EXERCICE_STATUT_IMPUTE])->statut;
@@ -155,7 +158,7 @@ class ImputationBusiness
         $intervention = $this->interventionRepo->findWith($interventionId, ['presences', 'phases', 'localite', 'typeIntervention']);
 
         if ($intervention->statut !== InterventionBusiness::INTERVENTION_STATUT_VALIDE) {
-//            throw new ArrayValidatorException(array("message" => "Impossible d'imputer cette intervention"));
+            throw new ArrayValidatorException(array("message" => "Impossible d'imputer cette intervention"));
         }
 
         $unite = $indemniteType->type_unite_id;
@@ -170,12 +173,12 @@ class ImputationBusiness
             array_push($sapeurs[$presence->sapeur_id], $presence);
         }
 
-        $phases = $intervention->phases;
-
-        //TODO Retourne les phases durant cette période
-        $getPhases = function ($presence) use ($phases) {
-
-        };
+//        $phases = $intervention->phases;
+//
+//        //TODO Retourne les phases durant cette période
+//        $getPhases = function ($presence) use ($phases) {
+//
+//        };
 
         $id = 1;
 
@@ -200,14 +203,13 @@ class ImputationBusiness
             $dureeTarifNuit = 0;
 
             //TODO Adapt soldeTarif selon la fonction principale
+            // ou pas
             $soldeTarif = $indemniteType->solde;
             $tauxWeekend = $indemniteType->taux_weekend;
             $tauxNuit = $indemniteType->taux_nuit;
 
             $testWeekend = $tauxWeekend !== null;
             $testNuit = $tauxNuit !== null;
-
-            $trace = "";
 
             foreach ($presences as $presence) {
                 $debut = Carbon::parse($presence->debut);
@@ -352,7 +354,10 @@ class ImputationBusiness
                     'sapeur_id' => $sapeur_id,
                     'compte_id' => $indemniteType->compte_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
-                    'intervention_id' => $intervention->id
+                    'intervention_id' => $intervention->id,
+                    'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+                    'date' => $intervention->date_debut,
+                    'heure' => $intervention->heure_debut,
                 );
 
                 $this->ecritureRepo->persisteNewEcriture($ecriture);
@@ -375,7 +380,10 @@ class ImputationBusiness
                     'sapeur_id' => $sapeur_id,
                     'compte_id' => $indemniteType->compte_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
-                    'intervention_id' => $intervention->id
+                    'intervention_id' => $intervention->id,
+                    'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+                    'date' => $intervention->date_debut,
+                    'heure' => $intervention->heure_debut,
                 );
 
                 $this->ecritureRepo->persisteNewEcriture($ecriture);
@@ -398,7 +406,10 @@ class ImputationBusiness
                     'sapeur_id' => $sapeur_id,
                     'compte_id' => $indemniteType->compte_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
-                    'intervention_id' => $intervention->id
+                    'intervention_id' => $intervention->id,
+                    'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+                    'date' => $intervention->date_debut,
+                    'heure' => $intervention->heure_debut,
                 );
 
                 $this->ecritureRepo->persisteNewEcriture($ecriture);
@@ -449,7 +460,10 @@ class ImputationBusiness
                 'sapeur_id' => $sapeur->sapeur_id,
                 'compte_id' => $indemniteType->compte_id,
                 'exercice_comptable_id' => $exercice->exercice_comptable_id,
-                'exercice_id' => $exercice->id
+                'exercice_id' => $exercice->id,
+                'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+                'date' => $exercice->date,
+                'heure' => $exercice->heure,
             );
 
             $this->ecritureRepo->persisteNewEcriture($ecriture);
@@ -499,7 +513,10 @@ class ImputationBusiness
                 'sapeur_id' => $sapeur->sapeur_id,
                 'compte_id' => $indemniteType->compte_id,
                 'exercice_comptable_id' => $exercice->exercice_comptable_id,
-                'exercice_id' => $exercice->id
+                'exercice_id' => $exercice->id,
+                'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+                'date' => $exercice->date,
+                'heure' => $exercice->heure,
             );
 
             $this->ecritureRepo->persisteNewEcriture($ecriture);
@@ -540,7 +557,10 @@ class ImputationBusiness
                 'sapeur_id' => $sapeur->sapeur_id,
                 'compte_id' => $indemniteType->compte_id,
                 'exercice_comptable_id' => $exercice->exercice_comptable_id,
-                'exercice_id' => $exercice->id
+                'exercice_id' => $exercice->id,
+                'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+                'date' => $exercice->date,
+                'heure' => $exercice->heure,
             );
 
             $this->ecritureRepo->persisteNewEcriture($ecriture);

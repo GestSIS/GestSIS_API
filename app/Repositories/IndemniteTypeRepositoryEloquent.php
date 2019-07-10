@@ -66,6 +66,7 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
         $object->quantite = $indemnite->quantite;
         $object->fonction_id = $indemnite->fonction_id;
         $object->compte_id = $indemnite->compte_id;
+        $object->ecriture_categorie_id = $indemnite->ecriture_categorie_id;
 
         return $object;
     }
@@ -89,6 +90,7 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
         $object->type_unite_id = $indemnite->type_unite_id;
         $object->compte_id = $indemnite->compte_id;
         $object->par_fonction = $indemnite->par_fonction;
+        $object->ecriture_categorie_id = $indemnite->ecriture_categorie_id;
 
         $indemnites = array();
         foreach ($indemnite->fonctions as $indemnite) {
@@ -141,6 +143,7 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
         $object->phase_id = $intervention->phase_id;
         $object->type_unite_id = $intervention->type_unite_id;
         $object->par_fonction = $intervention->par_fonction;
+        $object->ecriture_categorie_id = $intervention->ecriture_categorie_id;
 
         $indemnites = array();
         foreach ($intervention->fonctions as $indemnite) {

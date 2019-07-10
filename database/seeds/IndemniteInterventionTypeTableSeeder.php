@@ -12,8 +12,8 @@ class IndemniteInterventionTypeTableSeeder extends Seeder
     public function run()
     {
         $indemnites = array(
-            array('designation' => 'Intervention', 'compte_id' => 4, 'solde' => 30, 'type_unite_id' => 2, 'solde_min' => null, 'solde_min_pour' => null, 'phase_id' => 1, 'par_fonction' => false, 'taux_weekend' => null, 'taux_nuit' => null, 'debut' => null, 'fin' => null),
-            array('designation' => 'Intervention', 'compte_id' => 4, 'solde' => 30, 'type_unite_id' => 2, 'solde_min' => null, 'solde_min_pour' => null, 'phase_id' => null, 'par_fonction' => false, 'taux_weekend' => 1.25, 'taux_nuit' => 1.25, 'debut' => '20:00', 'fin' => '08:00'),
+            array('designation' => 'Intervention', 'ecriture_categorie_id' => 4, 'compte_id' => 4, 'solde' => 30, 'type_unite_id' => 2, 'solde_min' => null, 'solde_min_pour' => null, 'phase_id' => 1, 'par_fonction' => false, 'taux_weekend' => null, 'taux_nuit' => null, 'debut' => null, 'fin' => null),
+            array('designation' => 'Intervention', 'ecriture_categorie_id' => 4, 'compte_id' => 4, 'solde' => 30, 'type_unite_id' => 2, 'solde_min' => null, 'solde_min_pour' => null, 'phase_id' => null, 'par_fonction' => false, 'taux_weekend' => 1.25, 'taux_nuit' => 1.25, 'debut' => '20:00', 'fin' => '08:00'),
         );
 
         foreach ($indemnites as $item) {

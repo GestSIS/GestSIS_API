@@ -19,4 +19,6 @@ interface EcritureRepository
     public function listeIndemniteAnnuelByExeComptableId($exerciceComptableId);
 
     public function persisteNewEcriture($ecriture);
+
+    public function computeEcritureForPersonalDecompte($exerciceComptableId);
 }

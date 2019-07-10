@@ -21,6 +21,8 @@ class CreateEcrituresTable extends Migration
             $table->decimal('total');
 
             $table->decimal('tarif');
+            $table->date('date')->nullable();
+            $table->time('heure')->nullable();
 
             $table->unsignedBigInteger('type_unite_id');
             $table->foreign('type_unite_id')->references('id')->on('type_unites');
@@ -44,6 +46,9 @@ class CreateEcrituresTable extends Migration
             $table->unsignedBigInteger('exercice_comptable_id');
             $table->foreign('exercice_comptable_id')->references('id')->on('exercice_comptables');
 
+            $table->unsignedBigInteger('ecriture_categorie_id');
+            $table->foreign('ecriture_categorie_id')->references('id')->on('ecriture_categories');
+
             $table->unsignedBigInteger('intervention_id')->nullable();
             $table->foreign('intervention_id')->references('id')->on('interventions');
 
@@ -56,6 +61,10 @@ class CreateEcrituresTable extends Migration
             $table->unsignedBigInteger('frais_annuel_type_id')->nullable();
             $table->foreign('frais_annuel_type_id')->references('id')->on('frais_annuel_types');
 
+            $table->unsignedBigInteger('paiement_id')->nullable();
+            $table->foreign('paiement_id')->references('id')->on('paiements');
+
+            $table->date('date_paiement')->nullable();
         });
     }
 

@@ -35,6 +35,9 @@ class CreateGroupesTable extends Migration
      */
     public function down()
     {
+        Schema::table('groupes', function(Blueprint $table) {
+            $table->dropForeign(['pere_id']);
+        });
         Schema::dropIfExists('groupes');
     }
 }

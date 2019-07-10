@@ -36,6 +36,7 @@ class FraisTypeRepositoryEloquent implements FraisTypeRepository
         $object->montant = $frais->montant;
         $object->fonction_id = $frais->fonction_id;
         $object->compte_id = $frais->compte_id;
+        $object->ecriture_categorie_id = $frais->ecriture_categorie_id;
 
         return $object;
     }

@@ -155,7 +155,7 @@ Route::group(['prefix' => 'v2'], function () {
         Route::resource('comptes', 'CompteController')->only(['index']);
         Route::get('comptes/{id}/ecritures/{exerciceComptableId}', 'CompteController@ecritures');
 
-        Route::get('pdf-test', 'CompteController@generatePdf');
+        Route::get('pdf-test/{id}', 'CompteController@generatePdf');
         //SUPPRIMER
 
         // Sis

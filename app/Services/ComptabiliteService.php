@@ -9,6 +9,7 @@ use App\Contracts\EcritureRepository;
 use App\Contracts\ExerciceRepository;
 use App\Contracts\FraisTypeRepository;
 use App\Contracts\IndemniteTypeRepository;
+use PDF;
 
 class ComptabiliteService
 {
@@ -90,8 +91,6 @@ class ComptabiliteService
     {
         $statut = $this->business->imputerIntervention($interventionId, $data);
 
-        dd($this->ecritureRepo->listeEcritureForIntervention($interventionId));
-
         return [
             "statut" => $statut,
             "ecritures" => $this->ecritureRepo->listeEcritureForIntervention($interventionId)
@@ -106,5 +105,14 @@ class ComptabiliteService
             "frais" => $this->ecritureRepo->listeFraisAnnuelByExeComptableId($exerciceComptableId),
             "indemnites" => $this->ecritureRepo->listeIndemniteAnnuelByExeComptableId($exerciceComptableId),
         ];
+    }
+
+    function decompteAnnuelParSapeur($exerciceComptableId)
+    {
+        $ecritures = $this->ecritureRepo->computeEcritureForPersonalDecompte($exerciceComptableId);
+
+        return View('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
+        $pdf = PDF::loadView('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
+        return $pdf->download('invoice.pdf');
     }
 }

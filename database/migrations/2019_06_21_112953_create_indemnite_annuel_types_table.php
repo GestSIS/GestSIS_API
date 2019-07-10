@@ -26,6 +26,10 @@ class CreateIndemniteAnnuelTypesTable extends Migration
 
             $table->unsignedBigInteger('compte_id');
             $table->foreign('compte_id')->references('id')->on('comptes');
+
+            $table->unsignedBigInteger('ecriture_categorie_id');
+            $table->foreign('ecriture_categorie_id')->references('id')->on('ecriture_categories');
+
         });
     }
 

@@ -24,7 +24,11 @@ class Ecriture extends Model
         'intervention_id',
         'exercice_id',
         'indemnite_annuel_type_id',
-        'frais_annuel_type_id'
+        'frais_annuel_type_id',
+        'ecriture_categorie_id',
+        'date',
+        'heure',
+        'date_paiement',
     ];
 
 }
