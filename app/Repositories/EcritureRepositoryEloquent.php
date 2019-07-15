@@ -78,8 +78,17 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $ecritures = DB::table('ecritures')
             ->join('sapeurs', 'ecritures.sapeur_id', '=', 'sapeurs.id')
             ->join('ecriture_categories', 'ecritures.ecriture_categorie_id', '=', 'ecriture_categories.id')
+            ->join('type_unites', 'ecritures.type_unite_id', '=', 'type_unites.id')
+            ->join('civilites', 'sapeurs.civilite_id', '=', 'civilites.id')
             ->where('ecritures.exercice_comptable_id', $exerciceComptableId)
-            ->select('ecritures.*', DB::raw('concat(sapeurs.nom, " ", sapeurs.prenom) as sapeur'), 'ecriture_categories.tri', 'ecriture_categories.designation AS categorie')
+            ->select(
+                'ecritures.*',
+                DB::raw('concat(sapeurs.nom, " ", sapeurs.prenom) as sapeur'),
+                'ecriture_categories.tri',
+                'ecriture_categories.designation AS categorie',
+                'type_unites.abreviation as unite',
+                'civilites.forme_politesse as civilite'
+            )
             ->orderBy('sapeur')
             ->orderBy('ecriture_categories.tri', 'ASC')
             ->orderBy('ecritures.date')
@@ -200,6 +209,8 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->sapeur = $ecriture->sapeur;
         $object->categorie = $ecriture->categorie;
         $object->tri = $ecriture->tri;
+        $object->unite = $ecriture->unite;
+        $object->civilite = $ecriture->civilite;
 
         return $object;
     }

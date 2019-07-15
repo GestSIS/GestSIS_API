@@ -36,6 +36,9 @@ class ImputationBusiness
         $this->fraisRepo = $frais;
     }
 
+    protected const UNITE_CHF_PAR_PIECE = 1;
+    protected const UNITE_CHF_PAR_HEURE = 2;
+
     public function imputerAnnuel(int $exerciceComptableId)
     {
         // TODO Check pas déjà imputée cette année
@@ -81,7 +84,7 @@ class ImputationBusiness
             'solde' => 0,
             'indemnite' => $indemniteType->montant,
             'frais' => 0,
-            'type_unite_id' => 1,
+            'type_unite_id' => $indemniteType->type_unite_id,
             'designation' => $indemniteType->designation,
             'total' => $total,
             'tarif' => $indemniteType->montant,
@@ -103,7 +106,7 @@ class ImputationBusiness
             'solde' => 0,
             'indemnite' => 0,
             'frais' => $fraisType->montant,
-            'type_unite_id' => 1,
+            'type_unite_id' => $fraisType->type_unite_id,
             'designation' => $fraisType->designation,
             'total' => $total,
             'tarif' => $fraisType->montant,
@@ -133,11 +136,11 @@ class ImputationBusiness
         $sapeurs = array_filter($exercice->sapeurs, function ($sap) {
             return $sap->present;
         });
-        if ($unite === 2) {
+        if ($unite === self::UNITE_CHF_PAR_PIECE) {
             $this->imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation);
-        } elseif ($unite === 1 && $indemniteType->par_fonction) {
+        } elseif ($unite === self::UNITE_CHF_PAR_HEURE && $indemniteType->par_fonction) {
             $this->imputerExerciceParHeureEtFonction($exercice, $sapeurs, $indemniteType, $designation);
-        } elseif ($unite === 1 && $indemniteType->solde_min !== null) {
+        } elseif ($unite === self::UNITE_CHF_PAR_HEURE && $indemniteType->solde_min !== null) {
             $this->imputerExerciceParHeureEtSoldeMin($exercice, $sapeurs, $indemniteType, $designation);
         } else {
             dd("ERROR");
@@ -179,8 +182,6 @@ class ImputationBusiness
 //        $getPhases = function ($presence) use ($phases) {
 //
 //        };
-
-        $id = 1;
 
         foreach ($sapeurs as $sapeur_id => $presences) {
             $dureeNuit = 0;

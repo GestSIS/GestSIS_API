@@ -19,7 +19,7 @@ class EcritureCategorieTableSeeder extends Seeder
             array('id' => 5, 'designation' => 'Formation', 'tri' => 5),
             array('id' => 6, 'designation' => 'EM & Comissions', 'tri' => 6),
             array('id' => 7, 'designation' => 'Séances', 'tri' => 7),
-            array('id' => 8, 'designation' => 'Frais & indemnitls annuelles', 'tri' => 8),
+            array('id' => 8, 'designation' => 'Frais & indemnités annuelles', 'tri' => 8),
         );
 
         foreach ($categories as $categorie) {

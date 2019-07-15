@@ -18,6 +18,7 @@ class CreateCivilitesTable extends Migration
             $table->timestamps();
 
             $table->string('designation');
+            $table->string('forme_politesse');
         });
     }
 

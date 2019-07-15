@@ -111,7 +111,7 @@ class ComptabiliteService
     {
         $ecritures = $this->ecritureRepo->computeEcritureForPersonalDecompte($exerciceComptableId);
 
-        return View('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
+//        return View('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
         $pdf = PDF::loadView('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
         return $pdf->download('invoice.pdf');
     }

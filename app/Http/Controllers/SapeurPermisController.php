@@ -2,15 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Business\SapeurBusiness;
 use App\Exceptions\ArrayValidatorException;
 use App\Models\Sapeur;
+use App\Services\SapeurService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Validator;
 
 class SapeurPermisController extends Controller
 {
+    protected $service;
+
+    public function __construct(SapeurService $service)
+    {
+        $this->service = $service;
+    }
 
     /**
      * Return the permis
@@ -46,7 +53,7 @@ class SapeurPermisController extends Controller
         }
 
         try {
-            $permis = SapeurBusiness::get($id)->addPermis($validation->validated());
+            $permis = $this->service->addPermis($id, $validation->validated());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -81,7 +88,7 @@ class SapeurPermisController extends Controller
         }
 
         try {
-            $permis = SapeurBusiness::get($id)->updatePermis($validation->validated());
+            $permis = $this->service->updatePermis($id, $validation->validated());
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
@@ -99,7 +106,7 @@ class SapeurPermisController extends Controller
     public function destroy(int $id, int $permisId)
     {
         try {
-            SapeurBusiness::get($id)->removePermis($permisId);
+            $this->service->removePermis($id, $permisId);
         } catch (ArrayValidatorException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }

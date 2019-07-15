@@ -12,10 +12,10 @@ class CiviliteTableSeeder extends Seeder
     public function run()
     {
         DB::table('civilites')->insert([
-            'designation' => 'Homme',
+            'designation' => 'Homme', 'forme_politesse' => 'Monsieur'
         ]);
         DB::table('civilites')->insert([
-            'designation' => 'Femme',
+            'designation' => 'Femme', 'forme_politesse' => 'Madame'
         ]);
     }
 }

@@ -7,9 +7,10 @@ namespace App\Business;
 use App\Contracts\InterventionRepository;
 use App\Exceptions\ArrayValidatorException;
 use App\Models\Intervention;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Validator;
-use DateTime;
+
 
 class InterventionBusiness
 {
@@ -37,10 +38,11 @@ class InterventionBusiness
     {
         //TODO Vérifier intervention comptable
         $phaseTypeIntervention = 1;
+        $data['statut'] = self::INTERVENTION_STATUT_EMPTY;
 
         $intervention = $this->repository->createNewIntervention($data);
         $this->repository->addPhase($intervention->id, array(
-            "debut" => new DateTime($data['date_debut'] . ' ' . $data['heure_debut']),
+            "debut" => null,
             "phase_type_id" => $phaseTypeIntervention,
             "statut" => self::INTERVENTION_STATUT_EMPTY
         ));
@@ -277,9 +279,21 @@ class InterventionBusiness
         /* TODO Check:
         - Pas imputé
         */
+        $intervention = $this->repository->findInterventionById($interventionId);
+        $existingPhases = $this->repository->getInterventionPhases($interventionId);
 
+        $debut = Carbon::parse($intervention->date_debut . " " . $intervention->heure_debut);
         foreach ($phases as $phase) {
-            $this->repository->addPhase($interventionId, $phase);
+            if ($debut >= Carbon::parse($phase['debut'])) {
+                throw new ArrayValidatorException(["debut" => "Debut trop tôt"]);
+            } else {
+                foreach ($existingPhases as $existingPhase) {
+                    if ($existingPhase->debut !== null && $debut == Carbon::parse($existingPhase->debut)) {
+                        throw new ArrayValidatorException(["debut" => "Debut trop tôt"]);
+                    }
+                }
+                $this->repository->addPhase($interventionId, $phase);
+            }
         }
     }
 

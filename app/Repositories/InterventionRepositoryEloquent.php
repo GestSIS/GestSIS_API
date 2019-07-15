@@ -59,6 +59,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
         $intervention = new Intervention();
         $intervention->fill($data);
+        $intervention->fill($data);
         $intervention->date_imputation = null;
         $intervention->exercice_comptable_id = $data['exercice_comptable_id'];
         $intervention->save();

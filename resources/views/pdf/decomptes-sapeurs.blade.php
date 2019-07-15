@@ -16,13 +16,16 @@
             text-align: right !important;
             padding-right: 1rem !important;
         }
+
+        .sum-row {
+            background-color: white !important;
+        }
     </style>
 
     <title>Décomptes sapeurs</title>
 </head>
 <body>
-<div class="container">
-    <h1>Test</h1>
+<div class="">
     <?php
     $previousEcriture = null;
     $first = true;
@@ -56,12 +59,19 @@
 
     function formatDate($value)
     {
-        return str_replace('-','.', $value);
+        return str_replace('-', '.', $value);
     }
 
     function formatTime($value)
     {
         return substr($value, 0, 5);
+    }
+
+    function formatTarif($ecriture)
+    {
+        $tarifMin = $ecriture->solde_min === null ? "" : "($ecriture->solde_min CHF / $ecriture->solde_min_pour H)";
+        $tauxSpecial = $ecriture->taux === null ? "" : "* " . $ecriture->taux * 100 . " %";
+        return "$tarifMin " . formatNumber($ecriture->tarif) . " $ecriture->unite $tauxSpecial";
     }
 
     foreach ($ecritures as $index => $ecriture) {
@@ -98,7 +108,7 @@
     ?>
     @if ($newSapeur)
         <h1 class="text-center">Décompte de frais</h1>
-        <div>{{ $ecriture->sapeur }}</div>
+        <div>{{ ucfirst($ecriture->civilite) }} {{ $ecriture->sapeur }}</div>
     @endif
 
     @if ($newCategorie)
@@ -109,19 +119,21 @@
             @if ($isAnnuel)
                 @if ($debutSectionAnnuel)
                     <thead>
-                    <td colspan="3">Nature du service</td>
-                    <td>Tarif</td>
-                    <td>Qté</td>
-                    <td>Date Solde</td>
-                    <td class="text-center">Total</td>
+                    <tr>
+                        <th colspan="3">Nature du service</th>
+                        <th>Tarif</th>
+                        <th>Qté</th>
+                        <th>Date Solde</th>
+                        <th class="text-center">Total</th>
+                    </tr>
                     </thead>
                     <tbody>
                     @endif
                     <tr>
                         <td colspan="3">{{ $ecriture->designation }}</td>
-                        <td>{{ formatNumber($ecriture->tarif) }} TODO Unité</td>
+                        <td>{{ formatTarif($ecriture) }}</td>
                         <td>{{ formatNumber($ecriture->quantite) }}</td>
-                        <td>{{ $ecriture->date_paiement }} TODO SHOULD be null for now</td>
+                        <td>{{ formatDate($ecriture->date_paiement) }}TODO</td>
                         <td class="column-right">{{ formatNumber($ecriture->total) }}</td>
                     </tr>
                     @if ($finSectionAnnuel)
@@ -132,13 +144,15 @@
             @if ($isExercice)
                 @if ($debutSectionExercice)
                     <thead>
-                    <td>Date</td>
-                    <td>Heure</td>
-                    <td>Nature du service</td>
-                    <td>Tarif</td>
-                    <td>Qté</td>
-                    <td>Date Solde</td>
-                    <td class="text-center">Total</td>
+                    <tr>
+                        <th>Date</th>
+                        <th>Heure</th>
+                        <th>Nature du service</th>
+                        <th>Tarif</th>
+                        <th>Qté</th>
+                        <th>Date Solde</th>
+                        <th class="text-center">Total</th>
+                    </tr>
                     </thead>
                     <tbody>
                     @endif
@@ -146,9 +160,9 @@
                         <td>{{ formatDate($ecriture->date) }}</td>
                         <td>{{ formatTime($ecriture->heure) }}</td>
                         <td>{{ $ecriture->designation }}</td>
-                        <td>{{ formatNumber($ecriture->tarif) }} TODO Unité</td>
+                        <td>{{ formatTarif($ecriture) }}</td>
                         <td>{{ formatNumber($ecriture->quantite) }}</td>
-                        <td>{{ $ecriture->date_paiement }} TODO SHOULD be null for now</td>
+                        <td>{{ formatDate($ecriture->date_paiement) }}TODO</td>
                         <td class="column-right">{{ formatNumber($ecriture->total) }}</td>
                     </tr>
                     @if ($finSectionExercice)
@@ -159,13 +173,15 @@
             @if ($isIntervention)
                 @if ($debutSectionIntervention)
                     <thead>
-                    <td>Date</td>
-                    <td>Heure</td>
-                    <td>Intervention</td>
-                    <td>Tarif</td>
-                    <td>Qté</td>
-                    <td>Date Solde</td>
-                    <td>Total</td>
+                    <tr>
+                        <th>Date</th>
+                        <th>Heure</th>
+                        <th>Intervention</th>
+                        <th>Tarif</th>
+                        <th>Qté</th>
+                        <th>Date Solde</th>
+                        <th>Total</th>
+                    </tr>
                     </thead>
                     <tbody>
                     @endif
@@ -180,9 +196,9 @@
                     <tr>
                         <td colspan="2"></td>
                         <td>TODO Sous-écriture</td>
-                        <td>{{ $ecriture->tarif }} TODO ADD UNITE</td>
+                        <td>{{ formatTarif($ecriture) }}</td>
                         <td>{{ formatNumber($ecriture->quantite) }}</td>
-                        <td>{{ $ecriture->date_paiement }} SHOULD BE NULL</td>
+                        <td>{{formatDate( $ecriture->date_paiement) }}TODO</td>
                         <td class="column-right">{{ $ecriture->total }}</td>
                     </tr>
                     @if($finIntervention)
@@ -199,14 +215,14 @@
 
             @if ($endCategorie)
                 <tbody>
-                <tr>
+                <tr class="sum-row">
                     <th colspan="6" class="column-right">Sous-total</th>
-                    <th colspan="7" class="column-right">{{ formatNumber($categorieSousTotal) }}</th>
+                    <th class="column-right">{{ formatNumber($categorieSousTotal) }}</th>
                 </tr>
                 </tbody>
         </table>
     @endif
-    @if($endSapeur)
+    @if($endSapeur && !$last)
         <div class="page-break"></div>
     @endif
     <?php
@@ -217,6 +233,10 @@
     $wasAnnuel = $isAnnuel;
     }
     ?>
+
+    @if($nbEcritures === 0)
+        <h1>Aucune écriture</h1>
+    @endif
 </div>
 </body>
 </html>

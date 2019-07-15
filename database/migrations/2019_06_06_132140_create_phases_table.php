@@ -17,7 +17,7 @@ class CreatePhasesTable extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->dateTime('debut');
+            $table->dateTime('debut')->nullable();
 
             $table->unsignedBigInteger('phase_type_id');
             $table->foreign('phase_type_id')->references('id')->on('phase_types');
