@@ -86,7 +86,13 @@ class InterventionPhaseTest extends TestCase
 
         $ids = array_map(function ($s) {
             return $s->id;
-        }, $this->interventionService->addPhases($this->interventionId, $phases));
+        }, array_filter(
+                $this->interventionService->addPhases($this->interventionId, $phases),
+                function ($phase) {
+                    return $phase->debut !== null;
+                }
+            )
+        );
 
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/phases', ['phases' => $ids]);
 
