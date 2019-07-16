@@ -1,6 +1,8 @@
 language: php
 php:
   - 7.2.0
+services:
+  - mysql
 before_script:
   - cp .env.travis .env
   - mysql -e 'create database homestead_test'
