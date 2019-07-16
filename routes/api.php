@@ -28,7 +28,7 @@ Route::group(['prefix' => 'v2'], function () {
     // Route::post('user/signup', 'UserApiController@signup')->name('api.v2.user.signup');
 
     // // TODO: Authorization required
-    // Route::group(['middleware' => 'jwt.auth'], function(){
+     Route::group(['middleware' => 'jwtToken'], function(){
 
         // Sapeurs
         Route::resource('sapeurs', 'SapeurController')->only(['index', 'show', 'store', 'update']);//, 'destroy']);//->middleware('role:effectif_read');
@@ -169,7 +169,7 @@ Route::group(['prefix' => 'v2'], function () {
         // Route::post('transfert/{slug}', 'TransfertApiController@create')->name('api.v2.transfert.create')->middleware('role:transfert_all');
         // Route::put('transfert/{id}/recu', 'TransfertApiController@received')->name('api.v2.transfert.received')->middleware('role:transfert_all');
 
-    // });
+     });
 });
 
 //TODO: Implement those route for retro compatibility
