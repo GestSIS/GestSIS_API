@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Application\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Infrastructure\Models\Civilite;
+
+class CiviliteController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $civilites = Civilite::all();
+
+        return response()->json(['data' => $civilites]);
+    }
+}

@@ -12,7 +12,7 @@ class SapeursTableSeeder extends Seeder
      */
     public function run()
     {
-        factory(App\Models\Sapeur::class, 25)->create();
+        factory(App\Infrastructure\Models\Sapeur::class, 25)->create();
 
         // permis
         DB::table('permis')->insert([

@@ -2,7 +2,7 @@
 
 /* @var $factory Factory */
 
-use App\Models\Mission;
+use App\Infrastructure\Models\Mission;
 use Faker\Generator as Faker;
 use Illuminate\Database\Eloquent\Factory;
 
