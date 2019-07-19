@@ -6,6 +6,7 @@ use App\Models\Intervention;
 use App\Services\InterventionService;
 use Exception;
 use Tests\TestCase;
+use Carbon\Carbon;
 
 class InterventionPhaseTest extends TestCase
 {
@@ -20,6 +21,7 @@ class InterventionPhaseTest extends TestCase
         $this->interventionService = $this->app->make(InterventionService::class);
 
         $data = factory(Intervention::class)->make()->toArray();
+        $data["date_debut"] = "2019-01-01";
 
         $this->interventionId = $this->interventionService->createIntervention($data)->id;
     }
@@ -59,7 +61,11 @@ class InterventionPhaseTest extends TestCase
         $res = array_map(function ($s) {
             $s->debut = '2019-12-12 13:00';
             return $s;
-        }, $res);
+        }, array_filter($res,
+                function ($p) {
+                    return $p->debut === null;
+                })
+        );
 
         $response = $this->json('PUT', '/api/v2/interventions/' . $this->interventionId . '/phases', ['phases' => $res]);
 

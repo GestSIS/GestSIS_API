@@ -27,6 +27,8 @@ Route::group(['prefix' => 'v2'], function () {
 
     // Route::post('user/signup', 'UserApiController@signup')->name('api.v2.user.signup');
 
+    Route::get('pdf-test/{id}', 'CompteController@generatePdf');
+    
     // // TODO: Authorization required
      Route::group(['middleware' => 'jwtToken'], function(){
 
@@ -155,7 +157,6 @@ Route::group(['prefix' => 'v2'], function () {
         Route::resource('comptes', 'CompteController')->only(['index']);
         Route::get('comptes/{id}/ecritures/{exerciceComptableId}', 'CompteController@ecritures');
 
-        Route::get('pdf-test/{id}', 'CompteController@generatePdf');
         //SUPPRIMER
 
         // Sis
