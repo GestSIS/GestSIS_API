@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Firebase\JWT\JWT;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Stdclass;
 use Illuminate\Support\Facades\Storage;
 
@@ -14,6 +15,8 @@ class TokenTools
 {
     private const ACCESS_TOKEN_DURATION_IN_HOURS = 24;
     private const REFRESH_TOKEN_DURATION_IN_DAYS = 30;
+
+    private const REFRESH_TOKEN_LENGTH = 16;
 
     private const ISSUER = "GestSIS_Auth";
     private const AUDIENCE = "GestSIS_API";
@@ -59,9 +62,9 @@ class TokenTools
     public static function createRefreshToken()
     {
         Log::debug("CREATE REFRESH TOKEN");
+
         //Generate a random string.
-        openssl_random_pseudo_bytes(12);
-        $token = openssl_random_pseudo_bytes(16);
+        $token = Str::random(self::REFRESH_TOKEN_LENGTH);
 
         //Convert the binary data into hexadecimal representation.
         $refreshToken = new Stdclass();
