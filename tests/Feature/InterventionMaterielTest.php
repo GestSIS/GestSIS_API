@@ -25,6 +25,27 @@ class InterventionMaterielTest extends TestCase
     }
 
     /**
+     * Test index interventions
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testInterventionIndexMaterielOK()
+    {
+        $response = $this->json('GET', "/api/v2/interventions/393/materiels");
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'intervention_id', 'materiel_id'
+                    ]
+                ]
+            ]);
+    }
+
+    /**
      * Test add presence
      *
      * @return void

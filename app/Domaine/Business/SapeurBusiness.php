@@ -256,8 +256,9 @@ class SapeurBusiness
      */
     public function removeMutation(int $sapeurId, int $mutationId)
     {
-        //TODO Update actif statut depending of end of all mutation
         $this->repository->removeMutation($sapeurId, $mutationId);
+
+        //TODO Update actif statut depending of end of all mutation
     }
 
     public function addTelephone(int $sapeurId, $data)

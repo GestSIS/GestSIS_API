@@ -25,6 +25,27 @@ class InterventionAppelTest extends TestCase
     }
 
     /**
+     * Test index interventions
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testInterventionIndexAppelsOK()
+    {
+        $response = $this->json('GET', "/api/v2/interventions/393/appels");
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'intervention_id', 'id'
+                    ]
+                ]
+            ]);
+    }
+
+    /**
      * Test add phase
      *
      * @return void

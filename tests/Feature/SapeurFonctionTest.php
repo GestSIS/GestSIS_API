@@ -2,8 +2,8 @@
 
 namespace Tests\Unit;
 
-use App\Infrastructure\Models\Sapeur;
 use App\Domaine\API\SapeurService;
+use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
 use Exception;
 use Tests\TestCase;
@@ -27,6 +27,27 @@ class SapeurFonctionTest extends TestCase
     }
 
     /**
+     * Test index fonction
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testFonctionIndexOK()
+    {
+        $response = $this->json('GET', "/api/v2/sapeurs/1/fonctions");
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id', 'fonction_id', 'sapeur_id', 'debut', 'fin'
+                    ]
+                ]
+            ]);
+    }
+
+    /**
      * Test add fonction
      *
      * @return void
@@ -35,22 +56,27 @@ class SapeurFonctionTest extends TestCase
     public function testAddFonctionOK()
     {
         $data = array(
-            'debut' => Carbon::createMidnightDate(1958, 1, 1),
-            'fin' => Carbon::createMidnightDate(1958, 9, 17),
+            'debut' => "1958-01-01",
+            'fin' => "1958-09-17",
             'remarque' => '',
             'fonction_id' => 2
         );
 
-        //Remove potential pre-existant fonction
-        Sapeur::find($this->sapeurId)->fonctions()->where('fonction_sapeur.fonction_id', $data['fonction_id'])->delete();
+        $response = $this->json('POST', "/api/v2/sapeurs/$this->sapeurId/fonctions", $data);
 
-        $fonction_id = $this->service->addFonction($this->sapeurId, $data)->id;
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'id', 'fonction_id', 'sapeur_id', 'debut', 'fin'
+                ]
+            ]);
 
-        $fonction = Sapeur::find($this->sapeurId)->fonctions()->where('fonction_sapeur.id', $fonction_id)->first();
+        $fonction = $response->getData()->data;
 
         $this->assertTrue($fonction !== null);
-        $this->assertTrue($data['debut']->diffInDays($fonction->debut) === 0);
-        $this->assertTrue($data['fin']->diffInDays($fonction->fin) === 0);
+        $this->assertTrue(Carbon::parse($data['debut'])->diffInDays($fonction->debut) === 0);
+        $this->assertTrue(Carbon::parse($data['fin'])->diffInDays($fonction->fin) === 0);
         $this->assertTrue($data['remarque'] === $fonction->remarque);
         $this->assertTrue($data['fonction_id'] === $fonction->fonction_id);
     }
@@ -64,23 +90,21 @@ class SapeurFonctionTest extends TestCase
     public function testAddFonctionDuplicated()
     {
         $data = array(
-            'debut' => Carbon::createMidnightDate(1958, 1, 1),
-            'fin' => Carbon::createMidnightDate(1958, 9, 17),
+            'debut' => "1958-01-01",
+            'fin' => "1958-09-17",
             'remarque' => '',
             'fonction_id' => 2
         );
 
-        //Remove potential pre-existant fonction
-        Sapeur::find($this->sapeurId)->fonctions()->where('fonction_sapeur.fonction_id', $data['fonction_id'])->delete();
-
         $this->service->addFonction($this->sapeurId, $data);
 
-        try {
-            $this->service->addFonction($this->sapeurId, $data);
-            $this->assertTrue(false);
-        } catch (Exception $e) {
-            $this->assertTrue(true);
-        }
+        $response = $this->json('POST', "/api/v2/sapeurs/$this->sapeurId/fonctions", $data);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'error'
+            ]);
     }
 
     /**
@@ -98,25 +122,63 @@ class SapeurFonctionTest extends TestCase
             'fonction_id' => 2
         );
 
-        //Remove potential pre-existant fonction
-        Sapeur::find($this->sapeurId)->fonctions()->where('fonction_sapeur.fonction_id', $data['fonction_id'])->delete();
+        $fonction_id = $this->service->addFonction($this->sapeurId, $data)->id;
+
+        $data = array(
+            'id' => $fonction_id,
+            'debut' => "1959-05-08",
+            'fin' => "1960-09-17",
+            'remarque' => 'Deserve it'
+        );
+
+        $response = $this->json('PUT', "/api/v2/sapeurs/$this->sapeurId/fonctions/$fonction_id", $data);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'id', 'fonction_id', 'sapeur_id', 'debut', 'fin'
+                ]
+            ]);
+
+        $fonction = $response->getData()->data;
+
+        $this->assertTrue(Carbon::parse($data['debut'])->diffInDays($fonction->debut) === 0);
+        $this->assertTrue(Carbon::parse($data['fin'])->diffInDays($fonction->fin) === 0);
+        $this->assertTrue($data['remarque'] === $fonction->remarque);
+    }
+
+    /**
+     * Test edit fonction
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testEditFonctionInvalid()
+    {
+        $data = array(
+            'debut' => Carbon::createMidnightDate(1958, 1, 1),
+            'fin' => Carbon::createMidnightDate(1958, 9, 17),
+            'remarque' => '',
+            'fonction_id' => 2
+        );
 
         $fonction_id = $this->service->addFonction($this->sapeurId, $data)->id;
 
         $data = array(
             'id' => $fonction_id,
-            'debut' => Carbon::createMidnightDate(1959, 5, 8),
-            'fin' => Carbon::createMidnightDate(1960, 9, 17),
+            'debut' => "1959-05-08",
+            'fin' => "1960-09-17",
             'remarque' => 'Deserve it'
         );
 
-        $this->service->updateFonction($this->sapeurId, $data);
+        $response = $this->json('PUT', "/api/v2/sapeurs/$this->sapeurId/fonctions/0", $data);
 
-        $fonction = Sapeur::find($this->sapeurId)->fonctions()->where('fonction_sapeur.id', $fonction_id)->first();
-
-        $this->assertTrue($data['debut']->diffInDays($fonction->debut) === 0);
-        $this->assertTrue($data['fin']->diffInDays($fonction->fin) === 0);
-        $this->assertTrue($data['remarque'] === $fonction->remarque);
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'error'
+            ]);
     }
 
     /**
@@ -134,14 +196,24 @@ class SapeurFonctionTest extends TestCase
             'fonction_id' => 2
         );
 
-        //Remove potential pre-existant fonction
-        Sapeur::find($this->sapeurId)->fonctions()->where('fonction_sapeur.fonction_id', $data['fonction_id'])->delete();
-
         $fonction_id = $this->service->addFonction($this->sapeurId, $data)->id;
 
-        $this->service->removeFonction($this->sapeurId, $fonction_id);
+        $response = $this->json('DELETE', "/api/v2/sapeurs/$this->sapeurId/fonctions/$fonction_id");
 
-        $fonction = Sapeur::find($this->sapeurId)->fonctions()->where('fonction_sapeur.id', $fonction_id)->first();
-        $this->assertTrue($fonction === null);
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data'
+            ]);
+
+        $fonctions = $this->service->getSapeurFonctionsById($this->sapeurId);
+        array_filter($fonctions, function ($p) use ($fonction_id) {
+            return $p->id == $fonction_id;
+        });
+
+        $this->assertTrue(count($fonctions) === 0);
+
     }
+
+
 }

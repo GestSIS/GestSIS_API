@@ -27,6 +27,27 @@ class InterventionPhaseTest extends TestCase
     }
 
     /**
+     * Test index interventions
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testInterventionIndexAppelsOK()
+    {
+        $response = $this->json('GET', "/api/v2/interventions/393/phases");
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'intervention_id', 'phase_type_id', 'id'
+                    ]
+                ]
+            ]);
+    }
+
+    /**
      * Test add phase
      *
      * @return void

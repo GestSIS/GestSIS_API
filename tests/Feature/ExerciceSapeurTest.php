@@ -19,6 +19,27 @@ class ExerciceSapeurTest extends TestCase
     }
 
     /**
+     * Test index exercices
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testExerciceIndexSapeurOK()
+    {
+        $response = $this->json('GET', "/api/v2/exercices/1/sapeurs");
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'sapeur_id', 'exercice_id'
+                    ]
+                ]
+            ]);
+    }
+
+    /**
      * Test add grade
      *
      * @return void

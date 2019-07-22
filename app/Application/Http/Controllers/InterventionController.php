@@ -54,7 +54,7 @@ class InterventionController extends Controller
             'stat_nb' => 'integer|min:0',
             'statut' => 'boolean',
             'localite_id' => 'integer|min:1',
-            'intervention_comptable_id' => 'integer|min:1',
+            'exercice_comptable_id' => 'integer|min:1',
             'intervention_traitement_id' => 'integer|min:1',
             'stat_federal_id' => 'integer|min:1',
             'sapeur_id' => 'integer|min:1',
@@ -105,12 +105,12 @@ class InterventionController extends Controller
             'proprietaire' => 'string|nullable',
             'responsable' => 'string|nullable',
             'stat_nb' => 'integer|min:0',
-            'localite_id' => 'integer|exists:localites,id',
-            'intervention_comptable_id' => 'integer|exists:intervention_comptables,id',
-            'intervention_traitement_id' => 'integer|exists:intervention_traitements,id',
-            'stat_federal_id' => 'integer|exists:stat_federals,id',
-            'sapeur_id' => 'integer|exists:sapeurs,id',
-            'type_intervention_id' => 'integer|exists:type_interventions,id',
+            'localite_id' => 'integer|min:1',
+            'exercice_comptable_id' => 'integer|min:1',
+            'intervention_traitement_id' => 'integer|min:1',
+            'stat_federal_id' => 'integer|min:1',
+            'sapeur_id' => 'integer|min:1',
+            'type_intervention_id' => 'integer|min:1',
         ]);
 
         $intervention = $this->service->editInterventionInformationsById($id, $data);

@@ -24,6 +24,27 @@ class InterventionGroupeTest extends TestCase
     }
 
     /**
+     * Test index interventions
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testInterventionIndexGroupesOK()
+    {
+        $response = $this->json('GET', "/api/v2/interventions/393/groupes");
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'intervention_id', 'groupe_id'
+                    ]
+                ]
+            ]);
+    }
+
+    /**
      * Test add groupe
      *
      * @return void

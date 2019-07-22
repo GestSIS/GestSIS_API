@@ -24,6 +24,27 @@ class InterventionVehiculeTest extends TestCase
     }
 
     /**
+     * Test index intervention
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testInterventionVehiculeIndexOK()
+    {
+        $response = $this->json('GET', "/api/v2/interventions/393/vehicules");
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'intervention_id', 'id', 'vehicule_id'
+                    ]
+                ]
+            ]);
+    }
+
+    /**
      * Test add vehicule
      *
      * @return void

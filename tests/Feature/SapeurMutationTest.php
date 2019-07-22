@@ -2,8 +2,8 @@
 
 namespace Tests\Unit;
 
-use App\Infrastructure\Models\Sapeur;
 use App\Domaine\API\SapeurService;
+use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
 use Exception;
 use Tests\TestCase;
@@ -27,6 +27,27 @@ class SapeurMutationTest extends TestCase
     }
 
     /**
+     * Test add permis
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testGradeIndexOK()
+    {
+        $response = $this->json('GET', "/api/v2/sapeurs/1/mutations");
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id', 'incorporation', 'sapeur_id', 'sortie', 'motif'
+                    ]
+                ]
+            ]);
+    }
+
+    /**
      * Test add mutation
      *
      * @return void
@@ -35,17 +56,25 @@ class SapeurMutationTest extends TestCase
     public function testAddMutation()
     {
         $data = array(
-            'incorporation' => Carbon::createMidnightDate(2000, 1, 18),
+            'incorporation' => "2000-01-18",
             'sortie' => null,
             'motif' => '',
             'localite_id' => 1
         );
 
-        $mutation_id = $this->service->addMutation($this->sapeurId, $data)->id;
+        $response = $this->json('POST', "/api/v2/sapeurs/$this->sapeurId/mutations", $data);
 
-        $mutation = Sapeur::find($this->sapeurId)->mutations()->where('mutations.id', $mutation_id)->first();
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'id', 'incorporation', 'sapeur_id', 'sortie', 'motif'
+                ]
+            ]);
 
-        $this->assertTrue($data['incorporation']->diffInDays($mutation->incorporation) === 0);
+        $mutation = $response->getData()->data;
+
+        $this->assertTrue(Carbon::parse($data['incorporation'])->diffInDays($mutation->incorporation) === 0);
         $this->assertTrue($data['sortie'] === $mutation->sortie);
         $this->assertTrue($data['motif'] === $mutation->motif);
         $this->assertTrue($data['localite_id'] === $mutation->localite_id);
@@ -69,19 +98,65 @@ class SapeurMutationTest extends TestCase
         $mutation_id = $this->service->addMutation($this->sapeurId, $data)->id;
 
         $data = array(
-            'incorporation' => Carbon::createMidnightDate(2000, 1, 16),
-            'sortie' => Carbon::createMidnightDate(2000, 1, 20),
+            'incorporation' => "2000-01-16",
+            'sortie' => "2000-01-20",
             'motif' => '',
             'localite_id' => 2
         );
-        $this->service->updateMutation($this->sapeurId, array_merge($data, ['id' => $mutation_id]));
 
-        $mutation = Sapeur::find($this->sapeurId)->mutations()->where('mutations.id', $mutation_id)->first();
+        $response = $this->json('PUT', "/api/v2/sapeurs/$this->sapeurId/mutations/$mutation_id",
+            array_merge($data, ['id' => $mutation_id])
+        );
 
-        $this->assertTrue($data['incorporation']->diffInDays($mutation->incorporation) === 0);
-        $this->assertTrue($data['sortie']->diffInDays($mutation->sortie) === 0);
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'id', 'incorporation', 'sapeur_id', 'sortie', 'motif'
+                ]
+            ]);
+
+        $mutation = $response->getData()->data;
+
+        $this->assertTrue(Carbon::parse($data['incorporation'])->diffInDays($mutation->incorporation) === 0);
+        $this->assertTrue(Carbon::parse($data['sortie'])->diffInDays($mutation->sortie) === 0);
         $this->assertTrue($data['motif'] === $mutation->motif);
         $this->assertTrue($data['localite_id'] === $mutation->localite_id);
+    }
+
+    /**
+     * Test edit mutation
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testEditMutationInvalid()
+    {
+        $data = array(
+            'incorporation' => Carbon::createMidnightDate(2000, 1, 18),
+            'sortie' => null,
+            'motif' => '',
+            'localite_id' => 1
+        );
+
+        $mutation_id = $this->service->addMutation($this->sapeurId, $data)->id;
+
+        $data = array(
+            'incorporation' => "2000-01-16",
+            'sortie' => "2000-01-20",
+            'motif' => '',
+            'localite_id' => 2
+        );
+
+        $response = $this->json('PUT', "/api/v2/sapeurs/$this->sapeurId/mutations/0",
+            array_merge($data, ['id' => $mutation_id])
+        );
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'error'
+            ]);
     }
 
     /**
@@ -101,9 +176,19 @@ class SapeurMutationTest extends TestCase
 
         $mutation_id = $this->service->addMutation($this->sapeurId, $data)->id;
 
-        $this->service->removeMutation($this->sapeurId, $mutation_id);
-        $mutation = Sapeur::find($this->sapeurId)->mutations()->where('mutations.id', $mutation_id)->first();
+        $response = $this->json('DELETE', "/api/v2/sapeurs/$this->sapeurId/mutations/$mutation_id");
 
-        $this->assertTrue($mutation === null);
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data'
+            ]);
+
+        $mutations = $this->service->getSapeurMutationsById($this->sapeurId);
+        $mutations = array_filter($mutations, function ($m) use ($mutation_id) {
+            return $m->id == $mutation_id;
+        });
+
+        $this->assertTrue(count($mutations) === 0);
     }
 }

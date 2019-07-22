@@ -25,6 +25,27 @@ class InterventionMissionTest extends TestCase
     }
 
     /**
+     * Test index interventions
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testInterventionsIndexMissionsOK()
+    {
+        $response = $this->json('GET', "/api/v2/interventions/393/missions");
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'intervention_id', 'id'
+                    ]
+                ]
+            ]);
+    }
+
+    /**
      * Test add presence
      *
      * @return void

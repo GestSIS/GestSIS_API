@@ -45,8 +45,6 @@ class SapeurPermisTest extends TestCase
                     ]
                 ]
             ]);
-
-        $permis = $response->getData()->data;
     }
 
     /**

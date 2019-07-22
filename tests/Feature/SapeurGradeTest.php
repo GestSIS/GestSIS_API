@@ -2,9 +2,8 @@
 
 namespace Tests\Unit;
 
-use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\Sapeur;
 use App\Domaine\API\SapeurService;
+use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
 use Exception;
 use Tests\TestCase;
@@ -27,7 +26,28 @@ class SapeurGradeTest extends TestCase
     }
 
     /**
-     * Test add grade
+     * Test add permis
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testGradeIndexOK()
+    {
+        $response = $this->json('GET', "/api/v2/sapeurs/1/grades");
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id', 'grade_id', 'sapeur_id', 'date'
+                    ]
+                ]
+            ]);
+    }
+
+    /**
+     * Test index grade
      *
      * @return void
      * @throws Exception
@@ -35,20 +55,25 @@ class SapeurGradeTest extends TestCase
     public function testAddGradeOK()
     {
         $data = array(
-            'date' => Carbon::createMidnightDate(1958, 1, 1),
+            'date' => "1958-01-01",
             'remarque' => '',
             'grade_id' => 2
         );
 
-        //Remove potential pre-existant grade
-        Sapeur::find($this->sapeurId)->grades()->where('grade_sapeur.grade_id', $data['grade_id'])->delete();
+        $response = $this->json('POST', "/api/v2/sapeurs/$this->sapeurId/grades", $data);
 
-        $grade_id = $this->service->addGrade($this->sapeurId, $data)->id;
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'id', 'grade_id', 'sapeur_id', 'date'
+                ]
+            ]);
 
-        $grade = Sapeur::find($this->sapeurId)->grades()->where('grade_sapeur.id', $grade_id)->first();
+        $grade = $response->getData()->data;
 
         $this->assertTrue($grade !== null);
-        $this->assertTrue($data['date']->diffInDays($grade->date) === 0);
+        $this->assertTrue(Carbon::parse($data['date'])->diffInDays($grade->date) === 0);
         $this->assertTrue($data['remarque'] === $grade->remarque);
         $this->assertTrue($data['grade_id'] === $grade->grade_id);
     }
@@ -64,20 +89,18 @@ class SapeurGradeTest extends TestCase
         $data = array(
             'date' => Carbon::createMidnightDate(1958, 1, 1),
             'remarque' => '',
-            'grade_id' => 2
+            'grade_id' => 3
         );
-
-        //Remove potential pre-existant grade
-        Sapeur::find($this->sapeurId)->grades()->where('grade_sapeur.grade_id', $data['grade_id'])->delete();
 
         $this->service->addGrade($this->sapeurId, $data);
 
-        try {
-            $this->service->addGrade($this->sapeurId, $data);
-            $this->assertTrue(false);
-        } catch (ArrayException $e) {
-            $this->assertTrue(true);
-        }
+        $response = $this->json('POST', "/api/v2/sapeurs/$this->sapeurId/grades", $data);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'error'
+            ]);
     }
 
     /**
@@ -91,26 +114,62 @@ class SapeurGradeTest extends TestCase
         $data = array(
             'date' => Carbon::createMidnightDate(1958, 1, 1),
             'remarque' => '',
-            'grade_id' => 2
+            'grade_id' => 4
         );
-
-        //Remove potential pre-existant grade
-        Sapeur::find($this->sapeurId)->grades()->where('grade_sapeur.grade_id', $data['grade_id'])->delete();
 
         $grade_id = $this->service->addGrade($this->sapeurId, $data)->id;
 
         $data = array(
             'id' => $grade_id,
-            'date' => Carbon::createMidnightDate(1959, 5, 8),
+            'date' => "1959-05-08",
             'remarque' => 'Deserve it'
         );
 
-        $this->service->updateGrade($this->sapeurId, $data);
+        $response = $this->json('PUT', "/api/v2/sapeurs/$this->sapeurId/grades/$grade_id", $data);
 
-        $grade = Sapeur::find($this->sapeurId)->grades()->where('grade_sapeur.id', $grade_id)->first();
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'id', 'grade_id', 'sapeur_id', 'date'
+                ]
+            ]);
 
-        $this->assertTrue($data['date']->diffInDays($grade->date) === 0);
+        $grade = $response->getData()->data;
+
+        $this->assertTrue(Carbon::parse($data['date'])->diffInDays($grade->date) === 0);
         $this->assertTrue($data['remarque'] === $grade->remarque);
+    }
+
+    /**
+     * Test edit grade
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testEditGradeInvalid()
+    {
+        $data = array(
+            'date' => Carbon::createMidnightDate(1958, 1, 1),
+            'remarque' => '',
+            'grade_id' => 6
+        );
+
+        $grade_id = $this->service->addGrade($this->sapeurId, $data)->id;
+
+        $data = array(
+            'id' => $grade_id,
+            'date' => "1959-05-08",
+            'remarque' => 'Deserve it'
+        );
+
+        $response = $this->json('PUT', "/api/v2/sapeurs/$this->sapeurId/grades/0", $data);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'error'
+            ]);
     }
 
     /**
@@ -124,18 +183,24 @@ class SapeurGradeTest extends TestCase
         $data = array(
             'date' => Carbon::createMidnightDate(1958, 1, 1),
             'remarque' => '',
-            'grade_id' => 2
+            'grade_id' => 5
         );
-
-        //Remove potential pre-existant grade
-        Sapeur::find($this->sapeurId)->grades()->where('grade_sapeur.grade_id', $data['grade_id'])->delete();
 
         $grade_id = $this->service->addGrade($this->sapeurId, $data)->id;
 
-        $this->service->removeGrade($this->sapeurId, $grade_id);
+        $response = $this->json('DELETE', "/api/v2/sapeurs/$this->sapeurId/grades/$grade_id");
 
-        $grade = Sapeur::find($this->sapeurId)->grades()->where('grade_sapeur.grade_id', $data['grade_id'])->first();
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data'
+            ]);
 
-        $this->assertTrue($grade === null);
+        $grades = $this->service->getSapeurGradesById($this->sapeurId);
+        array_filter($grades, function ($p) use ($grade_id) {
+            return $p->id == $grade_id;
+        });
+
+        $this->assertTrue(count($grades) === 0);
     }
 }
