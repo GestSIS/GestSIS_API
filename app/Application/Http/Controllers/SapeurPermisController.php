@@ -62,11 +62,11 @@ class SapeurPermisController extends Controller
     public function update(Request $request, int $id, int $permisId)
     {
         $data = $request->validate([
-            'permis_id' => 'required|integer',
+            'id' => 'required|integer',
             'date' => 'required|date|before:tomorrow'
         ]);
 
-        if ($permisId !== $request->get('permis_id')) {
+        if ($permisId !== $request->get('id')) {
             return response()->json(['error' => 'invalid permis id']);
         }
 

@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Infrastructure\Models\Sapeur;
 use App\Domaine\API\SapeurService;
+use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
 use Exception;
 use Tests\TestCase;
@@ -32,16 +32,48 @@ class SapeurPermisTest extends TestCase
      * @return void
      * @throws Exception
      */
+    public function testPermisIndexOK()
+    {
+        $response = $this->json('GET', "/api/v2/sapeurs/1/permis");
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id', 'permis_type_id', 'sapeur_id', 'date'
+                    ]
+                ]
+            ]);
+
+        $permis = $response->getData()->data;
+    }
+
+    /**
+     * Test add permis
+     *
+     * @return void
+     * @throws Exception
+     */
     public function testAddPermisOK()
     {
         $permis_type = 9;
 
-        $response = $this->json('GET', '/api/v2/sapeurs');
+        $response = $this->json('POST', "/api/v2/sapeurs/$this->sapeurId/permis",
+            ['permis_type_id' => $permis_type, 'date' => '1958-01-01']
+        );
 
-        $this->service->addPermis($this->sapeurId, ['permis_type_id' => $permis_type, 'date' => Carbon::parse('1958-01-01')]);
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'id', 'permis_type_id', 'sapeur_id', 'date'
+                ]
+            ]);
 
-        $permis = Sapeur::find($this->sapeurId)->permis()->where('permis_type_id', $permis_type)->first();
-        $this->assertTrue($permis !== null);
+        $permis = $response->getData()->data;
+
+        $this->assertTrue($permis->permis_type_id === $permis_type);
     }
 
     /**
@@ -56,12 +88,16 @@ class SapeurPermisTest extends TestCase
         $date = Carbon::createFromDate(1958, 1, 1);
 
         $this->service->addPermis($this->sapeurId, ['permis_type_id' => $permis_type, 'date' => $date]);
-        try {
-            $this->service->addPermis($this->sapeurId, ['permis_type_id' => $permis_type, 'date' => $date]);
-            $this->assertTrue(false);
-        } catch (Exception $e) {
-            $this->assertTrue(true);
-        }
+
+        $response = $this->json('POST', "/api/v2/sapeurs/$this->sapeurId/permis",
+            ['permis_type_id' => $permis_type, 'date' => '1958-01-01']
+        );
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'error'
+            ]);
     }
 
     /**
@@ -76,12 +112,49 @@ class SapeurPermisTest extends TestCase
         $date = Carbon::createMidnightDate(1958, 1, 1);
 
         $permis = $this->service->addPermis($this->sapeurId, ['permis_type_id' => $permis_type, 'date' => $date]);
-        $date = Carbon::createMidnightDate(1999, 11, 21);
+        $date = "1999-11-21";
 
-        $this->service->updatePermis($this->sapeurId, ['id' => $permis->id, 'date' => $date]);
-        $permis = Sapeur::find($this->sapeurId)->permis()->where('permis.id', $permis->id)->first();
+        $response = $this->json('PUT', "/api/v2/sapeurs/$this->sapeurId/permis/$permis->id",
+            ['id' => $permis->id, 'date' => $date]
+        );
 
-        $this->assertTrue($date->diffInDays($permis->date) === 0);
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'id', 'permis_type_id', 'sapeur_id', 'date'
+                ]
+            ]);
+
+        $permis = $response->getData()->data;
+
+        $this->assertTrue(Carbon::parse($date)->diffInDays($permis->date) === 0);
+    }
+
+
+    /**
+     * Test edit permis
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testEditPermisInvalid()
+    {
+        $permis_type = 3;
+        $date = Carbon::createMidnightDate(1958, 1, 1);
+
+        $permis = $this->service->addPermis($this->sapeurId, ['permis_type_id' => $permis_type, 'date' => $date]);
+        $date = "1999-11-21";
+
+        $response = $this->json('PUT', "/api/v2/sapeurs/$this->sapeurId/permis/0",
+            ['id' => $permis->id, 'date' => $date]
+        );
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'error'
+            ]);
     }
 
     /**
@@ -95,12 +168,21 @@ class SapeurPermisTest extends TestCase
         $permis_type = 7;
         $date = Carbon::createMidnightDate(1958, 1, 1);
 
-        $permis = $this->service->addPermis($this->sapeurId, ['permis_type_id' => $permis_type, 'date' => $date]);
-        $date = Carbon::createMidnightDate(1999, 11, 21);
+        $permisId = $this->service->addPermis($this->sapeurId, ['permis_type_id' => $permis_type, 'date' => $date])->id;
 
-        $this->service->removePermis($this->sapeurId, $permis->id);
-        $permis = Sapeur::find($this->sapeurId)->permis()->where('permis.id', $permis->id)->first();
+        $response = $this->json('DELETE', "/api/v2/sapeurs/$this->sapeurId/permis/$permisId");
 
-        $this->assertTrue($permis === null);
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data'
+            ]);
+
+        $permis = $this->service->getSapeurPermisById($this->sapeurId);
+        array_filter($permis, function ($p) use ($permisId) {
+            return $p->id == $permisId;
+        });
+
+        $this->assertTrue(count($permis) === 0);
     }
 }

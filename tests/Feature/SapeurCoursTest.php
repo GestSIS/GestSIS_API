@@ -3,8 +3,6 @@
 namespace Tests\Feature;
 
 use App\Domaine\API\SapeurService;
-use App\Infrastructure\Models\Sapeur;
-use Exception;
 use Tests\TestCase;
 
 class SapeurTest extends TestCase
