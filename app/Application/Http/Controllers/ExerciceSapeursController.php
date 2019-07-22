@@ -2,12 +2,10 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\API\ExerciceService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Validator;
 
 class ExerciceSapeursController extends Controller
 {
@@ -41,25 +39,17 @@ class ExerciceSapeursController extends Controller
      */
     public function store(Request $request, int $exerciceId)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'sapeurs.*.convoque' => 'required|boolean',
-                'sapeurs.*.present' => 'required|boolean',
-                'sapeurs.*.amende' => 'required|boolean',
-                'sapeurs.*.remplace' => 'required|boolean',
-                'sapeurs.*.excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
-                'sapeurs.*.sapeur_id' => 'required|integer|exists:sapeurs,id'
-            ));
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
+        $data = $request->validate([
+            'sapeurs.*.convoque' => 'required|boolean',
+            'sapeurs.*.present' => 'required|boolean',
+            'sapeurs.*.amende' => 'required|boolean',
+            'sapeurs.*.remplace' => 'required|boolean',
+            'sapeurs.*.excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
+            'sapeurs.*.sapeur_id' => 'required|integer|exists:sapeurs,id'
+        ]);
 
-        try {
-            $sapeur = $this->service->addSapeurs($exerciceId, $validation->validated()['sapeurs']);
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
-        }
+        $sapeur = $this->service->addSapeurs($exerciceId, $data['sapeurs']);
 
         return response()->json(['data' => $sapeur]);
     }
@@ -74,25 +64,17 @@ class ExerciceSapeursController extends Controller
      */
     public function update(Request $request, int $exerciceId)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'sapeurs.*.id' => 'required|integer',
-                'sapeurs.*.convoque' => 'required|boolean',
-                'sapeurs.*.present' => 'required|boolean',
-                'sapeurs.*.amende' => 'required|boolean',
-                'sapeurs.*.remplace' => 'required|boolean',
-                'sapeurs.*.excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
-            ));
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
+        $data = $request->validate([
+            'sapeurs.*.id' => 'required|integer',
+            'sapeurs.*.convoque' => 'required|boolean',
+            'sapeurs.*.present' => 'required|boolean',
+            'sapeurs.*.amende' => 'required|boolean',
+            'sapeurs.*.remplace' => 'required|boolean',
+            'sapeurs.*.excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
+        ]);
 
-        try {
-            $sapeur = $this->service->updateSapeurs($exerciceId, $validation->validated()['sapeurs']);
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
-        }
+        $sapeur = $this->service->updateSapeurs($exerciceId, $data['sapeurs']);
 
         return response()->json(['data' => $sapeur]);
     }
@@ -106,20 +88,12 @@ class ExerciceSapeursController extends Controller
      */
     public function destroy(Request $request, int $exerciceId)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'sapeurs.*' => 'integer'
-            ));
 
-        if ($validation->fails()) {
-            throw new ArrayException($validation->errors());
-        }
+        $data = $request->validate([
+            'sapeurs.*' => 'integer'
+        ]);
 
-        try {
-            $statut = $this->service->removeSapeurs($exerciceId, $validation->validated()['sapeurs']);
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
-        }
+        $statut = $this->service->removeSapeurs($exerciceId, $data['sapeurs']);
 
         return response()->json(['data' => $statut]);
     }

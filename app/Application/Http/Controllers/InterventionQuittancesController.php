@@ -2,11 +2,10 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\API\InterventionService;
+use App\Domaine\Exceptions\ArrayException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Validator;
 
 class InterventionQuittancesController extends Controller
 {
@@ -39,20 +38,11 @@ class InterventionQuittancesController extends Controller
      */
     public function store(Request $request, int $intervention_id)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'quittances.*' => 'required|integer|min:1'
-            ));
+        $data = $request->validate([
+            'quittances.*' => 'required|integer|min:1'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $quittances = $this->service->addQuittances($intervention_id, $validation->validated()['quittances']);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $quittances = $this->service->addQuittances($intervention_id, $data['quittances']);
 
         return response()->json(['data' => $quittances]);
     }
@@ -66,20 +56,11 @@ class InterventionQuittancesController extends Controller
      */
     public function destroy(Request $request, int $intervention_id)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'quittances.*' => 'required|integer|min:1'
-            ));
+        $data = $request->validate([
+            'quittances.*' => 'required|integer|min:1'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $this->service->removeQuittances($intervention_id, $validation->validated()['quittances']);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $this->service->removeQuittances($intervention_id, $data['quittances']);
 
         return response()->json(['data' => 'success']);
     }

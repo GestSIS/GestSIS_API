@@ -2,11 +2,10 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\API\SapeurService;
+use App\Domaine\Exceptions\ArrayException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Validator;
 
 class SapeurGradeController extends Controller
 {
@@ -39,23 +38,13 @@ class SapeurGradeController extends Controller
     public function store(Request $request, int $sapeurId)
     {
         // Ajout d'un nouveau grade
-        $validation = Validator::make($request->all(),
-            array(
-                'grade_id' => 'required|integer|exists:grades,id',
-                'date' => 'required|date',
-                'remarque' => 'string|nullable',
-            )
-        );
+        $data = $request->validate([
+            'grade_id' => 'required|integer|exists:grades,id',
+            'date' => 'required|date',
+            'remarque' => 'string|nullable',
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $grade = $this->service->addGrade($sapeurId, $validation->validated());
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $grade = $this->service->addGrade($sapeurId, $data);
 
         return response()->json(['data' => $grade]);
     }
@@ -75,23 +64,13 @@ class SapeurGradeController extends Controller
             return response()->json(['error' => 'invalid grade id']);
         }
 
-        $validation = Validator::make($request->all(),
-            array(
-                'date' => 'date',
-                'remarque' => 'string|nullable',
-                'id' => 'required|integer|exists:grade_sapeur,id'
-            )
-        );
+        $data = $request->validate([
+            'date' => 'date',
+            'remarque' => 'string|nullable',
+            'id' => 'required|integer|exists:grade_sapeur,id'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $grade = $this->service->updateGrade($sapeurId, $validation->validated());
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $grade = $this->service->updateGrade($sapeurId, $data);
 
         return response()->json(['data' => $grade]);
     }
@@ -105,11 +84,7 @@ class SapeurGradeController extends Controller
      */
     public function destroy(int $sapeurId, int $gradeId)
     {
-        try {
-            $this->service->removeGrade($sapeurId, $gradeId);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $this->service->removeGrade($sapeurId, $gradeId);
 
         return response()->json(['data' => 'success']);
     }

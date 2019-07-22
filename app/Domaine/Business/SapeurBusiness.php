@@ -19,9 +19,11 @@ class SapeurBusiness
 
     public function createSapeur($data)
     {
+        //TODO Add iban statut système
+        $data['iban_statut'] = 1;
         $sapeur = $this->repository->createSapeur($data);
 
-        //FIXME Finalise add new sapeur mutation
+        //add new sapeur mutation
         $this->addMutation($sapeur->id, array(
             "localite_id" => $sapeur->localite_id,
             "incorporation" => $data['incorporation'],

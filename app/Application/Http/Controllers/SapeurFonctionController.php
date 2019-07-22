@@ -2,11 +2,10 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\API\SapeurService;
+use App\Domaine\Exceptions\ArrayException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Validator;
 
 class SapeurFonctionController extends Controller
 {
@@ -39,24 +38,14 @@ class SapeurFonctionController extends Controller
      */
     public function store(Request $request, int $sapeurId)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'fonction_id' => 'required|integer|exists:fonctions,id',
-                'debut' => 'required|date',
-                'fin' => 'date|nullable|after_or_equal:debut',
-                'remarque' => 'string|nullable',
-            )
-        );
+        $data = $request->validate([
+            'fonction_id' => 'required|integer|exists:fonctions,id',
+            'debut' => 'required|date',
+            'fin' => 'date|nullable|after_or_equal:debut',
+            'remarque' => 'string|nullable',
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $fonction = $this->service->addFonction($sapeurId, $validation->validated());
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $fonction = $this->service->addFonction($sapeurId, $data);
 
         return response()->json(['data' => $fonction]);
     }
@@ -76,24 +65,14 @@ class SapeurFonctionController extends Controller
             return response()->json(['error' => 'invalid fonction id']);
         }
 
-        $validation = Validator::make($request->all(),
-            array(
-                'id' => 'required|integer|exists:fonction_sapeur,id',
-                'debut' => 'date',
-                'fin' => 'date|nullable|after:debut',
-                'remarque' => 'string|nullable',
-            )
-        );
+        $data = $request->validate([
+            'id' => 'required|integer|exists:fonction_sapeur,id',
+            'debut' => 'date',
+            'fin' => 'date|nullable|after:debut',
+            'remarque' => 'string|nullable',
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $fonction = $this->service->updateFonction($sapeurId, $validation->validated());
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $fonction = $this->service->updateFonction($sapeurId, $data);
 
         return response()->json(['data' => $fonction]);
     }
@@ -107,11 +86,7 @@ class SapeurFonctionController extends Controller
      */
     public function destroy(int $sapeurId, int $fonctionId)
     {
-        try {
-            $this->service->removeFonction($sapeurId, $fonctionId);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $this->service->removeFonction($sapeurId, $fonctionId);
 
         return response()->json(['data' => 'success']);
     }

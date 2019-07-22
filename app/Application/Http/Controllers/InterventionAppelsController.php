@@ -2,11 +2,10 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\API\InterventionService;
+use App\Domaine\Exceptions\ArrayException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Validator;
 
 class InterventionAppelsController extends Controller
 {
@@ -34,27 +33,18 @@ class InterventionAppelsController extends Controller
      * @param Request $request
      * @param int $intervention_id
      * @return Response
-     * @throws ArrayExceptionn
+     * @throws ArrayException
      */
     public function store(Request $request, int $intervention_id)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'appels.*.date' => 'required|date_format:Y-m-d H:i',
-                'appels.*.numero' => 'string',
-                'appels.*.nom' => 'string',
-                'appels.*.commentaire' => 'string|nullable'
-            ));
+        $data = $request->validate([
+            'appels.*.date' => 'required|date_format:Y-m-d H:i',
+            'appels.*.numero' => 'string',
+            'appels.*.nom' => 'string',
+            'appels.*.commentaire' => 'string|nullable'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $appels = $this->service->addAppels($intervention_id, $validation->validated()['appels']);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $appels = $this->service->addAppels($intervention_id, $data['appels']);
 
         return response()->json(['data' => $appels]);
     }
@@ -65,28 +55,19 @@ class InterventionAppelsController extends Controller
      * @param Request $request
      * @param int $intervention_id
      * @return Response
-     * @throws ArrayExceptionn
+     * @throws ArrayException
      */
     public function update(Request $request, int $intervention_id)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'appels.*.id' => 'required|integer|exists:appels,id',
-                'appels.*.date' => 'required|date_format:Y-m-d H:i',
-                'appels.*.numero' => 'string',
-                'appels.*.nom' => 'string',
-                'appels.*.commentaire' => 'string|nullable'
-            ));
+        $data = $request->validate([
+            'appels.*.id' => 'required|integer|exists:appels,id',
+            'appels.*.date' => 'required|date_format:Y-m-d H:i',
+            'appels.*.numero' => 'string',
+            'appels.*.nom' => 'string',
+            'appels.*.commentaire' => 'string|nullable'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $appels = $this->service->updateAppels($intervention_id, $validation->validated()['appels']);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $appels = $this->service->updateAppels($intervention_id, $data['appels']);
 
         return response()->json(['data' => $appels]);
     }
@@ -100,20 +81,11 @@ class InterventionAppelsController extends Controller
      */
     public function destroy(Request $request, int $intervention_id)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'appels.*' => 'integer'
-            ));
+        $data = $request->validate([
+            'appels.*' => 'integer'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $this->service->removeAppels($intervention_id, $validation->validated()['appels']);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $this->service->removeAppels($intervention_id, $data['appels']);
 
         return response()->json(['data' => 'success']);
     }

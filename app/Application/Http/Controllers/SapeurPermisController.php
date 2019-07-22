@@ -2,13 +2,12 @@
 
 namespace App\Application\Http\Controllers;
 
+use App\Domaine\API\SapeurService;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\Sapeur;
-use App\Domaine\API\SapeurService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Validator;
 
 class SapeurPermisController extends Controller
 {
@@ -41,22 +40,12 @@ class SapeurPermisController extends Controller
      */
     public function store(Request $request, int $id)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'permis_type_id' => 'required|integer|exists:permis_types,id',
-                'date' => 'required|date|before:tomorrow',
-            )
-        );
+        $data = $request->validate([
+            'permis_type_id' => 'required|integer|exists:permis_types,id',
+            'date' => 'required|date|before:tomorrow'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(["error" => $validation->errors()]);
-        }
-
-        try {
-            $permis = $this->service->addPermis($id, $validation->validated());
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $permis = $this->service->addPermis($id, $data);
 
         return response()->json(['data' => $permis]);
     }
@@ -72,26 +61,16 @@ class SapeurPermisController extends Controller
      */
     public function update(Request $request, int $id, int $permisId)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'permis_id' => 'required|integer',
-                'date' => 'required|date|before:tomorrow',
-            )
-        );
-
-        if ($validation->fails()) {
-            return response()->json(["error" => $validation->errors()]);
-        }
+        $data = $request->validate([
+            'permis_id' => 'required|integer',
+            'date' => 'required|date|before:tomorrow'
+        ]);
 
         if ($permisId !== $request->get('permis_id')) {
             return response()->json(['error' => 'invalid permis id']);
         }
 
-        try {
-            $permis = $this->service->updatePermis($id, $validation->validated());
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $permis = $this->service->updatePermis($id, $data);
 
         return response()->json(['data' => $permis]);
     }
@@ -105,11 +84,7 @@ class SapeurPermisController extends Controller
      */
     public function destroy(int $id, int $permisId)
     {
-        try {
-            $this->service->removePermis($id, $permisId);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $this->service->removePermis($id, $permisId);
 
         return response()->json(['data' => 'success']);
     }

@@ -28,12 +28,12 @@ Route::group(['prefix' => 'v2'], function () {
     // Route::post('user/signup', 'UserApiController@signup')->name('api.v2.user.signup');
 
     Route::get('pdf-test/{id}', 'CompteController@generatePdf');
-    
+    Route::resource('sapeurs', 'SapeurController')->only(['index', 'show', 'store', 'update']);//, 'destroy']);//->middleware('role:effectif_read');
+
     // // TODO: Authorization required
-     Route::group(['middleware' => 'jwtToken'], function(){
+    Route::group(['middleware' => 'jwtToken'], function () {
 
         // Sapeurs
-        Route::resource('sapeurs', 'SapeurController')->only(['index', 'show', 'store', 'update']);//, 'destroy']);//->middleware('role:effectif_read');
 
         Route::resource('sapeurs.groupes', 'SapeurGroupeController')->only(['index']);
         Route::resource('sapeurs.permis', 'SapeurPermisController')->only(['index', 'store', 'update', 'destroy']);
@@ -44,7 +44,7 @@ Route::group(['prefix' => 'v2'], function () {
         Route::resource('sapeurs.cours', 'SapeurCoursController')->only(['index', 'store', 'update', 'destroy']);
 
         // Exercices
-        Route::resource('exercices', 'ExerciceController')->only(['index', 'show', 'store', 'update', 'destroy']);//->middleware('role:effectif_read');
+        Route::resource('exercices', 'ExerciceController')->only(['index', 'show', 'store', 'update', 'destroy']); //->middleware('role:effectif_read');
         Route::post('exercices/{id}/valider', 'ExerciceController@valider')->name('api.v2.exercices.valider');
 
         Route::resource('exercices.sapeurs', 'ExerciceSapeursController')->only(['index']);
@@ -54,8 +54,6 @@ Route::group(['prefix' => 'v2'], function () {
 
         // Exercices comptables
         Route::resource('exercice-comptables', 'ExerciceComptableController')->only(['index']);
-//        Route::resource('exercice-comptables.exercices', 'ExerciceComptableController')->only(['index']);
-//        Route::resource('exercice-comptables.interventions', 'ExerciceComptableController')->only(['index']);
 
         // Interventions
         Route::resource('interventions', 'InterventionController')->only(['index', 'show', 'store', 'update']);
@@ -170,7 +168,7 @@ Route::group(['prefix' => 'v2'], function () {
         // Route::post('transfert/{slug}', 'TransfertApiController@create')->name('api.v2.transfert.create')->middleware('role:transfert_all');
         // Route::put('transfert/{id}/recu', 'TransfertApiController@received')->name('api.v2.transfert.received')->middleware('role:transfert_all');
 
-     });
+    });
 });
 
 //TODO: Implement those route for retro compatibility

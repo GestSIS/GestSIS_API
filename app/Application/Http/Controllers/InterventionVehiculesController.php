@@ -2,10 +2,8 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\Business\InterventionBusiness;
-use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\Intervention;
 use App\Domaine\API\InterventionService;
+use App\Domaine\Exceptions\ArrayException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Validator;
@@ -42,20 +40,11 @@ class InterventionVehiculesController extends Controller
      */
     public function store(Request $request, int $interventionId)
     {
-        $validation = Validator::make($request->all(),
-        array(
+        $data = $request->validate([
             'vehicules.*' => 'required|integer'
-        ));
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $vehicules = $this->service->addVehicules($interventionId, $request->get('vehicules'));
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $vehicules = $this->service->addVehicules($interventionId, $data['vehicules']);
 
         return response()->json(['data' => $vehicules]);
     }
@@ -69,20 +58,11 @@ class InterventionVehiculesController extends Controller
      */
     public function destroy(Request $request, int $interventionId)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'vehicules.*' => 'required|integer'
-            ));
+        $data = $request->validate([
+            'vehicules.*' => 'required|integer'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $this->service->removeVehicules($interventionId, $request->get('vehicules'));
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $this->service->removeVehicules($interventionId, $data['vehicules']);
 
         return response()->json(['data' => 'success']);
     }

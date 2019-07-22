@@ -2,12 +2,10 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\Business\InterventionBusiness;
-use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\API\InterventionService;
+use App\Domaine\Exceptions\ArrayException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Validator;
 
 class InterventionMaterielsController extends Controller
 {
@@ -41,22 +39,12 @@ class InterventionMaterielsController extends Controller
      */
     public function store(Request $request, int $intervention_id)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'materiels.*.materiel_id' => 'required|exists:materiels,id',
-                'materiels.*.quantite' => 'required|numeric|min:1'
-            )
-        );
+        $data = $request->validate([
+            'materiels.*.materiel_id' => 'required|exists:materiels,id',
+            'materiels.*.quantite' => 'required|numeric|min:1'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $materiels = $this->service->addMateriels($intervention_id, $validation->validated()['materiels']);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $materiels = $this->service->addMateriels($intervention_id, $data['materiels']);
 
         return response()->json(['data' => $materiels]);
     }
@@ -71,22 +59,12 @@ class InterventionMaterielsController extends Controller
      */
     public function update(Request $request, int $intervention_id)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'materiels.*.id' => 'required|exists:intervention_materiel,id',
-                'materiels.*.quantite' => 'required|numeric|min:1'
-            )
-        );
+        $data = $request->validate([
+            'materiels.*.id' => 'required|exists:intervention_materiel,id',
+            'materiels.*.quantite' => 'required|numeric|min:1'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $materiels = $this->service->updateMateriels($intervention_id, $validation->validated()['materiels']);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $materiels = $this->service->updateMateriels($intervention_id, $data['materiels']);
 
         return response()->json(['data' => $materiels]);
     }
@@ -100,21 +78,11 @@ class InterventionMaterielsController extends Controller
      */
     public function destroy(Request $request, int $intervention_id)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'materiels.*' => 'required|exists:intervention_materiel,id',
-            )
-        );
+        $data = $request->validate([
+            'materiels.*' => 'required|exists:intervention_materiel,id',
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $this->service->removeMateriels($intervention_id, $validation->validated()['materiels']);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $this->service->removeMateriels($intervention_id, $data['materiels']);
 
         return response()->json(['data' => 'success']);
     }

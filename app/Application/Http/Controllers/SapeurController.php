@@ -2,12 +2,10 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\API\SapeurService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Validator;
 
 class SapeurController extends Controller
 {
@@ -36,36 +34,28 @@ class SapeurController extends Controller
      */
     public function store(Request $request)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'nom' => 'string|min:2',
-                'prenom' => 'string|min:2',
-                'suffixe' => 'string|nullable',
-                'rue' => 'string|min:3',
-                'no_rue' => 'string',
-                'date_naissance' => 'date',
-                'no_avs' => 'string',
-                'profession' => 'string|max:80',
-                'employeur' => 'string|max:150',
-                'lieu_de_travail' => 'string|max:100',
-                'email' => 'email',
-                'actif' => 'integer',
-                'iban' => 'string|max:100',
-                'iban_status' => 'integer',
-                'remarque' => 'string|max:300',
-                'porteur' => 'boolean',
-                'localite_id' => 'integer|exists:localites,id'
-            ));
+        $data = $request->validate([
+            'nom' => 'string|min:2',
+            'prenom' => 'string|min:2',
+            'suffixe' => 'string|nullable',
+            'rue' => 'string|min:3',
+            'no_rue' => 'string',
+            'date_naissance' => 'date',
+            'incorporation' => 'date',
+            'no_avs' => 'string',
+            'profession' => 'string|max:80',
+            'employeur' => 'string|max:150',
+            'lieu_de_travail' => 'string|max:100',
+            'email' => 'email',
+            'actif' => 'integer',
+            'iban' => 'string|max:100',
+            'remarque' => 'string|max:300',
+            'porteur' => 'boolean',
+            'localite_id' => 'integer|min:1',
+            'civilite_id' => 'integer|min:1'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $sapeur = $this->service->createSapeur($validation->validated());
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $sapeur = $this->service->createSapeur($data);
 
         return response()->json(['data' => $sapeur]);
     }
@@ -92,35 +82,27 @@ class SapeurController extends Controller
      */
     public function update(Request $request, int $id)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'nom' => 'string|min:2',
-                'prenom' => 'string|min:2',
-                'suffixe' => 'string|nullable',
-                'rue' => 'string|min:3',
-                'no_rue' => 'string',
-                'date_naissance' => 'date',
-                'no_avs' => 'string',
-                'profession' => 'string|max:80',
-                'employeur' => 'string|max:150',
-                'lieu_de_travail' => 'string|max:100',
-                'email' => 'email',
-                'actif' => 'integer',
-                'iban' => 'string|max:100',
-                'iban_status' => 'integer',
-                'remarque' => 'string|max:300',
-                'porteur' => 'boolean',
-                'localite_id' => 'integer|exists:localites,id',
-            ));
+        $data = $request->validate([
+            'nom' => 'string|min:2',
+            'prenom' => 'string|min:2',
+            'suffixe' => 'string|nullable',
+            'rue' => 'string|min:3',
+            'no_rue' => 'string',
+            'date_naissance' => 'date',
+            'no_avs' => 'string',
+            'profession' => 'string|max:80',
+            'employeur' => 'string|max:150',
+            'lieu_de_travail' => 'string|max:100',
+            'email' => 'email',
+            'actif' => 'integer',
+            'iban' => 'string|max:100',
+            'remarque' => 'string|max:300',
+            'porteur' => 'boolean',
+            'localite_id' => 'integer|exists:localites,id',
+            'civilite_id' => 'integer|min:1'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-        try {
-            $sapeur = $this->service->editSapeurDetailsById($id, $validation->validated());
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $sapeur = $this->service->editSapeurDetailsById($id, $data);
 
         return response()->json(['data' => $sapeur]);
     }
@@ -133,11 +115,7 @@ class SapeurController extends Controller
      */
     public function destroy(int $id)
     {
-        try {
-            $this->service->deleteSapeurById($id);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $this->service->deleteSapeurById($id);
 
         return response()->json(['data' => "success"]);
     }

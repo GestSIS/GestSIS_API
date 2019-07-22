@@ -2,11 +2,10 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\API\InterventionService;
+use App\Domaine\Exceptions\ArrayException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Validator;
 
 class InterventionPhasesController extends Controller
 {
@@ -40,22 +39,12 @@ class InterventionPhasesController extends Controller
      */
     public function store(Request $request, int $intervention_id)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'phases.*.phase_type_id' => 'required|integer',
-                'phases.*.debut' => 'required|date_format:Y-m-d H:i'
-            )
-        );
+        $data = $request->validate([
+            'phases.*.phase_type_id' => 'required|integer',
+            'phases.*.debut' => 'required|date_format:Y-m-d H:i'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $phases = $this->service->addPhases($intervention_id, $validation->validated()['phases']);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $phases = $this->service->addPhases($intervention_id, $data['phases']);
 
         return response()->json(['data' => $phases]);
     }
@@ -70,23 +59,13 @@ class InterventionPhasesController extends Controller
      */
     public function update(Request $request, int $intervention_id)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'phases.*.id' => 'required|integer',
-                'phases.*.phase_type_id' => 'integer',
-                'phases.*.debut' => 'date_format:Y-m-d H:i'
-            )
-        );
+        $data = $request->validate([
+            'phases.*.id' => 'required|integer',
+            'phases.*.phase_type_id' => 'integer',
+            'phases.*.debut' => 'date_format:Y-m-d H:i'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $phases = $this->service->updatePhases($intervention_id, $validation->validated()['phases']);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $phases = $this->service->updatePhases($intervention_id, $data['phases']);
 
         return response()->json(['data' => $phases]);
     }
@@ -100,17 +79,11 @@ class InterventionPhasesController extends Controller
      */
     public function destroy(Request $request, int $intervention_id)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'phases.*' => 'integer'
-            )
-        );
-        //TODO Validation
-        try {
-            $this->service->removePhases($intervention_id, $validation->validated()['phases']);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $data = $request->validate([
+            'phases.*' => 'integer'
+        ]);
+
+        $this->service->removePhases($intervention_id, $data['phases']);
 
         return response()->json(['data' => 'success']);
     }

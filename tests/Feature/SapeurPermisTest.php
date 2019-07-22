@@ -36,8 +36,7 @@ class SapeurPermisTest extends TestCase
     {
         $permis_type = 9;
 
-        //Remove potential pre-existant permis
-        Sapeur::find($this->sapeurId)->permis()->where('permis_type_id', $permis_type)->delete();
+        $response = $this->json('GET', '/api/v2/sapeurs');
 
         $this->service->addPermis($this->sapeurId, ['permis_type_id' => $permis_type, 'date' => Carbon::parse('1958-01-01')]);
 
@@ -53,11 +52,8 @@ class SapeurPermisTest extends TestCase
      */
     public function testAddPermisDuplicated()
     {
-        $permis_type = 9;
+        $permis_type = 4;
         $date = Carbon::createFromDate(1958, 1, 1);
-
-        //Remove potential pre-existant permis
-        Sapeur::find($this->sapeurId)->permis()->where('permis_type_id', $permis_type)->delete();
 
         $this->service->addPermis($this->sapeurId, ['permis_type_id' => $permis_type, 'date' => $date]);
         try {
@@ -76,11 +72,8 @@ class SapeurPermisTest extends TestCase
      */
     public function testEditPermis()
     {
-        $permis_type = 9;
+        $permis_type = 2;
         $date = Carbon::createMidnightDate(1958, 1, 1);
-
-        //Remove potential pre-existant permis
-        Sapeur::find($this->sapeurId)->permis()->where('permis_type_id', $permis_type)->delete();
 
         $permis = $this->service->addPermis($this->sapeurId, ['permis_type_id' => $permis_type, 'date' => $date]);
         $date = Carbon::createMidnightDate(1999, 11, 21);
@@ -99,11 +92,8 @@ class SapeurPermisTest extends TestCase
      */
     public function testRemovePermis()
     {
-        $permis_type = 9;
+        $permis_type = 7;
         $date = Carbon::createMidnightDate(1958, 1, 1);
-
-        //Remove potential pre-existant permis
-        Sapeur::find($this->sapeurId)->permis()->where('permis_type_id', $permis_type)->delete();
 
         $permis = $this->service->addPermis($this->sapeurId, ['permis_type_id' => $permis_type, 'date' => $date]);
         $date = Carbon::createMidnightDate(1999, 11, 21);

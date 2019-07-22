@@ -2,11 +2,10 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\API\SapeurService;
+use App\Domaine\Exceptions\ArrayException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Validator;
 
 class SapeurCoursController extends Controller
 {
@@ -38,28 +37,18 @@ class SapeurCoursController extends Controller
      */
     public function store(Request $request, int $sapeurId)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'date' => 'required|date',
-                'localite_id' => 'integer|exists:localites,id',
-                'cours_id' => 'required|integer|exists:cours,id',
-                'fonction_sapeur_id' => 'integer|nullable',
-                'fonction_id' => 'integer|nullable',
-                'grade_id' => 'integer|nullable',
-                'date_fonction' => 'bail|required_with:fonction_id|date|nullable',
-                'date_grade' => 'bail|required_with:grade_id|date|nullable'
-            )
-        );
+        $data = $request->validate([
+            'date' => 'required|date',
+            'localite_id' => 'integer|exists:localites,id',
+            'cours_id' => 'required|integer|exists:cours,id',
+            'fonction_sapeur_id' => 'integer|nullable',
+            'fonction_id' => 'integer|nullable',
+            'grade_id' => 'integer|nullable',
+            'date_fonction' => 'bail|required_with:fonction_id|date|nullable',
+            'date_grade' => 'bail|required_with:grade_id|date|nullable'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $cours = $this->service->addCours($sapeurId, $validation->validated());
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $cours = $this->service->addCours($sapeurId, $data);
         return response()->json(['data' => $cours]);
     }
 
@@ -78,23 +67,13 @@ class SapeurCoursController extends Controller
             return response()->json(['error' => 'invalid cours id']);
         }
 
-        $validation = Validator::make($request->all(),
-            array(
-                'id' => 'integer|exists:cours_sapeur,id',
-                'date' => 'date',
-                'localite_id' => 'integer|exists:localites,id',
-            )
-        );
+        $data = $request->validate([
+            'id' => 'integer|exists:cours_sapeur,id',
+            'date' => 'date',
+            'localite_id' => 'integer|exists:localites,id',
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $cours = $this->service->updateCours($sapeurId, $validation->validated());
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $cours = $this->service->updateCours($sapeurId, $data);
         return response()->json(['data' => $cours]);
     }
 
@@ -107,11 +86,7 @@ class SapeurCoursController extends Controller
      */
     public function destroy(int $sapeurId, int $coursId)
     {
-        try {
-            $this->service->removeCours($sapeurId, $coursId);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $this->service->removeCours($sapeurId, $coursId);
 
         return response()->json(['data' => 'success']);
     }

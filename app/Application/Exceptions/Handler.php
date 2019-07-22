@@ -2,8 +2,12 @@
 
 namespace App\Application\Exceptions;
 
+use App\Domaine\Exceptions\ArrayException;
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Validation\ValidationException;
 
 class Handler extends ExceptionHandler
 {
@@ -29,7 +33,7 @@ class Handler extends ExceptionHandler
     /**
      * Report or log an exception.
      *
-     * @param \Exception $exception
+     * @param Exception $exception
      * @return void
      * @throws Exception
      */
@@ -41,12 +45,20 @@ class Handler extends ExceptionHandler
     /**
      * Render an exception into an HTTP response.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Exception  $exception
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param Exception $exception
+     * @return Response
      */
     public function render($request, Exception $exception)
     {
+        if ($exception instanceof ArrayException) {
+            return response()->json(['error' => $exception->getErrors()], 200);
+        }
+
+        if ($exception instanceof ValidationException) {
+            return response()->json(['error' => $exception->errors()], 200);
+        }
+
         return parent::render($request, $exception);
     }
 }

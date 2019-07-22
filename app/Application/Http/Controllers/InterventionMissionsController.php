@@ -2,11 +2,10 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\API\InterventionService;
+use App\Domaine\Exceptions\ArrayException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Validator;
 
 class InterventionMissionsController extends Controller
 {
@@ -40,24 +39,15 @@ class InterventionMissionsController extends Controller
      */
     public function store(Request $request, int $intervention_id)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'missions.*.sapeur_id' => 'integer|exists:sapeurs,id',
-                'missions.*.debut' => 'required|date_format:Y-m-d H:i',
-                'missions.*.fin' => 'required|date_format:Y-m-d H:i|after:missions.*.debut',
-                'missions.*.titre' => 'string',
-                'missions.*.resume' => 'string|nullable'
-            ));
+        $data = $request->validate([
+            'missions.*.sapeur_id' => 'integer|exists:sapeurs,id',
+            'missions.*.debut' => 'required|date_format:Y-m-d H:i',
+            'missions.*.fin' => 'required|date_format:Y-m-d H:i|after:missions.*.debut',
+            'missions.*.titre' => 'string',
+            'missions.*.resume' => 'string|nullable'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $missions = $this->service->addMissions($intervention_id, $validation->validated()['missions']);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $missions = $this->service->addMissions($intervention_id, $data['missions']);
 
         return response()->json(['data' => $missions]);
     }
@@ -72,25 +62,16 @@ class InterventionMissionsController extends Controller
      */
     public function update(Request $request, int $intervention_id)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'missions.*.id' => 'integer|exists:missions,id',
-                'missions.*.sapeur_id' => 'integer|exists:sapeurs,id',
-                'missions.*.debut' => 'date_format:Y-m-d H:i',
-                'missions.*.fin' => 'date_format:Y-m-d H:i|after:missions.*.debut',
-                'missions.*.titre' => 'string',
-                'missions.*.resume' => 'string|nullable'
-            ));
+        $data = $request->validate([
+            'missions.*.id' => 'integer|exists:missions,id',
+            'missions.*.sapeur_id' => 'integer|exists:sapeurs,id',
+            'missions.*.debut' => 'date_format:Y-m-d H:i',
+            'missions.*.fin' => 'date_format:Y-m-d H:i|after:missions.*.debut',
+            'missions.*.titre' => 'string',
+            'missions.*.resume' => 'string|nullable'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $missions = $this->service->updateMissions($intervention_id, $validation->validated()['missions']);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $missions = $this->service->updateMissions($intervention_id, $data['missions']);
 
         return response()->json(['data' => $missions]);
     }
@@ -104,20 +85,11 @@ class InterventionMissionsController extends Controller
      */
     public function destroy(Request $request, int $intervention_id)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'missions.*' => 'integer|exists:missions,id'
-            ));
+        $data = $request->validate([
+            'missions.*' => 'integer|exists:missions,id'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $this->service->removeMissions($intervention_id, $validation->validated()['missions']);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $this->service->removeMissions($intervention_id, $data['missions']);
 
         return response()->json(['data' => 'success']);
     }

@@ -2,12 +2,11 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\API\SapeurService;
+use App\Domaine\Exceptions\ArrayException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-
 
 class SapeurTelephoneController extends Controller
 {
@@ -40,24 +39,14 @@ class SapeurTelephoneController extends Controller
      */
     public function store(Request $request, int $sapeurId)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'telephone_type_id' => 'required|integer|exists:telephone_types,id',
-                'numero' => 'required|string|min:2',
-                'priorite' => 'required|integer',
-                'rta' => 'required|boolean',
-            )
-        );
+        $data = $request->validate([
+            'telephone_type_id' => 'required|integer|exists:telephone_types,id',
+            'numero' => 'required|string|min:2',
+            'priorite' => 'required|integer',
+            'rta' => 'required|boolean',
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(["error" => $validation->errors()]);
-        }
-
-        try {
-            $telephone = $this->service->addTelephone($sapeurId, $validation->validated());
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $telephone = $this->service->addTelephone($sapeurId, $data);
 
         return response()->json(['data' => $telephone]);
     }
@@ -73,29 +62,19 @@ class SapeurTelephoneController extends Controller
      */
     public function update(Request $request, int $sapeurId, int $telephoneId)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'id' => 'required|integer|exists:sapeur_telephone,id',
-                'telephone_type_id' => 'integer|exists:telephone_types,id',
-                'numero' => 'string|min:2',
-                'priorite' => 'integer',
-                'rta' => 'boolean',
-            )
-        );
-
-        if ($validation->fails()) {
-            return response()->json(["error" => $validation->errors()]);
-        }
+        $data = $request->validate([
+            'id' => 'required|integer|exists:sapeur_telephone,id',
+            'telephone_type_id' => 'integer|exists:telephone_types,id',
+            'numero' => 'string|min:2',
+            'priorite' => 'integer',
+            'rta' => 'boolean',
+        ]);
 
         if ($telephoneId !== $request->get('id')) {
             return response()->json(['error' => 'invalid telephone id']);
         }
 
-        try {
-            $telephone = $this->service->updateTelephone($sapeurId, $validation->validated());
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $telephone = $this->service->updateTelephone($sapeurId, $data);
 
         return response()->json(['data' => $telephone]);
     }
@@ -109,11 +88,7 @@ class SapeurTelephoneController extends Controller
      */
     public function destroy(int $sapeurId, int $telephoneId)
     {
-        try {
-            $this->service->removeTelephone($sapeurId, $telephoneId);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $this->service->removeTelephone($sapeurId, $telephoneId);
 
         return response()->json(['data' => 'success']);
     }

@@ -2,12 +2,9 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\Exercice;
-use App\Domaine\API\ExercicenService;
 use App\Domaine\API\ExerciceService;
+use App\Infrastructure\Models\Exercice;
 use Illuminate\Http\Request;
-use Validator;
 
 class ExerciceController extends Controller
 {
@@ -30,29 +27,20 @@ class ExerciceController extends Controller
 
     public function store(Request $request)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'date' => 'date',
-                'heure' => 'date_format:H:i',
-                'lieu' => 'string|nullable',
-                'designation' => 'string',
-                'communications' => 'string|nullable',
-                'duree' => 'integer|min:1|max:780',
-                'status' => 'integer',
-                'exercice_categorie_id' => 'integer|exists:exercice_categories,id',
-                'localite_id' => 'integer|exists:localites,id',
-                'exercice_comptable_id' => 'integer|exists:exercice_comptables,id'
-            ));
+        $data = $request->validate([
+            'date' => 'date',
+            'heure' => 'date_format:H:i',
+            'lieu' => 'string|nullable',
+            'designation' => 'string',
+            'communications' => 'string|nullable',
+            'duree' => 'integer|min:1|max:780',
+            'status' => 'integer',
+            'exercice_categorie_id' => 'integer|exists:exercice_categories,id',
+            'localite_id' => 'integer|exists:localites,id',
+            'exercice_comptable_id' => 'integer|exists:exercice_comptables,id'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $exercice = $this->service->createExercice($validation->validated());
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $exercice = $this->service->createExercice($data);
 
         return response()->json(['data' => $exercice]);
     }
@@ -66,50 +54,33 @@ class ExerciceController extends Controller
 
     public function update(Request $request, $id)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'date' => 'date',
-                'heure' => 'date_format:H:i',
-                'lieu' => 'string|nullable',
-                'communications' => 'string|nullable',
-                'designation' => 'string',
-                'duree' => 'integer|min:1|max:780',
-                'status' => 'integer',
-                'exercice_categorie_id' => 'integer|exists:exercice_categories,id',
-                'localite_id' => 'integer|exists:localites,id'
-            ));
+        $data = $request->validate([
+            'date' => 'date',
+            'heure' => 'date_format:H:i',
+            'lieu' => 'string|nullable',
+            'communications' => 'string|nullable',
+            'designation' => 'string',
+            'duree' => 'integer|min:1|max:780',
+            'status' => 'integer',
+            'exercice_categorie_id' => 'integer|exists:exercice_categories,id',
+            'localite_id' => 'integer|exists:localites,id'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $exercice = $this->service->updatExercice($id, $validation->validated());
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $exercice = $this->service->updatExercice($id, $data);
 
         return response()->json(['data' => $exercice]);
     }
 
     public function destroy($id)
     {
-        try {
-            $this->service->deleteExerciceById($id);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $this->service->deleteExerciceById($id);
 
         return response()->json(['data' => 'success']);
     }
 
     public function valider($id)
     {
-        try {
-            $exercice = $this->service->validateExercice($id);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $exercice = $this->service->validateExercice($id);
 
         return response()->json(['data' => $exercice]);
     }

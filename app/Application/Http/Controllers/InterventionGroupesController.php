@@ -2,11 +2,10 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\API\InterventionService;
+use App\Domaine\Exceptions\ArrayException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Validator;
 
 class InterventionGroupesController extends Controller
 {
@@ -40,20 +39,11 @@ class InterventionGroupesController extends Controller
      */
     public function store(Request $request, int $interventionId)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'groupes.*' => 'required|integer'
-            ));
+        $data = $request->validate([
+            'groupes.*' => 'required|integer'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $groupes = $this->service->addGroupes($interventionId, $validation->validated()['groupes']);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $groupes = $this->service->addGroupes($interventionId, $data['groupes']);
 
         return response()->json(['data' => $groupes]);
     }
@@ -67,20 +57,11 @@ class InterventionGroupesController extends Controller
      */
     public function destroy(Request $request, int $interventionId)
     {
-        $validation = Validator::make($request->all(),
-            array(
-                'groupes.*' => 'required|integer'
-            ));
+        $data = $request->validate([
+            'groupes.*' => 'required|integer'
+        ]);
 
-        if ($validation->fails()) {
-            return response()->json(['error' => $validation->errors()]);
-        }
-
-        try {
-            $this->service->removeGroupes($interventionId, $validation->validated()['groupes']);
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $this->service->removeGroupes($interventionId, $data['groupes']);
 
         return response()->json(['data' => 'success']);
     }
