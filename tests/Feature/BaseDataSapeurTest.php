@@ -2,8 +2,6 @@
 
 namespace Tests\Unit;
 
-use App\Domaine\API\ExerciceService;
-use App\Infrastructure\Models\Exercice;
 use Exception;
 use Tests\TestCase;
 
@@ -151,7 +149,15 @@ class BaseDataSapeurTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'sapeur_id', 'groupe_id'
+                        'id',
+                        'no',
+                        'designation',
+                        'sapeurs' => [
+                            '*' => [
+                                'id',
+                                'sapeur_id'
+                            ]
+                        ]
                     ]
                 ]
             ]);
