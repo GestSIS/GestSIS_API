@@ -136,4 +136,45 @@ class BaseDataSapeurTest extends TestCase
             ]);
     }
 
+    /**
+     * Test index grupe sapeur
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testGroupeSapeurIndexOK()
+    {
+        $response = $this->json('GET', "/api/v2/groupes-sapeurs/");
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id', 'sapeur_id', 'groupe_id'
+                    ]
+                ]
+            ]);
+    }
+
+    /**
+     * Test index grupe sapeur
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testLocaliteIndexOK()
+    {
+        $response = $this->json('GET', "/api/v2/localites/");
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id', 'designation', 'npa'
+                    ]
+                ]
+            ]);
+    }
 }

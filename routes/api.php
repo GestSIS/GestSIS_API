@@ -136,11 +136,6 @@ Route::group(['prefix' => 'v2'], function () {
         // Route::get('cmedtype', 'BaseDataApiController@cmedtype')->name('api.v2.basedata.cmedtype');
 
         //Frais
-        Route::resource('frais-annuel-types', 'PhaseTypeController')->only(['index']);
-        Route::resource('indemnite-annuel-types', 'PhaseTypeController')->only(['index']);
-        Route::resource('indemnite-exercice-types', 'PhaseTypeController')->only(['index']);
-        Route::resource('indemnite-intervention-types', 'PhaseTypeController')->only(['index']);
-
         Route::post('imputation/intervention/{id}', 'ImputationController@intervention');
         Route::post('imputation/exercice/{id}', 'ImputationController@exercice');
         Route::post('imputation/annuel/{id}', 'ImputationController@annuel');
