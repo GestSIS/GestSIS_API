@@ -7,7 +7,7 @@ use App\Infrastructure\Models\Exercice;
 use Exception;
 use Tests\TestCase;
 
-class BaseDataSapeurTest extends TestCase
+class ExerciceComptableTest extends TestCase
 {
 
     /**

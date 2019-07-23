@@ -5,7 +5,7 @@ namespace Tests\Unit;
 use Exception;
 use Tests\TestCase;
 
-class BaseDataExerciceTest extends TestCase
+class BaseDataComptabiliteTest extends TestCase
 {
 
     /**
