@@ -6,11 +6,14 @@ use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Sapeur;
 use Exception;
 use Tests\TestCase;
+use App\Domaine\API\ExerciceService;
+use App\Domaine\API\SapeurService;
+use App\Domaine\API\ComptabiliteService;
 
 class ImputationExerciceTest extends TestCase
 {
 
-    protected $imputationService;
+    protected $comptabiliteService;
     protected $sapeurOneId;
     protected $sapeurTwoId;
     protected $sapeurThreeId;
@@ -20,9 +23,9 @@ class ImputationExerciceTest extends TestCase
     {
         parent::setUp();
 
-        $exerciceService = $this->app->make('App\Domaine\API\ExerciceService');
-        $sapeurService = $this->app->make('App\Domaine\API\SapeurService');
-        $this->comptabiliteService = $this->app->make('App\Domaine\API\ComptabiliteService');
+        $exerciceService = $this->app->make(ExerciceService::class);
+        $sapeurService = $this->app->make(SapeurService::class);
+        $this->comptabiliteService = $this->app->make(ComptabiliteService::class);
 
         $data = factory(Sapeur::class)->make()->toArray();
         $data['incorporation'] = "29.01.2019";
