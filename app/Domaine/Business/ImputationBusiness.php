@@ -225,7 +225,7 @@ class ImputationBusiness
                     //Arrondir debut à la fin de la première journée
                     //Arrondir fin à la fin de l'avant dernière journée
                     $debutCarbon = $debut->copy()->ceilDay();
-                    $finCarbon = $debut->copy()->floorDay();
+                    $finCarbon = $fin->copy()->floorDay();
 
                     $nbWeekend = 0;
                     $nbWeek = 0;
@@ -260,8 +260,7 @@ class ImputationBusiness
                     $nightPeriodTwoStart = $nightPeriodOneStart->copy()->subDay();
                     $nightPeriodTwoEnd = $nightPeriodOneEnd->copy()->subDay();
 
-                    //Alternative 1 -> only one day
-                    if ($debutCarbon->copy()->subDay() <= $finCarbon) {
+                    if ($debutCarbon->copy()->subDay() >= $finCarbon) {
                         //Debut et fin la même journée
                         if ($debutCarbon->isWeekend() && $testWeekend) {
                             $dureeTarifWeekend += $duree;
