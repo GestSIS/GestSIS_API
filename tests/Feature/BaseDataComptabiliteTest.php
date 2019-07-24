@@ -80,7 +80,7 @@ class BaseDataComptabiliteTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'designation', 'montant', 'quantite', 'sapeur_id'
+                        'id', 'designation', 'total', 'quantite', 'sapeur_id'
                     ]
                 ]
             ]);
@@ -102,7 +102,7 @@ class BaseDataComptabiliteTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'designation', 'montant', 'quantite', 'sapeur_id'
+                        'id', 'designation', 'total', 'quantite', 'sapeur_id'
                     ]
                 ]
             ]);
@@ -124,7 +124,7 @@ class BaseDataComptabiliteTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'designation', 'montant', 'quantite', 'sapeur_id'
+                        'id', 'designation', 'total', 'quantite', 'sapeur_id'
                     ]
                 ]
             ]);
