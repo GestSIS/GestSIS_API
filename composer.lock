@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "56ced5a78e4b4956bcc7fe32d79f5f16",
+    "content-hash": "616cfdca9f6c33ed9cd350622f9377f1",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1813,6 +1813,61 @@
                 "stylesheet"
             ],
             "time": "2016-07-19T19:14:21+00:00"
+        },
+        {
+            "name": "spatie/laravel-http-logger",
+            "version": "1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/laravel-http-logger.git",
+                "reference": "4c6951f03f4321057ccc742d0a3b367f3ecdce55"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/laravel-http-logger/zipball/4c6951f03f4321057ccc742d0a3b367f3ecdce55",
+                "reference": "4c6951f03f4321057ccc742d0a3b367f3ecdce55",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "~5.8.0",
+                "php": "^7.2"
+            },
+            "require-dev": {
+                "orchestra/testbench": "~3.8.0",
+                "phpunit/phpunit": "^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Spatie\\HttpLogger\\HttpLoggerServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\HttpLogger\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Brent Roose",
+                    "email": "brent@spatie.be",
+                    "homepage": "https://spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A Laravel 5 package to log HTTP requests",
+            "homepage": "https://github.com/spatie/laravel-http-logger",
+            "keywords": [
+                "laravel-http-logger",
+                "spatie"
+            ],
+            "time": "2019-02-27T16:32:33+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",
