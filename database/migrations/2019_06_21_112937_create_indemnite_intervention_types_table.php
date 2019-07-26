@@ -32,7 +32,7 @@ class CreateIndemniteInterventionTypesTable extends Migration
             $table->foreign('compte_id')->references('id')->on('comptes');
 
             $table->unsignedBigInteger('phase_id')->nullable();
-            $table->foreign('phase_id')->references('id')->on('phases');
+            $table->foreign('phase_id')->references('id')->on('phase_types');
 
             $table->unsignedBigInteger('type_unite_id');
             $table->foreign('type_unite_id')->references('id')->on('type_unites');

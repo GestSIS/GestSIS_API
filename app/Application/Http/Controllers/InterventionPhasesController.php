@@ -62,7 +62,7 @@ class InterventionPhasesController extends Controller
         $data = $request->validate([
             'phases.*.id' => 'required|integer',
             'phases.*.phase_type_id' => 'integer',
-            'phases.*.debut' => 'date_format:Y-m-d H:i'
+            'phases.*.debut' => 'date_format:Y-m-d H:i|nullable'
         ]);
 
         $phases = $this->service->updatePhases($intervention_id, $data['phases']);

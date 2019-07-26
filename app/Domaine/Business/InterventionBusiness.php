@@ -288,8 +288,8 @@ class InterventionBusiness
                 throw new ArrayException(["debut" => "Debut trop tôt"]);
             } else {
                 foreach ($existingPhases as $existingPhase) {
-                    if ($existingPhase->debut !== null && $debut == Carbon::parse($existingPhase->debut)) {
-                        throw new ArrayException(["debut" => "Debut trop tôt"]);
+                    if ($existingPhase->debut !== null && $debut === Carbon::parse($existingPhase->debut)) {
+                        throw new ArrayException(["debut" => "Duplicated phase at same time"]);
                     }
                 }
                 $this->repository->addPhase($interventionId, $phase);
