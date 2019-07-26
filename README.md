@@ -52,18 +52,18 @@ Tout ce qui permet d'interagir avec le domaine, `app\application`
 
 Se compose de 3 couches les API's, le business et les SPI's.
 
-### SPI's
+### API's
 
-Se couche d'une couche de service, défini les entrés du code métier, tout passe par là. `app\domaine\API`
+Cette couche se compose de services qui définissent les entrés du code métier, toute action à destination du métier passe par là. `app\domaine\API`
 Toute action de modification doit être passée à la couche Business. Seul les actions de listing peuvent directemenet être résolues.
 
 ### Business
 
 Le code métier dans le dossier`app\domaine\Business`
 
-### API's
+### SPI's
 
-Défini les besoins qui seront imèplémenté dans la couche infrastructure. `app\domaine\SPI`
+Défini les besoins qui seront implémentés dans la couche infrastructure. `app\domaine\SPI`
 
 ### Couche Infrastructure
 
