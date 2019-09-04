@@ -63,6 +63,28 @@ class InterventionVehiculeTest extends TestCase
             ]);
     }
 
+
+    /**
+     * Test add vehicule
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testAddInterventionVehiculeDuplicated()
+    {
+        $vehicules = [1, 2, 3, 5];
+
+        $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/vehicules', array('vehicules' => $vehicules));
+        $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/vehicules', array('vehicules' => $vehicules));
+
+        //TODO Check not duplicated
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'data' => true
+            ]);
+    }
+
     /**
      * Test remove vehicule
      *
@@ -71,9 +93,12 @@ class InterventionVehiculeTest extends TestCase
      */
     public function testRemoveInterventionVehicule()
     {
-        $vehicules = [1, 5];
+        $vehiculesAdd = [1, 2, 3, 5];
+        $vehiculesRemove = [1, 5];
 
-        $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/vehicules/', array("vehicules" => $vehicules));
+        $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/vehicules', array('vehicules' => $vehiculesAdd));
+
+        $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/vehicules/', array("vehicules" => $vehiculesRemove));
 
         $response
             ->assertStatus(200)

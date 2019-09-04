@@ -27,6 +27,15 @@ class InterventionBusiness
         $this->repository = $repository;
     }
 
+    private function checkIsNotImpute($interventionId)
+    {
+        $statut = $this->repository->getInterventionStatutById($interventionId);
+        if($statut >= self::INTERVENTION_STATUT_IMPUTE)
+        {
+            throw new ArrayException(['message' => 'Intervention already impute']);
+        }
+    }
+
     /**
      * Create a intervention
      *
@@ -87,11 +96,9 @@ class InterventionBusiness
      *
      * @param int
      */
-    public static function deleteInterventionById($interventionId)
+    public function deleteInterventionById($interventionId)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
 
         /* TODO: Suppression:
         - Sapeur
@@ -113,9 +120,7 @@ class InterventionBusiness
      */
     public function addPresences($interventionId, $sapeurs)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
 
         foreach ($sapeurs as $sapeur) {
             //TODO Check duplicated period of time
@@ -138,9 +143,7 @@ class InterventionBusiness
      */
     public function updatePresences($interventionId, $sapeurs)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
 
         foreach ($sapeurs as $sapeur) {
             //TODO Check period non dupliqué
@@ -156,9 +159,7 @@ class InterventionBusiness
      */
     public function removePresences($interventionId, $ids)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
 
         $this->repository->removePresencesById($interventionId, $ids);
         $statut = $this->repository->getInterventionStatutById($interventionId);
@@ -178,9 +179,7 @@ class InterventionBusiness
      */
     public function addAppels($interventionId, $appels)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
 
         foreach ($appels as $appel) {
             $this->repository->addAppel($interventionId, $appel);
@@ -196,9 +195,8 @@ class InterventionBusiness
      */
     public function updateAppels($interventionId, $appels)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
+
         foreach ($appels as $appel) {
             $this->repository->editAppelInfoById($interventionId, $appel['id'], $appel);
         }
@@ -209,12 +207,11 @@ class InterventionBusiness
      *
      * @param $data
      */
-    public function removeAppels($exercice_id, $ids)
+    public function removeAppels($interventionId, $ids)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
-        $this->repository->removeAppelsById($exercice_id, $ids);
+        $this->checkIsNotImpute($interventionId);
+
+        $this->repository->removeAppelsById($interventionId, $ids);
     }
 
     /**
@@ -226,9 +223,7 @@ class InterventionBusiness
      */
     public function addMissions($interventionId, $missions)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
 
         foreach ($missions as $mission) {
             $this->repository->addMission($interventionId, $mission);
@@ -244,9 +239,7 @@ class InterventionBusiness
      */
     public function updateMissions($interventionId, $missions)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
 
         foreach ($missions as $mission) {
             $this->repository->editMissionInfoById($interventionId, $mission['id'], $mission);
@@ -260,9 +253,7 @@ class InterventionBusiness
      */
     public function removeMissions($interventionId, $ids)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
 
         $this->repository->removeMissionsById($interventionId, $ids);
     }
@@ -276,9 +267,8 @@ class InterventionBusiness
      */
     public function addPhases($interventionId, $phases)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
+
         $intervention = $this->repository->findInterventionById($interventionId);
         $existingPhases = $this->repository->getInterventionPhases($interventionId);
 
@@ -306,9 +296,7 @@ class InterventionBusiness
      */
     public function updatePhases($interventionId, $phases)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
 
         foreach ($phases as $phase) {
             $this->repository->editPhaseInfosById($interventionId, $phase['id'], $phase);
@@ -322,9 +310,7 @@ class InterventionBusiness
      */
     public function removePhases($interventionId, $ids)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
 
         $this->repository->removePhasesById($interventionId, $ids);
     }
@@ -338,9 +324,7 @@ class InterventionBusiness
      */
     public function addMateriels($interventionId, $materiels)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
 
         foreach ($materiels as $materiel) {
             $this->repository->addMateriel($interventionId, $materiel);
@@ -356,9 +340,7 @@ class InterventionBusiness
      */
     public function updateMateriels($interventionId, $materiels)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
 
         foreach ($materiels as $materiel) {
             $this->repository->editMaterielQuantiteById($interventionId, $materiel['id'], $materiel['quantite']);
@@ -372,9 +354,7 @@ class InterventionBusiness
      */
     public function removeMateriels($interventionId, $ids)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
 
         $this->repository->removeMaterielsById($interventionId, $ids);
     }
@@ -388,9 +368,7 @@ class InterventionBusiness
      */
     public function addQuittances($interventionId, $quittances)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
 
         foreach ($quittances as $quittance) {
             $this->repository->addQuittance($interventionId, $quittance);
@@ -404,9 +382,7 @@ class InterventionBusiness
      */
     public function removeQuittances($interventionId, $ids)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
 
         $this->repository->removeQuittancesById($interventionId, $ids);
     }
@@ -420,10 +396,16 @@ class InterventionBusiness
      */
     public function addVehicules($interventionId, $vehicules)
     {
-        /* TODO Check:
-        - Pas imputé
-        - FIXME Check pas de véhicules dupliqués
-        */
+        $this->checkIsNotImpute($interventionId);
+
+        //Check duplicated vehicules
+        $vehiculesRef = $this->repository->getInterventionVehicules($interventionId);
+        $vehiculesId = array_map(function($vehicule){
+            return $vehicule->vehicule_id;
+        }, $vehiculesRef);
+        $vehicules = array_filter($vehicules, function($vehicule)use($vehiculesId){
+            return !in_array($vehicule, $vehiculesId);
+        });
 
         foreach ($vehicules as $vehicule) {
             $this->repository->addVehicule($interventionId, $vehicule);
@@ -437,9 +419,7 @@ class InterventionBusiness
      */
     public function removeVehicules($interventionId, $ids)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
 
         $this->repository->removeVehiculesById($interventionId, $ids);
     }
@@ -453,9 +433,8 @@ class InterventionBusiness
      */
     public function addGroupes($interventionId, $groupes)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
+
         foreach ($groupes as $groupe) {
             $this->repository->addGroupe($interventionId, $groupe);
         }
@@ -468,9 +447,7 @@ class InterventionBusiness
      */
     public function removeGroupes($interventionId, $ids)
     {
-        /* TODO Check:
-        - Pas imputé
-        */
+        $this->checkIsNotImpute($interventionId);
 
         $this->repository->removeGroupesById($interventionId, $ids);
     }

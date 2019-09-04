@@ -19,7 +19,7 @@ class SapeurBusiness
 
     public function createSapeur($data)
     {
-        //TODO Add iban statut système
+        //TODO Add iban statut système validation
         $data['iban_statut'] = 1;
         $sapeur = $this->repository->createSapeur($data);
 
