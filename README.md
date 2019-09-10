@@ -33,6 +33,25 @@ Ajouter un fichier `auth-public.key` dans le dossier `storage/keys` contenant la
 Il est possible de générer une paire de clé à l'adresse suivante :
 - [http://travistidwell.com/jsencrypt/demo/](http://travistidwell.com/jsencrypt/demo/) 
 
+## Configuration génération des PDF
+
+```bash
+#### Install all dependencies
+apt-get install -y \
+libxrender1 \
+libfontconfig1 \
+libx11-dev \
+libjpeg62 \
+libxtst6 \
+wget \
+&& wget https://github.com/h4cc/wkhtmltopdf-amd64/blob/master/bin/wkhtmltopdf-amd64?raw=true -O /usr/local/bin/wkhtmltopdf \
+&& chmod +x /usr/local/bin/wkhtmltopdf
+```
+
+Regarder l'issue suivante :
+
+- https://github.com/barryvdh/laravel-snappy/issues/68#issuecomment-314012014
+
 ## Serveur de développement
 
 Pour lancer le serveur de dev :
