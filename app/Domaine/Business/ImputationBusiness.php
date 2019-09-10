@@ -41,7 +41,7 @@ class ImputationBusiness
 
     public function imputerAnnuel(int $exerciceComptableId)
     {
-        // TODO: Check pas déjà imputée cette année
+        // TODO Check pas déjà imputée cette année
 
         $indemnites = $this->indemniteRepo->listeIndemniteAnnuelType();
         $frais = $this->fraisRepo->listeFraisAnnuelType();
