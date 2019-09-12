@@ -77,13 +77,14 @@ class InterventionVehiculeTest extends TestCase
         $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/vehicules', array('vehicules' => $vehicules));
         $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/vehicules', array('vehicules' => $vehicules));
 
-        //TODO Check not duplicated
-
         $response
             ->assertStatus(200)
             ->assertJson([
                 'data' => true
-            ]);
+            ])
+            ->assertJsonCount(
+                count($vehicules), 'data'
+            );
     }
 
     /**
