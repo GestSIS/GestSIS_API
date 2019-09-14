@@ -13,7 +13,7 @@
         "barryvdh/laravel-snappy": "^0.4.5",
         "fideloper/proxy": "^4.0",
         "firebase/php-jwt": "^5.0",
-        "laravel/framework": "5.8.*",
+        "laravel/framework": "^6.0",
         "laravel/tinker": "^1.0",
         "spatie/laravel-http-logger": "^1.2"
     },
