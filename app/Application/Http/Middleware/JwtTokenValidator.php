@@ -5,6 +5,7 @@ namespace App\Application\Http\Middleware;
 use Closure;
 use App\Application\Auth\TokenTools;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class JwtTokenValidator
 {

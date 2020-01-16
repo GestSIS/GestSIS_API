@@ -525,7 +525,6 @@ class ImputationBusiness
 
     private function imputerExerciceParHeureEtSoldeMin($exercice, $sapeurs, $indemniteType, $designation)
     {
-        //TODO indemnite et par fonction should be null
         //En minutes
         $duree = $exercice->duree / 60;
 
