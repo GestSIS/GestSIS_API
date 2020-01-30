@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Domaine\Business;
 
 use App\Domaine\SPI\EcritureRepository;
@@ -26,8 +25,8 @@ class ImputationBusiness
         ExerciceRepository $exercice,
         InterventionRepository $intervention,
         IndemniteTypeRepository $indemnite,
-        FraisTypeRepository $frais)
-    {
+        FraisTypeRepository $frais
+    ) {
         $this->ecritureRepo = $ecriture;
         $this->exerciceRepo = $exercice;
         $this->sapeurRepo = $sapeur;
@@ -38,21 +37,36 @@ class ImputationBusiness
 
     protected const UNITE_CHF_PAR_PIECE = 1;
     protected const UNITE_CHF_PAR_HEURE = 2;
-
+    
+    /**
+     * Génères des frais annuels pour les sapeurs n'ayant pas encore de frais annuels
+     */
     public function imputerAnnuel(int $exerciceComptableId)
     {
-        // TODO Check pas déjà imputée cette année
+        // Choice available pour une seule imputation annuelle :
+        // 1. ~~ Si déjà une imputation pour l'année alors ne rien faire~~
+        // 2. OUI -> Ajouter des imputations uniquement pour les sapeurs qui n'ont pas de frais pour l'instant
+        // 3. ~~ Tout supprimer pour l'année courante et tout regénérer~~
+        //
+        // Notes :
+        // - Ne prend actuellement en compte que la fonction actuelle et non pas la date de l'entrée en vigeure de cette fonction
+        // - Prend uniquement les actifs
 
         $indemnites = $this->indemniteRepo->listeIndemniteAnnuelType();
         $frais = $this->fraisRepo->listeFraisAnnuelType();
 
-        $sapeurs = array_filter($this->sapeurRepo->listeSapeurLight(),
-            function ($s) {
-                return $s->actif;
+        $ecritures = $this->ecritureRepo->listeEcrituresAnnuelsForExerciceComptableById($exerciceComptableId);
+
+        $sapeurs = array_filter(
+            $this->sapeurRepo->listeSapeurLight(),
+            function ($s) use ($ecritures) {
+                return $s->actif && count(array_filter($ecritures, function ($e) use ($s) {
+                    return $e->sapeur_id === $s->id;
+                })) == 0;
             }
         );
 
-        //Génération des indemnités annuels
+        // Génération des indemnités annuels
         foreach ($indemnites as $i) {
             array_map(
                 function ($s) use ($i, $exerciceComptableId) {
@@ -145,11 +159,10 @@ class ImputationBusiness
         } else {
             dd("ERROR");
             return false;
-            //TODO WARNING IN LOGS
+            //TODO: WARNING IN LOGS -> Should never arrive here
         }
 
-        //TODO Ajout date imputation
-        // ou pas
+        // Ajout date imputation ??? -> NON car car l'imputation se fait lors d'une autre étape
 
         // Changer le statut de l'exercice
         return $this->exerciceRepo->updateExerciceById($exerciceId, ["statut" => ExerciceBusiness::EXERCICE_STATUT_IMPUTE])->statut;
@@ -176,12 +189,11 @@ class ImputationBusiness
             array_push($sapeurs[$presence->sapeur_id], $presence);
         }
 
-//        $phases = $intervention->phases;
-//
-//        //TODO Retourne les phases durant cette période
-//        $getPhases = function ($presence) use ($phases) {
-//
-//        };
+        // $phases = $intervention->phases;
+
+        // //TODO: Retourne les phases durant cette période
+        // $getPhases = function ($presence) use ($phases) {
+        // };
 
         foreach ($sapeurs as $sapeur_id => $presences) {
             $dureeNuit = 0;
@@ -203,7 +215,7 @@ class ImputationBusiness
             $dureeTarifWeekend = 0;
             $dureeTarifNuit = 0;
 
-            //TODO Adapt soldeTarif selon la fonction principale
+            //TODO: Adapt soldeTarif selon la fonction principale
             // ou pas
             $soldeTarif = $indemniteType->solde;
             $tauxWeekend = $indemniteType->taux_weekend;
@@ -229,7 +241,7 @@ class ImputationBusiness
 
                     $nbWeekend = 0;
                     $nbWeek = 0;
-//                    dd($debutCarbon);
+                    // dd($debutCarbon);
                     if ($debutCarbon < $finCarbon) {
                         $nbWeekend += $debutCarbon->diffInDaysFiltered(function (Carbon $date) {
                             return $date->isWeekend();
@@ -274,7 +286,6 @@ class ImputationBusiness
                         } else {
                             $dureeTarifStandard += $duree;
                         }
-
                     } else {
                         //Two days
 
@@ -324,7 +335,7 @@ class ImputationBusiness
                         }
                     }
                 }
-            }//End boucle presences d'un sapeur
+            } //End boucle presences d'un sapeur
 
             $soldeStandard = $soldeTarif * $dureeTarifStandard;
             $soldeNuit = $soldeTarif * $dureeTarifNuit;
@@ -416,7 +427,7 @@ class ImputationBusiness
             }
         }
 
-        //TODO Ajout date imputation
+        //TODO: Ajout date imputation
 
         // Update statut
         return $this->interventionRepo->editInterventionInformationsById($interventionId, [
@@ -426,7 +437,7 @@ class ImputationBusiness
 
     private function imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation)
     {
-        // TODO : solde_min should be null
+        // TODO: : solde_min should be null
 
         // Générer écritures
         foreach ($sapeurs as $sapeur) {
@@ -472,7 +483,7 @@ class ImputationBusiness
 
     private function imputerExerciceParHeureEtFonction($exercice, $sapeurs, $indemniteType, $designation)
     {
-        //TODO solde_min should be null
+        //TODO: solde_min should be null
         //En minutes
         $duree = $exercice->duree / 60;
 

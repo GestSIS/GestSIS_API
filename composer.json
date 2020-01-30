@@ -1,7 +1,7 @@
 {
     "name": "laravel/laravel",
     "type": "project",
-    "description": "The Laravel Framework.",
+    "description": "API serveur for GestSIS ecosystem",
     "keywords": [
         "framework",
         "laravel"
