@@ -1,29 +1,29 @@
 {
     "name": "laravel/laravel",
     "type": "project",
-    "description": "The Laravel Framework.",
+    "description": "API serveur for GestSIS ecosystem",
     "keywords": [
         "framework",
         "laravel"
     ],
     "license": "MIT",
     "require": {
-        "php": "^7.2.0",
-        "barryvdh/laravel-cors": "^0.11.3",
-        "barryvdh/laravel-snappy": "^0.4.5",
+        "php": "^7.2.5",
+        "fruitcake/laravel-cors": "^1.0.3",
+        "barryvdh/laravel-snappy": "^0.4.6",
         "fideloper/proxy": "^4.0",
         "firebase/php-jwt": "^5.0",
         "laravel/framework": "^6.0",
         "laravel/tinker": "^1.0",
-        "spatie/laravel-http-logger": "^1.2"
+        "spatie/laravel-http-logger": "^1.4"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",
         "filp/whoops": "^2.0",
-        "fzaninotto/faker": "^1.4",
+        "fzaninotto/faker": "^1.9",
         "mockery/mockery": "^1.0",
         "nunomaduro/collision": "^2.0",
-        "phpunit/phpunit": "^7.5"
+        "phpunit/phpunit": "^8.5"
     },
     "config": {
         "optimize-autoloader": true,

@@ -14,7 +14,7 @@ $factory->define(Sapeur::class, function (Faker $faker) {
         'rue' => $faker->streetName,
         'no_rue' => $faker->streetSuffix,
         'date_naissance' => $faker->dateTimeBetween('-60years','-10years'),
-        'no_avs' => '756.'.$faker->randomNumber(4).'.'.$faker->randomNumber(4).'.'.$faker->randomNumber(2),
+        'no_avs' => $faker->avs13,
         'profession' => $faker->jobTitle,
         'employeur' => 'Canton du Jura',
         'lieu_de_travail' => $faker->city,
