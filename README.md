@@ -13,7 +13,8 @@ composer install
 cp .env.example .env
 ```
 
-Modifier le fichier `.env` afin de configurer la base de données. Attention, la création de la base de données n'est pas réalisé de ce script.
+Modifier le fichier `.env` afin de configurer la base de données. Attention, la création de la base de données n'est pas réalisée par ce script. La base de données pour ce serveur (GestSIS_API) ne doit pas
+être la même que celle du serveur d'authentification (GestSIS_Auth).
 
 Puis :
 ```sh
@@ -22,18 +23,17 @@ php artisan migrate --step
 php artisan db:seed
 ```
 
-## Configuration de l'authentification
+### Configuration de l'authentification
 
 ```sh
 mkdir storage/keys
 ```
 
-Ajouter un fichier `auth-public.key` dans le dossier `storage/keys` contenant la clé publique.
+Ajouter le fichier `auth-public.key` dans le dossier `storage/keys` contenant la clé publique.
 
-Il est possible de générer une paire de clé à l'adresse suivante :
-- [http://travistidwell.com/jsencrypt/demo/](http://travistidwell.com/jsencrypt/demo/) 
+Ce fichier doit au préalable avoir été généré dans le projet GestSIS_Auth.
 
-## Configuration génération des PDF
+### Configuration génération des PDF
 
 ```bash
 #### Install all dependencies
@@ -52,13 +52,16 @@ Regarder l'issue suivante :
 
 - https://github.com/barryvdh/laravel-snappy/issues/68#issuecomment-314012014
 
-## Serveur de développement
+### Serveur de développement
 
 Pour lancer le serveur de dev :
 
 ```sh
 php artisan serve
 ```
+
+### Développement dans une machine virtuelle
+Si le serveur de développement est lancé dans une machine virtuelle, mais que l'accès se fait depuis l'hôte, il est nécessaire d'ajouter `--host=XXX` à la commande ci-dessus.
 
 ## Architecture Hexagonale
 
@@ -88,4 +91,3 @@ Défini les besoins qui seront implémentés dans la couche infrastructure. `app
 ### Couche Infrastructure
 
 Ce qui est piloté par le domaine, `app\infrastructure`
-
