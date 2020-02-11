@@ -42,7 +42,7 @@ class ExerciceBusiness
         // 2 -> a valider
         // 3 -> a imputer
         // 4 -> imputée
-        $data['statut'] = 1;
+        $data['statut'] = 1; //TODO: Ajouter ça dans paramètres ?
         return $this->repository->createExercice($data);
     }
 
@@ -58,6 +58,7 @@ class ExerciceBusiness
 
     public function validateExercice($exerciceId)
     {
+        //TODO Check saisi des présences sont saisies
         $statut = $this->repository->getExerciceStatutById($exerciceId);
         if ($statut === self::EXERCICE_STATUT_SAISI) {
             return $this->repository->updateExerciceById($exerciceId, [

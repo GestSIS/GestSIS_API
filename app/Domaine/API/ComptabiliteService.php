@@ -41,6 +41,11 @@ class ComptabiliteService
         return $this->compteRepo->listComptes();
     }
 
+    function getAllEcrituresForExerciceComptableById($exerciceComptableId)
+    {
+        return $this->ecritureRepo->listeAllEcritureForExerciceComptableById($exerciceComptableId);
+    }
+
     function getEcrituresByCompte($compteId, $exerciceComptableId)
     {
         return $this->ecritureRepo->listeEcritureForCompteAndExerciceComptableById($compteId, $exerciceComptableId);

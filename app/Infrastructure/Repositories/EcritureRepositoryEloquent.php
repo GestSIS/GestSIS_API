@@ -11,6 +11,15 @@ use StdClass;
 class EcritureRepositoryEloquent implements EcritureRepository
 {
 
+    public function listeAllEcritureForExerciceComptableById($exerciceComptableId)
+    {
+        return $this->convertCollectionOfEcritures(
+            Ecriture
+                ::where('exercice_comptable_id', $exerciceComptableId)
+                ->get()
+        );
+    }
+
     public function listeEcritureForCompteAndExerciceComptableById($compteId, $exerciceComptableId)
     {
         return $this->convertCollectionOfEcritures(

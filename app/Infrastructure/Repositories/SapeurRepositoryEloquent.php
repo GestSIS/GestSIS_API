@@ -12,7 +12,6 @@ use App\Infrastructure\Models\Mutation;
 use App\Infrastructure\Models\Permis;
 use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\SapeurTelephone;
-use Mockery\Undefined;
 use stdClass;
 
 class SapeurRepositoryEloquent implements SapeurRepository

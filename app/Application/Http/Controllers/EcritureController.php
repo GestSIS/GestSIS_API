@@ -12,6 +12,13 @@ class EcritureController extends Controller
     {
         $this->service = $service;
     }
+    
+    public function all(int $exerciceComptableId)
+    {
+        $ecritures = $this->service->getAllEcrituresForExerciceComptableById($exerciceComptableId);
+
+        return response()->json(['data' => $ecritures]);
+    }
 
     public function annuel(int $exerciceComptableId)
     {

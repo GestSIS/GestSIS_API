@@ -6,6 +6,8 @@ namespace App\Domaine\SPI;
 
 interface EcritureRepository
 {
+    public function listeAllEcritureForExerciceComptableById($exerciceComptableId);
+    
     public function listeEcritureForCompteAndExerciceComptableById($compteId, $exerciceComptableId);
 
     public function listeEcritureForExercice($exerciceId);
