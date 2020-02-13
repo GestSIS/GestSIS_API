@@ -57,7 +57,7 @@ class SapeurMutationTest extends TestCase
     {
         $data = array(
             'incorporation' => "2000-01-18",
-            'sortie' => null,
+            'sortie' => "2000-01-29",
             'motif' => '',
             'localite_id' => 1
         );
@@ -89,8 +89,8 @@ class SapeurMutationTest extends TestCase
     public function testEditMutation()
     {
         $data = array(
-            'incorporation' => Carbon::createMidnightDate(2000, 1, 18),
-            'sortie' => null,
+            'incorporation' => Carbon::createMidnightDate(2002, 1, 18),
+            'sortie' => Carbon::createMidnightDate(2002, 1, 29),
             'motif' => '',
             'localite_id' => 1
         );
@@ -98,8 +98,8 @@ class SapeurMutationTest extends TestCase
         $mutation_id = $this->service->addMutation($this->sapeurId, $data)->id;
 
         $data = array(
-            'incorporation' => "2000-01-16",
-            'sortie' => "2000-01-20",
+            'incorporation' => "2005-01-16",
+            'sortie' => "2005-01-20",
             'motif' => '',
             'localite_id' => 2
         );
@@ -133,8 +133,8 @@ class SapeurMutationTest extends TestCase
     public function testEditMutationInvalid()
     {
         $data = array(
-            'incorporation' => Carbon::createMidnightDate(2000, 1, 18),
-            'sortie' => null,
+            'incorporation' => Carbon::createMidnightDate(2003, 1, 18),
+            'sortie' => Carbon::createMidnightDate(2005, 1, 18),
             'motif' => '',
             'localite_id' => 1
         );
@@ -143,7 +143,7 @@ class SapeurMutationTest extends TestCase
 
         $data = array(
             'incorporation' => "2000-01-16",
-            'sortie' => "2000-01-20",
+            'sortie' => Null,
             'motif' => '',
             'localite_id' => 2
         );
