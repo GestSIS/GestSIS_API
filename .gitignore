@@ -11,3 +11,6 @@ npm-debug.log
 yarn-error.log
 /.idea
 /development
+
+# Scripts perso
+run.sh
