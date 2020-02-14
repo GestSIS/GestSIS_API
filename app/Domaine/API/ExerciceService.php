@@ -35,6 +35,11 @@ class ExerciceService
     {
         return $this->repository->listSapeurOfExerciceById($exerciceId);
     }
+    
+    public function listExerciceOfSapeurById($exerciceComptableId, $sapeurId)
+    {
+        return $this->repository->listExerciceOfSapeurById($exerciceComptableId, $sapeurId);
+    }
 
     /**
      * Create a exercice

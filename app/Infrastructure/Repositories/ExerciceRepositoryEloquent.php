@@ -6,6 +6,7 @@ namespace App\Infrastructure\Repositories;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceSapeur;
+use Illuminate\Support\Facades\DB;
 use StdClass;
 
 class ExerciceRepositoryEloquent implements ExerciceRepository
@@ -43,6 +44,20 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
             ->get()
             ->map(function ($sapeur) use ($temp) {
                 return $temp->convertSapeur($sapeur);
+            })->toArray();
+    }
+
+    public function listExerciceOfSapeurById($exerciceComptableId, $sapeurId)
+    {
+        $temp = $this;
+        return DB::table('exercice_sapeur')
+            ->where('sapeur_id', $sapeurId)
+            ->where('exercice_comptable_id', $exerciceComptableId)
+            ->join('exercices', 'exercices.id', '=', 'exercice_sapeur.exercice_id')
+            ->select('exercice_sapeur.*', 'exercices.date', 'exercices.heure', 'exercices.communications', 'exercices.localite_id', 'exercices.exercice_categorie_id')
+            ->get()
+            ->map(function ($sapeur) use ($temp) {
+                return $temp->convertSapeurWithExercicesInfos($sapeur);
             })->toArray();
     }
 
@@ -236,6 +251,32 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         $object->remplace = $sapeur->remplace;
         $object->amende = $sapeur->amende;
         $object->excuse_type_id = $sapeur->excuse_type_id;
+
+        return $object;
+    }
+    
+    /**
+     * @param $sapeur
+     * @return StdClass|null
+     */
+    protected function convertSapeurWithExercicesInfos($sapeur)
+    {
+        if ($sapeur == null) return null;
+
+        $object = new StdClass();
+        $object->id = $sapeur->id;
+        $object->sapeur_id = $sapeur->sapeur_id;
+        $object->exercice_id = $sapeur->exercice_id;
+        $object->convoque = $sapeur->convoque;
+        $object->present = $sapeur->present;
+        $object->remplace = $sapeur->remplace;
+        $object->amende = $sapeur->amende;
+        $object->excuse_type_id = $sapeur->excuse_type_id;
+        $object->date = $sapeur->date;
+        $object->heure = $sapeur->heure;
+        $object->localite_id = $sapeur->localite_id;
+        $object->communications = $sapeur->communications;
+        $object->exercice_categorie_id = $sapeur->exercice_categorie_id;
 
         return $object;
     }

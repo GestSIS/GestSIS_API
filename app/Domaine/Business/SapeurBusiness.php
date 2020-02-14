@@ -184,12 +184,12 @@ class SapeurBusiness
         $fonctions = $this->repository->getSapeurFonctionsById($sapeurId);
 
         //Get fonction to update
-        $fonction = array_filter(
+        $fonction = array_values(array_filter(
             $fonctions,
             function ($f) use ($id) {
                 return $f->id === $id;
             }
-        )[0];
+        ))[0];
         $fonctionId = $fonction->fonction_id;
 
         $fonctions = array_filter(
@@ -305,6 +305,13 @@ class SapeurBusiness
      */
     public function removeMutation(int $sapeurId, int $mutationId)
     {
+        // Check at least one mutation
+        // Attention, quand on ajoutera les politiques, il faudra enlever cette limitation pour ce type de personnes
+        if(count($this->repository->getSapeurMutationsById($sapeurId) == 0)){
+            throw new ArrayException([
+                "info" => "Au moins une mutation nécessaire",
+            ]);
+        }
         $this->repository->removeMutation($sapeurId, $mutationId);
 
         //TODO: Update actif statut depending of end of all mutation

@@ -10,6 +10,8 @@ interface ExerciceRepository
 
     public function listSapeurOfExerciceById($exerciceId);
 
+    public function listExerciceOfSapeurById($exerciceComptableId, $sapeurId);
+
     public function getExerciceByIdWith($exerciceId, $with = []);
 
     public function createExercice(array $data);
