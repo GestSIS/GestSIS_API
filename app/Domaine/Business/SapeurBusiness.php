@@ -290,7 +290,7 @@ class SapeurBusiness
         //Update mutation
         $mutationId = $data['id'];
         $mutations = array_filter($this->repository->getSapeurMutationsById($sapeurId), function($m) use($mutationId) {
-            return $m->id != $mutationId;
+            return $m->id !== $mutationId;
         });
         $this->verifyMutationPeriode($data, $mutations);
 
@@ -307,7 +307,7 @@ class SapeurBusiness
     {
         // Check at least one mutation
         // Attention, quand on ajoutera les politiques, il faudra enlever cette limitation pour ce type de personnes
-        if(count($this->repository->getSapeurMutationsById($sapeurId) == 0)){
+        if(count($this->repository->getSapeurMutationsById($sapeurId)) === 0){
             throw new ArrayException([
                 "info" => "Au moins une mutation nécessaire",
             ]);
