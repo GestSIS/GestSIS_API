@@ -153,8 +153,8 @@ class SapeurBusiness
             }
         );
 
-        $startDate = $data['debut'] !== null ? date($data['debut']) : null;
-        $endDate = $data['fin'] !== null ? date($data['fin']) : null;
+        $startDate = array_key_exists('debut', $data) ? date($data['debut']) : null;
+        $endDate = array_key_exists('fin', $data) ? date($data['fin']) : null;
 
         //Check overlaps of a fonction
         foreach ($fonctions as $fonction) {
@@ -239,6 +239,29 @@ class SapeurBusiness
         $this->updateMainFonction($sapeurId);
     }
 
+    public function finFonctions($sapeurId, $date, $fonctionsId)
+    {
+        $fonctions = $this->repository->getSapeurFonctionsById($sapeurId);
+
+        //TODO: Contrôler que la date de fin ne soit pas antérieur à la date de début
+
+        foreach ($fonctionsId as $id) {
+            $fs = array_filter($fonctions, function ($f) use ($id) {
+                return $f->id === $id;
+            });
+            if (count($fs) === 1) {
+                $f = $fs[0];
+                $f->fin = $date;
+                $this->repository->updateFonction($sapeurId, json_decode(json_encode($f), true));
+            }
+        }
+
+        //$fonctions
+        $this->updateMainFonction($sapeurId);
+
+        return $this->repository->getSapeurFonctionsById($sapeurId);
+    }
+
     private function verifyMutationPeriode($editedMutation, $mutations)
     {
         //Contrôle qu'une seule mutation peut ne pas avoir de date de fin
@@ -262,8 +285,7 @@ class SapeurBusiness
             if (
                 is_null($sortieTemp) && $sortie->gte($incorporationTemp) ||
                 is_null($sortie) && $incorporation->lte($sortieTemp) ||
-                !is_null($sortieTemp) && !is_null($sortie) && (
-                    $incorporation->gte($incorporationTemp) && $incorporation->lte($sortieTemp) ||
+                !is_null($sortieTemp) && !is_null($sortie) && ($incorporation->gte($incorporationTemp) && $incorporation->lte($sortieTemp) ||
                     $sortie->gte($incorporationTemp) && $sortie->lte($sortieTemp))
             ) {
                 throw new ArrayException([
@@ -289,7 +311,7 @@ class SapeurBusiness
     {
         //Update mutation
         $mutationId = $data['id'];
-        $mutations = array_filter($this->repository->getSapeurMutationsById($sapeurId), function($m) use($mutationId) {
+        $mutations = array_filter($this->repository->getSapeurMutationsById($sapeurId), function ($m) use ($mutationId) {
             return $m->id !== $mutationId;
         });
         $this->verifyMutationPeriode($data, $mutations);
@@ -307,7 +329,7 @@ class SapeurBusiness
     {
         // Check at least one mutation
         // Attention, quand on ajoutera les politiques, il faudra enlever cette limitation pour ce type de personnes
-        if(count($this->repository->getSapeurMutationsById($sapeurId)) === 0){
+        if (count($this->repository->getSapeurMutationsById($sapeurId)) === 0) {
             throw new ArrayException([
                 "info" => "Au moins une mutation nécessaire",
             ]);
@@ -396,6 +418,12 @@ class SapeurBusiness
     public function removePermis(int $sapeurId, int $permisId)
     {
         $this->repository->removePermis($sapeurId, $permisId);
+    }
+
+    public function removeGroupes($sapeurId, $groupesIds)
+    {
+        $this->repository->removeGroupes($sapeurId, $groupesIds);
+        return $this->repository->getSapeurGroupesbyId($sapeurId);
     }
 
     /* ************************************************** *

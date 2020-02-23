@@ -136,4 +136,11 @@ class ExerciceBusiness
 
         return $statut;
     }
+
+    public function supprimerConvocations($sapeurId, $exerciceSapeursIds)
+    {
+        $this->repository->supprimerConvocations($sapeurId, $exerciceSapeursIds);
+        return true;
+        //TODO: Check if return smth
+    }
 }

@@ -65,4 +65,8 @@ interface SapeurRepository
     public function updatePermis(int $sapeurId, $data);
 
     public function removePermis(int $sapeurId, int $permisId);
+
+    public function removeGroupes(int $sapeurId, array $groupeIds);
+
+    public function removeGroupe(int $sapeurId, int $groupeId);
 }

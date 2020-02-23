@@ -8,23 +8,25 @@ interface ExerciceRepository
 {
     public function listExerciceLight();
 
-    public function listSapeurOfExerciceById($exerciceId);
+    public function listSapeurOfExerciceById(int $exerciceId);
 
-    public function listExerciceOfSapeurById($exerciceComptableId, $sapeurId);
+    public function listExerciceOfSapeurById(int $exerciceComptableId, int $sapeurId);
 
-    public function getExerciceByIdWith($exerciceId, $with = []);
+    public function getExerciceByIdWith(int $exerciceId, $with = []);
 
     public function createExercice(array $data);
 
-    public function updateExerciceById($exerciceId, $data);
+    public function updateExerciceById(int $exerciceId, $data);
 
-    public function addSapeurToExercice($exerciceId, $sapeurs);
+    public function addSapeurToExercice(int $exerciceId, array $sapeurs);
 
-    public function editSapeurOfExercice($exerciceId, $sapeurs);
+    public function editSapeurOfExercice(int $exerciceId, array $sapeurs);
 
-    public function removeSapeursFromExercice($exerciceId, $ids);
+    public function removeSapeursFromExercice(int $exerciceId, array $ids);
 
-    public function getExerciceStatutById($exerciceId);
+    public function getExerciceStatutById(int $exerciceId);
 
-    public function deleteExerciceById($exerciceId);
+    public function deleteExerciceById(int $exerciceId);
+
+    public function supprimerConvocations(int $sapeurId, array $exerciceSapeursIds);
 }

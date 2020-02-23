@@ -212,8 +212,43 @@ class SapeurFonctionTest extends TestCase
         });
 
         $this->assertTrue(count($fonctions) === 0);
-
     }
 
 
+    /**
+     * Test remove fonction
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testFinFonctions()
+    {
+        $data = array(
+            'debut' => Carbon::createMidnightDate(1958, 1, 1),
+            'remarque' => '',
+            'fonction_id' => 2
+        );
+
+        $fonction_id = $this->service->addFonction($this->sapeurId, $data)->id;
+
+        $data = array(
+            "date" => "1960-09-17",
+            "ids" => array($fonction_id)
+        );
+
+        $response = $this->json('POST', "/api/v2/sapeurs/$this->sapeurId/fin-fonctions/", $data);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data'
+            ]);
+
+        $fonctions = $this->service->getSapeurFonctionsById($this->sapeurId);
+        array_filter($fonctions, function ($p) use ($fonction_id) {
+            return $p->id == $fonction_id;
+        });
+
+        $this->assertTrue(!array_key_exists('fin', $fonctions));
+    }
 }

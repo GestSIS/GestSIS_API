@@ -115,4 +115,9 @@ class ExerciceService
     {
         return $this->business->removeSapeurs($exerciceId, $ids);
     }
+
+    public function supprimerConvocations($sapeurId, $exerciceSapeursIds)
+    {
+        return $this->business->supprimerConvocations($sapeurId, $exerciceSapeursIds);
+    }
 }

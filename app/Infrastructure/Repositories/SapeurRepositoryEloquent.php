@@ -303,6 +303,16 @@ class SapeurRepositoryEloquent implements SapeurRepository
         permis::where('sapeur_id', $sapeurId)->where('id', $permisId)->limit(1)->delete();
     }
 
+    public function removeGroupes(int $sapeurId, array $sapeurGroupeIds)
+    {
+        GroupeSapeur::where('sapeur_id', $sapeurId)->whereIn('id', $sapeurGroupeIds)->delete();
+    }
+
+    public function removeGroupe(int $sapeurId, int $sapeurGroupeId)
+    {
+        GroupeSapeur::where('sapeur_id', $sapeurId)->where('id', $sapeurGroupeId)->limit(1)->delete();
+    }
+
     protected function convertSapeurLight($sapeur)
     {
         if ($sapeur == null) return null;

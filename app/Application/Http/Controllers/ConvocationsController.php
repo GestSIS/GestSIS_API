@@ -7,7 +7,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class ExerciceSapeursController extends Controller
+class ConvocationsController extends Controller
 {
 
     protected $service;
@@ -94,6 +94,26 @@ class ExerciceSapeursController extends Controller
         ]);
 
         $statut = $this->service->removeSapeurs($exerciceId, $data['sapeurs']);
+
+        return response()->json(['data' => $statut]);
+    }
+
+    
+    /**
+     * Annule la présence de sapeurs
+     *
+     * @param Request $request
+     * @param int $sapeurId
+     * @return Response
+     */
+    public function supprimerConvocations(Request $request, int $sapeurId)
+    {
+
+        $data = $request->validate([
+            'convocations.*' => 'integer'
+        ]);
+
+        $statut = $this->service->supprimerConvocations($sapeurId, $data['convocations']);
 
         return response()->json(['data' => $statut]);
     }
