@@ -125,7 +125,7 @@ class SapeurService
 
     public function finFonctions($sapeurId, $date, $fonctionsId)
     {
-        $this->business->finFonctions($sapeurId, $date, $fonctionsId);
+        return $this->business->finFonctions($sapeurId, $date, $fonctionsId);
     }
 
     public function addMutation($sapeurId, $mutation)

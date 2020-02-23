@@ -243,7 +243,18 @@ class SapeurBusiness
     {
         $fonctions = $this->repository->getSapeurFonctionsById($sapeurId);
 
-        //TODO: Contrôler que la date de fin ne soit pas antérieur à la date de début
+        //Contrôle que la date de fin ne soit pas antérieur à la date de début
+        $dateFin = Carbon::parse($date);
+        foreach ($fonctionsId as $id) {
+            $fs = array_filter($fonctions, function ($f) use ($id) {
+                return $f->id === $id;
+            });
+            if (count($fs) !== 1 || Carbon::parse($fs[0]->debut)->gte($dateFin)) {
+                throw new ArrayException([
+                    'fin' => 'Date de fin invalide',
+                ]);
+            }
+        }
 
         foreach ($fonctionsId as $id) {
             $fs = array_filter($fonctions, function ($f) use ($id) {
