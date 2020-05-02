@@ -9,7 +9,6 @@ class FonctionSapeur extends Model
     protected $table = 'fonction_sapeur';
     protected $fillable = ['debut', 'fin', 'remarque'];
 
-
     /**
      * Le sapeur
      */
