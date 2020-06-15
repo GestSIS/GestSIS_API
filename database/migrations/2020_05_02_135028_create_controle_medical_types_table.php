@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateControlMedicalTypesTable extends Migration
+class CreateControleMedicalTypesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateControlMedicalTypesTable extends Migration
      */
     public function up()
     {
-        Schema::create('control_medical_types', function (Blueprint $table) {
+        Schema::create('controle_medical_types', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
@@ -29,6 +29,6 @@ class CreateControlMedicalTypesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('control_medical_types');
+        Schema::dropIfExists('controle_medical_types');
     }
 }
