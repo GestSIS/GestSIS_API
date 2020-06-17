@@ -4,6 +4,7 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\SapeurService;
 use Illuminate\Http\Response;
+use Illuminate\Http\Request;
 
 class SapeurGroupeController extends Controller
 {
@@ -26,4 +27,14 @@ class SapeurGroupeController extends Controller
         return response()->json(['data' => $groupes]);
     }
 
+    public function quitter(Request $request, int $sapeurId)
+    {
+        $data = $request->validate([
+            'groupes.*' => 'required|integer'
+        ]);
+
+        $groupes = $this->service->finGroupes($sapeurId, $data['groupes']);
+
+        return response()->json(['data' => $groupes]);
+    }
 }

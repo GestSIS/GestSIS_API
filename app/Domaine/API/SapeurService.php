@@ -123,6 +123,11 @@ class SapeurService
         $this->business->removeFonction($sapeurId, $fonctionId);
     }
 
+    public function finFonctions($sapeurId, $date, $fonctionsId)
+    {
+        return $this->business->finFonctions($sapeurId, $date, $fonctionsId);
+    }
+
     public function addMutation($sapeurId, $mutation)
     {
         return $this->business->addMutation($sapeurId, $mutation);
@@ -166,5 +171,10 @@ class SapeurService
     public function removePermis($sapeurId, $permisId)
     {
         $this->business->removePermis($sapeurId, $permisId);
+    }
+
+    public function finGroupes($sapeurId, $groupesIds)
+    {
+        return $this->business->removeGroupes($sapeurId, $groupesIds);
     }
 }

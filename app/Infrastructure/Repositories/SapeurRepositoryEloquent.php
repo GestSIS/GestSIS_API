@@ -12,7 +12,6 @@ use App\Infrastructure\Models\Mutation;
 use App\Infrastructure\Models\Permis;
 use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\SapeurTelephone;
-use Mockery\Undefined;
 use stdClass;
 
 class SapeurRepositoryEloquent implements SapeurRepository
@@ -302,6 +301,16 @@ class SapeurRepositoryEloquent implements SapeurRepository
     public function removePermis(int $sapeurId, int $permisId)
     {
         permis::where('sapeur_id', $sapeurId)->where('id', $permisId)->limit(1)->delete();
+    }
+
+    public function removeGroupes(int $sapeurId, array $sapeurGroupeIds)
+    {
+        GroupeSapeur::where('sapeur_id', $sapeurId)->whereIn('id', $sapeurGroupeIds)->delete();
+    }
+
+    public function removeGroupe(int $sapeurId, int $sapeurGroupeId)
+    {
+        GroupeSapeur::where('sapeur_id', $sapeurId)->where('id', $sapeurGroupeId)->limit(1)->delete();
     }
 
     protected function convertSapeurLight($sapeur)

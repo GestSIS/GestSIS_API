@@ -28,6 +28,8 @@ class CreateTelephoneTypesTable extends Migration
      */
     public function down()
     {
+        Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('telephone_types');
+        Schema::enableForeignKeyConstraints();
     }
 }

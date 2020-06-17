@@ -37,6 +37,6 @@ class CreateCoursSapeurTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cours_sapeurs');
+        Schema::dropIfExists('cours_sapeur');
     }
 }

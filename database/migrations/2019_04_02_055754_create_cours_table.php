@@ -41,6 +41,8 @@ class CreateCoursTable extends Migration
      */
     public function down()
     {
+        Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('cours');
+        Schema::enableForeignKeyConstraints();
     }
 }

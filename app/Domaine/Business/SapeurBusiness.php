@@ -5,7 +5,7 @@ namespace App\Domaine\Business;
 
 use App\Domaine\SPI\SapeurRepository;
 use App\Domaine\Exceptions\ArrayException;
-use Validator;
+use Carbon\Carbon;
 
 class SapeurBusiness
 {
@@ -52,7 +52,8 @@ class SapeurBusiness
         //Add Grade
         if ($gradeId !== null) {
             //Add grade if not already there
-            $result = array_filter($this->repository->getSapeurGradesById($sapeurId),
+            $result = array_filter(
+                $this->repository->getSapeurGradesById($sapeurId),
                 function ($f) use ($gradeId) {
                     return $f->grade_id === $gradeId;
                 }
@@ -68,7 +69,8 @@ class SapeurBusiness
 
         //Edit old fonction
         if ($data['fonction_sapeur_id'] !== null) {
-            $this->updateFonction($sapeurId,
+            $this->updateFonction(
+                $sapeurId,
                 array(
                     'id' => $data['fonction_sapeur_id'],
                     'fin' => $data['date_fonction'],
@@ -79,7 +81,8 @@ class SapeurBusiness
 
         //Add Fonction
         if ($data['fonction_id'] !== null) {
-            $this->addFonction($sapeurId,
+            $this->addFonction(
+                $sapeurId,
                 array(
                     'fonction_id' => $data['fonction_id'],
                     'debut' => $data['date_fonction'],
@@ -107,7 +110,8 @@ class SapeurBusiness
         $gradeId = $data['grade_id'];
 
         //Check si déjà présent
-        $res = array_filter($this->repository->getSapeurGradesById($sapeurId),
+        $res = array_filter(
+            $this->repository->getSapeurGradesById($sapeurId),
             function ($grade) use ($gradeId) {
                 return $grade->grade_id === $gradeId;
             }
@@ -142,14 +146,15 @@ class SapeurBusiness
         $fonctionId = $data['fonction_id'];
 
         //Check si déjà présent
-        $fonctions = array_filter($this->repository->getSapeurFonctionsById($sapeurId),
+        $fonctions = array_filter(
+            $this->repository->getSapeurFonctionsById($sapeurId),
             function ($fonction) use ($fonctionId) {
                 return $fonction->fonction_id === $fonctionId;
             }
         );
 
-        $startDate = $data['debut'] !== null ? date($data['debut']) : null;
-        $endDate = $data['fin'] !== null ? date($data['fin']) : null;
+        $startDate = array_key_exists('debut', $data) ? date($data['debut']) : null;
+        $endDate = array_key_exists('fin', $data) ? date($data['fin']) : null;
 
         //Check overlaps of a fonction
         foreach ($fonctions as $fonction) {
@@ -179,14 +184,16 @@ class SapeurBusiness
         $fonctions = $this->repository->getSapeurFonctionsById($sapeurId);
 
         //Get fonction to update
-        $fonction = array_filter($fonctions,
+        $fonction = array_values(array_filter(
+            $fonctions,
             function ($f) use ($id) {
                 return $f->id === $id;
             }
-        )[0];
+        ))[0];
         $fonctionId = $fonction->fonction_id;
 
-        $fonctions = array_filter($fonctions,
+        $fonctions = array_filter(
+            $fonctions,
             function ($f) use ($fonctionId, $id) {
                 return $f->fonction_id === $fonctionId && $f->id !== $id;
             }
@@ -232,21 +239,96 @@ class SapeurBusiness
         $this->updateMainFonction($sapeurId);
     }
 
+    public function finFonctions($sapeurId, $date, $fonctionsId)
+    {
+        $fonctions = $this->repository->getSapeurFonctionsById($sapeurId);
+
+        //Contrôle que la date de fin ne soit pas antérieur à la date de début
+        $dateFin = Carbon::parse($date);
+        foreach ($fonctionsId as $id) {
+            $fs = array_filter($fonctions, function ($f) use ($id) {
+                return $f->id === $id;
+            });
+            if (count($fs) !== 1 || Carbon::parse($fs[0]->debut)->gte($dateFin)) {
+                throw new ArrayException([
+                    'fin' => 'Date de fin invalide',
+                ]);
+            }
+        }
+
+        foreach ($fonctionsId as $id) {
+            $fs = array_filter($fonctions, function ($f) use ($id) {
+                return $f->id === $id;
+            });
+            if (count($fs) === 1) {
+                $f = $fs[0];
+                $f->fin = $date;
+                $this->repository->updateFonction($sapeurId, json_decode(json_encode($f), true));
+            }
+        }
+
+        //$fonctions
+        $this->updateMainFonction($sapeurId);
+
+        return $this->repository->getSapeurFonctionsById($sapeurId);
+    }
+
+    private function verifyMutationPeriode($editedMutation, $mutations)
+    {
+        //Contrôle qu'une seule mutation peut ne pas avoir de date de fin
+        if (!array_key_exists('sortie', $editedMutation) || is_null($editedMutation['sortie'])) {
+            foreach ($mutations as $m) {
+                if (is_null($m->sortie)) {
+                    throw new ArrayException([
+                        "sortie" => "Une seule mutation active à la fois",
+                    ]);
+                }
+            }
+        }
+
+        //Contrôle que deux mutations ne se chevauchent pas
+        $incorporation = Carbon::parse($editedMutation['incorporation']);
+        $sortie = (!array_key_exists('sortie', $editedMutation) || is_null($editedMutation['sortie'])) ? Null : Carbon::parse($editedMutation['sortie']);
+        foreach ($mutations as $m) {
+            //Check overlapping periodes
+            $incorporationTemp = Carbon::parse($m->incorporation);
+            $sortieTemp = is_null($m->sortie) ? null : Carbon::parse($m->sortie);
+            if (
+                is_null($sortieTemp) && $sortie->gte($incorporationTemp) ||
+                is_null($sortie) && $incorporation->lte($sortieTemp) ||
+                !is_null($sortieTemp) && !is_null($sortie) && ($incorporation->gte($incorporationTemp) && $incorporation->lte($sortieTemp) ||
+                    $sortie->gte($incorporationTemp) && $sortie->lte($sortieTemp))
+            ) {
+                throw new ArrayException([
+                    "sortie" => "Deux mutations en conflits",
+                    "incorporation" => "Deux mutations en conflits",
+                ]);
+            }
+        }
+    }
+
     public function addMutation($sapeurId, $data)
     {
-        //TODO Check only one not ended Mutation
+        $mutations = $this->repository->getSapeurMutationsById($sapeurId);
+        $this->verifyMutationPeriode($data, $mutations);
+
         $mutation = $this->repository->addMutation($sapeurId, $data);
 
-        //TODO Update actif statut depending of end of all mutation
+        //TODO: Update actif statut depending of end of all mutation
         return $mutation;
     }
 
     public function updateMutation(int $sapeurId, $data)
     {
         //Update mutation
-        return $this->repository->updateMutation($sapeurId, $data);
+        $mutationId = $data['id'];
+        $mutations = array_filter($this->repository->getSapeurMutationsById($sapeurId), function ($m) use ($mutationId) {
+            return $m->id !== $mutationId;
+        });
+        $this->verifyMutationPeriode($data, $mutations);
 
-        //TODO Update actif statut depending of end of all mutation
+        return $this->repository->updateMutation($sapeurId, $data);
+        //TODO: Update actif statut depending of end of all mutation
     }
 
     /**
@@ -256,9 +338,16 @@ class SapeurBusiness
      */
     public function removeMutation(int $sapeurId, int $mutationId)
     {
+        // Check at least one mutation
+        // Attention, quand on ajoutera les politiques, il faudra enlever cette limitation pour ce type de personnes
+        if (count($this->repository->getSapeurMutationsById($sapeurId)) === 0) {
+            throw new ArrayException([
+                "info" => "Au moins une mutation nécessaire",
+            ]);
+        }
         $this->repository->removeMutation($sapeurId, $mutationId);
 
-        //TODO Update actif statut depending of end of all mutation
+        //TODO: Update actif statut depending of end of all mutation
     }
 
     public function addTelephone(int $sapeurId, $data)
@@ -266,9 +355,9 @@ class SapeurBusiness
         $telephones = $this->repository->getSapeurTelephonesById($sapeurId);
         foreach ($telephones as $tel) {
             if (strcmp(
-                    trim(preg_replace('/\s+/', ' ', $tel->numero)),
-                    trim(preg_replace('/\s+/', ' ', $data['numero']))
-                ) === 0) {
+                trim(preg_replace('/\s+/', ' ', $tel->numero)),
+                trim(preg_replace('/\s+/', ' ', $data['numero']))
+            ) === 0) {
                 throw new ArrayException(['numero' => 'Duplicated numero']);
             }
         }
@@ -282,12 +371,14 @@ class SapeurBusiness
 
         $telephoneId = $data['id'];
 
-        $telephone = array_filter($telephones,
+        $telephone = array_filter(
+            $telephones,
             function ($t) use ($telephoneId) {
                 return $t->id === $telephoneId;
             }
         );
-        $telephones = array_filter($telephones,
+        $telephones = array_filter(
+            $telephones,
             function ($t) use ($telephoneId) {
                 return $t->id !== $telephoneId;
             }
@@ -295,9 +386,9 @@ class SapeurBusiness
 
         foreach ($telephones as $tel) {
             if (strcmp(
-                    trim(preg_replace('/\s+/', ' ', $tel->numero)),
-                    trim(preg_replace('/\s+/', ' ', $data['numero']))
-                ) === 0) {
+                trim(preg_replace('/\s+/', ' ', $tel->numero)),
+                trim(preg_replace('/\s+/', ' ', $data['numero']))
+            ) === 0) {
                 throw new ArrayException(['numero' => 'Duplicated numero']);
             }
         }
@@ -313,7 +404,8 @@ class SapeurBusiness
     public function addPermis(int $sapeurId, $data)
     {
         $permisId = $data['permis_type_id'];
-        $res = array_filter($this->repository->getSapeurPermisById($sapeurId),
+        $res = array_filter(
+            $this->repository->getSapeurPermisById($sapeurId),
             function ($p) use ($permisId) {
                 return $p->permis_type_id === $permisId;
             }
@@ -339,6 +431,12 @@ class SapeurBusiness
         $this->repository->removePermis($sapeurId, $permisId);
     }
 
+    public function removeGroupes($sapeurId, $groupesIds)
+    {
+        $this->repository->removeGroupes($sapeurId, $groupesIds);
+        return $this->repository->getSapeurGroupesbyId($sapeurId);
+    }
+
     /* ************************************************** *
      *                  METHODES PRIVEES                  *
      * ************************************************** */
@@ -348,10 +446,7 @@ class SapeurBusiness
         return ($end1 === null && $end2 === null ||
             $end1 === null && $start1 <= $end2 ||
             $end2 === null && $end1 >= $start2 ||
-            $end1 !== null && $end2 !== null && !(
-                $end1 < $start2 || $end2 < $start1
-            )
-        );
+            $end1 !== null && $end2 !== null && !($end1 < $start2 || $end2 < $start1));
     }
 
     private function updateMainFonction($sapeurId)
@@ -360,7 +455,8 @@ class SapeurBusiness
         $maxId = -1;
 
         //FIXME Recupérer avec fonctions pour le tri
-        $fonctions = array_filter($this->repository->getSapeurFonctionsById($sapeurId, true),
+        $fonctions = array_filter(
+            $this->repository->getSapeurFonctionsById($sapeurId, true),
             function ($fonction) {
                 return $fonction->fin === null;
             }

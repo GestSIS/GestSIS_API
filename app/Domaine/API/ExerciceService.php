@@ -35,6 +35,11 @@ class ExerciceService
     {
         return $this->repository->listSapeurOfExerciceById($exerciceId);
     }
+    
+    public function listExerciceOfSapeurById($exerciceComptableId, $sapeurId)
+    {
+        return $this->repository->listExerciceOfSapeurById($exerciceComptableId, $sapeurId);
+    }
 
     /**
      * Create a exercice
@@ -109,5 +114,10 @@ class ExerciceService
     public function removeSapeurs($exerciceId, $ids)
     {
         return $this->business->removeSapeurs($exerciceId, $ids);
+    }
+
+    public function supprimerConvocations($sapeurId, $exerciceSapeursIds)
+    {
+        return $this->business->supprimerConvocations($sapeurId, $exerciceSapeursIds);
     }
 }

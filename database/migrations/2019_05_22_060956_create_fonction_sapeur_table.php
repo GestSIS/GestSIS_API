@@ -36,6 +36,6 @@ class CreateFonctionSapeurTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('fonctions_sapeurs');
+        Schema::dropIfExists('fonction_sapeur');
     }
 }

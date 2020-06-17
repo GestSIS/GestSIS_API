@@ -29,15 +29,19 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::resource('sapeurs.grades', 'SapeurGradeController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('sapeurs.mutations', 'SapeurMutationController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('sapeurs.cours', 'SapeurCoursController')->only(['index', 'store', 'update', 'destroy']);
+        Route::get('sapeurs/{id}/exercices/{exerciceComptableId}', 'SapeurExerciceController@index');
+        Route::post('sapeurs/{id}/fin-fonctions', 'SapeurFonctionController@fin');
+        Route::post('sapeurs/{id}/quitter-groupes', 'SapeurGroupeController@quitter');
+        Route::post('sapeurs/{id}/supprimer-convocations', 'ConvocationsController@supprimerConvocations');
 
         // Exercices
         Route::resource('exercices', 'ExerciceController')->only(['index', 'show', 'store', 'update', 'destroy']); //->middleware('role:effectif_read');
         Route::post('exercices/{id}/valider', 'ExerciceController@valider')->name('api.v2.exercices.valider');
 
-        Route::resource('exercices.sapeurs', 'ExerciceSapeursController')->only(['index']);
-        Route::post('exercices/{id}/sapeurs', 'ExerciceSapeursController@store')->name('api.v2.exercices.sapeurs.store');
-        Route::put('exercices/{id}/sapeurs', 'ExerciceSapeursController@update')->name('api.v2.exercices.sapeurs.update');
-        Route::delete('exercices/{id}/sapeurs', 'ExerciceSapeursController@destroy')->name('api.v2.exercices.sapeurs.delete');
+        Route::resource('exercices.sapeurs', 'ConvocationsController')->only(['index']);
+        Route::post('exercices/{id}/sapeurs', 'ConvocationsController@store')->name('api.v2.exercices.sapeurs.store');
+        Route::put('exercices/{id}/sapeurs', 'ConvocationsController@update')->name('api.v2.exercices.sapeurs.update');
+        Route::delete('exercices/{id}/sapeurs', 'ConvocationsController@destroy')->name('api.v2.exercices.sapeurs.delete');
 
         // Exercices comptables
         Route::resource('exercice-comptables', 'ExerciceComptableController')->only(['index']);
@@ -130,6 +134,7 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::get('ecritures/annuel/{id}', 'EcritureController@annuel');
         Route::get('ecritures/intervention/{id}', 'EcritureController@intervention');
         Route::get('ecritures/exercice/{id}', 'EcritureController@exercice');
+        Route::get('ecritures/{id}', 'EcritureController@all');
 
         Route::resource('comptes', 'CompteController')->only(['index']);
         Route::get('comptes/{id}/ecritures/{exerciceComptableId}', 'CompteController@ecritures');

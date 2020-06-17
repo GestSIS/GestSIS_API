@@ -6,6 +6,7 @@ namespace App\Infrastructure\Repositories;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceSapeur;
+use Illuminate\Support\Facades\DB;
 use StdClass;
 
 class ExerciceRepositoryEloquent implements ExerciceRepository
@@ -35,7 +36,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
             })->toArray();
     }
 
-    public function listSapeurOfExerciceById($exerciceId)
+    public function listSapeurOfExerciceById(int $exerciceId)
     {
         $temp = $this;
         return ExerciceSapeur
@@ -46,7 +47,21 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
             })->toArray();
     }
 
-    public function getExerciceStatutById($exerciceId)
+    public function listExerciceOfSapeurById(int $exerciceComptableId, int $sapeurId)
+    {
+        $temp = $this;
+        return DB::table('exercice_sapeur')
+            ->where('sapeur_id', $sapeurId)
+            ->where('exercice_comptable_id', $exerciceComptableId)
+            ->join('exercices', 'exercices.id', '=', 'exercice_sapeur.exercice_id')
+            ->select('exercice_sapeur.*', 'exercices.date', 'exercices.heure', 'exercices.communications', 'exercices.localite_id', 'exercices.exercice_categorie_id')
+            ->get()
+            ->map(function ($sapeur) use ($temp) {
+                return $temp->convertSapeurWithExercicesInfos($sapeur);
+            })->toArray();
+    }
+
+    public function getExerciceStatutById(int $exerciceId)
     {
         return Exercice::findOrFail($exerciceId, 'statut')->statut;
     }
@@ -84,7 +99,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
      * @param $id
      * @return mixed
      */
-    public function updateExerciceById($exerciceId, $data)
+    public function updateExerciceById(int $exerciceId, $data)
     {
         if (array_key_exists('lieu', $data) && $data['lieu'] === null) {
             $data['lieu'] = '';
@@ -100,14 +115,14 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         return $this->convertExercice($exercice);
     }
 
-    public function getExerciceByIdWith($exerciceId, $with = [])
+    public function getExerciceByIdWith(int $exerciceId, $with = [])
     {
         //TODO validate $with
         $autorized = ['sapeurs', 'localite'];
         return $this->convertExercice(Exercice::with($with)->find($exerciceId), $with);
     }
 
-    public function addSapeurToExercice($exerciceId, $data)
+    public function addSapeurToExercice(int $exerciceId, $data)
     {
         $sapeur = new ExerciceSapeur();
         $sapeur->fill($data);
@@ -117,7 +132,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         $sapeur->save();
     }
 
-    public function editSapeurOfExercice($exerciceId, $sapeurs)
+    public function editSapeurOfExercice(int $exerciceId, array $sapeurs)
     {
         ExerciceSapeur
             ::where('exercice_id', $exerciceId)
@@ -125,7 +140,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
             ->update($sapeurs);
     }
 
-    public function removeSapeursFromExercice($exerciceId, $ids)
+    public function removeSapeursFromExercice(int $exerciceId, array $ids)
     {
         ExerciceSapeur
             ::where('exercice_id', $exerciceId)
@@ -167,6 +182,11 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         $sap->fill($sapeur);
         $sap->exercice_id = $exercice_id;
         $sap->save();
+    }
+
+    public function supprimerConvocations(int $sapeurId, array $exerciceSapeursIds)
+    {
+        ExerciceSapeur::where('sapeur_id', $sapeurId)->whereIn('id', $exerciceSapeursIds)->delete();
     }
 
     /**
@@ -236,6 +256,32 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         $object->remplace = $sapeur->remplace;
         $object->amende = $sapeur->amende;
         $object->excuse_type_id = $sapeur->excuse_type_id;
+
+        return $object;
+    }
+    
+    /**
+     * @param $sapeur
+     * @return StdClass|null
+     */
+    protected function convertSapeurWithExercicesInfos($sapeur)
+    {
+        if ($sapeur == null) return null;
+
+        $object = new StdClass();
+        $object->id = $sapeur->id;
+        $object->sapeur_id = $sapeur->sapeur_id;
+        $object->exercice_id = $sapeur->exercice_id;
+        $object->convoque = $sapeur->convoque;
+        $object->present = $sapeur->present;
+        $object->remplace = $sapeur->remplace;
+        $object->amende = $sapeur->amende;
+        $object->excuse_type_id = $sapeur->excuse_type_id;
+        $object->date = $sapeur->date;
+        $object->heure = $sapeur->heure;
+        $object->localite_id = $sapeur->localite_id;
+        $object->communications = $sapeur->communications;
+        $object->exercice_categorie_id = $sapeur->exercice_categorie_id;
 
         return $object;
     }

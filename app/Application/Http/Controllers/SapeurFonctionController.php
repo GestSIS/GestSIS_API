@@ -90,4 +90,16 @@ class SapeurFonctionController extends Controller
 
         return response()->json(['data' => 'success']);
     }
+
+    public function fin(Request $request, int $sapeurId)
+    {
+        $data = $request->validate([
+            'ids.*' => 'required|integer',
+            'date' => 'required|date'
+        ]);
+
+        $fonctions = $this->service->finFonctions($sapeurId, $data['date'], $data['ids']);
+        
+        return response()->json(['data' => $fonctions]);
+    }
 }

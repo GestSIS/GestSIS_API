@@ -34,6 +34,6 @@ class CreateGroupeSapeurTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('groupes_sapeurs');
+        Schema::dropIfExists('groupe_sapeur');
     }
 }

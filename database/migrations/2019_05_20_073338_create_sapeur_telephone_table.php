@@ -37,6 +37,8 @@ class CreateSapeurTelephoneTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('sapeurs_telephones');
+        Schema::disableForeignKeyConstraints();
+        Schema::dropIfExists('sapeur_telephone');
+        Schema::enableForeignKeyConstraints();
     }
 }
