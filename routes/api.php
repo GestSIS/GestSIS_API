@@ -139,7 +139,8 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::resource('comptes', 'CompteController')->only(['index']);
         Route::get('comptes/{id}/ecritures/{exerciceComptableId}', 'CompteController@ecritures');
         
-        //Controles medicaux
+        //Controles medicauxs
+        Route::get('medecins/', 'MedecinController@all');
         Route::get('controles-medicaux/', 'ControleMedicalController@all');
         Route::get('controles-medicaux/{id}', 'ControleMedicalController@index');
         Route::get('controles-medicaux-types', 'ControleMedicalTypeController@all');
