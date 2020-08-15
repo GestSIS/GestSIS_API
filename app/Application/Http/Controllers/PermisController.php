@@ -14,7 +14,7 @@ class PermisController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(){
-
+        //TODO Change this to use an extra level of indirections for consistency ???
         $permis = PermisType::all();
 
         return response()->json(['data' => $permis]);

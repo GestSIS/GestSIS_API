@@ -14,6 +14,7 @@ class GroupeController extends Controller
      */
     public function index()
     {
+        //TODO Change this to use an extra level of indirections for consistency ???
         $groupes = Groupe::all();
 
         return response()->json(['data' => $groupes]);

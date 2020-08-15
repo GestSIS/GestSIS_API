@@ -14,6 +14,7 @@ class FonctionController extends Controller
  */
     public function index()
     {
+        //TODO Change this to use an extra level of indirections for consistency ???
         $fonctions = Fonction::all();
 
         return response()->json(['data' => $fonctions]);

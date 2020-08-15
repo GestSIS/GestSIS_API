@@ -14,6 +14,7 @@ class CoursController extends Controller
      */
     public function index()
     {
+        //TODO Change this to use an extra level of indirections for consistency ???
         $cours = Cours::all();
 
         return response()->json(['data' => $cours]);

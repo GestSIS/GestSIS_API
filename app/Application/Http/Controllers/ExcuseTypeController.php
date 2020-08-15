@@ -14,6 +14,7 @@ class ExcuseTypeController extends Controller
      */
     public function index()
     {
+        //TODO Change this to use an extra level of indirections for consistency ???
         $excuseTypes = ExcuseType::all();
 
         return response()->json(['data' => $excuseTypes]);

@@ -66,5 +66,9 @@ class DatabaseSeeder extends Seeder
         $this->call(IndemniteExerciceFonctionTableSeeder::class);
         $this->call(IndemniteInterventionTypeTableSeeder::class);
 
+        //Controles médicaux
+        $this->call(MedecinTableSeeder::class);
+        $this->call(ControleMedicauxTypeTableSeeder::class);
+        $this->call(ControleMedicauxTableSeeder::class);
     }
 }

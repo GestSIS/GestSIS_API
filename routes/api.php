@@ -135,9 +135,14 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::get('ecritures/intervention/{id}', 'EcritureController@intervention');
         Route::get('ecritures/exercice/{id}', 'EcritureController@exercice');
         Route::get('ecritures/{id}', 'EcritureController@all');
-
+        
         Route::resource('comptes', 'CompteController')->only(['index']);
         Route::get('comptes/{id}/ecritures/{exerciceComptableId}', 'CompteController@ecritures');
+        
+        //Controles medicaux
+        Route::get('controles-medicaux/', 'ControleMedicalController@all');
+        Route::get('controles-medicaux/{id}', 'ControleMedicalController@index');
+        Route::get('controles-medicaux-types', 'ControleMedicalTypeController@all');
 
     });
 });
