@@ -16,7 +16,7 @@ use stdClass;
 
 class SapeurRepositoryEloquent implements SapeurRepository
 {
-    private const SAPEUR_LIGHT_COLUMNS = ['id', 'nom', 'prenom', 'actif', 'fonction_id'];
+    private const SAPEUR_LIGHT_COLUMNS = ['id', 'nom', 'prenom', 'actif', 'fonction_id', 'date_naissance'];
 
     public function listeSapeurLight()
     {
@@ -324,6 +324,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $object->prenom = $sapeur->prenom;
         $object->actif = $sapeur->actif;
         $object->fonction_id = $sapeur->fonction_id;
+        $object->date_naissance = $sapeur->date_naissance;
 
         return $object;
     }
