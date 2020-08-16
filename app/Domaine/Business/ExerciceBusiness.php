@@ -86,7 +86,7 @@ class ExerciceBusiness
         }, $this->repository->listSapeurOfExerciceById($exerciceId));
 
         $sapeurFiltered = array_filter($sapeurs, function($sap) use($ids) {
-            return in_array($sap->sapeur_id, $ids);
+            return !in_array($sap['sapeur_id'], $ids);
         });
 
         foreach ($sapeurFiltered as $sapeur) {

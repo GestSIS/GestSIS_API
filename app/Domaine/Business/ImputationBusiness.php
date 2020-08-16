@@ -540,19 +540,16 @@ class ImputationBusiness
         //En minutes
         $duree = $exercice->duree / 60;
 
+        $solde = 0;
+        if ($duree > $indemniteType->solde_min_pour) {
+            $solde += $indemniteType->solde_min;
+            $duree -= $indemniteType->solde_min_pour;
+        }
+
+        $solde += $indemniteType->solde * $duree;
+
         // Générer écritures
         foreach ($sapeurs as $sapeur) {
-            $solde = 0;
-            if ($duree > $indemniteType->solde_min_pour) {
-                $solde += $indemniteType->solde_min;
-                $duree -= $indemniteType->solde_min_pour;
-            } else {
-                $solde += $indemniteType->solde_min * $duree;
-                $duree = 0;
-            }
-
-            $solde += $indemniteType->solde * $duree;
-
             //Par heure -> calcul de la durée
             $ecriture = array(
                 'solde' => $solde,
