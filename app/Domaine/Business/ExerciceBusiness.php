@@ -80,18 +80,16 @@ class ExerciceBusiness
         //TODO INSIDE BUSINESS
         //TODO Check not impute
 
-        //TODO Check sapeur not duplicated
-        $saps = $this->repository->listSapeurOfExerciceById($exerciceId);
-        $test = "";
-        foreach ($sapeurs as $sapeur) {
-//            $sapeurId = $sapeur['sapeur_id'];
+        //Check sapeur not duplicated
+        $ids = array_map(function($sap) {
+            return $sap->sapeur_id;
+        }, $this->repository->listSapeurOfExerciceById($exerciceId));
 
-            //TODO Check pas dupliqué
-//            if (null !== null) {
-//                throw new ArrayException(array('id' => "Duplicated sapeur"));
-//            }
-            $test .= $exerciceId . "-";
+        $sapeurFiltered = array_filter($sapeurs, function($sap) use($ids) {
+            return in_array($sap->sapeur_id, $ids);
+        });
 
+        foreach ($sapeurFiltered as $sapeur) {
             $this->repository->addSapeurToExercice($exerciceId, $sapeur);
         }
 
@@ -116,6 +114,8 @@ class ExerciceBusiness
         }
 
         //TODO Si tous les sapeurs ont étés saisi passer un mode en attente de validation
+        $statut = $this->repository->getExerciceStatutById($exerciceId);
+        $this->repository->updateExerciceById($exerciceId, array("statut" => max($statut, self::EXERCICE_STATUT_SAISI)));
     }
 
     /**

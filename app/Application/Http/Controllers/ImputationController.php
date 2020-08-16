@@ -17,7 +17,8 @@ class ImputationController extends Controller
     public function exercice(Request $request, int $id)
     {
         $data = $request->validate([
-            'indemnite_exercice_type_id' => 'integer'
+            'indemnite_exercice_type_id' => 'integer',
+            // 'date_imputation' => 'date' // TODO Ajouter date d'imputation ?
         ]);
 
         $res = $this->service->imputationExercice($id, $data);
@@ -28,7 +29,8 @@ class ImputationController extends Controller
     public function intervention(Request $request, int $id)
     {
         $data = $request->validate([
-            'indemnite_intervention_type_id' => 'integer'
+            'indemnite_intervention_type_id' => 'integer',
+            // 'date_imputation' => 'date' // TODO Ajouter date imputation ?
         ]);
 
         $res = $this->service->imputationIntervention($id, $data);

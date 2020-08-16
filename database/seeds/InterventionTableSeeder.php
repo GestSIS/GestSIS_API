@@ -11,6 +11,8 @@ class InterventionTableSeeder extends Seeder
      */
     public function run()
     {
+        factory(App\Infrastructure\Models\Intervention::class, 25)->create();
+
         $interventions = array(
             array('id' => 3000012, 'type_intervention_id' => 12, 'localite_id' => 93, 'exercice_comptable_id' => 1, 'date_debut' => '2017-01-08', 'heure_debut' => '14:35:00', 'lieu' => 'Coin-Dessus 16', 'objet' => '' . "" . '', 'date_fin' => '2017-01-08', 'heure_fin' => '15:15:00', 'rapport_police' => '0', 'sapeur_id' => 1, 'stat_nb' => 1, 'sauve_personne' => 0, 'sauve_animaux' => 0, 'description' => '' . "" . '', 'proprietaire' => '' . "" . '', 'responsable' => '' . "" . '', 'degre' => 1, 'stat_federal_id' => 10, 'intervention_traitement_id' => 1, 'statut' => 0),
             array('id' => 3000010, 'type_intervention_id' => 7, 'localite_id' => 3, 'exercice_comptable_id' => 1, 'date_debut' => '2017-01-12', 'heure_debut' => '18:13:00', 'lieu' => 'Abbé Monnin 4', 'objet' => '' . "" . '', 'date_fin' => '2017-01-12', 'heure_fin' => '22:30:00', 'rapport_police' => '1', 'sapeur_id' => 1, 'stat_nb' => 1, 'sauve_personne' => 0, 'sauve_animaux' => 0, 'description' => '' . "" . '', 'proprietaire' => '' . "" . '', 'responsable' => '' . "" . '', 'degre' => 3, 'stat_federal_id' => 1, 'intervention_traitement_id' => 1, 'statut' => 0),
