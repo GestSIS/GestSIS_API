@@ -500,11 +500,11 @@ class ImputationBusiness
             $indemniteTarif = 0;
             if (count($fonction_tarif) > 0) {
                 $tarif = array_pop($fonction_tarif);
-                $soldeTarif += $tarif->solde;
-                $indemniteTarif += $tarif->indemnite;
+                $soldeTarif = $tarif->solde;
+                $indemniteTarif = $tarif->indemnite;
             } else {
-                $soldeTarif += $indemniteType->solde;
-                $indemniteTarif += $indemniteType->indemnite;
+                $soldeTarif = $indemniteType->solde;
+                $indemniteTarif = $indemniteType->indemnite;
             }
 
             $solde = $soldeTarif * $duree;
