@@ -141,9 +141,10 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         
         //Controles medicauxs
         Route::get('medecins/', 'MedecinController@all');
-        Route::get('controles-medicaux/', 'ControleMedicalController@all');
-        Route::get('controles-medicaux/{id}', 'ControleMedicalController@index');
         Route::get('controles-medicaux-types', 'ControleMedicalTypeController@all');
+        
+        Route::resource('controles-medicaux', 'ControleMedicalController')->only(['index', 'show', 'store', 'update', 'destroy']);
+        Route::resource('controles-medicaux.justificatifs', 'JustificatifController')->only(['show', 'store', 'destroy']);
 
     });
 });

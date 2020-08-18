@@ -3,8 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\ControleMedicalService;
-use App\Infrastructure\Models\ControleMedical;
-use App\Infrastructure\Models\Justificatif;
+use Illuminate\Http\Request;
 
 class ControleMedicalController extends Controller
 {
@@ -18,25 +17,87 @@ class ControleMedicalController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function all()
+    public function index()
     {
-        //TODO extract in service
-        $controles = ControleMedical::with('justificatifs')->get();
+        $controles = $this->service->listeAllControlesMedicaux();
 
         return response()->json(['data' => $controles]);
     }
 
     /**
-     * Display a listing of the resource.
+     * Display the specified resource.
      *
+     * @param int $id
      * @return Response
      */
-    public function index($controleId)
+    public function show(int $id)
     {
-        $controle = ControleMedical::with('justificatifs')->where('id',$controleId)->firstOrFail();
-        
+        $controle = $this->service->getControleMedical($id);
         return response()->json(['data' => $controle]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'sapeur_id' => 'string|min:2',
+            'medecin_id' => 'string|min:2',
+            'consultation' => 'string|nullable',
+            'validite' => 'string|min:3',
+            'en_cours' => 'string',
+            'designation' => 'date|before:' . date('Y-m-d'),
+            'controle_medical_type_id' => 'date',
+            'accepter' => 'string'
+        ]);
+
+        $sapeur = $this->service->createControleMedical($data);
+
+        return response()->json(['data' => $sapeur]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param Request $request
+     * @param int $id
+     * @return Response
+     * @throws Exception
+     */
+    public function update(Request $request, int $id)
+    {
+        $data = $request->validate([
+            'sapeur_id' => 'string|min:2',
+            'medecin_id' => 'string|min:2',
+            'consultation' => 'string|nullable',
+            'validite' => 'string|min:3',
+            'en_cours' => 'string',
+            'designation' => 'date|before:' . date('Y-m-d'),
+            'controle_medical_type_id' => 'date',
+            'accepter' => 'string'
+        ]);
+
+        $sapeur = $this->service->updateControleMedical($id, $data);
+
+        return response()->json(['data' => $sapeur]);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param int $id
+     * @return Response
+     */
+    public function destroy(int $id)
+    {
+        $this->service->deleteControleMedical($id);
+
+        return response()->json(['data' => "success"]);
     }
 }
