@@ -18,6 +18,8 @@ class CreateControleMedicalTypesTable extends Migration
             $table->timestamps();
 
             $table->string('designation');
+            $table->integer('validity_duration');
+            $table->boolean('expirable');
             $table->integer('tri');
         });
     }
