@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Domaine\API;
 
 use App\Domaine\Business\ControleMedicalBusiness;
@@ -18,23 +19,43 @@ class ControleMedicalService
         $this->business = $business;
     }
 
-    public function listeAllControlesMedicaux(){
+    public function listeAllControlesMedicaux()
+    {
         return $this->repository->listeAllControlesMedicaux();
     }
 
-    public function getControleMedical($id){
+    public function getControleMedical($id)
+    {
         return $this->repository->getControleMedical($id);
     }
 
-    public function createControleMedical($controle){}
+    public function createControleMedical($controle)
+    {
+        return $this->business->createControleMedical($controle);
+    }
 
-    public function deleteControleMedical($id){}
+    public function updateControleMedical($controleId, $controle)
+    {
+        return $this->business->updateControleMedical($controleId, $controle);
+    }
 
-    public function updateControleMedical($controle){}
+    public function deleteControleMedical($id)
+    {
+        return $this->business->removeControleMedical($id);
+    }
 
-    public function addJustificatif($controleId, $id, $file){}
+    public function addJustificatif($controleId, $file)
+    {
+        return $this->business->addJustificatif($controleId, $file);
+    }
 
-    public function getJustificatif($controleId, $id){}
+    public function getJustificatif($controleId, $id)
+    {
+        return $this->business->getJustificatif($controleId, $id);
+    }
 
-    public function removeJustificatif($controleId, $id){}
+    public function removeJustificatif($controleId, $id)
+    {
+        return $this->business->removeJustificatif($controleId, $id);
+    }
 }

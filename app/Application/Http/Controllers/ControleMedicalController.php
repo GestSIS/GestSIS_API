@@ -47,19 +47,19 @@ class ControleMedicalController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'sapeur_id' => 'string|min:2',
-            'medecin_id' => 'string|min:2',
-            'consultation' => 'string|nullable',
-            'validite' => 'string|min:3',
-            'en_cours' => 'string',
-            'designation' => 'date|before:' . date('Y-m-d'),
-            'controle_medical_type_id' => 'date',
-            'accepter' => 'string'
+            'sapeur_id' => 'integer',
+            'medecin_id' => 'integer',
+            'controle_medical_type_id' => 'integer',
+            'consultation' => 'date',
+            'validite' => 'nullable|date|after:consultation',
+            'designation' => 'string|nullable',
+            'en_cours' => 'integer',
+            'accepter' => 'integer'
         ]);
 
-        $sapeur = $this->service->createControleMedical($data);
+        $controle = $this->service->createControleMedical($data);
 
-        return response()->json(['data' => $sapeur]);
+        return response()->json(['data' => $controle]);
     }
 
     /**
@@ -73,19 +73,19 @@ class ControleMedicalController extends Controller
     public function update(Request $request, int $id)
     {
         $data = $request->validate([
-            'sapeur_id' => 'string|min:2',
-            'medecin_id' => 'string|min:2',
-            'consultation' => 'string|nullable',
-            'validite' => 'string|min:3',
-            'en_cours' => 'string',
-            'designation' => 'date|before:' . date('Y-m-d'),
-            'controle_medical_type_id' => 'date',
-            'accepter' => 'string'
+            'id' => 'integer',
+            'sapeur_id' => 'integer',
+            'medecin_id' => 'integer',
+            'controle_medical_type_id' => 'integer',
+            'consultation' => 'date',
+            'validite' => 'nullable|date|after:consultation',
+            'designation' => 'string|nullable',
+            'en_cours' => 'integer',
+            'accepter' => 'integer'
         ]);
 
-        $sapeur = $this->service->updateControleMedical($id, $data);
-
-        return response()->json(['data' => $sapeur]);
+        $controle = $this->service->updateControleMedical($id, $data);
+        return response()->json(['data' => $controle]);
     }
 
     /**

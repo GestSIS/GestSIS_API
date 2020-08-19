@@ -6,12 +6,16 @@ namespace App\Infrastructure\Repositories;
 
 use App\Domaine\SPI\ControleMedicalRepository;
 use App\Infrastructure\Models\ControleMedical;
+use App\Infrastructure\Models\ControleMedicalType;
+use App\Infrastructure\Models\Justificatif;
 use stdClass;
 
 class ControleMedicalRepositoryEloquent implements ControleMedicalRepository
 {
     //TODO Implement this class
-    public function listeAllControlesMedicaux(){
+
+    public function listeAllControlesMedicaux()
+    {
         $temp = $this;
         return ControleMedical::with('justificatifs')->get()
             ->map(function ($controle) use ($temp) {
@@ -19,21 +23,60 @@ class ControleMedicalRepositoryEloquent implements ControleMedicalRepository
             })->toArray();
     }
 
-    public function getControleMedical($id){
+    public function getControleMedical($id)
+    {
         return $this->convertControleMedical(ControleMedical::with('justificatifs')->find($id));
     }
-    
-    public function addControleMedical($controle){}
 
-    public function deleteControleMedical($id){}
+    public function createControleMedical($data)
+    {
+        if (is_null($data['designation'])) {
+            $data['designation'] = '';
+        }
 
-    public function updateControleMedical($controle){}
+        $controle = new ControleMedical();
+        $controle->fill($data);
+        $controle->sapeur_id = $data['sapeur_id'];
+        $controle->save();
 
-    public function addFileToControleMedical($file){}
+        return $this->convertControleMedical($controle);
+    }
 
-    public function getFileOfControleMedical($file){}
+    public function updateControleMedical($controleId, $data)
+    {
+        if (is_null($data['designation'])) {
+            $data['designation'] = '';
+        }
 
-    public function removeFileOfControleMedical($file){}
+        ControleMedical::where('id', $controleId)->limit(1)->update($data);
+        return $this->convertControleMedical(ControleMedical::find($controleId));
+    }
+
+    public function deleteControleMedical($id)
+    {
+        ControleMedical::destroy($id);
+    }
+
+    public function addJustificatif($controleMedicalId, $filename, $path)
+    {
+        $justificatif = new Justificatif();
+        $justificatif->controle_medical_id = $controleMedicalId;
+        $justificatif->filename = $filename;
+        $justificatif->logicalname = $path;
+        $justificatif->save();
+
+        return $this->convertJustificatif($justificatif);
+    }
+
+    public function getJustificatif($controleMedicalId, $justificatifId)
+    {
+        return $this->convertJustificatif(Justificatif::where([['controle_medical_id','=',$controleMedicalId],['id', '=', $justificatifId]])->first());
+    }
+
+    public function removeJustificatif($controleMedicalId, $justificatifId)
+    {
+        ControleMedical::where([['controle_medical_id','=',$controleMedicalId],['id', '=', $justificatifId]])->destroy();
+    }
 
     /**
      * @param $controle
@@ -54,12 +97,12 @@ class ControleMedicalRepositoryEloquent implements ControleMedicalRepository
         $object->sapeur_id = $controle->sapeur_id;
         $object->medecin_id = $controle->medecin_id;
         $object->controle_medical_type_id = $controle->controle_medical_type_id;
-        
-        $temp = $this;
-        $object->justificatifs = $controle->justificatifs
-            ->map(function ($controle) use ($temp) {
-                return $temp->convertControleMedical($controle);
-            })->toArray();
+
+        $justificatifs = array();
+        foreach ($controle->justificatifs as $j) {
+            array_push($justificatifs, $this->convertJustificatif($j));
+        }
+        $object->justificatifs = $justificatifs;
 
         return $object;
     }
@@ -81,5 +124,4 @@ class ControleMedicalRepositoryEloquent implements ControleMedicalRepository
 
         return $object;
     }
-
 }

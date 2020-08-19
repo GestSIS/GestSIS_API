@@ -4,8 +4,9 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\ControleMedicalService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
-class ControleMedicalController extends Controller
+class JustificatifController extends Controller
 {
     protected $service;
 
@@ -13,7 +14,6 @@ class ControleMedicalController extends Controller
     {
         $this->service = $service;
     }
-
     
     /**
      * Display the specified resource.
@@ -24,8 +24,16 @@ class ControleMedicalController extends Controller
     public function show(int $controleId, int $id)
     {
         //TODO: Return a file
-        $controle = $this->service->getJustificatif($controleId, $id);
-        return response()->json(['data' => $controle]);
+        $logicalname = $this->service->getJustificatif($controleId, $id);
+        
+        $headers = array(
+            'Content-Type: application/pdf',
+            'Cache-Control: no-cache private',
+            'Content-Description: File Transfer',
+            'Content-Disposition: attachment; filename=abc.pdf',
+            'Content-Transfer-Encoding: binary'
+        );
+        return Storage::download($logicalname, 'abc.pdf', $headers);
     }
 
     /**
@@ -36,13 +44,16 @@ class ControleMedicalController extends Controller
      */
     public function store(Request $request, int $id)
     {
-        $data = $request->validate([
+        if (!$request->hasFile('justificatif') || !$request->file('justificatif')->isValid())
+        {
+            return response()->json(['error' => 'Fichier justificatif manquant']);    
+        }
 
-        ]);
+        $file = $request->file('justificatif');
 
-        $sapeur = $this->service->addJustificatif($id, $data);
+        $justificatif = $this->service->addJustificatif($id, $file);
 
-        return response()->json(['data' => $sapeur]);
+        return response()->json(['data' => $justificatif]);
     }
 
     /**
@@ -53,7 +64,7 @@ class ControleMedicalController extends Controller
      */
     public function destroy(int $controleId, int $id)
     {
-        $this->service->deleteJustificatif($controleId, $id);
+        $this->service->removeJustificatif($controleId, $id);
 
         return response()->json(['data' => "success"]);
     }

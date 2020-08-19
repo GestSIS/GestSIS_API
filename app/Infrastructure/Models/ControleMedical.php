@@ -8,6 +8,17 @@ class ControleMedical extends Model
 {
     protected $table = 'controles_medicaux';
 
+    protected $fillable = ['designation', 'consultation', 'validite', 'accepter', 'en_cours', 'medecin_id', 'controle_medical_type_id'];
+
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'designation' => '',
+    ];
+
     /**
      * Le sapeur
      */
@@ -23,7 +34,7 @@ class ControleMedical extends Model
     {
         return $this->belongsTo('App\Infrastructure\Models\Medecin');
     }
-    
+
     /**
      * Le type
      */
@@ -31,7 +42,7 @@ class ControleMedical extends Model
     {
         return $this->belongsTo('App\Infrastructure\Models\ControleMedicalType');
     }
-    
+
     /**
      * Le type
      */

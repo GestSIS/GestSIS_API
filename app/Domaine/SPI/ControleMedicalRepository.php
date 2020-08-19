@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Domaine\SPI;
 
 interface ControleMedicalRepository
@@ -6,16 +7,16 @@ interface ControleMedicalRepository
     public function listeAllControlesMedicaux();
 
     public function getControleMedical($id);
-    
-    public function addControleMedical($controle);
+
+    public function createControleMedical($controle);
 
     public function deleteControleMedical($id);
 
-    public function updateControleMedical($controle);
+    public function updateControleMedical($controleId, $data);
 
-    public function addFileToControleMedical($file);
+    public function addJustificatif($controleMedicalId, $filename, $path);
 
-    public function getFileOfControleMedical($file);
+    public function getJustificatif($controleMedicalId, $justificatifId);
 
-    public function removeFileOfControleMedical($file);
+    public function removeJustificatif($controleMedicalId, $justificatifId);
 }
