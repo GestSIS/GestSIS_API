@@ -24,6 +24,9 @@ class CreateControlesMedicauxTable extends Migration
             $table->boolean('accepter');
             $table->boolean('en_cours');
 
+            $table->string('path')->nullable();
+            $table->string('filename')->nullable();
+
             // Foreign keys
             $table->unsignedBigInteger('sapeur_id');
             $table->foreign('sapeur_id')->references('id')->on('sapeurs');

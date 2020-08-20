@@ -14,9 +14,9 @@ interface ControleMedicalRepository
 
     public function updateControleMedical($controleId, $data);
 
-    public function addJustificatif($controleMedicalId, $filename, $path);
+    public function getJustificatif($id);
 
-    public function getJustificatif($controleMedicalId, $justificatifId);
+    public function addJustificatif($controleMedicalId, $path, $filename);
 
-    public function removeJustificatif($controleMedicalId, $justificatifId);
+    public function removeJustificatif($controleMedicalId);
 }

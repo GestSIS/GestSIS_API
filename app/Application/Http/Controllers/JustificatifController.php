@@ -21,19 +21,18 @@ class JustificatifController extends Controller
      * @param int $id
      * @return Response
      */
-    public function show(int $controleId, int $id)
+    public function show(int $controleId)
     {
         //TODO: Return a file
-        $logicalname = $this->service->getJustificatif($controleId, $id);
+        $justificatif = $this->service->getJustificatif($controleId);
         
         $headers = array(
             'Content-Type: application/pdf',
             'Cache-Control: no-cache private',
             'Content-Description: File Transfer',
-            'Content-Disposition: attachment; filename=abc.pdf',
             'Content-Transfer-Encoding: binary'
         );
-        return Storage::download($logicalname, 'abc.pdf', $headers);
+        return Storage::download($justificatif['path'], $justificatif['filename'], $headers);
     }
 
     /**
@@ -62,9 +61,9 @@ class JustificatifController extends Controller
      * @param int $id
      * @return Response
      */
-    public function destroy(int $controleId, int $id)
+    public function destroy(int $controleId)
     {
-        $this->service->removeJustificatif($controleId, $id);
+        $this->service->removeJustificatif($controleId);
 
         return response()->json(['data' => "success"]);
     }

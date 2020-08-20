@@ -36,30 +36,33 @@ class ControleMedicalBusiness
 
     public function removeControleMedical($controleId)
     {
-        //TODO Remove all justificatifs
+        //First remove justificatif
+        $this->removeJustificatif($controleId);
         return $this->repository->deleteControleMedical($controleId);
     }
 
     public function addJustificatif($controleMedicalId, $file)
     {
-        //TODO do the following
-        $path = $file->store('documents/justificatifs');
+        //First remove potential already existing document
+        $this->removeJustificatif($controleMedicalId);
+
+        //Then add the new one
+        $path = $file->store('documents/controles_medicaux');
         return $this->repository->addJustificatif($controleMedicalId, $file->getClientOriginalName(), $path);
     }
 
-    public function getJustificatif($controleMedicalId, $justificatifId)
+    public function getJustificatif($controleMedicalId)
     {
-        //TODO do the following
-        //return the file
-        $justificatif = $this->repository->getJustificatif($controleMedicalId, $justificatifId);
-        return $justificatif->logicalname;
+        //Return the file
+        $justificatif = $this->repository->getJustificatif($controleMedicalId);
+        return ['path' => $justificatif->path, 'filename' => $justificatif->filename];
     }
 
-    public function removeJustificatif($controleMedicalId, $justificatifId)
+    public function removeJustificatif($controleMedicalId)
     {
-        //TODO assert both id are related
-        //Remove file
-        //Remove reccord
-        // Storage::disk('s3')->delete('folder_path/file_name.jpg');
+        $path = $this->repository->removeJustificatif($controleMedicalId);
+        if ($path != null) {
+            Storage::delete($path);
+        }
     }
 }

@@ -42,12 +42,4 @@ class ControleMedical extends Model
     {
         return $this->belongsTo('App\Infrastructure\Models\ControleMedicalType');
     }
-
-    /**
-     * Le type
-     */
-    public function justificatifs()
-    {
-        return $this->hasMany('App\Infrastructure\Models\Justificatif');
-    }
 }
