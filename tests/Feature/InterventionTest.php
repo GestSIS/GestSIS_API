@@ -71,13 +71,13 @@ class InterventionTest extends TestCase
         $intervention = factory(Intervention::class)->make();
         $response = $this->json('POST', '/api/v2/interventions', $intervention->toArray());
 
+        // dd($intervention);
         $response
             ->assertStatus(200)
             ->assertJson([
                 'data' => true
             ]);
     }
-
 
     /**
      * Test validate exercice

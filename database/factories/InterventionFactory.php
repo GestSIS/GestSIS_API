@@ -11,11 +11,11 @@ $factory->define(Intervention::class, function (Faker $faker) {
     $dateTwo = clone $date;
 
     return [
-        'date_debut' => $date,
+        'date_debut' => $date->format('Y-m-d'),
         'heure_debut' => $date->format('H:m'),
         'lieu' => $faker->streetAddress,
         'objet' => $faker->randomElement(['Inondation', 'Incendie']),
-        'date_fin' => $dateTwo,
+        'date_fin' => $dateTwo->format('Y-m-d'),
         'heure_fin' => $dateTwo->format('H:m'),
         'rapport_police' => 0,
         'degre' => $faker->numberBetween(1, 3),
