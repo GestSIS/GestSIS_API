@@ -14,6 +14,7 @@ class ExerciceCategorieController extends Controller
      */
     public function index()
     {
+        //TODO Change this to use an extra level of indirections for consistency ???
         $exerciceCategories = ExerciceCategorie::all();
 
         return response()->json(['data' => $exerciceCategories]);

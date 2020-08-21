@@ -14,6 +14,7 @@ class VehiculeController extends Controller
      */
     public function index()
     {
+        //TODO move into a service ?
         $vehicules = Vehicule::all();
 
         return response()->json(['data' => $vehicules]);

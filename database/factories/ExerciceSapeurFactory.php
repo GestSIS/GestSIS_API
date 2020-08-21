@@ -2,10 +2,10 @@
 
 /* @var $factory Factory */
 
-use App\Infrastructure\Models\Exercice;
+use App\Infrastructure\Models\ExerciceSapeur;
 use Faker\Generator as Faker;
 
-$factory->define(Exercice::class, function (Faker $faker) {
+$factory->define(ExerciceSapeur::class, function (Faker $faker) {
     return [
         "exercice_comptable_id" => 4,
         "exercice_categorie_id" => $faker->numberBetween(1, 11),

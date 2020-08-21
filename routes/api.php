@@ -20,7 +20,7 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
     Route::group(['middleware' => 'jwtToken'], function () {
 
         // Sapeurs
-        Route::resource('sapeurs', 'SapeurController')->only(['index', 'show', 'store', 'update']);//, 'destroy']);//->middleware('role:effectif_read');
+        Route::resource('sapeurs', 'SapeurController')->only(['index', 'show', 'store', 'update']); //, 'destroy']);//->middleware('role:effectif_read');
 
         Route::resource('sapeurs.groupes', 'SapeurGroupeController')->only(['index']);
         Route::resource('sapeurs.permis', 'SapeurPermisController')->only(['index', 'store', 'update', 'destroy']);
@@ -139,5 +139,13 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::resource('comptes', 'CompteController')->only(['index']);
         Route::get('comptes/{id}/ecritures/{exerciceComptableId}', 'CompteController@ecritures');
 
+        //Controles medicauxs
+        Route::get('medecins/', 'MedecinController@all');
+        Route::get('controles-medicaux-types', 'ControleMedicalTypeController@all');
+
+        Route::resource('controles-medicaux', 'ControleMedicalController')->only(['index', 'show', 'store', 'update', 'destroy']);
+        Route::get('controles-medicaux/{id}/justificatif', 'JustificatifController@show');
+        Route::post('controles-medicaux/{id}/justificatif', 'JustificatifController@store');
+        Route::delete('controles-medicaux/{id}/justificatif', 'JustificatifController@destroy');
     });
 });

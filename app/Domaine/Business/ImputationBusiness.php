@@ -170,6 +170,7 @@ class ImputationBusiness
 
     public function imputerIntervention($interventionId, $data)
     {
+        // $dateImputation = $data['date_imputation']; // TODO: Ajouter date d'imputation ?
         $indemniteType = $this->indemniteRepo->findIndemniteInterventionTypeById($data['indemnite_intervention_type_id']);
         $intervention = $this->interventionRepo->findWith($interventionId, ['presences', 'phases', 'localite', 'typeIntervention']);
 
@@ -499,11 +500,11 @@ class ImputationBusiness
             $indemniteTarif = 0;
             if (count($fonction_tarif) > 0) {
                 $tarif = array_pop($fonction_tarif);
-                $soldeTarif += $tarif->solde;
-                $indemniteTarif += $tarif->indemnite;
+                $soldeTarif = $tarif->solde;
+                $indemniteTarif = $tarif->indemnite;
             } else {
-                $soldeTarif += $indemniteType->solde;
-                $indemniteTarif += $indemniteType->indemnite;
+                $soldeTarif = $indemniteType->solde;
+                $indemniteTarif = $indemniteType->indemnite;
             }
 
             $solde = $soldeTarif * $duree;
@@ -539,19 +540,16 @@ class ImputationBusiness
         //En minutes
         $duree = $exercice->duree / 60;
 
+        $solde = 0;
+        if ($duree > $indemniteType->solde_min_pour) {
+            $solde += $indemniteType->solde_min;
+            $duree -= $indemniteType->solde_min_pour;
+        }
+
+        $solde += $indemniteType->solde * $duree;
+
         // Générer écritures
         foreach ($sapeurs as $sapeur) {
-            $solde = 0;
-            if ($duree > $indemniteType->solde_min_pour) {
-                $solde += $indemniteType->solde_min;
-                $duree -= $indemniteType->solde_min_pour;
-            } else {
-                $solde += $indemniteType->solde_min * $duree;
-                $duree = 0;
-            }
-
-            $solde += $indemniteType->solde * $duree;
-
             //Par heure -> calcul de la durée
             $ecriture = array(
                 'solde' => $solde,

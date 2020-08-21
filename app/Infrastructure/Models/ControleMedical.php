@@ -1,12 +1,23 @@
 <?php
 
-namespace App\Models;
+namespace App\Infrastructure\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 class ControleMedical extends Model
 {
     protected $table = 'controles_medicaux';
+
+    protected $fillable = ['designation', 'consultation', 'validite', 'accepter', 'en_cours', 'medecin_id', 'controle_medical_type_id'];
+
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'designation' => '',
+    ];
 
     /**
      * Le sapeur
@@ -23,7 +34,7 @@ class ControleMedical extends Model
     {
         return $this->belongsTo('App\Infrastructure\Models\Medecin');
     }
-    
+
     /**
      * Le type
      */

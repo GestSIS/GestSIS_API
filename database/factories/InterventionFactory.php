@@ -9,14 +9,13 @@ use Illuminate\Database\Eloquent\Factory;
 $factory->define(Intervention::class, function (Faker $faker) {
     $date = $faker->dateTimeThisYear();
     $dateTwo = clone $date;
-    $dateTwo = $dateTwo->add(new DateInterval('P1D'));
 
     return [
-        'date_debut' => $date->format('d.m.Y'),
+        'date_debut' => $date->format('Y-m-d'),
         'heure_debut' => $date->format('H:m'),
         'lieu' => $faker->streetAddress,
         'objet' => $faker->randomElement(['Inondation', 'Incendie']),
-        'date_fin' => $dateTwo->format('d.m.Y'),
+        'date_fin' => $dateTwo->format('Y-m-d'),
         'heure_fin' => $dateTwo->format('H:m'),
         'rapport_police' => 0,
         'degre' => $faker->numberBetween(1, 3),
@@ -27,8 +26,8 @@ $factory->define(Intervention::class, function (Faker $faker) {
         'responsable' => $faker->name . '\n' . $faker->address,
         'stat_nb' => 1,
         'statut' => 0,
-        'exercice_comptable_id' => 3,
-        'localite_id' => $faker->numberBetween(1, 146),
+        'exercice_comptable_id' => 4,
+        'localite_id' => $faker->randomElement($array = array(3,5,23,44,93)),
         'type_intervention_id' => $faker->numberBetween(1, 5),
         'sapeur_id' => $faker->numberBetween(1, 10),
         'stat_federal_id' => $faker->numberBetween(1, 5),
