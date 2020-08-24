@@ -109,6 +109,10 @@ class SapeurRepositoryEloquent implements SapeurRepository
         if (array_key_exists('suffixe', $data) && $data['suffixe'] === null) {
             $data['suffixe'] = '';
         }
+        
+        if (array_key_exists('remarque', $data) && $data['remarque'] === null) {
+            $data['remarque'] = '';
+        }
 
         $sapeur = new Sapeur();
         $sapeur->fill($data);
@@ -119,8 +123,11 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
     public function updateSapeurById(int $sapeurId, $data)
     {
-        if (array_key_exists('suffixe', $data) && $data['suffixe'] === null) {
-            $data['suffixe'] = '';
+        $nullableFields = ['suffixe', 'remarque', 'profession', 'employeur', 'lieu_de_travail', 'iban'];
+        foreach ($nullableFields as $field) {
+            if (array_key_exists($field, $data) && $data[$field] === null) {
+                $data[$field] = '';
+            }
         }
 
         Sapeur::where('id', $sapeurId)->limit(1)->update($data);

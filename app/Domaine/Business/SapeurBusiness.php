@@ -20,13 +20,16 @@ class SapeurBusiness
     public function createSapeur($data)
     {
         //TODO Add iban statut système validation
+        //TODO Add no_avs validation
         $data['iban_statut'] = 1;
+        $data['actif'] = 1;
+        $data['porteur'] = 0;
         $sapeur = $this->repository->createSapeur($data);
 
         //add new sapeur mutation
         $this->addMutation($sapeur->id, array(
             "localite_id" => $sapeur->localite_id,
-            "incorporation" => $data['incorporation'],
+            "incorporation" => $data['date_incorporation'],
             "motif" => ""
         ));
         return $sapeur;
