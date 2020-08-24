@@ -29,7 +29,7 @@ class SapeurBusiness
         //add new sapeur mutation
         $this->addMutation($sapeur->id, array(
             "localite_id" => $sapeur->localite_id,
-            "incorporation" => $data['date_incorporation'],
+            "incorporation" => $data['incorporation'],
             "motif" => ""
         ));
         return $sapeur;

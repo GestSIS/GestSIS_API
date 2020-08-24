@@ -41,7 +41,7 @@ class SapeurController extends Controller
             'rue' => 'string|min:3',
             'no_rue' => 'string',
             'date_naissance' => 'date|before:' . date('Y-m-d'),
-            'date_incorporation' => 'date',
+            'incorporation' => 'date',
             'no_avs' => 'string',
             'profession' => 'string|max:80',
             'employeur' => 'string|max:150',
