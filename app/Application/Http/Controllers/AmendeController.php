@@ -4,7 +4,7 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\ComptabiliteService;
 
-class EcritureController extends Controller
+class AmendeController extends Controller
 {
     protected $service;
 
