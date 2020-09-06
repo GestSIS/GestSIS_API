@@ -119,12 +119,12 @@ class ComptabiliteService
 
     function genererAmendeSapeur($exerciceComptableId, $sapeurId)
     {
-        //TODO
+        return $this->business->genererAmendeSapeur($exerciceComptableId, $sapeurId);
     }
-
+    
     function genererAmendeAnnuel($exerciceComptableId)
     {
-        //TODO
+        return $this->business->genererAmendeAnnuels($exerciceComptableId);
     }
 
     function decompteAnnuelParSapeur($exerciceComptableId)

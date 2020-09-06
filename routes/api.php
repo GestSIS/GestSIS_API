@@ -15,6 +15,8 @@ use Spatie\HttpLogger\Middlewares\HttpLogger;
 
 Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () {
 
+    // Etats de sortie 
+    // TODO: Temporairement public, à déplacer
     Route::get('pdf-test/{id}', 'CompteController@generatePdf');
 
     Route::group(['middleware' => 'jwtToken'], function () {

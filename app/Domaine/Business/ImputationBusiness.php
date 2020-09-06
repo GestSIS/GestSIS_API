@@ -10,6 +10,7 @@ use App\Domaine\SPI\InterventionRepository;
 use App\Domaine\SPI\SapeurRepository;
 use App\Domaine\Exceptions\ArrayException;
 use Carbon\Carbon;
+use phpDocumentor\Reflection\Types\Null_;
 
 class ImputationBusiness
 {
@@ -38,6 +39,34 @@ class ImputationBusiness
     protected const UNITE_CHF_PAR_PIECE = 1;
     protected const UNITE_CHF_PAR_HEURE = 2;
     
+    /**
+     * Générer les amendes pour un sapeur
+     */
+    public function genererAmendeSapeur($exerciceComptableId, $sapeurId)
+    {
+
+    }
+
+    /**
+     * Générer les amendes pour l'année comptable en cours
+     */
+    public function genererAmendeAnnuels($exerciceComptableId)
+    {
+        // Load amendes config
+        $amendes = Null;
+        
+        // Load all absences pour chaque exercice et sapeur
+        $absences = Null;
+        
+        // Générer des ecritures pour chaque absence
+        $ecritures = Null;
+        
+        // Comparer avec les écritures existantes ou supprimer les existantes
+        
+        // Enregistrer les ecritures générées
+        
+    }
+
     /**
      * Génères des frais annuels pour les sapeurs n'ayant pas encore de frais annuels
      */
