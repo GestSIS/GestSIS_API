@@ -127,11 +127,14 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::post('imputation/intervention/{id}', 'ImputationController@intervention');
         Route::post('imputation/exercice/{id}', 'ImputationController@exercice');
         Route::post('imputation/annuel/{id}', 'ImputationController@annuel');
+        Route::post('generer-amende/{id}/sapeur/{sapeurId}', 'ImputationController@sapeur');
+        Route::post('generer-amende/{id}', 'ImputationController@annuel');
 
         Route::get('indemnites-types', 'IdemniteTypeController@index');
         Route::get('frais-types', 'FraisTypeController@index');
 
         Route::get('ecritures/annuel/{id}', 'EcritureController@annuel');
+        Route::get('ecritures/amende/{id}', 'EcritureController@amende');
         Route::get('ecritures/intervention/{id}', 'EcritureController@intervention');
         Route::get('ecritures/exercice/{id}', 'EcritureController@exercice');
         Route::get('ecritures/{id}', 'EcritureController@all');

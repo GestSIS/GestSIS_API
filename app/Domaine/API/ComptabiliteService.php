@@ -46,6 +46,11 @@ class ComptabiliteService
         return $this->ecritureRepo->listeAllEcritureForExerciceComptableById($exerciceComptableId);
     }
 
+    function getEcrituresAmendesForExerciceComptableById($exerciceComptableId)
+    {
+        return $this->ecritureRepo->listeAmendeForExerciceComptableById($exerciceComptableId);
+    }
+
     function getEcrituresByCompte($compteId, $exerciceComptableId)
     {
         return $this->ecritureRepo->listeEcritureForCompteAndExerciceComptableById($compteId, $exerciceComptableId);
@@ -105,11 +110,21 @@ class ComptabiliteService
     function imputationAnnuel($exerciceComptableId)
     {
         $this->business->imputerAnnuel($exerciceComptableId);
-
+        
         return [
             "frais" => $this->ecritureRepo->listeFraisAnnuelByExeComptableId($exerciceComptableId),
             "indemnites" => $this->ecritureRepo->listeIndemniteAnnuelByExeComptableId($exerciceComptableId),
         ];
+    }
+
+    function genererAmendeSapeur($exerciceComptableId, $sapeurId)
+    {
+        //TODO
+    }
+
+    function genererAmendeAnnuel($exerciceComptableId)
+    {
+        //TODO
     }
 
     function decompteAnnuelParSapeur($exerciceComptableId)

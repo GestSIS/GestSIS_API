@@ -17,19 +17,12 @@ class CreateAmendesTable extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->string('motif');
+            $table->integer('order');
             $table->decimal('montant');
-            $table->date('date');
 
             // Foreign keys
-            $table->unsignedBigInteger('sapeur_id');
-            $table->foreign('sapeur_id')->references('id')->on('sapeurs');
-
-            $table->unsignedBigInteger('exercice_id');
-            $table->foreign('exercice_id')->references('id')->on('exercices');
-
-            $table->unsignedBigInteger('exercice_comptable_id');
-            $table->foreign('exercice_comptable_id')->references('id')->on('exercice_comptables');
+            $table->unsignedBigInteger('compte_id');
+            $table->foreign('compte_id')->references('id')->on('comptes');
         });
     }
 

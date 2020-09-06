@@ -10,6 +10,8 @@ interface EcritureRepository
     
     public function listeEcritureForCompteAndExerciceComptableById($compteId, $exerciceComptableId);
 
+    public function listeAmendeForExerciceComptableById($exerciceComptableId);
+
     public function listeEcritureForExercice($exerciceId);
 
     public function listeEcritureForIntervention($interventionId);
