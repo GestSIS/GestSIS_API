@@ -80,14 +80,14 @@
     $isExercice = isExercice($ecriture);
     $isAnnuel = isAnnuel($ecriture);
 
-    $newSapeur = $first || $previousEcriture->sapeur_id !== $ecriture->sapeur_id;
-    $newCategorie = $newSapeur || $previousEcriture->ecriture_categorie_id !== $ecriture->ecriture_categorie_id;
+    $newSapeur = $first;// || $previousEcriture->sapeur_id !== $ecriture->sapeur_id;
+    $newCategorie = $newSapeur;// || $previousEcriture->ecriture_categorie_id !== $ecriture->ecriture_categorie_id;
 
     $debutSectionExercice = $isExercice && ($newCategorie || !$wasExercice);
     $debutSectionIntervention = $isIntervention && ($newCategorie || !$wasIntervention);
     $debutSectionAnnuel = $isAnnuel && ($newCategorie || !$wasAnnuel);
 
-    $newIntervention = $newSapeur || $previousEcriture->intervention_id !== $ecriture->intervention_id;
+    $newIntervention = $newSapeur;// || $previousEcriture->intervention_id !== $ecriture->intervention_id;
 
     $endSapeur = $last || $nextEcriture->sapeur_id !== $ecriture->sapeur_id;
     $endCategorie = $endSapeur || $nextEcriture->ecriture_categorie_id !== $ecriture->ecriture_categorie_id;
