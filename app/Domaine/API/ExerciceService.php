@@ -35,7 +35,7 @@ class ExerciceService
     {
         return $this->repository->listSapeurOfExerciceById($exerciceId);
     }
-    
+
     public function listExerciceOfSapeurById($exerciceComptableId, $sapeurId)
     {
         return $this->repository->listExerciceOfSapeurById($exerciceComptableId, $sapeurId);
@@ -119,5 +119,32 @@ class ExerciceService
     public function supprimerConvocations($sapeurId, $exerciceSapeursIds)
     {
         return $this->business->supprimerConvocations($sapeurId, $exerciceSapeursIds);
+    }
+
+    function listeAppel($exerciceId)
+    {
+        $presences = $this->repository->listSapeurOfExerciceById($exerciceId);
+
+        return View('pdf/liste-appel', ["presences" => $presences]);
+        $pdf = PDF::loadView('pdf/liste-appel', ["presences" => $presences]);
+        return $pdf->download('invoice.pdf');
+    }
+
+    function listeAppelParLocalite($exerciceId)
+    {
+        $presences = $this->repository->listSapeurOfExerciceById($exerciceId);
+
+        return View('pdf/liste-appel-localite', ["presences" => $presences]);
+        $pdf = PDF::loadView('pdf/decomptes-sapeurs', ["presences" => $presences]);
+        return $pdf->download('invoice.pdf');
+    }
+
+    function listePresence($exerciceId)
+    {
+        $presences = $this->repository->listSapeurOfExerciceById($exerciceId);
+
+        return View('pdf/liste-presence', ["presences" => $presences]);
+        $pdf = PDF::loadView('pdf/liste-presence', ["presences" => $presences]);
+        return $pdf->download('invoice.pdf');
     }
 }

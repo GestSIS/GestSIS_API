@@ -84,4 +84,19 @@ class ExerciceController extends Controller
 
         return response()->json(['data' => $exercice]);
     }
+    
+    function listeAppel($exerciceId)
+    {
+        return $this->service->listeAppel($exerciceId);
+    }
+    
+    function listeAppelParLocalite($exerciceId)
+    {
+        return $this->service->listeAppelParLocalite($exerciceId);
+    }
+    
+    function listePresence($exerciceId)
+    {
+        return $this->service->listePresence($exerciceId);
+    }
 }

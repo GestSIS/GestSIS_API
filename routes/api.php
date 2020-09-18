@@ -18,6 +18,9 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
     // Etats de sortie 
     // TODO: Temporairement public, à déplacer
     Route::get('pdf-test/{id}', 'CompteController@generatePdf');
+    Route::get('exercice/{id}/liste-presence', 'ExerciceController@listePresence');
+    Route::get('exercice/{id}/liste-appel', 'ExerciceController@listeAppel');
+    Route::get('exercice/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
 
     Route::group(['middleware' => 'jwtToken'], function () {
 
