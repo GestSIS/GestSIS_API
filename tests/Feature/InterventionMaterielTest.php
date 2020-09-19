@@ -77,7 +77,7 @@ class InterventionMaterielTest extends TestCase
 
         $this->interventionId = $this->interventionService->createIntervention($data)->id;
 
-        $materiels = InterventionMateriel::factory()->count(1)->make()->toArray();
+        $materiels = InterventionMateriel::factory()->count(1)->make(['intervention_id' => $this->interventionId])->toArray();
 
         $res = $this->interventionService->addMateriels($this->interventionId, $materiels);
 
@@ -102,7 +102,7 @@ class InterventionMaterielTest extends TestCase
 
         $this->interventionId = $this->interventionService->createIntervention($data)->id;
 
-        $materiels = InterventionMateriel::factory()->count(1)->make()->toArray();
+        $materiels = InterventionMateriel::factory()->count(3)->make(['intervention_id' => $this->interventionId])->toArray();
 
         $ids = array_map(function ($s) {
             return $s->id;
