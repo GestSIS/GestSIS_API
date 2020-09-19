@@ -1,5 +1,7 @@
 <?php
 
+use App\Infrastructure\Models\User;
+
 return [
 
     /*
@@ -35,7 +37,7 @@ return [
     ],
 
     'stripe' => [
-        'model' => App\User::class,
+        'model' => App\Infrastructure\Models\User::class,
         'key' => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),
         'webhook' => [

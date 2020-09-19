@@ -2,10 +2,13 @@
 
 namespace App\Infrastructure\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Medecin extends Model
 {
+    
+    use HasFactory;
     
     /**
      * Le sapeur
