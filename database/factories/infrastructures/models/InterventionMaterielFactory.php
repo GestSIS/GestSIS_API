@@ -5,7 +5,7 @@ namespace Database\Factories\Infrastructure\Models;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Infrastructure\Models\InterventionMateriel;
 
-class MaterielFactory extends Factory
+class InterventionMaterielFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
