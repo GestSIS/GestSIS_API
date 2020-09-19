@@ -23,7 +23,7 @@ class MissionFactory extends Factory
     {
         $date = $this->faker->dateTimeThisYear();
         $dateTwo = clone $date;
-        $dateTwo = $dateTwo->add(new DateInterval('P1D'));
+        $dateTwo = $dateTwo->modify('+1 day');
 
         return [
             'intervention_id' => 1,

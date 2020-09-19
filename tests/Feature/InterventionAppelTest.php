@@ -54,7 +54,7 @@ class InterventionAppelTest extends TestCase
      */
     public function testAddInterventionAppels()
     {
-        $appels = factory('App\Infrastructure\Models\Appel', 3)->make();
+        $appels = Appel::factory()->count(3)->make();
 
         $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/appels', ['appels' => $appels]);
 
@@ -73,7 +73,7 @@ class InterventionAppelTest extends TestCase
      */
     public function testEditInterventionAppels()
     {
-        $appels = factory('App\Infrastructure\Models\Appel', 3)->make()->toArray();
+        $appels = Appel::factory()->count(3)->make()->toArray();
 
         $res = $this->interventionService->addAppels($this->interventionId, $appels);
         $res = array_map(function ($s) {
@@ -98,7 +98,7 @@ class InterventionAppelTest extends TestCase
      */
     public function testRemoveInterventionAppels()
     {
-        $appels = factory('App\Infrastructure\Models\Appel', 3)->make()->toArray();
+        $appels = Appel::factory()->count(3)->make()->toArray();
 
         $ids = array_map(function ($s) {
             return $s->id;

@@ -39,7 +39,7 @@ class ImputationExerciceTest extends TestCase
         $data['incorporation'] = "29.01.2019";
         $this->sapeurThreeId = $sapeurService->createSapeur($data)->id;
 
-        $this->exerciceId = $exerciceService->createExercice(factory(Exercice::class)->make()->toArray())->id;
+        $this->exerciceId = $exerciceService->createExercice(Exercice::factory()->make()->toArray())->id;
 
         $exerciceService->addSapeurs($this->exerciceId, array(
             array(
