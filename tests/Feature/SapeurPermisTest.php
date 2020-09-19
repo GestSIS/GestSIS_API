@@ -20,7 +20,7 @@ class SapeurPermisTest extends TestCase
 
         $this->service = $this->app->make(SapeurService::class);
 
-        $data = factory(Sapeur::class)->make()->toArray();
+        $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "29.01.2019";
 
         $this->sapeurId = $this->service->createSapeur($data)->id;

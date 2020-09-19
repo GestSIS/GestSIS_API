@@ -18,7 +18,7 @@ class InterventionVehiculeTest extends TestCase
 
         $this->interventionService = $this->app->make('App\Domaine\API\InterventionService');
 
-        $data = factory(Intervention::class)->make()->toArray();
+        $data = Intervention::factory()->make()->toArray();
 
         $this->interventionId = $this->interventionService->createIntervention($data)->id;
     }

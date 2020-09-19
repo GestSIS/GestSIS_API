@@ -28,19 +28,19 @@ class ImputationInterventionTest extends TestCase
         $sapeurService = $this->app->make(SapeurService::class);
         $this->comptabiliteService = $this->app->make(ComptabiliteService::class);
 
-        $data = factory(Sapeur::class)->make()->toArray();
+        $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "29.01.2019";
         $this->sapeurOneId = $sapeurService->createSapeur($data)->id;;
 
-        $data = factory(Sapeur::class)->make()->toArray();
+        $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "29.01.2019";
         $this->sapeurTwoId = $sapeurService->createSapeur($data)->id;;
 
-        $data = factory(Sapeur::class)->make()->toArray();
+        $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "29.01.2019";
         $this->sapeurThreeId = $sapeurService->createSapeur($data)->id;
 
-        $intervention = factory(Intervention::class)->make();
+        $intervention = Intervention::factory()->make();
         $intervention->date_debut = Carbon::createMidnightDate(2019, 1,1);
         $intervention->date_fin = Carbon::createMidnightDate(2019, 1,3);
 

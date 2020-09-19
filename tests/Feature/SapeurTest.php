@@ -22,7 +22,7 @@ class SapeurTest extends TestCase
     public function testIndexSapeur()
     {
         //Préparation
-        $data = factory(Sapeur::class)->make()->toArray();
+        $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "29.01.2019";
 
         $this->sapeurService->createSapeur($data);
@@ -58,7 +58,7 @@ class SapeurTest extends TestCase
     public function testCreateSapeur()
     {
         //Préparation
-        $data = factory(Sapeur::class)->make()->toArray();
+        $data = Sapeur::factory()->make()->toArray();
 
         $data['incorporation'] = "29.01.2019";
         $data['date_naissance'] = "29.01.2019";
@@ -96,11 +96,11 @@ class SapeurTest extends TestCase
     public function testUpdateSapeur()
     {
         //Préparation
-        $data = factory(Sapeur::class)->make()->toArray();
+        $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "29.01.2019";
 
         $sapeurId = $this->sapeurService->createSapeur($data)->id;
-        $data = factory(Sapeur::class)->make()->toArray();
+        $data = Sapeur::factory()->make()->toArray();
         $data['date_naissance'] = "1995-01-01";
 
         //TEST PART

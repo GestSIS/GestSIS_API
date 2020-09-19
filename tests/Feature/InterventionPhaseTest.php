@@ -20,7 +20,7 @@ class InterventionPhaseTest extends TestCase
 
         $this->interventionService = $this->app->make(InterventionService::class);
 
-        $data = factory(Intervention::class)->make()->toArray();
+        $data = Intervention::factory()->make()->toArray();
         $data["date_debut"] = "2019-01-01";
 
         $this->interventionId = $this->interventionService->createIntervention($data)->id;

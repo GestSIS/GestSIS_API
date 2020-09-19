@@ -88,7 +88,7 @@ class ExerciceTest extends TestCase
      */
     public function testAddExerciceOK()
     {
-        $exercice = factory(Exercice::class)->make();
+        $exercice = Exercice::factory()->make();
 
         $response = $this->json('POST', '/api/v2/exercices', $exercice->toArray());
 
@@ -107,8 +107,8 @@ class ExerciceTest extends TestCase
      */
     public function testEditExercice()
     {
-        $exercice = factory(Exercice::class)->create();
-        $exerciceEdited = factory(Exercice::class)->make();
+        $exercice = Exercice::factory()->create();
+        $exerciceEdited = Exercice::factory()->make();
 
         $response = $this->json(
             'PUT',
@@ -130,7 +130,7 @@ class ExerciceTest extends TestCase
      */
     public function testValidateExerciceInvalid()
     {
-        $exercice = factory(Exercice::class)->create();
+        $exercice = Exercice::factory()->create();
 
         $response = $this->json('POST', "/api/v2/exercices/$exercice->id/valider");
 
@@ -149,7 +149,7 @@ class ExerciceTest extends TestCase
      */
     public function testValidateExerciceOK()
     {
-        $exercice = factory(Exercice::class)->create();
+        $exercice = Exercice::factory()->create();
 
         $sapeurs = [
             array(
@@ -180,7 +180,7 @@ class ExerciceTest extends TestCase
      */
     public function testRemoveExercice()
     {
-        $exercice = factory(Exercice::class)->create();
+        $exercice = Exercice::factory()->create();
 
         $response = $this->json(
             'DELETE',

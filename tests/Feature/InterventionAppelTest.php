@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Infrastructure\Models\Intervention;
+use App\Infrastructure\Models\Appel;
 use App\Domaine\API\InterventionService;
 use Exception;
 use Tests\TestCase;
@@ -19,7 +20,7 @@ class InterventionAppelTest extends TestCase
 
         $this->interventionService = $this->app->make(InterventionService::class);
 
-        $data = factory(Intervention::class)->make()->toArray();
+        $data = Intervention::factory()->make()->toArray();
 
         $this->interventionId = $this->interventionService->createIntervention($data)->id;
     }
