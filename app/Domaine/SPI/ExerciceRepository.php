@@ -9,7 +9,7 @@ interface ExerciceRepository
     public function listExerciceLight();
 
     public function listSapeurOfExerciceById(int $exerciceId);
-
+    
     public function listExerciceOfSapeurById(int $exerciceComptableId, int $sapeurId);
 
     public function getExerciceByIdWith(int $exerciceId, $with = []);

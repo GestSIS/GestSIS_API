@@ -68,7 +68,7 @@ class InterventionTest extends TestCase
      */
     public function testAddInterventionOK()
     {
-        $intervention = factory(Intervention::class)->make();
+        $intervention = Intervention::factory()->make();
         $response = $this->json('POST', '/api/v2/interventions', $intervention->toArray());
 
         // dd($intervention);
@@ -87,7 +87,7 @@ class InterventionTest extends TestCase
      */
     public function testValidateInterventionInvalid()
     {
-        $intervention = factory(Intervention::class)->create();
+        $intervention = Intervention::factory()->create();
 
         $response = $this->json('POST', "/api/v2/interventions/$intervention->id/valider");
 
@@ -106,7 +106,7 @@ class InterventionTest extends TestCase
      */
     public function testValidateInterventionOK()
     {
-        $intervention = factory(Intervention::class)->create();
+        $intervention = Intervention::factory()->create();
 
         $sapeurs = array(
             array(
@@ -148,8 +148,8 @@ class InterventionTest extends TestCase
      */
     public function testEditIntervention()
     {
-        $intervention = factory(Intervention::class)->create();
-        $interventionEdited = factory(Intervention::class)->make();
+        $intervention = Intervention::factory()->create();
+        $interventionEdited = Intervention::factory()->make();
 
         $response = $this->json(
             'PUT',

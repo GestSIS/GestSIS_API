@@ -2,12 +2,15 @@
 
 namespace App\Infrastructure\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Exercice extends Model
 {
     protected $fillable = ['date', 'heure', 'lieu', 'designation', 'communications', 'duree', 'statut', 'exercice_categorie_id', 'localite_id', 'statut'];
 
+    use HasFactory;
+    
     //Statut:
     // 0 -> Annulé
     // 1 -> A saisir

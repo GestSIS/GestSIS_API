@@ -27,6 +27,13 @@ class EcritureController extends Controller
         return response()->json(['data' => $ecritures]);
     }
 
+    public function amende(int $exerciceComptableId)
+    {
+        $ecritures = $this->service->getEcrituresAmendesForExerciceComptableById($exerciceComptableId);
+
+        return response()->json(['data' => $ecritures]);
+    }
+
     public function intervention(int $interventionId)
     {
         $ecritures = $this->service->getEcrituresForInterventionById($interventionId);

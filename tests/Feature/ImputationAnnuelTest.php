@@ -24,7 +24,7 @@ class ImputationAnnuelTest extends TestCase
         $sapeurService = $this->app->make(SapeurService::class);
         $this->comptabiliteService = $this->app->make(ComptabiliteService::class);
 
-        $data = factory(Sapeur::class)->make()->toArray();
+        $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "29.01.2019";
         $this->sapeurOneId = $sapeurService->createSapeur($data)->id;
         $sapeurService->addFonction($this->sapeurOneId, [
@@ -34,7 +34,7 @@ class ImputationAnnuelTest extends TestCase
             'remarque' => 'Deserve it'
         ]);
 
-        $data = factory(Sapeur::class)->make()->toArray();
+        $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "29.01.2019";
         $this->sapeurTwoId = $sapeurService->createSapeur($data)->id;
         $sapeurService->addFonction($this->sapeurTwoId, [
@@ -44,7 +44,7 @@ class ImputationAnnuelTest extends TestCase
             'remarque' => 'Deserve it'
         ]);
 
-        $data = factory(Sapeur::class)->make()->toArray();
+        $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "29.01.2019";
         $this->sapeurThreeId = $sapeurService->createSapeur($data)->id;
         $sapeurService->addFonction($this->sapeurThreeId, [

@@ -47,7 +47,7 @@ class ExerciceSapeurTest extends TestCase
      */
     public function testAddExerciceSapeurs()
     {
-        $exercice = factory(Exercice::class)->create();
+        $exercice = Exercice::factory()->create();
 
         $sapeurs = array(
             'sapeurs' => array(
@@ -95,7 +95,7 @@ class ExerciceSapeurTest extends TestCase
      */
     public function testEditExerciceSapeurs()
     {
-        $exercice = factory(Exercice::class)->make();
+        $exercice = Exercice::factory()->make();
         $exercice = $this->exerciceService->createExercice($exercice->toArray());
 
         $sapeurs = [
@@ -147,7 +147,7 @@ class ExerciceSapeurTest extends TestCase
      */
     public function testRemoveExerciceSapeurs()
     {
-        $exercice = factory(Exercice::class)->make();
+        $exercice = Exercice::factory()->make();
         $exercice = $this->exerciceService->createExercice($exercice->toArray());
 
         $sapeurs = [

@@ -19,6 +19,16 @@ class EcritureRepositoryEloquent implements EcritureRepository
                 ->get()
         );
     }
+    
+    public function listeAmendeForExerciceComptableById($exerciceComptableId)
+    {
+        return $this->convertCollectionOfEcritures(
+            Ecriture
+                ::where('exercice_comptable_id', $exerciceComptableId)
+                ->where('amende', True)
+                ->get()
+        );
+    }
 
     public function listeEcritureForCompteAndExerciceComptableById($compteId, $exerciceComptableId)
     {

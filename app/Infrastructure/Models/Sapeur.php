@@ -2,10 +2,13 @@
 
 namespace App\Infrastructure\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Sapeur extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['nom', 'prenom', 'suffixe', 'rue', 'no_rue', 'date_naissance', 'no_avs', 'profession', 'employeur',
                  'lieu_de_travail', 'email', 'actif', 'iban', 'iban_statut', 'remarque','porteur', 'localite_id', 'civilite_id'];
 

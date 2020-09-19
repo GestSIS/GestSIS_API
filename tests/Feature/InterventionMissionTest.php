@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Infrastructure\Models\Mission;
 use App\Infrastructure\Models\Intervention;
 use App\Domaine\API\InterventionService;
 use Exception;
@@ -19,7 +20,7 @@ class InterventionMissionTest extends TestCase
 
         $this->interventionService = $this->app->make(InterventionService::class);
 
-        $data = factory(Intervention::class)->make()->toArray();
+        $data = Intervention::factory()->make()->toArray();
 
         $this->interventionId = $this->interventionService->createIntervention($data)->id;
     }
@@ -53,7 +54,7 @@ class InterventionMissionTest extends TestCase
      */
     public function testAddInterventionMissions()
     {
-        $missions = factory('App\Infrastructure\Models\Mission', 3)->make(['intervention_id' => $this->interventionId]);
+        $missions = Mission::factory()->count(3)->make(['intervention_id' => $this->interventionId]);
 
         $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/missions', ['missions' => $missions]);
 
@@ -72,7 +73,7 @@ class InterventionMissionTest extends TestCase
      */
     public function testEditInterventionMissions()
     {
-        $missions = factory('App\Infrastructure\Models\Mission', 3)->make(['intervention_id' => $this->interventionId])->toArray();
+        $missions = Mission::factory()->count(3)->make(['intervention_id' => $this->interventionId])->toArray();
 
         $res = $this->interventionService->addMissions($this->interventionId, $missions);
         $res = array_map(function ($s) {
@@ -98,7 +99,7 @@ class InterventionMissionTest extends TestCase
      */
     public function testRemoveInterventionMissions()
     {
-        $missions = factory('App\Infrastructure\Models\Mission', 3)->make(['intervention_id' => $this->interventionId])->toArray();
+        $missions = Mission::factory()->count(3)->make(['intervention_id' => $this->interventionId])->toArray();
 
         $ids = array_map(function ($s) {
             return $s->id;
