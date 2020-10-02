@@ -1,23 +1,25 @@
 <?php
 
-
 namespace App\Domaine\API;
-
 
 use App\Domaine\Business\ExerciceBusiness;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\Exercice;
 use Illuminate\Database\Eloquent\Collection;
+use PDF;
 
 class ExerciceService
 {
     protected $repository;
+    protected $sapeurRepository;
     protected $business;
 
-    public function __construct(ExerciceRepository $repository, ExerciceBusiness $business)
+    public function __construct(ExerciceRepository $repository, SapeurRepository $sapeurRepository, ExerciceBusiness $business)
     {
         $this->repository = $repository;
+        $this->sapeurRepository = $sapeurRepository;
         $this->business = $business;
     }
 
@@ -141,10 +143,19 @@ class ExerciceService
 
     function listePresence($exerciceId)
     {
-        $presences = $this->repository->listSapeurOfExerciceById($exerciceId);
-
-        return View('pdf/liste-presence', ["presences" => $presences]);
-        $pdf = PDF::loadView('pdf/liste-presence', ["presences" => $presences]);
+        $exercice = $this->repository->getExerciceByIdWith($exerciceId, ['sapeurs', 'localite']);
+        $sapeurs = $this->sapeurRepository->listeSapeurLight();
+        $exercice->sapeurs = array_map(function($s) use($sapeurs) {
+            $id = $s->sapeur_id;
+            $sap = array_values(array_filter($sapeurs, function($sapeur) use ($id) {
+              return $sapeur->id == $id;
+            }))[0];
+            $s->display = $sap->nom." ".$sap->prenom;
+            return $s;
+          }, array_values($exercice->sapeurs));
+          
+        return View('pdf/liste-presence', ["exercice" => $exercice]);
+        $pdf = PDF::loadView('pdf/liste-presence', ["exercice" => $exercice]);
         return $pdf->download('invoice.pdf');
     }
 }
