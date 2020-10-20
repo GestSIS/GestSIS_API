@@ -22,6 +22,9 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
     Route::get('exercice/{id}/liste-appel', 'ExerciceController@listeAppel');
     Route::get('exercice/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
 
+    Route::get('test/{id}/{avs}/{ac}/{ded}', 'PaiementController@creer');
+    Route::get('test/ecritures/{id}', 'EcritureController@all');
+
     Route::group(['middleware' => 'jwtToken'], function () {
 
         // Sapeurs
