@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class ModifyPaiementsTable extends Migration
+class UpdatePaiementsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -36,6 +36,17 @@ class ModifyPaiementsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('paiements');
+        Schema::table('paiements', function (Blueprint $table) {
+            $table->dropForeign(['decompte_id']);
+            $table->dropForeign(['sapeur_id']);
+            $table->dropColumn('decompte_id');
+            $table->dropColumn('sapeur_id');
+            $table->dropColumn('solde');
+            $table->dropColumn('indemnite');
+            $table->dropColumn('frais');
+            $table->dropColumn('amende');
+            $table->dropColumn('avs');
+            $table->dropColumn('total');
+        });
     }
 }
