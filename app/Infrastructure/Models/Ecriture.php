@@ -29,6 +29,7 @@ class Ecriture extends Model
         'date',
         'heure',
         'date_paiement',
+        'id_paiement'
     ];
 
 }
