@@ -24,16 +24,24 @@ class DecompteController extends Controller
      * $taux_ac - taux ac payé par le sapeur
      * $deduction - true si les déduction doivent être faites sur ce paiement
      */
-    public function creer($designation, $exerciceComptableId, $taux_avs, $taux_ac, $deduction)
+    public function creer($request)
     {
+
+        $data = $request->validate([
+            'designation' => 'string',
+            'taux_avs' => 'numeric|min:0|max:1|nullable',
+            'taux_ac' => 'numeric|min:0|max:1|nullable',
+            'deduction' => 'boolean',
+            'exerciceContableId' => 'integer|min:1'
+        ]);
+
         $decompte = new Decompte();
-        $decompte->designation = $designation;
-        $decompte->exercice_comptable_id = $exerciceComptableId;
+        $decompte->designation = $data['designation'];
+        $decompte->exercice_comptable_id = $data['exerciceComptableId'];
         $decompte->save();
 
-        $ecritures = $this->service->getAllEcrituresForExerciceComptableById($exerciceComptableId);
+        $ecritures = $this->service->getAllEcrituresForExerciceComptableById($data['exerciceComptableId']);
         $totaux = [];
-        $taux = $taux_ac + $taux_avs;
         //faire les totaux par sapeurs
         foreach ($ecritures as $ecriture) {
             //ne pas ajouter une écriture déja payé
@@ -62,10 +70,11 @@ class DecompteController extends Controller
         }
 
         //déductions
-        if ($deduction) {
+        if ($data['deduction']) {
+            $taux = $data['taux_ac'] + $data['taux_avs'];
             //vérifie si autre décompte sans déduction
-            if (sizeof(Decompte::where('exercice_comptable_id', $exerciceComptableId)->where('deduction', false)->get()) > 0) {
-                foreach (Decompte::where('exercice_comptable_id', $exerciceComptableId)->where('deduction', false)->get() as $d) {
+            if (sizeof(Decompte::where('exercice_comptable_id', $data['exerciceComptableId'])->where('deduction', false)->get()) > 0) {
+                foreach (Decompte::where('exercice_comptable_id', $data['exerciceComptableId'])->where('deduction', false)->get() as $d) {
                     foreach (Paiement::where('decompte_id', $d->id)->get() as $p) {
                         if (!array_key_exists($ecriture->sapeur_id, $totaux)) {
                             $totaux[$ecriture->sapeur_id] = array(
@@ -119,7 +128,8 @@ class DecompteController extends Controller
     /**
      * Retourne tous les décomptes
      */
-    public function getAll(){
+    public function getAll()
+    {
         $decomptes = Decompte::all();
 
         return response()->json(['data' => $decomptes]);
@@ -129,7 +139,8 @@ class DecompteController extends Controller
      * Retourne un décompte
      * $id - id du décompte souhaité
      */
-    public function get($id){
+    public function get($id)
+    {
         $decomptes = Decompte::find($id);
 
         return response()->json(['data' => $decomptes]);
@@ -139,7 +150,8 @@ class DecompteController extends Controller
      * Retourne tous les décompte pour un exercice comptable
      * $id - id de l'exercice comptable
      */
-    public function getByExerciceComptable($id){
+    public function getByExerciceComptable($id)
+    {
         $decomptes = Decompte::where('exercice_comptable_id', $id)->get();
 
         return response()->json(['data' => $decomptes]);
