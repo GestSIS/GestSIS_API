@@ -15,7 +15,13 @@ class DeompteTest extends TestCase
      */
     public function testDecompteCreation()
     {
-        $response = $this->json('GET', "api/v2/decompte/create");
+        $data = array();
+        $data['designation'] = "test";
+        $data['taux_avs'] = "0.04";
+        $data['taux_ac'] = "0.02";
+        $data['deduction'] = "1";
+        $data['exerciceComptableId'] = "4";
+        $response = $this->json('POST', "api/v2/decompte/create", $data);
 
         $response
             ->assertStatus(200)

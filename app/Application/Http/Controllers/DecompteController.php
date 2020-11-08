@@ -24,20 +24,20 @@ class DecompteController extends Controller
      * $taux_ac - taux ac payé par le sapeur
      * $deduction - true si les déduction doivent être faites sur ce paiement
      */
-    public function creer($request)
+    public function creer(Request $request)
     {
-
         $data = $request->validate([
             'designation' => 'string',
             'taux_avs' => 'numeric|min:0|max:1|nullable',
             'taux_ac' => 'numeric|min:0|max:1|nullable',
             'deduction' => 'boolean',
-            'exerciceContableId' => 'integer|min:1'
+            'exerciceComptableId' => 'integer|min:1'
         ]);
 
         $decompte = new Decompte();
         $decompte->designation = $data['designation'];
         $decompte->exercice_comptable_id = $data['exerciceComptableId'];
+        $decompte->deduction = $data['deduction'];
         $decompte->save();
 
         $ecritures = $this->service->getAllEcrituresForExerciceComptableById($data['exerciceComptableId']);
