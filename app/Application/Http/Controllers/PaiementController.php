@@ -47,7 +47,7 @@ class PaiementController extends Controller
         $paiements = array();
 
         foreach($decomptes as $decompte){
-            array_merge($paiements, Paiement::where('decompte_id', $$decomptes->id)->get());
+            array_merge($paiements, Paiement::where('decompte_id', $decompte->id)->get()->toArray());
         }
 
         return response()->json(['data' => $paiements]);
