@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Domaine\API\ComptabiliteService;
 use App\Infrastructure\Models\Decompte;
+use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Paiement;
 
 class DecompteController extends Controller
@@ -46,7 +47,7 @@ class DecompteController extends Controller
         $decompte->acTotal = 0;
         $decompte->save();
 
-        $ecritures = $this->service->getAllEcrituresForExerciceComptableById($data['exerciceComptableId']);
+        $ecritures = Ecriture::where('exercice_comptable_id' ,$data['exerciceComptableId'])->get();
         $totaux = [];
         //faire les totaux par sapeurs
         foreach ($ecritures as $ecriture) {
@@ -73,6 +74,7 @@ class DecompteController extends Controller
 
                 $ecriture->date_paiement = date('Y-m-d');
                 $ecriture->decompte_id = $decompte->id;
+                $ecriture->save();
             }
         }
 
@@ -123,7 +125,7 @@ class DecompteController extends Controller
             $paiements[] = [
                 'decompte_id' => $decompte->id,
                 'solde' => $total['solde'],
-                'indeminte' => $total['indemnite'],
+                'indemnite' => $total['indemnite'],
                 'frais' => $total['frais'],
                 'amende' => $total['amende'],
                 'avs' => $total['avs'],
