@@ -15,8 +15,8 @@ class DecompteTableSeeder extends Seeder
     public function run()
     {
         $categories = array(
-            array('id' => 1, 'designation' => 'partiel', 'exercice_comptable_id' => 3, 'deduction' => 0),
-            array('id' => 2, 'designation' => 'final', 'exercice_comptable_id' => 3, 'deduction' => 1),
+            array('id' => 1, 'designation' => 'partiel', 'exercice_comptable_id' => 3, 'deduction' => 0, 'avsTotal' => 0, 'acTotal' => 0),
+            array('id' => 2, 'designation' => 'final', 'exercice_comptable_id' => 3, 'deduction' => 1, 'avsTotal' => 0, 'acTotal' => 0),
         );
 
         foreach ($categories as $categorie) {

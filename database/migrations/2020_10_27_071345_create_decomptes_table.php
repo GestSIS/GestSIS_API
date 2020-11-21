@@ -21,7 +21,7 @@ class CreateDecomptesTable extends Migration
             $table->foreign('exercice_comptable_id')->references('id')->on('exercice_comptables');
 
             $table->string('designation');
-            $table->integer('deduction');
+            $table->boolean('deduction');
         });
     }
 

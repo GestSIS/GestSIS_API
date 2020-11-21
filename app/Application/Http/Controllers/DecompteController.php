@@ -42,6 +42,8 @@ class DecompteController extends Controller
         $decompte->designation = $data['designation'];
         $decompte->exercice_comptable_id = $data['exerciceComptableId'];
         $decompte->deduction = $data['deduction'];
+        $decompte->avsTotal = 0;
+        $decompte->acTotal = 0;
         $decompte->save();
 
         $ecritures = $this->service->getAllEcrituresForExerciceComptableById($data['exerciceComptableId']);
@@ -58,8 +60,9 @@ class DecompteController extends Controller
                         "amende" => 0.0,
                         "avs" => 0.0,
                         "total" => 0.0,
-                        "soldePI" => 0.0,
-                        "indemnitePI" => 0.0
+                        "soldeTotal" => 0.0,
+                        "indemniteTotal" => 0.0,
+                        "deductionEffectuees" => 0.0
                     );
                 }
                 $totaux[$ecriture->sapeur_id]['solde'] += $ecriture->solde;
@@ -77,32 +80,37 @@ class DecompteController extends Controller
         if ($data['deduction']) {
             $taux = $data['taux_ac'] + $data['taux_avs'];
             //vérifie si autre décompte sans déduction
-            foreach (Decompte::where('exercice_comptable_id', $data['exerciceComptableId'])->where('deduction', false)->get() as $d) {
+            foreach (Decompte::where('exercice_comptable_id', $data['exerciceComptableId'])->get() as $d) {
                 foreach (Paiement::where('decompte_id', $d->id)->get() as $p) {
-                    if (!array_key_exists($ecriture->sapeur_id, $totaux)) {
-                        $totaux[$ecriture->sapeur_id] = array(
+                    if (!array_key_exists($p->sapeur_id, $totaux)) {
+                        $totaux[$p->sapeur_id] = array(
                             "solde" => 0.0,
                             "indemnite" => 0.0,
                             "frais" => 0.0,
                             "amende" => 0.0,
                             "avs" => 0.0,
                             "total" => 0.0,
-                            "soldePI" => 0.0,
-                            "indemnitePI" => 0.0
+                            "soldeTotal" => 0.0,
+                            "indemniteTotal" => 0.0,
+                            "avsTotal" => 0.0
                         );
                     }
-                    $totaux['soldePI'] += $p->solde;
-                    $totaux['indemnitePI'] += $p->indemine;
+                    $totaux[$p->sapeur_id]['soldeTotal'] += $p->solde;
+                    $totaux[$p->sapeur_id]['indemniteTotal'] += $p->indemine;
+                    $totaux[$p->sapeur_id]['avsTotal'] += $p->avs;
                 }
             }
             foreach ($totaux as $key => $total) {
-                $solde_imposable = max($total['solde'] + $total['soldePI'] - $data['minimumSoldeImposable'], 0.0);
-                $total_imposable = $solde_imposable + $total['indemnite'] + $total['indemnitePI'];
+                $solde_imposable = max($total['solde'] + $total['soldeTotal'] - $data['minimumSoldeImposable'], 0.0);
+                $total_imposable = $solde_imposable + $total['indemnite'] + $total['indemniteTotal'];
                 //TODO ou si sapeur fait la demande
                 if ($total_imposable > $data['minmumImposableAVSAC']) {
-                    $totaux[$key]['avs'] = $total_imposable * $taux;
+                    $totaux[$key]['avs'] = ($total_imposable * $taux)-$total['avsTotal'];
+                    $decompte->avsTotal += ($total_imposable * $data['taux_avs'])-(($total['avsTotal']/$taux)*$data['taux_avs']);
+                    $decompte->acTotal += ($total_imposable * $data['taux_ac'])-(($total['avsTotal']/$taux)*$data['taux_ac']);
                 }
             }
+            $decompte->save();
         }
 
         //total à payer
@@ -113,14 +121,14 @@ class DecompteController extends Controller
         //création paiements
         foreach ($totaux as $key => $total) {
             $paiements[] = [
-            'decompte_id' => $decompte->id,
-            'solde' => $total['solde'],
-            'indeminte' => $total['indemnite'],
-            'frais' => $total['frais'],
-            'amende' => $total['amende'],
-            'avs' => $total['avs'],
-            'total' => $total['total'],
-            'sapeur_id' => $key
+                'decompte_id' => $decompte->id,
+                'solde' => $total['solde'],
+                'indeminte' => $total['indemnite'],
+                'frais' => $total['frais'],
+                'amende' => $total['amende'],
+                'avs' => $total['avs'],
+                'total' => $total['total'],
+                'sapeur_id' => $key
             ];
         }
         Paiement::insert($paiements);
