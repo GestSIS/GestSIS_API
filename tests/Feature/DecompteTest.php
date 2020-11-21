@@ -10,36 +10,9 @@ use Tests\TestCase;
 class DeompteTest extends TestCase
 {
     /**
-     * création d'un décompte.
-     *
-     * @return void
-     */
-    public function testDecompteCreation()
-    {
-        $data = array();
-        $data['designation'] = "test";
-        $data['taux_avs'] = "0.04";
-        $data['taux_ac'] = "0.02";
-        $data['deduction'] = "1";
-        $data['exerciceComptableId'] = "4";
-        $response = $this->json('POST', "api/v2/decompte/create", $data);
-
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'data' => [
-                    'id',
-                    'designation',
-                    'exercice_comptable_id',
-                    'deduction'
-                ]
-            ]);
-    }
-
-    /**
      * Test simple de création de décompte sans déductions
      */
-    public function testDecompte1()
+    public function testDecompteSimple()
     {
         $ecritures = [
             array(
@@ -204,6 +177,56 @@ class DeompteTest extends TestCase
                             "avs" => 0.00,
                             "total" => 7.00
                         ]
+                    ]
+                ]
+            );
+
+            //vérification qu'on ne paye pas deux fois
+            $response = $this->json('POST', "api/v2/decompte/create", $data);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'designation',
+                    'exercice_comptable_id',
+                    'deduction'
+                ]
+            ])->assertJson(
+                [
+                    "data" => [
+                        "designation" => "test",
+                        "exercice_comptable_id" => "1",
+                        "deduction" => "0",
+                        "avsTotal" => 0,
+                        "acTotal" => 0
+                    ]
+                ]
+            );
+
+        $response = $this->json('GET', "api/v2/paiement/decompte/" . $response['data']['id']);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'decompte_id',
+                        'solde',
+                        'indemnite',
+                        'frais',
+                        'amende',
+                        'avs',
+                        'total',
+                        'sapeur_id',
+                    ]
+                ]
+            ])->assertJson(
+                [
+                    "data" => [
+                        
                     ]
                 ]
             );
