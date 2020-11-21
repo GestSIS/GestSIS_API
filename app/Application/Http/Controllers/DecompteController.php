@@ -47,8 +47,9 @@ class DecompteController extends Controller
         $decompte->acTotal = 0;
         $decompte->save();
 
-        $ecritures = Ecriture::where('exercice_comptable_id' ,$data['exerciceComptableId'])->get();
-        $totaux = [];
+        $ecritures = Ecriture::where('exercice_comptable_id', $data['exerciceComptableId'])->get();
+
+        $totaux = array();
         //faire les totaux par sapeurs
         foreach ($ecritures as $ecriture) {
             //ne pas ajouter une écriture déja payé
@@ -75,6 +76,7 @@ class DecompteController extends Controller
                 $ecriture->date_paiement = date('Y-m-d');
                 $ecriture->decompte_id = $decompte->id;
                 $ecriture->save();
+
             }
         }
 
@@ -119,6 +121,7 @@ class DecompteController extends Controller
         foreach ($totaux as $key => $total) {
             $totaux[$key]['total'] = $total['solde'] + $total['indemnite'] + $total['frais'] - $total['avs'];
         }
+
         $paiements = array();
         //création paiements
         foreach ($totaux as $key => $total) {
@@ -135,7 +138,7 @@ class DecompteController extends Controller
         }
         Paiement::insert($paiements);
 
-        return response()->json(['data' => $decompte]);
+        return response()->json(['data' => $decompte)->get()]);
     }
 
     /**
