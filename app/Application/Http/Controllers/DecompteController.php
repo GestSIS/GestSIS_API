@@ -138,7 +138,7 @@ class DecompteController extends Controller
         }
         Paiement::insert($paiements);
 
-        return response()->json(['data' => $decompte)->get()]);
+        return response()->json(['data' => $decompte]);
     }
 
     /**
