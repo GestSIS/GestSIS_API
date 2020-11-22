@@ -366,6 +366,143 @@ class DeompteTest extends TestCase
             );
     }
 
+
+    public function testDeuxDecompteDeduction()
+    {
+        $ecritures = [
+            array(
+                "designation" => "test",
+                "total" => 1,
+                "tarif" => 0,
+                "type_unite_id" => 1,
+                "quantite" => 0,
+                "solde" => 6900,
+                "indemnite" => 0,
+                "frais" => 0,
+                "amende_montant" => 0,
+                "sapeur_id" => 1,
+                "compte_id" => 1,
+                "exercice_comptable_id" => 3,
+                "ecriture_categorie_id" => 1,
+            ),
+            array(
+                "designation" => "test",
+                "total" => 1,
+                "tarif" => 0,
+                "type_unite_id" => 1,
+                "quantite" => 0,
+                "solde" => 0,
+                "indemnite" => 1900,
+                "frais" => 0,
+                "amende_montant" => 0,
+                "sapeur_id" => 2,
+                "compte_id" => 1,
+                "exercice_comptable_id" => 3,
+                "ecriture_categorie_id" => 1,
+            ),
+            array(
+                "designation" => "test",
+                "total" => 1,
+                "tarif" => 0,
+                "type_unite_id" => 1,
+                "quantite" => 0,
+                "solde" => 6000,
+                "indemnite" => 900,
+                "frais" => 0,
+                "amende_montant" => 0,
+                "sapeur_id" => 3,
+                "compte_id" => 1,
+                "exercice_comptable_id" => 3,
+                "ecriture_categorie_id" => 1,
+            )
+        ];
+        Ecriture::insert($ecritures);
+
+
+        $data = array();
+        $data['designation'] = "test";
+        $data['taux_avs'] = "0.05275";
+        $data['taux_ac'] = "0.12";
+        $data['deduction'] = 1;
+        $data['exerciceComptableId'] = "3";
+        $data['minimumImposableAVSAC'] = 2300;
+        $data['minimumSoldeImposable'] = 5000;
+        $response = $this->json('POST', "api/v2/decompte/create", $data);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'designation',
+                    'exercice_comptable_id',
+                    'deduction'
+                ]
+            ])->assertJson(
+                [
+                    "data" => [
+                        "designation" => "test",
+                        "exercice_comptable_id" => "3",
+                        "deduction" => "1",
+                        "avsTotal" => 0,
+                        "acTotal" => 0
+                    ]
+                ]
+            );
+
+        $response = $this->json('GET', "api/v2/paiement/decompte/" . $response['data']['id']);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'decompte_id',
+                        'solde',
+                        'indemnite',
+                        'frais',
+                        'amende',
+                        'avs',
+                        'total',
+                        'sapeur_id',
+                    ]
+                ]
+            ])->assertJson(
+                [
+                    "data" => [
+                        [
+                            "sapeur_id" => 1,
+                            "solde" => "6900.00",
+                            "indemnite" => "0.00",
+                            "frais" => "0.00",
+                            "amende" => "0.00",
+                            "avs" => "0",
+                            "total" => "6900"
+                        ],
+                        [
+                            "sapeur_id" => 2,
+                            "solde" => "0.00",
+                            "indemnite" => "1900.00",
+                            "frais" => "0.00",
+                            "amende" => "0.00",
+                            "avs" => "0",
+                            "total" => "1900"
+                        ],
+                        [
+                            "sapeur_id" => 3,
+                            "solde" => "6000.00",
+                            "indemnite" => "900.00",
+                            "frais" => "0.00",
+                            "amende" => "0.00",
+                            "avs" => "0",
+                            "total" => "6900"
+                        ]
+                    ]
+                ]
+            );
+    }
+
     /**
      * get all décomptes.
      *
