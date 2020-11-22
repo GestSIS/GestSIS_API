@@ -35,7 +35,7 @@ class DecompteController extends Controller
             'taux_ac' => 'numeric|min:0|max:1|nullable',
             'deduction' => 'boolean',
             'exerciceComptableId' => 'integer|min:1',
-            'minmumImposableAVSAC' => 'numeric',
+            'minimumImposableAVSAC' => 'numeric',
             'minimumSoldeImposable' => 'numeric'
         ]);
 
@@ -64,7 +64,7 @@ class DecompteController extends Controller
                         "total" => 0.0,
                         "soldeTotal" => 0.0,
                         "indemniteTotal" => 0.0,
-                        "deductionEffectuees" => 0.0
+                        "avsTotal" => 0.0
                     );
                 }
                 $totaux[$ecriture->sapeur_id]['solde'] += $ecriture->solde;
@@ -104,11 +104,12 @@ class DecompteController extends Controller
                     $totaux[$p->sapeur_id]['avsTotal'] += $p->avs;
                 }
             }
+
             foreach ($totaux as $key => $total) {
                 $solde_imposable = max($total['solde'] + $total['soldeTotal'] - $data['minimumSoldeImposable'], 0.0);
                 $total_imposable = $solde_imposable + $total['indemnite'] + $total['indemniteTotal'];
                 //TODO ou si sapeur fait la demande
-                if ($total_imposable > $data['minmumImposableAVSAC']) {
+                if ($total_imposable > $data['minimumImposableAVSAC']) {
                     $totaux[$key]['avs'] = ($total_imposable * $taux)-$total['avsTotal'];
                     $decompte->avsTotal += ($total_imposable * $data['taux_avs'])-(($total['avsTotal']/$taux)*$data['taux_avs']);
                     $decompte->acTotal += ($total_imposable * $data['taux_ac'])-(($total['avsTotal']/$taux)*$data['taux_ac']);
