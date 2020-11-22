@@ -84,8 +84,8 @@ class DecompteController extends Controller
         if ($data['deduction']) {
             $taux = $data['taux_ac'] + $data['taux_avs'];
             //vérifie si autre décompte sans déduction
-            foreach (Decompte::where('exercice_comptable_id', $data['exerciceComptableId'])->get() as $d) {
-                foreach (Paiement::where('decompte_id', $d->id)->get() as $p) {
+            foreach (Decompte::where('exercice_comptable_id', $data['exerciceComptableId'])->with('paiements')->get() as $d) {
+                foreach ($d->paiements as $p) {
                     if (!array_key_exists($p->sapeur_id, $totaux)) {
                         $totaux[$p->sapeur_id] = array(
                             "solde" => 0.0,

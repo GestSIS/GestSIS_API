@@ -10,4 +10,9 @@ class Decompte extends Model
     {
         return $this->belongsTo('App\Infrastructure\Models\ExerciceComptable');
     }
+
+    public function paiements()
+    {
+        return $this->hasMany('App\Infrastructure\Models\Paiement');
+    }
 }

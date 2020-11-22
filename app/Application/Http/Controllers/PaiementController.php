@@ -43,13 +43,8 @@ class PaiementController extends Controller
      * $id - id de l'exercice comptable
      */
     public function getByExerciceComptable($id){
-        $decomptes = Decompte::where('exercice_comptable_id', $id)->get();
-        $paiements = array();
+        $decomptes = Decompte::where('exercice_comptable_id', $id)->with('paiements')->get();
 
-        foreach($decomptes as $decompte){
-            array_merge($paiements, Paiement::where('decompte_id', $decompte->id)->get()->toArray());
-        }
-
-        return response()->json(['data' => $paiements]);
+        return response()->json(['data' => $decomptes]);
     }
 }

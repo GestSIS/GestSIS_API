@@ -75,17 +75,27 @@ class PaiementsTest extends TestCase
         $response
             ->assertStatus(200)
             ->assertJsonStructure([
-                'data' => [
+                "data" => [
                     '*' => [
-                        'id',
-                        'decompte_id',
-                        'solde',
-                        'indemnite',
-                        'frais',
-                        'amende',
-                        'avs',
-                        'total',
-                        'sapeur_id',
+                        "id",
+                        "exercice_comptable_id",
+                        "designation",
+                        "deduction",
+                        "avsTotal",
+                        "acTotal",
+                        "paiements" => [
+                            '*' => [
+                                "id",
+                                "decompte_id",
+                                "sapeur_id",
+                                "solde",
+                                "indemnite",
+                                "frais",
+                                "amende",
+                                "avs",
+                                "total"
+                            ]
+                        ]
                     ]
                 ]
             ]);
