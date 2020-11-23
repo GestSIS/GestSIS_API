@@ -40,7 +40,15 @@ class DecompteController extends Controller
             'minimumSoldeImposable' => 'numeric'
         ]);
 
-        return response()->json(['data' => PaiementBusiness::creer($data)]);
+        return response()->json(['data' => PaiementBusiness::creerDecompte(
+            $data['designation'],
+            $data['exerciceComptableId'],
+            $data['deduction'],
+            $data['taux_ac'],
+            $data['taux_avs'],
+            $data['minimumSoldeImposable'],
+            $data['minimumImposableAVSAC']
+        )]);
     }
 
     /**

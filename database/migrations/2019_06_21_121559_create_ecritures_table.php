@@ -36,7 +36,6 @@ class CreateEcrituresTable extends Migration
             $table->decimal('solde');
             $table->decimal('indemnite');
             $table->decimal('frais');
-            $table->decimal('amende_montant');
 
             $table->boolean('amende')->default(false);
             //TODO Regarder si les clés étrangères suivantes peuventêtre remplacé par un simple boolean

@@ -8,18 +8,28 @@ use App\Infrastructure\Models\Paiement;
 
 class PaiementBusiness
 {
-    public static function creer($data)
+    /**
+     * creer un décompte
+     * $designation - nom du décompte
+     * $exerciceComptableId - id de l'exercice comptable pour lequel créer les paiements
+     * $tauxAvs - taux avs payé par le sapeur
+     * $tauxAc - taux ac payé par le sapeur
+     * $deduction - true si les déduction doivent être faites sur ce paiement
+     * $minimumImposableAVSAC - montant imposable minimum pour l'avs
+     * $minimumSoldeImposable - montant minimum pour que la solde soit imposable
+     */
+    public static function creerDecompte($designation, $exerciceComptableId, $deduction, $tauxAc, $tauxAvs, $minimumSoldeImposable, $minimumImposableAVSAC)
     {
 
         $decompte = new Decompte();
-        $decompte->designation = $data['designation'];
-        $decompte->exercice_comptable_id = $data['exerciceComptableId'];
-        $decompte->deduction = $data['deduction'];
+        $decompte->designation = $designation;
+        $decompte->exercice_comptable_id = $exerciceComptableId;
+        $decompte->deduction = $deduction;
         $decompte->avsTotal = 0;
         $decompte->acTotal = 0;
         $decompte->save();
 
-        $ecritures = Ecriture::where('exercice_comptable_id', $data['exerciceComptableId'])->get();
+        $ecritures = Ecriture::where('exercice_comptable_id', $exerciceComptableId)->get();
 
         $totaux = array();
         //faire les totaux par sapeurs
@@ -53,10 +63,10 @@ class PaiementBusiness
         }
 
         //déductions
-        if ($data['deduction']) {
-            $taux = $data['taux_ac'] + $data['taux_avs'];
+        if ($deduction) {
+            $taux = $tauxAc + $tauxAvs;
             //vérifie si autre décompte sans déduction
-            foreach (Decompte::where('exercice_comptable_id', $data['exerciceComptableId'])->with('paiements')->get() as $d) {
+            foreach (Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get() as $d) {
                 foreach ($d->paiements as $p) {
                     if (!array_key_exists($p->sapeur_id, $totaux)) {
                         $totaux[$p->sapeur_id] = array(
@@ -77,15 +87,15 @@ class PaiementBusiness
                 }
             }
             foreach ($totaux as $key => $total) {
-                $solde_imposable = max($total['solde'] + $total['soldeTotal'] - $data['minimumSoldeImposable'], 0.0);
+                $solde_imposable = max($total['solde'] + $total['soldeTotal'] - $minimumSoldeImposable, 0.0);
                 $total_imposable = $solde_imposable + $total['indemnite'] + $total['indemniteTotal'];
                 
             
                 //TODO ou si sapeur fait la demande
-                if ($total_imposable > $data['minimumImposableAVSAC']) {
+                if ($total_imposable > $minimumImposableAVSAC) {
                     $totaux[$key]['avs'] = ($total_imposable * $taux)-$total['avsTotal'];
-                    $decompte->avsTotal += ($total_imposable * $data['taux_avs'])-(($total['avsTotal']/$taux)*$data['taux_avs']);
-                    $decompte->acTotal += ($total_imposable * $data['taux_ac'])-(($total['avsTotal']/$taux)*$data['taux_ac']);
+                    $decompte->avsTotal += ($total_imposable * $tauxAvs)-(($total['avsTotal']/$taux)*$tauxAvs);
+                    $decompte->acTotal += ($total_imposable * $tauxAc)-(($total['avsTotal']/$taux)*$tauxAc);
                 }
             }
             $decompte->save();

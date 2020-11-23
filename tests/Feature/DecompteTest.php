@@ -24,7 +24,6 @@ class DeompteTest extends TestCase
                 "solde" => 1,
                 "indemnite" => 0,
                 "frais" => 0,
-                "amende_montant" => 0,
                 "sapeur_id" => 1,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 1,
@@ -39,7 +38,6 @@ class DeompteTest extends TestCase
                 "solde" => 0,
                 "indemnite" => 2,
                 "frais" => 0,
-                "amende_montant" => 0,
                 "sapeur_id" => 1,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 1,
@@ -54,7 +52,6 @@ class DeompteTest extends TestCase
                 "solde" => 0,
                 "indemnite" => 0,
                 "frais" => 4,
-                "amende_montant" => 0,
                 "sapeur_id" => 1,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 1,
@@ -69,7 +66,6 @@ class DeompteTest extends TestCase
                 "solde" => 1,
                 "indemnite" => 0,
                 "frais" => 0,
-                "amende_montant" => 0,
                 "sapeur_id" => 2,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 1,
@@ -84,7 +80,6 @@ class DeompteTest extends TestCase
                 "solde" => 0,
                 "indemnite" => 2,
                 "frais" => 0,
-                "amende_montant" => 0,
                 "sapeur_id" => 2,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 1,
@@ -99,7 +94,6 @@ class DeompteTest extends TestCase
                 "solde" => 0,
                 "indemnite" => 0,
                 "frais" => 4,
-                "amende_montant" => 0,
                 "sapeur_id" => 2,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 1,
@@ -115,6 +109,9 @@ class DeompteTest extends TestCase
         $data['taux_ac'] = "0.5";
         $data['deduction'] = 0;
         $data['exerciceComptableId'] = "1";
+        $data['minimumImposableAVSAC'] = 2300;
+        $data['minimumSoldeImposable'] = 5000;
+        
         $response = $this->json('POST', "api/v2/decompte/create", $data);
 
         $response
@@ -242,7 +239,6 @@ class DeompteTest extends TestCase
                 "solde" => 7400,
                 "indemnite" => 0,
                 "frais" => 0,
-                "amende_montant" => 0,
                 "sapeur_id" => 1,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 2,
@@ -257,7 +253,6 @@ class DeompteTest extends TestCase
                 "solde" => 0,
                 "indemnite" => 2400,
                 "frais" => 0,
-                "amende_montant" => 0,
                 "sapeur_id" => 2,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 2,
@@ -272,7 +267,6 @@ class DeompteTest extends TestCase
                 "solde" => 6000,
                 "indemnite" => 1400,
                 "frais" => 0,
-                "amende_montant" => 0,
                 "sapeur_id" => 3,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 2,
@@ -379,7 +373,6 @@ class DeompteTest extends TestCase
                 "solde" => 6900,
                 "indemnite" => 0,
                 "frais" => 0,
-                "amende_montant" => 0,
                 "sapeur_id" => 1,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 3,
@@ -394,7 +387,6 @@ class DeompteTest extends TestCase
                 "solde" => 0,
                 "indemnite" => 1900,
                 "frais" => 0,
-                "amende_montant" => 0,
                 "sapeur_id" => 2,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 3,
@@ -409,7 +401,6 @@ class DeompteTest extends TestCase
                 "solde" => 6000,
                 "indemnite" => 900,
                 "frais" => 0,
-                "amende_montant" => 0,
                 "sapeur_id" => 3,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 3,
