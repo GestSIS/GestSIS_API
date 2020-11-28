@@ -19,6 +19,14 @@ class PaiementController extends Controller
         return response()->json(['data' => $paiements]);
     }
 
+     /**
+     * Créer un fichier iso20022 pour un paiement
+     * 
+     * @param int $paiementId id du paiement pour lequelle le fichier doit être créé
+     * @param string $nom titulaire du compte débiteur
+     * @param string $bic bic de la banque du compte débiteur
+     * @param string $iban iban du compte débiteur
+     */
     public function iso20022(Request $request)
     {
         $data = $request->validate([

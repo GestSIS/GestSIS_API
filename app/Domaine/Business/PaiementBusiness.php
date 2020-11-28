@@ -14,17 +14,23 @@ use Z38\SwissPayment\StructuredPostalAddress;
 use Z38\SwissPayment\TransactionInformation\BankCreditTransfer;
 use Z38\SwissPayment\Money;
 
+/**
+ * PaiementBusiness
+ */
 class PaiementBusiness
 {
     /**
      * creer un décompte
-     * $designation - nom du décompte
-     * $exerciceComptableId - id de l'exercice comptable pour lequel créer les paiements
-     * $tauxAvs - taux avs payé par le sapeur
-     * $tauxAc - taux ac payé par le sapeur
-     * $deduction - true si les déduction doivent être faites sur ce paiement
-     * $minimumImposableAVSAC - montant imposable minimum pour l'avs
-     * $minimumSoldeImposable - montant minimum pour que la solde soit imposable
+     * 
+     * @param string $designation nom du décompte
+     * @param int $exerciceComptableId id de l'exercice comptable pour lequel créer les paiements
+     * @param float $taux_avs taux avs payé par le sapeur
+     * @param float $taux_ac taux ac payé par le sapeur
+     * @param boolean $deduction true si les déduction doivent être faites sur ce paiement
+     * @param float $minimumImposableAVSAC montant imposable minimum pour l'avs
+     * @param float $minimumSoldeImposable montant minimum pour que la solde soit imposable
+     * 
+     * @return Decompte décompte créé
      */
     public static function creerDecompte($designation, $exerciceComptableId, $deduction, $tauxAc, $tauxAvs, $minimumSoldeImposable, $minimumImposableAVSAC)
     {
@@ -132,6 +138,16 @@ class PaiementBusiness
         return $decompte;
     }
 
+    /**
+     * Créer un fichier iso20022 pour un décompte
+     * 
+     * @param int $decompteId id du décompte pour lequelle le fichier doit être créé
+     * @param string $nom titulaire du compte débiteur
+     * @param string $bic bic de la banque du compte débiteur
+     * @param string $iban iban du compte débiteur
+     * 
+     * @return string fichier xml répondant à la norme ISO 20022
+     */
     public static function iso20022FromDecompte($decompteId, $nom, $bic, $iban)
     {
         $paiements = Decompte::find($decompteId)->paiements()->get();
@@ -163,6 +179,16 @@ class PaiementBusiness
         return $message->asXml();
     }
 
+     /**
+     * Créer un fichier iso20022 pour un paiement
+     * 
+     * @param int $paiementId id du paiement pour lequelle le fichier doit être créé
+     * @param string $nom titulaire du compte débiteur
+     * @param string $bic bic de la banque du compte débiteur
+     * @param string $iban iban du compte débiteur
+     * 
+     * @return string fichier xml répondant à la norme ISO 20022
+     */
     public static function iso20022FromPaiement($paiementId, $nom, $bic, $iban)
     {
         $paiement = new PaymentInformation(
