@@ -2,6 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
+use App\Domaine\Business\PaiementBusiness;
 use Illuminate\Http\Request;
 
 use App\Infrastructure\Models\Paiement;
@@ -16,6 +17,20 @@ class PaiementController extends Controller
         $paiements = Paiement::all();
 
         return response()->json(['data' => $paiements]);
+    }
+
+    public function iso20022(Request $request)
+    {
+        $data = $request->validate([
+            'paiementId' => 'integer|min:1',
+            'nom' => 'string',
+            'iban' => 'string',
+            'bic' => 'string',
+        ]);
+
+        return response()->streamDownload(function () use ($data) {
+            echo PaiementBusiness::iso20022FromPaiement($data['paiementId'], $data['nom'], $data['bic'], $data['iban']);
+        }, "paiement.xml");
     }
 
     /**

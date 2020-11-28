@@ -9,6 +9,14 @@ use App\Domaine\Business\PaiementBusiness;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Paiement;
+use Z38\SwissPayment\BIC;
+use Z38\SwissPayment\IBAN;
+use Z38\SwissPayment\IID;
+use Z38\SwissPayment\Message\CustomerCreditTransfer;
+use Z38\SwissPayment\PaymentInformation\PaymentInformation;
+use Z38\SwissPayment\StructuredPostalAddress;
+use Z38\SwissPayment\TransactionInformation\BankCreditTransfer;
+use Z38\SwissPayment\Money;
 
 class DecompteController extends Controller
 {
@@ -49,6 +57,20 @@ class DecompteController extends Controller
             $data['minimumSoldeImposable'],
             $data['minimumImposableAVSAC']
         )]);
+    }
+
+    public function iso20022(Request $request)
+    {
+        $data = $request->validate([
+            'decompteId' => 'integer|min:1',
+            'nom' => 'string',
+            'iban' => 'string',
+            'bic' => 'string',
+        ]);
+
+        return response()->streamDownload(function () use ($data) {
+            echo PaiementBusiness::iso20022FromDecompte($data['decompteId'], $data['nom'], $data['bic'], $data['iban']);
+        }, Decompte::find($data['decompteId'])->designation.".xml");
     }
 
     /**

@@ -5,6 +5,14 @@ namespace App\Domaine\Business;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Paiement;
+use Z38\SwissPayment\BIC;
+use Z38\SwissPayment\IBAN;
+use Z38\SwissPayment\IID;
+use Z38\SwissPayment\Message\CustomerCreditTransfer;
+use Z38\SwissPayment\PaymentInformation\PaymentInformation;
+use Z38\SwissPayment\StructuredPostalAddress;
+use Z38\SwissPayment\TransactionInformation\BankCreditTransfer;
+use Z38\SwissPayment\Money;
 
 class PaiementBusiness
 {
@@ -58,7 +66,6 @@ class PaiementBusiness
                 $ecriture->date_paiement = date('Y-m-d');
                 $ecriture->decompte_id = $decompte->id;
                 $ecriture->save();
-
             }
         }
 
@@ -89,13 +96,13 @@ class PaiementBusiness
             foreach ($totaux as $key => $total) {
                 $solde_imposable = max($total['solde'] + $total['soldeTotal'] - $minimumSoldeImposable, 0.0);
                 $total_imposable = $solde_imposable + $total['indemnite'] + $total['indemniteTotal'];
-                
-            
+
+
                 //TODO ou si sapeur fait la demande
                 if ($total_imposable > $minimumImposableAVSAC) {
-                    $totaux[$key]['avs'] = ($total_imposable * $taux)-$total['avsTotal'];
-                    $decompte->avsTotal += ($total_imposable * $tauxAvs)-(($total['avsTotal']/$taux)*$tauxAvs);
-                    $decompte->acTotal += ($total_imposable * $tauxAc)-(($total['avsTotal']/$taux)*$tauxAc);
+                    $totaux[$key]['avs'] = ($total_imposable * $taux) - $total['avsTotal'];
+                    $decompte->avsTotal += ($total_imposable * $tauxAvs) - (($total['avsTotal'] / $taux) * $tauxAvs);
+                    $decompte->acTotal += ($total_imposable * $tauxAc) - (($total['avsTotal'] / $taux) * $tauxAc);
                 }
             }
             $decompte->save();
@@ -124,5 +131,62 @@ class PaiementBusiness
 
         return $decompte;
     }
-    
+
+    public static function iso20022FromDecompte($decompteId, $nom, $bic, $iban)
+    {
+        $paiements = Decompte::find($decompteId)->paiements()->get();
+        $paiement = new PaymentInformation(
+            "payment-000",
+            $nom,
+            new BIC($bic),
+            new IBAN($iban)
+        );
+        $i = 0;
+        foreach ($paiements as $p) {
+            $sapeur = $p->sapeur()->get()[0];
+            $transaction = new BankCreditTransfer(
+                "instr-" . $i,
+                "e2e-" . $i,
+                new Money\CHF((int)($p->total * 100)),
+                $sapeur->prenom . " " . $sapeur->nom,
+                new StructuredPostalAddress($sapeur->rue, $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
+                new IBAN($sapeur->iban),
+                IID::fromIBAN(new IBAN($sapeur->iban))
+            );
+            $paiement->addTransaction($transaction);
+            $i++;
+        }
+
+        $message = new CustomerCreditTransfer('message-001', $nom);
+        $message->addPayment($paiement);
+
+        return $message->asXml();
+    }
+
+    public static function iso20022FromPaiement($paiementId, $nom, $bic, $iban)
+    {
+        $paiement = new PaymentInformation(
+            "payment-000",
+            $nom,
+            new BIC($bic),
+            new IBAN($iban)
+        );
+        $p = Paiement::find($paiementId);
+        $sapeur = $p->sapeur()->get()[0];
+        $transaction = new BankCreditTransfer(
+            "instr-001",
+            "e2e-001",
+            new Money\CHF((int)($p->total * 100)),
+            $sapeur->prenom . " " . $sapeur->nom,
+            new StructuredPostalAddress($sapeur->rue, $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
+            new IBAN($sapeur->iban),
+            IID::fromIBAN(new IBAN($sapeur->iban))
+        );
+        $paiement->addTransaction($transaction);
+
+        $message = new CustomerCreditTransfer('message-001', $nom);
+        $message->addPayment($paiement);
+
+        return $message->asXml();
+    }
 }
