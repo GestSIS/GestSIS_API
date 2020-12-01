@@ -23,12 +23,12 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
     Route::get('exercice/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
 
     Route::post('decompte/create', 'DecompteController@creer');
-    Route::post('decompte/iso20022', 'DecompteController@iso20022');
+    Route::post('decompte/{id}/iso20022', 'DecompteController@iso20022');
     Route::get('decompte/', 'DecompteController@getAll');
     Route::get('decompte/{id}', 'DecompteController@get');
     Route::get('decompte/exerciceComptable/{id}', 'DecompteController@getByExerciceComptable');
 
-    Route::post('paiement/iso20022', 'PaiementController@iso20022');
+    Route::post('paiement/{id}/iso20022', 'PaiementController@iso20022');
     Route::get('paiement/', 'PaiementController@getAll');
     Route::get('paiement/{id}', 'PaiementController@get');
     Route::get('paiement/decompte/{id}', 'PaiementController@getByDecompte');

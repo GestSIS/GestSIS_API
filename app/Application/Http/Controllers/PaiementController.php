@@ -22,22 +22,21 @@ class PaiementController extends Controller
      /**
      * Créer un fichier iso20022 pour un paiement
      * 
-     * @param int $paiementId id du paiement pour lequelle le fichier doit être créé
+     * @param int $id id du paiement pour lequelle le fichier doit être créé
      * @param string $nom titulaire du compte débiteur
      * @param string $bic bic de la banque du compte débiteur
      * @param string $iban iban du compte débiteur
      */
-    public function iso20022(Request $request)
+    public function iso20022(Request $request, $id)
     {
         $data = $request->validate([
-            'paiementId' => 'integer|min:1',
             'nom' => 'string',
             'iban' => 'string',
             'bic' => 'string',
         ]);
 
-        return response()->streamDownload(function () use ($data) {
-            echo PaiementBusiness::iso20022FromPaiement($data['paiementId'], $data['nom'], $data['bic'], $data['iban']);
+        return response()->streamDownload(function () use ($data, $id) {
+            echo PaiementBusiness::iso20022FromPaiement($id, $data['nom'], $data['bic'], $data['iban']);
         }, "paiement.xml");
     }
 
