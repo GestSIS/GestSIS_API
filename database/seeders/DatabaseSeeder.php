@@ -73,5 +73,8 @@ class DatabaseSeeder extends Seeder
         $this->call(MedecinTableSeeder::class);
         $this->call(ControleMedicauxTypeTableSeeder::class);
         $this->call(ControleMedicauxTableSeeder::class);
+
+        $this->call(DecompteTableSeeder::class);
+        $this->call(PaiementTableSeeder::class);
     }
 }

@@ -189,6 +189,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->date = $ecriture->date;
         $object->heure = $ecriture->heure;
         $object->date_paiement = $ecriture->date_paiement;
+        $object->decompte_id = $ecriture->decompte_id;
 
         return $object;
     }
