@@ -21,6 +21,9 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
     Route::get('exercice/{id}/liste-presence', 'ExerciceController@listePresence');
     Route::get('exercice/{id}/liste-appel', 'ExerciceController@listeAppel');
     Route::get('exercice/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
+    
+    Route::get('generer-amende/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
+    Route::get('generer-amende/{id}', 'AmendeController@annuel');
 
     Route::group(['middleware' => 'jwtToken'], function () {
 
@@ -102,8 +105,8 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::get('telephones', 'TelephoneController@index')->name('api.v2.telephone.index');
 
         // Groupes
-        Route::get('groupes', 'GroupeController@index')->name('api.v2.groupes');
         Route::get('groupes-sapeurs', 'GroupeSapeursController@index')->name('api.v2.groupes-sapeurs');
+        Route::resource('groupes', 'GroupeController')->only(['index', 'store', 'update', 'delete']);
 
         //Données de bases générales
         Route::get('localites', 'LocaliteController@index')->name('api.v2.localites');
@@ -132,8 +135,8 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::post('imputation/intervention/{id}', 'ImputationController@intervention');
         Route::post('imputation/exercice/{id}', 'ImputationController@exercice');
         Route::post('imputation/annuel/{id}', 'ImputationController@annuel');
-        Route::post('generer-amende/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
-        Route::post('generer-amende/{id}', 'AmendeController@annuel');
+        // Route::post('generer-amende/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
+        // Route::post('generer-amende/{id}', 'AmendeController@annuel');
 
         Route::get('indemnites-types', 'IdemniteTypeController@index');
         Route::get('frais-types', 'FraisTypeController@index');

@@ -10,7 +10,9 @@ use App\Domaine\SPI\InterventionRepository;
 use App\Domaine\SPI\SapeurRepository;
 use App\Domaine\Exceptions\ArrayException;
 use Carbon\Carbon;
-use phpDocumentor\Reflection\Types\Null_;
+use App\Infrastructure\Models\Amende;
+use App\Infrastructure\Models\Ecriture;
+use App\Infrastructure\Models\ExerciceSapeur;
 
 class ImputationBusiness
 {
@@ -44,7 +46,75 @@ class ImputationBusiness
      */
     public function genererAmendeSapeur($exerciceComptableId, $sapeurId)
     {
+        // Chargment de la config des amendes
+        $amendes = Amende::orderBy('order', 'ASC')->get();
+        $nbAmende = count($amendes);
 
+        if ($nbAmende <= 0) {
+            throw new ArrayException(['config' => 'Pas de configurations d\'amendes'], "Aucune amende configurée");
+        }
+
+        // Chargement des exercices amendés du sapeur
+        $exercices = ExerciceSapeur::where([
+            ['sapeur_id', '=', $sapeurId],
+            ['amende', '=', 1]
+        ])->join('exercices', 'exercices.id', '=', 'exercice_sapeur.exercice_id')
+        ->where('exercices.exercice_comptable_id', $exerciceComptableId)
+        ->orderBy('exercices.date', 'ASC')
+        ->orderBy('exercices.heure')->get();
+
+        // Suppression de amendes existantes
+        Ecriture::where([
+            ['exercice_comptable_id', '=', $exerciceComptableId],
+            ['sapeur_id', '=', $sapeurId],
+            ['amende', '=', true]
+        ])->delete();
+
+        // Pour l'instant juste générer de nouvelles amendes
+        $newEcritures = array();
+        $i = 0;
+        foreach($exercices as $exercice) {
+            
+            $amende = $amendes[$i];
+            
+            // Creation d'une écriture pour chaque exercice amendé
+            $ecriture = array(
+                'solde' => 0,
+                'solde_min' => null,
+                'solde_min_pour' => null,
+                'indemnite' => 0,
+                'taux' => null,
+                'taux_description' => null,
+                'frais' => 0,
+                'amende' => True,
+                'type_unite_id' => null,
+                'designation' => $exercice->designation,
+                'total' => $amende->montant,
+                'tarif' => 0,
+                'quantite' => 0,
+                'sapeur_id' => $exercice->sapeur_id,
+                'exercice_id' => $exercice->exercice_id,
+                'intervention_id' => null,
+                'compte_id' => $amende->compte_id,
+                'exercice_comptable_id' => $exerciceComptableId,
+                'indemnite_annuel_type_id' => null,
+                'ecriture_categorie_id' => $amende->ecriture_categorie_id,
+                'frais_annuel_type_id' => null,
+                'paiement_id' => null,
+                'date_paiement' => null,
+                'heure' => null,
+                'date' => null,
+            );
+
+            array_push($newEcritures, $ecriture);
+            
+            if ($i + 1 < $nbAmende) {
+                $i++;
+            }
+        }
+
+        Ecriture::insert($newEcritures);
+        return $newEcritures;
     }
 
     /**
@@ -52,19 +122,80 @@ class ImputationBusiness
      */
     public function genererAmendeAnnuels($exerciceComptableId)
     {
-        // Load amendes config
-        $amendes = Null;
-        
-        // Load all absences pour chaque exercice et sapeur
-        $absences = Null;
-        
-        // Générer des ecritures pour chaque absence
-        $ecritures = Null;
-        
-        // Comparer avec les écritures existantes ou supprimer les existantes
-        
-        // Enregistrer les ecritures générées
-        
+        // Chargment de la config des amendes
+        $amendes = Amende::orderBy('order', 'ASC')->get();
+        $nbAmende = count($amendes);
+
+        if ($nbAmende <= 0) {
+            throw new ArrayException(['config' => 'Pas de configurations d\'amendes'], "Aucune amende configurée");
+        }
+
+        // Chargement des exercices amendés du sapeur
+        $exercices = ExerciceSapeur::where([
+            ['amende', '=', 1]
+        ])->join('exercices', 'exercices.id', '=', 'exercice_sapeur.exercice_id')
+        ->where('exercices.exercice_comptable_id', $exerciceComptableId)
+        ->orderBy('exercice_sapeur.sapeur_id', 'ASC')
+        ->orderBy('exercices.date', 'ASC')
+        ->orderBy('exercices.heure')->get();
+
+        // Suppression de amendes existantes
+        Ecriture::where([
+            ['exercice_comptable_id', '=', $exerciceComptableId],
+            ['amende', '=', true]
+        ])->delete();
+
+        // Pour l'instant juste générer de nouvelles amendes
+        $newEcritures = array();
+        $i = 0;
+        $sapeurId = -1;
+
+        foreach($exercices as $exercice) {
+            if ($sapeurId != $exercice->sapeur_id) {
+                $i = 0;
+                $sapeurId = $exercice->sapeur_id;
+            }
+
+            $amende = $amendes[$i];
+            
+            // Creation d'une écriture pour chaque exercice amendé
+            $ecriture = array(
+                'solde' => 0,
+                'solde_min' => null,
+                'solde_min_pour' => null,
+                'indemnite' => 0,
+                'taux' => null,
+                'taux_description' => null,
+                'frais' => 0,
+                'amende' => True,
+                'type_unite_id' => null,
+                'designation' => $exercice->designation,
+                'total' => $amende->montant,
+                'tarif' => 0,
+                'quantite' => 0,
+                'sapeur_id' => $exercice->sapeur_id,
+                'exercice_id' => $exercice->exercice_id,
+                'intervention_id' => null,
+                'compte_id' => $amende->compte_id,
+                'exercice_comptable_id' => $exerciceComptableId,
+                'indemnite_annuel_type_id' => null,
+                'ecriture_categorie_id' => $amende->ecriture_categorie_id,
+                'frais_annuel_type_id' => null,
+                'paiement_id' => null,
+                'date_paiement' => null,
+                'heure' => null,
+                'date' => null,
+            );
+
+            array_push($newEcritures, $ecriture);
+            
+            if ($i + 1 < $nbAmende) {
+                $i++;
+            }
+        }
+
+        Ecriture::insert($newEcritures);
+        return $newEcritures;
     }
 
     /**

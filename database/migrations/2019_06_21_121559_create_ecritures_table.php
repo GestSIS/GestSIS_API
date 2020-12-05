@@ -24,7 +24,7 @@ class CreateEcrituresTable extends Migration
             $table->date('date')->nullable();
             $table->time('heure')->nullable();
 
-            $table->unsignedBigInteger('type_unite_id');
+            $table->unsignedBigInteger('type_unite_id')->nullable();
             $table->foreign('type_unite_id')->references('id')->on('type_unites');
 
             $table->decimal('quantite');
