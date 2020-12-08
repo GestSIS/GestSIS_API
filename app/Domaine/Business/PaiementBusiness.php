@@ -102,8 +102,7 @@ class PaiementBusiness
             foreach ($totaux as $key => $total) {
                 $solde_imposable = max($total['solde'] + $total['soldeTotal'] - $minimumSoldeImposable, 0.0);
                 $total_imposable = $solde_imposable + $total['indemnite'] + $total['indemniteTotal'];
-
-
+              
                 //TODO ou si sapeur fait la demande
                 if ($total_imposable > $minimumImposableAVSAC) {
                     $totaux[$key]['avs'] = ($total_imposable * $taux) - $total['avsTotal'];
