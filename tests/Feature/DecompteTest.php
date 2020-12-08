@@ -560,4 +560,22 @@ class DeompteTest extends TestCase
                 ]
             ]);
     }
+
+    /**
+     * get iso20022
+     *
+     * @return void
+     */
+    public function testIso20022()
+    {
+        $data = [
+            'decompteId' => 5,
+            'nom' => "SIS Delémont",
+            'IBAN' => 'CH51 0022 5225 9529 1301 C',
+            'bic' => 'UBSWCHZH80A'
+        ];
+        $response = $this->json('POST', "api/v2/decompte/5/iso20022", $data);
+
+        $response->assertStatus(200);
+    }
 }
