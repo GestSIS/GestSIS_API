@@ -164,7 +164,8 @@ class PaiementBusiness
                 "e2e-" . $i,
                 new Money\CHF((int)($p->total * 100)),
                 $sapeur->prenom . " " . $sapeur->nom,
-                new StructuredPostalAddress($sapeur->rue, $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
+                //new StructuredPostalAddress($sapeur->rue == null ? "" : $sapeur->rue, $sapeur->no_rue == null ? "" : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
+                new StructuredPostalAddress($sapeur->rue == null ? "" : $sapeur->rue, $sapeur->no_rue == null ? "" : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
                 new IBAN($sapeur->iban),
                 IID::fromIBAN(new IBAN($sapeur->iban))
             );
@@ -203,7 +204,7 @@ class PaiementBusiness
             "e2e-001",
             new Money\CHF((int)($p->total * 100)),
             $sapeur->prenom . " " . $sapeur->nom,
-            new StructuredPostalAddress($sapeur->rue, $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
+            new StructuredPostalAddress($sapeur->rue == null ? "" : $sapeur->rue, $sapeur->no_rue == null ? "" : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
             new IBAN($sapeur->iban),
             IID::fromIBAN(new IBAN($sapeur->iban))
         );
