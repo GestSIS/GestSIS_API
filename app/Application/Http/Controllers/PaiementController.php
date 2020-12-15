@@ -30,9 +30,9 @@ class PaiementController extends Controller
     public function iso20022(Request $request, $id)
     {
         $data = $request->validate([
-            'nom' => 'string',
-            'iban' => 'string',
-            'bic' => 'string',
+            'nom' => 'string|required',
+            'iban' => 'string|required',
+            'bic' => 'string|required',
         ]);
 
         return response()->streamDownload(function () use ($data, $id) {
