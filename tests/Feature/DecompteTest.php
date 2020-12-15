@@ -524,7 +524,7 @@ class DeompteTest extends TestCase
      */
     public function testDecompteAnneeComptable()
     {
-        $response = $this->json('GET', "api/v2/decompte/exerciceComptable/3");
+        $response = $this->json('GET', "api/v2/decompte/exercice-comptable/3");
 
         $response
             ->assertStatus(200)

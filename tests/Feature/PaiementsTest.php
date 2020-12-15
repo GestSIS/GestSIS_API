@@ -70,7 +70,7 @@ class PaiementsTest extends TestCase
      */
     public function testPaiementAnnee()
     {
-        $response = $this->json('GET', "api/v2/paiement/exerciceComptable/4");
+        $response = $this->json('GET', "api/v2/paiement/exercice-comptable/4");
 
         $response
             ->assertStatus(200)
