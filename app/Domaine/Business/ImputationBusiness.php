@@ -44,7 +44,7 @@ class ImputationBusiness
     /**
      * Générer les amendes pour un sapeur
      */
-    public function genererAmendeSapeur($exerciceComptableId, $sapeurId)
+    public function genererAmendesSapeur($exerciceComptableId, $sapeurId)
     {
         // Chargment de la config des amendes
         $amendes = Amende::orderBy('order', 'ASC')->get();
@@ -103,7 +103,7 @@ class ImputationBusiness
                 'paiement_id' => null,
                 'date_paiement' => null,
                 'heure' => null,
-                'date' => null,
+                'date' => $exercice->date,
             );
 
             array_push($newEcritures, $ecriture);
@@ -120,7 +120,7 @@ class ImputationBusiness
     /**
      * Générer les amendes pour l'année comptable en cours
      */
-    public function genererAmendeAnnuels($exerciceComptableId)
+    public function genererAmendesAnnuels($exerciceComptableId)
     {
         // Chargment de la config des amendes
         $amendes = Amende::orderBy('order', 'ASC')->get();
@@ -184,7 +184,7 @@ class ImputationBusiness
                 'paiement_id' => null,
                 'date_paiement' => null,
                 'heure' => null,
-                'date' => null,
+                'date' => $exercice->date,
             );
 
             array_push($newEcritures, $ecriture);

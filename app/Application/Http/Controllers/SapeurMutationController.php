@@ -86,8 +86,8 @@ class SapeurMutationController extends Controller
      */
     public function destroy(int $sapeurId, int $mutationId)
     {
-        $this->service->removeMutation($sapeurId, $mutationId);
+        $actif = $this->service->removeMutation($sapeurId, $mutationId);
 
-        return response()->json(['data' => 'success']);
+        return response()->json(['data' => ['actif' => $actif]]);
     }
 }

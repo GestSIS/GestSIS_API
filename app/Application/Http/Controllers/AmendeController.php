@@ -15,7 +15,7 @@ class AmendeController extends Controller
 
     public function sapeur(int $exerciceComptableId, int $sapeurId)
     {
-        $ecritures = $this->service->genererAmendeSapeur($exerciceComptableId, $sapeurId);
+        $ecritures = $this->service->genererAmendesSapeur($exerciceComptableId, $sapeurId);
 
         return response()->json(['data' => $ecritures]);
     }

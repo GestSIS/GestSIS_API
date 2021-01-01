@@ -134,6 +134,10 @@ class SapeurRepositoryEloquent implements SapeurRepository
         return $this->convertSapeur(Sapeur::find($sapeurId));
     }
 
+    public function updateSapeurStatusById(int $sapeurId, $actif) {
+        Sapeur::where('id', $sapeurId)->limit(1)->update(array('actif' => $actif));
+    }
+
     public function deleteSapeurById($sapeurId)
     {
         //TODO FIXME !!!

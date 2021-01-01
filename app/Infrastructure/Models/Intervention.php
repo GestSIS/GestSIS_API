@@ -53,6 +53,14 @@ class Intervention extends Model
     }
 
     /**
+     * The sapeur that belong to the sapeur.
+     */
+    public function ecritures()
+    {
+        return $this->hasMany('App\Infrastructure\Models\Ecritures');
+    }
+
+    /**
      * The groupe that belong to the sapeur.
      */
     public function groupes()

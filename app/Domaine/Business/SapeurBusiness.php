@@ -174,7 +174,7 @@ class SapeurBusiness
         }
 
         $fonction = $this->repository->addFonction($sapeurId, $data);
-        $this->updateMainFonction($sapeurId);
+        $this->updateFonctionPrincipale($sapeurId);
 
         return $fonction;
     }
@@ -232,14 +232,14 @@ class SapeurBusiness
 
         //Update fonction
         $fonction = $this->repository->updateFonction($sapeurId, $data);
-        $this->updateMainFonction($sapeurId);
+        $this->updateFonctionPrincipale($sapeurId);
         return $fonction;
     }
 
     public function removeFonction(int $sapeurId, int $fonctionSapeurId)
     {
         $this->repository->removeFonction($sapeurId, $fonctionSapeurId);
-        $this->updateMainFonction($sapeurId);
+        $this->updateFonctionPrincipale($sapeurId);
     }
 
     public function finFonctions($sapeurId, $date, $fonctionsId)
@@ -271,7 +271,7 @@ class SapeurBusiness
         }
 
         //$fonctions
-        $this->updateMainFonction($sapeurId);
+        $this->updateFonctionPrincipale($sapeurId);
 
         return $this->repository->getSapeurFonctionsById($sapeurId);
     }
@@ -310,6 +310,15 @@ class SapeurBusiness
         }
     }
 
+    private function isStillActif($mutations) {
+        foreach($mutations as $mutation) {
+            if ($mutation->sortie === NULL) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function addMutation($sapeurId, $data)
     {
         $mutations = $this->repository->getSapeurMutationsById($sapeurId);
@@ -317,8 +326,11 @@ class SapeurBusiness
 
         $mutation = $this->repository->addMutation($sapeurId, $data);
 
-        //TODO: Update actif statut depending of end of all mutation
-        return $mutation;
+        // Update actif statut depending of end of all mutation
+        array_push($mutations, $mutation);
+        $actif = $this->isStillActif($mutations) ? 1 : 0;
+        $this->repository->updateSapeurStatusById($sapeurId, $actif);
+        return ["mutation" => $mutation, "actif" => $actif];
     }
 
     public function updateMutation(int $sapeurId, $data)
@@ -330,8 +342,13 @@ class SapeurBusiness
         });
         $this->verifyMutationPeriode($data, $mutations);
 
-        return $this->repository->updateMutation($sapeurId, $data);
-        //TODO: Update actif statut depending of end of all mutation
+        $mutation = $this->repository->updateMutation($sapeurId, $data);
+        
+        // Update actif statut depending of end of all mutation
+        array_push($mutations, $mutation);
+        $actif = $this->isStillActif($mutations) ? 1 : 0;
+        $this->repository->updateSapeurStatusById($sapeurId, $actif);
+        return ["mutation" => $mutation, "actif" => $actif];
     }
 
     /**
@@ -350,7 +367,11 @@ class SapeurBusiness
         }
         $this->repository->removeMutation($sapeurId, $mutationId);
 
-        //TODO: Update actif statut depending of end of all mutation
+        // Update actif statut depending of end of all mutation
+        $mutations = $this->repository->getSapeurMutationsById($sapeurId);
+        $actif = $this->isStillActif($mutations) ? 1 : 0;
+        $this->repository->updateSapeurStatusById($sapeurId, $actif);
+        return $actif;
     }
 
     public function addTelephone(int $sapeurId, $data)
@@ -452,7 +473,7 @@ class SapeurBusiness
             $end1 !== null && $end2 !== null && !($end1 < $start2 || $end2 < $start1));
     }
 
-    private function updateMainFonction($sapeurId)
+    private function updateFonctionPrincipale($sapeurId)
     {
         $maxTri = -1;
         $maxId = -1;

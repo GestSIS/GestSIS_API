@@ -154,7 +154,7 @@ class ExerciceService
             return $s;
           }, array_values($exercice->sapeurs));
           
-        return View('pdf/liste-presence', ["exercice" => $exercice]);
+        // return View('pdf/liste-presence', ["exercice" => $exercice]);
         $pdf = PDF::loadView('pdf/liste-presence', ["exercice" => $exercice]);
         return $pdf->download('invoice.pdf');
     }

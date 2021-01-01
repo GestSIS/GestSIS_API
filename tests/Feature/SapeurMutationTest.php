@@ -68,7 +68,8 @@ class SapeurMutationTest extends TestCase
             ->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    'id', 'incorporation', 'sapeur_id', 'sortie', 'motif'
+                    'mutation' => ['id', 'incorporation', 'sapeur_id', 'sortie', 'motif'],
+                    'actif' => 1
                 ]
             ]);
 
@@ -112,7 +113,8 @@ class SapeurMutationTest extends TestCase
             ->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    'id', 'incorporation', 'sapeur_id', 'sortie', 'motif'
+                    'mutation' => ['id', 'incorporation', 'sapeur_id', 'sortie', 'motif'],
+                    'actif' => 1
                 ]
             ]);
 

@@ -22,8 +22,10 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
     Route::get('exercice/{id}/liste-appel', 'ExerciceController@listeAppel');
     Route::get('exercice/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
     
-    Route::get('generer-amende/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
-    Route::get('generer-amende/{id}', 'AmendeController@annuel');
+    Route::post('generer-amendes/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
+    Route::post('generer-amendes/{id}', 'AmendeController@annuel');
+    
+    Route::get('interventions/{id}/rapport', 'InterventionController@rapport')->name('api.v2.interventions.rapport');
 
     Route::group(['middleware' => 'jwtToken'], function () {
 

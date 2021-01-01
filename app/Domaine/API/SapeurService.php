@@ -140,7 +140,7 @@ class SapeurService
 
     public function removeMutation($sapeurId, $mutationId)
     {
-        $this->business->removeMutation($sapeurId, $mutationId);
+        return $this->business->removeMutation($sapeurId, $mutationId);
     }
 
     public function addTelephone($sapeurId, $telephone)
