@@ -34,6 +34,8 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
     Route::get('paiement/decompte/{id}', 'PaiementController@getByDecompte');
     Route::get('paiement/exercice-comptable/{id}', 'PaiementController@getByExerciceComptable');
 
+    Route::get('test', 'DecompteController@certificatSalaireSapeur');
+
     Route::group(['middleware' => 'jwtToken'], function () {
 
         // Sapeurs

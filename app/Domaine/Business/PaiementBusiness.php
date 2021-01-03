@@ -2,9 +2,16 @@
 
 namespace App\Domaine\Business;
 
+use App\Infrastructure\Models\Civilite;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
+use App\Infrastructure\Models\ExerciceCategorie;
+use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\Paiement;
+use App\Infrastructure\Models\Sapeur;
+use FPDM;
+use Illuminate\Support\Facades\Date;
+use IntlDateFormatter;
 use Z38\SwissPayment\BIC;
 use Z38\SwissPayment\IBAN;
 use Z38\SwissPayment\IID;
@@ -213,5 +220,34 @@ class PaiementBusiness
         $message->addPayment($paiement);
 
         return $message->asXml();
+    }
+
+    public static function certificatSalaire($exerciceComptableId, $sapeurId){
+        $sapeur = Sapeur::find($sapeurId);
+        $localite = $sapeur->localite()->get()[0];
+        $civilite = Civilite::find($sapeur->civilite_id);
+        $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
+        $fields = array(
+            'A' => "checked",
+            "C2" => $sapeur->no_avs,
+            "D" => $exerciceComptable->annee,
+            "E-von" => "01.01.".$exerciceComptable->annee,
+            "E-bis" => "31.12.".$exerciceComptable->annee,
+            'HAnrede' => $civilite->forme_politesse,
+            "HName" => $sapeur->nom . " " . $sapeur->prenom,
+            "HAdresse" => $sapeur->rue . " " . $sapeur->no_rue,
+            "HPostfach" => $localite->npa . " " . $localite->designation,
+            "OrtDatum" => PaiementBusiness::datefr()
+        );
+        $pdf = new FPDM('/app/resources/certificatSalaire.pdf');
+        $pdf->useCheckboxParser = true;
+        $pdf->load($fields, true);
+        $pdf->merge();
+        $pdf->Output();
+    }
+
+    private static function datefr(){
+        $mois = array(1=>" janvier ", " février ", " mars ", " avril ", " mai ", " juin ", " jullet ", " août ", " septembre ", " octobre ", " novembre ", " décembre ");
+        return date('j').$mois[date('n')].date('Y');
     }
 }

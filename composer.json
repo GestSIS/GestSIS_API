@@ -19,6 +19,7 @@
         "laravel/tinker": "^2.0",
         "laravel/ui": "^3.0",
         "spatie/laravel-http-logger": "^1.4",
+        "tmw/fpdm": "^2.9",
         "z38/swiss-payment": "^0.7.0"
     },
     "require-dev": {
