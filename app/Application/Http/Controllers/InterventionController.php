@@ -151,6 +151,8 @@ class InterventionController extends Controller
      */
     public function destroy($id)
     {
-        //TODO
+        $statut = $this->service->deleteInterventionById($id);
+        
+        return response()->json(['data' => $statut]);
     }
 }

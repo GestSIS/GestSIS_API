@@ -98,7 +98,7 @@ class InterventionService
      */
     public function deleteInterventionById($interventionId)
     {
-        $this->business->deleteInterventionById($interventionId);
+        return $this->business->deleteInterventionById($interventionId);
     }
 
     /**

@@ -57,7 +57,7 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::resource('exercice-comptables', 'ExerciceComptableController')->only(['index']);
 
         // Interventions
-        Route::resource('interventions', 'InterventionController')->only(['index', 'show', 'store', 'update']);
+        Route::resource('interventions', 'InterventionController')->only(['index', 'show', 'store', 'update', 'destroy']);
         Route::post('interventions/{id}/valider', 'InterventionController@valider')->name('api.v2.interventions.valider');
 
         Route::resource('interventions.materiels', 'InterventionMaterielsController')->only(['index']);
