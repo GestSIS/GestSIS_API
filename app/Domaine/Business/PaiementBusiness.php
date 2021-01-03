@@ -223,10 +223,31 @@ class PaiementBusiness
     }
 
     public static function certificatSalaire($exerciceComptableId, $sapeurId){
+        //infos de base
         $sapeur = Sapeur::find($sapeurId);
         $localite = $sapeur->localite()->get()[0];
         $civilite = Civilite::find($sapeur->civilite_id);
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
+
+        //Calcul des totaux
+        $solde = 0;
+        $indemnite= 0;
+        $deduction = 0;
+
+        foreach(Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get() as $d)
+        {
+            foreach ($d->paiements as $p)
+            {
+                if($p->sapeur_id==$sapeurId)
+                {
+                    $solde+=$p->solde;
+                    $indemnite+=$p->indemnite;
+                    $deduction+=$p->avs;
+                }
+            }
+        }
+
+        //remplissage pdf
         $fields = array(
             'A' => "checked",
             "C2" => $sapeur->no_avs,
@@ -237,9 +258,15 @@ class PaiementBusiness
             "HName" => $sapeur->nom . " " . $sapeur->prenom,
             "HAdresse" => $sapeur->rue . " " . $sapeur->no_rue,
             "HPostfach" => $localite->npa . " " . $localite->designation,
+            "1" => $solde+$indemnite,
+            "8" => $solde+$indemnite,
+            "9" => round($deduction),
+            "11" => ($solde+$indemnite)-round($deduction),
+            "15-1" => "Répartition:\tSolde\t\t".$solde,
+            "15-2" => "\t\t\tIndeminté\t".$indemnite,
             "OrtDatum" => PaiementBusiness::datefr()
         );
-        $pdf = new FPDM('/app/resources/certificatSalaire.pdf');
+        $pdf = new FPDM('/app/resources/certificatSalaire3.pdf');
         $pdf->useCheckboxParser = true;
         $pdf->load($fields, true);
         $pdf->merge();

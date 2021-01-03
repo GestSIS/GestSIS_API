@@ -115,6 +115,6 @@ class DecompteController extends Controller
 
     public function CertificatSalaireSapeur()
     {
-        PaiementBusiness::certificatSalaire(1, 1);
+        PaiementBusiness::certificatSalaire(2, 3);
     }
 }
