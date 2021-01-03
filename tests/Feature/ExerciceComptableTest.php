@@ -31,4 +31,17 @@ class ExerciceComptableTest extends TestCase
             ]);
     }
 
+
+    /**
+     * génération du certificat de salaire d'un sapeur
+     *
+     * @return void
+     */
+    public function certificatSalaireSapeur()
+    {
+        $response = $this->json('GET', "api/v2/exercice-comptables/2/certificatSalaire/3");
+
+        $response->assertStatus(200);
+    }
+
 }

@@ -222,6 +222,14 @@ class PaiementBusiness
         return $message->asXml();
     }
 
+    /**
+     * Créer un pdf contenant le certificat de salaire d'un sapeur pour l'exercice comptable spécifié
+     * 
+     * @param int $exerciceComptableId id de l'exercice compable souhaité
+     * @param int $sapeurId id du sapeur dont on veut le certificat de salaire
+     * 
+     * @return pdf certificat de salaire
+     */
     public static function certificatSalaire($exerciceComptableId, $sapeurId){
         //infos de base
         $sapeur = Sapeur::find($sapeurId);
@@ -266,13 +274,18 @@ class PaiementBusiness
             "15-2" => "\t\t\tIndeminté\t".$indemnite,
             "OrtDatum" => PaiementBusiness::datefr()
         );
-        $pdf = new FPDM('/app/resources/certificatSalaire3.pdf');
+        $pdf = new FPDM('/app/resources/certificatSalaire.pdf');
         $pdf->useCheckboxParser = true;
         $pdf->load($fields, true);
         $pdf->merge();
         $pdf->Output();
     }
 
+    /**
+     * retourne la date sous la forme jour mois année (ex 1 janvier 2000)
+     * 
+     * @return string date
+     */
     private static function datefr(){
         $mois = array(1=>" janvier ", " février ", " mars ", " avril ", " mai ", " juin ", " jullet ", " août ", " septembre ", " octobre ", " novembre ", " décembre ");
         return date('j').$mois[date('n')].date('Y');

@@ -113,8 +113,8 @@ class DecompteController extends Controller
         return response()->json(['data' => $decomptes]);
     }
 
-    public function CertificatSalaireSapeur()
+    public function CertificatSalaireSapeur($ExerciceCompatbleId, $SapeurId)
     {
-        PaiementBusiness::certificatSalaire(2, 3);
+        PaiementBusiness::certificatSalaire($ExerciceCompatbleId, $SapeurId);
     }
 }
