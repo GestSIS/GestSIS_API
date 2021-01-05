@@ -9,6 +9,14 @@ use App\Domaine\Business\PaiementBusiness;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Paiement;
+use Z38\SwissPayment\BIC;
+use Z38\SwissPayment\IBAN;
+use Z38\SwissPayment\IID;
+use Z38\SwissPayment\Message\CustomerCreditTransfer;
+use Z38\SwissPayment\PaymentInformation\PaymentInformation;
+use Z38\SwissPayment\StructuredPostalAddress;
+use Z38\SwissPayment\TransactionInformation\BankCreditTransfer;
+use Z38\SwissPayment\Money;
 
 class DecompteController extends Controller
 {
@@ -20,13 +28,14 @@ class DecompteController extends Controller
 
     /**
      * creer un décompte
-     * $designation - nom du décompte
-     * $exerciceComptableId - id de l'exercice comptable pour lequel créer les paiements
-     * $taux_avs - taux avs payé par le sapeur
-     * $taux_ac - taux ac payé par le sapeur
-     * $deduction - true si les déduction doivent être faites sur ce paiement
-     * $minimumImposableAVSAC - montant imposable minimum pour l'avs
-     * $minimumSoldeImposable - montant minimum pour que la solde soit imposable
+     * 
+     * @param string $designation - nom du décompte
+     * @param int $exerciceComptableId - id de l'exercice comptable pour lequel créer les paiements
+     * @param float $taux_avs - taux avs payé par le sapeur
+     * @param float $taux_ac - taux ac payé par le sapeur
+     * @param boolean $deduction - true si les déduction doivent être faites sur ce paiement
+     * @param float $minimumImposableAVSAC - montant imposable minimum pour l'avs
+     * @param float $minimumSoldeImposable - montant minimum pour que la solde soit imposable
      */
     public function creer(Request $request)
     {
@@ -49,6 +58,27 @@ class DecompteController extends Controller
             $data['minimumSoldeImposable'],
             $data['minimumImposableAVSAC']
         )]);
+    }
+
+    /**
+     * Créer un fichier iso20022 pour un décompte
+     * 
+     * @param int $id id du décompte pour lequelle le fichier doit être créé
+     * @param string $nom titulaire du compte débiteur
+     * @param string $bic bic de la banque du compte débiteur
+     * @param string $iban iban du compte débiteur
+     */
+    public function iso20022(Request $request, $id)
+    {
+        $data = $request->validate([
+            'nom' => 'string|required',
+            'iban' => 'string|required',
+            'bic' => 'string|required',
+        ]);
+
+        return response()->streamDownload(function () use ($data, $id) {
+            echo PaiementBusiness::iso20022FromDecompte($id, $data['nom'], $data['bic'], $data['iban']);
+        }, Decompte::find($id)->designation.".xml");
     }
 
     /**

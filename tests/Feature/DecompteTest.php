@@ -524,7 +524,7 @@ class DeompteTest extends TestCase
      */
     public function testDecompteAnneeComptable()
     {
-        $response = $this->json('GET', "api/v2/decompte/exerciceComptable/3");
+        $response = $this->json('GET', "api/v2/decompte/exercice-comptable/3");
 
         $response
             ->assertStatus(200)
@@ -559,5 +559,23 @@ class DeompteTest extends TestCase
                     'deduction'
                 ]
             ]);
+    }
+
+    /**
+     * get iso20022
+     *
+     * @return void
+     */
+    public function testIso20022()
+    {
+        $data = [
+            'decompteId' => 5,
+            'nom' => "SIS Delémont",
+            'IBAN' => 'CH51 0022 5225 9529 1301 C',
+            'bic' => 'UBSWCHZH80A'
+        ];
+        $response = $this->json('POST', "api/v2/decompte/5/iso20022", $data);
+
+        $response->assertStatus(200);
     }
 }
