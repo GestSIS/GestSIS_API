@@ -225,11 +225,12 @@ class PaiementBusiness
      * Créer un pdf contenant le certificat de salaire de tous les sapeurs pour l'exercice comptable spécifié
      * 
      * @param int $exerciceComptableId id de l'exercice compable souhaité
+     * @param bool $affichageFrais true si affichage des frais
      * 
      * @return pdf certificats de salaire
      */
 
-    public static function certificatSalaire($exerciceComptableId)
+    public static function certificatSalaire($exerciceComptableId, $affichageFrais = false)
     {
         //calcul des totaux
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
@@ -240,19 +241,22 @@ class PaiementBusiness
                     $totaux[$p->sapeur_id] = array(
                         "solde" => 0,
                         "indemnite" => 0,
-                        "deduction" => 0
+                        "deduction" => 0,
+                        "frais" => 0
                     );
                 }
                 $totaux[$p->sapeur_id]['solde'] += $p->solde;
                 $totaux[$p->sapeur_id]['indemnite'] += $p->indemnite;
                 $totaux[$p->sapeur_id]['deduction'] += $p->avs;
+                $totaux[$p->sapeur_id]['frais'] += $p->frais;
             }
         }
-
-        //génération du pdf de chaque sapeur
+        //emplacement temporaire pour les fichiers
         mkdir("/app/storage/tpm/" . $exerciceComptableId, 0777, true);
+        //utilise https://github.com/mikehaertl/php-pdftk
         $merged = new Pdf();
         try {
+            //génération du pdf de chaque sapeur
             foreach ($totaux as $sapeurId => $total) {
                 $sapeur = Sapeur::find($sapeurId);
                 $localite = $sapeur->localite()->get()[0];
@@ -269,6 +273,8 @@ class PaiementBusiness
                     "HAdresse" => $sapeur->rue . " " . $sapeur->no_rue,
                     "HPostfach" => $localite->npa . " " . $localite->designation,
                     "1" => $total['solde'] + $total['indemnite'],
+                    //rempliassage point 6 - indémintés
+                    //"6" => $total['indemnite'],
                     "8" => $total['solde'] + $total['indemnite'],
                     "9" => round($total['deduction']),
                     "11" => ($total['solde'] + $total['indemnite']) - round($total['deduction']),
@@ -276,18 +282,23 @@ class PaiementBusiness
                     "15-2" => "\t\t\tIndemnité\t" . $total['indemnite'],
                     "OrtDatum" => PaiementBusiness::datefr()
                 );
+
+                if($total['frais']>0 && $affichageFrais){
+                    $fields["13-2-3-2"] = $total['frais'];
+                }
+
                 $pdf = new FPDM('/app/resources/certificatSalaire.pdf');
                 $pdf->useCheckboxParser = true;
-                $pdf->flatten_mode = true;
                 $pdf->load($fields, true);
                 $pdf->merge();
                 $pdf->Output("F", "/app/storage/tpm/" . $exerciceComptableId . "/" . $sapeurId . ".pdf");
                 $merged->addFile("/app/storage/tpm/" . $exerciceComptableId . "/" . $sapeurId . ".pdf");
             }
 
-            //output mergedPdf et nettoyage
+            //création du pdf final
             $merged->send();
         } finally {
+            //supression du dossier même si erreur php
             PaiementBusiness::delete_files("/app/storage/tpm/");
         }
     }
@@ -297,10 +308,11 @@ class PaiementBusiness
      * 
      * @param int $exerciceComptableId id de l'exercice compable souhaité
      * @param int $sapeurId id du sapeur dont on veut le certificat de salaire
+     * @param bool $affichageFrais true si affichage des frais
      * 
      * @return pdf certificat de salaire
      */
-    public static function certificatSalaireSapeur($exerciceComptableId, $sapeurId)
+    public static function certificatSalaireSapeur($exerciceComptableId, $sapeurId, $affichageFrais = false)
     {
         //infos de base
         $sapeur = Sapeur::find($sapeurId);
@@ -312,6 +324,7 @@ class PaiementBusiness
         $solde = 0;
         $indemnite = 0;
         $deduction = 0;
+        $frais = 0;
 
         foreach (Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get() as $d) {
             foreach ($d->paiements as $p) {
@@ -319,6 +332,7 @@ class PaiementBusiness
                     $solde += $p->solde;
                     $indemnite += $p->indemnite;
                     $deduction += $p->avs;
+                    $frais += $p->frais;
                 }
             }
         }
@@ -335,6 +349,8 @@ class PaiementBusiness
             "HAdresse" => $sapeur->rue . " " . $sapeur->no_rue,
             "HPostfach" => $localite->npa . " " . $localite->designation,
             "1" => $solde + $indemnite,
+            //rempliassage point 6 - indémintés
+            //"6" => $indemnite,
             "8" => $solde + $indemnite,
             "9" => round($deduction),
             "11" => ($solde + $indemnite) - round($deduction),
@@ -342,6 +358,11 @@ class PaiementBusiness
             "15-2" => "\t\t\tIndeminté\t" . $indemnite,
             "OrtDatum" => PaiementBusiness::datefr()
         );
+
+        if($frais>0 && $affichageFrais){
+            $fields["13-2-3-2"] = $frais;
+        }
+
         $pdf = new FPDM('/app/resources/certificatSalaire.pdf');
         $pdf->useCheckboxParser = true;
         $pdf->load($fields, true);
