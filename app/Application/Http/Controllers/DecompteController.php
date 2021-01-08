@@ -9,6 +9,7 @@ use App\Domaine\Business\PaiementBusiness;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Paiement;
+use Exception;
 use Z38\SwissPayment\BIC;
 use Z38\SwissPayment\IBAN;
 use Z38\SwissPayment\IID;
@@ -93,7 +94,8 @@ class DecompteController extends Controller
 
     /**
      * Retourne un décompte
-     * $id - id du décompte souhaité
+     * 
+     * @param int $id id du décompte souhaité
      */
     public function get($id)
     {
@@ -104,7 +106,8 @@ class DecompteController extends Controller
 
     /**
      * Retourne tous les décompte pour un exercice comptable
-     * $id - id de l'exercice comptable
+     * 
+     * @param int $id id de l'exercice comptable
      */
     public function getByExerciceComptable($id)
     {
@@ -113,13 +116,24 @@ class DecompteController extends Controller
         return response()->json(['data' => $decomptes]);
     }
 
-    public function CertificatSalaireSapeur($ExerciceCompatbleId, $SapeurId)
+    /**
+     * Retoune le certificat d'un sapeur pour un exercice comptable
+     * 
+     * @param int $ExerciceComptableId id de l'exercice comp
+     * @param int $SapeurId id du sapeur
+     */
+    public function CertificatSalaireSapeur($ExerciceComptableId, $SapeurId)
     {
-        PaiementBusiness::certificatSalaireSapeur($ExerciceCompatbleId, $SapeurId);
+        PaiementBusiness::certificatSalaireSapeur($ExerciceComptableId, $SapeurId);
     }
 
-    public function CertificatSalaire($ExerciceCompatbleId)
+    /**
+     * Retoune le certificat de tous les sapeurs pour un exercice comptable
+     * 
+     * @param int $ExerciceComptableId id de l'exercice comp
+     */
+    public function CertificatSalaire($ExerciceComptableId)
     {
-        PaiementBusiness::certificatSalaire($ExerciceCompatbleId);
+        PaiementBusiness::certificatSalaire($ExerciceComptableId);
     }
 }

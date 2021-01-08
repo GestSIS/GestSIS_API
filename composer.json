@@ -10,7 +10,6 @@
     "require": {
         "php": "^7.3",
         "barryvdh/laravel-snappy": "^0.4.6",
-        "clegginabox/pdf-merger": "dev-master",
         "facade/ignition": "^2.3.6",
         "fideloper/proxy": "^4.0",
         "firebase/php-jwt": "^5.0",

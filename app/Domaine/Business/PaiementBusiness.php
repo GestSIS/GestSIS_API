@@ -9,10 +9,7 @@ use App\Infrastructure\Models\ExerciceCategorie;
 use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Sapeur;
-use Clegginabox\PDFMerger\PDFMerger;
 use FPDM;
-use Illuminate\Support\Facades\Date;
-use IntlDateFormatter;
 use Z38\SwissPayment\BIC;
 use Z38\SwissPayment\IBAN;
 use Z38\SwissPayment\IID;
@@ -223,6 +220,14 @@ class PaiementBusiness
 
         return $message->asXml();
     }
+
+    /**
+     * Créer un pdf contenant le certificat de salaire de tous les sapeurs pour l'exercice comptable spécifié
+     * 
+     * @param int $exerciceComptableId id de l'exercice compable souhaité
+     * 
+     * @return pdf certificats de salaire
+     */
 
     public static function certificatSalaire($exerciceComptableId)
     {

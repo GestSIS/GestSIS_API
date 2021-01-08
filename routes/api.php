@@ -34,8 +34,8 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
     Route::get('paiement/decompte/{id}', 'PaiementController@getByDecompte');
     Route::get('paiement/exercice-comptable/{id}', 'PaiementController@getByExerciceComptable');
 
-    Route::get('exercice-comptables/{ExerciceCompatbleId}/certificatSalaire/{SapeurId}', 'DecompteController@certificatSalaireSapeur');
-    Route::get('exercice-comptables/{ExerciceCompatbleId}/certificatSalaire', 'DecompteController@certificatSalaire');
+    Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire/{SapeurId}', 'DecompteController@certificatSalaireSapeur');
+    Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire', 'DecompteController@certificatSalaire');
 
 
     Route::group(['middleware' => 'jwtToken'], function () {
