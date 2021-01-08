@@ -115,6 +115,11 @@ class DecompteController extends Controller
 
     public function CertificatSalaireSapeur($ExerciceCompatbleId, $SapeurId)
     {
-        PaiementBusiness::certificatSalaire($ExerciceCompatbleId, $SapeurId);
+        PaiementBusiness::certificatSalaireSapeur($ExerciceCompatbleId, $SapeurId);
+    }
+
+    public function CertificatSalaire($ExerciceCompatbleId)
+    {
+        PaiementBusiness::certificatSalaire($ExerciceCompatbleId);
     }
 }
