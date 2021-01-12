@@ -19,7 +19,6 @@
         "laravel/tinker": "^2.0",
         "laravel/ui": "^3.0",
         "mikehaertl/php-pdftk": "^0.9.2",
-        "spatie/laravel-http-logger": "^1.4",
         "tmw/fpdm": "^2.9",
         "spatie/laravel-http-logger": "^1.4",
         "z38/swiss-payment": "^0.7.0"

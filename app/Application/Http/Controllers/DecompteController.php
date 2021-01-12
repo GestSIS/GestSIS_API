@@ -122,9 +122,14 @@ class DecompteController extends Controller
      * @param int $ExerciceComptableId id de l'exercice comp
      * @param int $SapeurId id du sapeur
      */
-    public function CertificatSalaireSapeur($ExerciceComptableId, $SapeurId)
+    public function certificatSalaireSapeur(Request $request, $ExerciceComptableId, $SapeurId)
     {
-        PaiementBusiness::certificatSalaireSapeur($ExerciceComptableId, $SapeurId);
+        $data = $request->validate([
+            'frais' => 'boolean'
+        ]);
+        if(!isset($data['frais']))
+            $data['frais']=false;
+        PaiementBusiness::certificatSalaireSapeur($ExerciceComptableId, $SapeurId, $data['frais']);
     }
 
     /**
@@ -132,8 +137,13 @@ class DecompteController extends Controller
      * 
      * @param int $ExerciceComptableId id de l'exercice comp
      */
-    public function CertificatSalaire($ExerciceComptableId)
+    public function certificatSalaire(Request $request, $ExerciceComptableId)
     {
-        PaiementBusiness::certificatSalaire($ExerciceComptableId);
+        $data = $request->validate([
+            'frais' => 'boolean'
+        ]);
+        if(!isset($data['frais']))
+            $data['frais']=false;
+        PaiementBusiness::certificatSalaire($ExerciceComptableId, $data['frais']);
     }
 }
