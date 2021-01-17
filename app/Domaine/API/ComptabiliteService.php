@@ -9,6 +9,7 @@ use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\FraisTypeRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
+use App\Infrastructure\Models\ExerciceComptable;
 use PDF;
 
 class ComptabiliteService
@@ -34,6 +35,10 @@ class ComptabiliteService
         $this->fraisRepo = $frais;
         $this->compteRepo = $comptes;
         $this->business = $business;
+    }
+
+    function creerExerciceComptable($data) {
+        return $this->business->creerExerciceComptable($data);
     }
 
     function getComptes()

@@ -64,7 +64,6 @@ class InterventionController extends Controller
         $intervention = $this->service->createIntervention($data);
 
         return response()->json(['data' => $intervention]);
-
     }
 
     /**

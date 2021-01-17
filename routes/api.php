@@ -18,15 +18,12 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
     // Etats de sortie 
     // TODO: Temporairement public, à déplacer
     Route::get('pdf-test/{id}', 'CompteController@generatePdf');
+
+    // TODO: Finalise
     Route::get('exercice/{id}/liste-presence', 'ExerciceController@listePresence');
     Route::get('exercice/{id}/liste-appel', 'ExerciceController@listeAppel');
     Route::get('exercice/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
     
-    Route::post('generer-amendes/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
-    Route::post('generer-amendes/{id}', 'AmendeController@annuel');
-    
-    Route::get('interventions/{id}/rapport', 'InterventionController@rapport')->name('api.v2.interventions.rapport');
-
     Route::group(['middleware' => 'jwtToken'], function () {
 
         // Sapeurs
@@ -54,7 +51,7 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::delete('exercices/{id}/sapeurs', 'ConvocationsController@destroy')->name('api.v2.exercices.sapeurs.delete');
 
         // Exercices comptables
-        Route::resource('exercice-comptables', 'ExerciceComptableController')->only(['index']);
+        Route::resource('exercice-comptables', 'ExerciceComptableController')->only(['index', 'store']); //TODO: ajout cloturer
 
         // Interventions
         Route::resource('interventions', 'InterventionController')->only(['index', 'show', 'store', 'update', 'destroy']);
@@ -97,6 +94,9 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::put('interventions/{id}/phases', 'InterventionPhasesController@update')->name('api.v2.interventions.phases.update');
         Route::delete('interventions/{id}/phases', 'InterventionPhasesController@destroy')->name('api.v2.interventions.phases.delete');
 
+        // TODO:
+        Route::get('interventions/{id}/rapport', 'InterventionController@rapport')->name('api.v2.interventions.rapport');
+
         // Vehicules
         Route::get('vehicules', 'VehiculeController@index')->name('api.v2.vehicule.index');
 
@@ -137,8 +137,6 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::post('imputation/intervention/{id}', 'ImputationController@intervention');
         Route::post('imputation/exercice/{id}', 'ImputationController@exercice');
         Route::post('imputation/annuel/{id}', 'ImputationController@annuel');
-        // Route::post('generer-amende/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
-        // Route::post('generer-amende/{id}', 'AmendeController@annuel');
 
         Route::get('indemnites-types', 'IdemniteTypeController@index');
         Route::get('frais-types', 'FraisTypeController@index');
@@ -151,6 +149,10 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
 
         Route::resource('comptes', 'CompteController')->only(['index']);
         Route::get('comptes/{id}/ecritures/{exerciceComptableId}', 'CompteController@ecritures');
+
+        // Amendes
+        Route::post('generer-amendes/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
+        Route::post('generer-amendes/{id}', 'AmendeController@annuel');
 
         //Controles medicauxs
         Route::get('medecins/', 'MedecinController@all');

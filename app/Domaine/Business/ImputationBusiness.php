@@ -12,6 +12,7 @@ use App\Domaine\Exceptions\ArrayException;
 use Carbon\Carbon;
 use App\Infrastructure\Models\Amende;
 use App\Infrastructure\Models\Ecriture;
+use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\ExerciceSapeur;
 
 class ImputationBusiness
@@ -41,6 +42,15 @@ class ImputationBusiness
     protected const UNITE_CHF_PAR_PIECE = 1;
     protected const UNITE_CHF_PAR_HEURE = 2;
     
+    public function creerExerciceComptable($data)
+    {
+        $exerciceComptable = new ExerciceComptable();
+        $exerciceComptable->fill($data);
+        $exerciceComptable->boucle = 0;
+        $exerciceComptable->save();
+        return $exerciceComptable;
+    }
+
     /**
      * Générer les amendes pour un sapeur
      */
