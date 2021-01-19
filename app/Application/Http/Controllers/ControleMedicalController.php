@@ -53,8 +53,8 @@ class ControleMedicalController extends Controller
             'consultation' => 'date',
             'validite' => 'nullable|date|after:consultation',
             'designation' => 'string|nullable',
-            'en_cours' => 'integer',
-            'accepter' => 'integer'
+            'en_cours' => 'boolean',
+            'accepter' => 'boolean'
         ]);
 
         $controle = $this->service->createControleMedical($data);
@@ -80,8 +80,8 @@ class ControleMedicalController extends Controller
             'consultation' => 'date',
             'validite' => 'nullable|date|after:consultation',
             'designation' => 'string|nullable',
-            'en_cours' => 'integer',
-            'accepter' => 'integer'
+            'en_cours' => 'boolean',
+            'accepter' => 'boolean'
         ]);
 
         $controle = $this->service->updateControleMedical($id, $data);
