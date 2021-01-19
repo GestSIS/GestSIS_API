@@ -344,7 +344,7 @@ class PaiementBusiness
             $fields["13-2-3-2"] = $total['frais'];
         }
 
-        $pdf = new FPDM('/app/resources/certificatSalaire.pdf');
+        $pdf = new FPDM(resource_path('certificatSalaire.pdf'));
         $pdf->useCheckboxParser = true;
         $pdf->load($fields, true);
         $pdf->merge();

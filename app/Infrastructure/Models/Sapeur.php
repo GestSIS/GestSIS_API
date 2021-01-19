@@ -86,7 +86,7 @@ class Sapeur extends Model
     }
 
     /**
-     * The localite where the sapeur lives
+     * The civility of the sapeur
      */
     public function civilite()
     {
