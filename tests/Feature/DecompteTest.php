@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class DeompteTest extends TestCase
+class DecompteTest extends TestCase
 {
     /**
      * Test simple de création de décompte sans déductions
