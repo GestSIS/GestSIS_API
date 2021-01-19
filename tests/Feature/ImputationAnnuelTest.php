@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Test\Feature;
 
 use App\Domaine\API\ComptabiliteService;
 use App\Domaine\API\SapeurService;
