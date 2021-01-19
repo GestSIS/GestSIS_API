@@ -128,7 +128,9 @@ class DecompteController extends Controller
             'frais' => 'boolean'
         ]);
         if(!isset($data['frais']))
+        {
             $data['frais']=false;
+        }
         PaiementBusiness::certificatSalaireSapeur($ExerciceComptableId, $SapeurId, $data['frais']);
     }
 
@@ -143,7 +145,9 @@ class DecompteController extends Controller
             'frais' => 'boolean'
         ]);
         if(!isset($data['frais']))
+        {
             $data['frais']=false;
+        }
         PaiementBusiness::certificatSalaire($ExerciceComptableId, $data['frais']);
     }
 }

@@ -258,9 +258,11 @@ class PaiementBusiness
         $merged = new Pdf();
         try {
             //génération du pdf de chaque sapeur
-            foreach ($totaux as $sapeurId => $total) {
-                PaiementBusiness::creationPdf($sapeurId, $exerciceComptable, $total, $affichageFrais, true);
-                $merged->addFile(Storage::path("tmp/" . $exerciceComptableId . "/" . $sapeurId . ".pdf"));
+            foreach (Sapeur::with(['localite', 'civilite'])->get() as $sapeur){
+                if(isset($totaux[$sapeur->id])){
+                    $path = PaiementBusiness::creationPdf($sapeur, $exerciceComptable, $totaux[$sapeur->id], $affichageFrais, true);
+                    $merged->addFile($path);
+                }
             }
 
             //création du pdf final
@@ -301,7 +303,8 @@ class PaiementBusiness
             }
         }
 
-        PaiementBusiness::creationPdf($sapeurId, $exerciceComptable, $total, $affichageFrais, false);
+        $sapeur = Sapeur::with(['localite', 'civilite'])->find($sapeurId);
+        PaiementBusiness::creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, false);
     }
 
     /**
@@ -313,11 +316,10 @@ class PaiementBusiness
      * @param bool $affichageFrais true si les frais doivent apparaitre
      * @param bool $enregistrement true si le fichier doit 'etre enregistré, sortie navigateur sinon
      */
-    private static function creationPdf($sapeurId, $exerciceComptable, $total, $affichageFrais, $enregistrement)
+    private static function creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, $enregistrement)
     {
-        $sapeur = Sapeur::find($sapeurId);
-        $localite = $sapeur->localite()->get()[0];
-        $civilite = Civilite::find($sapeur->civilite_id);
+        $localite = $sapeur->localite;
+        $civilite = $sapeur->civilite;
 
         $fields = array(
             'A' => "checked",
@@ -349,7 +351,9 @@ class PaiementBusiness
         $pdf->load($fields, true);
         $pdf->merge();
         if ($enregistrement) {
-            $pdf->Output("F", Storage::path("tmp/" . $exerciceComptable->id . "/" . $sapeurId . ".pdf"));
+            $path = Storage::path("tmp/" . $exerciceComptable->id . "/" . $sapeur->id . ".pdf");
+            $pdf->Output("F", $path);
+            return $path;
         } else {
             $pdf->Output();
         }

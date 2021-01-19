@@ -84,4 +84,12 @@ class Sapeur extends Model
     {
         return $this->belongsTo('App\Infrastructure\Models\Localite');
     }
+
+    /**
+     * The localite where the sapeur lives
+     */
+    public function civilite()
+    {
+        return $this->belongsTo('App\Infrastructure\Models\Civilite');
+    }
 }
