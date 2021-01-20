@@ -7,17 +7,6 @@ use Illuminate\Http\Request;
 use App\Domaine\API\ComptabiliteService;
 use App\Domaine\Business\PaiementBusiness;
 use App\Infrastructure\Models\Decompte;
-use App\Infrastructure\Models\Ecriture;
-use App\Infrastructure\Models\Paiement;
-use Exception;
-use Z38\SwissPayment\BIC;
-use Z38\SwissPayment\IBAN;
-use Z38\SwissPayment\IID;
-use Z38\SwissPayment\Message\CustomerCreditTransfer;
-use Z38\SwissPayment\PaymentInformation\PaymentInformation;
-use Z38\SwissPayment\StructuredPostalAddress;
-use Z38\SwissPayment\TransactionInformation\BankCreditTransfer;
-use Z38\SwissPayment\Money;
 
 class DecompteController extends Controller
 {
@@ -79,7 +68,7 @@ class DecompteController extends Controller
 
         return response()->streamDownload(function () use ($data, $id) {
             echo PaiementBusiness::iso20022FromDecompte($id, $data['nom'], $data['bic'], $data['iban']);
-        }, Decompte::find($id)->designation.".xml");
+        }, Decompte::find($id)->designation . ".xml");
     }
 
     /**
@@ -127,9 +116,8 @@ class DecompteController extends Controller
         $data = $request->validate([
             'frais' => 'boolean'
         ]);
-        if(!isset($data['frais']))
-        {
-            $data['frais']=false;
+        if (!isset($data['frais'])) {
+            $data['frais'] = false;
         }
         PaiementBusiness::certificatSalaireSapeur($ExerciceComptableId, $SapeurId, $data['frais']);
     }
@@ -144,9 +132,8 @@ class DecompteController extends Controller
         $data = $request->validate([
             'frais' => 'boolean'
         ]);
-        if(!isset($data['frais']))
-        {
-            $data['frais']=false;
+        if (!isset($data['frais'])) {
+            $data['frais'] = false;
         }
         PaiementBusiness::certificatSalaire($ExerciceComptableId, $data['frais']);
     }

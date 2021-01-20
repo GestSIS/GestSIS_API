@@ -258,9 +258,9 @@ class PaiementBusiness
         $merged = new Pdf();
         try {
             //génération du pdf de chaque sapeur
-            foreach (Sapeur::whereIn('id', array_keys($totaux))->with(['localite', 'civilite'])->get() as $sapeur){
-                    $path = PaiementBusiness::creationPdf($sapeur, $exerciceComptable, $totaux[$sapeur->id], $affichageFrais, true);
-                    $merged->addFile($path);
+            foreach (Sapeur::whereIn('id', array_keys($totaux))->with(['localite', 'civilite'])->get() as $sapeur) {
+                $path = PaiementBusiness::creationPdf($sapeur, $exerciceComptable, $totaux[$sapeur->id], $affichageFrais, true);
+                $merged->addFile($path);
             }
 
             //création du pdf final

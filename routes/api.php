@@ -52,7 +52,7 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         // Exercices comptables
         Route::resource('exercice-comptables', 'ExerciceComptableController')->only(['index']);
         Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire/{SapeurId}', 'DecompteController@certificatSalaireSapeur');
-        Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire', 'DecompteController@certificatSalaire');    
+        Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire', 'DecompteController@certificatSalaire');
 
         // Décomptes
         Route::post('decompte/create', 'DecompteController@creer');

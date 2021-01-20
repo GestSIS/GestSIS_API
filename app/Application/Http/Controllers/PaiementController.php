@@ -13,13 +13,14 @@ class PaiementController extends Controller
     /**
      * Retourne tous les paiement
      */
-    public function getAll(){
+    public function getAll()
+    {
         $paiements = Paiement::all();
 
         return response()->json(['data' => $paiements]);
     }
 
-     /**
+    /**
      * Créer un fichier iso20022 pour un paiement
      * 
      * @param int $id id du paiement pour lequelle le fichier doit être créé
@@ -44,7 +45,8 @@ class PaiementController extends Controller
      * Retourne un paiement
      * $id - id du paiement souhaité
      */
-    public function get($id){
+    public function get($id)
+    {
         $paiements = Paiement::find($id);
 
         return response()->json(['data' => $paiements]);
@@ -54,7 +56,8 @@ class PaiementController extends Controller
      * Retourne tous les paiements pour un décompte
      * $id - id du paiement
      */
-    public function getByDecompte($id){
+    public function getByDecompte($id)
+    {
         $paiements = Paiement::where('decompte_id', $id)->get();
 
         return response()->json(['data' => $paiements]);
@@ -64,7 +67,8 @@ class PaiementController extends Controller
      * Retourne tous les paiements pour un exercice comptable
      * $id - id de l'exercice comptable
      */
-    public function getByExerciceComptable($id){
+    public function getByExerciceComptable($id)
+    {
         $decomptes = Decompte::where('exercice_comptable_id', $id)->with('paiements')->get();
 
         return response()->json(['data' => $decomptes]);
