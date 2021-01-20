@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Test\Feature;
 
 use Exception;
 use Tests\TestCase;

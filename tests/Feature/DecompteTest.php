@@ -1,13 +1,11 @@
 <?php
 
-namespace Tests\Feature;
+namespace Test\Feature;
 
 use App\Infrastructure\Models\Ecriture;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class DeompteTest extends TestCase
+class DecompteTest extends TestCase
 {
     /**
      * Test simple de création de décompte sans déductions
@@ -111,7 +109,7 @@ class DeompteTest extends TestCase
         $data['exerciceComptableId'] = "1";
         $data['minimumImposableAVSAC'] = 2300;
         $data['minimumSoldeImposable'] = 5000;
-        
+
         $response = $this->json('POST', "api/v2/decompte/create", $data);
 
         $response

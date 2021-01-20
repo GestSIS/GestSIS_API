@@ -2,9 +2,16 @@
 
 namespace App\Domaine\Business;
 
+use App\Infrastructure\Models\Civilite;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
+use App\Infrastructure\Models\ExerciceCategorie;
+use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\Paiement;
+use App\Infrastructure\Models\Sapeur;
+use Carbon\Carbon;
+use FPDM;
+use Illuminate\Support\Facades\Storage;
 use Z38\SwissPayment\BIC;
 use Z38\SwissPayment\IBAN;
 use Z38\SwissPayment\IID;
@@ -13,6 +20,7 @@ use Z38\SwissPayment\PaymentInformation\PaymentInformation;
 use Z38\SwissPayment\StructuredPostalAddress;
 use Z38\SwissPayment\TransactionInformation\BankCreditTransfer;
 use Z38\SwissPayment\Money;
+use mikehaertl\pdftk\Pdf;
 
 /**
  * PaiementBusiness
@@ -102,7 +110,7 @@ class PaiementBusiness
             foreach ($totaux as $key => $total) {
                 $solde_imposable = max($total['solde'] + $total['soldeTotal'] - $minimumSoldeImposable, 0.0);
                 $total_imposable = $solde_imposable + $total['indemnite'] + $total['indemniteTotal'];
-              
+
                 //TODO ou si sapeur fait la demande
                 if ($total_imposable > $minimumImposableAVSAC) {
                     $totaux[$key]['avs'] = ($total_imposable * $taux) - $total['avsTotal'];
@@ -177,8 +185,7 @@ class PaiementBusiness
 
         return $message->asXml();
     }
-
-     /**
+    /**
      * Créer un fichier iso20022 pour un paiement
      * 
      * @param int $paiementId id du paiement pour lequelle le fichier doit être créé
@@ -213,5 +220,151 @@ class PaiementBusiness
         $message->addPayment($paiement);
 
         return $message->asXml();
+    }
+
+    /**
+     * Créer un pdf contenant le certificat de salaire de tous les sapeurs pour l'exercice comptable spécifié
+     * 
+     * @param int $exerciceComptableId id de l'exercice compable souhaité
+     * @param bool $affichageFrais true si affichage des frais
+     * 
+     * @return pdf certificats de salaire
+     */
+
+    public static function certificatSalaire($exerciceComptableId, $affichageFrais = false)
+    {
+        //calcul des totaux
+        $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
+        $totaux = [];
+        foreach (Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get() as $d) {
+            foreach ($d->paiements as $p) {
+                if (!array_key_exists($p->sapeur_id, $totaux)) {
+                    $totaux[$p->sapeur_id] = array(
+                        "solde" => 0,
+                        "indemnite" => 0,
+                        "deduction" => 0,
+                        "frais" => 0
+                    );
+                }
+                $totaux[$p->sapeur_id]['solde'] += $p->solde;
+                $totaux[$p->sapeur_id]['indemnite'] += $p->indemnite;
+                $totaux[$p->sapeur_id]['deduction'] += $p->avs;
+                $totaux[$p->sapeur_id]['frais'] += $p->frais;
+            }
+        }
+        //emplacement temporaire pour les fichiers
+        Storage::makeDirectory("tmp/" . $exerciceComptableId);
+        //utilise https://github.com/mikehaertl/php-pdftk
+        $merged = new Pdf();
+        try {
+            //génération du pdf de chaque sapeur
+            foreach (Sapeur::whereIn('id', array_keys($totaux))->with(['localite', 'civilite'])->get() as $sapeur) {
+                $path = PaiementBusiness::creationPdf($sapeur, $exerciceComptable, $totaux[$sapeur->id], $affichageFrais, true);
+                $merged->addFile($path);
+            }
+
+            //création du pdf final
+            $merged->send();
+        } finally {
+            //supression du dossier même si erreur php
+            Storage::deleteDirectory("tmp/" . $exerciceComptableId);
+        }
+    }
+
+    /**
+     * Créer un pdf contenant le certificat de salaire d'un sapeur pour l'exercice comptable spécifié
+     * 
+     * @param int $exerciceComptableId id de l'exercice compable souhaité
+     * @param int $sapeurId id du sapeur dont on veut le certificat de salaire
+     * @param bool $affichageFrais true si affichage des frais
+     * 
+     * @return pdf certificat de salaire
+     */
+    public static function certificatSalaireSapeur($exerciceComptableId, $sapeurId, $affichageFrais = false)
+    {
+        $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
+
+        //Calcul des totaux
+        $total['solde'] = 0;
+        $total['indemnite'] = 0;
+        $total['deduction'] = 0;
+        $total['frais'] = 0;
+
+        foreach (Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get() as $d) {
+            foreach ($d->paiements as $p) {
+                if ($p->sapeur_id == $sapeurId) {
+                    $total['solde'] += $p->solde;
+                    $total['indemnite'] += $p->indemnite;
+                    $total['deduction'] += $p->avs;
+                    $total['frais'] += $p->frais;
+                }
+            }
+        }
+
+        $sapeur = Sapeur::with(['localite', 'civilite'])->find($sapeurId);
+        PaiementBusiness::creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, false);
+    }
+
+    /**
+     * Création du pdf
+     * 
+     * @param int $sapeurId id du sapeur
+     * @param ExerciceComptable $exerciceComptable exercice compatble en cours
+     * @param array $total tableau contenant les totaux de solde, indeminté, frais et déduction
+     * @param bool $affichageFrais true si les frais doivent apparaitre
+     * @param bool $enregistrement true si le fichier doit 'etre enregistré, sortie navigateur sinon
+     */
+    private static function creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, $enregistrement)
+    {
+        $localite = $sapeur->localite;
+        $civilite = $sapeur->civilite;
+
+        $fields = array(
+            'A' => "checked",
+            "C2" => $sapeur->no_avs,
+            "D" => $exerciceComptable->annee,
+            "E-von" => "01.01." . $exerciceComptable->annee,
+            "E-bis" => "31.12." . $exerciceComptable->annee,
+            'HAnrede' => $civilite->forme_politesse,
+            "HName" => $sapeur->nom . " " . $sapeur->prenom,
+            "HAdresse" => $sapeur->rue . " " . $sapeur->no_rue,
+            "HPostfach" => $localite->npa . " " . $localite->designation,
+            "1" => $total['solde'] + $total['indemnite'],
+            //rempliassage point 6 - indémintés
+            //"6" => $total['indemnite'],
+            "8" => $total['solde'] + $total['indemnite'],
+            "9" => round($total['deduction']),
+            "11" => ($total['solde'] + $total['indemnite']) - round($total['deduction']),
+            "15-1" => "Répartition:\tSolde\t\t" . $total['solde'],
+            "15-2" => "\t\t\tIndemnité\t" . $total['indemnite'],
+            "OrtDatum" => PaiementBusiness::datefr()
+        );
+
+        if ($total['frais'] > 0 && $affichageFrais) {
+            $fields["13-2-3-2"] = $total['frais'];
+        }
+
+        $pdf = new FPDM(resource_path('certificatSalaire.pdf'));
+        $pdf->useCheckboxParser = true;
+        $pdf->load($fields, true);
+        $pdf->merge();
+        if ($enregistrement) {
+            $path = Storage::path("tmp/" . $exerciceComptable->id . "/" . $sapeur->id . ".pdf");
+            $pdf->Output("F", $path);
+            return $path;
+        } else {
+            $pdf->Output();
+        }
+    }
+
+    /**
+     * retourne la date sous la forme jour mois année (ex 1 janvier 2000)
+     * 
+     * @return string date
+     */
+    private static function datefr()
+    {
+        $date = Carbon::now()->locale('fr_CH');
+        return $date->day . " " . $date->monthName . " " . $date->year;
     }
 }

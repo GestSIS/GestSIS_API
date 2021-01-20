@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Test\Feature;
 
 use App\Infrastructure\Models\Intervention;
 use App\Infrastructure\Models\InterventionMateriel;
@@ -102,7 +102,7 @@ class InterventionMaterielTest extends TestCase
 
         $this->interventionId = $this->interventionService->createIntervention($data)->id;
 
-        $materiels = InterventionMateriel::factory()->count(3)->make(['intervention_id' => $this->interventionId])->toArray();
+        $materiels = InterventionMateriel::factory()->count(1)->make(['intervention_id' => $this->interventionId])->toArray();
 
         $ids = array_map(function ($s) {
             return $s->id;

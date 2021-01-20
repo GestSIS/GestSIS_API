@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Test\Feature;
 
 use App\Infrastructure\Models\Exercice;
 use Exception;

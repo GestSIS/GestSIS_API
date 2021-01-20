@@ -22,17 +22,6 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
     Route::get('exercice/{id}/liste-appel', 'ExerciceController@listeAppel');
     Route::get('exercice/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
 
-    Route::post('decompte/create', 'DecompteController@creer');
-    Route::post('decompte/{id}/iso20022', 'DecompteController@iso20022');
-    Route::get('decompte/', 'DecompteController@getAll');
-    Route::get('decompte/{id}', 'DecompteController@get');
-    Route::get('decompte/exercice-comptable/{id}', 'DecompteController@getByExerciceComptable');
-
-    Route::post('paiement/{id}/iso20022', 'PaiementController@iso20022');
-    Route::get('paiement/', 'PaiementController@getAll');
-    Route::get('paiement/{id}', 'PaiementController@get');
-    Route::get('paiement/decompte/{id}', 'PaiementController@getByDecompte');
-    Route::get('paiement/exercice-comptable/{id}', 'PaiementController@getByExerciceComptable');
 
     Route::group(['middleware' => 'jwtToken'], function () {
 
@@ -62,6 +51,22 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
 
         // Exercices comptables
         Route::resource('exercice-comptables', 'ExerciceComptableController')->only(['index']);
+        Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire/{SapeurId}', 'DecompteController@certificatSalaireSapeur');
+        Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire', 'DecompteController@certificatSalaire');
+
+        // Décomptes
+        Route::post('decompte/create', 'DecompteController@creer');
+        Route::post('decompte/{id}/iso20022', 'DecompteController@iso20022');
+        Route::get('decompte/', 'DecompteController@getAll');
+        Route::get('decompte/{id}', 'DecompteController@get');
+        Route::get('decompte/exercice-comptable/{id}', 'DecompteController@getByExerciceComptable');
+
+        // Paiements
+        Route::post('paiement/{id}/iso20022', 'PaiementController@iso20022');
+        Route::get('paiement/', 'PaiementController@getAll');
+        Route::get('paiement/{id}', 'PaiementController@get');
+        Route::get('paiement/decompte/{id}', 'PaiementController@getByDecompte');
+        Route::get('paiement/exercice-comptable/{id}', 'PaiementController@getByExerciceComptable');
 
         // Interventions
         Route::resource('interventions', 'InterventionController')->only(['index', 'show', 'store', 'update']);
