@@ -2,20 +2,48 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\MissionType;
-use Illuminate\Http\Response;
+use App\Domaine\API\InterventionParamService;
+use Illuminate\Http\Request;
 
 class MissionTypeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
+    protected $service;
+
+    public function __construct(InterventionParamService $service)
+    {
+        $this->service = $service;
+    }
+
     public function index()
     {
-        $missions = MissionType::all();
+        $missions = $this->service->missions();
 
         return response()->json(['data' => $missions]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'titre' => 'string|min:1'
+        ]);
+
+        $mission = $this->service->ajouterMission($data);
+        return response()->json(['data' => $mission]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $data = $request->validate([
+            'titre' => 'string|min:1'
+        ]);
+
+        $mission = $this->service->modifierMission($id, $data);
+        return response()->json(['data' => $mission]);
+    }
+
+    public function destroy($id)
+    {
+        $mission = $this->service->supprimerMission($id);
+        return response()->json(['data' => $mission]);
     }
 }

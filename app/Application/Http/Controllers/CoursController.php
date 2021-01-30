@@ -2,21 +2,54 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\Cours;
+use App\Domaine\API\SapeurParamService;
 use Illuminate\Http\Request;
 
 class CoursController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    protected $service;
+
+    public function __construct(SapeurParamService $service)
+    {
+        $this->service = $service;
+    }
+
     public function index()
     {
-        //TODO Change this to use an extra level of indirections for consistency ???
-        $cours = Cours::all();
+        $cours = $this->service->cours();
 
+        return response()->json(['data' => $cours]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'designation' => 'string|min:1',
+            'validity_duration' => 'integer|min:1',
+            'expirable' => 'boolean',
+            'tri' => 'integer'
+        ]);
+
+        $cours = $this->service->ajouterCours($data);
+        return response()->json(['data' => $cours]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $data = $request->validate([
+            'designation' => 'string|min:1',
+            'validity_duration' => 'integer|min:1',
+            'expirable' => 'boolean',
+            'tri' => 'integer'
+        ]);
+
+        $cours = $this->service->modifierCours($id, $data);
+        return response()->json(['data' => $cours]);
+    }
+
+    public function destroy($id)
+    {
+        $cours = $this->service->supprimerCours($id);
         return response()->json(['data' => $cours]);
     }
 }

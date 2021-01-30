@@ -11,6 +11,7 @@
 |
 */
 
+use Illuminate\Support\Facades\Route;
 use Spatie\HttpLogger\Middlewares\HttpLogger;
 
 Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () {
@@ -109,68 +110,67 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::put('interventions/{id}/phases', 'InterventionPhasesController@update')->name('api.v2.interventions.phases.update');
         Route::delete('interventions/{id}/phases', 'InterventionPhasesController@destroy')->name('api.v2.interventions.phases.delete');
 
-        // Vehicules
-        Route::get('vehicules', 'VehiculeController@index')->name('api.v2.vehicule.index');
-
-        // Materiel
-        Route::get('materiels', 'MaterielController@index')->name('api.v2.materiel.index');
-
-        // Téléphones
-        Route::get('telephones', 'TelephoneController@index')->name('api.v2.telephone.index');
-
-        // Groupes
-        Route::get('groupes', 'GroupeController@index')->name('api.v2.groupes');
-        Route::get('groupes-sapeurs', 'GroupeSapeursController@index')->name('api.v2.groupes-sapeurs');
-
-        //Données de bases générales
-        Route::get('localites', 'LocaliteController@index')->name('api.v2.localites');
-        //TODO Communes
-
-        // Données de bases Sapeur
-        Route::get('permis', 'PermisController@index')->name('api.v2.permis');
+        // Static Params Sapeurs
         Route::get('civilites', 'CiviliteController@index')->name('api.v2.civilites');
-        Route::get('grades', 'GradeController@index')->name('api.v2.grades');
-        Route::get('fonctions', 'FonctionController@index')->name('api.v2.fonctions');
-        Route::get('cours', 'CoursController@index')->name('api.v2.cours');
+        Route::get('localites', 'LocaliteController@index')->name('api.v2.localites');
         Route::get('telephone-types', 'TelephoneTypeController@index')->name('api.v2.telephone-types');
-        Route::get('mission-types', 'MissionTypeController@index')->name('api.v2.mission-types');
+        Route::get('permis', 'PermisController@index')->name('api.v2.permis');
 
+        // Static Params Intervention
+        Route::resource('phase-types', 'PhaseTypeController')->only(['index']);
+        Route::resource('stat-federal', 'StatFederalController')->only(['index', 'store', 'update']);
+        
+        // Données de bases Sapeur
+        Route::get('groupes-sapeurs', 'GroupeSapeursController@index')->name('api.v2.groupes-sapeurs');
+        Route::resource('groupes', 'GroupeController')->only(['index', 'store', 'update']);
+        Route::resource('grades', 'GradeController')->only(['index', 'store', 'update']);
+        Route::resource('fonctions', 'FonctionController')->only(['index', 'store', 'update']);
+        Route::resource('cours', 'CoursController')->only(['index', 'store', 'update']);
+        
         // Données de bases exercices
         Route::get('exercice-categories', 'ExerciceCategorieController@index')->name('api.v2.exercice-categorie');
         Route::get('excuses-types', 'ExcuseTypeController@index')->name('api.v2.excuse-type');
-
+        
         // Données de base intervention
-        Route::resource('stat-federal', 'StatFederalController')->only(['index']);
-        Route::resource('type-intervention', 'TypeInterventionController')->only(['index']);
-        Route::resource('intervention-traitement', 'InterventionTraitementController')->only(['index']);
-        Route::resource('phase-types', 'PhaseTypeController')->only(['index']);
-
-        //Frais
+        Route::resource('vehicules', 'VehiculeController')->only(['index', 'store', 'update']);
+        Route::resource('materiels', 'MaterielController')->only(['index', 'store', 'update']);
+        Route::resource('type-intervention', 'TypeInterventionController')->only(['index', 'store', 'update']);
+        Route::resource('stat-intervention', 'StatInterventionController')->only(['index', 'store', 'update']);
+        Route::resource('intervention-traitement', 'InterventionTraitementController')->only(['index', 'store', 'update']);
+        Route::resource('mission-types', 'MissionTypeController@index')->only(['index', 'store', 'update']);
+        Route::resource('telephones', 'TelephoneController@index')->only(['index', 'store', 'update']);
+        
+        // Frais
         Route::post('imputation/intervention/{id}', 'ImputationController@intervention');
         Route::post('imputation/exercice/{id}', 'ImputationController@exercice');
         Route::post('imputation/annuel/{id}', 'ImputationController@annuel');
         Route::post('generer-amende/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
         Route::post('generer-amende/{id}', 'AmendeController@annuel');
 
-        Route::get('indemnites-types', 'IdemniteTypeController@index');
-        Route::get('frais-types', 'FraisTypeController@index');
-
         Route::get('ecritures/annuel/{id}', 'EcritureController@annuel');
         Route::get('ecritures/amende/{id}', 'EcritureController@amende');
         Route::get('ecritures/intervention/{id}', 'EcritureController@intervention');
         Route::get('ecritures/exercice/{id}', 'EcritureController@exercice');
         Route::get('ecritures/{id}', 'EcritureController@all');
-
+        
         Route::resource('comptes', 'CompteController')->only(['index']);
         Route::get('comptes/{id}/ecritures/{exerciceComptableId}', 'CompteController@ecritures');
-
-        //Controles medicauxs
-        Route::get('medecins/', 'MedecinController@all');
-        Route::get('controles-medicaux-types', 'ControleMedicalTypeController@all');
-
+        
+        // Params Frais
+        Route::get('indemnites-types', 'IndemniteTypeController@index');
+        Route::get('indemnites-exercice-types', 'IndemniteExerciceTypeController@index');
+        Route::get('indemnites-intervention-types', 'IndemniteInterventionTypeController@index');
+        Route::get('indemnites-annuel-types', 'IndemniteAnnuelTypeController@index');
+        Route::get('frais-types', 'FraisTypeController@index');
+        
+        // Controles médicaux
         Route::resource('controles-medicaux', 'ControleMedicalController')->only(['index', 'show', 'store', 'update', 'destroy']);
         Route::get('controles-medicaux/{id}/justificatif', 'JustificatifController@show');
         Route::post('controles-medicaux/{id}/justificatif', 'JustificatifController@store');
         Route::delete('controles-medicaux/{id}/justificatif', 'JustificatifController@destroy');
+
+        // Params Controles medicaux
+        Route::resource('medecins', 'MedecinController')->only(['index', 'store', 'update']);
+        Route::resource('controles-medicaux-types', 'ControleMedicalTypeController')->only(['index', 'store', 'update']);
     });
 });

@@ -3,9 +3,9 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\InterventionParamService;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Request;
 
-class InterventionTraitementController extends Controller
+class StatInterventionController extends Controller
 {
     protected $service;
 
@@ -16,9 +16,9 @@ class InterventionTraitementController extends Controller
 
     public function index()
     {
-        $traitements = $this->service->traitements();
+        $stats = $this->service->stats();
 
-        return response()->json(['data' => $traitements]);
+        return response()->json(['data' => $stats]);
     }
 
     public function store(Request $request)
@@ -28,8 +28,8 @@ class InterventionTraitementController extends Controller
             'tri' => 'integer'
         ]);
 
-        $traitement = $this->service->ajouterTraitement($data);
-        return response()->json(['data' => $traitement]);
+        $stat = $this->service->ajouterStat($data);
+        return response()->json(['data' => $stat]);
     }
 
     public function update(Request $request, $id)
@@ -39,13 +39,13 @@ class InterventionTraitementController extends Controller
             'tri' => 'integer'
         ]);
 
-        $traitement = $this->service->modifierTraitement($id, $data);
-        return response()->json(['data' => $traitement]);
+        $stat = $this->service->modifierStat($id, $data);
+        return response()->json(['data' => $stat]);
     }
 
     public function destroy($id)
     {
-        $traitement = $this->service->supprimerTraitement($id);
-        return response()->json(['data' => $traitement]);
+        $stat = $this->service->supprimerStat($id);
+        return response()->json(['data' => $stat]);
     }
 }

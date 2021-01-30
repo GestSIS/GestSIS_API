@@ -2,21 +2,59 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\Fonction;
+use App\Domaine\API\SapeurParamService;
 use Illuminate\Http\Request;
 
 class FonctionController extends Controller
 {
-/**
- * Display a listing of the resource.
- *
- * @return \Illuminate\Http\Response
- */
+    protected $service;
+
+    public function __construct(SapeurParamService $service)
+    {
+        $this->service = $service;
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function index()
     {
-        //TODO Change this to use an extra level of indirections for consistency ???
-        $fonctions = Fonction::all();
+        $fonctions = $this->service->fonctions();
 
         return response()->json(['data' => $fonctions]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'designation' => 'string|min:1',
+            'validity_duration' => 'integer|min:1',
+            'expirable' => 'boolean',
+            'tri' => 'integer'
+        ]);
+
+        $fonction = $this->service->ajouterFonction($data);
+        return response()->json(['data' => $fonction]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $data = $request->validate([
+            'designation' => 'string|min:1',
+            'validity_duration' => 'integer|min:1',
+            'expirable' => 'boolean',
+            'tri' => 'integer'
+        ]);
+
+        $fonction = $this->service->modifierFonction($id, $data);
+        return response()->json(['data' => $fonction]);
+    }
+
+    public function destroy($id)
+    {
+        $fonction = $this->service->supprimerFonction($id);
+        return response()->json(['data' => $fonction]);
     }
 }

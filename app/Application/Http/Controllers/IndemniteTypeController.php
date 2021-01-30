@@ -5,7 +5,7 @@ namespace App\Application\Http\Controllers;
 use App\Domaine\API\ComptabiliteService;
 use Illuminate\Http\Response;
 
-class IdemniteTypeController extends Controller
+class IndemniteTypeController extends Controller
 {
 
     protected $service;
