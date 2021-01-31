@@ -5,7 +5,7 @@ namespace App\Application\Http\Controllers;
 use App\Domaine\API\InterventionParamService;
 use Illuminate\Http\Request;
 
-class StatFederalFederalController extends Controller
+class StatFederalController extends Controller
 {
 
     protected $service;
