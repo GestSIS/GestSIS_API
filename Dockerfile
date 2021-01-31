@@ -1,4 +1,4 @@
-FROM php:fpm
+FROM php:7.4-fpm
 
 RUN mkdir -p /usr/share/man/man1 \
     && apt-get update \
