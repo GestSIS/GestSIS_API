@@ -32,7 +32,7 @@ class SapeurMutationTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testGradeIndexOK()
+    public function testGradeIndexOk()
     {
         $response = $this->json('GET', "/api/v2/sapeurs/1/mutations");
 
@@ -69,16 +69,18 @@ class SapeurMutationTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     'mutation' => ['id', 'incorporation', 'sapeur_id', 'sortie', 'motif'],
-                    'actif' => 1
+                    'actif'
                 ]
             ]);
 
-        $mutation = $response->getData()->data;
+        $mutation = $response->getData()->data->mutation;
+        $actif = $response->getData()->data->actif;
 
         $this->assertTrue(Carbon::parse($data['incorporation'])->diffInDays($mutation->incorporation) === 0);
         $this->assertTrue($data['sortie'] === $mutation->sortie);
         $this->assertTrue($data['motif'] === $mutation->motif);
         $this->assertTrue($data['localite_id'] === $mutation->localite_id);
+        $this->assertTrue($actif === 1);
     }
 
     /**
@@ -96,7 +98,7 @@ class SapeurMutationTest extends TestCase
             'localite_id' => 1
         );
 
-        $mutation_id = $this->service->addMutation($this->sapeurId, $data)->id;
+        $mutation_id = $this->service->addMutation($this->sapeurId, $data)['mutation']->id;
 
         $data = array(
             'incorporation' => "2005-01-16",
@@ -113,12 +115,12 @@ class SapeurMutationTest extends TestCase
             ->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    'mutation' => ['id', 'incorporation', 'sapeur_id', 'sortie', 'motif'],
-                    'actif' => 1
+                    'mutation' => ['id', 'localite_id', 'incorporation', 'sapeur_id', 'sortie', 'motif'],
+                    'actif'
                 ]
             ]);
 
-        $mutation = $response->getData()->data;
+        $mutation = $response->getData()->data->mutation;
 
         $this->assertTrue(Carbon::parse($data['incorporation'])->diffInDays($mutation->incorporation) === 0);
         $this->assertTrue(Carbon::parse($data['sortie'])->diffInDays($mutation->sortie) === 0);
@@ -141,7 +143,7 @@ class SapeurMutationTest extends TestCase
             'localite_id' => 1
         );
 
-        $mutation_id = $this->service->addMutation($this->sapeurId, $data)->id;
+        $mutation_id = $this->service->addMutation($this->sapeurId, $data)['mutation']->id;
 
         $data = array(
             'incorporation' => "2000-01-16",
@@ -176,7 +178,7 @@ class SapeurMutationTest extends TestCase
             'localite_id' => 2
         );
 
-        $mutation_id = $this->service->addMutation($this->sapeurId, $data)->id;
+        $mutation_id = $this->service->addMutation($this->sapeurId, $data)['mutation']->id;
 
         $response = $this->json('DELETE', "/api/v2/sapeurs/$this->sapeurId/mutations/$mutation_id");
 

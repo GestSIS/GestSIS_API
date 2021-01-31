@@ -44,7 +44,7 @@ class SapeurCoursTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testAddCoursOK()
+    public function testAddCoursOk()
     {
         //Create cours
         $data = array(

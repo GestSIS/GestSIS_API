@@ -15,7 +15,7 @@ class BaseDataInterventionTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testMissionTypesIndexOK()
+    public function testMissionTypesIndexOk()
     {
         $response = $this->json('GET', "/api/v2/mission-types/");
 
@@ -36,7 +36,7 @@ class BaseDataInterventionTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testStatFederalIndexOK()
+    public function testStatFederalIndexOk()
     {
         $response = $this->json('GET', "/api/v2/stat-federal/");
 
@@ -57,7 +57,7 @@ class BaseDataInterventionTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testTypeInterventionIndexOK()
+    public function testTypeInterventionIndexOk()
     {
         $response = $this->json('GET', "/api/v2/type-intervention/");
 
@@ -78,7 +78,7 @@ class BaseDataInterventionTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testInterventionTraitementIndexOK()
+    public function testInterventionTraitementIndexOk()
     {
         $response = $this->json('GET', "/api/v2/intervention-traitement/");
 
@@ -99,7 +99,7 @@ class BaseDataInterventionTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testPhaseTypesIndexOK()
+    public function testPhaseTypesIndexOk()
     {
         $response = $this->json('GET', "/api/v2/phase-types/");
 
@@ -120,7 +120,7 @@ class BaseDataInterventionTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testVehiculesIndexOK()
+    public function testVehiculesIndexOk()
     {
         $response = $this->json('GET', "/api/v2/vehicules/");
 
@@ -141,7 +141,7 @@ class BaseDataInterventionTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testMaterielsIndexOK()
+    public function testMaterielsIndexOk()
     {
         $response = $this->json('GET', "/api/v2/materiels/");
 
@@ -162,7 +162,7 @@ class BaseDataInterventionTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testTelephonesIndexOK()
+    public function testTelephonesIndexOk()
     {
         $response = $this->json('GET', "/api/v2/telephones/");
 

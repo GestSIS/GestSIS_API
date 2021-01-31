@@ -32,7 +32,7 @@ class SapeurTelephoneTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testTelephoneIndexOK()
+    public function testTelephoneIndexOk()
     {
         $response = $this->json('GET', "/api/v2/sapeurs/1/telephones");
 

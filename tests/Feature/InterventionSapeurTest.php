@@ -29,7 +29,7 @@ class InterventionSapeurTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testInterventionIndexSapeursOK()
+    public function testInterventionIndexSapeursOk()
     {
         $response = $this->json('GET', "/api/v2/interventions/393/sapeurs");
 

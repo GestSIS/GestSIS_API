@@ -25,7 +25,7 @@ class ExerciceTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testExerciceIndexAllOK()
+    public function testExerciceIndexAllOk()
     {
         $response = $this->json('GET', "/api/v2/exercices/");
 
@@ -46,7 +46,7 @@ class ExerciceTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testExerciceIndexLimitedOK()
+    public function testExerciceIndexLimitedOk()
     {
         $response = $this->json('GET', "/api/v2/exercices?exercice_comptable_id=3");
 
@@ -67,7 +67,7 @@ class ExerciceTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testExerciceShowOK()
+    public function testExerciceShowOk()
     {
         $response = $this->json('GET', "/api/v2/exercices/1");
 
@@ -86,7 +86,7 @@ class ExerciceTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testAddExerciceOK()
+    public function testAddExerciceOk()
     {
         $exercice = Exercice::factory()->make();
 
@@ -147,7 +147,7 @@ class ExerciceTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testValidateExerciceOK()
+    public function testValidateExerciceOk()
     {
         $exercice = Exercice::factory()->create();
 

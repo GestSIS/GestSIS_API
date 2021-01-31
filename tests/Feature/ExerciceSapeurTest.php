@@ -24,7 +24,7 @@ class ExerciceSapeurTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testExerciceIndexSapeurOK()
+    public function testExerciceIndexSapeurOk()
     {
         $response = $this->json('GET', "/api/v2/exercices/1/sapeurs");
 

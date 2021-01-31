@@ -16,7 +16,7 @@ class GroupeTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testGroupeIndexOK()
+    public function testGroupeIndexOk()
     {
         $response = $this->json('GET', "/api/v2/groupes/");
 

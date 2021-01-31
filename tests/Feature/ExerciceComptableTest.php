@@ -16,7 +16,7 @@ class ExerciceComptableTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testExerciceComptableIndexOK()
+    public function testExerciceComptableIndexOk()
     {
         $response = $this->json('GET', "/api/v2/exercice-comptables/");
 

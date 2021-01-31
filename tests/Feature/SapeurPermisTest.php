@@ -32,7 +32,7 @@ class SapeurPermisTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testPermisIndexOK()
+    public function testPermisIndexOk()
     {
         $response = $this->json('GET', "/api/v2/sapeurs/1/permis");
 
@@ -53,7 +53,7 @@ class SapeurPermisTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testAddPermisOK()
+    public function testAddPermisOk()
     {
         $permis_type = 9;
 
