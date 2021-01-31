@@ -3,21 +3,55 @@
 namespace App\Domaine\Business;
 
 use App\Domaine\SPI\ControleMedicalRepository;
-use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\Intervention;
-use App\Infrastructure\Models\Justificatif;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
+use App\Infrastructure\Models\ControleMedicalType;
+use App\Infrastructure\Models\Medecin;
 use Illuminate\Support\Facades\Storage;
 
 class ControleMedicalBusiness
 {
-
     protected $repository;
 
     public function __construct(ControleMedicalRepository $repository)
     {
         $this->repository = $repository;
+    }
+
+    public function ajouterMedecin($data)
+    {
+        $medecin = new Medecin();
+        $medecin->fill($data);
+        $medecin->save();
+        return $medecin;
+    }
+
+    public function modifierMedecin($id, $data)
+    {
+        Medecin::where('id', $id)->limit(1)->update($data);
+        return Medecin::find($id);
+    }
+    
+    public function supprimerMedecin($id)
+    {
+        // TODO: Implémenter supprimer médecin
+    }
+    
+    public function ajouterType($data)
+    {
+        $type = new ControleMedicalType();
+        $type->fill($data);
+        $type->save();
+        return $type;
+    }
+
+    public function modifierType($id, $data)
+    {
+        ControleMedicalType::where('id', $id)->limit(1)->update($data);
+        return ControleMedicalType::find($id);
+    }
+    
+    public function supprimerType($id)
+    {
+        // TODO: Implémenter supprimer médecin
     }
 
     public function createControleMedical($controleMedical)

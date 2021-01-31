@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -74,5 +73,8 @@ class DatabaseSeeder extends Seeder
         $this->call(MedecinTableSeeder::class);
         $this->call(ControleMedicauxTypeTableSeeder::class);
         $this->call(ControleMedicauxTableSeeder::class);
+
+        $this->call(DecompteTableSeeder::class);
+        $this->call(PaiementTableSeeder::class);
     }
 }

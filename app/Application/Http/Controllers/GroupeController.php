@@ -2,11 +2,19 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\Groupe;
+use App\Domaine\API\SapeurParamService;
 use Illuminate\Http\Request;
 
 class GroupeController extends Controller
 {
+
+    protected $service;
+
+    public function __construct(SapeurParamService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +22,7 @@ class GroupeController extends Controller
      */
     public function index()
     {
-        $groupes = Groupe::all();
+        $groupes = $this->service->groupes();
 
         return response()->json(['data' => $groupes]);
     }
@@ -22,26 +30,32 @@ class GroupeController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'pere_id' => 'integer|nullable',
-            'type' => 'boolean',
-            'no' => 'integer|nullable',
-            'designation' => 'string',
-            'info' => 'string|nullable',
-            'tri' => 'integer',
+            'designation' => 'string|min:1',
+            'validity_duration' => 'integer|min:1',
+            'expirable' => 'boolean',
+            'tri' => 'integer'
         ]);
 
-        $intervention = $this->service->createIntervention($data);
-
-        return response()->json(['data' => $intervention]);
+        $groupe = $this->service->ajouterGroupe($data);
+        return response()->json(['data' => $groupe]);
     }
 
-    public function update(Request $request, $groupeId)
+    public function update(Request $request, $id)
     {
-        
+        $data = $request->validate([
+            'designation' => 'string|min:1',
+            'validity_duration' => 'integer|min:1',
+            'expirable' => 'boolean',
+            'tri' => 'integer'
+        ]);
+
+        $groupe = $this->service->modifierGroupe($id, $data);
+        return response()->json(['data' => $groupe]);
     }
 
-    public function delete(Request $request, $groupeId)
+    public function destroy($id)
     {
-        
+        $groupe = $this->service->supprimerGroupe($id);
+        return response()->json(['data' => $groupe]);
     }
 }

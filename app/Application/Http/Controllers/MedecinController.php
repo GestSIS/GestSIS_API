@@ -2,20 +2,54 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\Medecin;
-use Illuminate\Http\Response;
+use App\Domaine\API\ControleMedicalService;
+use Illuminate\Http\Request;
 
 class MedecinController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
-    public function all()
+    protected $service;
+
+    public function __construct(ControleMedicalService $service)
     {
-        $medecins = Medecin::all();
+        $this->service = $service;
+    }
+
+    public function index()
+    {
+        $medecins = $this->service->medecins();
 
         return response()->json(['data' => $medecins]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'designation' => 'string|min:1',
+            'address' => 'string|min:1',
+            'localite_id' => 'integer',
+            'actif' => 'boolean'
+        ]);
+
+        $medecin = $this->service->ajouterMedecin($data);
+        return response()->json(['data' => $medecin]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $data = $request->validate([
+            'designation' => 'string|min:1',
+            'address' => 'string|min:1',
+            'localite_id' => 'integer',
+            'actif' => 'boolean'
+        ]);
+
+        $medecin = $this->service->modifierMedecin($id, $data);
+        return response()->json(['data' => $medecin]);
+    }
+
+    public function destroy($id)
+    {
+        $medecin = $this->service->supprimerMedecin($id);
+        return response()->json(['data' => $medecin]);
     }
 }

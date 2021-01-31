@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Groupe extends Model
 {
-    protected $fillable = ['pere_id', 'type', 'no', 'designation', 'info', 'tri'];
-
+    protected $fillable = ['type', 'no', 'designation', 'info', 'tri', 'pere_id'];
+    
     /**
      * The sapeur that belong to the sapeur.
      */

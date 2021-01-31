@@ -8,7 +8,7 @@ use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\Exercice;
 use Illuminate\Database\Eloquent\Collection;
-use PDF;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 
 class ExerciceService
 {
@@ -128,7 +128,7 @@ class ExerciceService
         $presences = $this->repository->listSapeurOfExerciceById($exerciceId);
 
         return View('pdf/liste-appel', ["presences" => $presences]);
-        $pdf = PDF::loadView('pdf/liste-appel', ["presences" => $presences]);
+        $pdf = SnappyPdf::loadView('pdf/liste-appel', ["presences" => $presences]);
         return $pdf->download('invoice.pdf');
     }
 
@@ -137,7 +137,7 @@ class ExerciceService
         $presences = $this->repository->listSapeurOfExerciceById($exerciceId);
 
         return View('pdf/liste-appel-localite', ["presences" => $presences]);
-        $pdf = PDF::loadView('pdf/decomptes-sapeurs', ["presences" => $presences]);
+        $pdf = PDSnappyPdfF::loadView('pdf/decomptes-sapeurs', ["presences" => $presences]);
         return $pdf->download('invoice.pdf');
     }
 
@@ -155,7 +155,7 @@ class ExerciceService
           }, array_values($exercice->sapeurs));
           
         // return View('pdf/liste-presence', ["exercice" => $exercice]);
-        $pdf = PDF::loadView('pdf/liste-presence', ["exercice" => $exercice]);
+        $pdf = SnappyPdf::loadView('pdf/liste-presence', ["exercice" => $exercice]);
         return $pdf->download('invoice.pdf');
     }
 }

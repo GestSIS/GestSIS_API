@@ -84,4 +84,12 @@ class Sapeur extends Model
     {
         return $this->belongsTo('App\Infrastructure\Models\Localite');
     }
+
+    /**
+     * The civility of the sapeur
+     */
+    public function civilite()
+    {
+        return $this->belongsTo('App\Infrastructure\Models\Civilite');
+    }
 }

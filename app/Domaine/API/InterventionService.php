@@ -7,6 +7,7 @@ use App\Domaine\Business\InterventionBusiness;
 use App\Domaine\SPI\InterventionRepository;
 use App\Infrastructure\Models\Intervention;
 use Illuminate\Database\Eloquent\Collection;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 
 class InterventionService
 {
@@ -373,7 +374,7 @@ class InterventionService
         //   }, array_values($exercice->sapeurs));
           
         return View('pdf/rapport-intervention', ["intervention" => $intervention, "params" => $params]);
-        // $pdf = PDF::loadView('pdf/rapport-intervention', ["intervention" => $intervention, "params" => $params]);
+        // $pdf = SnappyPdf::loadView('pdf/rapport-intervention', ["intervention" => $intervention, "params" => $params]);
         // return $pdf->download('invoice.pdf');
     }
 }

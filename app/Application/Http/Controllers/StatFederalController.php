@@ -2,20 +2,53 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\StatFederal;
-use Illuminate\Http\Response;
+use App\Domaine\API\InterventionParamService;
+use Illuminate\Http\Request;
 
 class StatFederalController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
+
+    protected $service;
+
+    public function __construct(InterventionParamService $service)
+    {
+        $this->service = $service;
+    }
+
     public function index()
     {
-        $stats = StatFederal::all();
+        $statsFederal = $this->service->statsFederal();
 
-        return response()->json(['data' => $stats]);
+        return response()->json(['data' => $statsFederal]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'designation' => 'string|min:1',
+            'status' => 'integer',
+            'tri' => 'integer'
+        ]);
+
+        $stat = $this->service->ajouterStatFederal($data);
+        return response()->json(['data' => $stat]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $data = $request->validate([
+            'designation' => 'string|min:1',
+            'status' => 'integer',
+            'tri' => 'integer'
+        ]);
+
+        $stat = $this->service->modifierStatFederal($id, $data);
+        return response()->json(['data' => $stat]);
+    }
+
+    public function destroy($id)
+    {
+        $stat = $this->service->supprimerStatFederal($id);
+        return response()->json(['data' => $stat]);
     }
 }

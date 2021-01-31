@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class Cours extends Model
 {
-    protected $fillable = ['lieu', 'date'];
+    protected $fillable = ['precedent_id', 'grade_id', 'fonction_id', 'abreviation', 'designation', 'tri', 'validite_debut', 'validite_fin'];
 }

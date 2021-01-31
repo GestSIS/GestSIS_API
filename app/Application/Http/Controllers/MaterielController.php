@@ -2,20 +2,58 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\Materiel;
+use App\Domaine\API\InterventionParamService;
 use Illuminate\Http\Request;
 
 class MaterielController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    protected $service;
+
+    public function __construct(InterventionParamService $service)
+    {
+        $this->service = $service;
+    }
+
     public function index()
     {
-        $materiel = Materiel::all();
+        $materiels = $this->service->materiels();
 
+        return response()->json(['data' => $materiels]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'designation' => 'string|min:1',
+            'status' => 'integer',
+            'tri' => 'integer',
+            'forfait' => 'numeric',
+            'unite' => 'integer',
+            'type_unite_id' => 'integer'
+        ]);
+
+        $materiel = $this->service->ajouterMateriel($data);
+        return response()->json(['data' => $materiel]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $data = $request->validate([
+            'designation' => 'string|min:1',
+            'status' => 'integer',
+            'tri' => 'integer',
+            'forfait' => 'numeric',
+            'unite' => 'integer',
+            'type_unite_id' => 'integer'
+        ]);
+
+        $materiel = $this->service->modifierMateriel($id, $data);
+        return response()->json(['data' => $materiel]);
+    }
+
+    public function destroy($id)
+    {
+        $materiel = $this->service->supprimerMateriel($id);
         return response()->json(['data' => $materiel]);
     }
 }

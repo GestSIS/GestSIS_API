@@ -209,6 +209,34 @@ class ImputationBusiness
     }
 
     /**
+     * Générer les amendes pour un sapeur
+     */
+    public function genererAmendeSapeur($exerciceComptableId, $sapeurId)
+    {
+
+    }
+
+    /**
+     * Générer les amendes pour l'année comptable en cours
+     */
+    public function genererAmendeAnnuels($exerciceComptableId)
+    {
+        // Load amendes config
+        $amendes = Null;
+        
+        // Load all absences pour chaque exercice et sapeur
+        $absences = Null;
+        
+        // Générer des ecritures pour chaque absence
+        $ecritures = Null;
+        
+        // Comparer avec les écritures existantes ou supprimer les existantes
+        
+        // Enregistrer les ecritures générées
+        
+    }
+
+    /**
      * Génères des frais annuels pour les sapeurs n'ayant pas encore de frais annuels
      */
     public function imputerAnnuel(int $exerciceComptableId)

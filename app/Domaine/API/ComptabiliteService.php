@@ -9,8 +9,7 @@ use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\FraisTypeRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
-use App\Infrastructure\Models\ExerciceComptable;
-use PDF;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 
 class ComptabiliteService
 {
@@ -137,7 +136,7 @@ class ComptabiliteService
         $ecritures = $this->ecritureRepo->computeEcritureForPersonalDecompte($exerciceComptableId);
 
 //        return View('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
-        $pdf = PDF::loadView('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
+        $pdf = SnappyPdf::loadView('pdf/decomptes-sapeurs', ["ecritures" => $ecritures]);
         return $pdf->download('invoice.pdf');
     }
 }
