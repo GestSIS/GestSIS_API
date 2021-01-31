@@ -110,7 +110,7 @@ class ComptabiliteService
     function imputationAnnuel($exerciceComptableId)
     {
         $this->business->imputerAnnuel($exerciceComptableId);
-        
+
         return [
             "frais" => $this->ecritureRepo->listeFraisAnnuelByExeComptableId($exerciceComptableId),
             "indemnites" => $this->ecritureRepo->listeIndemniteAnnuelByExeComptableId($exerciceComptableId),
@@ -121,7 +121,7 @@ class ComptabiliteService
     {
         return $this->business->genererAmendeSapeur($exerciceComptableId, $sapeurId);
     }
-    
+
     function genererAmendeAnnuel($exerciceComptableId)
     {
         return $this->business->genererAmendeAnnuels($exerciceComptableId);
@@ -132,7 +132,7 @@ class ComptabiliteService
         $ecritures = $this->ecritureRepo->computeEcritureForPersonalDecompte($exerciceComptableId);
 
 //        return View('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
-        $pdf = PDF::loadView('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
+        $pdf = PDF::loadView('pdf/decomptes-sapeurs', ["ecritures" => $ecritures]);
         return $pdf->download('invoice.pdf');
     }
 }

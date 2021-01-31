@@ -15,14 +15,14 @@ class StatInterventionTableSeeder extends Seeder
     public function run()
     {
         $stats = array(
-            array('id' => 1, 'Pas de stats' => 'stat 1', 'tri' => 1),
-            array('id' => 2, 'Feux' => 'stat 2', 'tri' => 2),
-            array('id' => 3, 'Guêpes' => 'stat 3', 'tri' => 3),
-            array('id' => 4, 'Alarmes automatiques' => 'stat 4', 'tri' => 4),
-            array('id' => 5, 'Divers' => 'stat 5', 'tri' => 5),
-            array('id' => 6, 'Pollutions' => 'stat 6', 'tri' => 6),
-            array('id' => 7, 'Sauvetages' => 'stat 7', 'tri' => 7),
-            array('id' => 8, 'Inondations / Eléments naturels' => 'stat 8', 'tri' => 8),
+            array('id' => 1, 'designation' => 'Pas de stats', 'tri' => 1),
+            array('id' => 2, 'designation' => 'Feux', 'tri' => 2),
+            array('id' => 3, 'designation' => 'Guêpes', 'tri' => 3),
+            array('id' => 4, 'designation' => 'Alarmes automatiques', 'tri' => 4),
+            array('id' => 5, 'designation' => 'Divers', 'tri' => 5),
+            array('id' => 6, 'designation' => 'Pollutions', 'tri' => 6),
+            array('id' => 7, 'designation' => 'Sauvetages', 'tri' => 7),
+            array('id' => 8, 'designation' => 'Inondations / Eléments naturels', 'tri' => 8),
         );
 
         foreach ($stats as $item) {
