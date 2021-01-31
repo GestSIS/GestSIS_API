@@ -3,6 +3,7 @@
 namespace App\Domaine\API;
 
 use App\Domaine\Business\SapeurParamBusiness;
+use App\Infrastructure\Models\Cours;
 use App\Infrastructure\Models\Fonction;
 use App\Infrastructure\Models\Grade;
 use App\Infrastructure\Models\Groupe;

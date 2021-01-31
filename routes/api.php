@@ -137,8 +137,8 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::resource('type-intervention', 'TypeInterventionController')->only(['index', 'store', 'update']);
         Route::resource('stat-intervention', 'StatInterventionController')->only(['index', 'store', 'update']);
         Route::resource('intervention-traitement', 'InterventionTraitementController')->only(['index', 'store', 'update']);
-        Route::resource('mission-types', 'MissionTypeController@index')->only(['index', 'store', 'update']);
-        Route::resource('telephones', 'TelephoneController@index')->only(['index', 'store', 'update']);
+        Route::resource('mission-types', 'MissionTypeController')->only(['index', 'store', 'update']);
+        Route::resource('telephones', 'TelephoneController')->only(['index', 'store', 'update']);
         
         // Frais
         Route::post('imputation/intervention/{id}', 'ImputationController@intervention');
@@ -158,10 +158,10 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         
         // Params Frais
         Route::get('indemnites-types', 'IndemniteTypeController@index');
-        Route::get('indemnites-exercice-types', 'IndemniteExerciceTypeController@index');
-        Route::get('indemnites-intervention-types', 'IndemniteInterventionTypeController@index');
-        Route::get('indemnites-annuel-types', 'IndemniteAnnuelTypeController@index');
-        Route::get('frais-types', 'FraisTypeController@index');
+        Route::resource('indemnites-exercice-types', 'IndemniteExerciceTypeController')->only(['index', 'store', 'update']);
+        Route::resource('indemnites-intervention-types', 'IndemniteInterventionTypeController')->only(['index', 'store', 'update']);
+        Route::resource('indemnites-annuel-types', 'IndemniteAnnuelTypeController')->only(['index', 'store', 'update']);
+        Route::resource('frais-types', 'FraisTypeController')->only(['index', 'store', 'update']);
         
         // Controles médicaux
         Route::resource('controles-medicaux', 'ControleMedicalController')->only(['index', 'show', 'store', 'update', 'destroy']);

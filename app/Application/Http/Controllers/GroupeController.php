@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ControleMedicalService;
+use App\Domaine\API\SapeurParamService;
 use Illuminate\Http\Request;
 
 class GroupeController extends Controller
@@ -10,7 +10,7 @@ class GroupeController extends Controller
 
     protected $service;
 
-    public function __construct(ControleMedicalService $service)
+    public function __construct(SapeurParamService $service)
     {
         $this->service = $service;
     }

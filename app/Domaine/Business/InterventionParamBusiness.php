@@ -7,6 +7,7 @@ use App\Infrastructure\Models\Materiel;
 use App\Infrastructure\Models\MissionType;
 use App\Infrastructure\Models\StatFederal;
 use App\Infrastructure\Models\StatIntervention;
+use App\Infrastructure\Models\Telephone;
 use App\Infrastructure\Models\TypeIntervention;
 use App\Infrastructure\Models\Vehicule;
 
@@ -84,6 +85,25 @@ class InterventionParamBusiness
     }
 
     public static function supprimerMission($id)
+    {
+        //TODO: Not implemented now
+    }
+
+    public function ajouterTelephone($data)
+    {
+        $telephone = new Telephone();
+        $telephone->fill($data);
+        $telephone->save();
+        return $telephone;
+    }
+
+    public function modifierTelephone($id, $data)
+    {
+        Telephone::where('id', $id)->limit(1)->update($data);
+        return Telephone::find($id);
+    }
+
+    public static function supprimerTelephone($id)
     {
         //TODO: Not implemented now
     }

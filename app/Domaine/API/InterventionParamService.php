@@ -8,6 +8,7 @@ use App\Infrastructure\Models\Materiel;
 use App\Infrastructure\Models\MissionType;
 use App\Infrastructure\Models\StatFederal;
 use App\Infrastructure\Models\StatIntervention;
+use App\Infrastructure\Models\Telephone;
 use App\Infrastructure\Models\TypeIntervention;
 use App\Infrastructure\Models\Vehicule;
 
@@ -98,6 +99,26 @@ class InterventionParamService
     public function supprimerMission($id)
     {
         return $this->business->supprimerMission($id);
+    }
+    
+    public function telehpnes()
+    {
+        return Telephone::all();
+    }
+
+    public function ajouterTelephone($data)
+    {
+        return $this->business->ajouterTelephone($data);
+    }
+
+    public function modifierTelephone($id, $data)
+    {
+        return $this->business->modifierTelephone($id, $data);
+    }
+
+    public function supprimerTelephone($id)
+    {
+        return $this->business->supprimerTelephone($id);
     }
     
     public function vehicules()
