@@ -118,7 +118,7 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
 
         // Static Params Intervention
         Route::resource('phase-types', 'PhaseTypeController')->only(['index']);
-        Route::resource('stat-federal', 'StatFederalController')->only(['index', 'store', 'update']);
+        Route::resource('stat-federal', 'StatFederalController')->only(['index']); // TODO: see to add the correct right for the followuinf routes : 'store', 'update']);
         
         // Données de bases Sapeur
         Route::get('groupes-sapeurs', 'GroupeSapeursController@index')->name('api.v2.groupes-sapeurs');

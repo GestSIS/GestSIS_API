@@ -101,7 +101,7 @@ class InterventionParamService
         return $this->business->supprimerMission($id);
     }
     
-    public function telehpnes()
+    public function telephones()
     {
         return Telephone::all();
     }
