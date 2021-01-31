@@ -19,18 +19,11 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
     // Etats de sortie 
     // TODO: Temporairement public, à déplacer
     Route::get('pdf-test/{id}', 'CompteController@generatePdf');
-    Route::get('exercice/{id}/liste-presence', 'ExerciceController@listePresence');
-    Route::get('exercice/{id}/liste-appel', 'ExerciceController@listeAppel');
-    Route::get('exercice/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
+    Route::get('exercices/{id}/liste-presence', 'ExerciceController@listePresence');
+    Route::get('exercices/{id}/liste-appel', 'ExerciceController@listeAppel');
+    Route::get('exercices/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
 
-
-    // TODO: Finalise
-    Route::get('exercice/{id}/liste-presence', 'ExerciceController@listePresence');
-    Route::get('exercice/{id}/liste-appel', 'ExerciceController@listeAppel');
-    Route::get('exercice/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
-    
     Route::group(['middleware' => 'jwtToken'], function () {
-
         // Sapeurs
         Route::resource('sapeurs', 'SapeurController')->only(['index', 'show', 'store', 'update']); //, 'destroy']);//->middleware('role:effectif_read');
 
