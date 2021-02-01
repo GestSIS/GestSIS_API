@@ -68,8 +68,8 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::delete('exercices/{id}/sapeurs', 'ConvocationsController@destroy')->name('api.v2.exercices.sapeurs.delete');
 
         // Params exercices
-        Route::resource('exercice-categories', 'ExerciceCategorieController@index')->only(['index', 'store', 'update']);
-        Route::resource('excuses-types', 'ExcuseTypeController@index')->only(['index', 'store', 'update']);
+        Route::resource('exercice-categories', 'ExerciceCategorieController')->only(['index', 'store', 'update']);
+        Route::resource('excuses-types', 'ExcuseTypeController')->only(['index', 'store', 'update']);
 
         // Interventions
         Route::resource('interventions', 'InterventionController')->only(['index', 'show', 'store', 'update', 'destroy']);
