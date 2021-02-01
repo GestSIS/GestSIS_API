@@ -32,7 +32,7 @@ class BaseDataComptabiliteTest extends TestCase
     }
 
     /**
-     * Test index idemnite annuel type
+     * Test index indemnite annuel type
      *
      * @return void
      * @throws Exception

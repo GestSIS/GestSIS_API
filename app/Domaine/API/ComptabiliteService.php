@@ -39,12 +39,7 @@ class ComptabiliteService
     function creerExerciceComptable($data) {
         return $this->business->creerExerciceComptable($data);
     }
-
-    function getComptes()
-    {
-        return $this->compteRepo->listComptes();
-    }
-
+    
     function getAllEcrituresForExerciceComptableById($exerciceComptableId)
     {
         return $this->ecritureRepo->listeAllEcritureForExerciceComptableById($exerciceComptableId);
@@ -58,22 +53,6 @@ class ComptabiliteService
     function getEcrituresByCompte($compteId, $exerciceComptableId)
     {
         return $this->ecritureRepo->listeEcritureForCompteAndExerciceComptableById($compteId, $exerciceComptableId);
-    }
-
-    function getIndemnitesTypes()
-    {
-        return array(
-            "exercices" => $this->indemniteRepo->listeIndemniteExerciceType(),
-            "interventions" => $this->indemniteRepo->listeIndemniteInterventionType(),
-            "annuels" => $this->indemniteRepo->listeIndemniteAnnuelType(),
-        );
-    }
-
-    function getFraisTypes()
-    {
-        return array(
-            "annuels" => $this->fraisRepo->listeFraisAnnuelType()
-        );
     }
 
     function getEcrituresForExerciceById($exerciceId)

@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 
 class ExcuseTypeController extends Controller
 {
-
     protected $service;
 
     public function __construct(ExerciceParamService $service)

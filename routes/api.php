@@ -24,9 +24,14 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
     Route::get('exercices/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
 
     Route::group(['middleware' => 'jwtToken'], function () {
+
+        // Exercices comptables
+        Route::resource('exercice-comptables', 'ExerciceComptableController')->only(['index', 'store']); //TODO: ajout cloturer
+        Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire/{SapeurId}', 'DecompteController@certificatSalaireSapeur');
+        Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire', 'DecompteController@certificatSalaire');
+
         // Sapeurs
         Route::resource('sapeurs', 'SapeurController')->only(['index', 'show', 'store', 'update']); //, 'destroy']);//->middleware('role:effectif_read');
-
         Route::resource('sapeurs.groupes', 'SapeurGroupeController')->only(['index']);
         Route::resource('sapeurs.permis', 'SapeurPermisController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('sapeurs.telephones', 'SapeurTelephoneController')->only(['index', 'store', 'update', 'destroy']);
@@ -34,10 +39,24 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::resource('sapeurs.grades', 'SapeurGradeController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('sapeurs.mutations', 'SapeurMutationController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('sapeurs.cours', 'SapeurCoursController')->only(['index', 'store', 'update', 'destroy']);
+
         Route::get('sapeurs/{id}/exercices/{exerciceComptableId}', 'SapeurExerciceController@index');
         Route::post('sapeurs/{id}/fin-fonctions', 'SapeurFonctionController@fin');
         Route::post('sapeurs/{id}/quitter-groupes', 'SapeurGroupeController@quitter');
         Route::post('sapeurs/{id}/supprimer-convocations', 'ConvocationsController@supprimerConvocations');
+
+        // Static Params Sapeurs ---
+        Route::get('civilites', 'CiviliteController@index')->name('api.v2.civilites');
+        Route::get('localites', 'LocaliteController@index')->name('api.v2.localites');
+        Route::get('telephone-types', 'TelephoneTypeController@index')->name('api.v2.telephone-types');
+        Route::get('permis', 'PermisController@index')->name('api.v2.permis');
+
+        // Params Sapeur
+        Route::get('groupes-sapeurs', 'GroupeSapeursController@index')->name('api.v2.groupes-sapeurs');
+        Route::resource('groupes', 'GroupeController')->only(['index', 'store', 'update']);
+        Route::resource('grades', 'GradeController')->only(['index', 'store', 'update']);
+        Route::resource('fonctions', 'FonctionController')->only(['index', 'store', 'update']);
+        Route::resource('cours', 'CoursController')->only(['index', 'store', 'update']);
 
         // Exercices
         Route::resource('exercices', 'ExerciceController')->only(['index', 'show', 'store', 'update', 'destroy']); //->middleware('role:effectif_read');
@@ -48,24 +67,9 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::put('exercices/{id}/sapeurs', 'ConvocationsController@update')->name('api.v2.exercices.sapeurs.update');
         Route::delete('exercices/{id}/sapeurs', 'ConvocationsController@destroy')->name('api.v2.exercices.sapeurs.delete');
 
-        // Exercices comptables
-        Route::resource('exercice-comptables', 'ExerciceComptableController')->only(['index', 'store']); //TODO: ajout cloturer
-        Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire/{SapeurId}', 'DecompteController@certificatSalaireSapeur');
-        Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire', 'DecompteController@certificatSalaire');
-
-        // Décomptes
-        Route::post('decompte/create', 'DecompteController@creer');
-        Route::post('decompte/{id}/iso20022', 'DecompteController@iso20022');
-        Route::get('decompte/', 'DecompteController@getAll');
-        Route::get('decompte/{id}', 'DecompteController@get');
-        Route::get('decompte/exercice-comptable/{id}', 'DecompteController@getByExerciceComptable');
-
-        // Paiements
-        Route::post('paiement/{id}/iso20022', 'PaiementController@iso20022');
-        Route::get('paiement/', 'PaiementController@getAll');
-        Route::get('paiement/{id}', 'PaiementController@get');
-        Route::get('paiement/decompte/{id}', 'PaiementController@getByDecompte');
-        Route::get('paiement/exercice-comptable/{id}', 'PaiementController@getByExerciceComptable');
+        // Params exercices
+        Route::resource('exercice-categories', 'ExerciceCategorieController@index')->only(['index', 'store', 'update']);
+        Route::resource('excuses-types', 'ExcuseTypeController@index')->only(['index', 'store', 'update']);
 
         // Interventions
         Route::resource('interventions', 'InterventionController')->only(['index', 'show', 'store', 'update', 'destroy']);
@@ -108,31 +112,14 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::put('interventions/{id}/phases', 'InterventionPhasesController@update')->name('api.v2.interventions.phases.update');
         Route::delete('interventions/{id}/phases', 'InterventionPhasesController@destroy')->name('api.v2.interventions.phases.delete');
 
-        // TODO:
+        // Impressions interventions
         Route::get('interventions/{id}/rapport', 'InterventionController@rapport')->name('api.v2.interventions.rapport');
-
-        // Static Params Sapeurs ---
-        Route::get('civilites', 'CiviliteController@index')->name('api.v2.civilites');
-        Route::get('localites', 'LocaliteController@index')->name('api.v2.localites');
-        Route::get('telephone-types', 'TelephoneTypeController@index')->name('api.v2.telephone-types');
-        Route::get('permis', 'PermisController@index')->name('api.v2.permis');
 
         // Static Params Intervention
         Route::resource('phase-types', 'PhaseTypeController')->only(['index']);
         Route::resource('stat-federal', 'StatFederalController')->only(['index']); // TODO: see to add the correct right for the followuinf routes : 'store', 'update']);
-        
-        // Données de bases Sapeur
-        Route::get('groupes-sapeurs', 'GroupeSapeursController@index')->name('api.v2.groupes-sapeurs');
-        Route::resource('groupes', 'GroupeController')->only(['index', 'store', 'update']);
-        Route::resource('grades', 'GradeController')->only(['index', 'store', 'update']);
-        Route::resource('fonctions', 'FonctionController')->only(['index', 'store', 'update']);
-        Route::resource('cours', 'CoursController')->only(['index', 'store', 'update']);
-        
-        // Données de bases exercices
-        Route::get('exercice-categories', 'ExerciceCategorieController@index')->name('api.v2.exercice-categorie');
-        Route::get('excuses-types', 'ExcuseTypeController@index')->name('api.v2.excuse-type');
-        
-        // Données de base intervention
+
+        // Params intervention
         Route::resource('vehicules', 'VehiculeController')->only(['index', 'store', 'update']);
         Route::resource('materiels', 'MaterielController')->only(['index', 'store', 'update']);
         Route::resource('type-intervention', 'TypeInterventionController')->only(['index', 'store', 'update']);
@@ -140,8 +127,8 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::resource('intervention-traitement', 'InterventionTraitementController')->only(['index', 'store', 'update']);
         Route::resource('mission-types', 'MissionTypeController')->only(['index', 'store', 'update']);
         Route::resource('telephones', 'TelephoneController')->only(['index', 'store', 'update']);
-        
-        // Frais
+
+        // Comptabilite
         Route::post('imputation/intervention/{id}', 'ImputationController@intervention');
         Route::post('imputation/exercice/{id}', 'ImputationController@exercice');
         Route::post('imputation/annuel/{id}', 'ImputationController@annuel');
@@ -153,28 +140,43 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::get('ecritures/intervention/{id}', 'EcritureController@intervention');
         Route::get('ecritures/exercice/{id}', 'EcritureController@exercice');
         Route::get('ecritures/{id}', 'EcritureController@all');
-        
-        Route::resource('comptes', 'CompteController')->only(['index']);
+
         Route::get('comptes/{id}/ecritures/{exerciceComptableId}', 'CompteController@ecritures');
+        Route::resource('comptes', 'CompteController')->only(['index', 'store', 'update']);
+
+        // Params Comptabilite
+        Route::get('indemnites-types', 'IndemniteTypeController@index');
+        Route::resource('frais-types', 'FraisTypeController')->only(['index']);
+        Route::resource('indemnites-exercice-types', 'IndemniteExerciceTypeController')->only(['index', 'store', 'update']);
+        Route::resource('indemnites-intervention-types', 'IndemniteInterventionTypeController')->only(['index', 'store', 'update']);
+        Route::resource('indemnites-annuel-types', 'IndemniteAnnuelTypeController')->only(['index', 'store', 'update']);
+        Route::resource('frais-annuel-types', 'FraisAnnuelTypeController')->only(['index', 'store', 'update']);
+
+        // Décomptes
+        Route::post('decompte/create', 'DecompteController@creer');
+        Route::post('decompte/{id}/iso20022', 'DecompteController@iso20022');
+        Route::get('decompte/', 'DecompteController@getAll');
+        Route::get('decompte/{id}', 'DecompteController@get');
+        Route::get('decompte/exercice-comptable/{id}', 'DecompteController@getByExerciceComptable');
+
+        // Paiements
+        Route::post('paiement/{id}/iso20022', 'PaiementController@iso20022');
+        Route::get('paiement/', 'PaiementController@getAll');
+        Route::get('paiement/{id}', 'PaiementController@get');
+        Route::get('paiement/decompte/{id}', 'PaiementController@getByDecompte');
+        Route::get('paiement/exercice-comptable/{id}', 'PaiementController@getByExerciceComptable');
 
         // Amendes
         Route::post('generer-amendes/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
         Route::post('generer-amendes/{id}', 'AmendeController@annuel');
-        
-        // Params Frais
-        Route::get('indemnites-types', 'IndemniteTypeController@index');
-        Route::resource('indemnites-exercice-types', 'IndemniteExerciceTypeController')->only(['index', 'store', 'update']);
-        Route::resource('indemnites-intervention-types', 'IndemniteInterventionTypeController')->only(['index', 'store', 'update']);
-        Route::resource('indemnites-annuel-types', 'IndemniteAnnuelTypeController')->only(['index', 'store', 'update']);
-        Route::resource('frais-types', 'FraisTypeController')->only(['index', 'store', 'update']);
-        
+
         // Controles médicaux
         Route::resource('controles-medicaux', 'ControleMedicalController')->only(['index', 'show', 'store', 'update', 'destroy']);
         Route::get('controles-medicaux/{id}/justificatif', 'JustificatifController@show');
         Route::post('controles-medicaux/{id}/justificatif', 'JustificatifController@store');
         Route::delete('controles-medicaux/{id}/justificatif', 'JustificatifController@destroy');
 
-        // Params Controles medicaux
+        // Params Controles médicaux
         Route::resource('medecins', 'MedecinController')->only(['index', 'store', 'update']);
         Route::resource('controles-medicaux-types', 'ControleMedicalTypeController')->only(['index', 'store', 'update']);
     });

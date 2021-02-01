@@ -3,7 +3,6 @@
 
 namespace App\Domaine\Business;
 
-use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\ExerciceCategorie;
 use App\Infrastructure\Models\ExcuseType;
 
