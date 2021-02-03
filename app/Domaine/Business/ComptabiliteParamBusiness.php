@@ -4,6 +4,7 @@
 namespace App\Domaine\Business;
 
 use App\Infrastructure\Models\Compte;
+use App\Infrastructure\Models\EcritureCategorie;
 use App\Infrastructure\Models\FraisAnnuelType;
 use App\Infrastructure\Models\IndemniteAnnuelType;
 use App\Infrastructure\Models\IndemniteExerciceType;
@@ -11,6 +12,26 @@ use App\Infrastructure\Models\IndemniteInterventionType;
 
 class ComptabiliteParamBusiness
 {
+    
+    public function ajouterCategorie($data)
+    {
+        $categorie = new EcritureCategorie();
+        $categorie->fill($data);
+        $categorie->save();
+        return $categorie;
+    }
+
+    public function modifierCategorie($id, $data)
+    {
+        EcritureCategorie::where('id', $id)->limit(1)->update($data);
+        return EcritureCategorie::find($id);
+    }
+
+    public function supprimerCategorie($id)
+    {
+        //TODO: Implement this
+    }
+
     public static function ajouterFraisAnnuel($data)
     {
         $frais = new FraisAnnuelType();

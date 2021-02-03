@@ -3,11 +3,12 @@
 namespace App\Domaine\API;
 
 use App\Domaine\Business\ComptabiliteParamBusiness;
-use App\Domaine\SPI\CompteRepository;
 use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\FraisTypeRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
+use App\Infrastructure\Models\Compte;
+use App\Infrastructure\Models\EcritureCategorie;
 
 class ComptabiliteParamService
 {
@@ -15,7 +16,6 @@ class ComptabiliteParamService
     protected $exerciceRepo;
     protected $indemniteRepo;
     protected $fraisRepo;
-    protected $compteRepo;
     protected $business;
 
     public function __construct(
@@ -23,14 +23,12 @@ class ComptabiliteParamService
         ExerciceRepository $exercice,
         IndemniteTypeRepository $indemnite,
         FraisTypeRepository $frais,
-        CompteRepository $comptes,
         ComptabiliteParamBusiness $business)
     {
         $this->ecritureRepo = $ecriture;
         $this->exerciceRepo = $exercice;
         $this->indemniteRepo = $indemnite;
         $this->fraisRepo = $frais;
-        $this->compteRepo = $comptes;
         $this->business = $business;
     }
     
@@ -48,6 +46,26 @@ class ComptabiliteParamService
         return array(
             "annuels" => $this->fraisRepo->listeFraisAnnuelType()
         );
+    }
+
+    function categories()
+    {
+        return EcritureCategorie::all();
+    }
+
+    public function ajouterCategorie($data)
+    {
+        return $this->business->ajouterCategorie($data);
+    }
+
+    public function modifierCategorie($id, $data)
+    {
+        return $this->business->modifierCategorie($id, $data);
+    }
+
+    public function supprimerCategorie($id)
+    {
+        return $this->business->supprimerCategorie($id);
     }
 
     function indemnitesAnnuel()
@@ -132,7 +150,7 @@ class ComptabiliteParamService
 
     public function comptes()
     {
-        return $this->compteRepo->listComptes();
+        return Compte::all();
     }
 
     public function ajouterCompte($data)

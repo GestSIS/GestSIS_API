@@ -4,7 +4,6 @@
 namespace App\Domaine\API;
 
 use App\Domaine\Business\ImputationBusiness;
-use App\Domaine\SPI\CompteRepository;
 use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\FraisTypeRepository;
@@ -25,14 +24,12 @@ class ComptabiliteService
         ExerciceRepository $exercice,
         IndemniteTypeRepository $indemnite,
         FraisTypeRepository $frais,
-        CompteRepository $comptes,
         ImputationBusiness $business)
     {
         $this->ecritureRepo = $ecriture;
         $this->exerciceRepo = $exercice;
         $this->indemniteRepo = $indemnite;
         $this->fraisRepo = $frais;
-        $this->compteRepo = $comptes;
         $this->business = $business;
     }
 

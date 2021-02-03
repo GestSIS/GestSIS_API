@@ -24,7 +24,6 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
     Route::get('exercices/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
 
     Route::group(['middleware' => 'jwtToken'], function () {
-
         // Exercices comptables
         Route::resource('exercice-comptables', 'ExerciceComptableController')->only(['index', 'store']); //TODO: ajout cloturer
         Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire/{SapeurId}', 'DecompteController@certificatSalaireSapeur');
@@ -142,15 +141,19 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::get('ecritures/{id}', 'EcritureController@all');
 
         Route::get('comptes/{id}/ecritures/{exerciceComptableId}', 'CompteController@ecritures');
-        Route::resource('comptes', 'CompteController')->only(['index', 'store', 'update']);
-
+        
+        // Static param Comptabilite
+        Route::get('unites', 'UniteController@index')->name('api.v2.unites');
+        
         // Params Comptabilite
         Route::get('indemnites-types', 'IndemniteTypeController@index');
+        Route::resource('comptes', 'CompteController')->only(['index', 'store', 'update']);
         Route::resource('frais-types', 'FraisTypeController')->only(['index']);
         Route::resource('indemnites-exercice-types', 'IndemniteExerciceTypeController')->only(['index', 'store', 'update']);
         Route::resource('indemnites-intervention-types', 'IndemniteInterventionTypeController')->only(['index', 'store', 'update']);
         Route::resource('indemnites-annuel-types', 'IndemniteAnnuelTypeController')->only(['index', 'store', 'update']);
         Route::resource('frais-annuel-types', 'FraisAnnuelTypeController')->only(['index', 'store', 'update']);
+        Route::resource('ecriture-categories', 'EcritureCategorieController')->only(['index', 'store', 'update']);
 
         // Décomptes
         Route::post('decompte/create', 'DecompteController@creer');
@@ -179,5 +182,7 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         // Params Controles médicaux
         Route::resource('medecins', 'MedecinController')->only(['index', 'store', 'update']);
         Route::resource('controles-medicaux-types', 'ControleMedicalTypeController')->only(['index', 'store', 'update']);
+
+        // TODO: Ajouter route type d'unité
     });
 });

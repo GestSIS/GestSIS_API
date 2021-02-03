@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class ControleMedicalType extends Model
 {
-    protected $fillable = ['designation', 'validity_duration', 'expirable', 'tri'];
+    protected $fillable = ['designation', 'duree_validite', 'expirable', 'tri'];
 }

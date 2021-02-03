@@ -25,7 +25,7 @@ class MedecinFactory extends Factory
     {
         return [
             'designation' => $this->faker->firstName . ' ' . $this->faker->lastName,
-            'addresse' => $this->faker->streetName,
+            'adresse' => $this->faker->streetName,
             'actif' => 1,
             'localite_id' => $this->faker->numberBetween(1,146),
         ];

@@ -31,7 +31,7 @@ class GroupeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
-            'validity_duration' => 'integer|min:1',
+            'duree_validite' => 'integer|min:1',
             'expirable' => 'boolean',
             'tri' => 'integer'
         ]);
@@ -44,7 +44,7 @@ class GroupeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
-            'validity_duration' => 'integer|min:1',
+            'duree_validite' => 'integer|min:1',
             'expirable' => 'boolean',
             'tri' => 'integer'
         ]);

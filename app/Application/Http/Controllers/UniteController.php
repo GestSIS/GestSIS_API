@@ -2,9 +2,9 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\PermisType;
+use App\Infrastructure\Models\TypeUnite;
 
-class PermisController extends Controller
+class UniteController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,8 +14,8 @@ class PermisController extends Controller
     public function index()
     {
         //TODO Change this to use an extra level of indirections for consistency ???
-        $permis = PermisType::all();
+        $unites = TypeUnite::all();
 
-        return response()->json(['data' => $permis]);
+        return response()->json(['data' => $unites]);
     }
 }
