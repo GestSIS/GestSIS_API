@@ -7,11 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Medecin extends Model
 {
-    protected $fillable = ['designation', 'address', 'actif', 'localite_id'];
+    protected $fillable = ['designation', 'adresse', 'actif', 'localite_id'];
     use HasFactory;
-    
-    use HasFactory;
-    
+
     /**
      * Le sapeur
      */

@@ -25,7 +25,7 @@ class MedecinController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
-            'address' => 'string|min:1',
+            'adresse' => 'string|min:1',
             'localite_id' => 'integer',
             'actif' => 'boolean'
         ]);
@@ -38,7 +38,7 @@ class MedecinController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
-            'address' => 'string|min:1',
+            'adresse' => 'string|min:1',
             'localite_id' => 'integer',
             'actif' => 'boolean'
         ]);
