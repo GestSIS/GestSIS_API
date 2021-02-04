@@ -4,6 +4,7 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\ExerciceComptableService;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class ExerciceComptableController extends Controller
 {
@@ -22,19 +23,25 @@ class ExerciceComptableController extends Controller
      */
     public function index()
     {
-        //TODO Change this to use an extra level of indirections for consistency ???
         $exerciceComptables = $this->service->all();
 
         return response()->json(['data' => $exerciceComptables]);
     }
 
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param Request $request
+     * @return Response
+     * @throws ArrayException
+     */
     public function store(Request $request)
     {
         $data = $request->validate([
-            'annee' => 'integer',
-            'designation' => 'string|min:1',
-            'debut' => 'date',
-            'fin' => 'date',
+            'annee' => 'required|integer',
+            'designation' => 'required|string|min:1',
+            'debut' => 'required|date',
+            'fin' => 'required|date',
             'boucle' => 'integer'
         ]);
 

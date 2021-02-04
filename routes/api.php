@@ -25,7 +25,7 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
 
     Route::group(['middleware' => 'jwtToken'], function () {
         // Exercices comptables
-        Route::resource('exercice-comptables', 'ExerciceComptableController')->only(['index', 'store']); //TODO: ajout cloturer
+        Route::resource('exercice-comptables', 'ExerciceComptableController')->only(['index', 'store', 'update']); //TODO: ajout cloturer
         Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire/{SapeurId}', 'DecompteController@certificatSalaireSapeur');
         Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire', 'DecompteController@certificatSalaire');
 

@@ -24,8 +24,8 @@ class TelephoneController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'numéro' => 'string|min:1',
-            'nom' => 'strin|min:1',
+            'numero' => 'string|min:1',
+            'nom' => 'string|min:1',
             'tri' => 'integer',
         ]);
 
@@ -36,8 +36,8 @@ class TelephoneController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->validate([
-            'numéro' => 'string|min:1',
-            'nom' => 'strin|min:1',
+            'numero' => 'string|min:1',
+            'nom' => 'string|min:1',
             'tri' => 'integer',
         ]);
 

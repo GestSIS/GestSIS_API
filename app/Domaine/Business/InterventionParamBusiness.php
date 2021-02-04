@@ -110,6 +110,9 @@ class InterventionParamBusiness
 
     public function ajouterVehicule($data)
     {
+        if (!array_key_exists('type_unite_id', $data) || $data['type_unite_id'] == "0") {
+            $data['type_unite_id'] = null;
+        }
         $vehicule = new Vehicule();
         $vehicule->fill($data);
         $vehicule->save();
@@ -118,6 +121,9 @@ class InterventionParamBusiness
 
     public function modifierVehicule($id, $data)
     {
+        if (!array_key_exists('type_unite_id', $data) || $data['type_unite_id'] == "0") {
+            $data['type_unite_id'] = null;
+        }
         Vehicule::where('id', $id)->limit(1)->update($data);
         return Vehicule::find($id);
     }
@@ -129,6 +135,9 @@ class InterventionParamBusiness
 
     public function ajouterMateriel($data)
     {
+        if (!array_key_exists('type_unite_id', $data) || $data['type_unite_id'] == "0") {
+            $data['type_unite_id'] = null;
+        }
         $materiel = new Materiel();
         $materiel->fill($data);
         $materiel->save();
@@ -137,6 +146,9 @@ class InterventionParamBusiness
 
     public function modifierMateriel($id, $data)
     {
+        if (!array_key_exists('type_unite_id', $data) || $data['type_unite_id'] == "0") {
+            $data['type_unite_id'] = null;
+        }
         Materiel::where('id', $id)->limit(1)->update($data);
         return Materiel::find($id);
     }

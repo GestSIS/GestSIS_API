@@ -28,7 +28,7 @@ class MaterielController extends Controller
             'status' => 'integer',
             'tri' => 'integer',
             'forfait' => 'numeric',
-            'unite' => 'integer',
+            'unite' => 'numeric',
             'type_unite_id' => 'integer'
         ]);
 
@@ -43,7 +43,7 @@ class MaterielController extends Controller
             'status' => 'integer',
             'tri' => 'integer',
             'forfait' => 'numeric',
-            'unite' => 'integer',
+            'unite' => 'numeric',
             'type_unite_id' => 'integer'
         ]);
 

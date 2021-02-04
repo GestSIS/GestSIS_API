@@ -24,8 +24,8 @@ class EcritureCategorieController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'tri' => 'numeric',
+            'designation' => 'required|string|min:1',
+            'tri' => 'required|numeric',
             ]);
             
         $categorie = $this->service->ajouterCategorie($data);
@@ -35,8 +35,8 @@ class EcritureCategorieController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'tri' => 'numeric',
+            'designation' => 'required|string|min:1',
+            'tri' => 'required|numeric',
         ]);
 
         $categorie = $this->service->modifierCategorie($id, $data);

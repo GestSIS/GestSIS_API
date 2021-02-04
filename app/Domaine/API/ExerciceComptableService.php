@@ -22,21 +22,21 @@ class ExerciceComptableService
 
     public function creer($data)
     {
-        $this->business->creerExerciceComptable($data);
+        return $this->business->creerExerciceComptable($data);
     }
 
     public function modifier($id, $data)
     {
-        $this->business->modifierExerciceComptable($id, $data);
+        return $this->business->modifierExerciceComptable($id, $data);
     }
 
     public function supprimer($id)
     {
-        $this->business->supprimerExerciceComptable($id);
+        return $this->business->supprimerExerciceComptable($id);
     }
 
     public function cloturer($id)
     {
-        $this->business->cloturerExerciceComptable($id);
+        return $this->business->cloturerExerciceComptable($id);
     }
 }

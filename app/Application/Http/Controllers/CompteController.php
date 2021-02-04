@@ -35,7 +35,7 @@ class CompteController extends Controller
             'actif' => 'boolean',
         ]);
 
-        $compte = $this->service->ajouterCompte($data);
+        $compte = $this->paramService->ajouterCompte($data);
         return response()->json(['data' => $compte]);
     }
 
@@ -47,13 +47,13 @@ class CompteController extends Controller
             'actif' => 'boolean',
         ]);
 
-        $compte = $this->service->modifierCompte($id, $data);
+        $compte = $this->paramService->modifierCompte($id, $data);
         return response()->json(['data' => $compte]);
     }
 
     public function destroy($id)
     {
-        $compte = $this->service->supprimerCompte($id);
+        $compte = $this->paramService->supprimerCompte($id);
         return response()->json(['data' => $compte]);
     }
 
