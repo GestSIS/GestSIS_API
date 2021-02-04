@@ -29,9 +29,9 @@ class FonctionController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'duree_validite' => 'integer|min:1',
-            'expirable' => 'boolean',
+            'nom' => 'string|min:1',
+            'abreviation' => 'string|min:1',
+            'cumulable' => 'boolean',
             'tri' => 'integer'
         ]);
 
@@ -42,9 +42,9 @@ class FonctionController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'duree_validite' => 'integer|min:1',
-            'expirable' => 'boolean',
+            'nom' => 'string|min:1',
+            'abreviation' => 'string|min:1',
+            'cumulable' => 'boolean',
             'tri' => 'integer'
         ]);
 

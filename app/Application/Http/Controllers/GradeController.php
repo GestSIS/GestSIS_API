@@ -30,8 +30,8 @@ class GradeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
-            'duree_validite' => 'integer|min:1',
-            'expirable' => 'boolean',
+            'abreviation' => 'string|min:1',
+            'groupe' => 'integer|min:1',
             'tri' => 'integer'
         ]);
 
@@ -43,8 +43,8 @@ class GradeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
-            'duree_validite' => 'integer|min:1',
-            'expirable' => 'boolean',
+            'abreviation' => 'string|min:1',
+            'groupe' => 'integer|min:1',
             'tri' => 'integer'
         ]);
 
