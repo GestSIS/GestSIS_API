@@ -43,6 +43,7 @@ class CreateSapeursTable extends Migration
             // Iban Status
             $table->string('iban');
             $table->integer('iban_statut');
+            $table->boolean('avs')->default(false);
             
             $table->text('remarque');
             $table->integer('porteur');
