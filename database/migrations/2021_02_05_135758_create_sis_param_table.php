@@ -13,7 +13,7 @@ class CreateSisParamTable extends Migration
      */
     public function up()
     {
-        Schema::create('sis_param', function (Blueprint $table) {
+        Schema::create('sis_params', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
             
@@ -42,6 +42,6 @@ class CreateSisParamTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('sis_param');
+        Schema::dropIfExists('sis_params');
     }
 }

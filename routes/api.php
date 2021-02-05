@@ -24,6 +24,9 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
     Route::get('exercices/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
 
     Route::group(['middleware' => 'jwtToken'], function () {
+        // Sis Params
+        Route::resource('sis-param', 'SisParamController')->only(['index', 'store']);
+
         // Exercices comptables
         Route::resource('exercice-comptables', 'ExerciceComptableController')->only(['index', 'store', 'update']); //TODO: ajout cloturer
         Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire/{SapeurId}', 'DecompteController@certificatSalaireSapeur');
