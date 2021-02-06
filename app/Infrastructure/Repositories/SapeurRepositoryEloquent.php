@@ -355,6 +355,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $object->no_rue = $sapeur->no_rue;
         $object->date_naissance = $sapeur->date_naissance;
         $object->no_avs = $sapeur->no_avs;
+        $object->cotisation_avs = $sapeur->cotisation_avs;
         $object->profession = $sapeur->profession;
         $object->employeur = $sapeur->employeur;
         $object->lieu_de_travail = $sapeur->lieu_de_travail;

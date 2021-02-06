@@ -26,6 +26,7 @@ class CreateSapeursTable extends Migration
             // $table->date('date_inco'); // TODO: vérifier si nécessaire
             // $table->date('date_sortie'); //TODO: vérifier si nécessaire
             $table->string('no_avs');
+            $table->boolean('cotisation_avs')->default(false);
 
             $table->string('profession');
             $table->string('employeur');
@@ -43,7 +44,6 @@ class CreateSapeursTable extends Migration
             // Iban Status
             $table->string('iban');
             $table->integer('iban_statut');
-            $table->boolean('avs')->default(false);
             
             $table->text('remarque');
             $table->integer('porteur');
