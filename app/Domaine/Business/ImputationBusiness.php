@@ -57,7 +57,7 @@ class ImputationBusiness
     public function genererAmendesSapeur($exerciceComptableId, $sapeurId)
     {
         // Chargment de la config des amendes
-        $amendes = Amende::orderBy('order', 'ASC')->get();
+        $amendes = Amende::orderBy('ordre', 'ASC')->get();
         $nbAmende = count($amendes);
 
         if ($nbAmende <= 0) {
@@ -133,7 +133,7 @@ class ImputationBusiness
     public function genererAmendesAnnuels($exerciceComptableId)
     {
         // Chargment de la config des amendes
-        $amendes = Amende::orderBy('order', 'ASC')->get();
+        $amendes = Amende::orderBy('ordre', 'ASC')->get();
         $nbAmende = count($amendes);
 
         if ($nbAmende <= 0) {
@@ -206,34 +206,6 @@ class ImputationBusiness
 
         Ecriture::insert($newEcritures);
         return $newEcritures;
-    }
-
-    /**
-     * Générer les amendes pour un sapeur
-     */
-    public function genererAmendeSapeur($exerciceComptableId, $sapeurId)
-    {
-
-    }
-
-    /**
-     * Générer les amendes pour l'année comptable en cours
-     */
-    public function genererAmendeAnnuels($exerciceComptableId)
-    {
-        // Load amendes config
-        $amendes = Null;
-        
-        // Load all absences pour chaque exercice et sapeur
-        $absences = Null;
-        
-        // Générer des ecritures pour chaque absence
-        $ecritures = Null;
-        
-        // Comparer avec les écritures existantes ou supprimer les existantes
-        
-        // Enregistrer les ecritures générées
-        
     }
 
     /**

@@ -1,8 +1,8 @@
 <?php
 
-
 namespace App\Domaine\Business;
 
+use App\Infrastructure\Models\Amende;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\EcritureCategorie;
 use App\Infrastructure\Models\FraisAnnuelType;
@@ -12,7 +12,23 @@ use App\Infrastructure\Models\IndemniteInterventionType;
 
 class ComptabiliteParamBusiness
 {
-    
+    public function updateAmendes($data)
+    {
+        $compteId = $data['compte_id'];
+        $ecitureCategorieId = $data['ecriture_categorie_id'];
+
+        $index = 1;
+        foreach ($data['amendes'] as $amende) {
+            $amende['ordre'] = $index;
+            $amende['compte_id'] = $compteId;
+            $amende['ecriture_categorie_id'] = $ecitureCategorieId;
+            Amende::updateOrCreate(['ordre' => $index], $amende);
+            $index++;
+        }
+        Amende::where('ordre', '>=', $index)->delete();
+        return Amende::all();
+    }
+
     public function ajouterCategorie($data)
     {
         $categorie = new EcritureCategorie();
@@ -78,7 +94,7 @@ class ComptabiliteParamBusiness
         }
         $indemnite = IndemniteExerciceType::create($data);
         if ($parFonction) {
-            if(!array_key_exists('fonctions', $data)) {
+            if (!array_key_exists('fonctions', $data)) {
                 $data['fonctions'] = [];
             }
             $indemnite->fonctions()->createMany($data['fonctions']);
@@ -86,7 +102,7 @@ class ComptabiliteParamBusiness
         $indemnite->fonctions;
         return $indemnite;
     }
-    
+
     public static function modifierIndemniteExercice($id, $data)
     {
         $parFonction = array_key_exists('par_fonction', $data) && $data['par_fonction'];
@@ -99,10 +115,10 @@ class ComptabiliteParamBusiness
         if (!$parFonction) {
             $indemnite->fonctions()->delete();
         } else {
-            if(!array_key_exists('fonctions', $data)) {
+            if (!array_key_exists('fonctions', $data)) {
                 $data['fonctions'] = [];
             }
-            $indemnite->fonctions()->whereNotIn('fonction_id', array_filter(array_map(fn($f) => $f['fonction_id'], $data['fonctions']),fn($f) => !is_null($f)))->delete();
+            $indemnite->fonctions()->whereNotIn('fonction_id', array_filter(array_map(fn ($f) => $f['fonction_id'], $data['fonctions']), fn ($f) => !is_null($f)))->delete();
             foreach ($data['fonctions'] as $f) {
                 $indemnite->fonctions()->updateOrCreate(['fonction_id' => $f['fonction_id']], $f);
             }
@@ -139,12 +155,12 @@ class ComptabiliteParamBusiness
         if (!$parFonction) {
             $indemnite->fonctions()->delete();
         } else {
-            $indemnite->fonctions()->whereNotIn('fonction_id', array_filter(array_map(fn($f) => $f['fonction_id'], $data['fonctions']),fn($f) => !is_null($f)))->delete();
+            $indemnite->fonctions()->whereNotIn('fonction_id', array_filter(array_map(fn ($f) => $f['fonction_id'], $data['fonctions']), fn ($f) => !is_null($f)))->delete();
             foreach ($data['fonctions'] as $f) {
                 $indemnite->fonctions()->updateOrCreate(['fonction_id' => $f['fonction_id']], $f);
             }
         }
-        
+
         $indemnite->fonctions;
         return $indemnite;
     }
@@ -157,7 +173,7 @@ class ComptabiliteParamBusiness
     public static function ajouterCompte($data)
     {
         $indemnite = Compte::create($data);
-        
+
         return $indemnite;
     }
 

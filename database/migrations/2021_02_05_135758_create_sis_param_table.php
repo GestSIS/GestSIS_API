@@ -24,6 +24,8 @@ class CreateSisParamTable extends Migration
             $table->string('no_arrondissement');
             $table->string('telephone');
             $table->string('email');
+            $table->string('iban');
+            $table->string('bic');
 
             // Localité
             $table->unsignedBigInteger('localite_id');

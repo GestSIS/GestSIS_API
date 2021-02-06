@@ -15,9 +15,9 @@ class AmendeTableSeeder extends Seeder
     public function run()
     {
         $amendes = array(
-            array('id' => 1, 'order' => 1, 'montant' => 20, 'compte_id' => 9, 'ecriture_categorie_id' => 9),
-            array('id' => 2, 'order' => 2, 'montant' => 50, 'compte_id' => 9, 'ecriture_categorie_id' => 9),
-            array('id' => 3, 'order' => 3, 'montant' => 100, 'compte_id' => 9, 'ecriture_categorie_id' => 9),
+            array('id' => 1, 'ordre' => 1, 'montant' => 20, 'compte_id' => 9, 'ecriture_categorie_id' => 9),
+            array('id' => 2, 'ordre' => 2, 'montant' => 50, 'compte_id' => 9, 'ecriture_categorie_id' => 9),
+            array('id' => 3, 'ordre' => 3, 'montant' => 100, 'compte_id' => 9, 'ecriture_categorie_id' => 9),
         );
 
         foreach ($amendes as $item) {

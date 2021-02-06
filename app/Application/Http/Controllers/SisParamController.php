@@ -33,6 +33,8 @@ class SisParamController extends Controller
             'email' => 'required|string',
             'localite_id' => 'required|integer',
             'sapeur_id' => 'required|integer',
+            'iban' => 'required|string',
+            'bic' => 'required|string',
         ]);
         
         $params = $this->service->updateParams($data);

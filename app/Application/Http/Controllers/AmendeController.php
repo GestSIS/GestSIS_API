@@ -2,28 +2,34 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ComptabiliteService;
+use App\Domaine\API\ComptabiliteParamService;
+use Illuminate\Http\Request;
 
 class AmendeController extends Controller
 {
     protected $service;
 
-    public function __construct(ComptabiliteService $service)
+    public function __construct(ComptabiliteParamService $service)
     {
         $this->service = $service;
     }
 
-    public function sapeur(int $exerciceComptableId, int $sapeurId)
+    public function index()
     {
-        $ecritures = $this->service->genererAmendesSapeur($exerciceComptableId, $sapeurId);
+        $amendes = $this->service->amendes();
 
-        return response()->json(['data' => $ecritures]);
+        return response()->json(['data' => $amendes]);
     }
 
-    public function annuel(int $exerciceComptableId)
+    public function store(Request $request)
     {
-        $ecritures = $this->service->genererAmendeAnnuel($exerciceComptableId);
+        $data = $request->validate([
+            'compte_id' => 'required|integer',
+            'ecriture_categorie_id' => 'required|integer',
+            'amendes.*.montant' => 'required|numeric',
+        ]);
+        $amendes = $this->service->updateAmendes($data);
 
-        return response()->json(['data' => $ecritures]);
+        return response()->json(['data' => $amendes]);
     }
 }

@@ -17,7 +17,7 @@ class CreateAmendesTable extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->integer('order');
+            $table->integer('ordre');
             $table->decimal('montant');
 
             // Foreign keys

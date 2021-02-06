@@ -7,6 +7,7 @@ use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\FraisTypeRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
+use App\Infrastructure\Models\Amende;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\EcritureCategorie;
 
@@ -31,7 +32,17 @@ class ComptabiliteParamService
         $this->fraisRepo = $frais;
         $this->business = $business;
     }
-    
+
+    function amendes()
+    {
+        return Amende::all();
+    }
+
+    function updateAmendes($data)
+    {
+        return $this->business->updateAmendes($data);
+    }
+
     function indemnitesTypes()
     {
         return array(

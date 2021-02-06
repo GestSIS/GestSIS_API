@@ -174,7 +174,10 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
 
         // Amendes
         Route::post('generer-amendes/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
-        Route::post('generer-amendes/{id}', 'AmendeController@annuel');
+        Route::post('generer-amendes/{id}', 'AmendeSapeurController@annuel');
+
+        // Params Amendes
+        Route::resource('amendes', 'AmendeController')->only(['index', 'store']);
 
         // Controles médicaux
         Route::resource('controles-medicaux', 'ControleMedicalController')->only(['index', 'show', 'store', 'update', 'destroy']);
