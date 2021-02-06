@@ -26,6 +26,7 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
     Route::group(['middleware' => 'jwtToken'], function () {
         // Sis Params
         Route::resource('sis-param', 'SisParamController')->only(['index', 'store']);
+        Route::resource('avs-param', 'AvsParamController')->only(['index', 'store']);
 
         // Exercices comptables
         Route::resource('exercice-comptables', 'ExerciceComptableController')->only(['index', 'store', 'update']); //TODO: ajout cloturer
