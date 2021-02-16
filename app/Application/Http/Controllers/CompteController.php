@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\ComptabiliteParamService;
-use App\Domaine\API\ComptabiliteService;
+use App\Domaine\API\ImputationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -11,7 +11,7 @@ class CompteController extends Controller
 {
     protected $paramService;
 
-    public function __construct(ComptabiliteService $service, ComptabiliteParamService $paramService)
+    public function __construct(ImputationService $service, ComptabiliteParamService $paramService)
     {
         $this->service = $service;
         $this->paramService = $paramService;

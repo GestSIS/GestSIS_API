@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class AvsParam extends Model
 {
-    protected $fillable = ['taux_avs', 'taux_ac','franchise', 'compte_id'];
+    protected $fillable = ['taux_avs', 'taux_ac','franchise_avs', 'franchise_imposition', 'compte_id'];
 }

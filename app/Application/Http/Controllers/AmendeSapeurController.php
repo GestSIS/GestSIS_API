@@ -2,13 +2,13 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ComptabiliteService;
+use App\Domaine\API\ImputationService;
 
 class AmendeSapeurController extends Controller
 {
     protected $service;
 
-    public function __construct(ComptabiliteService $service)
+    public function __construct(ImputationService $service)
     {
         $this->service = $service;
     }

@@ -4,14 +4,14 @@ namespace App\Application\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Domaine\API\ComptabiliteService;
+use App\Domaine\API\PaiementService;
 use App\Domaine\Business\PaiementBusiness;
 use App\Infrastructure\Models\Decompte;
 
 class DecompteController extends Controller
 {
 
-    public function __construct(ComptabiliteService $service)
+    public function __construct(PaiementService $service)
     {
         $this->service = $service;
     }
@@ -24,30 +24,18 @@ class DecompteController extends Controller
      * @param float $taux_avs - taux avs payé par le sapeur
      * @param float $taux_ac - taux ac payé par le sapeur
      * @param boolean $deduction - true si les déduction doivent être faites sur ce paiement
-     * @param float $minimumImposableAVSAC - montant imposable minimum pour l'avs
-     * @param float $minimumSoldeImposable - montant minimum pour que la solde soit imposable
+     * @param float $franchiseAvs - montant imposable minimum pour l'avs
+     * @param float $franchiseImposition - montant minimum pour que la solde soit imposable
      */
     public function creer(Request $request)
     {
         $data = $request->validate([
-            'designation' => 'string',
-            'taux_avs' => 'numeric|min:0|max:1|nullable',
-            'taux_ac' => 'numeric|min:0|max:1|nullable',
             'deduction' => 'boolean',
             'exerciceComptableId' => 'integer|min:1',
-            'minimumImposableAVSAC' => 'numeric',
-            'minimumSoldeImposable' => 'numeric'
         ]);
-
-        return response()->json(['data' => PaiementBusiness::creerDecompte(
-            $data['designation'],
-            $data['exerciceComptableId'],
-            $data['deduction'],
-            $data['taux_ac'],
-            $data['taux_avs'],
-            $data['minimumSoldeImposable'],
-            $data['minimumImposableAVSAC']
-        )]);
+        
+        $decompte = $this->service->creerDecompte($data['exerciceComptableId'], $data['deduction']);
+        return response()->json(['data' => $decompte]);
     }
 
     /**
@@ -67,18 +55,8 @@ class DecompteController extends Controller
         ]);
 
         return response()->streamDownload(function () use ($data, $id) {
-            echo PaiementBusiness::iso20022FromDecompte($id, $data['nom'], $data['bic'], $data['iban']);
+            echo $this->service->iso20022FromDecompte($id, $data['nom'], $data['bic'], $data['iban']);
         }, Decompte::find($id)->designation . ".xml");
-    }
-
-    /**
-     * Retourne tous les décomptes
-     */
-    public function getAll()
-    {
-        $decomptes = Decompte::all();
-
-        return response()->json(['data' => $decomptes]);
     }
 
     /**
@@ -88,9 +66,9 @@ class DecompteController extends Controller
      */
     public function get($id)
     {
-        $decomptes = Decompte::find($id);
+        $decompte = $this->service->getDecompteParId($id);
 
-        return response()->json(['data' => $decomptes]);
+        return response()->json(['data' => $decompte]);
     }
 
     /**
@@ -100,41 +78,29 @@ class DecompteController extends Controller
      */
     public function getByExerciceComptable($id)
     {
-        $decomptes = Decompte::where('exercice_comptable_id', $id)->get();
-
+        $decomptes = $this->service->getDecomptePourExerciceComptable($id);
+        
         return response()->json(['data' => $decomptes]);
     }
 
     /**
      * Retoune le certificat d'un sapeur pour un exercice comptable
      * 
-     * @param int $ExerciceComptableId id de l'exercice comp
-     * @param int $SapeurId id du sapeur
+     * @param int $exerciceComptableId id de l'exercice comp
+     * @param int $sapeurId id du sapeur
      */
-    public function certificatSalaireSapeur(Request $request, $ExerciceComptableId, $SapeurId)
+    public function certificatSalaireSapeur($exerciceComptableId, $sapeurId)
     {
-        $data = $request->validate([
-            'frais' => 'boolean'
-        ]);
-        if (!isset($data['frais'])) {
-            $data['frais'] = false;
-        }
-        PaiementBusiness::certificatSalaireSapeur($ExerciceComptableId, $SapeurId, $data['frais']);
+        return $this->service->certificatSalaireSapeur($exerciceComptableId, $sapeurId);
     }
 
     /**
      * Retoune le certificat de tous les sapeurs pour un exercice comptable
      * 
-     * @param int $ExerciceComptableId id de l'exercice comp
+     * @param int $exerciceComptableId id de l'exercice comp
      */
-    public function certificatSalaire(Request $request, $ExerciceComptableId)
+    public function certificatSalaire($exerciceComptableId)
     {
-        $data = $request->validate([
-            'frais' => 'boolean'
-        ]);
-        if (!isset($data['frais'])) {
-            $data['frais'] = false;
-        }
-        PaiementBusiness::certificatSalaire($ExerciceComptableId, $data['frais']);
+        return $this->service->certificatSalaireSapeur($exerciceComptableId);
     }
 }

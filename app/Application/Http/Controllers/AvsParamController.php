@@ -24,9 +24,10 @@ class AvsParamController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'taux_avs' => 'required|numeric',
-            'taux_ac' => 'required|numeric',
-            'franchise' => 'required|numeric',
+            'taux_avs' => 'required|numeric|gt:0',
+            'taux_ac' => 'required|numeric|gt:0',
+            'franchise_avs' => 'required|numeric|gte:0',
+            'franchise_imposition' => 'required|numeric|gte:0',
             'compte_id' => 'required|integer',
         ]);
         

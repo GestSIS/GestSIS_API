@@ -8,7 +8,7 @@ use Exception;
 use Tests\TestCase;
 use App\Domaine\API\InterventionService;
 use App\Domaine\API\SapeurService;
-use App\Domaine\API\ComptabiliteService;
+use App\Domaine\API\ImputationService;
 use Carbon\Carbon;
 
 class ImputationInterventionTest extends TestCase
@@ -26,7 +26,7 @@ class ImputationInterventionTest extends TestCase
 
         $interventionService = $this->app->make(InterventionService::class);
         $sapeurService = $this->app->make(SapeurService::class);
-        $this->comptabiliteService = $this->app->make(ComptabiliteService::class);
+        $this->comptabiliteService = $this->app->make(ImputationService::class);
 
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "29.01.2019";

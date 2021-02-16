@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Domaine\API;
 
 use App\Domaine\Business\ImputationBusiness;
@@ -10,7 +9,7 @@ use App\Domaine\SPI\FraisTypeRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 
-class ComptabiliteService
+class ImputationService
 {
     protected $ecritureRepo;
     protected $exerciceRepo;
@@ -24,8 +23,8 @@ class ComptabiliteService
         ExerciceRepository $exercice,
         IndemniteTypeRepository $indemnite,
         FraisTypeRepository $frais,
-        ImputationBusiness $business)
-    {
+        ImputationBusiness $business
+    ) {
         $this->ecritureRepo = $ecriture;
         $this->exerciceRepo = $exercice;
         $this->indemniteRepo = $indemnite;
@@ -33,10 +32,11 @@ class ComptabiliteService
         $this->business = $business;
     }
 
-    function creerExerciceComptable($data) {
+    function creerExerciceComptable($data)
+    {
         return $this->business->creerExerciceComptable($data);
     }
-    
+
     function getAllEcrituresForExerciceComptableById($exerciceComptableId)
     {
         return $this->ecritureRepo->listeAllEcritureForExerciceComptableById($exerciceComptableId);
@@ -90,7 +90,7 @@ class ComptabiliteService
     function imputationAnnuel($exerciceComptableId)
     {
         $this->business->imputerAnnuel($exerciceComptableId);
-        
+
         return [
             "frais" => $this->ecritureRepo->listeFraisAnnuelByExeComptableId($exerciceComptableId),
             "indemnites" => $this->ecritureRepo->listeIndemniteAnnuelByExeComptableId($exerciceComptableId),
@@ -101,7 +101,7 @@ class ComptabiliteService
     {
         return $this->business->genererAmendesSapeur($exerciceComptableId, $sapeurId);
     }
-    
+
     function genererAmendeAnnuel($exerciceComptableId)
     {
         return $this->business->genererAmendesAnnuels($exerciceComptableId);
@@ -111,7 +111,7 @@ class ComptabiliteService
     {
         $ecritures = $this->ecritureRepo->computeEcritureForPersonalDecompte($exerciceComptableId);
 
-//        return View('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
+        //        return View('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
         $pdf = SnappyPdf::loadView('pdf/decomptes-sapeurs', ["ecritures" => $ecritures]);
         return $pdf->download('invoice.pdf');
     }

@@ -17,9 +17,10 @@ class CreateAvsParamTable extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
             
-            $table->decimal('taux_avs');
-            $table->decimal('taux_ac');
-            $table->decimal('franchise');
+            $table->decimal('taux_avs', 6, 5);
+            $table->decimal('taux_ac', 6, 5);
+            $table->decimal('franchise_avs');
+            $table->decimal('franchise_imposition');
 
             // Comptes
             $table->unsignedBigInteger('compte_id');

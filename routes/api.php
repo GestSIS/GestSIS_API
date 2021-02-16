@@ -23,7 +23,7 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
     Route::get('exercices/{id}/liste-appel', 'ExerciceController@listeAppel');
     Route::get('exercices/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
 
-    Route::group(['middleware' => 'jwtToken'], function () {
+    // Route::group(['middleware' => 'jwtToken'], function () {
         // Sis Params
         Route::resource('sis-param', 'SisParamController')->only(['index', 'store']);
         Route::resource('avs-param', 'AvsParamController')->only(['index', 'store']);
@@ -160,18 +160,16 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::resource('ecriture-categories', 'EcritureCategorieController')->only(['index', 'store', 'update']);
 
         // Décomptes
-        Route::post('decompte/create', 'DecompteController@creer');
-        Route::post('decompte/{id}/iso20022', 'DecompteController@iso20022');
-        Route::get('decompte/', 'DecompteController@getAll');
-        Route::get('decompte/{id}', 'DecompteController@get');
-        Route::get('decompte/exercice-comptable/{id}', 'DecompteController@getByExerciceComptable');
-
+        //TODO: Choisir api final à utiliser
+        Route::post('decomptes/create', 'DecompteController@creer');
+        Route::get('decomptes/exercice-comptable/{id}', 'DecompteController@getByExerciceComptable');
+        Route::post('decomptes/{id}/iso20022', 'DecompteController@iso20022');
+        Route::get('decomptes/{id}', 'DecompteController@get');
+        
         // Paiements
-        Route::post('paiement/{id}/iso20022', 'PaiementController@iso20022');
-        Route::get('paiement/', 'PaiementController@getAll');
-        Route::get('paiement/{id}', 'PaiementController@get');
-        Route::get('paiement/decompte/{id}', 'PaiementController@getByDecompte');
-        Route::get('paiement/exercice-comptable/{id}', 'PaiementController@getByExerciceComptable');
+        Route::get('paiements/exercice-comptable/{id}', 'PaiementController@getByExerciceComptable');
+        Route::post('paiements/{id}/iso20022', 'PaiementController@iso20022');
+        Route::get('paiements/{id}', 'PaiementController@get');
 
         // Amendes
         Route::post('generer-amendes/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
@@ -191,5 +189,5 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::resource('controles-medicaux-types', 'ControleMedicalTypeController')->only(['index', 'store', 'update']);
 
         // TODO: Ajouter route type d'unité
-    });
+    // });
 });

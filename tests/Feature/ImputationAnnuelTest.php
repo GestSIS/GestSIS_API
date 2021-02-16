@@ -2,7 +2,7 @@
 
 namespace Test\Feature;
 
-use App\Domaine\API\ComptabiliteService;
+use App\Domaine\API\ImputationService;
 use App\Domaine\API\SapeurService;
 use App\Infrastructure\Models\Sapeur;
 use Exception;
@@ -22,7 +22,7 @@ class ImputationAnnuelTest extends TestCase
         parent::setUp();
 
         $sapeurService = $this->app->make(SapeurService::class);
-        $this->comptabiliteService = $this->app->make(ComptabiliteService::class);
+        $this->comptabiliteService = $this->app->make(ImputationService::class);
 
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "29.01.2019";
