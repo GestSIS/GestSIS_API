@@ -108,7 +108,7 @@ class PaiementService
      * 
      * @param int $exerciceComptableId id de l'exercice comp
      */
-    public function certificatSalairePourDExerciceComptable($exerciceComptableId)
+    public function certificatSalairePourExerciceComptable($exerciceComptableId)
     {
         $affichageFrais = true;
         return $this->business->certificatSalaire($exerciceComptableId, $affichageFrais);

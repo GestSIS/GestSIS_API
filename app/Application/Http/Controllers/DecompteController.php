@@ -101,6 +101,6 @@ class DecompteController extends Controller
      */
     public function certificatSalaire($exerciceComptableId)
     {
-        return $this->service->certificatSalaireSapeur($exerciceComptableId);
+        return $this->service->certificatSalairePourExerciceComptable($exerciceComptableId);
     }
 }

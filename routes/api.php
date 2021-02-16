@@ -30,8 +30,8 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
 
         // Exercices comptables
         Route::resource('exercice-comptables', 'ExerciceComptableController')->only(['index', 'store', 'update']); //TODO: ajout cloturer
-        Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire/{SapeurId}', 'DecompteController@certificatSalaireSapeur');
         Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire', 'DecompteController@certificatSalaire');
+        Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire/{SapeurId}', 'DecompteController@certificatSalaireSapeur');
 
         // Sapeurs
         Route::resource('sapeurs', 'SapeurController')->only(['index', 'show', 'store', 'update']); //, 'destroy']);//->middleware('role:effectif_read');
