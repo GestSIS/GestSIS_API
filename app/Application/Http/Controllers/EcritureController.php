@@ -48,4 +48,11 @@ class EcritureController extends Controller
         return response()->json(['data' => $ecritures]);
     }
 
+    public function exercices(int $exerciceComptableId)
+    {
+        $ecritures = $this->service->getEcrituresForExercicesByExerciceComptable($exerciceComptableId);
+
+        return response()->json(['data' => $ecritures]);
+    }
+
 }

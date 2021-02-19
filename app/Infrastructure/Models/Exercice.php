@@ -18,6 +18,11 @@ class Exercice extends Model
     // 3 -> Disponible pour imputation
     // 4 -> Imputée
 
+    public function ecritures()
+    {
+        return $this->hasMany('App\Infrastructure\Models\Ecriture');
+    }
+
     public function localite()
     {
         return $this->belongsTo('App\Infrastructure\Models\Localite');

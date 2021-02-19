@@ -7,6 +7,7 @@ use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\FraisTypeRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
+use App\Infrastructure\Models\Exercice;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 
 class ImputationService
@@ -55,6 +56,13 @@ class ImputationService
     function getEcrituresForExerciceById($exerciceId)
     {
         return $this->ecritureRepo->listeEcritureForExercice($exerciceId);
+    }
+
+    function getEcrituresForExercicesByExerciceComptable($exerciceComptableId) {
+        return Exercice::where([
+            ['exercice_comptable_id', '=', $exerciceComptableId],
+            ['statut', '>', 2],
+        ])->with('ecritures')->get();
     }
 
     function getEcrituresForInterventionById($interventionId)

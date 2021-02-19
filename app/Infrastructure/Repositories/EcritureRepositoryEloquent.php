@@ -177,6 +177,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->solde = $ecriture->solde;
         $object->indemnite = $ecriture->indemnite;
         $object->frais = $ecriture->frais;
+        $object->frais = $ecriture->amende;
         $object->sapeur_id = $ecriture->sapeur_id;
         $object->exercice_comptable_id = $ecriture->exercice_comptable_id;
         $object->intervention_id = $ecriture->intervention_id;
@@ -188,6 +189,9 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->date = $ecriture->date;
         $object->heure = $ecriture->heure;
         $object->decompte_id = $ecriture->decompte_id;
+
+        $object->amende = $ecriture->amende;
+        $object->avs = $ecriture->avs;
 
         return $object;
     }
@@ -228,6 +232,9 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->tri = $ecriture->tri;
         $object->unite = $ecriture->unite;
         $object->civilite = $ecriture->civilite;
+
+        $object->amende = $ecriture->amende;
+        $object->avs = $ecriture->avs;
 
         return $object;
     }

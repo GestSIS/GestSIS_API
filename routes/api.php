@@ -138,10 +138,11 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::post('generer-amende/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
         Route::post('generer-amende/{id}', 'AmendeController@annuel');
 
+        Route::get('ecritures/exercices/{id}', 'EcritureController@exercices');
+        Route::get('ecritures/exercice/{id}', 'EcritureController@exercice');
         Route::get('ecritures/annuel/{id}', 'EcritureController@annuel');
         Route::get('ecritures/amende/{id}', 'EcritureController@amende');
         Route::get('ecritures/intervention/{id}', 'EcritureController@intervention');
-        Route::get('ecritures/exercice/{id}', 'EcritureController@exercice');
         Route::get('ecritures/{id}', 'EcritureController@all');
 
         Route::get('comptes/{id}/ecritures/{exerciceComptableId}', 'CompteController@ecritures');
