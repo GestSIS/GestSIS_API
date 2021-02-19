@@ -36,27 +36,28 @@ class CreateEcrituresTable extends Migration
             $table->decimal('solde');
             $table->decimal('indemnite');
             $table->decimal('frais');
+
             $table->boolean('avs')->default(false);
-
             $table->boolean('amende')->default(false);
-            //TODO Regarder si les clés étrangères suivantes peuventêtre remplacé par un simple boolean
-            // indemnite_annuel_type_id
-            // $table->boolean('indemnite_annuel')->default();
-            // frais_annuel_type_id
-            // $table->boolean('frais_annuel')->default();
 
-            $table->unsignedBigInteger('sapeur_id');
-            $table->foreign('sapeur_id')->references('id')->on('sapeurs');
+            // TODO: Regarder si les clés étrangères suivantes peuventêtre remplacé par un simple boolean
+            // indemnite_annuel_type_id
+            // $table->boolean('indemnite_annuel')->default(false);
+            // frais_annuel_type_id
+            // $table->boolean('frais_annuel')->default(false);
 
             $table->unsignedBigInteger('compte_id');
             $table->foreign('compte_id')->references('id')->on('comptes');
-
+            
             $table->unsignedBigInteger('exercice_comptable_id');
             $table->foreign('exercice_comptable_id')->references('id')->on('exercice_comptables');
 
-            // Utilisé pour les décomptes sapeurs
             $table->unsignedBigInteger('ecriture_categorie_id');
             $table->foreign('ecriture_categorie_id')->references('id')->on('ecriture_categories');
+            
+            // Utilisé pour les décomptes sapeurs
+            $table->unsignedBigInteger('sapeur_id')->nullable();
+            $table->foreign('sapeur_id')->references('id')->on('sapeurs');
 
             $table->unsignedBigInteger('intervention_id')->nullable();
             $table->foreign('intervention_id')->references('id')->on('interventions');
@@ -64,18 +65,13 @@ class CreateEcrituresTable extends Migration
             $table->unsignedBigInteger('exercice_id')->nullable();
             $table->foreign('exercice_id')->references('id')->on('exercices');
 
-            /** TODO A voir si remplacer les deux clés suivantes */
+            /** TODO: A voir si remplacer les deux clés suivantes */
             $table->unsignedBigInteger('indemnite_annuel_type_id')->nullable();
             $table->foreign('indemnite_annuel_type_id')->references('id')->on('indemnite_annuel_types');
 
             $table->unsignedBigInteger('frais_annuel_type_id')->nullable();
             $table->foreign('frais_annuel_type_id')->references('id')->on('frais_annuel_types');
             /** END TODO */
-
-            $table->unsignedBigInteger('paiement_id')->nullable();
-            $table->foreign('paiement_id')->references('id')->on('paiements');
-
-            $table->date('date_paiement')->nullable();
         });
     }
 

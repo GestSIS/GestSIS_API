@@ -16,7 +16,7 @@ class PhaseTypeTableSeeder extends Seeder
     {
         $phases = array(
             array('id' => 1,'designation' => 'intervention'),
-            array('id' => 2,'designation' => 'entretien'),
+            array('id' => 2,'designation' => 'rétablissement'),
         );
 
         foreach ($phases as $item) {

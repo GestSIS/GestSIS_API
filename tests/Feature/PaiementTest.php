@@ -52,8 +52,8 @@ class PaiementTest extends TestCase
                         "exercice_comptable_id",
                         "designation",
                         "deduction",
-                        "avsTotal",
-                        "acTotal",
+                        "avs_total",
+                        "ac_total",
                         "paiements" => [
                             '*' => [
                                 "id",

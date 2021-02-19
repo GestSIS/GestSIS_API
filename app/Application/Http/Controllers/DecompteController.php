@@ -27,17 +27,41 @@ class DecompteController extends Controller
      * @param float $franchiseAvs - montant imposable minimum pour l'avs
      * @param float $franchiseImposition - montant minimum pour que la solde soit imposable
      */
-    public function creer(Request $request)
+    public function creerAnnuel(Request $request)
     {
         $data = $request->validate([
-            'deduction' => 'boolean',
-            'exerciceComptableId' => 'integer|min:1',
+            'exercice_comptable_id' => 'required|integer|min:1',
+            'date' => 'required|date',
+            'designation' => 'required|string|min:1',
         ]);
-        
-        $decompte = $this->service->creerDecompte($data['exerciceComptableId'], $data['deduction']);
+
+        $decompte = $this->service->creerDecompteAnnuel($data['exercice_comptable_id'], $data['date'], $data['designation']);
         return response()->json(['data' => $decompte]);
     }
 
+    public function creerSapeur(Request $request)
+    {
+        $data = $request->validate([
+            'exercice_comptable_id' => 'required|integer|min:1',
+            'sapeur_id' => 'required|integer|min:1',
+            'date' => 'required|date',
+        ]);
+
+        $decompte = $this->service->creerDecompteSapeur($data['exercice_comptable_id'], $data['sapeur_id'], $data['date']);
+        return response()->json(['data' => $decompte]);
+    }
+
+    public function creerExercice(Request $request)
+    {
+        $data = $request->validate([
+            'exercice_id' => 'required|integer|min:1',
+            'date' => 'required|date',
+            'deduction' => 'required|boolean',
+        ]);
+
+        $decompte = $this->service->creerDecompteExercice($data['exercice_id'], $data['date'], $data['deduction']);
+        return response()->json(['data' => $decompte]);
+    }
     /**
      * Créer un fichier iso20022 pour un décompte
      * 
@@ -79,7 +103,7 @@ class DecompteController extends Controller
     public function getByExerciceComptable($id)
     {
         $decomptes = $this->service->getDecomptePourExerciceComptable($id);
-        
+
         return response()->json(['data' => $decomptes]);
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Domaine\Business;
 
+use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\ExerciceComptable;
@@ -38,17 +39,17 @@ class PaiementBusiness
      * 
      * @return Decompte décompte créé
      */
-    public function creerDecompte($designation, $exerciceComptableId, $deduction, $tauxAc, $tauxAvs, $franchiseImposition, $franchiseAvs)
+    public function creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction)
     {
+        $avsParam = AvsParam::first();
+
         $decompte = new Decompte();
         $decompte->designation = $designation;
         $decompte->exercice_comptable_id = $exerciceComptableId;
         $decompte->deduction = $deduction;
-        $decompte->avsTotal = 0;
-        $decompte->acTotal = 0;
+        $decompte->avs_total = 0;
+        $decompte->ac_total = 0;
         $decompte->save();
-
-        $ecritures = Ecriture::where('exercice_comptable_id', $exerciceComptableId)->get();
 
         $totaux = array();
         //faire les totaux par sapeurs
@@ -65,7 +66,7 @@ class PaiementBusiness
                         "total" => 0.0,
                         "soldeTotal" => 0.0,
                         "indemniteTotal" => 0.0,
-                        "avsTotal" => 0.0
+                        "avs_total" => 0.0
                     );
                 }
                 $totaux[$ecriture->sapeur_id]['solde'] += $ecriture->solde;
@@ -74,7 +75,7 @@ class PaiementBusiness
                 // pas encore présent dans écriture, mais n'y sera pas
                 //$totaux[$ecriture->sapeur_id]['amende']+=$ecriture->amende;
 
-                $ecriture->date_paiement = date('Y-m-d');
+                // $ecriture->date_paiement = $date;
                 $ecriture->decompte_id = $decompte->id;
                 $ecriture->save();
             }
@@ -82,7 +83,7 @@ class PaiementBusiness
 
         //déductions
         if ($deduction) {
-            $taux = $tauxAc + $tauxAvs;
+            $taux = $avsParam->taux_ac + $avsParam->taux_avs;
             //vérifie si autre décompte sans déduction
             foreach (Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get() as $d) {
                 foreach ($d->paiements as $p) {
@@ -96,23 +97,23 @@ class PaiementBusiness
                             "total" => 0.0,
                             "soldeTotal" => 0.0,
                             "indemniteTotal" => 0.0,
-                            "avsTotal" => 0.0
+                            "avs_total" => 0.0
                         );
                     }
                     $totaux[$p->sapeur_id]['soldeTotal'] += $p->solde;
                     $totaux[$p->sapeur_id]['indemniteTotal'] += $p->indemine;
-                    $totaux[$p->sapeur_id]['avsTotal'] += $p->avs;
+                    $totaux[$p->sapeur_id]['avs_total'] += $p->avs;
                 }
             }
             foreach ($totaux as $key => $total) {
-                $solde_imposable = max($total['solde'] + $total['soldeTotal'] - $franchiseImposition, 0.0);
+                $solde_imposable = max($total['solde'] + $total['soldeTotal'] - $avsParam->franchise_imposition, 0.0);
                 $total_imposable = $solde_imposable + $total['indemnite'] + $total['indemniteTotal'];
 
                 // TODO: ou si sapeur fait la demande
-                if ($total_imposable >= $franchiseAvs) {
-                    $totaux[$key]['avs'] = ($total_imposable * $taux) - $total['avsTotal'];
-                    $decompte->avsTotal += ($total_imposable * $tauxAvs) - (($total['avsTotal'] / $taux) * $tauxAvs);
-                    $decompte->acTotal += ($total_imposable * $tauxAc) - (($total['avsTotal'] / $taux) * $tauxAc);
+                if ($total_imposable >= $avsParam->franchise_avs) {
+                    $totaux[$key]['avs'] = ($total_imposable * $taux) - $total['avs_total'];
+                    $decompte->avs_total += ($total_imposable * $avsParam->taux_avs) - (($total['avs_total'] / $taux) * $avsParam->taux_avs);
+                    $decompte->ac_total += ($total_imposable * $avsParam->taux_ac) - (($total['avs_total'] / $taux) * $avsParam->taux_ac);
                 }
             }
             $decompte->save();
@@ -137,22 +138,29 @@ class PaiementBusiness
                 'total' => $total['total'],
                 'sapeur_id' => $key
             ];
-            // $ecrituresAvs[] = [
-            //     'avs' => true,
-            //     'decompte_id' => $decompte->id,
-            //     'solde' => 0,
-            //     'indemnite' => 0,
-            //     'frais' => 0,
-            //     'type_unite_id' => 0,
-            //     'designation' => 'Déductions AVS décompte n°', //TODO: Numéro de décompte ?
-            //     'total' => $total['avs'],
-            //     'tarif' => 0,
-            //     'quantite' => 0,
-            //     'sapeur_id' => $key,
-            //     'compte_id' => $avsParam->compte_id,
-            //     'exercice_comptable_id' => $exerciceComptableId,
-            //     'ecriture_categorie_id' => $avsParam->ecriture_categorie_id
-            // ];
+        }
+        if ($deduction) {
+            Ecriture::insert([
+                'solde' => 0,
+                'indemnite' => 0,
+                'frais' => 0,
+                'avs' => true,
+                'type_unite_id' => null,
+                'designation' => $designation,
+                'total' => $decompte->avs_total + $decompte->ac_total,
+                'tarif' => 0,
+                'quantite' => 1,
+                'solde_min' => null,
+                'solde_min_pour' => null,
+                'sapeur_id' => null,
+                'compte_id' => $avsParam->compte_id,
+                'exercice_comptable_id' => $exerciceComptableId,
+                'ecriture_categorie_id' => $avsParam->ecriture_categorie_id,
+                'intervention_id' => null,
+                'date' => $date,
+                'heure' => "00:00:00",
+                'decompte_id' => $decompte->id,
+            ]);
         }
         Paiement::insert($paiements);
 

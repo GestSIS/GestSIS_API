@@ -132,8 +132,8 @@ class DecompteTest extends TestCase
                         "designation" => "Decompte n°xxx",
                         "exercice_comptable_id" => 1,
                         "deduction" => 0,
-                        "avsTotal" => 0,
-                        "acTotal" => 0
+                        "avs_total" => 0,
+                        "ac_total" => 0
                     ]
                 ]
             );
@@ -206,8 +206,8 @@ class DecompteTest extends TestCase
                         "designation" => "Decompte n°xxx",
                         "exercice_comptable_id" => 1,
                         "deduction" => 0,
-                        "avsTotal" => 0,
-                        "acTotal" => 0
+                        "avs_total" => 0,
+                        "ac_total" => 0
                     ]
                 ]
             );
@@ -316,8 +316,8 @@ class DecompteTest extends TestCase
                         "designation" => "Decompte n°xxx",
                         "exercice_comptable_id" => 2,
                         "deduction" => 1,
-                        "avsTotal" => 379.79999999999995,
-                        "acTotal" => 864
+                        "avs_total" => 379.79999999999995,
+                        "ac_total" => 864
                     ]
                 ]
             );
@@ -458,8 +458,8 @@ class DecompteTest extends TestCase
                         "designation" => "Decompte n°xxx",
                         "exercice_comptable_id" => 3,
                         "deduction" => 1,
-                        "avsTotal" => 0,
-                        "acTotal" => 0
+                        "avs_total" => 0,
+                        "ac_total" => 0
                     ]
                 ]
             );

@@ -23,7 +23,6 @@ class JustificatifController extends Controller
      */
     public function show(int $controleId)
     {
-        //TODO: Return a file
         $justificatif = $this->service->getJustificatif($controleId);
         
         $headers = array(

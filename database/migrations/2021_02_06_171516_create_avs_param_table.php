@@ -17,14 +17,17 @@ class CreateAvsParamTable extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
             
-            $table->decimal('taux_avs', 6, 5);
-            $table->decimal('taux_ac', 6, 5);
-            $table->decimal('franchise_avs');
-            $table->decimal('franchise_imposition');
+            $table->unsignedDecimal('taux_avs', 6, 5);
+            $table->unsignedDecimal('taux_ac', 6, 5);
+            $table->unsignedDecimal('franchise_avs');
+            $table->unsignedDecimal('franchise_imposition');
 
             // Comptes
             $table->unsignedBigInteger('compte_id');
             $table->foreign('compte_id')->references('id')->on('comptes');
+            
+            $table->unsignedBigInteger('ecriture_categorie_id');
+            $table->foreign('ecriture_categorie_id')->references('id')->on('ecriture_categories');
         });
     }
 

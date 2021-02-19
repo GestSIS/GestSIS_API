@@ -6,7 +6,10 @@ namespace App\Domaine\API;
 use App\Domaine\Business\PaiementBusiness;
 use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Decompte;
+use App\Infrastructure\Models\Ecriture;
+use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Paiement;
+use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\SisParam;
 
 class PaiementService
@@ -26,25 +29,48 @@ class PaiementService
     /**
      * creer un décompte
      * 
-     * @param string $designation - nom du décompte
      * @param int $exerciceComptableId - id de l'exercice comptable pour lequel créer les paiements
-     * @param float $taux_avs - taux avs payé par le sapeur
-     * @param float $taux_ac - taux ac payé par le sapeur
-     * @param boolean $deduction - true si les déduction doivent être faites sur ce paiement
-     * @param float $franchiseAvs - montant imposable minimum pour l'avs
-     * @param float $franchiseImposition - montant minimum pour que la solde soit imposable
      */
-    public function creerDecompte($exerciceComptableId, $deduction)
+    public function creerDecompteAnnuel($exerciceComptableId, $date, $designation)
     {
-        $designation = 'Decompte n°xxx';
-        $params = AvsParam::first();
-        
-        $tauxAc = $params->taux_ac;
-        $tauxAvs = $params->taux_avs;
-        $franchiseImposition = $params->franchise_imposition;
-        $franchiseAvs = $params->franchise_avs;
-        
-        return $this->business->creerDecompte($designation, $exerciceComptableId, $deduction, $tauxAc, $tauxAvs, $franchiseImposition, $franchiseAvs);
+        $deduction = true;
+        $ecritures = Ecriture::where('exercice_comptable_id', $exerciceComptableId)->get();
+
+        return $this->business->creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction);
+    }
+
+    /**
+     * creer un décompte
+     * 
+     * @param int $exerciceComptableId - id de l'exercice comptable pour lequel créer les paiements
+     */
+    public function creerDecompteSapeur($exerciceComptableId, $sapeurId, $date)
+    {
+        $sapeur = Sapeur::find($sapeurId);
+        $designation = "Decompte $sapeur->nom $sapeur->prenom";
+
+        $deduction = true;
+
+        $ecritures = Ecriture::where([
+            ['exercice_comptable_id', '=', $exerciceComptableId],
+            ['sapeur_id', '=', $sapeurId],
+        ])->get();
+
+        return $this->business->creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction);
+    }
+
+    /**
+     * creer un décompte
+     * 
+     * @param int $exerciceComptableId - id de l'exercice comptable pour lequel créer les paiements
+     */
+    public function creerDecompteExercice($exerciceId, $date, $deduction)
+    {
+        $designation = 'Decompte exercice';
+        $exerciceComptableId = Exercice::find($exerciceId)->exercice_comptable_id;
+        $ecritures = Ecriture::where('exercice_id', $exerciceId)->get();
+
+        return $this->business->creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction);
     }
 
     /**

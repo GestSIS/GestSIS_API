@@ -31,6 +31,7 @@ class CreateExerciceSapeurTable extends Migration
             $table->integer('present');
             $table->integer('amende');
             $table->integer('remplace');
+            // $table->numeric('heure', 4, 2)->default(0.0);
 
             $table->unique(['exercice_id', 'sapeur_id']);
         });

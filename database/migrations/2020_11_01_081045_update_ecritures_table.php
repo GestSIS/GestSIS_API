@@ -14,7 +14,7 @@ class UpdateEcrituresTable extends Migration
     public function up()
     {
         Schema::table('ecritures', function (Blueprint $table) {
-            $table->bigInteger('decompte_id')->unsigned()->nullable();
+            $table->unsignedBigInteger('decompte_id')->nullable();
             $table->foreign('decompte_id')->references('id')->on('decomptes');
         });
     }

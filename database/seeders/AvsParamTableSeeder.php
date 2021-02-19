@@ -21,6 +21,7 @@ class AvsParamTableSeeder extends Seeder
             'franchise_avs' => 2300,
             'franchise_imposition' => 5000,
             'compte_id' => 5,
+            'ecriture_categorie_id' => 10,
         ]);
     }
 }

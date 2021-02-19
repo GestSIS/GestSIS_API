@@ -22,6 +22,9 @@ class CreateIndemniteExerciceTypesTable extends Migration
             $table->unsignedDecimal('solde');
             $table->unsignedDecimal('indemnite');
 
+            // $table->unsignedDecimal('solde_heure_additionelle')->default(0.0);
+            // $table->unsignedDecimal('indemnite_heure_additionelle')->default(0.0);
+
             $table->unsignedDecimal('solde_min')->nullable();
             $table->unsignedDecimal('solde_min_pour')->nullable();
 
