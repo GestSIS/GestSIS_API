@@ -81,7 +81,7 @@ class ImputationBusiness
         ])->delete();
 
         // Pour l'instant juste générer de nouvelles amendes
-        $newEcritures = array();
+        $ecritures = [];
         $i = 0;
         foreach ($exercices as $exercice) {
 
@@ -89,41 +89,36 @@ class ImputationBusiness
 
             // Creation d'une écriture pour chaque exercice amendé
             $ecriture = array(
-                'solde' => 0,
-                'solde_min' => null,
-                'solde_min_pour' => null,
                 'indemnite' => 0,
-                'taux' => null,
-                'taux_description' => null,
+                'solde' => 0,
                 'frais' => 0,
+
                 'amende' => True,
-                'type_unite_id' => null,
-                'designation' => $exercice->designation,
                 'total' => $amende->montant,
+                'designation' => $exercice->designation,
                 'tarif' => 0,
                 'quantite' => 0,
+
                 'sapeur_id' => $exercice->sapeur_id,
                 'exercice_id' => $exercice->exercice_id,
-                'intervention_id' => null,
                 'compte_id' => $amende->compte_id,
                 'exercice_comptable_id' => $exerciceComptableId,
-                'indemnite_annuel_type_id' => null,
                 'ecriture_categorie_id' => $amende->ecriture_categorie_id,
-                'frais_annuel_type_id' => null,
+
                 'decompte_id' => null,
                 'heure' => null,
                 'date' => $exercice->date,
             );
 
-            array_push($newEcritures, $ecriture);
+            $ecritures[] = $ecriture;
 
             if ($i + 1 < $nbAmende) {
                 $i++;
             }
         }
 
-        Ecriture::insert($newEcritures);
-        return $newEcritures;
+        Ecriture::insert($ecritures);
+        return $ecritures;
     }
 
     /**

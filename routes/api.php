@@ -132,63 +132,67 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::resource('telephones', 'TelephoneController')->only(['index', 'store', 'update']);
 
         // Comptabilite
-        Route::post('imputation/intervention/{id}', 'ImputationController@intervention');
-        Route::post('imputation/exercice/{id}', 'ImputationController@exercice');
-        Route::post('imputation/annuel/{id}', 'ImputationController@annuel');
-        Route::post('generer-amende/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
-        Route::post('generer-amende/{id}', 'AmendeController@annuel');
+        Route::group(['middleware' => 'jwtToken:comptabilite.tout'], function () {
+            Route::post('imputation/intervention/{id}', 'ImputationController@intervention');
+            Route::post('imputation/exercice/{id}', 'ImputationController@exercice');
+            Route::post('imputation/annuel/{id}', 'ImputationController@annuel');
+            Route::post('generer-amende/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
+            Route::post('generer-amende/{id}', 'AmendeController@annuel');
 
-        Route::get('ecritures/exercices/{id}', 'EcritureController@exercices');
-        Route::get('ecritures/exercice/{id}', 'EcritureController@exercice');
-        Route::get('ecritures/annuel/{id}', 'EcritureController@annuel');
-        Route::get('ecritures/amende/{id}', 'EcritureController@amende');
-        Route::get('ecritures/intervention/{id}', 'EcritureController@intervention');
-        Route::get('ecritures/{id}', 'EcritureController@all');
+            Route::get('ecritures/exercices/{id}', 'EcritureController@exercices');
+            Route::get('ecritures/exercice/{id}', 'EcritureController@exercice');
+            Route::get('ecritures/annuel/{id}', 'EcritureController@annuel');
+            Route::get('ecritures/amende/{id}', 'EcritureController@amende');
+            Route::get('ecritures/intervention/{id}', 'EcritureController@intervention');
+            Route::get('ecritures/{id}', 'EcritureController@all');
 
-        Route::get('comptes/{id}/ecritures/{exerciceComptableId}', 'CompteController@ecritures');
+            Route::get('comptes/{id}/ecritures/{exerciceComptableId}', 'CompteController@ecritures');
         
-        // Static param Comptabilite
-        Route::get('unites', 'UniteController@index')->name('api.v2.unites');
-        
-        // Params Comptabilite
-        Route::get('indemnites-types', 'IndemniteTypeController@index');
-        Route::resource('comptes', 'CompteController')->only(['index', 'store', 'update']);
-        Route::resource('frais-types', 'FraisTypeController')->only(['index']);
-        Route::resource('indemnites-exercice-types', 'IndemniteExerciceTypeController')->only(['index', 'store', 'update']);
-        Route::resource('indemnites-intervention-types', 'IndemniteInterventionTypeController')->only(['index', 'store', 'update']);
-        Route::resource('indemnites-annuel-types', 'IndemniteAnnuelTypeController')->only(['index', 'store', 'update']);
-        Route::resource('frais-annuel-types', 'FraisAnnuelTypeController')->only(['index', 'store', 'update']);
-        Route::resource('ecriture-categories', 'EcritureCategorieController')->only(['index', 'store', 'update']);
+            // Static param Comptabilite
+            Route::get('unites', 'UniteController@index')->name('api.v2.unites');
+            
+            // Params Comptabilite
+            Route::get('indemnites-types', 'IndemniteTypeController@index');
+            Route::resource('comptes', 'CompteController')->only(['index', 'store', 'update']);
+            Route::resource('frais-types', 'FraisTypeController')->only(['index']);
+            Route::resource('indemnites-exercice-types', 'IndemniteExerciceTypeController')->only(['index', 'store', 'update']);
+            Route::resource('indemnites-intervention-types', 'IndemniteInterventionTypeController')->only(['index', 'store', 'update']);
+            Route::resource('indemnites-annuel-types', 'IndemniteAnnuelTypeController')->only(['index', 'store', 'update']);
+            Route::resource('frais-annuel-types', 'FraisAnnuelTypeController')->only(['index', 'store', 'update']);
+            Route::resource('ecriture-categories', 'EcritureCategorieController')->only(['index', 'store', 'update']);
 
-        // Décomptes
-        Route::post('decomptes/creer-annuel', 'DecompteController@creerAnnuel');
-        Route::post('decomptes/creer-sapeur', 'DecompteController@creerSapeur');
-        Route::post('decomptes/creer-exercice', 'DecompteController@creerExercice');
-        Route::get('decomptes/exercice-comptable/{id}', 'DecompteController@getByExerciceComptable');
-        Route::post('decomptes/{id}/iso20022', 'DecompteController@iso20022');
-        Route::get('decomptes/{id}', 'DecompteController@get');
+            // Décomptes
+            Route::post('decomptes/creer-annuel', 'DecompteController@creerAnnuel');
+            Route::post('decomptes/creer-sapeur', 'DecompteController@creerSapeur');
+            Route::post('decomptes/creer-exercice', 'DecompteController@creerExercice');
+            Route::get('decomptes/exercice-comptable/{id}', 'DecompteController@getByExerciceComptable');
+            Route::post('decomptes/{id}/iso20022', 'DecompteController@iso20022');
+            Route::get('decomptes/{id}', 'DecompteController@get');
 
-        // Paiements
-        Route::get('paiements/exercice-comptable/{id}', 'PaiementController@getByExerciceComptable');
-        Route::post('paiements/{id}/iso20022', 'PaiementController@iso20022');
-        Route::get('paiements/{id}', 'PaiementController@get');
+            // Paiements
+            Route::get('paiements/exercice-comptable/{id}', 'PaiementController@getByExerciceComptable');
+            Route::post('paiements/{id}/iso20022', 'PaiementController@iso20022');
+            Route::get('paiements/{id}', 'PaiementController@get');
 
-        // Amendes
-        Route::post('generer-amendes/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
-        Route::post('generer-amendes/{id}', 'AmendeSapeurController@annuel');
+            // Amendes
+            Route::post('generer-amendes/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
+            Route::post('generer-amendes/{id}', 'AmendeSapeurController@annuel');
 
-        // Params Amendes
-        Route::resource('amendes', 'AmendeController')->only(['index', 'store']);
+            // Params Amendes
+            Route::resource('amendes', 'AmendeController')->only(['index', 'store']);
+        });
 
         // Controles médicaux
-        Route::resource('controles-medicaux', 'ControleMedicalController')->only(['index', 'show', 'store', 'update', 'destroy']);
-        Route::get('controles-medicaux/{id}/justificatif', 'JustificatifController@show');
-        Route::post('controles-medicaux/{id}/justificatif', 'JustificatifController@store');
-        Route::delete('controles-medicaux/{id}/justificatif', 'JustificatifController@destroy');
+        Route::group(['middleware' => 'jwtToken:controle_medical.all'], function () {
+            Route::resource('controles-medicaux', 'ControleMedicalController')->only(['index', 'show', 'store', 'update', 'destroy']);
+            Route::get('controles-medicaux/{id}/justificatif', 'JustificatifController@show');
+            Route::post('controles-medicaux/{id}/justificatif', 'JustificatifController@store');
+            Route::delete('controles-medicaux/{id}/justificatif', 'JustificatifController@destroy');
 
-        // Params Controles médicaux
-        Route::resource('medecins', 'MedecinController')->only(['index', 'store', 'update']);
-        Route::resource('controles-medicaux-types', 'ControleMedicalTypeController')->only(['index', 'store', 'update']);
+            // Params Controles médicaux
+            Route::resource('medecins', 'MedecinController')->only(['index', 'store', 'update']);
+            Route::resource('controles-medicaux-types', 'ControleMedicalTypeController')->only(['index', 'store', 'update']);
+        });
 
         // TODO: Ajouter route type d'unité
     // });

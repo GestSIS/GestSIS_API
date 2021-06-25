@@ -5,7 +5,6 @@ namespace App\Application\Http\Middleware;
 use Closure;
 use App\Application\Auth\TokenTools;
 use Exception;
-use Illuminate\Support\Facades\Log;
 
 class JwtTokenValidator
 {
@@ -16,16 +15,33 @@ class JwtTokenValidator
      * @param  \Closure  $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle($request, Closure $next, $role = Null)
     {
         if (env('APP_ENV') === 'testing') {
             return $next($request);
         }
 
         try{
-            TokenTools::validateToken($request->bearerToken());
+            $token = TokenTools::validateToken($request->bearerToken());
         }catch(Exception $e){
-            return response()->json(["error" => "access refused"], 401);
+            return response()->json(["error" => "Accès refusé"], 401);
+        }
+
+        $sisKey = $request->header('Sis-Id', Null);
+        if (is_null($sisKey)) {
+            return response()->json(["error" => "Sis non sélectionné"], 401);
+        }
+
+        if (!is_null($role) && $role != '') {
+            // Check has role for provided sis
+            $perms = (array) $token->data->permissions;
+            if (!array_key_exists($sisKey, $perms)) {
+                return response()->json(["error" => "Aucun droit pour ce sis"], 401);
+            }
+            
+            if (!in_array($role, $perms[$sisKey])) {
+                return response()->json(["error" => "Rôle ".$role." manquant"], 401);
+            }
         }
 
         return $next($request);

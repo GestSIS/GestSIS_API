@@ -177,7 +177,6 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->solde = $ecriture->solde;
         $object->indemnite = $ecriture->indemnite;
         $object->frais = $ecriture->frais;
-        $object->frais = $ecriture->amende;
         $object->sapeur_id = $ecriture->sapeur_id;
         $object->exercice_comptable_id = $ecriture->exercice_comptable_id;
         $object->intervention_id = $ecriture->intervention_id;
