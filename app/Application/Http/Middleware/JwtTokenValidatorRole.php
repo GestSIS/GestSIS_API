@@ -6,7 +6,7 @@ use Closure;
 use App\Application\Auth\TokenTools;
 use Exception;
 
-class JwtTokenValidator
+class JwtTokenValidatorRole
 {
     /**
      * Handle an incoming request.

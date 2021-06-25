@@ -14,7 +14,12 @@
 use Illuminate\Support\Facades\Route;
 use Spatie\HttpLogger\Middlewares\HttpLogger;
 
+use App\Application\Http\Controllers\EmailController;
+
 Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () {
+    Route::group(['middleware' => 'jwtTokenAuth'], function () {
+        Route::get('email-validate', [EmailController::class, 'validateEmail']);
+    });
 
     // Etats de sortie 
     // TODO: Temporairement public, à déplacer
@@ -23,7 +28,7 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
     Route::get('exercices/{id}/liste-appel', 'ExerciceController@listeAppel');
     Route::get('exercices/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
 
-    // Route::group(['middleware' => 'jwtToken'], function () {
+    // Route::group(['middleware' => 'jwtTokenRole'], function () {
         // Sis Params
         Route::resource('sis-param', 'SisParamController')->only(['index', 'store']);
         Route::resource('avs-param', 'AvsParamController')->only(['index', 'store']);
@@ -132,7 +137,7 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         Route::resource('telephones', 'TelephoneController')->only(['index', 'store', 'update']);
 
         // Comptabilite
-        Route::group(['middleware' => 'jwtToken:comptabilite.tout'], function () {
+        Route::group(['middleware' => 'jwtTokenRole:comptabilite.tout'], function () {
             Route::post('imputation/intervention/{id}', 'ImputationController@intervention');
             Route::post('imputation/exercice/{id}', 'ImputationController@exercice');
             Route::post('imputation/annuel/{id}', 'ImputationController@annuel');
@@ -183,7 +188,7 @@ Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () 
         });
 
         // Controles médicaux
-        Route::group(['middleware' => 'jwtToken:controle_medical.all'], function () {
+        Route::group(['middleware' => 'jwtTokenRole:controle_medical.all'], function () {
             Route::resource('controles-medicaux', 'ControleMedicalController')->only(['index', 'show', 'store', 'update', 'destroy']);
             Route::get('controles-medicaux/{id}/justificatif', 'JustificatifController@show');
             Route::post('controles-medicaux/{id}/justificatif', 'JustificatifController@store');
