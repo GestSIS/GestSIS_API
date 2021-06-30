@@ -2,9 +2,11 @@
 
 namespace Test\Feature;
 
+use App\Domaine\Business\PaiementBusiness;
 use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\SisParam;
+use Carbon\Carbon;
 use Tests\TestCase;
 
 class DecompteTest extends TestCase
@@ -101,6 +103,7 @@ class DecompteTest extends TestCase
             )
         ];
         Ecriture::insert($ecritures);
+        $ecritures = Ecriture::where('exercice_comptable_id', 1)->get();
 
         AvsParam::updateOrCreate([], [
             'taux_avs' => "0.5",
@@ -112,33 +115,35 @@ class DecompteTest extends TestCase
         $params = [
             'designation' => 'test',
             'deduction' => 0,
-            'exerciceComptableId' => 1,
+            'exercice_comptable_id' => 1,
+            'date' => Carbon::today()
         ];
 
-        $response = $this->json('POST', "api/v2/decomptes/create", $params);
-
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'data' => [
-                    'id',
-                    'designation',
-                    'exercice_comptable_id',
-                    'deduction'
-                ]
-            ])->assertJson(
-                [
-                    "data" => [
-                        "designation" => "Decompte n°xxx",
-                        "exercice_comptable_id" => 1,
-                        "deduction" => 0,
-                        "avs_total" => 0,
-                        "ac_total" => 0
-                    ]
-                ]
-            );
-
-        $response = $this->json('GET', "api/v2/decomptes/" . $response['data']['id']);
+        $business = new PaiementBusiness();
+        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'],$params['deduction']);
+        // $response = $this->json('POST', "api/v2/decomptes/creer-annuel", $params);
+        
+        // $response
+        //     ->assertStatus(200)
+        //     ->assertJsonStructure([
+        //         'data' => [
+        //             'id',
+        //             'designation',
+        //             'exercice_comptable_id',
+        //             'deduction'
+        //         ]
+        //     ])->assertJson(
+        //         [
+        //             "data" => [
+        //                 "designation" => "Decompte n°xxx",
+        //                 "exercice_comptable_id" => 1,
+        //                 "deduction" => 0,
+        //                 "avs_total" => 0,
+        //                 "ac_total" => 0
+        //             ]
+        //         ]
+        //     );
+        $response = $this->json('GET', "api/v2/decomptes/" . $response['id']);
 
         $response
             ->assertStatus(200)
@@ -189,31 +194,32 @@ class DecompteTest extends TestCase
             );
 
         //vérification qu'on ne paye pas deux fois
-        $response = $this->json('POST', "api/v2/decomptes/create", $params);
+        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'],$params['deduction']);
+        // $response = $this->json('POST', "api/v2/decomptes/create", $params);
 
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'data' => [
-                    'id',
-                    'designation',
-                    'exercice_comptable_id',
-                    'deduction'
-                ]
-            ])->assertJson(
-                [
-                    "data" => [
-                        "designation" => "Decompte n°xxx",
-                        "exercice_comptable_id" => 1,
-                        "deduction" => 0,
-                        "avs_total" => 0,
-                        "ac_total" => 0
-                    ]
-                ]
-            );
+        // $response
+        //     ->assertStatus(200)
+        //     ->assertJsonStructure([
+        //         'data' => [
+        //             'id',
+        //             'designation',
+        //             'exercice_comptable_id',
+        //             'deduction'
+        //         ]
+        //     ])->assertJson(
+        //         [
+        //             "data" => [
+        //                 "designation" => "Decompte n°xxx",
+        //                 "exercice_comptable_id" => 1,
+        //                 "deduction" => 0,
+        //                 "avs_total" => 0,
+        //                 "ac_total" => 0
+        //             ]
+        //         ]
+        //     );
 
-        $response = $this->json('GET', "api/v2/decomptes/" . $response['data']['id']);
-
+        $response = $this->json('GET', "api/v2/decomptes/" . $response['id']);
+        
         $response
             ->assertStatus(200)
             ->assertJsonStructure([
@@ -286,6 +292,7 @@ class DecompteTest extends TestCase
             )
         ];
         Ecriture::insert($ecritures);
+        $ecritures = Ecriture::where('exercice_comptable_id', 2)->get();
 
         AvsParam::updateOrCreate([], [
             'taux_avs' => "0.05275",
@@ -297,32 +304,36 @@ class DecompteTest extends TestCase
         $params = [
             'designation' => 'test',
             'deduction' => 1,
-            'exerciceComptableId' => 2,
+            'exercice_comptable_id' => 2,
+            'date' => Carbon::today()
         ];
-        $response = $this->json('POST', "api/v2/decomptes/create", $params);
 
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'data' => [
-                    'id',
-                    'designation',
-                    'exercice_comptable_id',
-                    'deduction'
-                ]
-            ])->assertJson(
-                [
-                    "data" => [
-                        "designation" => "Decompte n°xxx",
-                        "exercice_comptable_id" => 2,
-                        "deduction" => 1,
-                        "avs_total" => 379.79999999999995,
-                        "ac_total" => 864
-                    ]
-                ]
-            );
+        $business = new PaiementBusiness();
+        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'],$params['deduction']);
+        // $response = $this->json('POST', "api/v2/decomptes/creer-annuel", $params);
 
-        $response = $this->json('GET', "api/v2/decomptes/" . $response['data']['id']);
+        // $response
+        //     ->assertStatus(200)
+        //     ->assertJsonStructure([
+        //         'data' => [
+        //             'id',
+        //             'designation',
+        //             'exercice_comptable_id',
+        //             'deduction'
+        //         ]
+        //     ])->assertJson(
+        //         [
+        //             "data" => [
+        //                 "designation" => "Decompte n°xxx",
+        //                 "exercice_comptable_id" => 2,
+        //                 "deduction" => 1,
+        //                 "avs_total" => 379.79999999999995,
+        //                 "ac_total" => 864
+        //             ]
+        //         ]
+        //     );
+
+        $response = $this->json('GET', "api/v2/decomptes/" . $response['id']);
 
         $response
             ->assertStatus(200)
@@ -427,6 +438,7 @@ class DecompteTest extends TestCase
             )
         ];
         Ecriture::insert($ecritures);
+        $ecritures = Ecriture::where('exercice_comptable_id', 3)->get();
 
         AvsParam::updateOrCreate([], [
             'taux_avs' => "0.05275",
@@ -438,33 +450,36 @@ class DecompteTest extends TestCase
         $params = [
             'designation' => 'test',
             'deduction' => 1,
-            'exerciceComptableId' => 3,
+            'exercice_comptable_id' => 3,
+            'date' => Carbon::today()
         ];
 
-        $response = $this->json('POST', "api/v2/decomptes/create", $params);
+        $business = new PaiementBusiness();
+        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'],$params['deduction']);
+        // $response = $this->json('POST', "api/v2/decomptes/creer-annuel", $params);
 
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'data' => [
-                    'id',
-                    'designation',
-                    'exercice_comptable_id',
-                    'deduction'
-                ]
-            ])->assertJson(
-                [
-                    "data" => [
-                        "designation" => "Decompte n°xxx",
-                        "exercice_comptable_id" => 3,
-                        "deduction" => 1,
-                        "avs_total" => 0,
-                        "ac_total" => 0
-                    ]
-                ]
-            );
+        // $response
+        //     ->assertStatus(200)
+        //     ->assertJsonStructure([
+        //         'data' => [
+        //             'id',
+        //             'designation',
+        //             'exercice_comptable_id',
+        //             'deduction'
+        //         ]
+        //     ])->assertJson(
+        //         [
+        //             "data" => [
+        //                 "designation" => "Decompte n°xxx",
+        //                 "exercice_comptable_id" => 3,
+        //                 "deduction" => 1,
+        //                 "avs_total" => 0,
+        //                 "ac_total" => 0
+        //             ]
+        //         ]
+        //     );
 
-        $response = $this->json('GET', "api/v2/decomptes/" . $response['data']['id']);
+        $response = $this->json('GET', "api/v2/decomptes/" . $response['id']);
 
         $response
             ->assertStatus(200)
