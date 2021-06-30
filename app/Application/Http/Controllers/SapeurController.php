@@ -54,15 +54,15 @@ class SapeurController extends Controller
             'porteur' => 'boolean',
             'localite_id' => 'integer|min:1',
             'civilite_id' => 'integer|min:1'
-            ]);
-            
-            $sapeur = $this->service->createSapeur($data);
-
-            return response()->json(['data' => $sapeur]);
-        }
+        ]);
         
-        /**
-         * Display the specified resource.
+        $sapeur = $this->service->createSapeur($data);
+
+        return response()->json(['data' => $sapeur]);
+    }
+        
+    /**
+     * Display the specified resource.
      *
      * @param int $id
      * @return Response
