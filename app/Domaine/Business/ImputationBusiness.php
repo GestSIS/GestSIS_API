@@ -10,7 +10,10 @@ use App\Domaine\SPI\InterventionRepository;
 use App\Domaine\SPI\SapeurRepository;
 use App\Domaine\Exceptions\ArrayException;
 use Carbon\Carbon;
-use phpDocumentor\Reflection\Types\Null_;
+use App\Infrastructure\Models\Amende;
+use App\Infrastructure\Models\Ecriture;
+use App\Infrastructure\Models\ExerciceComptable;
+use App\Infrastructure\Models\ExerciceSapeur;
 
 class ImputationBusiness
 {
@@ -38,33 +41,164 @@ class ImputationBusiness
 
     protected const UNITE_CHF_PAR_PIECE = 1;
     protected const UNITE_CHF_PAR_HEURE = 2;
-    
+
+    public function creerExerciceComptable($data)
+    {
+        $exerciceComptable = new ExerciceComptable();
+        $exerciceComptable->fill($data);
+        $exerciceComptable->boucle = 0;
+        $exerciceComptable->save();
+        return $exerciceComptable;
+    }
+
     /**
      * Générer les amendes pour un sapeur
      */
-    public function genererAmendeSapeur($exerciceComptableId, $sapeurId)
+    public function genererAmendesSapeur($exerciceComptableId, $sapeurId)
     {
+        // Chargment de la config des amendes
+        $amendes = Amende::orderBy('ordre', 'ASC')->get();
+        $nbAmende = count($amendes);
 
+        if ($nbAmende <= 0) {
+            throw new ArrayException(['config' => 'Pas de configurations d\'amendes'], "Aucune amende configurée");
+        }
+
+        // Chargement des exercices amendés du sapeur
+        $exercices = ExerciceSapeur::where([
+            ['sapeur_id', '=', $sapeurId],
+            ['amende', '=', 1]
+        ])->join('exercices', 'exercices.id', '=', 'exercice_sapeur.exercice_id')
+            ->where('exercices.exercice_comptable_id', $exerciceComptableId)
+            ->orderBy('exercices.date', 'ASC')
+            ->orderBy('exercices.heure')->get();
+
+        // Suppression de amendes existantes
+        Ecriture::where([
+            ['exercice_comptable_id', '=', $exerciceComptableId],
+            ['sapeur_id', '=', $sapeurId],
+            ['amende', '=', true]
+        ])->delete();
+
+        // Pour l'instant juste générer de nouvelles amendes
+        $ecritures = [];
+        $i = 0;
+        foreach ($exercices as $exercice) {
+
+            $amende = $amendes[$i];
+
+            // Creation d'une écriture pour chaque exercice amendé
+            $ecriture = array(
+                'indemnite' => 0,
+                'solde' => 0,
+                'frais' => 0,
+
+                'amende' => True,
+                'total' => $amende->montant,
+                'designation' => $exercice->designation,
+                'tarif' => 0,
+                'quantite' => 0,
+
+                'sapeur_id' => $exercice->sapeur_id,
+                'exercice_id' => $exercice->exercice_id,
+                'compte_id' => $amende->compte_id,
+                'exercice_comptable_id' => $exerciceComptableId,
+                'ecriture_categorie_id' => $amende->ecriture_categorie_id,
+
+                'decompte_id' => null,
+                'heure' => null,
+                'date' => $exercice->date,
+            );
+
+            $ecritures[] = $ecriture;
+
+            if ($i + 1 < $nbAmende) {
+                $i++;
+            }
+        }
+
+        Ecriture::insert($ecritures);
+        return $ecritures;
     }
 
     /**
      * Générer les amendes pour l'année comptable en cours
      */
-    public function genererAmendeAnnuels($exerciceComptableId)
+    public function genererAmendesAnnuels($exerciceComptableId)
     {
-        // Load amendes config
-        $amendes = Null;
-        
-        // Load all absences pour chaque exercice et sapeur
-        $absences = Null;
-        
-        // Générer des ecritures pour chaque absence
-        $ecritures = Null;
-        
-        // Comparer avec les écritures existantes ou supprimer les existantes
-        
-        // Enregistrer les ecritures générées
-        
+        // Chargment de la config des amendes
+        $amendes = Amende::orderBy('ordre', 'ASC')->get();
+        $nbAmende = count($amendes);
+
+        if ($nbAmende <= 0) {
+            throw new ArrayException(['config' => 'Pas de configurations d\'amendes'], "Aucune amende configurée");
+        }
+
+        // Chargement des exercices amendés du sapeur
+        $exercices = ExerciceSapeur::where([
+            ['amende', '=', 1]
+        ])->join('exercices', 'exercices.id', '=', 'exercice_sapeur.exercice_id')
+            ->where('exercices.exercice_comptable_id', $exerciceComptableId)
+            ->orderBy('exercice_sapeur.sapeur_id', 'ASC')
+            ->orderBy('exercices.date', 'ASC')
+            ->orderBy('exercices.heure')->get();
+
+        // Suppression de amendes existantes
+        Ecriture::where([
+            ['exercice_comptable_id', '=', $exerciceComptableId],
+            ['amende', '=', true]
+        ])->delete();
+
+        // Pour l'instant juste générer de nouvelles amendes
+        $newEcritures = array();
+        $i = 0;
+        $sapeurId = -1;
+
+        foreach ($exercices as $exercice) {
+            if ($sapeurId != $exercice->sapeur_id) {
+                $i = 0;
+                $sapeurId = $exercice->sapeur_id;
+            }
+
+            $amende = $amendes[$i];
+
+            // Creation d'une écriture pour chaque exercice amendé
+            $ecriture = array(
+                'solde' => 0,
+                'solde_min' => null,
+                'solde_min_pour' => null,
+                'indemnite' => 0,
+                'taux' => null,
+                'taux_description' => null,
+                'frais' => 0,
+                'amende' => True,
+                'type_unite_id' => null,
+                'designation' => $exercice->designation,
+                'total' => $amende->montant,
+                'tarif' => 0,
+                'quantite' => 0,
+                'sapeur_id' => $exercice->sapeur_id,
+                'exercice_id' => $exercice->exercice_id,
+                'intervention_id' => null,
+                'compte_id' => $amende->compte_id,
+                'exercice_comptable_id' => $exerciceComptableId,
+                'indemnite_annuel_type_id' => null,
+                'ecriture_categorie_id' => $amende->ecriture_categorie_id,
+                'frais_annuel_type_id' => null,
+                'decompte_id' => null,
+                'heure' => null,
+                'date' => $exercice->date,
+            );
+
+            array_push($newEcritures, $ecriture);
+
+            if ($i + 1 < $nbAmende) {
+                $i++;
+            }
+        }
+
+        Ecriture::insert($newEcritures);
+        return $newEcritures;
     }
 
     /**
@@ -72,14 +206,14 @@ class ImputationBusiness
      */
     public function imputerAnnuel(int $exerciceComptableId)
     {
-        // Choice available pour une seule imputation annuelle :
+        // Choix disponible pour une seule imputation annuelle :
         // 1. ~~ Si déjà une imputation pour l'année alors ne rien faire~~
         // 2. OUI -> Ajouter des imputations uniquement pour les sapeurs qui n'ont pas de frais pour l'instant
         // 3. ~~ Tout supprimer pour l'année courante et tout regénérer~~
         //
         // Notes :
         // - Ne prend actuellement en compte que la fonction actuelle et non pas la date de l'entrée en vigeure de cette fonction
-        // - Prend uniquement les actifs
+        // - Prend uniquement les sapeurs actifs
 
         $indemnites = $this->indemniteRepo->listeIndemniteAnnuelType();
         $frais = $this->fraisRepo->listeFraisAnnuelType();
@@ -107,7 +241,7 @@ class ImputationBusiness
             );
         }
 
-        //Générations des frais annuels
+        // Générations des frais annuels
         foreach ($frais as $f) {
             array_map(
                 function ($s) use ($f, $exerciceComptableId) {
@@ -164,42 +298,17 @@ class ImputationBusiness
         $this->ecritureRepo->persisteNewEcriture($ecriture);
     }
 
-    public function imputerExercice($exerciceId, $data)
-    {
-        $exercice = $this->exerciceRepo->getExerciceByIdWith($exerciceId, ['sapeurs', 'localite']);
-
-        if ($exercice->statut !== ExerciceBusiness::EXERCICE_STATUT_VALIDE) {
-            throw new ArrayException(array("message" => "Impossible d'imputer cet exercice"));
-        }
-
-        $indemniteType = $this->indemniteRepo->findIndemniteExerciceTypeById($data['indemnite_exercice_type_id']);
-
-        $unite = $indemniteType->type_unite_id;
-        $designation = "{$exercice->localite->designation} ({$exercice->lieu}) $exercice->designation";
-        $sapeurs = array_filter($exercice->sapeurs, function ($sap) {
-            return $sap->present;
-        });
-        if ($unite === self::UNITE_CHF_PAR_PIECE) {
-            $this->imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation);
-        } elseif ($unite === self::UNITE_CHF_PAR_HEURE && $indemniteType->par_fonction) {
-            $this->imputerExerciceParHeureEtFonction($exercice, $sapeurs, $indemniteType, $designation);
-        } elseif ($unite === self::UNITE_CHF_PAR_HEURE && $indemniteType->solde_min !== null) {
-            $this->imputerExerciceParHeureEtSoldeMin($exercice, $sapeurs, $indemniteType, $designation);
-        } else {
-            dd("ERROR");
-            return false;
-            //TODO: WARNING IN LOGS -> Should never arrive here
-        }
-
-        // Ajout date imputation ??? -> NON car car l'imputation se fait lors d'une autre étape
-
-        // Changer le statut de l'exercice
-        return $this->exerciceRepo->updateExerciceById($exerciceId, ["statut" => ExerciceBusiness::EXERCICE_STATUT_IMPUTE])->statut;
-    }
-
+    /**
+     * Générer les écritures liés aux présences des sapeurs durant cette intervention
+     * 
+     * Décompose le temps de chaque sapeurs entre
+     * - Week-end (nuit inclus)
+     * - Nuit
+     * - Normal
+     * Puis calcul le total avec les taux paramétrés.
+     */
     public function imputerIntervention($interventionId, $data)
     {
-        // $dateImputation = $data['date_imputation']; // TODO: Ajouter date d'imputation ?
         $indemniteType = $this->indemniteRepo->findIndemniteInterventionTypeById($data['indemnite_intervention_type_id']);
         $intervention = $this->interventionRepo->findWith($interventionId, ['presences', 'phases', 'localite', 'typeIntervention']);
 
@@ -207,10 +316,145 @@ class ImputationBusiness
             throw new ArrayException(array("message" => "Impossible d'imputer cette intervention"));
         }
 
+        if ($indemniteType->taux_weekend > 0 || $indemniteType->taux_nuit > 0) {
+            $this->imputerInterventionTaux($interventionId, $intervention, $indemniteType, $data);
+        } else {
+            return $this->imputerInterventionSoldeMin($interventionId, $intervention, $indemniteType, $data);
+        }
+
+        // Update statut
+        return $this->interventionRepo->editInterventionInformationsById($interventionId, [
+            "statut" => InterventionBusiness::INTERVENTION_STATUT_IMPUTE
+        ])->statut;
+    }
+
+    private function imputerInterventionSoldeMin($interventionId, $intervention, $indemniteType, $data)
+    {
         $unite = $indemniteType->type_unite_id;
+
+        // Grouper les présences par sapeurs
+        $sapeurs = [];
+        foreach ($intervention->presences as $presence) {
+            if (!array_key_exists($presence->sapeur_id, $sapeurs)) {
+                $sapeurs[$presence->sapeur_id] = [];
+            }
+            array_push($sapeurs[$presence->sapeur_id], $presence);
+        }
+
+        $phases = collect($intervention->phases)->sortByDesc('debut');
+
+        $soldeMinDuree = array();
+        $nonSoldeMinDuree = array();
+
+        $indemnite_phase_id = $indemniteType->phase_id;
+
+        // Sépare les période de chaque sapeur entre les différentes phases
+        foreach ($sapeurs as $sapeurId => $presences) {
+            $soldeMinDureeSapeur = 0;
+            $nonSoldeMinDureeSapeur = 0;
+            foreach ($presences as $periode) {
+                $debut = Carbon::parse($periode->debut);
+                $fin = Carbon::parse($periode->fin);
+                foreach ($phases as $phase) {
+                    $phaseDebut = Carbon::parse($phase->debut);
+
+                    if ($phase->debut != NULL && $phaseDebut->gte($fin)) {
+                        continue;
+                    }
+
+                    if ($phase->debut == NULL) {
+                        $phaseDebut = $debut;
+                    }
+
+                    $temp = $phaseDebut->max($debut);
+                    $duree = $temp->diffInMinutes($fin) / 60;
+                    $fin = $temp;
+
+                    // Totalité des périodes restantes pour cette phase
+                    if ($indemnite_phase_id == NULL || $indemnite_phase_id == 0 || $phase->phase_type_id == $indemnite_phase_id) {
+                        $soldeMinDureeSapeur += $duree;
+                    } else {
+                        $nonSoldeMinDureeSapeur += $duree;
+                    }
+                    break;
+                }
+            }
+            $soldeMinDuree[$sapeurId] = ($soldeMinDuree[$sapeurId] ?? 0) + $soldeMinDureeSapeur;
+            $nonSoldeMinDuree[$sapeurId] = ($nonSoldeMinDuree[$sapeurId] ?? 0) + $nonSoldeMinDureeSapeur;
+        }
+
+        $solde = $indemniteType->solde;
+        $soldeMin = $indemniteType->solde_min ?? $indemniteType->solde;
+        $soldeMinPour = $indemniteType->solde_min ?? 1;
         $designation = "{$intervention->localite->designation} ({$intervention->type->designation}) $intervention->lieu";
 
-        //Grouper les présences par sapeurs
+        $ecritures = array();
+        foreach ($soldeMinDuree as $sapeurId => $duree) {
+            $nonDuree = $nonSoldeMinDuree[$sapeurId];
+
+            $total = 0;
+
+            if ($duree > $soldeMinPour) {
+                $total += $soldeMin;
+                $duree -= $soldeMinPour;
+            }
+
+            $total += $indemniteType->solde * $duree;
+            $total += $indemniteType->solde * $nonDuree;
+
+            if ($duree > 0) {
+                $ecritures[] = array(
+                    'solde' => $total,
+                    'indemnite' => 0,
+                    'frais' => 0,
+                    'type_unite_id' => $indemniteType->type_unite_id,
+                    'designation' => $designation,
+                    'total' => $total,
+                    'tarif' => $solde,
+                    'quantite' => $duree + $nonDuree,
+                    'solde_min' => null,
+                    'solde_min_pour' => null,
+                    'sapeur_id' => $sapeurId,
+                    'compte_id' => $indemniteType->compte_id,
+                    'exercice_comptable_id' => $intervention->exercice_comptable_id,
+                    'intervention_id' => $intervention->id,
+                    'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+                    'date' => $intervention->date_debut,
+                    'heure' => $intervention->heure_debut,
+                );
+            }
+            if ($nonDuree) {
+                $ecritures[] = array(
+                    'solde' => $total,
+                    'indemnite' => 0,
+                    'frais' => 0,
+                    'type_unite_id' => $indemniteType->type_unite_id,
+                    'designation' => $designation,
+                    'total' => $total,
+                    'tarif' => $solde,
+                    'quantite' => $nonDuree,
+                    'solde_min' => null,
+                    'solde_min_pour' => null,
+                    'sapeur_id' => $sapeurId,
+                    'compte_id' => $indemniteType->compte_id,
+                    'exercice_comptable_id' => $intervention->exercice_comptable_id,
+                    'intervention_id' => $intervention->id,
+                    'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+                    'date' => $intervention->date_debut,
+                    'heure' => $intervention->heure_debut,
+                );
+            }
+        }
+
+        Ecriture::insert($ecritures);
+    }
+
+    private function imputerInterventionTaux($interventionId, $intervention, $indemniteType, $data)
+    {
+        // $dateImputation = $data['date_imputation']; // TODO: Ajouter date d'imputation ?
+        $designation = "{$intervention->localite->designation} ({$intervention->type->designation}) $intervention->lieu";
+
+        // Grouper les présences par sapeurs
         $sapeurs = [];
         foreach ($intervention->presences as $presence) {
             if (!array_key_exists($presence->sapeur_id, $sapeurs)) {
@@ -224,8 +468,16 @@ class ImputationBusiness
         // //TODO: Retourne les phases durant cette période
         // $getPhases = function ($presence) use ($phases) {
         // };
+        $ecritures = array();
 
+        // Calcul la durée de présence dans chaque catégorie (week-end, nuit, standard)
         foreach ($sapeurs as $sapeur_id => $presences) {
+            // Durées calculées en heures
+            $dureeTarifStandard = 0;
+            $dureeTarifWeekend = 0;
+            $dureeTarifNuit = 0;
+
+            // Durée de la période de nuit
             $dureeNuit = 0;
             $debutNuit = null;
             $finNuit = null;
@@ -240,13 +492,7 @@ class ImputationBusiness
                 $dureeNuit += $debutNuit->floatDiffInHours($finNuit);
             }
 
-            //Durées calculées en heures
-            $dureeTarifStandard = 0;
-            $dureeTarifWeekend = 0;
-            $dureeTarifNuit = 0;
-
-            //TODO: Adapt soldeTarif selon la fonction principale
-            // ou pas
+            // Récupération des tarifs
             $soldeTarif = $indemniteType->solde;
             $tauxWeekend = $indemniteType->taux_weekend;
             $tauxNuit = $indemniteType->taux_nuit;
@@ -264,38 +510,38 @@ class ImputationBusiness
                     $dureeTarifStandard += $duree;
                 } else {
 
-                    //Arrondir debut à la fin de la première journée
-                    //Arrondir fin à la fin de l'avant dernière journée
+                    // Arrondir debut à la fin de la première journée
+                    // Arrondir fin à la fin de l'avant dernière journée
                     $debutCarbon = $debut->copy()->ceilDay();
                     $finCarbon = $fin->copy()->floorDay();
 
-                    $nbWeekend = 0;
-                    $nbWeek = 0;
-                    // dd($debutCarbon);
+                    $nbJourWeekend = 0;
+                    $nbJourSemaine = 0;
                     if ($debutCarbon < $finCarbon) {
-                        $nbWeekend += $debutCarbon->diffInDaysFiltered(function (Carbon $date) {
+                        $nbJourWeekend += $debutCarbon->diffInDaysFiltered(function (Carbon $date) {
                             return $date->isWeekend();
                         }, $finCarbon);
-                        $nbWeek += $debutCarbon->diffInDaysFiltered(function (Carbon $date) {
+                        $nbJourSemaine += $debutCarbon->diffInDaysFiltered(function (Carbon $date) {
                             return !$date->isWeekend();
                         }, $finCarbon);
                     }
-                    //Dispatch full days to hours
+
+                    // Ajout des jours complet de présence
                     if ($testWeekend && $testNuit) {
-                        $dureeTarifStandard += $nbWeek * $dureeNuit;
-                        $dureeTarifWeekend += $nbWeekend * 24;
-                        $dureeTarifNuit += $nbWeek * (24 - $dureeNuit);
+                        $dureeTarifStandard += $nbJourSemaine * (24 - $dureeNuit);
+                        $dureeTarifWeekend += $nbJourWeekend * 24;
+                        $dureeTarifNuit += $nbJourSemaine * $dureeNuit;
                     } elseif ($testWeekend) {
-                        $dureeTarifWeekend += $nbWeekend * 24;
-                        $dureeTarifNuit += $nbWeek * 24;
+                        $dureeTarifWeekend += $nbJourWeekend * 24;
+                        $dureeTarifNuit += $nbJourSemaine * 24;
                     } elseif ($testNuit) {
-                        $dureeTarifStandard += ($nbWeek + $nbWeekend) * $dureeNuit;
-                        $dureeTarifNuit += ($nbWeek + $nbWeekend) * (24 - $dureeNuit);
+                        $dureeTarifStandard += ($nbJourSemaine + $nbJourWeekend) * (24 - $dureeNuit);
+                        $dureeTarifNuit += ($nbJourSemaine + $nbJourWeekend) * $dureeNuit;
                     } else {
-                        $dureeTarifStandard += ($nbWeek + $nbWeekend) * 24;
+                        $dureeTarifStandard += ($nbJourSemaine + $nbJourWeekend) * 24;
                     }
 
-                    //Définition des deux périodes de nuit qui peuvent potentiellement overlap sur la présence
+                    // Définition des deux périodes de nuit qui peuvent potentiellement overlap sur la présence
                     $diff = $debutNuit->diffInDays($debutCarbon, false);
                     $nightPeriodOneStart = $debutNuit->copy()->addDays($diff);
                     $nightPeriodOneEnd = $finNuit->copy()->addDays($diff);
@@ -303,7 +549,7 @@ class ImputationBusiness
                     $nightPeriodTwoEnd = $nightPeriodOneEnd->copy()->subDay();
 
                     if ($debutCarbon->copy()->subDay() >= $finCarbon) {
-                        //Debut et fin la même journée
+                        // Debut et fin la même journée
                         if ($debutCarbon->isWeekend() && $testWeekend) {
                             $dureeTarifWeekend += $duree;
                         } elseif ($testNuit) {
@@ -317,19 +563,19 @@ class ImputationBusiness
                             $dureeTarifStandard += $duree;
                         }
                     } else {
-                        //Two days
+                        // Période portant sur deux jours
 
-                        //Modification de la durée
+                        // Modification de la durée
                         $finJour = $debut->copy()->ceilDay();
                         $duree = $debut->floatDiffInHours($finJour);
 
-                        //Premier jour de la présence -> début
+                        // Premier jour de la présence -> début
                         if ($debutCarbon->isWeekend() && $testWeekend) {
                             $dureeTarifWeekend += $duree;
                         } elseif ($testNuit) {
                             $overlapping = 0;
 
-                            //Create period 1 start and end date
+                            // Create period 1 start and end date
                             $overlapping += max($debut->max($nightPeriodOneStart)->floatDiffInHours($finJour->min($nightPeriodOneEnd), false), 0);
                             $overlapping += max($debut->max($nightPeriodTwoStart)->floatDiffInHours($finJour->min($nightPeriodTwoEnd), false), 0);
 
@@ -339,9 +585,9 @@ class ImputationBusiness
                             $dureeTarifStandard += $duree;
                         }
 
-                        //Deuxième jour de la présence -> fin
+                        // Deuxième jour de la présence -> fin
 
-                        //Modification de la durée
+                        // Modification de la durée
                         $debutJour = $fin->copy()->floorDay();
                         $duree = $debutJour->floatDiffInHours($fin);
 
@@ -365,104 +611,92 @@ class ImputationBusiness
                         }
                     }
                 }
-            } //End boucle presences d'un sapeur
+            }
 
+            // Calcul des tarifs
             $soldeStandard = $soldeTarif * $dureeTarifStandard;
             $soldeNuit = $soldeTarif * $dureeTarifNuit;
             $soldeWeekend = $soldeTarif * $dureeTarifWeekend;
 
-            //Application des taux
-            if ($testWeekend) {
-                $soldeWeekend *= $tauxWeekend;
-            }
-            if ($testNuit) {
-                $soldeNuit *= $tauxNuit;
-            }
+            // Application des taux
+            $soldeWeekend *= $tauxWeekend;
+            $soldeNuit *= $tauxNuit;
 
-            //Génération des écritures
+            // Génération des écritures
             if ($soldeStandard > 0) {
-                $ecriture = array(
-                    'solde' => $soldeStandard,
-                    'indemnite' => 0,
-                    'frais' => 0,
-                    'type_unite_id' => $indemniteType->type_unite_id,
+                $ecritures[] = array(
                     'designation' => $designation,
                     'total' => $soldeStandard,
                     'tarif' => $soldeTarif,
+                    'date' => $intervention->date_debut,
+                    'heure' => $intervention->heure_debut,
+                    'type_unite_id' => $indemniteType->type_unite_id,
                     'quantite' => $dureeTarifStandard,
-                    'solde_min' => null,
-                    'solde_min_pour' => null,
+
+                    'taux' => null,
+                    'taux_description' => null,
+                    'solde' => $soldeStandard,
+                    'indemnite' => 0,
+                    'frais' => 0,
+
                     'sapeur_id' => $sapeur_id,
                     'compte_id' => $indemniteType->compte_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
-                    'intervention_id' => $intervention->id,
+                    'intervention_id' => $interventionId,
                     'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
-                    'date' => $intervention->date_debut,
-                    'heure' => $intervention->heure_debut,
                 );
-
-                $this->ecritureRepo->persisteNewEcriture($ecriture);
             }
 
             if ($soldeNuit > 0) {
-                $ecriture = array(
-                    'solde' => $soldeNuit,
-                    'indemnite' => 0,
-                    'frais' => 0,
-                    'type_unite_id' => $indemniteType->type_unite_id,
+                $ecritures[] = [
                     'designation' => $designation . " - Nuit",
                     'total' => $soldeNuit,
                     'tarif' => $soldeTarif,
+                    'date' => $intervention->date_debut,
+                    'heure' => $intervention->heure_debut,
+                    'type_unite_id' => $indemniteType->type_unite_id,
                     'quantite' => $dureeTarifNuit,
-                    'solde_min' => null,
-                    'solde_min_pour' => null,
+
                     'taux' => $tauxNuit,
                     'taux_description' => 'Nuit',
+                    'solde' => $soldeNuit,
+                    'indemnite' => 0,
+                    'frais' => 0,
+
                     'sapeur_id' => $sapeur_id,
                     'compte_id' => $indemniteType->compte_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
-                    'intervention_id' => $intervention->id,
+                    'intervention_id' => $interventionId,
                     'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
-                    'date' => $intervention->date_debut,
-                    'heure' => $intervention->heure_debut,
-                );
-
-                $this->ecritureRepo->persisteNewEcriture($ecriture);
+                ];
             }
 
             if ($soldeWeekend > 0) {
-                $ecriture = array(
-                    'solde' => $soldeWeekend,
-                    'indemnite' => 0,
-                    'frais' => 0,
-                    'type_unite_id' => $indemniteType->type_unite_id,
+                $ecritures[] = [
                     'designation' => $designation . " - Weekend",
                     'total' => $soldeWeekend,
                     'tarif' => $soldeTarif,
+                    'date' => $intervention->date_debut,
+                    'heure' => $intervention->heure_debut,
+                    'type_unite_id' => $indemniteType->type_unite_id,
                     'quantite' => $dureeTarifWeekend,
-                    'solde_min' => null,
-                    'solde_min_pour' => null,
+
                     'taux' => $tauxWeekend,
                     'taux_description' => 'Weekend',
+                    'solde' => $soldeWeekend,
+                    'indemnite' => 0,
+                    'frais' => 0,
+
                     'sapeur_id' => $sapeur_id,
                     'compte_id' => $indemniteType->compte_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
-                    'intervention_id' => $intervention->id,
+                    'intervention_id' => $interventionId,
                     'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
-                    'date' => $intervention->date_debut,
-                    'heure' => $intervention->heure_debut,
-                );
-
-                $this->ecritureRepo->persisteNewEcriture($ecriture);
+                ];
             }
         }
 
-        //TODO: Ajout date imputation
-
-        // Update statut
-        return $this->interventionRepo->editInterventionInformationsById($interventionId, [
-            "statut" => InterventionBusiness::INTERVENTION_STATUT_IMPUTE
-        ])->statut;
+        Ecriture::insert($ecritures);
     }
 
     private function imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation)
@@ -470,6 +704,7 @@ class ImputationBusiness
         // TODO: : solde_min should be null
 
         // Générer écritures
+        $ecritures = [];
         foreach ($sapeurs as $sapeur) {
             $id = $this->sapeurRepo->getSapeurDetailsById($sapeur->sapeur_id)->fonction_id;
 
@@ -488,8 +723,8 @@ class ImputationBusiness
                 $indemnite += $indemniteType->indemnite;
             }
 
-            //Par pièce et pas par fonction -> pas de calcul
-            $ecriture = array(
+            // Par pièce et pas par fonction -> pas de calcul
+            $ecritures[] = [
                 'solde' => $solde,
                 'indemnite' => $indemnite,
                 'frais' => 0,
@@ -505,10 +740,43 @@ class ImputationBusiness
                 'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
                 'date' => $exercice->date,
                 'heure' => $exercice->heure,
-            );
+            ];
 
-            $this->ecritureRepo->persisteNewEcriture($ecriture);
+            Ecriture::insert($ecritures);
         }
+    }
+
+    public function imputerExercice($exerciceId, $data)
+    {
+        $exercice = $this->exerciceRepo->getExerciceByIdWith($exerciceId, ['sapeurs', 'localite']);
+
+        if ($exercice->statut !== ExerciceBusiness::EXERCICE_STATUT_VALIDE) {
+            throw new ArrayException(array("message" => "Impossible d'imputer cet exercice"));
+        }
+
+        $indemniteType = $this->indemniteRepo->findIndemniteExerciceTypeById($data['indemnite_exercice_type_id']);
+
+        $unite = $indemniteType->type_unite_id;
+        $designation = "{$exercice->localite->designation} ({$exercice->lieu}) $exercice->designation";
+        $sapeurs = array_filter($exercice->sapeurs, function ($sap) {
+            return $sap->present;
+        });
+        if ($unite === self::UNITE_CHF_PAR_PIECE) {
+            $this->imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation);
+        } elseif ($unite === self::UNITE_CHF_PAR_HEURE && $indemniteType->par_fonction) {
+            $this->imputerExerciceParHeureEtFonction($exercice, $sapeurs, $indemniteType, $designation);
+        } elseif ($unite === self::UNITE_CHF_PAR_HEURE) {
+            $this->imputerExerciceParHeureEtSoldeMin($exercice, $sapeurs, $indemniteType, $designation);
+        } else {
+            dd("ERROR");
+            return false;
+            //TODO: WARNING IN LOGS -> Should never arrive here
+        }
+
+        // Ajout date imputation ??? -> NON car car l'imputation se fait lors d'une autre étape
+
+        // Changer le statut de l'exercice
+        return $this->exerciceRepo->updateExerciceById($exerciceId, ["statut" => ExerciceBusiness::EXERCICE_STATUT_IMPUTE])->statut;
     }
 
     private function imputerExerciceParHeureEtFonction($exercice, $sapeurs, $indemniteType, $designation)
@@ -548,7 +816,7 @@ class ImputationBusiness
                 'designation' => $designation,
                 'total' => $solde + $indemnite,
                 'tarif' => $soldeTarif + $indemniteTarif,
-                'quantite' => $exercice->duree / 60,
+                'quantite' => $duree,
                 'solde_min' => $indemniteType->solde_min,
                 'solde_min_pour' => $indemniteType->solde_min_pour,
                 'sapeur_id' => $sapeur->sapeur_id,
@@ -570,6 +838,11 @@ class ImputationBusiness
         $duree = $exercice->duree / 60;
 
         $solde = 0;
+        if ($indemniteType->solde_min == null) {
+            $indemniteType->solde_min = 0;
+            $indemniteType->solde_min_pour = 0;
+        }
+
         if ($duree > $indemniteType->solde_min_pour) {
             $solde += $indemniteType->solde_min;
             $duree -= $indemniteType->solde_min_pour;
@@ -588,7 +861,7 @@ class ImputationBusiness
                 'designation' => $designation,
                 'total' => $solde,
                 'tarif' => $indemniteType->solde,
-                'quantite' => $exercice->duree / 60,
+                'quantite' => $duree,
                 'solde_min' => $indemniteType->solde_min,
                 'solde_min_pour' => $indemniteType->solde_min_pour,
                 'sapeur_id' => $sapeur->sapeur_id,

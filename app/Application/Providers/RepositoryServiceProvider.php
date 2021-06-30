@@ -38,10 +38,6 @@ class RepositoryServiceProvider extends ServiceProvider
             'App\Infrastructure\Repositories\FraisTypeRepositoryEloquent'
         );
         $this->app->bind(
-            'App\Domaine\SPI\CompteRepository',
-            'App\Infrastructure\Repositories\CompteRepositoryEloquent'
-        );
-        $this->app->bind(
             'App\Domaine\SPI\ControleMedicalRepository',
             'App\Infrastructure\Repositories\ControleMedicalRepositoryEloquent'
         );

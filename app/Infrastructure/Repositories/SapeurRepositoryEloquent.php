@@ -16,7 +16,7 @@ use stdClass;
 
 class SapeurRepositoryEloquent implements SapeurRepository
 {
-    private const SAPEUR_LIGHT_COLUMNS = ['id', 'nom', 'prenom', 'actif', 'fonction_id', 'date_naissance'];
+    private const SAPEUR_LIGHT_COLUMNS = ['id', 'nom', 'prenom', 'actif', 'fonction_id', 'civilite_id', 'date_naissance'];
 
     public function listeSapeurLight()
     {
@@ -132,6 +132,10 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
         Sapeur::where('id', $sapeurId)->limit(1)->update($data);
         return $this->convertSapeur(Sapeur::find($sapeurId));
+    }
+
+    public function updateSapeurStatusById(int $sapeurId, $actif) {
+        Sapeur::where('id', $sapeurId)->limit(1)->update(array('actif' => $actif));
     }
 
     public function deleteSapeurById($sapeurId)
@@ -332,6 +336,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $object->actif = $sapeur->actif;
         $object->fonction_id = $sapeur->fonction_id;
         $object->date_naissance = $sapeur->date_naissance;
+        $object->civilite_id = $sapeur->civilite_id;
 
         return $object;
     }
@@ -350,6 +355,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $object->no_rue = $sapeur->no_rue;
         $object->date_naissance = $sapeur->date_naissance;
         $object->no_avs = $sapeur->no_avs;
+        $object->cotisation_avs = $sapeur->cotisation_avs;
         $object->profession = $sapeur->profession;
         $object->employeur = $sapeur->employeur;
         $object->lieu_de_travail = $sapeur->lieu_de_travail;

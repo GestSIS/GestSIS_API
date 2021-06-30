@@ -138,8 +138,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         if (!array_key_exists('exercice_id', $ecriture)) $ecriture['exercice_id'] = null;
         if (!array_key_exists('indemnite_annuel_type_id', $ecriture)) $ecriture['indemnite_annuel_type_id'] = null;
         if (!array_key_exists('frais_annuel_type_id', $ecriture)) $ecriture['frais_annuel_type_id'] = null;
-        if (!array_key_exists('paiement_id', $ecriture)) $ecriture['paiement_id'] = null;
-        if (!array_key_exists('date_paiement', $ecriture)) $ecriture['date_paiement'] = null;
+        if (!array_key_exists('decompte_id', $ecriture)) $ecriture['decompte_id'] = null;
         if (!array_key_exists('date', $ecriture)) $ecriture['date'] = null;
         if (!array_key_exists('heure', $ecriture)) $ecriture['heure'] = null;
 
@@ -188,8 +187,10 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->ecriture_categorie_id = $ecriture->ecriture_categorie_id;
         $object->date = $ecriture->date;
         $object->heure = $ecriture->heure;
-        $object->date_paiement = $ecriture->date_paiement;
         $object->decompte_id = $ecriture->decompte_id;
+
+        $object->amende = $ecriture->amende;
+        $object->avs = $ecriture->avs;
 
         return $object;
     }
@@ -225,12 +226,14 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->ecriture_categorie_id = $ecriture->ecriture_categorie_id;
         $object->date = $ecriture->date;
         $object->heure = $ecriture->heure;
-        $object->date_paiement = $ecriture->date_paiement;
         $object->sapeur = $ecriture->sapeur;
         $object->categorie = $ecriture->categorie;
         $object->tri = $ecriture->tri;
         $object->unite = $ecriture->unite;
         $object->civilite = $ecriture->civilite;
+
+        $object->amende = $ecriture->amende;
+        $object->avs = $ecriture->avs;
 
         return $object;
     }

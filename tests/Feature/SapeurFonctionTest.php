@@ -32,7 +32,7 @@ class SapeurFonctionTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testFonctionIndexOK()
+    public function testFonctionIndexOk()
     {
         $response = $this->json('GET', "/api/v2/sapeurs/1/fonctions");
 
@@ -53,7 +53,7 @@ class SapeurFonctionTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testAddFonctionOK()
+    public function testAddFonctionOk()
     {
         $data = array(
             'debut' => "1958-01-01",

@@ -31,7 +31,7 @@ class SapeurGradeTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testGradeIndexOK()
+    public function testGradeIndexOk()
     {
         $response = $this->json('GET', "/api/v2/sapeurs/1/grades");
 
@@ -52,7 +52,7 @@ class SapeurGradeTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testAddGradeOK()
+    public function testAddGradeOk()
     {
         $data = array(
             'date' => "1958-01-01",

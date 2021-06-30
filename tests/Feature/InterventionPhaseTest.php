@@ -32,7 +32,7 @@ class InterventionPhaseTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testInterventionIndexAppelsOK()
+    public function testInterventionIndexAppelsOk()
     {
         $response = $this->json('GET', "/api/v2/interventions/393/phases");
 

@@ -18,6 +18,7 @@ class IndemniteInterventionType extends Model
         'compte_id',
         'phase_id',
         'type_unite_id',
+        'ecriture_categorie_id',
         'par_fonction',
     ];
 

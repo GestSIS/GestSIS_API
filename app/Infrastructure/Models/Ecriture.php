@@ -28,9 +28,10 @@ class Ecriture extends Model
         'ecriture_categorie_id',
         'date',
         'heure',
-        'date_paiement',
-        'id_paiement',
-        'decompte_id'
+        'decompte_id',
+
+        'amende',
+        'avs',
     ];
 
 }

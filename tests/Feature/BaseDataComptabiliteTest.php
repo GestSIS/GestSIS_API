@@ -14,7 +14,7 @@ class BaseDataComptabiliteTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testFraisTypeIndexOK()
+    public function testFraisTypeIndexOk()
     {
         $response = $this->json('GET', "/api/v2/frais-types/");
 
@@ -32,12 +32,12 @@ class BaseDataComptabiliteTest extends TestCase
     }
 
     /**
-     * Test index idemnite annuel type
+     * Test index indemnite annuel type
      *
      * @return void
      * @throws Exception
      */
-    public function testIndemniteTypeIndexOK()
+    public function testIndemniteTypeIndexOk()
     {
         $response = $this->json('GET', "/api/v2/indemnites-types/");
 
@@ -70,7 +70,7 @@ class BaseDataComptabiliteTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testEritureAnnuelIndexOK()
+    public function testEritureAnnuelIndexOk()
     {
         $exerciceComptable = 3;
         $response = $this->json('GET', "/api/v2/ecritures/annuel/$exerciceComptable");
@@ -92,7 +92,7 @@ class BaseDataComptabiliteTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testEcritureExerciceIndexOK()
+    public function testEcritureExerciceIndexOk()
     {
         $exerciceId = 1;
         $response = $this->json('GET', "/api/v2/ecritures/exercice/$exerciceId");
@@ -114,7 +114,7 @@ class BaseDataComptabiliteTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testEcritureInterventionIndexOK()
+    public function testEcritureInterventionIndexOk()
     {
         $interventionId = 393;
         $response = $this->json('GET', "/api/v2/ecritures/intervention/$interventionId");

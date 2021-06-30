@@ -1,17 +1,16 @@
 <?php
 
-
 namespace App\Domaine\API;
 
 use App\Domaine\Business\ImputationBusiness;
-use App\Domaine\SPI\CompteRepository;
 use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\FraisTypeRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
-use PDF;
+use App\Infrastructure\Models\Exercice;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 
-class ComptabiliteService
+class ImputationService
 {
     protected $ecritureRepo;
     protected $exerciceRepo;
@@ -25,20 +24,18 @@ class ComptabiliteService
         ExerciceRepository $exercice,
         IndemniteTypeRepository $indemnite,
         FraisTypeRepository $frais,
-        CompteRepository $comptes,
-        ImputationBusiness $business)
-    {
+        ImputationBusiness $business
+    ) {
         $this->ecritureRepo = $ecriture;
         $this->exerciceRepo = $exercice;
         $this->indemniteRepo = $indemnite;
         $this->fraisRepo = $frais;
-        $this->compteRepo = $comptes;
         $this->business = $business;
     }
 
-    function getComptes()
+    function creerExerciceComptable($data)
     {
-        return $this->compteRepo->listComptes();
+        return $this->business->creerExerciceComptable($data);
     }
 
     function getAllEcrituresForExerciceComptableById($exerciceComptableId)
@@ -56,25 +53,16 @@ class ComptabiliteService
         return $this->ecritureRepo->listeEcritureForCompteAndExerciceComptableById($compteId, $exerciceComptableId);
     }
 
-    function getIndemnitesTypes()
-    {
-        return array(
-            "exercices" => $this->indemniteRepo->listeIndemniteExerciceType(),
-            "interventions" => $this->indemniteRepo->listeIndemniteInterventionType(),
-            "annuels" => $this->indemniteRepo->listeIndemniteAnnuelType(),
-        );
-    }
-
-    function getFraisTypes()
-    {
-        return array(
-            "annuels" => $this->fraisRepo->listeFraisAnnuelType()
-        );
-    }
-
     function getEcrituresForExerciceById($exerciceId)
     {
         return $this->ecritureRepo->listeEcritureForExercice($exerciceId);
+    }
+
+    function getEcrituresForExercicesByExerciceComptable($exerciceComptableId) {
+        return Exercice::where([
+            ['exercice_comptable_id', '=', $exerciceComptableId],
+            ['statut', '>', 2],
+        ])->with('ecritures')->get();
     }
 
     function getEcrituresForInterventionById($interventionId)
@@ -110,29 +98,29 @@ class ComptabiliteService
     function imputationAnnuel($exerciceComptableId)
     {
         $this->business->imputerAnnuel($exerciceComptableId);
-        
+
         return [
             "frais" => $this->ecritureRepo->listeFraisAnnuelByExeComptableId($exerciceComptableId),
             "indemnites" => $this->ecritureRepo->listeIndemniteAnnuelByExeComptableId($exerciceComptableId),
         ];
     }
 
-    function genererAmendeSapeur($exerciceComptableId, $sapeurId)
+    function genererAmendesSapeur($exerciceComptableId, $sapeurId)
     {
-        return $this->business->genererAmendeSapeur($exerciceComptableId, $sapeurId);
+        return $this->business->genererAmendesSapeur($exerciceComptableId, $sapeurId);
     }
-    
+
     function genererAmendeAnnuel($exerciceComptableId)
     {
-        return $this->business->genererAmendeAnnuels($exerciceComptableId);
+        return $this->business->genererAmendesAnnuels($exerciceComptableId);
     }
 
     function decompteAnnuelParSapeur($exerciceComptableId)
     {
         $ecritures = $this->ecritureRepo->computeEcritureForPersonalDecompte($exerciceComptableId);
 
-//        return View('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
-        $pdf = PDF::loadView('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
+        //        return View('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
+        $pdf = SnappyPdf::loadView('pdf/decomptes-sapeurs', ["ecritures" => $ecritures]);
         return $pdf->download('invoice.pdf');
     }
 }

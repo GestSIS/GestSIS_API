@@ -26,10 +26,12 @@ class CreateExerciceSapeurTable extends Migration
             $table->bigInteger('excuse_type_id')->unsigned()->nullable();
             $table->foreign('excuse_type_id')->references('id')->on('excuse_types');
 
+            // TODO: Change into boolean ?
             $table->integer('convoque');
             $table->integer('present');
             $table->integer('amende');
             $table->integer('remplace');
+            // $table->numeric('heure', 4, 2)->default(0.0);
 
             $table->unique(['exercice_id', 'sapeur_id']);
         });

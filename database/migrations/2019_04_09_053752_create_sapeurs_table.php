@@ -26,6 +26,7 @@ class CreateSapeursTable extends Migration
             // $table->date('date_inco'); // TODO: vérifier si nécessaire
             // $table->date('date_sortie'); //TODO: vérifier si nécessaire
             $table->string('no_avs');
+            $table->boolean('cotisation_avs')->default(false);
 
             $table->string('profession');
             $table->string('employeur');

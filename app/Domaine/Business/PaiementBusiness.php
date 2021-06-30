@@ -2,10 +2,9 @@
 
 namespace App\Domaine\Business;
 
-use App\Infrastructure\Models\Civilite;
+use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
-use App\Infrastructure\Models\ExerciceCategorie;
 use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Sapeur;
@@ -35,23 +34,22 @@ class PaiementBusiness
      * @param float $taux_avs taux avs payé par le sapeur
      * @param float $taux_ac taux ac payé par le sapeur
      * @param boolean $deduction true si les déduction doivent être faites sur ce paiement
-     * @param float $minimumImposableAVSAC montant imposable minimum pour l'avs
-     * @param float $minimumSoldeImposable montant minimum pour que la solde soit imposable
+     * @param float $franchiseAvs montant imposable minimum pour l'avs
+     * @param float $franchiseImposition montant minimum pour que la solde soit imposable
      * 
      * @return Decompte décompte créé
      */
-    public static function creerDecompte($designation, $exerciceComptableId, $deduction, $tauxAc, $tauxAvs, $minimumSoldeImposable, $minimumImposableAVSAC)
+    public function creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction)
     {
+        $avsParam = AvsParam::first();
 
         $decompte = new Decompte();
         $decompte->designation = $designation;
         $decompte->exercice_comptable_id = $exerciceComptableId;
         $decompte->deduction = $deduction;
-        $decompte->avsTotal = 0;
-        $decompte->acTotal = 0;
+        $decompte->avs_total = 0;
+        $decompte->ac_total = 0;
         $decompte->save();
-
-        $ecritures = Ecriture::where('exercice_comptable_id', $exerciceComptableId)->get();
 
         $totaux = array();
         //faire les totaux par sapeurs
@@ -68,16 +66,16 @@ class PaiementBusiness
                         "total" => 0.0,
                         "soldeTotal" => 0.0,
                         "indemniteTotal" => 0.0,
-                        "avsTotal" => 0.0
+                        "avs_total" => 0.0
                     );
                 }
                 $totaux[$ecriture->sapeur_id]['solde'] += $ecriture->solde;
                 $totaux[$ecriture->sapeur_id]['indemnite'] += $ecriture->indemnite;
                 $totaux[$ecriture->sapeur_id]['frais'] += $ecriture->frais;
-                //pas encore présent dans écriture
+                // pas encore présent dans écriture, mais n'y sera pas
                 //$totaux[$ecriture->sapeur_id]['amende']+=$ecriture->amende;
 
-                $ecriture->date_paiement = date('Y-m-d');
+                // $ecriture->date_paiement = $date;
                 $ecriture->decompte_id = $decompte->id;
                 $ecriture->save();
             }
@@ -85,7 +83,7 @@ class PaiementBusiness
 
         //déductions
         if ($deduction) {
-            $taux = $tauxAc + $tauxAvs;
+            $taux = $avsParam->taux_ac + $avsParam->taux_avs;
             //vérifie si autre décompte sans déduction
             foreach (Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get() as $d) {
                 foreach ($d->paiements as $p) {
@@ -99,23 +97,23 @@ class PaiementBusiness
                             "total" => 0.0,
                             "soldeTotal" => 0.0,
                             "indemniteTotal" => 0.0,
-                            "avsTotal" => 0.0
+                            "avs_total" => 0.0
                         );
                     }
                     $totaux[$p->sapeur_id]['soldeTotal'] += $p->solde;
                     $totaux[$p->sapeur_id]['indemniteTotal'] += $p->indemine;
-                    $totaux[$p->sapeur_id]['avsTotal'] += $p->avs;
+                    $totaux[$p->sapeur_id]['avs_total'] += $p->avs;
                 }
             }
             foreach ($totaux as $key => $total) {
-                $solde_imposable = max($total['solde'] + $total['soldeTotal'] - $minimumSoldeImposable, 0.0);
+                $solde_imposable = max($total['solde'] + $total['soldeTotal'] - $avsParam->franchise_imposition, 0.0);
                 $total_imposable = $solde_imposable + $total['indemnite'] + $total['indemniteTotal'];
 
-                //TODO ou si sapeur fait la demande
-                if ($total_imposable > $minimumImposableAVSAC) {
-                    $totaux[$key]['avs'] = ($total_imposable * $taux) - $total['avsTotal'];
-                    $decompte->avsTotal += ($total_imposable * $tauxAvs) - (($total['avsTotal'] / $taux) * $tauxAvs);
-                    $decompte->acTotal += ($total_imposable * $tauxAc) - (($total['avsTotal'] / $taux) * $tauxAc);
+                // TODO: ou si sapeur fait la demande
+                if ($total_imposable >= $avsParam->franchise_avs) {
+                    $totaux[$key]['avs'] = ($total_imposable * $taux) - $total['avs_total'];
+                    $decompte->avs_total += ($total_imposable * $avsParam->taux_avs) - (($total['avs_total'] / $taux) * $avsParam->taux_avs);
+                    $decompte->ac_total += ($total_imposable * $avsParam->taux_ac) - (($total['avs_total'] / $taux) * $avsParam->taux_ac);
                 }
             }
             $decompte->save();
@@ -127,6 +125,7 @@ class PaiementBusiness
         }
 
         $paiements = array();
+        // $ecrituresAvs = array();
         //création paiements
         foreach ($totaux as $key => $total) {
             $paiements[] = [
@@ -139,6 +138,29 @@ class PaiementBusiness
                 'total' => $total['total'],
                 'sapeur_id' => $key
             ];
+        }
+        if ($deduction) {
+            Ecriture::insert([
+                'solde' => 0,
+                'indemnite' => 0,
+                'frais' => 0,
+                'avs' => true,
+                'type_unite_id' => null,
+                'designation' => $designation,
+                'total' => $decompte->avs_total + $decompte->ac_total,
+                'tarif' => 0,
+                'quantite' => 1,
+                'solde_min' => null,
+                'solde_min_pour' => null,
+                'sapeur_id' => null,
+                'compte_id' => $avsParam->compte_id,
+                'exercice_comptable_id' => $exerciceComptableId,
+                'ecriture_categorie_id' => $avsParam->ecriture_categorie_id,
+                'intervention_id' => null,
+                'date' => $date,
+                'heure' => "00:00:00",
+                'decompte_id' => $decompte->id,
+            ]);
         }
         Paiement::insert($paiements);
 
@@ -155,7 +177,7 @@ class PaiementBusiness
      * 
      * @return string fichier xml répondant à la norme ISO 20022
      */
-    public static function iso20022FromDecompte($decompteId, $nom, $bic, $iban)
+    public function iso20022FromDecompte($decompteId, $nom, $bic, $iban)
     {
         $paiements = Decompte::find($decompteId)->paiements()->get();
         $paiement = new PaymentInformation(
@@ -195,7 +217,7 @@ class PaiementBusiness
      * 
      * @return string fichier xml répondant à la norme ISO 20022
      */
-    public static function iso20022FromPaiement($paiementId, $nom, $bic, $iban)
+    public function iso20022FromPaiement($paiementId, $nom, $bic, $iban)
     {
         $paiement = new PaymentInformation(
             "payment-000",
@@ -231,7 +253,7 @@ class PaiementBusiness
      * @return pdf certificats de salaire
      */
 
-    public static function certificatSalaire($exerciceComptableId, $affichageFrais = false)
+    public function certificatSalaire($exerciceComptableId, $affichageFrais = false)
     {
         //calcul des totaux
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
@@ -259,7 +281,7 @@ class PaiementBusiness
         try {
             //génération du pdf de chaque sapeur
             foreach (Sapeur::whereIn('id', array_keys($totaux))->with(['localite', 'civilite'])->get() as $sapeur) {
-                $path = PaiementBusiness::creationPdf($sapeur, $exerciceComptable, $totaux[$sapeur->id], $affichageFrais, true);
+                $path = $this->creationPdf($sapeur, $exerciceComptable, $totaux[$sapeur->id], $affichageFrais, true);
                 $merged->addFile($path);
             }
 
@@ -280,7 +302,7 @@ class PaiementBusiness
      * 
      * @return pdf certificat de salaire
      */
-    public static function certificatSalaireSapeur($exerciceComptableId, $sapeurId, $affichageFrais = false)
+    public function certificatSalaireSapeur($exerciceComptableId, $sapeurId, $affichageFrais = false)
     {
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
 
@@ -302,7 +324,7 @@ class PaiementBusiness
         }
 
         $sapeur = Sapeur::with(['localite', 'civilite'])->find($sapeurId);
-        PaiementBusiness::creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, false);
+        $this->creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, false);
     }
 
     /**
@@ -314,7 +336,7 @@ class PaiementBusiness
      * @param bool $affichageFrais true si les frais doivent apparaitre
      * @param bool $enregistrement true si le fichier doit 'etre enregistré, sortie navigateur sinon
      */
-    private static function creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, $enregistrement)
+    private function creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, $enregistrement)
     {
         $localite = $sapeur->localite;
         $civilite = $sapeur->civilite;
@@ -337,7 +359,7 @@ class PaiementBusiness
             "11" => ($total['solde'] + $total['indemnite']) - round($total['deduction']),
             "15-1" => "Répartition:\tSolde\t\t" . $total['solde'],
             "15-2" => "\t\t\tIndemnité\t" . $total['indemnite'],
-            "OrtDatum" => PaiementBusiness::datefr()
+            "OrtDatum" => $this->datefr()
         );
 
         if ($total['frais'] > 0 && $affichageFrais) {
@@ -362,7 +384,7 @@ class PaiementBusiness
      * 
      * @return string date
      */
-    private static function datefr()
+    private function datefr()
     {
         $date = Carbon::now()->locale('fr_CH');
         return $date->day . " " . $date->monthName . " " . $date->year;

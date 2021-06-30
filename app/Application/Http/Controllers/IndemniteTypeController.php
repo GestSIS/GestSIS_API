@@ -2,15 +2,14 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ComptabiliteService;
+use App\Domaine\API\ComptabiliteParamService;
 use Illuminate\Http\Response;
 
-class IdemniteTypeController extends Controller
+class IndemniteTypeController extends Controller
 {
-
     protected $service;
 
-    public function __construct(ComptabiliteService $service)
+    public function __construct(ComptabiliteParamService $service)
     {
         $this->service = $service;
     }
@@ -22,9 +21,9 @@ class IdemniteTypeController extends Controller
      */
     public function index()
     {
-        $idemnites = $this->service->getIndemnitesTypes();
+        $indemnites = $this->service->indemnitesTypes();
 
-        return response()->json(['data' => $idemnites]);
+        return response()->json(['data' => $indemnites]);
     }
 
 }

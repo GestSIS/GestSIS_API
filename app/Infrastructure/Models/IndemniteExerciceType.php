@@ -14,11 +14,12 @@ class IndemniteExerciceType extends Model
         'solde_min_pour',
         'type_unite_id',
         'compte_id',
-        'par_fonction'
+        'par_fonction',
+        'ecriture_categorie_id'
     ];
 
     public function fonctions()
     {
-        return $this->hasMany('App\Infrastructure\Models\IndemniteExerciceFonction', 'indemnite_exe_id');
+        return $this->hasMany(IndemniteExerciceFonction::class, 'indemnite_exe_id');
     }
 }

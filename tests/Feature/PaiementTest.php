@@ -2,38 +2,11 @@
 
 namespace Test\Feature;
 
+use App\Infrastructure\Models\SisParam;
 use Tests\TestCase;
 
-class PaiementsTest extends TestCase
+class PaiementTest extends TestCase
 {
-
-    /**
-     * get all paiements.
-     *
-     * @return void
-     */
-    public function testPaiementAll()
-    {
-        $response = $this->json('GET', "api/v2/paiement/");
-
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'data' => [
-                    '*' => [
-                        'id',
-                        'decompte_id',
-                        'solde',
-                        'indemnite',
-                        'frais',
-                        'amende',
-                        'avs',
-                        'total',
-                        'sapeur_id',
-                    ]
-                ]
-            ]);
-    }
 
     /**
      * get  paiements.
@@ -42,7 +15,7 @@ class PaiementsTest extends TestCase
      */
     public function testPaiement()
     {
-        $response = $this->json('GET', "api/v2/paiement/1");
+        $response = $this->json('GET', "api/v2/paiements/1");
 
         $response
             ->assertStatus(200)
@@ -66,9 +39,9 @@ class PaiementsTest extends TestCase
      *
      * @return void
      */
-    public function testPaiementAnnee()
+    public function testPaiementAnneeComptable()
     {
-        $response = $this->json('GET', "api/v2/paiement/exercice-comptable/4");
+        $response = $this->json('GET', "api/v2/paiements/exercice-comptable/4");
 
         $response
             ->assertStatus(200)
@@ -79,8 +52,8 @@ class PaiementsTest extends TestCase
                         "exercice_comptable_id",
                         "designation",
                         "deduction",
-                        "avsTotal",
-                        "acTotal",
+                        "avs_total",
+                        "ac_total",
                         "paiements" => [
                             '*' => [
                                 "id",
@@ -100,34 +73,6 @@ class PaiementsTest extends TestCase
     }
 
     /**
-     * get all paiements for decompte.
-     *
-     * @return void
-     */
-    public function testPaiementDecompte()
-    {
-        $response = $this->json('GET', "api/v2/paiement/decompte/1");
-
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'data' => [
-                    '*' => [
-                        'id',
-                        'decompte_id',
-                        'solde',
-                        'indemnite',
-                        'frais',
-                        'amende',
-                        'avs',
-                        'total',
-                        'sapeur_id',
-                    ]
-                ]
-            ]);
-    }
-
-    /**
      * get iso20022
      *
      * @return void
@@ -136,12 +81,14 @@ class PaiementsTest extends TestCase
     {
         $data = [
             'paiementId' => 3,
+        ];
+        SisParam::updateOrCreate([], [
             'nom' => "SIS Delémont",
             'IBAN' => 'CH51 0022 5225 9529 1301 C',
             'bic' => 'UBSWCHZH80A'
-        ];
+        ]);
 
-        $response = $this->json('POST', "/api/v2/paiement/3/iso20022", $data);
+        $response = $this->json('POST', "/api/v2/paiements/3/iso20022", $data);
 
         $response->assertStatus(200);
     }

@@ -2,21 +2,57 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\ExerciceCategorie;
-use Illuminate\Http\Response;
+use App\Domaine\API\ExerciceParamService;
+use Illuminate\Http\Request;
 
 class ExerciceCategorieController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
+
+    protected $service;
+
+    public function __construct(ExerciceParamService $service)
+    {
+        $this->service = $service;
+    }
+
     public function index()
     {
-        //TODO Change this to use an extra level of indirections for consistency ???
-        $exerciceCategories = ExerciceCategorie::all();
+        $categorie = $this->service->categories();
 
-        return response()->json(['data' => $exerciceCategories]);
+        return response()->json(['data' => $categorie]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'designation' => 'string|min:1',
+            'amendable' => 'boolean',
+            'duree_base' => 'integer',
+            'status' => 'integer',
+            'tri' => 'integer'
+        ]);
+
+        $categorie = $this->service->ajouterCategorie($data);
+        return response()->json(['data' => $categorie]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $data = $request->validate([
+            'designation' => 'string|min:1',
+            'amendable' => 'boolean',
+            'duree_base' => 'integer',
+            'status' => 'integer',
+            'tri' => 'integer'
+        ]);
+
+        $categorie = $this->service->modifierCategorie($id, $data);
+        return response()->json(['data' => $categorie]);
+    }
+
+    public function destroy($id)
+    {
+        $categorie = $this->service->supprimerCategorie($id);
+        return response()->json(['data' => $categorie]);
     }
 }

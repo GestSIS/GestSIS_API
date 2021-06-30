@@ -26,7 +26,7 @@ class InterventionTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testInterventionIndexOK()
+    public function testInterventionIndexOk()
     {
         $response = $this->json('GET', "/api/v2/interventions/");
 
@@ -47,7 +47,7 @@ class InterventionTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testInterventionShowOK()
+    public function testInterventionShowOk()
     {
         $response = $this->json('GET', "/api/v2/interventions/393");
 
@@ -66,7 +66,7 @@ class InterventionTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testAddInterventionOK()
+    public function testAddInterventionOk()
     {
         $intervention = Intervention::factory()->make();
         $response = $this->json('POST', '/api/v2/interventions', $intervention->toArray());
@@ -104,7 +104,7 @@ class InterventionTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testValidateInterventionOK()
+    public function testValidateInterventionOk()
     {
         $intervention = Intervention::factory()->create();
 

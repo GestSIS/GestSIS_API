@@ -14,7 +14,7 @@ class BaseDataSapeurTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testPermisIndexOK()
+    public function testPermisIndexOk()
     {
         $response = $this->json('GET', "/api/v2/permis/");
 
@@ -35,7 +35,7 @@ class BaseDataSapeurTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testCivilitesIndexOK()
+    public function testCivilitesIndexOk()
     {
         $response = $this->json('GET', "/api/v2/civilites/");
 
@@ -56,7 +56,7 @@ class BaseDataSapeurTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testGradeIndexOK()
+    public function testGradeIndexOk()
     {
         $response = $this->json('GET', "/api/v2/grades/");
 
@@ -77,7 +77,7 @@ class BaseDataSapeurTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testFonctionIndexOK()
+    public function testFonctionIndexOk()
     {
         $response = $this->json('GET', "/api/v2/fonctions/");
 
@@ -98,7 +98,7 @@ class BaseDataSapeurTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testCoursIndexOK()
+    public function testCoursIndexOk()
     {
         $response = $this->json('GET', "/api/v2/cours/");
 
@@ -119,7 +119,7 @@ class BaseDataSapeurTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testTelephonesTypesIndexOK()
+    public function testTelephonesTypesIndexOk()
     {
         $response = $this->json('GET', "/api/v2/telephone-types/");
 
@@ -140,7 +140,7 @@ class BaseDataSapeurTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testGroupeSapeurIndexOK()
+    public function testGroupeSapeurIndexOk()
     {
         $response = $this->json('GET', "/api/v2/groupes-sapeurs/");
 
@@ -169,7 +169,7 @@ class BaseDataSapeurTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testLocaliteIndexOK()
+    public function testLocaliteIndexOk()
     {
         $response = $this->json('GET', "/api/v2/localites/");
 

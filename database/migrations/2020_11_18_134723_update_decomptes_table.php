@@ -14,8 +14,8 @@ class UpdateDecomptesTable extends Migration
     public function up()
     {
         Schema::table('decomptes', function (Blueprint $table) {
-            $table->decimal('avsTotal');
-            $table->decimal('acTotal');
+            $table->decimal('avs_total');
+            $table->decimal('ac_total');
         });
     }
 
@@ -27,8 +27,8 @@ class UpdateDecomptesTable extends Migration
     public function down()
     {
         Schema::table('decomptes', function (Blueprint $table) {
-            $table->dropColumn('avsTotal');
-            $table->dropColumn('acTotal');
+            $table->dropColumn('avs_total');
+            $table->dropColumn('ac_total');
         });
     }
 }

@@ -1,23 +1,25 @@
 <?php
 
-
 namespace App\Domaine\API;
-
 
 use App\Domaine\Business\ExerciceBusiness;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\Exercice;
 use Illuminate\Database\Eloquent\Collection;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 
 class ExerciceService
 {
     protected $repository;
+    protected $sapeurRepository;
     protected $business;
 
-    public function __construct(ExerciceRepository $repository, ExerciceBusiness $business)
+    public function __construct(ExerciceRepository $repository, SapeurRepository $sapeurRepository, ExerciceBusiness $business)
     {
         $this->repository = $repository;
+        $this->sapeurRepository = $sapeurRepository;
         $this->business = $business;
     }
 
@@ -126,7 +128,7 @@ class ExerciceService
         $presences = $this->repository->listSapeurOfExerciceById($exerciceId);
 
         return View('pdf/liste-appel', ["presences" => $presences]);
-        $pdf = PDF::loadView('pdf/liste-appel', ["presences" => $presences]);
+        $pdf = SnappyPdf::loadView('pdf/liste-appel', ["presences" => $presences]);
         return $pdf->download('invoice.pdf');
     }
 
@@ -135,16 +137,25 @@ class ExerciceService
         $presences = $this->repository->listSapeurOfExerciceById($exerciceId);
 
         return View('pdf/liste-appel-localite', ["presences" => $presences]);
-        $pdf = PDF::loadView('pdf/decomptes-sapeurs', ["presences" => $presences]);
+        $pdf = PDSnappyPdfF::loadView('pdf/decomptes-sapeurs', ["presences" => $presences]);
         return $pdf->download('invoice.pdf');
     }
 
     function listePresence($exerciceId)
     {
-        $presences = $this->repository->listSapeurOfExerciceById($exerciceId);
-
-        return View('pdf/liste-presence', ["presences" => $presences]);
-        $pdf = PDF::loadView('pdf/liste-presence', ["presences" => $presences]);
+        $exercice = $this->repository->getExerciceByIdWith($exerciceId, ['sapeurs', 'localite']);
+        $sapeurs = $this->sapeurRepository->listeSapeurLight();
+        $exercice->sapeurs = array_map(function($s) use($sapeurs) {
+            $id = $s->sapeur_id;
+            $sap = array_values(array_filter($sapeurs, function($sapeur) use ($id) {
+              return $sapeur->id == $id;
+            }))[0];
+            $s->display = $sap->nom." ".$sap->prenom;
+            return $s;
+          }, array_values($exercice->sapeurs));
+          
+        // return View('pdf/liste-presence', ["exercice" => $exercice]);
+        $pdf = SnappyPdf::loadView('pdf/liste-presence', ["exercice" => $exercice]);
         return $pdf->download('invoice.pdf');
     }
 }

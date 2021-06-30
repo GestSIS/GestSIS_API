@@ -2,16 +2,19 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ComptabiliteService;
+use App\Domaine\API\ComptabiliteParamService;
+use App\Domaine\API\ImputationService;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class CompteController extends Controller
 {
-    protected $service;
+    protected $paramService;
 
-    public function __construct(ComptabiliteService $service)
+    public function __construct(ImputationService $service, ComptabiliteParamService $paramService)
     {
         $this->service = $service;
+        $this->paramService = $paramService;
     }
 
     /**
@@ -21,7 +24,37 @@ class CompteController extends Controller
      */
     public function index()
     {
-        return response()->json(['data' => $this->service->getComptes()]);
+        return response()->json(['data' => $this->paramService->comptes()]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'designation' => 'string|min:1',
+            'numero' => 'numeric',
+            'actif' => 'boolean',
+        ]);
+
+        $compte = $this->paramService->ajouterCompte($data);
+        return response()->json(['data' => $compte]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $data = $request->validate([
+            'designation' => 'string|min:1',
+            'numero' => 'numeric',
+            'actif' => 'boolean',
+        ]);
+
+        $compte = $this->paramService->modifierCompte($id, $data);
+        return response()->json(['data' => $compte]);
+    }
+
+    public function destroy($id)
+    {
+        $compte = $this->paramService->supprimerCompte($id);
+        return response()->json(['data' => $compte]);
     }
 
     public function ecritures(int $compteId, int $exerciceComptableId)
@@ -31,6 +64,7 @@ class CompteController extends Controller
 
     public function generatePdf(int $exerciceComptableId)
     {
+        // TODO: Really in this controller ?
         return $this->service->decompteAnnuelParSapeur($exerciceComptableId);
     }
 }

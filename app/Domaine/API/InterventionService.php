@@ -5,9 +5,9 @@ namespace App\Domaine\API;
 
 use App\Domaine\Business\InterventionBusiness;
 use App\Domaine\SPI\InterventionRepository;
-use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\Intervention;
 use Illuminate\Database\Eloquent\Collection;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 
 class InterventionService
 {
@@ -99,7 +99,7 @@ class InterventionService
      */
     public function deleteInterventionById($interventionId)
     {
-        $this->business->deleteInterventionById($interventionId);
+        return $this->business->deleteInterventionById($interventionId);
     }
 
     /**
@@ -352,5 +352,29 @@ class InterventionService
     public function removeGroupes($interventionId, $ids)
     {
         $this->business->removeGroupes($interventionId, $ids);
+    }
+
+    public function rapport($interventionId, $params)
+    {
+        $intervention = Intervention::find($interventionId);
+        // $missions = Mission::where('interventionId', '=', $interventionId)->all();
+        // $appels = Appel::where('interventionId', '=', $interventionId)->all();
+        // $appels = Appel::where('interventionId', '=', $interventionId)->all();
+        // Intervention::join('missions')->join('appels')->join()
+        // Intervention::with(['sapInt', 'sapeurs'])
+        // $intervention = $this->repository->getIntervention($interventionId, ['sapeurs', 'localite']);
+        // $sapeurs = $this->sapeurRepository->listeSapeurLight();
+        // $exercice->sapeurs = array_map(function($s) use($sapeurs) {
+        //     $id = $s->sapeur_id;
+        //     $sap = array_values(array_filter($sapeurs, function($sapeur) use ($id) {
+        //       return $sapeur->id == $id;
+        //     }))[0];
+        //     $s->display = $sap->nom." ".$sap->prenom;
+        //     return $s;
+        //   }, array_values($exercice->sapeurs));
+          
+        return View('pdf/rapport-intervention', ["intervention" => $intervention, "params" => $params]);
+        // $pdf = SnappyPdf::loadView('pdf/rapport-intervention', ["intervention" => $intervention, "params" => $params]);
+        // return $pdf->download('invoice.pdf');
     }
 }

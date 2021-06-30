@@ -64,7 +64,6 @@ class InterventionController extends Controller
         $intervention = $this->service->createIntervention($data);
 
         return response()->json(['data' => $intervention]);
-
     }
 
     /**
@@ -121,8 +120,26 @@ class InterventionController extends Controller
     public function valider($id)
     {
         $statut = $this->service->validerInterventionById($id);
-
+        
         return response()->json(['data' => $statut]);
+    }
+    
+    public function rapport(Request $request, $id)
+    {
+        $params = $request->validate([
+            'infoGeneral' => 'boolean',
+            'description' => 'boolean',
+            'groupes' => 'boolean',
+            'presences' => 'boolean',
+            'montants' => 'boolean',
+            'vehicules' => 'boolean',
+            'materiel' => 'boolean',
+            'absents' => 'boolean',
+            'status' => 'boolean',
+            'missions' => 'boolean',
+            'appels' => 'boolean',
+        ]);
+        return $this->service->rapport($id, $params);
     }
 
     /**
@@ -133,6 +150,8 @@ class InterventionController extends Controller
      */
     public function destroy($id)
     {
-        //TODO
+        $statut = $this->service->deleteInterventionById($id);
+        
+        return response()->json(['data' => $statut]);
     }
 }

@@ -3,7 +3,9 @@ namespace App\Domaine\Business;
 
 use App\Domaine\SPI\InterventionRepository;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\GroupeIntervention;
 use App\Infrastructure\Models\Intervention;
+use App\Infrastructure\Models\InterventionSapeur;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -94,16 +96,8 @@ class InterventionBusiness
     public function deleteInterventionById($interventionId)
     {
         $this->checkIsNotImpute($interventionId);
-
-        /* TODO: Suppression:
-        - Sapeur
-        - Groupes
-        - Vehicules
-        - Matériel
-        - Quittances
-        - Missions
-        - Appels
-        */
+        $this->repository->supprimerInterventionById($interventionId);
+        return true;
     }
 
     /**

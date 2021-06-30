@@ -2,13 +2,13 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ComptabiliteService;
+use App\Domaine\API\ImputationService;
 
 class EcritureController extends Controller
 {
     protected $service;
 
-    public function __construct(ComptabiliteService $service)
+    public function __construct(ImputationService $service)
     {
         $this->service = $service;
     }
@@ -44,6 +44,13 @@ class EcritureController extends Controller
     public function exercice(int $exerciceId)
     {
         $ecritures = $this->service->getEcrituresForExerciceById($exerciceId);
+
+        return response()->json(['data' => $ecritures]);
+    }
+
+    public function exercices(int $exerciceComptableId)
+    {
+        $ecritures = $this->service->getEcrituresForExercicesByExerciceComptable($exerciceComptableId);
 
         return response()->json(['data' => $ecritures]);
     }

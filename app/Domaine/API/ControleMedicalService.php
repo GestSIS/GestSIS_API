@@ -5,7 +5,9 @@ namespace App\Domaine\API;
 use App\Domaine\Business\ControleMedicalBusiness;
 use App\Domaine\SPI\ControleMedicalRepository;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\ControleMedicalType;
 use App\Infrastructure\Models\Exercice;
+use App\Infrastructure\Models\Medecin;
 use Illuminate\Database\Eloquent\Collection;
 
 class ControleMedicalService
@@ -17,6 +19,46 @@ class ControleMedicalService
     {
         $this->repository = $repository;
         $this->business = $business;
+    }
+    
+    public function medecins()
+    {
+        return Medecin::all();
+    }
+
+    public function ajouterMedecin($data)
+    {
+        return $this->business->ajouterMedecin($data);
+    }
+
+    public function modifierMedecin($id, $data)
+    {
+        return $this->business->modifierMedecin($id, $data);
+    }
+    
+    public function supprimerMedecin($id)
+    {
+        return $this->business->supprimerMedecin($id);
+    }
+        
+    public function types()
+    {
+        return ControleMedicalType::all();
+    }
+
+    public function ajouterType($data)
+    {
+        return $this->business->ajouterType($data);
+    }
+
+    public function modifierType($id, $data)
+    {
+        return $this->business->modifierType($id, $data);
+    }
+    
+    public function supprimerType($id)
+    {
+        return $this->business->supprimerType($id);
     }
 
     public function listeAllControlesMedicaux()

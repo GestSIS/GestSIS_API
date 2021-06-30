@@ -29,7 +29,7 @@ class InterventionVehiculeTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testInterventionVehiculeIndexOK()
+    public function testInterventionVehiculeIndexOk()
     {
         $response = $this->json('GET', "/api/v2/interventions/393/vehicules");
 

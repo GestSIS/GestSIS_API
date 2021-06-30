@@ -31,7 +31,7 @@ class InterventionMaterielTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testInterventionIndexMaterielOK()
+    public function testInterventionIndexMaterielOk()
     {
         $response = $this->json('GET', "/api/v2/interventions/393/materiels");
 

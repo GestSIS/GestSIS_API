@@ -4,7 +4,8 @@ namespace App\Application\Providers;
 
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
-use App\Domaine\API\ComptabiliteService;
+use App\Domaine\API\ImputationService;
+use App\Domaine\API\ExerciceComptableService;
 use App\Domaine\API\InterventionService;
 use App\Domaine\API\ExerciceService;
 use App\Domaine\API\SapeurService;
@@ -18,8 +19,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('ComptabiliteService', function ($app) {
-            return new ComptabiliteService();
+        $this->app->singleton('ImputationService', function ($app) {
+            return new ImputationService();
+        });
+        $this->app->singleton('ExerciceComptableService', function ($app) {
+            return new ExerciceComptableService();
         });
         $this->app->singleton('InterventionService', function ($app) {
             return new InterventionService();

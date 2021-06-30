@@ -16,7 +16,7 @@ class BaseDataExerciceTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testExerciceCategorieIndexOK()
+    public function testExerciceCategorieIndexOk()
     {
         $response = $this->json('GET', "/api/v2/exercice-categories/");
 
@@ -37,7 +37,7 @@ class BaseDataExerciceTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testExcuseTypesIndexOK()
+    public function testExcuseTypesIndexOk()
     {
         $response = $this->json('GET', "/api/v2/excuses-types/");
 

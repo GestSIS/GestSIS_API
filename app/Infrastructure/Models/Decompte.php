@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Decompte extends Model
 {
-    public function exerciceCompatble()
+    public function exerciceComptable()
     {
         return $this->belongsTo('App\Infrastructure\Models\ExerciceComptable');
     }

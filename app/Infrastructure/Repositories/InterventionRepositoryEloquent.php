@@ -82,7 +82,15 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     public function supprimerInterventionById($interventionId)
     {
-        //TODO
+        InterventionSapeur::where('intervention_id','=', $interventionId)->delete();
+        GroupeIntervention::where('intervention_id','=', $interventionId)->delete();
+        InterventionVehicule::where('intervention_id','=', $interventionId)->delete();
+        InterventionMateriel::where('intervention_id','=', $interventionId)->delete();
+        Quittance::where('intervention_id','=', $interventionId)->delete();
+        Mission::where('intervention_id','=', $interventionId)->delete();
+        Appel::where('intervention_id','=', $interventionId)->delete();
+        Phase::where('intervention_id','=', $interventionId)->delete();
+        Intervention::where('id','=', $interventionId)->delete();
     }
 
     public function getInterventionAppels($interventionId)

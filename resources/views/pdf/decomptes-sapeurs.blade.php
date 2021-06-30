@@ -131,7 +131,7 @@
                         <td colspan="3">{{ $ecriture->designation }}</td>
                         <td>{{ formatTarif($ecriture) }}</td>
                         <td>{{ formatNumber($ecriture->quantite) }}</td>
-                        <td>{{ formatDate($ecriture->date_paiement) }}TODO</td>
+                        {{-- <td>{{ formatDate($ecriture->date_paiement) }}TODO</td> --}}
                         <td class="column-right">{{ formatNumber($ecriture->total) }}</td>
                     </tr>
                     @if ($finSectionAnnuel)
@@ -160,7 +160,7 @@
                         <td>{{ $ecriture->designation }}</td>
                         <td>{{ formatTarif($ecriture) }}</td>
                         <td>{{ formatNumber($ecriture->quantite) }}</td>
-                        <td>{{ formatDate($ecriture->date_paiement) }}TODO</td>
+                        {{-- <td>{{ formatDate($ecriture->date_paiement) }}TODO</td> --}}
                         <td class="column-right">{{ formatNumber($ecriture->total) }}</td>
                     </tr>
                     @if ($finSectionExercice)
@@ -196,7 +196,7 @@
                         <td>TODO Sous-écriture</td>
                         <td>{{ formatTarif($ecriture) }}</td>
                         <td>{{ formatNumber($ecriture->quantite) }}</td>
-                        <td>{{formatDate( $ecriture->date_paiement) }}TODO</td>
+                        {{-- <td>{{formatDate( $ecriture->date_paiement) }}TODO</td> --}}
                         <td class="column-right">{{ $ecriture->total }}</td>
                     </tr>
                     @if($finIntervention)
