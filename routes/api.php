@@ -13,10 +13,11 @@
 
 use Illuminate\Support\Facades\Route;
 use Spatie\HttpLogger\Middlewares\HttpLogger;
+use App\Application\Http\Middleware\DbSelector;
 
 use App\Application\Http\Controllers\EmailController;
 
-Route::group(['prefix' => 'v2', 'middleware' => HttpLogger::class], function () {
+Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
     Route::group(['middleware' => 'jwtTokenAuth'], function () {
         Route::get('email-validate', [EmailController::class, 'validateEmail']);
     });
