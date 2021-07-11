@@ -1,6 +1,7 @@
 <?php
 
 $dbs = explode(",", env('DB_LISTE', true));
+<<<<<<< HEAD
 $connections = [
     'testing' => [
         'driver' => 'mysql',
@@ -21,6 +22,9 @@ $connections = [
         ]) : [],
     ],
 ];
+=======
+$connections = [];
+>>>>>>> Selection de la base de données selon SIS
 foreach ($dbs as $db) {
     $connections[$db] = [
         'driver' => 'mysql',
