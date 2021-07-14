@@ -16,11 +16,14 @@ use Spatie\HttpLogger\Middlewares\HttpLogger;
 use App\Application\Http\Middleware\DbSelector;
 
 use App\Application\Http\Controllers\EmailController;
+use App\Application\Http\Middleware\JwtTokenValidatorAuth;
+
+// Route spécial pour le serveur d'authentification
+Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenValidatorAuth::class]], function () {
+    Route::get('email-validate', [EmailController::class, 'validateEmail']);
+});
 
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
-    Route::group(['middleware' => 'jwtTokenAuth'], function () {
-        Route::get('email-validate', [EmailController::class, 'validateEmail']);
-    });
 
     // Etats de sortie 
     // TODO: Temporairement public, à déplacer

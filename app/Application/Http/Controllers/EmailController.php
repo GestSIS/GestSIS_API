@@ -16,7 +16,7 @@ class EmailController extends Controller
     
     public function validateEmail(Request $request)
     {
-        //TODO: Check for multiple sis
+        // Check for multiple sis
         $email = $request->input('email');
         return response()->json(['data' => $this->service->checkEmail($email)]);
     }
