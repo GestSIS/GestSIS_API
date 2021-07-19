@@ -17,6 +17,10 @@ class DbSelector
      */
     public function handle(Request $request, Closure $next)
     {
+        if (env('APP_ENV') === 'testing') {
+            return $next($request);
+        }
+
         $sisKey = $request->header('Sis-Id', Null);
         if (is_null($sisKey)) {
             return response()->json(["error" => "Sis non sélectionné"], 401);

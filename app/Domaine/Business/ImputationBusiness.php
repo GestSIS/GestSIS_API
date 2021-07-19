@@ -319,7 +319,7 @@ class ImputationBusiness
         if ($indemniteType->taux_weekend > 0 || $indemniteType->taux_nuit > 0) {
             $this->imputerInterventionTaux($interventionId, $intervention, $indemniteType, $data);
         } else {
-            return $this->imputerInterventionSoldeMin($interventionId, $intervention, $indemniteType, $data);
+            $this->imputerInterventionSoldeMin($interventionId, $intervention, $indemniteType, $data);
         }
 
         // Update statut

@@ -30,7 +30,7 @@ class ImputationController extends Controller
     {
         $data = $request->validate([
             'indemnite_intervention_type_id' => 'integer',
-            // 'date_imputation' => 'date' // TODO Ajouter date imputation ?
+            // 'date_imputation' => 'date' // TODO: Ajouter date imputation ?
         ]);
 
         $res = $this->service->imputationIntervention($id, $data);
