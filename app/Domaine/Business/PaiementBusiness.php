@@ -49,6 +49,7 @@ class PaiementBusiness
         $decompte->deduction = $deduction;
         $decompte->avs_total = 0;
         $decompte->ac_total = 0;
+        $decompte->total = 0;
         $decompte->save();
 
         $totaux = array();
@@ -109,6 +110,9 @@ class PaiementBusiness
                 $solde_imposable = max($total['solde'] + $total['soldeTotal'] - $avsParam->franchise_imposition, 0.0);
                 $total_imposable = $solde_imposable + $total['indemnite'] + $total['indemniteTotal'];
 
+                // TODO: Attention lors de l'ajout des amendes
+                $decompte->total += $total['solde'];
+
                 // TODO: ou si sapeur fait la demande
                 if ($total_imposable >= $avsParam->franchise_avs) {
                     $totaux[$key]['avs'] = ($total_imposable * $taux) - $total['avs_total'];
@@ -125,7 +129,6 @@ class PaiementBusiness
         }
 
         $paiements = array();
-        // $ecrituresAvs = array();
         //création paiements
         foreach ($totaux as $key => $total) {
             $paiements[] = [
