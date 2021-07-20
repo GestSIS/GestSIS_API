@@ -742,8 +742,8 @@ class ImputationBusiness
                 'heure' => $exercice->heure,
             ];
 
-            Ecriture::insert($ecritures);
         }
+        Ecriture::insert($ecritures);
     }
 
     public function imputerExercice($exerciceId, $data)
