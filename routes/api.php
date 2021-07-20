@@ -17,32 +17,13 @@ use App\Application\Http\Middleware\DbSelector;
 
 use App\Application\Http\Controllers\EmailController;
 use App\Application\Http\Middleware\JwtTokenValidatorAuth;
-<<<<<<< HEAD
-=======
 
-// Route spécial pour le serveur d'authentification
-Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenValidatorAuth::class]], function () {
-    Route::get('email-validate', [EmailController::class, 'validateEmail']);
-});
->>>>>>> update check email pour controller toutes les DBs
-
-<<<<<<< HEAD
 // Route spécial pour le serveur d'authentification
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenValidatorAuth::class]], function () {
     Route::get('email-validate', [EmailController::class, 'validateEmail']);
 });
 
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
-=======
-Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
-<<<<<<< HEAD
-    Route::group(['middleware' => 'jwtTokenAuth'], function () {
-        Route::get('email-validate', [EmailController::class, 'validateEmail']);
-    });
->>>>>>> Selection de la base de données selon SIS
-=======
->>>>>>> update check email pour controller toutes les DBs
-
     // Etats de sortie 
     // TODO: Temporairement public, à déplacer
     Route::get('pdf-test/{id}', 'CompteController@generatePdf');
