@@ -47,6 +47,7 @@ class PaiementBusiness
         $decompte->designation = $designation;
         $decompte->exercice_comptable_id = $exerciceComptableId;
         $decompte->deduction = $deduction;
+        $decompte->date = $date;
         $decompte->avs_total = 0;
         $decompte->ac_total = 0;
         $decompte->total = 0;
