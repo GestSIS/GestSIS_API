@@ -77,6 +77,9 @@ class PaiementBusiness
                 // pas encore présent dans écriture, mais n'y sera pas
                 //$totaux[$ecriture->sapeur_id]['amende']+=$ecriture->amende;
 
+                // TODO: Attention lors de l'ajout des amendes
+                $decompte->total += $ecriture->total;
+
                 // $ecriture->date_paiement = $date;
                 $ecriture->decompte_id = $decompte->id;
                 $ecriture->save();
@@ -110,9 +113,6 @@ class PaiementBusiness
             foreach ($totaux as $key => $total) {
                 $solde_imposable = max($total['solde'] + $total['soldeTotal'] - $avsParam->franchise_imposition, 0.0);
                 $total_imposable = $solde_imposable + $total['indemnite'] + $total['indemniteTotal'];
-
-                // TODO: Attention lors de l'ajout des amendes
-                $decompte->total += $total['solde'];
 
                 // TODO: ou si sapeur fait la demande
                 if ($total_imposable >= $avsParam->franchise_avs) {
