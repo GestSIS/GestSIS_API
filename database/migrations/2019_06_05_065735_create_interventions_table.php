@@ -32,7 +32,7 @@ class CreateInterventionsTable extends Migration
             $table->text('responsable');
             $table->integer('stat_nb');
 
-            $table->boolean('statut');
+            $table->smallInteger('statut');
 
             $table->dateTime('date_imputation')->nullable();
 

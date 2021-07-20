@@ -5,6 +5,7 @@ namespace App\Domaine\API;
 use App\Domaine\Business\ControleMedicalBusiness;
 use App\Domaine\SPI\ControleMedicalRepository;
 use App\Infrastructure\Models\Sapeur;
+use Illuminate\Support\Facades\DB;
 
 class EmailService
 {
@@ -19,6 +20,17 @@ class EmailService
     
     public function checkEmail($email)
     {
-        return Sapeur::where('email', '=', $email)->exists();
+        // Iteration sur toutes les bases de données
+        $dbs = explode(",", env('DB_LISTE', true));
+        $res = [];
+        foreach ($dbs as $db) {
+            DB::reconnect($db);
+            $sapeur = DB::connection($db)->table('sapeurs')->where('email', '=', $email)->select('sapeurs.id')->first();
+            if (!is_null($sapeur)) {
+                $res[$db] = $sapeur->id;
+            }
+            DB::disconnect($db);
+        }
+        return $res;
     }
 }
