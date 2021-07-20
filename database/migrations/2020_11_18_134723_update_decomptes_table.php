@@ -16,6 +16,7 @@ class UpdateDecomptesTable extends Migration
         Schema::table('decomptes', function (Blueprint $table) {
             $table->decimal('avs_total');
             $table->decimal('ac_total');
+            $table->decimal('total');
         });
     }
 
@@ -29,6 +30,7 @@ class UpdateDecomptesTable extends Migration
         Schema::table('decomptes', function (Blueprint $table) {
             $table->dropColumn('avs_total');
             $table->dropColumn('ac_total');
+            $table->dropColumn('total');
         });
     }
 }
