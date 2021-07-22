@@ -172,6 +172,19 @@ class PaiementBusiness
     }
 
     /**
+     * Supprimer un décompte
+     * 
+     * @param int $decompteId id du décompte à supprimer
+     * 
+     * @return string booléen du résultat
+     */
+    public function supprimerDecompte($decompteId) {
+        Ecriture::where('decompte_id', '=', $decompteId)->where('avs', '=', true)->delete();
+        Ecriture::where('decompte_id', '=', $decompteId)->update(['decompte_id' => null]);
+        Decompte::where('id', '=', $decompteId)->delete(); // Casca de delete des paiements
+    }
+
+    /**
      * Créer un fichier iso20022 pour un décompte
      * 
      * @param int $decompteId id du décompte pour lequelle le fichier doit être créé

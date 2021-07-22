@@ -15,7 +15,7 @@ class UpdatePaiementsTable extends Migration
     {
         Schema::table('paiements', function (Blueprint $table) {
             $table->bigInteger('decompte_id')->unsigned()->nullable();
-            $table->foreign('decompte_id')->references('id')->on('decomptes');
+            $table->foreign('decompte_id')->references('id')->on('decomptes')->onDelete('cascade');
 
             $table->bigInteger('sapeur_id')->unsigned()->nullable();
             $table->foreign('sapeur_id')->references('id')->on('sapeurs');

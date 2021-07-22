@@ -17,15 +17,11 @@ class DecompteController extends Controller
     }
 
     /**
-     * creer un décompte
+     * Créer un décompte annuel
      * 
      * @param string $designation - nom du décompte
      * @param int $exerciceComptableId - id de l'exercice comptable pour lequel créer les paiements
-     * @param float $taux_avs - taux avs payé par le sapeur
-     * @param float $taux_ac - taux ac payé par le sapeur
-     * @param boolean $deduction - true si les déduction doivent être faites sur ce paiement
-     * @param float $franchiseAvs - montant imposable minimum pour l'avs
-     * @param float $franchiseImposition - montant minimum pour que la solde soit imposable
+     * @param date $date - date de la création du décompte
      */
     public function creerAnnuel(Request $request)
     {
@@ -39,6 +35,13 @@ class DecompteController extends Controller
         return response()->json(['data' => $decompte]);
     }
 
+    /**
+     * Créer un décompte
+     * 
+     * @param int $exerciceComptableId - id de l'exercice comptable pour lequel créer les paiements
+     * @param date $date - date de la création du décompte
+     * @param boolean $deduction - true si les déduction doivent être faites sur ce paiement
+     */
     public function creerSapeur(Request $request)
     {
         $data = $request->validate([
@@ -51,6 +54,13 @@ class DecompteController extends Controller
         return response()->json(['data' => $decompte]);
     }
 
+    /**
+     * Créer un décompte
+     * 
+     * @param int $exerciceId - id de l'exercice
+     * @param date $date - date de la création du décompte
+     * @param boolean $deduction - true si les déduction doivent être faites sur ce paiement
+     */
     public function creerExercice(Request $request)
     {
         $data = $request->validate([
@@ -62,6 +72,20 @@ class DecompteController extends Controller
         $decompte = $this->service->creerDecompteExercice($data['exercice_id'], $data['date'], $data['deduction']);
         return response()->json(['data' => $decompte]);
     }
+    
+    /**
+     * Supprimer un décompte
+     * 
+     * @param int $exerciceId - id de l'exercice
+     * @param date $date - date de la création du décompte
+     * @param boolean $deduction - true si les déduction doivent être faites sur ce paiement
+     */
+    public function destroy($decompteId)
+    {
+        $res = $this->service->supprimerDecompte($decompteId);
+        return response()->json(['data' => $res]);
+    }
+
     /**
      * Créer un fichier iso20022 pour un décompte
      * 
@@ -80,7 +104,7 @@ class DecompteController extends Controller
      * 
      * @param int $id id du décompte souhaité
      */
-    public function get($id)
+    public function show($id)
     {
         $decompte = $this->service->getDecompteParId($id);
 
@@ -100,7 +124,7 @@ class DecompteController extends Controller
     }
 
     /**
-     * Retoune le certificat d'un sapeur pour un exercice comptable
+     * Retourne le certificat d'un sapeur pour un exercice comptable
      * 
      * @param int $exerciceComptableId id de l'exercice comp
      * @param int $sapeurId id du sapeur
@@ -111,7 +135,7 @@ class DecompteController extends Controller
     }
 
     /**
-     * Retoune le certificat de tous les sapeurs pour un exercice comptable
+     * Retourne le certificat de tous les sapeurs pour un exercice comptable
      * 
      * @param int $exerciceComptableId id de l'exercice comp
      */
