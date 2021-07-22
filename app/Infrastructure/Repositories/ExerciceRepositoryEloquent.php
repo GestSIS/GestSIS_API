@@ -117,7 +117,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
 
     public function getExerciceByIdWith(int $exerciceId, $with = [])
     {
-        //TODO validate $with
+        //TODO: validate $with
         $autorized = ['sapeurs', 'localite'];
         return $this->convertExercice(Exercice::with($with)->find($exerciceId), $with);
     }
