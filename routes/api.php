@@ -26,11 +26,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenVali
 Route::get('pdf-test/{id}', 'CompteController@generatePdf');
 
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
-    // Etats de sortie 
-    // TODO: Temporairement public, à déplacer
-    Route::get('exercices/{id}/liste-appel', 'ExerciceController@listeAppel');
-    Route::get('exercices/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
-
     // Sis Params
     Route::group(['middleware' => 'jwtTokenRole:sis.config'], function () {
         Route::resource('sis-param', 'SisParamController')->only(['index', 'store']);
@@ -98,6 +93,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::delete('exercices/{id}/sapeurs', 'ConvocationsController@destroy')->name('api.v2.exercices.sapeurs.delete');
 
         Route::get('exercices/{id}/liste-presence', 'ExerciceController@listePresence');
+        Route::get('exercices/{id}/liste-appel', 'ExerciceController@listeAppel');
+        // TODO: à implémenter
+        // Route::get('exercices/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
     });
     
     Route::group(['middleware' => 'jwtTokenRole:exercice.modification'], function () {
