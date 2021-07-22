@@ -236,7 +236,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('decomptes/creer-exercice', 'DecompteController@creerExercice');
         Route::get('decomptes/exercice-comptable/{id}', 'DecompteController@getByExerciceComptable');
         Route::get('decomptes/{id}/iso20022', 'DecompteController@iso20022');
-        Route::get('decomptes/{id}', 'DecompteController@get');
+        Route::resource('decomptes', 'DecompteController')->only(['show', 'destroy']);
 
         // Paiements
         Route::get('paiements/exercice-comptable/{id}', 'PaiementController@getByExerciceComptable');

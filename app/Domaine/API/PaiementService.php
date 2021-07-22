@@ -40,6 +40,16 @@ class PaiementService
     }
 
     /**
+     * supprimer un décompte
+     * 
+     * @param int $edecompteId - id du décompte à supprimer
+     */
+    public function supprimerDecompte($decompteId)
+    {
+        return $this->business->supprimerDecompte($decompteId);
+    }
+
+    /**
      * creer un décompte
      * 
      * @param int $exerciceComptableId - id de l'exercice comptable pour lequel créer les paiements
