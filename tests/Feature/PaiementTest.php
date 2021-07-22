@@ -88,7 +88,7 @@ class PaiementTest extends TestCase
             'bic' => 'UBSWCHZH80A'
         ]);
 
-        $response = $this->json('GET', "/api/v2/paiements/3/iso20022", $data);
+        $response = $this->json('POST', "/api/v2/paiements/3/iso20022", $data);
 
         $response->assertStatus(200);
     }
