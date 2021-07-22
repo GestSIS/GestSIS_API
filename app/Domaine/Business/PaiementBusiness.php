@@ -88,7 +88,7 @@ class PaiementBusiness
 
         //déductions
         if ($deduction) {
-            $taux = $avsParam->taux_ac + $avsParam->taux_avs;
+            $tauxParitaire = ($avsParam->taux_ac + $avsParam->taux_avs) / 2;
             //vérifie si autre décompte sans déduction
             foreach (Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get() as $d) {
                 foreach ($d->paiements as $p) {
@@ -106,19 +106,21 @@ class PaiementBusiness
                         );
                     }
                     $totaux[$p->sapeur_id]['soldeTotal'] += $p->solde;
-                    $totaux[$p->sapeur_id]['indemniteTotal'] += $p->indemine;
+                    $totaux[$p->sapeur_id]['indemniteTotal'] += $p->indemnite;
                     $totaux[$p->sapeur_id]['avs_total'] += $p->avs;
                 }
             }
+            //TODO: fetch sapeurs déduction choix
+
             foreach ($totaux as $key => $total) {
                 $solde_imposable = max($total['solde'] + $total['soldeTotal'] - $avsParam->franchise_imposition, 0.0);
                 $total_imposable = $solde_imposable + $total['indemnite'] + $total['indemniteTotal'];
 
-                // TODO: ou si sapeur fait la demande
+                // TODO: ou si sapeur en fait la demande
                 if ($total_imposable >= $avsParam->franchise_avs) {
-                    $totaux[$key]['avs'] = ($total_imposable * $taux) - $total['avs_total'];
-                    $decompte->avs_total += ($total_imposable * $avsParam->taux_avs) - (($total['avs_total'] / $taux) * $avsParam->taux_avs);
-                    $decompte->ac_total += ($total_imposable * $avsParam->taux_ac) - (($total['avs_total'] / $taux) * $avsParam->taux_ac);
+                    $totaux[$key]['avs'] = ($total_imposable * $tauxParitaire) - $total['avs_total'];
+                    $decompte->avs_total += ($total_imposable * $avsParam->taux_avs / 2) - (($total['avs_total'] / $tauxParitaire) * $avsParam->taux_avs / 2);
+                    $decompte->ac_total += ($total_imposable * $avsParam->taux_ac / 2) - (($total['avs_total'] / $tauxParitaire) * $avsParam->taux_ac / 2);
                 }
             }
             $decompte->save();
@@ -369,14 +371,14 @@ class PaiementBusiness
             "HAdresse" => $sapeur->rue . " " . $sapeur->no_rue,
             "HPostfach" => $localite->npa . " " . $localite->designation,
             "1" => $total['solde'] + $total['indemnite'],
-            //rempliassage point 6 - indémintés
+            //rempliassage point 6 - indemnités
             //"6" => $total['indemnite'],
             "8" => $total['solde'] + $total['indemnite'],
             "9" => round($total['deduction']),
             "11" => ($total['solde'] + $total['indemnite']) - round($total['deduction']),
             "15-1" => "Répartition:\tSolde\t\t" . $total['solde'],
             "15-2" => "\t\t\tIndemnité\t" . $total['indemnite'],
-            "OrtDatum" => $this->datefr()
+            "OrtDatum" => $this->dateFr()
         );
 
         if ($total['frais'] > 0 && $affichageFrais) {
@@ -401,7 +403,7 @@ class PaiementBusiness
      * 
      * @return string date
      */
-    private function datefr()
+    private function dateFr()
     {
         $date = Carbon::now()->locale('fr_CH');
         return $date->day . " " . $date->monthName . " " . $date->year;

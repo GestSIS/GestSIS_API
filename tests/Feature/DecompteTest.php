@@ -106,8 +106,8 @@ class DecompteTest extends TestCase
         $ecritures = Ecriture::where('exercice_comptable_id', 1)->get();
 
         AvsParam::updateOrCreate([], [
-            'taux_avs' => "0.5",
-            'taux_ac' => "0.5",
+            'taux_avs' => "1.0",
+            'taux_ac' => "1.0",
             'franchise_avs' => 2300,
             'franchise_imposition' => 5000
         ]);
@@ -295,8 +295,8 @@ class DecompteTest extends TestCase
         $ecritures = Ecriture::where('exercice_comptable_id', 2)->get();
 
         AvsParam::updateOrCreate([], [
-            'taux_avs' => "0.05275",
-            'taux_ac' => "0.12",
+            'taux_avs' => "0.10525",
+            'taux_ac' => "0.24",
             'franchise_avs' => 2300,
             'franchise_imposition' => 5000
         ]);
@@ -441,8 +441,8 @@ class DecompteTest extends TestCase
         $ecritures = Ecriture::where('exercice_comptable_id', 3)->get();
 
         AvsParam::updateOrCreate([], [
-            'taux_avs' => "0.05275",
-            'taux_ac' => "0.12",
+            'taux_avs' => "0.10525",
+            'taux_ac' => "0.24",
             'franchise_avs' => 2300,
             'franchise_imposition' => 5000
         ]);
@@ -596,7 +596,7 @@ class DecompteTest extends TestCase
             'bic' => 'UBSWCHZH80A'
         ]);
 
-        $response = $this->json('GET', "api/v2/decomptes/5/iso20022", $data);
+        $response = $this->json('POST', "api/v2/decomptes/5/iso20022", $data);
 
         $response->assertStatus(200);
     }
