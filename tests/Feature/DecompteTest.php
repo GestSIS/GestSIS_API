@@ -596,7 +596,7 @@ class DecompteTest extends TestCase
             'bic' => 'UBSWCHZH80A'
         ]);
 
-        $response = $this->json('POST', "api/v2/decomptes/5/iso20022", $data);
+        $response = $this->json('GET', "api/v2/decomptes/5/iso20022", $data);
 
         $response->assertStatus(200);
     }

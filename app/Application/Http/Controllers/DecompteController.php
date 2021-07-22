@@ -70,17 +70,9 @@ class DecompteController extends Controller
      * @param string $bic bic de la banque du compte débiteur
      * @param string $iban iban du compte débiteur
      */
-    public function iso20022(Request $request, $id)
+    public function iso20022($id)
     {
-        $data = $request->validate([
-            'nom' => 'string|required',
-            'iban' => 'string|required',
-            'bic' => 'string|required',
-        ]);
-
-        return response()->streamDownload(function () use ($data, $id) {
-            echo $this->service->iso20022FromDecompte($id, $data['nom'], $data['bic'], $data['iban']);
-        }, Decompte::find($id)->designation . ".xml");
+        return $this->service->iso20022PourDecompte($id);
     }
 
     /**

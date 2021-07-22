@@ -236,12 +236,12 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('decomptes/creer-sapeur', 'DecompteController@creerSapeur');
         Route::post('decomptes/creer-exercice', 'DecompteController@creerExercice');
         Route::get('decomptes/exercice-comptable/{id}', 'DecompteController@getByExerciceComptable');
-        Route::post('decomptes/{id}/iso20022', 'DecompteController@iso20022');
+        Route::get('decomptes/{id}/iso20022', 'DecompteController@iso20022');
         Route::get('decomptes/{id}', 'DecompteController@get');
 
         // Paiements
         Route::get('paiements/exercice-comptable/{id}', 'PaiementController@getByExerciceComptable');
-        Route::post('paiements/{id}/iso20022', 'PaiementController@iso20022');
+        Route::get('paiements/{id}/iso20022', 'PaiementController@iso20022');
         Route::get('paiements/{id}', 'PaiementController@get');
 
         // Amendes

@@ -181,7 +181,7 @@ class PaiementBusiness
      * 
      * @return string fichier xml répondant à la norme ISO 20022
      */
-    public function iso20022FromDecompte($decompteId, $nom, $bic, $iban)
+    public function iso20022PourDecompte($decompteId, $nom, $bic, $iban)
     {
         $paiements = Decompte::find($decompteId)->paiements()->get();
         $paiement = new PaymentInformation(
@@ -221,7 +221,7 @@ class PaiementBusiness
      * 
      * @return string fichier xml répondant à la norme ISO 20022
      */
-    public function iso20022FromPaiement($paiementId, $nom, $bic, $iban)
+    public function iso20022PourPaiement($paiementId, $nom, $bic, $iban)
     {
         $paiement = new PaymentInformation(
             "payment-000",
