@@ -25,13 +25,16 @@
         <td><strong>Heure</strong> : {{ substr($exercice->heure, 0, 5) }}</td>
         <td><strong>Désignation</strong> : {{ $exercice->designation }}</td>
       </tr>
+      <tr>
+        <td colspan="2"><strong>Communications</strong> : {{ $exercice->communications }}</td>
+      </tr>
     </table>
     <table class="table table-sm table-striped mt-2">
       <thead>
         <tr>
-          <th>Nom</th>
+          <th>Nom prénom</th>
           <th class="text-center">Convoqué</th>
-          <th class="text-center">Present</th>
+          <th class="text-center">Présent</th>
           <th class="text-center">Remplacé</th>
           <th class="text-center">Excusé</th>
           <th class="text-center">Amende</th>
@@ -101,7 +104,7 @@
       </tbody>
       <thead>
         <tr>
-          <th>Nombre : {{ count($exercice->sapeurs) }}</th>
+          <th>Nombre : {{ $nb }}</th>
           <th class="text-center">{{ $convoque }}</th>
           <th class="text-center">{{ $present }}</th>
           <th class="text-center">{{ $remplace }}</th>
