@@ -23,12 +23,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenVali
     Route::get('email-validate', [EmailController::class, 'validateEmail']);
 });
 
-Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
+Route::get('pdf-test/{id}', 'CompteController@generatePdf');
 
+Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
     // Etats de sortie 
     // TODO: Temporairement public, à déplacer
-    Route::get('pdf-test/{id}', 'CompteController@generatePdf');
-    Route::get('exercices/{id}/liste-presence', 'ExerciceController@listePresence');
     Route::get('exercices/{id}/liste-appel', 'ExerciceController@listeAppel');
     Route::get('exercices/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
 
@@ -97,6 +96,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('exercices/{id}/sapeurs', 'ConvocationsController@store')->name('api.v2.exercices.sapeurs.store');
         Route::put('exercices/{id}/sapeurs', 'ConvocationsController@update')->name('api.v2.exercices.sapeurs.update');
         Route::delete('exercices/{id}/sapeurs', 'ConvocationsController@destroy')->name('api.v2.exercices.sapeurs.delete');
+
+        Route::get('exercices/{id}/liste-presence', 'ExerciceController@listePresence');
     });
     
     Route::group(['middleware' => 'jwtTokenRole:exercice.modification'], function () {
