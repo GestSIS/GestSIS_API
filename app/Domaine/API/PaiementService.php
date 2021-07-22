@@ -89,12 +89,17 @@ class PaiementService
         $iban = $params->iban;
 
         $nomFichier = Decompte::find($decompteId)->designation . ".xml";
-
-        return response()->streamDownload(
-            fn () =>
-            $this->business->iso20022FromDecompte($decompteId, $nom, $bic, $iban),
-            $nomFichier
-        );
+        try {
+            $content = $this->business->iso20022PourDecompte($decompteId, $nom, $bic, $iban);
+            return response()->streamDownload(
+                function () use($content) {
+                    echo $content;
+                },
+                $nomFichier
+            );
+        } catch(\InvalidArgumentException $e) {
+            return response()->json(['data' => ['message' => 'Veuillez vérifier les informations de paiment de votre SIS']], 500);
+        }
     }
 
     /**
@@ -156,17 +161,17 @@ class PaiementService
         $iban = $params->iban;
 
         $nomFichier = "paiement.xml";
-
-        // TODO: Tester
-        return response()->streamDownload(
-            function () use ($paiementId, $nom, $bic, $iban) {
-                echo $this->business->iso20022FromPaiement($paiementId, $nom, $bic, $iban);
-            },
-            $nomFichier
-        );
-        // return response()->streamDownload(function () use ($data, $id) {
-        //     echo $this->business->iso20022FromPaiement($id, $data['nom'], $data['bic'], $data['iban']);
-        // }, "paiement.xml");
+        try {
+            $content = $this->business->iso20022PourPaiement($paiementId, $nom, $bic, $iban);
+            return response()->streamDownload(
+                function () use($content) {
+                    echo $content;
+                },
+                $nomFichier
+            );
+        } catch(\InvalidArgumentException $e) {
+            return response()->json(['data' => ['message' => 'Veuillez vérifier les informations de paiment de votre SIS']], 500);
+        }
     }
 
     /**
