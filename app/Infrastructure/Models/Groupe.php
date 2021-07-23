@@ -6,13 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Groupe extends Model
 {
-    protected $fillable = ['type', 'no', 'designation', 'info', 'tri', 'pere_id'];
+    protected $fillable = ['type', 'no', 'designation', 'info', 'tri', 'pere_id', 'actif'];
     
     /**
      * The sapeur that belong to the sapeur.
      */
     public function sapeurs()
     {
-        return $this->hasMany('App\Infrastructure\Models\GroupeSapeur');
+        return $this->hasMany(GroupeSapeur::class);
     }
 }

@@ -10,4 +10,14 @@ class Mission extends Model
     use HasFactory;
 
     protected $fillable = ['debut', 'fin', 'titre', 'resume', 'sapeur_id'];
+   
+    public function sapeur()
+    {
+        return $this->belongsTo(Sapeur::class);
+    }
+
+    public function intervention()
+    {
+        return $this->belongsTo(Intervention::class);
+    }
 }

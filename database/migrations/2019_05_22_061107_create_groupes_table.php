@@ -22,6 +22,7 @@ class CreateGroupesTable extends Migration
             $table->string('designation');
             $table->string('info');
             $table->integer('tri');
+            $table->boolean('actif');
 
             $table->bigInteger('pere_id')->unsigned()->nullable();
             $table->foreign('pere_id')->references('id')->on('groupes');

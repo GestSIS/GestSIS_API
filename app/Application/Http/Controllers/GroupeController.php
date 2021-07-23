@@ -33,7 +33,8 @@ class GroupeController extends Controller
             'designation' => 'string|min:1',
             'duree_validite' => 'integer|min:1',
             'expirable' => 'boolean',
-            'tri' => 'integer'
+            'tri' => 'integer',
+            'actif' => 'boolean',
         ]);
 
         $groupe = $this->service->ajouterGroupe($data);
@@ -46,7 +47,8 @@ class GroupeController extends Controller
             'designation' => 'string|min:1',
             'duree_validite' => 'integer|min:1',
             'expirable' => 'boolean',
-            'tri' => 'integer'
+            'tri' => 'integer',
+            'actif' => 'boolean',
         ]);
 
         $groupe = $this->service->modifierGroupe($id, $data);
