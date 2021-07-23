@@ -45,7 +45,7 @@ class Intervention extends Model
     }
 
     /**
-     * The sapeur that belong to the sapeur.
+     * Les présences
      */
     public function presences()
     {
@@ -53,7 +53,7 @@ class Intervention extends Model
     }
 
     /**
-     * The sapeur that belong to the sapeur.
+     * Les écritures lié à l'intervention
      */
     public function ecritures()
     {
@@ -61,7 +61,7 @@ class Intervention extends Model
     }
 
     /**
-     * The groupe that belong to the sapeur.
+     * Les groupes alarmés
      */
     public function groupes()
     {
@@ -69,7 +69,7 @@ class Intervention extends Model
     }
 
     /**
-     * The materiel that belong to the sapeur.
+     * Le matériel utilisé
      */
     public function materiels()
     {
@@ -77,7 +77,7 @@ class Intervention extends Model
     }
 
     /**
-     * The vehicule that belong to the sapeur.
+     * Les véhicules engagés
      */
     public function vehicules()
     {
@@ -85,7 +85,7 @@ class Intervention extends Model
     }
 
     /**
-     * The quittance that belong to the sapeur.
+     * les quittances
      */
     public function quittances()
     {

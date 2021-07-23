@@ -356,9 +356,24 @@ class InterventionService
 
     public function rapport($interventionId, $params)
     {
-        $intervention = Intervention::find($interventionId);
+        $withOptions = [];
+        $withMapping = [
+            'groupes' => 'groupes',
+            'presences' => 'sapeurs',
+            'montants' => 'boolean',
+            'vehicules' => 'boolean',
+            'materiel' => 'boolean',
+            'missions' => 'missions',
+            'appels' => 'appels',
+        ];
+        foreach($params as $param) {
+            if(array_key_exists($param, $withMapping)) {
+                $withOptions[] = 1;
+            }
+        }
+
+        $intervention = Intervention::with($withOptions)->find($interventionId);
         // $missions = Mission::where('interventionId', '=', $interventionId)->all();
-        // $appels = Appel::where('interventionId', '=', $interventionId)->all();
         // $appels = Appel::where('interventionId', '=', $interventionId)->all();
         // Intervention::join('missions')->join('appels')->join()
         // Intervention::with(['sapInt', 'sapeurs'])
@@ -372,7 +387,7 @@ class InterventionService
         //     $s->display = $sap->nom." ".$sap->prenom;
         //     return $s;
         //   }, array_values($exercice->sapeurs));
-          
+        
         return View('pdf/rapport-intervention', ["intervention" => $intervention, "params" => $params]);
         // $pdf = SnappyPdf::loadView('pdf/rapport-intervention', ["intervention" => $intervention, "params" => $params]);
         // return $pdf->download('invoice.pdf');
