@@ -25,7 +25,7 @@ class GroupeTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'designation', 'no'
+                        'id', 'designation', 'no', 'actif'
                     ]
                 ]
             ]);

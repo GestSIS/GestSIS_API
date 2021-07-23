@@ -154,7 +154,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::delete('interventions/{id}/phases', 'InterventionPhasesController@destroy')->name('api.v2.interventions.phases.delete');
         
         // Impressions interventions
-        Route::get('interventions/{id}/rapport', 'InterventionController@rapport')->name('api.v2.interventions.rapport');
+        Route::post('interventions/{id}/rapport', 'InterventionController@rapport')->name('api.v2.interventions.rapport');
     });
     
     // Intervention validation
