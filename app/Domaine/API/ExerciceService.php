@@ -155,7 +155,7 @@ class ExerciceService
         $fonctions = Fonction::get();
         $fonctionsMap = [];
         foreach($fonctions as $fonction) {
-            $fonctionsMap[$fonction->id] = $fonction->designation;
+            $fonctionsMap[$fonction->id] = $fonction->nom;
         }
 
         // return View('pdf/liste-appel', ["exercice" => $exercice, "fonctions" => $fonctionsMap, "excuses" => $excusesMap]);
