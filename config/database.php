@@ -1,10 +1,6 @@
 <?php
 
 $dbs = explode(",", env('DB_LISTE', true));
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> ajout database config pour tests
 $connections = [
     'testing' => [
         'driver' => 'mysql',
@@ -25,12 +21,6 @@ $connections = [
         ]) : [],
     ],
 ];
-<<<<<<< HEAD
-=======
-$connections = [];
->>>>>>> Selection de la base de données selon SIS
-=======
->>>>>>> ajout database config pour tests
 foreach ($dbs as $db) {
     $connections[$db] = [
         'driver' => 'mysql',

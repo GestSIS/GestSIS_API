@@ -23,11 +23,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenVali
     Route::get('email-validate', [EmailController::class, 'validateEmail']);
 });
 
-<<<<<<< HEAD
-=======
 Route::get('pdf-test/{id}', 'CompteController@generatePdf');
 
->>>>>>> Liste présence
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
     // Sis Params
     Route::group(['middleware' => 'jwtTokenRole:sis.config'], function () {
