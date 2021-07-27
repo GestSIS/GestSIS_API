@@ -192,12 +192,12 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     
     // Exercices comptables
     Route::group(['middleware' => 'jwtTokenRole'], function () {
-        Route::resource('exercice-comptables', 'ExerciceComptableController')->only(['index']); //TODO: ajout cloturer
+        Route::resource('exercices-comptable', 'ExerciceComptableController')->only(['index']); //TODO: ajout cloturer
     });
     
     Route::group(['middleware' => 'jwtTokenRole:comptabilite.tout'], function () {
-        Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire', 'DecompteController@certificatSalaire');
-        Route::get('exercice-comptables/{ExerciceComptableId}/certificat-salaire/{SapeurId}', 'DecompteController@certificatSalaireSapeur');
+        Route::get('exercices-comptable/{ExerciceComptableId}/certificat-salaire', 'DecompteController@certificatSalaire');
+        Route::get('exercices-comptable/{ExerciceComptableId}/certificat-salaire/{SapeurId}', 'DecompteController@certificatSalaireSapeur');
     });
 
     // Comptabilite
@@ -216,6 +216,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('ecritures/{id}', 'EcritureController@all');
 
         Route::get('comptes/{id}/ecritures/{exerciceComptableId}', 'CompteController@ecritures');
+
+        Route::get('exercices-comptable/{exercieComptableId}/comptes/{compteId}/justificatif', 'CompteController@justificatifIndividuel');
+        Route::get('exercices-comptable/{exercieComptableId}/justificatif', 'CompteController@justificatifComplet');
+        // Route::get('comptes/justificatif/{id}', 'CompteController@justificatifIndividuel');
+        // Route::get('comptes/{id}/justificatif/{id}', 'CompteController@justificatifComplet');
     
         // Static param Comptabilite
         Route::get('unites', 'UniteController@index')->name('api.v2.unites');

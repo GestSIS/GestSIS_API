@@ -18,7 +18,7 @@ class ExerciceComptableTest extends TestCase
      */
     public function testExerciceComptableIndexOk()
     {
-        $response = $this->json('GET', "/api/v2/exercice-comptables/");
+        $response = $this->json('GET', "/api/v2/exercices-comptable/");
 
         $response
             ->assertStatus(200)
@@ -39,7 +39,7 @@ class ExerciceComptableTest extends TestCase
      */
     public function certificatSalaireSapeur()
     {
-        $response = $this->json('GET', "api/v2/exercice-comptables/2/certificat-salaire/3");
+        $response = $this->json('GET', "api/v2/exercices-comptable/2/certificat-salaire/3");
 
         $response->assertStatus(200);
     }
@@ -52,7 +52,7 @@ class ExerciceComptableTest extends TestCase
      */
     public function certificatsSalaire()
     {
-        $response = $this->json('GET', "api/v2/exercice-comptables/2/certificat-salaire");
+        $response = $this->json('GET', "api/v2/exercices-comptable/2/certificat-salaire");
 
         $response->assertStatus(200);
     }
