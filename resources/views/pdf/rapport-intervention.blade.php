@@ -151,6 +151,22 @@
       @endforeach
     </table>
     @endif
+    {{-- Groupes --}}
+    @if (array_key_exists("groupes", $params))
+    <h2 class="h4">Groupes alarmés</h2>
+    <table class="table table-sm mb-2">
+      @if (count($intervention->groupes) == 0)
+      <tr>
+        <td>Aucun groupe</td>
+      </tr>
+      @endif
+      @foreach ($intervention->groupes as $groupe)
+      <tr>
+        <td>{{ $groupes[$groupe->groupe_id]->no }} {{ $groupes[$groupe->groupe_id]->designation }}</td>
+      </tr>
+      @endforeach
+    </table>
+    @endif
     {{-- Informations générales --}}
     <table class="table table-sm table-striped mt-2">
       <thead>
