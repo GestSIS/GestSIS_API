@@ -17,7 +17,7 @@ class CreateGroupesTable extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->integer('type');
+            $table->integer('type')->default(0);
             $table->integer('no')->nullable();
             $table->string('designation');
             $table->string('info');

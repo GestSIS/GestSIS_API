@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\SapeurParamService;
+use App\Domaine\API\GroupeService;
 use Illuminate\Http\Request;
 
 class GroupeController extends Controller
@@ -10,10 +10,11 @@ class GroupeController extends Controller
 
     protected $service;
 
-    public function __construct(SapeurParamService $service)
+    public function __construct(GroupeService $service)
     {
         $this->service = $service;
     }
+
 
     /**
      * Display a listing of the resource.
@@ -22,8 +23,7 @@ class GroupeController extends Controller
      */
     public function index()
     {
-        $groupes = $this->service->groupes();
-
+        $groupes = $this->service->listeGroupe();
         return response()->json(['data' => $groupes]);
     }
 

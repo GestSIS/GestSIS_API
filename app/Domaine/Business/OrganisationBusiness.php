@@ -4,11 +4,12 @@
 namespace App\Domaine\Business;
 
 use App\Infrastructure\Models\Groupe;
+use App\Infrastructure\Models\GroupeSapeur;
 
 class OrganisationBusiness
 {
-    
-    public function createGroup($data)
+
+    public function ajouterGroupe($data)
     {
         // TODO: Check pere_id ?
         $groupe = new Groupe();
@@ -18,13 +19,39 @@ class OrganisationBusiness
         return $groupe;
     }
 
-    public function updateGroupe($data)
+    public function modifierGroupe($groupeId, $data)
     {
+        // Chargement des groupes
+        $groupes = Groupe::get();
+        $groupesMap = [];
+        foreach ($groupes as $groupe) {
+            $groupesMap[$groupe->id] = $groupe->pere_id;
+        }
 
+        // Controle qu'il n'y ait pas de loop dans la hierarchie des groupes
+        $pereId = $data['pere_id'];
+        $visited = [];
+        while (!is_null($pereId)) {
+            if (in_array($pereId, $visited) || $pereId == $groupeId) {
+                return response()->json(["message" => "Groupe parent invalide, création d'une boucle"], 501);
+            }
+            $visited[] = $pereId;
+            $pereId = $groupesMap[$pereId];
+        }
+
+        Groupe::where('id', $groupeId)->limit(1)->update($data);
     }
 
-    public function deleteGroupe($data)
+    public function supprimerGroupe($groupeId)
     {
-        
+        //TODO: ajouter des checks
+        Groupe::where('id', $groupeId)->limit(1)->delete();
+    }
+
+    public function modifierGroupeSapeurs($groupeId, $sapeurIds)
+    {
+        $groupe = Groupe::find($groupeId);
+        $groupe->sapeurs()->sync($sapeurIds);
+        return GroupeSapeur::where('groupe_id', $groupeId)->get();
     }
 }

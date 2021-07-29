@@ -91,7 +91,8 @@ class InterventionService
         return $this->business->editInterventionInformationsById($interventionId, $data);
     }
 
-    public function validerInterventionById($interventionId){
+    public function validerInterventionById($interventionId)
+    {
         return $this->business->validerInterventionById($interventionId);
     }
 
@@ -370,8 +371,8 @@ class InterventionService
             'appels' => 'appels',
         ];
         // return response()->json($params);
-        foreach($params as $param => $value) {
-            if($value && array_key_exists($param, $withMapping)) {
+        foreach ($params as $param => $value) {
+            if ($value && array_key_exists($param, $withMapping)) {
                 $withOptions[] = $withMapping[$param];
             }
         }
@@ -380,7 +381,7 @@ class InterventionService
         $vehiculesMap = [];
         if (in_array('vehicules', $withOptions)) {
             $vehicules = Vehicule::get();
-            foreach($vehicules as $vehicule) {
+            foreach ($vehicules as $vehicule) {
                 $vehiculesMap[$vehicule->id] = $vehicule->designation;
             }
         }
@@ -389,16 +390,16 @@ class InterventionService
         $materielsMap = [];
         if (in_array('materiels', $withOptions)) {
             $materiels = Materiel::get();
-            foreach($materiels as $materiel) {
+            foreach ($materiels as $materiel) {
                 $materielsMap[$materiel->id] = $materiel->designation;
             }
         }
-        
+
         // Chargement des groupes
         $groupesMap = [];
         if (in_array('groupes', $withOptions)) {
             $groupes = Groupe::get();
-            foreach($groupes as $groupe) {
+            foreach ($groupes as $groupe) {
                 $groupesMap[$groupe->id] = $groupe;
             }
         }
@@ -418,7 +419,7 @@ class InterventionService
         //     $s->display = $sap->nom." ".$sap->prenom;
         //     return $s;
         //   }, array_values($exercice->sapeurs));
-        
+
         return View('pdf/rapport-intervention', [
             "intervention" => $intervention,
             "params" => $params,
