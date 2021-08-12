@@ -19,7 +19,11 @@ class RtaService
 
     public function getReference()
     {
-        return ReferenceRta::get();
+        $data = ReferenceRta::all()->toArray();
+        return array_map(function ($s) {
+            $s['data'] = json_decode($s['data']);
+            return $s;
+        }, $data);
     }
 
     public function setReference($data, $username, $password, $communication, $sis)
@@ -134,6 +138,6 @@ class RtaService
         }
 
         // Retourne la nouvelle référence
-        return ReferenceRta::get();
+        return $this->getReference();
     }
 }
