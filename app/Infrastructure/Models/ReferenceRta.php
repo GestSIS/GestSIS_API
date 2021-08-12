@@ -9,5 +9,7 @@ class ReferenceRta extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['date', 'data'];
+    protected $fillable = ['data', 'sapeur_id'];
+
+    protected $primaryKey = 'sapeur_id';
 }

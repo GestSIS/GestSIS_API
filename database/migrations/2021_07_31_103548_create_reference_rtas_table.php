@@ -14,11 +14,12 @@ class CreateReferenceRtasTable extends Migration
     public function up()
     {
         Schema::create('reference_rtas', function (Blueprint $table) {
-            $table->id();
             $table->timestamps();
 
-            $table->date('date');
-            $table->longText('data');
+            $table->unsignedBigInteger('sapeur_id')->unique();
+            $table->primary('sapeur_id');
+
+            $table->json('data');
         });
     }
 
