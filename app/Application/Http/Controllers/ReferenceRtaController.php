@@ -19,9 +19,19 @@ class ReferenceRtaController extends Controller
      *
      * @return Response
      */
-    public function getReference()
+    public function getReferenceRta()
     {
-        return response()->json(["data" => $this->service->getReference()]);
+        return response()->json(["data" => $this->service->getReferenceRta()]);
+    }
+
+    /**
+     * Get the actual gestsis version
+     *
+     * @return Response
+     */
+    public function getReferenceGestSis()
+    {
+        return response()->json(["data" => $this->service->getReferenceGestSis()]);
     }
 
     /**
@@ -37,44 +47,39 @@ class ReferenceRtaController extends Controller
             'sis' => 'string|required',
             'communication' => 'string|required',
             'ajoutes' => 'array',
-            'ajoutes.*.id' => 'required|integer',
+            'ajoutes.*.sapeur_id' => 'required|integer',
             'ajoutes.*.nom' => 'required|string',
             'ajoutes.*.prenom' => 'required|string',
-            'ajoutes.*.suffixe' => 'required|string|nullable',
+            'ajoutes.*.suffixe' => 'nullable|string',
             'ajoutes.*.localite' => 'required|string',
-            'ajoutes.*.fonction' => 'required|string',
-            'ajoutes.*.date' => 'required|date',
+            'ajoutes.*.fonction' => 'nullable|string',
+            'ajoutes.*.date_naissance' => 'required|date',
             'ajoutes.*.groupes' => 'required|array|min:1',
-            'ajoutes.*.groupes.*.required|no' => 'integer',
-            'ajoutes.*.groupes.*.required|designation' => 'string',
+            'ajoutes.*.groupes.*.no' => 'required|integer',
+            'ajoutes.*.groupes.*.designation' => 'required|string',
             'ajoutes.*.numeros' => 'required|array|min:1',
             'ajoutes.*.numeros.*' => 'required|string',
             'modifies' => 'array',
-            'modifies.*.id' => 'integer|exists:reference_rtas,sapeur_id',
+            'modifies.*.sapeur_id' => 'integer|exists:reference_rtas,sapeur_id',
             'modifies.*.nom' => 'string',
             'modifies.*.prenom' => 'string',
-            'modifies.*.suffixe' => 'string|nullable',
+            'modifies.*.suffixe' => 'nullable|string',
             'modifies.*.localite' => 'required|string',
-            'modifies.*.fonction' => 'string',
-            'modifies.*.date' => 'date',
+            'modifies.*.fonction' => 'nullable|string',
+            'modifies.*.date_naissance' => 'date',
             'modifies.*.groupes' => 'required|array|min:1',
-            'modifies.*.groupes.*.no' => 'integer',
-            'modifies.*.groupes.*.designation' => 'string',
+            'modifies.*.groupes.*.no' => 'required|integer',
+            'modifies.*.groupes.*.designation' => 'required|string',
             'modifies.*.numeros' => 'required|array|min:1',
             'modifies.*.numeros.*' => 'string',
             'supprimes' => 'array',
-            'supprimes.*.id' => 'integer',
+            'supprimes.*.sapeur_id' => 'integer',
             'supprimes.*.nom' => 'string',
             'supprimes.*.prenom' => 'string',
             'supprimes.*.suffixe' => 'string|nullable',
             'supprimes.*.localites' => 'string|nullable',
-            'supprimes.*.fonction' => 'string',
-            'supprimes.*.date' => 'date',
-            'supprimes.*.groupes' => 'array',
-            'supprimes.*.groupes.*.no' => 'integer',
-            'supprimes.*.groupes.*.designation' => 'string',
-            'supprimes.*.numeros' => 'array',
-            'supprimes.*.numeros.*' => 'string',
+            'supprimes.*.fonction' => 'string|nullable',
+            'supprimes.*.date_naissance' => 'date',
         ]);
 
         $username = $data['username'];

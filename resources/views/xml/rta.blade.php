@@ -14,11 +14,11 @@
       <TelPriv>{{ count($sapeur['numeros']) > 1 ? $sapeur['numeros'][1] : '' }}</TelPriv>
       <TelProf>{{ count($sapeur['numeros']) > 2 ? $sapeur['numeros'][2] : ''}}</TelProf>
       <Fonction>{{ $sapeur['fonction'] }}</Fonction>
-      <Date>{{ $sapeur['date'] }}</Date>
+      <Date>{{ $sapeur['date_naissance'] }}</Date>
       <Localite>{{ $sapeur['localite'] }}</Localite>
       <Groupes>
         @foreach ($sapeur['groupes'] as $groupe)
-        <Groupe No="{{ $groupe['numero'] }}">{{ $groupe['nom'] }}</Groupe>
+        <Groupe No="{{ $groupe['no'] }}">{{ $groupe['designation'] }}</Groupe>
         @endforeach
       </Groupes>
     </Sapeur>
