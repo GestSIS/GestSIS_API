@@ -40,6 +40,7 @@ class OrganisationBusiness
         }
 
         Groupe::where('id', $groupeId)->limit(1)->update($data);
+        return Groupe::with('sapeurIds')->find($groupeId);
     }
 
     public function supprimerGroupe($groupeId)

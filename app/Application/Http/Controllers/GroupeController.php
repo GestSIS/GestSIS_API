@@ -33,6 +33,7 @@ class GroupeController extends Controller
             'designation' => 'string|min:1',
             'duree_validite' => 'integer|min:1',
             'expirable' => 'boolean',
+            'pere_id' => 'integer|nullable',
             'tri' => 'integer',
             'actif' => 'boolean',
         ]);
@@ -47,10 +48,12 @@ class GroupeController extends Controller
             'designation' => 'string|min:1',
             'duree_validite' => 'integer|min:1',
             'expirable' => 'boolean',
+            'pere_id' => 'integer|nullable',
             'tri' => 'integer',
             'actif' => 'boolean',
         ]);
 
+        // return response()->json(['data' => $data]);
         $groupe = $this->service->modifierGroupe($id, $data);
         return response()->json(['data' => $groupe]);
     }
