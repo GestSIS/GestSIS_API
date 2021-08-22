@@ -135,14 +135,14 @@ class BaseDataSapeurTest extends TestCase
     }
 
     /**
-     * Test index grupe sapeur
+     * Test index groupe sapeur
      *
      * @return void
      * @throws Exception
      */
     public function testGroupeSapeurIndexOk()
     {
-        $response = $this->json('GET', "/api/v2/groupes-sapeurs/");
+        $response = $this->json('GET', "/api/v2/groupes/");
 
         $response
             ->assertStatus(200)
@@ -152,7 +152,7 @@ class BaseDataSapeurTest extends TestCase
                         'id',
                         'no',
                         'designation',
-                        'sapeurs' => [
+                        'sapeur_ids' => [
                             '*' => [
                                 'id',
                                 'sapeur_id'
