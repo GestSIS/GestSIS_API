@@ -18,7 +18,7 @@ class CreateVehiculesTable extends Migration
             $table->timestamps();
 
             $table->string('designation');
-            $table->integer('status');
+            $table->boolean('status');
             $table->integer('tri');
             $table->decimal('forfait', 5, 2);
             $table->decimal('unite', 5, 2);

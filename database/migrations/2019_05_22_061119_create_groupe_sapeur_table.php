@@ -18,10 +18,10 @@ class CreateGroupeSapeurTable extends Migration
             $table->timestamps();
 
             $table->bigInteger('groupe_id')->unsigned();
-            $table->foreign('groupe_id')->references('id')->on('groupes');
+            $table->foreign('groupe_id')->references('id')->on('groupes')->onDelete('cascade');
 
             $table->bigInteger('sapeur_id')->unsigned();
-            $table->foreign('sapeur_id')->references('id')->on('sapeurs');
+            $table->foreign('sapeur_id')->references('id')->on('sapeurs')->onDelete('cascade');
 
             $table->unique(['groupe_id', 'sapeur_id']);
         });

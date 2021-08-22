@@ -106,8 +106,8 @@ class DecompteTest extends TestCase
         $ecritures = Ecriture::where('exercice_comptable_id', 1)->get();
 
         AvsParam::updateOrCreate([], [
-            'taux_avs' => "0.5",
-            'taux_ac' => "0.5",
+            'taux_avs' => "1.0",
+            'taux_ac' => "1.0",
             'franchise_avs' => 2300,
             'franchise_imposition' => 5000
         ]);
@@ -120,9 +120,9 @@ class DecompteTest extends TestCase
         ];
 
         $business = new PaiementBusiness();
-        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'],$params['deduction']);
+        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
         // $response = $this->json('POST', "api/v2/decomptes/creer-annuel", $params);
-        
+
         // $response
         //     ->assertStatus(200)
         //     ->assertJsonStructure([
@@ -194,7 +194,7 @@ class DecompteTest extends TestCase
             );
 
         //vérification qu'on ne paye pas deux fois
-        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'],$params['deduction']);
+        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
         // $response = $this->json('POST', "api/v2/decomptes/create", $params);
 
         // $response
@@ -219,7 +219,7 @@ class DecompteTest extends TestCase
         //     );
 
         $response = $this->json('GET', "api/v2/decomptes/" . $response['id']);
-        
+
         $response
             ->assertStatus(200)
             ->assertJsonStructure([
@@ -295,8 +295,8 @@ class DecompteTest extends TestCase
         $ecritures = Ecriture::where('exercice_comptable_id', 2)->get();
 
         AvsParam::updateOrCreate([], [
-            'taux_avs' => "0.05275",
-            'taux_ac' => "0.12",
+            'taux_avs' => "0.1055",
+            'taux_ac' => "0.24",
             'franchise_avs' => 2300,
             'franchise_imposition' => 5000
         ]);
@@ -309,7 +309,7 @@ class DecompteTest extends TestCase
         ];
 
         $business = new PaiementBusiness();
-        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'],$params['deduction']);
+        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
         // $response = $this->json('POST', "api/v2/decomptes/creer-annuel", $params);
 
         // $response
@@ -441,8 +441,8 @@ class DecompteTest extends TestCase
         $ecritures = Ecriture::where('exercice_comptable_id', 3)->get();
 
         AvsParam::updateOrCreate([], [
-            'taux_avs' => "0.05275",
-            'taux_ac' => "0.12",
+            'taux_avs' => "0.1055",
+            'taux_ac' => "0.24",
             'franchise_avs' => 2300,
             'franchise_imposition' => 5000
         ]);
@@ -455,7 +455,7 @@ class DecompteTest extends TestCase
         ];
 
         $business = new PaiementBusiness();
-        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'],$params['deduction']);
+        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
         // $response = $this->json('POST', "api/v2/decomptes/creer-annuel", $params);
 
         // $response
@@ -592,11 +592,11 @@ class DecompteTest extends TestCase
         ];
         SisParam::updateOrCreate([], [
             'nom' => "SIS Delémont",
-            'IBAN' => 'CH51 0022 5225 9529 1301 C',
+            'iban' => 'CH51 0022 5225 9529 1301 C',
             'bic' => 'UBSWCHZH80A'
         ]);
 
-        $response = $this->json('POST', "api/v2/decomptes/5/iso20022", $data);
+        $response = $this->json('GET', "api/v2/decomptes/5/iso20022", $data);
 
         $response->assertStatus(200);
     }

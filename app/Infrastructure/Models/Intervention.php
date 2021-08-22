@@ -36,60 +36,75 @@ class Intervention extends Model
 
     public function localite()
     {
-        return $this->belongsTo('App\Infrastructure\Models\Localite');
+        return $this->belongsTo(Localite::class);
+    }
+    
+    public function statFederal()
+    {
+        return $this->belongsTo(StatFederal::class);
+    }
+    
+    public function traitement()
+    {
+        return $this->belongsTo(InterventionTraitement::class, 'intervention_traitement_id');
+    }
+    
+    public function chefIntervention()
+    {
+        return $this->belongsTo(Sapeur::class, 'sapeur_id');
     }
 
     public function typeIntervention()
     {
-        return $this->belongsTo('App\Infrastructure\Models\TypeIntervention');
+        return $this->belongsTo(TypeIntervention::class);
     }
 
     /**
-     * The sapeur that belong to the sapeur.
+     * Les présences
      */
     public function presences()
     {
-        return $this->hasMany('App\Infrastructure\Models\InterventionSapeur');
+        return $this->hasMany(InterventionSapeur::class);
     }
 
     /**
-     * The sapeur that belong to the sapeur.
+     * Les écritures lié à l'intervention
      */
     public function ecritures()
     {
-        return $this->hasMany('App\Infrastructure\Models\Ecritures');
+        return $this->hasMany(Ecriture::class);
     }
 
     /**
-     * The groupe that belong to the sapeur.
+     * Les groupes alarmés
      */
     public function groupes()
     {
-        return $this->hasMany('App\Infrastructure\Models\InterventionGroupe');
+        return $this->hasMany(GroupeIntervention::class);
     }
 
     /**
-     * The materiel that belong to the sapeur.
+     * Le matériel utilisé
      */
     public function materiels()
     {
-        return $this->hasMany('App\Infrastructure\Models\InterventionMateriel');
+        return $this->hasMany(InterventionMateriel::class);
     }
 
     /**
-     * The vehicule that belong to the sapeur.
+     * Les véhicules engagés
      */
     public function vehicules()
     {
-        return $this->hasMany('App\Infrastructure\Models\InterventionVehicule');
+        return $this->hasMany(InterventionVehicule::class);
     }
 
     /**
-     * The quittance that belong to the sapeur.
+     * les quittances
      */
     public function quittances()
     {
-        return $this->hasMany('App\Infrastructure\Models\Quittance');
+        return $this->hasMany(Quittance::class);
     }
 
     /**
@@ -97,7 +112,7 @@ class Intervention extends Model
      */
     public function missions()
     {
-        return $this->hasMany('App\Infrastructure\Models\Mission');
+        return $this->hasMany(Mission::class);
     }
 
     /**
@@ -105,7 +120,7 @@ class Intervention extends Model
      */
     public function appels()
     {
-        return $this->hasMany('App\Infrastructure\Models\Appel');
+        return $this->hasMany(Appel::class);
     }
 
     /**
@@ -113,7 +128,7 @@ class Intervention extends Model
      */
     public function phases()
     {
-        return $this->hasMany('App\Infrastructure\Models\Phase');
+        return $this->hasMany(Phase::class);
     }
 
     /**
@@ -121,6 +136,6 @@ class Intervention extends Model
      */
     public function exerciceComptable()
     {
-        return $this->belongsTo('App\Infrastructure\Models\ExerciceComptable');
+        return $this->belongsTo(ExerciceComptable::class);
     }
 }

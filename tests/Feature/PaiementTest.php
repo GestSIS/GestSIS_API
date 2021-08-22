@@ -84,11 +84,11 @@ class PaiementTest extends TestCase
         ];
         SisParam::updateOrCreate([], [
             'nom' => "SIS Delémont",
-            'IBAN' => 'CH51 0022 5225 9529 1301 C',
+            'iban' => 'CH51 0022 5225 9529 1301 C',
             'bic' => 'UBSWCHZH80A'
         ]);
 
-        $response = $this->json('POST', "/api/v2/paiements/3/iso20022", $data);
+        $response = $this->json('GET', "/api/v2/paiements/3/iso20022", $data);
 
         $response->assertStatus(200);
     }

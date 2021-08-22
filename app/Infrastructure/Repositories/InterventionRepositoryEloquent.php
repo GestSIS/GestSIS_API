@@ -348,6 +348,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
         $object->type_intervention_id = $intervention->type_intervention_id;
         $object->presence_id = $intervention->presence_id;
         $object->stat_federal_id = $intervention->stat_federal_id;
+        $object->sapeur_id = $intervention->sapeur_id;
         $object->intervention_traitement_id = $intervention->intervention_traitement_id;
 
         if (in_array('presences', $with)) {

@@ -4,6 +4,7 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\ComptabiliteParamService;
 use App\Domaine\API\ImputationService;
+use App\Infrastructure\Models\Sapeur;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -66,5 +67,15 @@ class CompteController extends Controller
     {
         // TODO: Really in this controller ?
         return $this->service->decompteAnnuelParSapeur($exerciceComptableId);
+    }
+
+    public function justificatifIndividuel(int $exerciceComptableId, int $compteId)
+    {
+        return $this->service->justificatifIndividuel($exerciceComptableId, $compteId);
+    }
+
+    public function justificatifComplet(int $exerciceComptableId)
+    {
+        return $this->service->justificatifComplet($exerciceComptableId);
     }
 }

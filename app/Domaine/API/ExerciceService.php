@@ -6,7 +6,9 @@ use App\Domaine\Business\ExerciceBusiness;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\SPI\SapeurRepository;
+use App\Infrastructure\Models\ExcuseType;
 use App\Infrastructure\Models\Exercice;
+use App\Infrastructure\Models\Fonction;
 use Illuminate\Database\Eloquent\Collection;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 
@@ -125,10 +127,39 @@ class ExerciceService
 
     function listeAppel($exerciceId)
     {
-        $presences = $this->repository->listSapeurOfExerciceById($exerciceId);
+        $exercice = $this->repository->getExerciceByIdWith($exerciceId, ['sapeurs', 'localite']);
+        $sapeurs = $this->sapeurRepository->listeSapeurLight();
+        $exercice->sapeurs = array_map(function ($s) use ($sapeurs) {
+            $id = $s->sapeur_id;
+            $sap = array_values(array_filter($sapeurs, function ($sapeur) use ($id) {
+                return $sapeur->id == $id;
+            }))[0];
+            $s->display = $sap->nom . " " . $sap->prenom;
+            $s->fonction_id = $sap->fonction_id;
+            return $s;
+        }, array_values($exercice->sapeurs));
 
-        return View('pdf/liste-appel', ["presences" => $presences]);
-        $pdf = SnappyPdf::loadView('pdf/liste-appel', ["presences" => $presences]);
+        // Tri des sapeurs par ordre alphabétique
+        usort($exercice->sapeurs, function ($a, $b) {
+            return strcmp($a->display, $b->display);
+        });
+
+        // Chargement des excuses types
+        $excuses = ExcuseType::get();
+        $excusesMap = [];
+        foreach($excuses as $excuse) {
+            $excusesMap[$excuse->id] = $excuse->designation;
+        }
+        
+        // Chargement des fonctions
+        $fonctions = Fonction::get();
+        $fonctionsMap = [];
+        foreach($fonctions as $fonction) {
+            $fonctionsMap[$fonction->id] = $fonction->nom;
+        }
+
+        // return View('pdf/liste-appel', ["exercice" => $exercice, "fonctions" => $fonctionsMap, "excuses" => $excusesMap]);
+        $pdf = SnappyPdf::loadView('pdf/liste-appel', ["exercice" => $exercice, "fonctions" => $fonctionsMap, "excuses" => $excusesMap]);
         return $pdf->download('invoice.pdf');
     }
 
@@ -137,7 +168,7 @@ class ExerciceService
         $presences = $this->repository->listSapeurOfExerciceById($exerciceId);
 
         return View('pdf/liste-appel-localite', ["presences" => $presences]);
-        $pdf = PDSnappyPdfF::loadView('pdf/decomptes-sapeurs', ["presences" => $presences]);
+        $pdf = SnappyPdf::loadView('pdf/decomptes-sapeurs', ["presences" => $presences]);
         return $pdf->download('invoice.pdf');
     }
 
@@ -145,17 +176,29 @@ class ExerciceService
     {
         $exercice = $this->repository->getExerciceByIdWith($exerciceId, ['sapeurs', 'localite']);
         $sapeurs = $this->sapeurRepository->listeSapeurLight();
-        $exercice->sapeurs = array_map(function($s) use($sapeurs) {
+        $exercice->sapeurs = array_map(function ($s) use ($sapeurs) {
             $id = $s->sapeur_id;
-            $sap = array_values(array_filter($sapeurs, function($sapeur) use ($id) {
-              return $sapeur->id == $id;
+            $sap = array_values(array_filter($sapeurs, function ($sapeur) use ($id) {
+                return $sapeur->id == $id;
             }))[0];
-            $s->display = $sap->nom." ".$sap->prenom;
+            $s->display = $sap->nom . " " . $sap->prenom;
             return $s;
-          }, array_values($exercice->sapeurs));
-          
-        // return View('pdf/liste-presence', ["exercice" => $exercice]);
-        $pdf = SnappyPdf::loadView('pdf/liste-presence', ["exercice" => $exercice]);
-        return $pdf->download('invoice.pdf');
+        }, array_values($exercice->sapeurs));
+
+        // Tri des sapeurs par ordre alphabétique
+        usort($exercice->sapeurs, function ($a, $b) {
+            return strcmp($a->display, $b->display);
+        });
+
+        // Chargement des excuses types
+        $excuses = ExcuseType::get();
+        $excusesMap = [];
+        foreach($excuses as $excuse) {
+            $excusesMap[$excuse->id] = $excuse->designation;
+        }
+
+        // return View('pdf/liste-presence', ["exercice" => $exercice, "excuses" => $excusesMap]);
+        $pdf = SnappyPdf::loadView('pdf/liste-presence', ["exercice" => $exercice, "excuses" => $excusesMap]);
+        return $pdf->download('presences.pdf');
     }
 }

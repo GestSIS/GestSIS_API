@@ -16,7 +16,7 @@ use stdClass;
 
 class SapeurRepositoryEloquent implements SapeurRepository
 {
-    private const SAPEUR_LIGHT_COLUMNS = ['id', 'nom', 'prenom', 'actif', 'fonction_id', 'civilite_id', 'date_naissance'];
+    private const SAPEUR_LIGHT_COLUMNS = ['id', 'nom', 'prenom', 'actif', 'localite_id', 'fonction_id', 'civilite_id', 'date_naissance'];
 
     public function listeSapeurLight()
     {
@@ -109,7 +109,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         if (array_key_exists('suffixe', $data) && $data['suffixe'] === null) {
             $data['suffixe'] = '';
         }
-        
+
         if (array_key_exists('remarque', $data) && $data['remarque'] === null) {
             $data['remarque'] = '';
         }
@@ -134,7 +134,8 @@ class SapeurRepositoryEloquent implements SapeurRepository
         return $this->convertSapeur(Sapeur::find($sapeurId));
     }
 
-    public function updateSapeurStatusById(int $sapeurId, $actif) {
+    public function updateSapeurStatusById(int $sapeurId, $actif)
+    {
         Sapeur::where('id', $sapeurId)->limit(1)->update(array('actif' => $actif));
     }
 
@@ -337,6 +338,8 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $object->fonction_id = $sapeur->fonction_id;
         $object->date_naissance = $sapeur->date_naissance;
         $object->civilite_id = $sapeur->civilite_id;
+        $object->localite_id = $sapeur->localite_id;
+        $object->fonction_id = $sapeur->fonction_id;
 
         return $object;
     }

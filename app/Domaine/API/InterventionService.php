@@ -5,7 +5,10 @@ namespace App\Domaine\API;
 
 use App\Domaine\Business\InterventionBusiness;
 use App\Domaine\SPI\InterventionRepository;
+use App\Infrastructure\Models\Groupe;
 use App\Infrastructure\Models\Intervention;
+use App\Infrastructure\Models\Materiel;
+use App\Infrastructure\Models\Vehicule;
 use Illuminate\Database\Eloquent\Collection;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 
@@ -88,7 +91,8 @@ class InterventionService
         return $this->business->editInterventionInformationsById($interventionId, $data);
     }
 
-    public function validerInterventionById($interventionId){
+    public function validerInterventionById($interventionId)
+    {
         return $this->business->validerInterventionById($interventionId);
     }
 
@@ -356,9 +360,52 @@ class InterventionService
 
     public function rapport($interventionId, $params)
     {
-        $intervention = Intervention::find($interventionId);
+        $withOptions = ['statFederal', 'typeIntervention', 'localite', 'chefIntervention', 'traitement'];
+        $withMapping = [
+            'groupes' => 'groupes',
+            // 'presences' => 'sapeurs',
+            // 'montants' => 'boolean',
+            'vehicules' => 'vehicules',
+            'materiel' => 'materiels',
+            'missions' => 'missions.sapeur',
+            'appels' => 'appels',
+        ];
+        // return response()->json($params);
+        foreach ($params as $param => $value) {
+            if ($value && array_key_exists($param, $withMapping)) {
+                $withOptions[] = $withMapping[$param];
+            }
+        }
+
+        // Chargement des vehicules
+        $vehiculesMap = [];
+        if (in_array('vehicules', $withOptions)) {
+            $vehicules = Vehicule::get();
+            foreach ($vehicules as $vehicule) {
+                $vehiculesMap[$vehicule->id] = $vehicule->designation;
+            }
+        }
+
+        // Chargement du matériel
+        $materielsMap = [];
+        if (in_array('materiels', $withOptions)) {
+            $materiels = Materiel::get();
+            foreach ($materiels as $materiel) {
+                $materielsMap[$materiel->id] = $materiel->designation;
+            }
+        }
+
+        // Chargement des groupes
+        $groupesMap = [];
+        if (in_array('groupes', $withOptions)) {
+            $groupes = Groupe::get();
+            foreach ($groupes as $groupe) {
+                $groupesMap[$groupe->id] = $groupe;
+            }
+        }
+
+        $intervention = Intervention::with($withOptions)->find($interventionId);
         // $missions = Mission::where('interventionId', '=', $interventionId)->all();
-        // $appels = Appel::where('interventionId', '=', $interventionId)->all();
         // $appels = Appel::where('interventionId', '=', $interventionId)->all();
         // Intervention::join('missions')->join('appels')->join()
         // Intervention::with(['sapInt', 'sapeurs'])
@@ -372,8 +419,14 @@ class InterventionService
         //     $s->display = $sap->nom." ".$sap->prenom;
         //     return $s;
         //   }, array_values($exercice->sapeurs));
-          
-        return View('pdf/rapport-intervention', ["intervention" => $intervention, "params" => $params]);
+
+        return View('pdf/rapport-intervention', [
+            "intervention" => $intervention,
+            "params" => $params,
+            "vehicules" => $vehiculesMap,
+            "materiels" => $materielsMap,
+            "groupes" => $groupesMap
+        ]);
         // $pdf = SnappyPdf::loadView('pdf/rapport-intervention', ["intervention" => $intervention, "params" => $params]);
         // return $pdf->download('invoice.pdf');
     }

@@ -9,47 +9,54 @@
     .page-break {
       page-break-after: always;
     }
-
-    .column-right {
-      text-align: right !important;
-      padding-right: 1rem !important;
-    }
-
-    .sum-row {
-      background-color: white !important;
-    }
   </style>
 
-  <title>Décomptes sapeurs</title>
+  <title>Liste de présence</title>
 </head>
-
 <body>
   <div class="container-fluid">
-    <div class="row">
-      <div class="col-8"><h1>Présences</h1></div>
-      <div class="col-4"><p>{{$exercice->localite_id}} : {{$exercice->lieu}}</p></div>
-    </div>
-    <div class="row">
-      <div class="col-2">{{$exercice->date}}</div>
-      <div class="col-2">{{$exercice->heure}}</div>
-      <div class="col-8">{{$exercice->designation}}</div>
-    </div>
-    <div class="row">
-      <div class="col-12">{{$exercice->communications}}</div>
-    </div>
-    <table class="table table-sm table-striped">
+    <h1>Présences</h1>
+    <table class="table table-sm mb-2">
+      <tr>
+        <td><strong>Date</strong> : {{ str_replace('-', '.', $exercice->date) }}</td>
+        <td><strong>Lieu</strong> : {{ $exercice->localite->designation }}, {{ $exercice->lieu }}</td>
+      </tr>
+      <tr>
+        <td><strong>Heure</strong> : {{ substr($exercice->heure, 0, 5) }}</td>
+        <td><strong>Désignation</strong> : {{ $exercice->designation }}</td>
+      </tr>
+      <tr>
+        <td colspan="2"><strong>Communications</strong> : {{ $exercice->communications }}</td>
+      </tr>
+    </table>
+    <table class="table table-sm table-striped mt-2">
       <thead>
         <tr>
-          <th>Nom</th>
-          <th class="text-center">Convoque</th>
-          <th class="text-center">Present</th>
-          <th class="text-center">Remplace</th>
-          <th class="text-center">Excuse</th>
+          <th>Nom prénom</th>
+          <th class="text-center">Convoqué</th>
+          <th class="text-center">Présent</th>
+          <th class="text-center">Remplacé</th>
+          <th class="text-center">Excusé</th>
           <th class="text-center">Amende</th>
         </tr>
       </thead>
       <tbody>
+        <?
+        $nb = 0;
+        $convoque = 0;
+        $present = 0;
+        $excuse = 0;
+        $remplace = 0;
+        $amende = 0;
+        ?>
         @foreach ($exercice->sapeurs as $presence)
+        <?
+        $nb++;
+        if ($presence->present) $present++;
+        if ($presence->convoque) $convoque++;
+        if ($presence->remplace) $remplace++;
+        if ($presence->excuse_type_id) $excuse++;
+        ?>
         <tr>
           <td>{{ $presence->display }}</td>
           <td>
@@ -81,7 +88,7 @@
               <label class="form-check-label" for="excuse-{{$presence->sapeur_id}}" class="custom-control-label"><input type="checkbox" class="form-check-input" id="excuse-{{$presence->sapeur_id}}" @if ($presence->excuse_type_id)
                 checked="checked"
                 @endif
-                ><span>Excuse non valable</span></label>
+                ><span>{{ $presence->excuse_type_id ? $excuses[$presence->excuse_type_id] : '' }}</span></label>
             </div>
           </td>
           <td>
@@ -95,6 +102,16 @@
         </tr>
         @endforeach
       </tbody>
+      <thead>
+        <tr>
+          <th>Nombre : {{ $nb }}</th>
+          <th class="text-center">{{ $convoque }}</th>
+          <th class="text-center">{{ $present }}</th>
+          <th class="text-center">{{ $remplace }}</th>
+          <th class="text-center">{{ $excuse }}</th>
+          <th class="text-center">{{ $amende }}</th>
+        </tr>
+      </thead>
     </table>
   </div>
 </body>

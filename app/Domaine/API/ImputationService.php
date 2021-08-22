@@ -7,7 +7,9 @@ use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\FraisTypeRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
+use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\Exercice;
+use App\Infrastructure\Models\Sapeur;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 
 class ImputationService
@@ -58,7 +60,8 @@ class ImputationService
         return $this->ecritureRepo->listeEcritureForExercice($exerciceId);
     }
 
-    function getEcrituresForExercicesByExerciceComptable($exerciceComptableId) {
+    function getEcrituresForExercicesByExerciceComptable($exerciceComptableId)
+    {
         return Exercice::where([
             ['exercice_comptable_id', '=', $exerciceComptableId],
             ['statut', '>', 2],
@@ -121,6 +124,56 @@ class ImputationService
 
         //        return View('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
         $pdf = SnappyPdf::loadView('pdf/decomptes-sapeurs', ["ecritures" => $ecritures]);
+        return $pdf->download('invoice.pdf');
+    }
+
+    public function justificatifIndividuel(int $exerciceComptableId, int $compteId)
+    {
+        // Blade::component('single-compte', SingleCompte::class);
+
+        $compte = Compte::with(['ecritures' => function ($query) use ($exerciceComptableId) {
+            $query->where('exercice_comptable_id', $exerciceComptableId)->orderBy('date', 'asc');
+        }])->find($compteId);
+
+        // Chargement des groupes
+        $sapeursMap = [];
+        $sapeurs = Sapeur::get(['id', 'nom', 'prenom']);
+        foreach ($sapeurs as $sapeur) {
+            $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
+        }
+
+        // return View('pdf/compte', [
+        //     "compte" => $compte,
+        //     "sapeurs" => $sapeursMap,
+        // ]);
+        $pdf = SnappyPdf::loadView('pdf/compte', [
+            "compte" => $compte,
+            "sapeurs" => $sapeursMap,
+        ]);
+        return $pdf->download('invoice.pdf');
+    }
+
+    public function justificatifComplet(int $exerciceComptableId)
+    {
+        $comptes = Compte::with(['ecritures' => function ($query) use ($exerciceComptableId) {
+            $query->where('exercice_comptable_id', $exerciceComptableId)->orderBy('date', 'asc');
+        }])->orderBy('numero', 'asc')->get();
+
+        // Chargement des groupes
+        $sapeursMap = [];
+        $sapeurs = Sapeur::get(['id', 'nom', 'prenom']);
+        foreach ($sapeurs as $sapeur) {
+            $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
+        }
+
+        // return View('pdf/comptes', [
+        //     "comptes" => $comptes,
+        //     "sapeurs" => $sapeurs,
+        // ]);
+        $pdf = SnappyPdf::loadView('pdf/comptes', [
+            "comptes" => $comptes,
+            "sapeurs" => $sapeurs,
+        ]);
         return $pdf->download('invoice.pdf');
     }
 }

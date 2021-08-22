@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\SapeurParamService;
+use App\Domaine\API\GroupeService;
 use Illuminate\Http\Request;
 
 class GroupeController extends Controller
@@ -10,10 +10,11 @@ class GroupeController extends Controller
 
     protected $service;
 
-    public function __construct(SapeurParamService $service)
+    public function __construct(GroupeService $service)
     {
         $this->service = $service;
     }
+
 
     /**
      * Display a listing of the resource.
@@ -22,8 +23,7 @@ class GroupeController extends Controller
      */
     public function index()
     {
-        $groupes = $this->service->groupes();
-
+        $groupes = $this->service->listeGroupe();
         return response()->json(['data' => $groupes]);
     }
 
@@ -33,7 +33,9 @@ class GroupeController extends Controller
             'designation' => 'string|min:1',
             'duree_validite' => 'integer|min:1',
             'expirable' => 'boolean',
-            'tri' => 'integer'
+            'pere_id' => 'integer|nullable',
+            'tri' => 'integer',
+            'actif' => 'boolean',
         ]);
 
         $groupe = $this->service->ajouterGroupe($data);
@@ -46,9 +48,12 @@ class GroupeController extends Controller
             'designation' => 'string|min:1',
             'duree_validite' => 'integer|min:1',
             'expirable' => 'boolean',
-            'tri' => 'integer'
+            'pere_id' => 'integer|nullable',
+            'tri' => 'integer',
+            'actif' => 'boolean',
         ]);
 
+        // return response()->json(['data' => $data]);
         $groupe = $this->service->modifierGroupe($id, $data);
         return response()->json(['data' => $groupe]);
     }
