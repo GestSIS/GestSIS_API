@@ -102,12 +102,12 @@ class PaiementService
         try {
             $content = $this->business->iso20022PourDecompte($decompteId, $nom, $bic, $iban);
             return response()->streamDownload(
-                function () use($content) {
+                function () use ($content) {
                     echo $content;
                 },
                 $nomFichier
             );
-        } catch(\InvalidArgumentException $e) {
+        } catch (\InvalidArgumentException $e) {
             return response()->json(['data' => ['message' => 'Veuillez vérifier les informations de paiment de votre SIS']], 500);
         }
     }
@@ -174,13 +174,13 @@ class PaiementService
         try {
             $content = $this->business->iso20022PourPaiement($paiementId, $nom, $bic, $iban);
             return response()->streamDownload(
-                function () use($content) {
+                function () use ($content) {
                     echo $content;
                 },
                 $nomFichier
             );
-        } catch(\InvalidArgumentException $e) {
-            return response()->json(['data' => ['message' => 'Veuillez vérifier les informations de paiment de votre SIS']], 500);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['data' => ['message' => 'Veuillez vérifier les informations de paiement de votre SIS']], 500);
         }
     }
 
