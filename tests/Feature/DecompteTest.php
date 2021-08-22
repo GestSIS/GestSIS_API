@@ -120,9 +120,9 @@ class DecompteTest extends TestCase
         ];
 
         $business = new PaiementBusiness();
-        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'],$params['deduction']);
+        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
         // $response = $this->json('POST', "api/v2/decomptes/creer-annuel", $params);
-        
+
         // $response
         //     ->assertStatus(200)
         //     ->assertJsonStructure([
@@ -194,7 +194,7 @@ class DecompteTest extends TestCase
             );
 
         //vérification qu'on ne paye pas deux fois
-        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'],$params['deduction']);
+        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
         // $response = $this->json('POST', "api/v2/decomptes/create", $params);
 
         // $response
@@ -219,7 +219,7 @@ class DecompteTest extends TestCase
         //     );
 
         $response = $this->json('GET', "api/v2/decomptes/" . $response['id']);
-        
+
         $response
             ->assertStatus(200)
             ->assertJsonStructure([
@@ -309,7 +309,7 @@ class DecompteTest extends TestCase
         ];
 
         $business = new PaiementBusiness();
-        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'],$params['deduction']);
+        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
         // $response = $this->json('POST', "api/v2/decomptes/creer-annuel", $params);
 
         // $response
@@ -455,7 +455,7 @@ class DecompteTest extends TestCase
         ];
 
         $business = new PaiementBusiness();
-        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'],$params['deduction']);
+        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
         // $response = $this->json('POST', "api/v2/decomptes/creer-annuel", $params);
 
         // $response
