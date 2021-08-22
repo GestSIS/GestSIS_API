@@ -295,7 +295,7 @@ class DecompteTest extends TestCase
         $ecritures = Ecriture::where('exercice_comptable_id', 2)->get();
 
         AvsParam::updateOrCreate([], [
-            'taux_avs' => "0.10525",
+            'taux_avs' => "0.1055",
             'taux_ac' => "0.24",
             'franchise_avs' => 2300,
             'franchise_imposition' => 5000
@@ -441,7 +441,7 @@ class DecompteTest extends TestCase
         $ecritures = Ecriture::where('exercice_comptable_id', 3)->get();
 
         AvsParam::updateOrCreate([], [
-            'taux_avs' => "0.10525",
+            'taux_avs' => "0.1055",
             'taux_ac' => "0.24",
             'franchise_avs' => 2300,
             'franchise_imposition' => 5000

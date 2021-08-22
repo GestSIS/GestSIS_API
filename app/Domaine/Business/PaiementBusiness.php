@@ -87,8 +87,8 @@ class PaiementBusiness
         }
 
         //déductions
+        $tauxParitaire = ($avsParam->taux_ac + $avsParam->taux_avs) / 2.0;
         if ($deduction) {
-            $tauxParitaire = ($avsParam->taux_ac + $avsParam->taux_avs) / 2.0;
             //vérifie si autre décompte sans déduction
             foreach (Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get() as $d) {
                 foreach ($d->paiements as $p) {
@@ -119,8 +119,8 @@ class PaiementBusiness
                 // TODO: ou si sapeur en fait la demande
                 if ($total_imposable >= $avsParam->franchise_avs) {
                     $totaux[$key]['avs'] = ($total_imposable * $tauxParitaire) - $total['avs_total'];
-                    $decompte->avs_total += ($total_imposable * $avsParam->taux_avs / 2.0) - (($total['avs_total'] / $tauxParitaire) * $avsParam->taux_avs / 2.0);
-                    $decompte->ac_total += ($total_imposable * $avsParam->taux_ac / 2.0) - (($total['avs_total'] / $tauxParitaire) * $avsParam->taux_ac / 2.0);
+                    $decompte->avs_total += ($total_imposable * ($avsParam->taux_avs / 2.0)) - (($total['avs_total'] / $tauxParitaire) * ($avsParam->taux_avs / 2.0));
+                    $decompte->ac_total += ($total_imposable * ($avsParam->taux_ac / 2.0)) - (($total['avs_total'] / $tauxParitaire) * ($avsParam->taux_ac / 2.0));
                 }
             }
             $decompte->save();
