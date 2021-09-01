@@ -434,24 +434,21 @@ class InterventionService
             $presences = array_filter($sapeursMap, function ($s) {
                 return array_key_exists('presences', $s);
             });
+            //TODO: Trier par nom, prénom
         }
 
-        // $missions = Mission::where('interventionId', '=', $interventionId)->all();
-        // $appels = Appel::where('interventionId', '=', $interventionId)->all();
-        // Intervention::join('missions')->join('appels')->join()
-        // Intervention::with(['sapInt', 'sapeurs'])
-        // $intervention = $this->repository->getIntervention($interventionId, ['sapeurs', 'localite']);
-        // $sapeurs = $this->sapeurRepository->listeSapeurLight();
-        // $exercice->sapeurs = array_map(function($s) use($sapeurs) {
-        //     $id = $s->sapeur_id;
-        //     $sap = array_values(array_filter($sapeurs, function($sapeur) use ($id) {
-        //       return $sapeur->id == $id;
-        //     }))[0];
-        //     $s->display = $sap->nom." ".$sap->prenom;
-        //     return $s;
-        //   }, array_values($exercice->sapeurs));
+        // return View('pdf/rapport-intervention', [
+        //     "intervention" => $intervention,
+        //     "params" => $params,
+        //     "vehicules" => $vehiculesMap,
+        //     "materiels" => $materielsMap,
+        //     "groupes" => $groupesMap,
+        //     "sapeurs" => $sapeursMap,
+        //     "quittances" => $quittancesMap,
+        //     "presences" => $presences,
+        // ]);
 
-        return View('pdf/rapport-intervention', [
+        $pdf = SnappyPdf::loadView('pdf/rapport-intervention', [
             "intervention" => $intervention,
             "params" => $params,
             "vehicules" => $vehiculesMap,
@@ -461,7 +458,6 @@ class InterventionService
             "quittances" => $quittancesMap,
             "presences" => $presences,
         ]);
-        // $pdf = SnappyPdf::loadView('pdf/rapport-intervention', ["intervention" => $intervention, "params" => $params]);
-        // return $pdf->download('invoice.pdf');
+        return $pdf->download('rapport.pdf');
     }
 }

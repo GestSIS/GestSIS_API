@@ -207,7 +207,6 @@
       @endforeach
       <thead>
       <tr>
-        {{-- FIXME: Nb sapeur incorrect lorsqu'il y a plusieurs présences pour un seul sapeur --}}
           <th colspan="3">Nombre sapeur : {{ count($presences) }}</th>
         </tr>
       </thead>
