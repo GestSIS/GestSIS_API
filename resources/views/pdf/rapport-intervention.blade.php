@@ -167,54 +167,52 @@
       @endforeach
     </table>
     @endif
-    {{-- Informations générales --}}
-    <table class="table table-sm table-striped mt-2">
+    {{-- Présences --}}
+    @if (array_key_exists("presences", $params))
+    <h2 class="h4">Présences</h2>
+    <table class="table table-sm mb-2">
+      @if (count($presences) == 0)
+      <tr>
+        <td>Aucune présence saisie pour cette intervention</td>
+      </tr>
+      @else
       <thead>
         <tr>
-          <th>Nom prénom</th>
-          <th class="text-center">Fonction</th>
-          <th class="text-center">Présent</th>
-          <th class="text-center">Remplacé</th>
-          <th class="text-center">Excusé</th>
+          <th>Sapeur</th>
+          <th>Quittance</th>
+          <th>Présences</th>
         </tr>
       </thead>
-      {{-- <tbody>
-        @foreach ($intervention->sapeurs as $presence)
-        <tr>
-          <td>{{ $presence->display }}</td>
-          <td>{{ $presence->fonction_id ? $fonctions[$presence->fonction_id] : '' }}</td>
-          <td>
-            <div class="form-check text-center">
-              <label class="form-check-label" for="present-{{$presence->sapeur_id}}"><input type="checkbox" class="form-check-input" id="present-{{$presence->sapeur_id}}" @if ($presence->present)
-                checked="checked"
-                @endif
-                >&#8203;</label>
-            </div>
-          </td>
-          <td>
-            <div class="form-check text-center">
-              <label class="form-check-label" for="remplace-{{$presence->sapeur_id}}"><input type="checkbox" class="form-check-input" id="remplace-{{$presence->sapeur_id}}" @if ($presence->remplace)
-                checked="checked"
-                @endif
-                >&#8203;</label>
-            </div>
-          </td>
-          <td>
-            <div class="form-check text-center">
-              <label class="form-check-label" for="excuse-{{$presence->sapeur_id}}" class="custom-control-label"><input type="checkbox" class="form-check-input" id="excuse-{{$presence->sapeur_id}}" @if ($presence->excuse_type_id)
-                checked="checked"
-                @endif
-                ><span>{{ $presence->excuse_type_id ? $excuses[$presence->excuse_type_id] : '' }}</span></label>
-            </div>
-          </td>
-        </tr>
+      @endif
+      @foreach ($presences as $sapeur)
+      <tr>
+        <td>{{ $sapeur['nom'] }} {{ $sapeur['prenom'] }}</td>
+        <td>
+          <div class="form-check text-center">
+            <label class="form-check-label" for="remplace-{{$sapeur['id']}}"><input type="checkbox" class="form-check-input" id="remplace-{{$sapeur['id']}}" @if (array_key_exists($sapeur['id'], $quittances))
+              checked="checked"
+              @endif
+              >&#8203;</label>
+          </div>
+        </td>
+        @foreach ($sapeur['presences'] as $presence)
+        @if($loop->index != 0)
+      </tr>
+      <tr>
+        <td colspan="2"></td>
+        @endif
+        <td>{{ \Carbon\Carbon::parse($presence['debut'])->format('d.m H:i') }} - {{ \Carbon\Carbon::parse($presence['fin'])->format('H:i') }}</td>
         @endforeach
-      </tbody> --}}
+      </tr>
+      @endforeach
       <thead>
-        <tr>
-          {{-- <th colspan="5">Nombre : {{ count($intervention->sapeurs) }}</th> --}}
+      <tr>
+        {{-- FIXME: Nb sapeur incorrect lorsqu'il y a plusieurs présences pour un seul sapeur --}}
+          <th colspan="3">Nombre sapeur : {{ count($presences) }}</th>
         </tr>
       </thead>
+    </table>
+    @endif
     </table>
   </div>
 </body>

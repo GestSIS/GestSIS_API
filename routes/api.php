@@ -198,6 +198,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('exercices-comptable', 'ExerciceComptableController')->only(['index']); //TODO: ajout cloturer
     });
 
+    Route::group(['middleware' => 'jwtTokenRole:comptabilite.config'], function () {
+        //TODO: A implémenter, création, edition, suppression et clôturer
+        // Route::resource('exercices-comptable', 'ExerciceComptableController')->only(['post']);
+    });
+
     Route::group(['middleware' => 'jwtTokenRole:comptabilite.tout'], function () {
         Route::get('exercices-comptable/{ExerciceComptableId}/certificat-salaire', 'DecompteController@certificatSalaire');
         Route::get('exercices-comptable/{ExerciceComptableId}/certificat-salaire/{SapeurId}', 'DecompteController@certificatSalaireSapeur');
