@@ -9,7 +9,6 @@ use Tests\TestCase;
 
 class InterventionGroupeTest extends TestCase
 {
-
     protected $interventionService;
     protected $interventionId;
 
@@ -72,10 +71,11 @@ class InterventionGroupeTest extends TestCase
      */
     public function testRemoveInterventionGroupe()
     {
-        $groupes = GroupeIntervention::where('intervention_id', $this->interventionId)->pluck('id')->toArray();
+        $groupes = [['designation' => 'g1', 'no' => 1]];
+        $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/groupes', array('groupes' => $groupes));
+        $groupes = GroupeIntervention::where('intervention_id', '=', $this->interventionId)->pluck('id')->toArray();
 
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/groupes/', array("groupes" => $groupes));
-
         $response
             ->assertStatus(200)
             ->assertJson([
