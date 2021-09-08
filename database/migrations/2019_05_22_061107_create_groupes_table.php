@@ -23,7 +23,7 @@ class CreateGroupesTable extends Migration
             $table->integer('tri');
 
             $table->bigInteger('pere_id')->unsigned()->nullable();
-            $table->foreign('pere_id')->references('id')->on('groupes');
+            $table->foreign('pere_id')->references('id')->on('groupes')->onDelete('cascade');
         });
     }
 

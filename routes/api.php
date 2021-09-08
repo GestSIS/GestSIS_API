@@ -79,7 +79,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Param organisation
     Route::group(['middleware' => 'jwtTokenRole:organisation.config'], function () {
-        Route::resource('groupes', 'GroupeController')->only(['index', 'store', 'update']); //, 'destroy']);
+        Route::resource('groupes', 'GroupeController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('groupes.sapeurs', 'GroupeSapeursController')->only(['store']);
 
         Route::get('rta', 'ReferenceRtaController@getReferenceRta')->name('api.v2.rta.get-rta');
