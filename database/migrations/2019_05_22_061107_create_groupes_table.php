@@ -20,7 +20,7 @@ class CreateGroupesTable extends Migration
             $table->integer('type')->default(0);
             $table->integer('no')->nullable();
             $table->string('designation');
-            $table->string('info');
+            $table->string('info')->default('');
             $table->integer('tri');
             $table->boolean('actif');
 

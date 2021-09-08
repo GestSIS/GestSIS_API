@@ -31,10 +31,11 @@ class GroupeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
-            'duree_validite' => 'integer|min:1',
-            'expirable' => 'boolean',
+            'no' => 'integer|nullable',
+            'info' => 'string',
             'pere_id' => 'integer|nullable',
             'tri' => 'integer',
+            'type' => 'integer',
             'actif' => 'boolean',
         ]);
 
@@ -46,14 +47,14 @@ class GroupeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
-            'duree_validite' => 'integer|min:1',
-            'expirable' => 'boolean',
+            'no' => 'integer|nullable',
+            'info' => 'string|nullable',
             'pere_id' => 'integer|nullable',
             'tri' => 'integer',
+            'type' => 'integer',
             'actif' => 'boolean',
         ]);
 
-        // return response()->json(['data' => $data]);
         $groupe = $this->service->modifierGroupe($id, $data);
         return response()->json(['data' => $groupe]);
     }
