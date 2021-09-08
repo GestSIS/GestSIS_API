@@ -17,14 +17,11 @@ class CreateGroupeInterventionTable extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->bigInteger('groupe_id')->unsigned();
-            $table->foreign('groupe_id')->references('id')->on('groupes');
+            $table->integer('no')->nullable();
+            $table->string('designation');
 
             $table->bigInteger('intervention_id')->unsigned();
             $table->foreign('intervention_id')->references('id')->on('interventions');
-
-
-            $table->unique(['groupe_id', 'intervention_id']);
         });
     }
 

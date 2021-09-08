@@ -40,7 +40,8 @@ class InterventionGroupesController extends Controller
     public function store(Request $request, int $interventionId)
     {
         $data = $request->validate([
-            'groupes.*' => 'required|integer'
+            'groupes.*.no' => 'required|integer',
+            'groupes.*.designation' => 'required|string',
         ]);
 
         $groupes = $this->service->addGroupes($interventionId, $data['groupes']);

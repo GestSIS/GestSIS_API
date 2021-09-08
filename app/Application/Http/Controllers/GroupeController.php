@@ -32,11 +32,9 @@ class GroupeController extends Controller
         $data = $request->validate([
             'designation' => 'string|min:1',
             'no' => 'integer|nullable',
-            'info' => 'string',
             'pere_id' => 'integer|nullable',
             'tri' => 'integer',
             'type' => 'integer',
-            'actif' => 'boolean',
         ]);
 
         $groupe = $this->service->ajouterGroupe($data);
@@ -48,11 +46,9 @@ class GroupeController extends Controller
         $data = $request->validate([
             'designation' => 'string|min:1',
             'no' => 'integer|nullable',
-            'info' => 'string|nullable',
             'pere_id' => 'integer|nullable',
             'tri' => 'integer',
             'type' => 'integer',
-            'actif' => 'boolean',
         ]);
 
         $groupe = $this->service->modifierGroupe($id, $data);

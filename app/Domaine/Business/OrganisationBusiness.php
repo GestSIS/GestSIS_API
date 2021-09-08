@@ -11,14 +11,7 @@ class OrganisationBusiness
 
     public function ajouterGroupe($data)
     {
-        if (!array_key_exists('no', $data) || $data['no'] == '') {
-            $data['no'] = null;
-        }
-        if (!array_key_exists('info', $data) || is_null($data['info'])) {
-            $data['info'] = '';
-        }
         $data['tri'] = Groupe::max('tri') + 1;
-        $data['actif'] = true;
 
         $groupe = new Groupe();
         $groupe->fill($data);
@@ -47,20 +40,12 @@ class OrganisationBusiness
             $pereId = $groupesMap[$pereId];
         }
 
-        if (!array_key_exists('no', $data) || $data['no'] == '') {
-            $data['no'] = null;
-        }
-        if (!array_key_exists('info', $data) || is_null($data['info'])) {
-            $data['info'] = '';
-        }
-
         Groupe::where('id', $groupeId)->limit(1)->update($data);
         return Groupe::with('sapeurIds')->find($groupeId);
     }
 
     public function supprimerGroupe($groupeId)
     {
-        //TODO: ajouter des checks
         Groupe::where('id', $groupeId)->limit(1)->delete();
     }
 
