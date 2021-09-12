@@ -105,8 +105,11 @@ class ExerciceService
      */
     public function updateSapeurs($exerciceId, $sapeurs)
     {
-        $this->business->updateSapeurs($exerciceId, $sapeurs);
-        return $this->repository->listSapeurOfExerciceById($exerciceId);
+        $statut = $this->business->updateSapeurs($exerciceId, $sapeurs);
+        return [
+            'statut' => $statut,
+            'sapeurs' => $this->repository->listSapeurOfExerciceById($exerciceId)
+        ];
     }
 
     /**
@@ -147,14 +150,14 @@ class ExerciceService
         // Chargement des excuses types
         $excuses = ExcuseType::get();
         $excusesMap = [];
-        foreach($excuses as $excuse) {
+        foreach ($excuses as $excuse) {
             $excusesMap[$excuse->id] = $excuse->designation;
         }
-        
+
         // Chargement des fonctions
         $fonctions = Fonction::get();
         $fonctionsMap = [];
-        foreach($fonctions as $fonction) {
+        foreach ($fonctions as $fonction) {
             $fonctionsMap[$fonction->id] = $fonction->nom;
         }
 
@@ -193,7 +196,7 @@ class ExerciceService
         // Chargement des excuses types
         $excuses = ExcuseType::get();
         $excusesMap = [];
-        foreach($excuses as $excuse) {
+        foreach ($excuses as $excuse) {
             $excusesMap[$excuse->id] = $excuse->designation;
         }
 
