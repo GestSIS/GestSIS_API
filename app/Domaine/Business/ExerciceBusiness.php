@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Domaine\Business;
 
 use App\Domaine\SPI\ExerciceRepository;
@@ -9,7 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 class ExerciceBusiness
 {
-    //Status:
+    // Statut:
     // 0 -> Annulé
     // 1 -> A saisir
     // 2 -> En attente de validation
@@ -29,6 +28,33 @@ class ExerciceBusiness
     }
 
     /**
+     * Modifie le statut à saisi si toutes les présences ont été saisies
+     */
+    private function updateStatut($exerciceId)
+    {
+        $statut = $this->repository->getExerciceStatutById($exerciceId);
+        if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_SAISI) {
+            return $statut;
+        }
+
+        // Check saisi des présences sont saisies
+        $presences = $this->repository->listSapeurOfExerciceById($exerciceId);
+        $presenceIncompletes = array_filter($presences, function ($p) {
+            // Si convoqué alors une saisie doit être faite pour chaque sapeur
+            return $p->convoque && !$p->present && !$p->amende && !$p->remplace && !$p->excuse_type_id;
+        });
+
+        // Update statut si l'exercice est incomplet
+        if (count($presenceIncompletes) > 0) {
+            $statut = self::EXERCICE_STATUT_EMPTY;
+            $this->repository->updateExerciceById($exerciceId, array("statut" => $statut));
+        } else {
+            $this->repository->updateExerciceById($exerciceId, array("statut" => max($statut, self::EXERCICE_STATUT_SAISI)));
+        }
+        return $statut;
+    }
+
+    /**
      * Create a exercice
      *
      * @param $data
@@ -38,34 +64,46 @@ class ExerciceBusiness
     public function createExercice($data)
     {
         // Statut:
-        // 1 -> a saisir
-        // 2 -> a valider
-        // 3 -> a imputer
-        // 4 -> imputée
-        $data['statut'] = 1; //TODO: Ajouter ça dans paramètres ?
+        // 0 -> annulé
+        // 1 -> vide
+        // 2 -> saisie
+        // 3 -> validé
+        // 4 -> imputé
+        $data['statut'] = self::EXERCICE_STATUT_EMPTY;
         return $this->repository->createExercice($data);
     }
 
     public function deleteExerciceById($exerciceId)
     {
-        //TODO Check status
+        // Check pas déjà imputé
         $statut = $this->repository->getExerciceStatutById($exerciceId);
-
-        if ($statut < self::EXERCICE_STATUT_VALIDE) {
-            $this->repository->deleteExerciceById($exerciceId);
+        if ($statut > self::EXERCICE_STATUT_IMPUTE) {
+            return new ArrayException(['message' => 'Impossible de supprimer un exercice déjà imputé']);
         }
+
+        $this->repository->deleteExerciceById($exerciceId);
     }
 
     public function validateExercice($exerciceId)
     {
-        //TODO Check saisi des présences sont saisies
         $statut = $this->repository->getExerciceStatutById($exerciceId);
-        if ($statut === self::EXERCICE_STATUT_SAISI) {
-            return $this->repository->updateExerciceById($exerciceId, [
-                "statut" => self::EXERCICE_STATUT_VALIDE
-            ]);
+        if ($statut !== self::EXERCICE_STATUT_SAISI) {
+            throw new ArrayException(["message" => "Impossible de valider l'exercice."]);
         }
-        throw new ArrayException(["message" => "Impossible de valider l'exercice."]);
+
+        // Check saisi des présences sont saisies
+        $presences = $this->repository->listSapeurOfExerciceById($exerciceId);
+        $presenceIncompletes = array_filter($presences, function ($p) {
+            // Si convoqué alors une saisie doit être faite pour chaque sapeur
+            return $p->convoque && !$p->present && !$p->amende && !$p->remplace && !$p->excuse_type_id;
+        });
+        if (count($presenceIncompletes)) {
+            throw new ArrayException(["message" => "Certains sapeurs convoqué sont incomplet"]);
+        }
+
+        return $this->repository->updateExerciceById($exerciceId, [
+            "statut" => self::EXERCICE_STATUT_VALIDE
+        ]);
     }
 
     /**
@@ -77,15 +115,18 @@ class ExerciceBusiness
      */
     public function addSapeurs($exerciceId, $sapeurs)
     {
-        //TODO INSIDE BUSINESS
-        //TODO Check not impute
+        // Check pas déjà imputé
+        $statut = $this->repository->getExerciceStatutById($exerciceId);
+        if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_SAISI) {
+            throw new ArrayException(['message' => 'Impossible de modifier un exercice déjà imputé']);
+        }
 
-        //Check sapeur not duplicated
-        $ids = array_map(function($sap) {
+        // Check sapeur not duplicated
+        $ids = array_map(function ($sap) {
             return $sap->sapeur_id;
         }, $this->repository->listSapeurOfExerciceById($exerciceId));
 
-        $sapeurFiltered = array_filter($sapeurs, function($sap) use($ids) {
+        $sapeurFiltered = array_filter($sapeurs, function ($sap) use ($ids) {
             return !in_array($sap['sapeur_id'], $ids);
         });
 
@@ -93,10 +134,7 @@ class ExerciceBusiness
             $this->repository->addSapeurToExercice($exerciceId, $sapeur);
         }
 
-        $statut = $this->repository->getExerciceStatutById($exerciceId);
-        $this->repository->updateExerciceById($exerciceId, array("statut" => max($statut, self::EXERCICE_STATUT_SAISI)));
-
-        return $statut;
+        return $this->updateStatut($exerciceId);
     }
 
     /**
@@ -108,14 +146,17 @@ class ExerciceBusiness
      */
     public function updateSapeurs($exerciceId, $sapeurs)
     {
-        //TODO Check pas imputé
+        // Check pas déjà imputé
+        $statut = $this->repository->getExerciceStatutById($exerciceId);
+        if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_SAISI) {
+            return new ArrayException(['message' => 'Impossible de modifier un exercice déjà imputé']);
+        }
+
         foreach ($sapeurs as $sapeur) {
             $this->repository->editSapeurOfExercice($exerciceId, $sapeur);
         }
 
-        //TODO Si tous les sapeurs ont étés saisi passer un mode en attente de validation
-        $statut = $this->repository->getExerciceStatutById($exerciceId);
-        $this->repository->updateExerciceById($exerciceId, array("statut" => max($statut, self::EXERCICE_STATUT_SAISI)));
+        return $this->updateStatut($exerciceId);
     }
 
     /**
@@ -125,22 +166,22 @@ class ExerciceBusiness
      */
     public function removeSapeurs($exerciceId, $ids)
     {
-        //TODO Check pas imputé
-        $this->repository->removeSapeursFromExercice($exerciceId, $ids);
-
+        // Check pas déjà imputé
         $statut = $this->repository->getExerciceStatutById($exerciceId);
-
-        if (count($this->repository->listSapeurOfExerciceById($exerciceId)) === 0) {
-            $statut = $this->repository->updateExerciceById($exerciceId, ["statut" => self::EXERCICE_STATUT_EMPTY])->statut;
+        if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_SAISI) {
+            return new ArrayException(['message' => 'Impossible de modifier un exercice déjà imputé']);
         }
 
-        return $statut;
+        $this->repository->removeSapeursFromExercice($exerciceId, $ids);
+
+        return $this->updateStatut($exerciceId);
     }
 
     public function supprimerConvocations($sapeurId, $exerciceSapeursIds)
     {
+        // TODO: Check pour chaque exercice s'il est possible de supprimer la convocation
+        // et donc que l'exercice n'est pas déjà imputé
         $this->repository->supprimerConvocations($sapeurId, $exerciceSapeursIds);
         return true;
-        //TODO: Check if return smth
     }
 }

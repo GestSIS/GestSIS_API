@@ -20,12 +20,10 @@ class CreateGroupesTable extends Migration
             $table->integer('type')->default(0);
             $table->integer('no')->nullable();
             $table->string('designation');
-            $table->string('info');
             $table->integer('tri');
-            $table->boolean('actif');
 
             $table->bigInteger('pere_id')->unsigned()->nullable();
-            $table->foreign('pere_id')->references('id')->on('groupes');
+            $table->foreign('pere_id')->references('id')->on('groupes')->onDelete('cascade');
         });
     }
 

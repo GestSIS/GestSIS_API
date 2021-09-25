@@ -7,7 +7,10 @@ use App\Domaine\Business\InterventionBusiness;
 use App\Domaine\SPI\InterventionRepository;
 use App\Infrastructure\Models\Groupe;
 use App\Infrastructure\Models\Intervention;
+use App\Infrastructure\Models\InterventionSapeur;
 use App\Infrastructure\Models\Materiel;
+use App\Infrastructure\Models\Quittance;
+use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\Vehicule;
 use Illuminate\Database\Eloquent\Collection;
 use Barryvdh\Snappy\Facades\SnappyPdf;
@@ -363,7 +366,7 @@ class InterventionService
         $withOptions = ['statFederal', 'typeIntervention', 'localite', 'chefIntervention', 'traitement'];
         $withMapping = [
             'groupes' => 'groupes',
-            // 'presences' => 'sapeurs',
+            'presences' => 'presences',
             // 'montants' => 'boolean',
             'vehicules' => 'vehicules',
             'materiel' => 'materiels',
@@ -405,29 +408,56 @@ class InterventionService
         }
 
         $intervention = Intervention::with($withOptions)->find($interventionId);
-        // $missions = Mission::where('interventionId', '=', $interventionId)->all();
-        // $appels = Appel::where('interventionId', '=', $interventionId)->all();
-        // Intervention::join('missions')->join('appels')->join()
-        // Intervention::with(['sapInt', 'sapeurs'])
-        // $intervention = $this->repository->getIntervention($interventionId, ['sapeurs', 'localite']);
-        // $sapeurs = $this->sapeurRepository->listeSapeurLight();
-        // $exercice->sapeurs = array_map(function($s) use($sapeurs) {
-        //     $id = $s->sapeur_id;
-        //     $sap = array_values(array_filter($sapeurs, function($sapeur) use ($id) {
-        //       return $sapeur->id == $id;
-        //     }))[0];
-        //     $s->display = $sap->nom." ".$sap->prenom;
-        //     return $s;
-        //   }, array_values($exercice->sapeurs));
 
-        return View('pdf/rapport-intervention', [
+        // Chargement des sapeurs et quittances
+        $sapeursMap = [];
+        $quittancesMap = [];
+        if (in_array('presences', $withOptions)) {
+            $sapeurs = Sapeur::get(['nom', 'prenom', 'id']);
+            foreach ($sapeurs as $sapeur) {
+                $sapeursMap[$sapeur->id] = $sapeur->toArray();
+            }
+
+            foreach ($intervention->presences as $presence) {
+                if (!array_key_exists('presences', $sapeursMap[$presence->sapeur_id])) {
+                    $sapeursMap[$presence->sapeur_id]['presences'] = [];
+                }
+                $sapeursMap[$presence->sapeur_id]['presences'][] = $presence;
+            }
+
+            // Chargement des quittances
+            $quittances = Quittance::where('intervention_id', $interventionId)->get();
+            foreach ($quittances as $quittance) {
+                $quittancesMap[$quittance->sapeur_id] = $quittance;
+            }
+
+            $presences = array_filter($sapeursMap, function ($s) {
+                return array_key_exists('presences', $s);
+            });
+            //TODO: Trier par nom, prénom
+        }
+
+        // return View('pdf/rapport-intervention', [
+        //     "intervention" => $intervention,
+        //     "params" => $params,
+        //     "vehicules" => $vehiculesMap,
+        //     "materiels" => $materielsMap,
+        //     "groupes" => $groupesMap,
+        //     "sapeurs" => $sapeursMap,
+        //     "quittances" => $quittancesMap,
+        //     "presences" => $presences,
+        // ]);
+
+        $pdf = SnappyPdf::loadView('pdf/rapport-intervention', [
             "intervention" => $intervention,
             "params" => $params,
             "vehicules" => $vehiculesMap,
             "materiels" => $materielsMap,
-            "groupes" => $groupesMap
+            "groupes" => $groupesMap,
+            "sapeurs" => $sapeursMap,
+            "quittances" => $quittancesMap,
+            "presences" => $presences,
         ]);
-        // $pdf = SnappyPdf::loadView('pdf/rapport-intervention', ["intervention" => $intervention, "params" => $params]);
-        // return $pdf->download('invoice.pdf');
+        return $pdf->download('rapport.pdf');
     }
 }

@@ -11,12 +11,13 @@ class OrganisationBusiness
 
     public function ajouterGroupe($data)
     {
-        // TODO: Check pere_id ?
+        $data['tri'] = Groupe::max('tri') + 1;
+
         $groupe = new Groupe();
         $groupe->fill($data);
         $groupe->save();
 
-        return $groupe;
+        return Groupe::with('sapeurIds')->find($groupe->id);
     }
 
     public function modifierGroupe($groupeId, $data)
@@ -29,7 +30,7 @@ class OrganisationBusiness
         }
 
         // Controle qu'il n'y ait pas de loop dans la hierarchie des groupes
-        $pereId = $data['pere_id'];
+        $pereId = array_key_exists('pere_id', $data) ? $data['pere_id'] : null;
         $visited = [];
         while (!is_null($pereId)) {
             if (in_array($pereId, $visited) || $pereId == $groupeId) {
@@ -45,7 +46,6 @@ class OrganisationBusiness
 
     public function supprimerGroupe($groupeId)
     {
-        //TODO: ajouter des checks
         Groupe::where('id', $groupeId)->limit(1)->delete();
     }
 

@@ -1,11 +1,10 @@
 <?php
+
 namespace App\Domaine\Business;
 
 use App\Domaine\SPI\InterventionRepository;
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\GroupeIntervention;
 use App\Infrastructure\Models\Intervention;
-use App\Infrastructure\Models\InterventionSapeur;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -27,8 +26,7 @@ class InterventionBusiness
     private function checkIsNotImpute($interventionId)
     {
         $statut = $this->repository->getInterventionStatutById($interventionId);
-        if($statut >= self::INTERVENTION_STATUT_IMPUTE)
-        {
+        if ($statut >= self::INTERVENTION_STATUT_IMPUTE) {
             throw new ArrayException(['message' => 'Intervention already impute']);
         }
     }
@@ -389,10 +387,10 @@ class InterventionBusiness
 
         //Check duplicated vehicules
         $vehiculesRef = $this->repository->getInterventionVehicules($interventionId);
-        $vehiculesId = array_map(function($vehicule){
+        $vehiculesId = array_map(function ($vehicule) {
             return $vehicule->vehicule_id;
         }, $vehiculesRef);
-        $vehicules = array_filter($vehicules, function($vehicule)use($vehiculesId){
+        $vehicules = array_filter($vehicules, function ($vehicule) use ($vehiculesId) {
             return !in_array($vehicule, $vehiculesId);
         });
 
@@ -414,7 +412,7 @@ class InterventionBusiness
     }
 
     /**
-     * Ajout de groupes à un intervention
+     * Ajout de groupes à une intervention
      *
      * @param $data
      * @return Collection
@@ -425,7 +423,7 @@ class InterventionBusiness
         $this->checkIsNotImpute($interventionId);
 
         foreach ($groupes as $groupe) {
-            $this->repository->addGroupe($interventionId, $groupe);
+            $this->repository->addGroupe($interventionId, $groupe['no'], $groupe['designation']);
         }
     }
 

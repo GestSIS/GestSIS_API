@@ -26,6 +26,12 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenVali
 Route::get('pdf-test/{id}', 'CompteController@generatePdf');
 
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
+
+    // Paramètres accessible pour tout droit config
+    Route::group(['middleware' => 'jwtTokenRole:utilisateur.config'], function () {
+        Route::resource('sis-param', 'SisParamController')->only(['index']);
+    });
+
     // Sis Params
     Route::group(['middleware' => 'jwtTokenRole:sis.config'], function () {
         Route::resource('sis-param', 'SisParamController')->only(['index', 'store']);
@@ -72,6 +78,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Params Sapeur
     Route::group(['middleware' => 'jwtTokenRole:sapeur.config'], function () {
+        Route::resource('sis-param', 'SisParamController')->only(['index']);
         Route::resource('grades', 'GradeController')->only(['index', 'store', 'update']);
         Route::resource('fonctions', 'FonctionController')->only(['index', 'store', 'update']);
         Route::resource('cours', 'CoursController')->only(['index', 'store', 'update']);
@@ -79,7 +86,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Param organisation
     Route::group(['middleware' => 'jwtTokenRole:organisation.config'], function () {
-        Route::resource('groupes', 'GroupeController')->only(['index', 'store', 'update']); //, 'destroy']);
+        Route::resource('sis-param', 'SisParamController')->only(['index']);
+        Route::resource('groupes', 'GroupeController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('groupes.sapeurs', 'GroupeSapeursController')->only(['store']);
 
         Route::get('rta', 'ReferenceRtaController@getReferenceRta')->name('api.v2.rta.get-rta');
@@ -111,6 +119,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Params exercices
     Route::group(['middleware' => 'jwtTokenRole:exercice.config'], function () {
+        Route::resource('sis-param', 'SisParamController')->only(['index']);
         Route::resource('exercice-categories', 'ExerciceCategorieController')->only(['index', 'store', 'update']);
         Route::resource('excuses-types', 'ExcuseTypeController')->only(['index', 'store', 'update']);
     });
@@ -184,6 +193,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     Route::group(['middleware' => 'jwtTokenRole:intervention.config'], function () {
+        Route::resource('sis-param', 'SisParamController')->only(['index']);
         Route::resource('type-intervention', 'TypeInterventionController')->only(['index', 'store', 'update']);
         Route::resource('vehicules', 'VehiculeController')->only(['index', 'store', 'update']);
         Route::resource('materiels', 'MaterielController')->only(['index', 'store', 'update']);
@@ -195,7 +205,15 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Exercices comptables
     Route::group(['middleware' => 'jwtTokenRole'], function () {
-        Route::resource('exercices-comptable', 'ExerciceComptableController')->only(['index']); //TODO: ajout cloturer
+        Route::resource('exercices-comptable', 'ExerciceComptableController')->only(['index']);
+    });
+
+    Route::group(['middleware' => 'jwtTokenRole:comptabilite.config'], function () {
+        Route::resource('sis-param', 'SisParamController')->only(['index']);
+        //TODO: Suppression d'exercices comptable ???
+        Route::resource('exercices-comptable', 'ExerciceComptableController')->only(['index', 'store', 'update']);
+        //TODO: Regarder que faire avec cloturer, déjà modifiable via la route update pour le moment
+        // Route::post('exercice-comptable/{id}/cloturer', 'ExerciceComptableController@cloturer');
     });
 
     Route::group(['middleware' => 'jwtTokenRole:comptabilite.tout'], function () {
@@ -260,6 +278,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     Route::group(['middleware' => 'jwtTokenRole:comptabilite.config'], function () {
+        Route::resource('sis-param', 'SisParamController')->only(['index']);
         Route::resource('avs-param', 'AvsParamController')->only(['index', 'store']);
         Route::resource('comptes', 'CompteController')->only(['index', 'store', 'update']);
         Route::resource('frais-types', 'FraisTypeController')->only(['index']);
@@ -280,6 +299,12 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::delete('controles-medicaux/{id}/justificatif', 'JustificatifController@destroy');
 
         // Params Controles médicaux
+        Route::resource('medecins', 'MedecinController')->only(['index']);
+        Route::resource('controles-medicaux-types', 'ControleMedicalTypeController')->only(['index']);
+    });
+
+    Route::group(['middleware' => 'jwtTokenRole:controle_medical.config'], function () {
+        Route::resource('sis-param', 'SisParamController')->only(['index']);
         Route::resource('medecins', 'MedecinController')->only(['index', 'store', 'update']);
         Route::resource('controles-medicaux-types', 'ControleMedicalTypeController')->only(['index', 'store', 'update']);
     });

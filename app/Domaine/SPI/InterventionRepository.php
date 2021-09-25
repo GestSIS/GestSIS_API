@@ -52,6 +52,6 @@ interface InterventionRepository
     public function addVehicule($interventionId, $vehiculeId);
     public function removeVehiculesById($interventionId, array $ids);
 
-    public function addGroupe($interventionId, $groupeId);
+    public function addGroupe($interventionId, $no, $designation);
     public function removeGroupesById($interventionId, array $ids);
 }

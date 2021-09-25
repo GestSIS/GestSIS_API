@@ -82,15 +82,15 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     public function supprimerInterventionById($interventionId)
     {
-        InterventionSapeur::where('intervention_id','=', $interventionId)->delete();
-        GroupeIntervention::where('intervention_id','=', $interventionId)->delete();
-        InterventionVehicule::where('intervention_id','=', $interventionId)->delete();
-        InterventionMateriel::where('intervention_id','=', $interventionId)->delete();
-        Quittance::where('intervention_id','=', $interventionId)->delete();
-        Mission::where('intervention_id','=', $interventionId)->delete();
-        Appel::where('intervention_id','=', $interventionId)->delete();
-        Phase::where('intervention_id','=', $interventionId)->delete();
-        Intervention::where('id','=', $interventionId)->delete();
+        InterventionSapeur::where('intervention_id', '=', $interventionId)->delete();
+        GroupeIntervention::where('intervention_id', '=', $interventionId)->delete();
+        InterventionVehicule::where('intervention_id', '=', $interventionId)->delete();
+        InterventionMateriel::where('intervention_id', '=', $interventionId)->delete();
+        Quittance::where('intervention_id', '=', $interventionId)->delete();
+        Mission::where('intervention_id', '=', $interventionId)->delete();
+        Appel::where('intervention_id', '=', $interventionId)->delete();
+        Phase::where('intervention_id', '=', $interventionId)->delete();
+        Intervention::where('id', '=', $interventionId)->delete();
     }
 
     public function getInterventionAppels($interventionId)
@@ -302,10 +302,11 @@ class InterventionRepositoryEloquent implements InterventionRepository
         InterventionVehicule::where('intervention_id', $interventionId)->whereIn('id', $ids)->delete();
     }
 
-    public function addGroupe($interventionId, $groupeId)
+    public function addGroupe($interventionId, $no, $designation)
     {
         $groupe = new GroupeIntervention();
-        $groupe->groupe_id = $groupeId;
+        $groupe->no = $no;
+        $groupe->designation = $designation;
         $groupe->intervention_id = $interventionId;
         $groupe->save();
         return $groupe;
@@ -511,7 +512,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
         $object = new StdClass();
         $object->id = $groupe->id;
 
-        $object->groupe_id = $groupe->groupe_id;
+        $object->no = $groupe->no;
+        $object->designation = $groupe->designation;
         $object->intervention_id = $groupe->intervention_id;
 
         return $object;

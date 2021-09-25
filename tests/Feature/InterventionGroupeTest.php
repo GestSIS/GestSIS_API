@@ -2,13 +2,13 @@
 
 namespace Test\Feature;
 
+use App\Infrastructure\Models\GroupeIntervention;
 use App\Infrastructure\Models\Intervention;
 use Exception;
 use Tests\TestCase;
 
 class InterventionGroupeTest extends TestCase
 {
-
     protected $interventionService;
     protected $interventionId;
 
@@ -38,7 +38,7 @@ class InterventionGroupeTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'intervention_id', 'groupe_id'
+                        'intervention_id', 'designation', 'no'
                     ]
                 ]
             ]);
@@ -52,7 +52,7 @@ class InterventionGroupeTest extends TestCase
      */
     public function testAddInterventionGroupe()
     {
-        $groupes = [1, 2, 3, 5];
+        $groupes = [['designation' => 'g1', 'no' => 1], ['designation' => 'g2', 'no' => 2], ['designation' => 'g3', 'no' => 3], ['designation' => 'g5', 'no' => 5]];
 
         $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/groupes', array('groupes' => $groupes));
 
@@ -71,10 +71,11 @@ class InterventionGroupeTest extends TestCase
      */
     public function testRemoveInterventionGroupe()
     {
-        $groupes = [1, 5];
+        $groupes = [['designation' => 'g1', 'no' => 1]];
+        $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/groupes', array('groupes' => $groupes));
+        $groupes = GroupeIntervention::where('intervention_id', '=', $this->interventionId)->pluck('id')->toArray();
 
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/groupes/', array("groupes" => $groupes));
-
         $response
             ->assertStatus(200)
             ->assertJson([
