@@ -5,8 +5,6 @@ namespace App\Application\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Domaine\API\PaiementService;
-use App\Domaine\Business\PaiementBusiness;
-use App\Infrastructure\Models\Decompte;
 
 class DecompteController extends Controller
 {
@@ -72,7 +70,7 @@ class DecompteController extends Controller
         $decompte = $this->service->creerDecompteExercice($data['exercice_id'], $data['date'], $data['deduction']);
         return response()->json(['data' => $decompte]);
     }
-    
+
     /**
      * Supprimer un décompte
      * 
@@ -94,6 +92,16 @@ class DecompteController extends Controller
     public function iso20022($id)
     {
         return $this->service->iso20022PourDecompte($id);
+    }
+
+    /**
+     * Créer un fichier iso20022 pour un décompte
+     * 
+     * @param int $id id du décompte pour lequelle le fichier doit être créé
+     */
+    public function print($id)
+    {
+        return $this->service->impressionDecompte($id);
     }
 
     /**

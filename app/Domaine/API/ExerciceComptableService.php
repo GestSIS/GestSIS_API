@@ -3,7 +3,6 @@
 namespace App\Domaine\API;
 
 use App\Infrastructure\Models\ExerciceComptable;
-use App\Domaine\Business\ControleMedicalBusiness;
 use App\Domaine\Business\ExerciceComptableBusiness;
 
 class ExerciceComptableService

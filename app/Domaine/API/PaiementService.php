@@ -4,13 +4,13 @@
 namespace App\Domaine\API;
 
 use App\Domaine\Business\PaiementBusiness;
-use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\SisParam;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 
 class PaiementService
 {
@@ -110,6 +110,21 @@ class PaiementService
         } catch (\InvalidArgumentException $e) {
             return response()->json(['data' => ['message' => 'Veuillez vérifier les informations de paiment de votre SIS']], 500);
         }
+    }
+
+    public function impressionDecompte($decompteId)
+    {
+        $decompte = Decompte::find($decompteId);
+        $ecritures = Ecriture::where('decompte_id', '=', $decompteId)->orderBy('date')->get();
+        $sapeursMap = [];
+        $sapeurs = Sapeur::get(['id', 'nom', 'prenom']);
+        foreach ($sapeurs as $sapeur) {
+            $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
+        }
+
+        return View('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
+        $pdf = SnappyPdf::loadView('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
+        return $pdf->download('presences.pdf');
     }
 
     /**

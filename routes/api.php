@@ -52,6 +52,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('telephone-types', 'TelephoneTypeController@index')->name('api.v2.telephone-types');
         Route::get('permis', 'PermisController@index')->name('api.v2.permis');
 
+        // Publipostage
+        Route::post('publipostage', 'PublipostageController@index')->name('publipostage');
+
         // Params Sapeurs
         Route::resource('groupes', 'GroupeController')->only(['index']);
         Route::resource('grades', 'GradeController')->only(['index']);
@@ -262,6 +265,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('decomptes/creer-exercice', 'DecompteController@creerExercice');
         Route::get('decomptes/exercice-comptable/{id}', 'DecompteController@getByExerciceComptable');
         Route::get('decomptes/{id}/iso20022', 'DecompteController@iso20022');
+        Route::get('decomptes/{id}/print', 'DecompteController@print');
         Route::resource('decomptes', 'DecompteController')->only(['show', 'destroy']);
 
         // Paiements

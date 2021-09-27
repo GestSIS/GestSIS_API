@@ -9,8 +9,10 @@ class Sapeur extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nom', 'prenom', 'suffixe', 'rue', 'no_rue', 'date_naissance', 'no_avs', 'profession', 'employeur',
-                 'lieu_de_travail', 'email', 'actif', 'iban', 'iban_statut', 'remarque','porteur', 'localite_id', 'civilite_id'];
+    protected $fillable = [
+        'nom', 'prenom', 'suffixe', 'rue', 'no_rue', 'date_naissance', 'no_avs', 'profession', 'employeur',
+        'lieu_de_travail', 'email', 'actif', 'iban', 'iban_statut', 'remarque', 'porteur', 'localite_id', 'civilite_id'
+    ];
 
     protected $attributes = [
         'suffixe' => '',
@@ -22,7 +24,7 @@ class Sapeur extends Model
         'iban' => ''
     ];
     /**
-     * The cours that belong to the sapeur.
+     * Les cours du sapeurs
      */
     public function cours()
     {
@@ -30,7 +32,7 @@ class Sapeur extends Model
     }
 
     /**
-     * The cours that belong to the sapeur.
+     * Les grades du sapeur
      */
     public function grades()
     {
@@ -38,11 +40,27 @@ class Sapeur extends Model
     }
 
     /**
-     * The cours that belong to the sapeur.
+     * Le grade principal du sapeur
+     */
+    public function grade()
+    {
+        return $this->belongsTo('App\Infrastructure\Models\Grade');
+    }
+
+    /**
+     * Les fonctions du sapeur
      */
     public function fonctions()
     {
         return $this->hasMany('App\Infrastructure\Models\FonctionSapeur');
+    }
+
+    /**
+     * La fonction principale du sapeur
+     */
+    public function fonction()
+    {
+        return $this->belongsTo('App\Infrastructure\Models\Fonction');
     }
 
     /**

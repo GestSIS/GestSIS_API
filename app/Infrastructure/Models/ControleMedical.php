@@ -12,7 +12,7 @@ class ControleMedical extends Model
     protected $fillable = ['designation', 'consultation', 'validite', 'accepter', 'en_cours', 'medecin_id', 'controle_medical_type_id'];
 
     use HasFactory;
-    
+
     /**
      * The model's default values for attributes.
      *

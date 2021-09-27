@@ -177,6 +177,11 @@ return [
         App\Application\Providers\RouteServiceProvider::class,
 
         /*
+         * Excel export provider
+         */
+        Maatwebsite\Excel\ExcelServiceProvider::class,
+
+        /*
          * Proper providers
          */
         App\Application\Providers\RepositoryServiceProvider::class,
@@ -232,6 +237,7 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
     ],
 
 ];
