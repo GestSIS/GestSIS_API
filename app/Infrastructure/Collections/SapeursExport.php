@@ -33,9 +33,9 @@ class SapeursExport implements FromQuery, WithHeadings
       ->leftJoin('grades', 'grades.id', '=', 'sapeurs.grade_id')
       ->leftJoin('localites', 'localites.id', '=', 'sapeurs.localite_id')
       ->select([
+        'civilites.forme_politesse',
         'sapeurs.nom', 'sapeurs.prenom', 'sapeurs.suffixe', 'sapeurs.rue', 'sapeurs.no_rue', 'sapeurs.date_naissance', 'sapeurs.no_avs', 'sapeurs.profession', 'sapeurs.employeur',
         'sapeurs.lieu_de_travail', 'sapeurs.email', 'sapeurs.actif', 'sapeurs.iban', 'sapeurs.remarque',
-        'civilites.designation', 'civilites.forme_politesse',
         'localites.npa', 'localites.designation',
         'grades.designation', 'grades.abreviation',
         'fonctions.nom', 'fonctions.abreviation'
@@ -46,9 +46,9 @@ class SapeursExport implements FromQuery, WithHeadings
   {
     //Put Here Header Name That you want in your excel sheet 
     return [
+      'civilite',
       'nom', 'prenom', 'suffixe', 'rue', 'no_rue', 'date_naissance', 'no_avs', 'profession', 'employeur',
       'lieu_de_travail', 'email', 'actif', 'iban', 'remarque',
-      'civilite', 'forme_politesse',
       'npa', 'localite',
       'grade', 'grade_abr',
       'fonction', 'fonction_abr'
