@@ -184,7 +184,7 @@ class PaiementBusiness
     {
         Ecriture::where('decompte_id', '=', $decompteId)->where('avs', '=', true)->delete();
         Ecriture::where('decompte_id', '=', $decompteId)->update(['decompte_id' => null]);
-        Decompte::where('id', '=', $decompteId)->delete(); // Casca de delete des paiements
+        Decompte::where('id', '=', $decompteId)->delete(); // Cascade delete des paiements
     }
 
     /**
