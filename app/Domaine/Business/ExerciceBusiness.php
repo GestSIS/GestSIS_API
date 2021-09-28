@@ -47,10 +47,11 @@ class ExerciceBusiness
         // Update statut si l'exercice est incomplet
         if (count($presenceIncompletes) > 0) {
             $statut = self::EXERCICE_STATUT_EMPTY;
-            $this->repository->updateExerciceById($exerciceId, array("statut" => $statut));
         } else {
-            $this->repository->updateExerciceById($exerciceId, array("statut" => max($statut, self::EXERCICE_STATUT_SAISI)));
+            $statut = max($statut, self::EXERCICE_STATUT_SAISI);
         }
+        $this->repository->updateExerciceById($exerciceId, array("statut" => $statut));
+
         return $statut;
     }
 
