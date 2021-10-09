@@ -4,8 +4,11 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\InterventionService;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\InterventionMateriel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\Console\Helper\Table;
 
 class InterventionMaterielsController extends Controller
 {
@@ -85,5 +88,19 @@ class InterventionMaterielsController extends Controller
         $this->service->removeMateriels($intervention_id, $data['materiels']);
 
         return response()->json(['data' => 'success']);
+    }
+
+    /**
+     * Return le nombre d'intervention par materiel pour l'année comptable
+     *
+     * @param Request $request
+     * @param int $exercice_comptable_id
+     * @return Response
+     */
+    public function stat(int $exercice_comptable_id)
+    {
+        $data = $this->service->statMateriel($exercice_comptable_id);
+
+        return response()->json(['data' => $data]);
     }
 }

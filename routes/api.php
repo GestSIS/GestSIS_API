@@ -170,7 +170,14 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         // Impressions interventions
         Route::post('interventions/{id}/rapport', 'InterventionController@rapport')->name('api.v2.interventions.rapport');
+
+        //TODO: Ajout deux routes
+        Route::get('statistiques/{id}/materiel', 'InterventionMaterielsController@stat');
+        Route::get('statistiques/{id}/vehicule', 'InterventionVehiculesController@stat');
+        // Route occurence intervention véhicules
+        // Route occurence intervention materiel
     });
+    Route::get('statistiques/{id}/vehicule', 'InterventionVehiculesController@stat');
 
     // Intervention validation
     Route::group(['middleware' => 'jwtTokenRole:intervention.validation'], function () {
