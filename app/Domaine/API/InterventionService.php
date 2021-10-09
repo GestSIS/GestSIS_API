@@ -14,6 +14,7 @@ use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\Vehicule;
 use Illuminate\Database\Eloquent\Collection;
 use Barryvdh\Snappy\Facades\SnappyPdf;
+use Illuminate\Support\Facades\DB;
 
 class InterventionService
 {
@@ -459,5 +460,41 @@ class InterventionService
             "presences" => $presences,
         ]);
         return $pdf->download('rapport.pdf');
+    }
+
+    /**
+     * Return le nombre d'intervention par materiel pour l'année comptable
+     *
+     * @param Request $request
+     * @param int $exercice_comptable_id
+     * @return Response
+     */
+    public function statMateriel(int $exercice_comptable_id)
+    {
+        $data = DB::select("SELECT im.materiel_id, sum(im.quantite) as nb
+                FROM intervention_materiel as im
+                INNER JOIN interventions as i ON i.id = im.intervention_id
+                WHERE i.exercice_comptable_id = ? GROUP BY im.materiel_id
+            ", [$exercice_comptable_id]);
+
+        return $data;
+    }
+
+    /**
+     * Return le nombre d'intervention par véhicule pour l'année comptable
+     *
+     * @param Request $request
+     * @param int $exercice_comptable_id
+     * @return Response
+     */
+    public function statVehicule(int $exercice_comptable_id)
+    {
+        $data = DB::select("SELECT iv.vehicule_id, count(*) as nb
+                FROM intervention_vehicule as iv
+                INNER JOIN interventions as i ON i.id = iv.intervention_id
+                WHERE i.exercice_comptable_id = ? GROUP BY iv.vehicule_id
+            ", [$exercice_comptable_id]);
+
+        return $data;
     }
 }
