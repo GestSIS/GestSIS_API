@@ -180,6 +180,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('statistiques/{id}/materiel', 'InterventionMaterielsController@stat');
         Route::get('statistiques/{id}/vehicule', 'InterventionVehiculesController@stat');
     });
+    Route::get('statistiques/{id}/vehicule', 'InterventionVehiculesController@stat');
 
     // Intervention validation
     Route::group(['middleware' => 'jwtTokenRole:intervention.validation'], function () {
