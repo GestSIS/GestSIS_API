@@ -79,7 +79,7 @@ class ExerciceBusiness
         // Check pas déjà imputé
         $statut = $this->repository->getExerciceStatutById($exerciceId);
         if ($statut > self::EXERCICE_STATUT_IMPUTE) {
-            return new ArrayException(['message' => 'Impossible de supprimer un exercice déjà imputé']);
+            throw new ArrayException(['message' => 'Impossible de supprimer un exercice déjà imputé']);
         }
 
         $this->repository->deleteExerciceById($exerciceId);
@@ -118,7 +118,7 @@ class ExerciceBusiness
     {
         // Check pas déjà imputé
         $statut = $this->repository->getExerciceStatutById($exerciceId);
-        if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_SAISI) {
+        if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_VALIDE) {
             throw new ArrayException(['message' => 'Impossible de modifier un exercice déjà imputé']);
         }
 
@@ -149,8 +149,8 @@ class ExerciceBusiness
     {
         // Check pas déjà imputé
         $statut = $this->repository->getExerciceStatutById($exerciceId);
-        if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_SAISI) {
-            return new ArrayException(['message' => 'Impossible de modifier un exercice déjà imputé']);
+        if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_VALIDE) {
+            throw new ArrayException(['message' => 'Impossible de modifier un exercice déjà imputé']);
         }
 
         foreach ($sapeurs as $sapeur) {
@@ -170,7 +170,7 @@ class ExerciceBusiness
         // Check pas déjà imputé
         $statut = $this->repository->getExerciceStatutById($exerciceId);
         if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_SAISI) {
-            return new ArrayException(['message' => 'Impossible de modifier un exercice déjà imputé']);
+            throw new ArrayException(['message' => 'Impossible de modifier un exercice déjà imputé']);
         }
 
         $this->repository->removeSapeursFromExercice($exerciceId, $ids);

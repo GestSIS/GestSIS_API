@@ -64,7 +64,6 @@ class ConvocationsController extends Controller
      */
     public function update(Request $request, int $exerciceId)
     {
-
         $data = $request->validate([
             'sapeurs.*.id' => 'required|integer',
             'sapeurs.*.convoque' => 'required|boolean',
@@ -98,7 +97,7 @@ class ConvocationsController extends Controller
         return response()->json(['data' => $statut]);
     }
 
-    
+
     /**
      * Annule la présence de sapeurs
      *
