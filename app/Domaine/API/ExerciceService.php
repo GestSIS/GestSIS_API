@@ -11,6 +11,7 @@ use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Fonction;
 use Illuminate\Database\Eloquent\Collection;
 use Barryvdh\Snappy\Facades\SnappyPdf;
+use Illuminate\Support\Facades\DB;
 
 class ExerciceService
 {
@@ -203,5 +204,24 @@ class ExerciceService
         // return View('pdf/liste-presence', ["exercice" => $exercice, "excuses" => $excusesMap]);
         $pdf = SnappyPdf::loadView('pdf/liste-presence', ["exercice" => $exercice, "excuses" => $excusesMap]);
         return $pdf->download('presences.pdf');
+    }
+
+
+    /**
+     * Return les statistiques de présence pour les exercices
+     *
+     * @param Request $request
+     * @param int $exercice_comptable_id
+     * @return Response
+     */
+    public function statPresences(int $exercice_comptable_id)
+    {
+        $presences = DB::select("SELECT es.*
+                FROM exercice_sapeur as es
+                INNER JOIN exercices as e ON e.id = es.exercice_id
+                WHERE e.exercice_comptable_id = ?
+            ", [$exercice_comptable_id]);
+
+        return $presences;
     }
 }

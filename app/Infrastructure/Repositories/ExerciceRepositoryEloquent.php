@@ -132,12 +132,12 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         $sapeur->save();
     }
 
-    public function editSapeurOfExercice(int $exerciceId, array $sapeurs)
+    public function editSapeurOfExercice(int $exerciceId, array $sapeur)
     {
         ExerciceSapeur
             ::where('exercice_id', $exerciceId)
-            ->where('id', $sapeurs['id'])
-            ->update($sapeurs);
+            ->where('id', $sapeur['id'])
+            ->update($sapeur);
     }
 
     public function removeSapeursFromExercice(int $exerciceId, array $ids)
@@ -259,7 +259,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
 
         return $object;
     }
-    
+
     /**
      * @param $sapeur
      * @return StdClass|null
