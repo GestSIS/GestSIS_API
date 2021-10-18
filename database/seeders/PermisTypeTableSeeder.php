@@ -23,6 +23,7 @@ class PermisTypeTableSeeder extends Seeder
             array('type' => 'C',),
             array('type' => 'CE',),
             array('type' => 'C1',),
+            array('type' => 'C1 118',),
             array('type' => 'C1E',),
             array('type' => 'D',),
             array('type' => 'DE',),
