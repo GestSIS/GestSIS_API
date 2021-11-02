@@ -14,7 +14,7 @@ class JustificatifController extends Controller
     {
         $this->service = $service;
     }
-    
+
     /**
      * Display the specified resource.
      *
@@ -24,7 +24,7 @@ class JustificatifController extends Controller
     public function show(int $controleId)
     {
         $justificatif = $this->service->getJustificatif($controleId);
-        
+
         $headers = array(
             'Content-Type: application/pdf',
             'Cache-Control: no-cache private',
@@ -42,14 +42,13 @@ class JustificatifController extends Controller
      */
     public function store(Request $request, int $id)
     {
-        if (!$request->hasFile('justificatif') || !$request->file('justificatif')->isValid())
-        {
-            return response()->json(['error' => 'Fichier justificatif manquant']);    
+        if (!$request->hasFile('justificatif') || !$request->file('justificatif')->isValid()) {
+            return response()->json(['error' => 'Fichier justificatif manquant']);
         }
 
         $file = $request->file('justificatif');
-
-        $justificatif = $this->service->addJustificatif($id, $file);
+        $sisKey = $request->header('Sis-Id', Null);
+        $justificatif = $this->service->addJustificatif($id, $file, $sisKey);
 
         return response()->json(['data' => $justificatif]);
     }
