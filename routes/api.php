@@ -45,6 +45,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('sapeurs.grades', 'SapeurGradeController')->only(['index']);
         Route::resource('sapeurs.mutations', 'SapeurMutationController')->only(['index']);
         Route::resource('sapeurs.cours', 'SapeurCoursController')->only(['index']);
+        Route::resource('sapeurs.photo', 'SapeurPhotoController')->only(['index']);
 
         // Static Params Sapeurs ---
         Route::get('civilites', 'CiviliteController@index')->name('api.v2.civilites');
@@ -72,6 +73,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('sapeurs.grades', 'SapeurGradeController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('sapeurs.mutations', 'SapeurMutationController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('sapeurs.cours', 'SapeurCoursController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('sapeurs.photo', 'SapeurPhotoController')->only(['index', 'store', 'delete']);
 
         Route::get('sapeurs/{id}/exercices/{exerciceComptableId}', 'SapeurExerciceController@index');
         Route::post('sapeurs/{id}/fin-fonctions', 'SapeurFonctionController@fin');
