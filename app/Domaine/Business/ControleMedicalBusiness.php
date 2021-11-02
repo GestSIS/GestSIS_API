@@ -29,12 +29,12 @@ class ControleMedicalBusiness
         Medecin::where('id', $id)->limit(1)->update($data);
         return Medecin::find($id);
     }
-    
+
     public function supprimerMedecin($id)
     {
         // TODO: Implémenter supprimer médecin
     }
-    
+
     public function ajouterType($data)
     {
         $type = new ControleMedicalType();
@@ -48,7 +48,7 @@ class ControleMedicalBusiness
         ControleMedicalType::where('id', $id)->limit(1)->update($data);
         return ControleMedicalType::find($id);
     }
-    
+
     public function supprimerType($id)
     {
         // TODO: Implémenter supprimer médecin
@@ -75,13 +75,13 @@ class ControleMedicalBusiness
         return $this->repository->deleteControleMedical($controleId);
     }
 
-    public function addJustificatif($controleMedicalId, $file)
+    public function addJustificatif($controleMedicalId, $file, $sisId)
     {
         //First remove potential already existing document
         $this->removeJustificatif($controleMedicalId);
 
         //Then add the new one
-        $path = $file->store('documents/controles_medicaux');
+        $path = $file->store('documents/' . $sisId . '/controles_medicaux');
         return $this->repository->addJustificatif($controleMedicalId, $file->getClientOriginalName(), $path);
     }
 

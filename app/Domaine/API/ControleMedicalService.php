@@ -20,7 +20,7 @@ class ControleMedicalService
         $this->repository = $repository;
         $this->business = $business;
     }
-    
+
     public function medecins()
     {
         return Medecin::all();
@@ -35,12 +35,12 @@ class ControleMedicalService
     {
         return $this->business->modifierMedecin($id, $data);
     }
-    
+
     public function supprimerMedecin($id)
     {
         return $this->business->supprimerMedecin($id);
     }
-        
+
     public function types()
     {
         return ControleMedicalType::all();
@@ -55,7 +55,7 @@ class ControleMedicalService
     {
         return $this->business->modifierType($id, $data);
     }
-    
+
     public function supprimerType($id)
     {
         return $this->business->supprimerType($id);
@@ -86,9 +86,9 @@ class ControleMedicalService
         return $this->business->removeControleMedical($id);
     }
 
-    public function addJustificatif($controleId, $file)
+    public function addJustificatif($controleId, $file, $sisId)
     {
-        return $this->business->addJustificatif($controleId, $file);
+        return $this->business->addJustificatif($controleId, $file, $sisId);
     }
 
     public function getJustificatif($controleId)
