@@ -6,6 +6,7 @@ namespace App\Domaine\API;
 
 use App\Domaine\Business\SapeurBusiness;
 use App\Domaine\SPI\SapeurRepository;
+use Illuminate\Support\Facades\Storage;
 
 class SapeurService
 {
@@ -61,6 +62,40 @@ class SapeurService
     public function getSapeurTelephonesById(int $sapeurId)
     {
         return $this->repository->getSapeurTelephonesById($sapeurId);
+    }
+
+    private static $ALLOWED_PHOTO_EXTENSION = ['jpg', 'jpeg', 'png'];
+
+    public function getPhotoSapeur($sapeurId, $sisId)
+    {
+        foreach (self::$ALLOWED_PHOTO_EXTENSION as $extension) {
+            $path = 'photos/' . $sisId . '/' . $sapeurId . '.' . $extension;
+            if (Storage::exists($path)) {
+                // return response()->json(storage_path($path));
+                // return response()->file(storage_path('app/' . $path));
+                return Storage::download($path, null, ['Response-Type' => 'arraybuffer']);
+            }
+        }
+        return response()->json(Null);
+    }
+
+    public function deletePhotoSapeur($sapeurId, $sisId)
+    {
+        $path = 'photos/' . $sisId . '/' . $sapeurId . '.';
+        $files = array_map(function ($extension) use ($path) {
+            return $path . $extension;
+        }, self::$ALLOWED_PHOTO_EXTENSION);
+        Storage::delete($files);
+    }
+
+    public function uploadPhotoSapeur($image, $sapeurId, $sisId)
+    {
+        //Supprime toute potentielle image précédente
+        $this->deletePhotoSapeur($sapeurId, $sisId);
+
+        // Ajout de l'image
+        $extension = strtolower($image->extension());
+        return $image->storeAs('photos/' . $sisId,  $sapeurId . "." . $extension);
     }
 
     public function createSapeur($data)
