@@ -5,7 +5,9 @@ namespace App\Domaine\Business;
 use App\Infrastructure\Models\Amende;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\EcritureCategorie;
+use App\Infrastructure\Models\FraisAnnuel;
 use App\Infrastructure\Models\FraisAnnuelType;
+use App\Infrastructure\Models\IndemniteAnnuel;
 use App\Infrastructure\Models\IndemniteAnnuelType;
 use App\Infrastructure\Models\IndemniteExerciceType;
 use App\Infrastructure\Models\IndemniteInterventionType;
@@ -50,7 +52,7 @@ class ComptabiliteParamBusiness
 
     public static function ajouterFraisAnnuel($data)
     {
-        $frais = new FraisAnnuelType();
+        $frais = new FraisAnnuel();
         $frais->fill($data);
         $frais->save();
         return $frais;
@@ -58,16 +60,58 @@ class ComptabiliteParamBusiness
 
     public static function modifierFraisAnnuel($id, $data)
     {
-        FraisAnnuelType::where('id', $id)->limit(1)->update($data);
-        return FraisAnnuelType::find($id);
+        FraisAnnuel::where('id', $id)->limit(1)->update($data);
+        return FraisAnnuel::find($id);
     }
 
     public static function supprimerFraisAnnuel($id)
     {
-        //TODO: Not implemented now
+        FraisAnnuel::where('id', $id)->limit(1)->delete();
+    }
+
+    public static function ajouterFraisAnnuelType($data)
+    {
+        $frais = new FraisAnnuelType();
+        $frais->fill($data);
+        $frais->save();
+        $object = $frais->toArray();
+        $object['fraisAnnuels'] = [];
+        return $object;
+    }
+
+    public static function modifierFraisAnnuelType($id, $data)
+    {
+        FraisAnnuelType::where('id', $id)->limit(1)->update($data);
+        return FraisAnnuelType::with('fraisAnnuels')->find($id);
+    }
+
+    public static function supprimerFraisAnnuelType($id)
+    {
+        FraisAnnuelType::where('id', $id)->limit(1)->delete();
     }
 
     public static function ajouterIndemniteAnnuel($data)
+    {
+        $indemnite = new IndemniteAnnuel();
+        $indemnite->fill($data);
+        $indemnite->save();
+        $object = $indemnite->toArray();
+        $object['indemniteAnnuels'] = [];
+        return $object;
+    }
+
+    public static function modifierIndemniteAnnuel($id, $data)
+    {
+        IndemniteAnnuel::where('id', $id)->limit(1)->update($data);
+        return IndemniteAnnuel::find($id);
+    }
+
+    public static function supprimerIndemniteAnnuel($id)
+    {
+        IndemniteAnnuel::where('id', $id)->limit(1)->delete();
+    }
+
+    public static function ajouterIndemniteAnnuelType($data)
     {
         $indemnite = new IndemniteAnnuelType();
         $indemnite->fill($data);
@@ -75,15 +119,15 @@ class ComptabiliteParamBusiness
         return $indemnite;
     }
 
-    public static function modifierIndemniteAnnuel($id, $data)
+    public static function modifierIndemniteAnnuelType($id, $data)
     {
         IndemniteAnnuelType::where('id', $id)->limit(1)->update($data);
-        return IndemniteAnnuelType::find($id);
+        return IndemniteAnnuelType::with('indemniteAnnuels')->find($id);
     }
 
-    public static function supprimerIndemniteAnnuel($id)
+    public static function supprimerIndemniteAnnuelType($id)
     {
-        //TODO: Not implemented now
+        IndemniteAnnuelType::where('id', $id)->limit(1)->delete();
     }
 
     public static function ajouterIndemniteExercice($data)
@@ -130,7 +174,7 @@ class ComptabiliteParamBusiness
 
     public static function supprimerIndemniteExercice($id)
     {
-        //TODO: Not implemented now
+        IndemniteExerciceType::where('id', $id)->limit(1)->delete();
     }
 
     public static function ajouterIndemniteIntervention($data)
@@ -167,7 +211,7 @@ class ComptabiliteParamBusiness
 
     public static function supprimerIndemniteIntervention($id)
     {
-        //TODO: Not implemented now
+        IndemniteInterventionType::where('id', $id)->limit(1)->delete();
     }
 
     public static function ajouterCompte($data)

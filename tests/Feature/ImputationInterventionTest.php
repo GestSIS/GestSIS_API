@@ -30,19 +30,19 @@ class ImputationInterventionTest extends TestCase
 
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "29.01.2019";
-        $this->sapeurOneId = $sapeurService->createSapeur($data)->id;;
+        $this->sapeurOneId = $sapeurService->createSapeur($data)->id;
 
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "29.01.2019";
-        $this->sapeurTwoId = $sapeurService->createSapeur($data)->id;;
+        $this->sapeurTwoId = $sapeurService->createSapeur($data)->id;
 
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "29.01.2019";
         $this->sapeurThreeId = $sapeurService->createSapeur($data)->id;
 
         $intervention = Intervention::factory()->make();
-        $intervention->date_debut = Carbon::createMidnightDate(2019, 1,1);
-        $intervention->date_fin = Carbon::createMidnightDate(2019, 1,3);
+        $intervention->date_debut = Carbon::createMidnightDate(2019, 1, 1);
+        $intervention->date_fin = Carbon::createMidnightDate(2019, 1, 3);
 
         $this->interventionId = $interventionService->createIntervention($intervention->toArray())->id;
 
@@ -118,21 +118,21 @@ class ImputationInterventionTest extends TestCase
         //dd($ecritures);
         //$this->assertTrue(count($ecritures) === 3);
     }
-//    /**
-//     * Test add exercice
-//     *
-//     * @return void
-//     * @throws Exception
-//     */
-//    public function testImputationLonguePériode()
-//    {
-//        $param = array(
-//            "indemnite_exercice_type_id" => 10
-//        );
-//
-//        $ecritures = $this->comptabiliteService->imputationExercice($this->interventionId, $param);
-//        //$response = $this->json('POST', '/api/v2/imputation/exercice/' . $this->interventionId, $param);
-//
-//        $this->assertTrue(count($ecritures) === 2);
-//    }
+    //    /**
+    //     * Test add exercice
+    //     *
+    //     * @return void
+    //     * @throws Exception
+    //     */
+    //    public function testImputationLonguePériode()
+    //    {
+    //        $param = array(
+    //            "indemnite_exercice_type_id" => 10
+    //        );
+    //
+    //        $ecritures = $this->comptabiliteService->imputationExercice($this->interventionId, $param);
+    //        //$response = $this->json('POST', '/api/v2/imputation/exercice/' . $this->interventionId, $param);
+    //
+    //        $this->assertTrue(count($ecritures) === 2);
+    //    }
 }

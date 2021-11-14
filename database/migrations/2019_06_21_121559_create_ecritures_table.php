@@ -40,21 +40,18 @@ class CreateEcrituresTable extends Migration
             $table->boolean('avs')->default(false);
             $table->boolean('amende')->default(false);
 
-            // TODO: Regarder si les clés étrangères suivantes peuventêtre remplacé par un simple boolean
-            // indemnite_annuel_type_id
-            // $table->boolean('indemnite_annuel')->default(false);
-            // frais_annuel_type_id
-            // $table->boolean('frais_annuel')->default(false);
+            $table->boolean('indemnite_annuel')->default(false);
+            $table->boolean('frais_annuel')->default(false);
 
             $table->unsignedBigInteger('compte_id');
             $table->foreign('compte_id')->references('id')->on('comptes');
-            
+
             $table->unsignedBigInteger('exercice_comptable_id');
             $table->foreign('exercice_comptable_id')->references('id')->on('exercice_comptables');
 
             $table->unsignedBigInteger('ecriture_categorie_id');
             $table->foreign('ecriture_categorie_id')->references('id')->on('ecriture_categories');
-            
+
             // Utilisé pour les décomptes sapeurs
             $table->unsignedBigInteger('sapeur_id')->nullable();
             $table->foreign('sapeur_id')->references('id')->on('sapeurs');
@@ -64,14 +61,6 @@ class CreateEcrituresTable extends Migration
 
             $table->unsignedBigInteger('exercice_id')->nullable();
             $table->foreign('exercice_id')->references('id')->on('exercices');
-
-            /** TODO: A voir si remplacer les deux clés suivantes */
-            $table->unsignedBigInteger('indemnite_annuel_type_id')->nullable();
-            $table->foreign('indemnite_annuel_type_id')->references('id')->on('indemnite_annuel_types');
-
-            $table->unsignedBigInteger('frais_annuel_type_id')->nullable();
-            $table->foreign('frais_annuel_type_id')->references('id')->on('frais_annuel_types');
-            /** END TODO */
         });
     }
 

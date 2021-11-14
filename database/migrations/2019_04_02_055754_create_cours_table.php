@@ -16,7 +16,7 @@ class CreateCoursTable extends Migration
         Schema::create('cours', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
-            
+
             $table->unsignedBigInteger('precedent_id')->nullable();
             $table->foreign('precedent_id')->references('id')->on('cours');
 
@@ -24,7 +24,7 @@ class CreateCoursTable extends Migration
             $table->foreign('grade_id')->references('id')->on('grades');
 
             $table->unsignedBigInteger('fonction_id')->nullable();
-            $table->foreign('fonction_id')->references('id')->on('fonctions');
+            $table->foreign('fonction_id')->references('id')->on('fonctions')->onDelete('set null');
 
             $table->string('abreviation');
             $table->string('designation');

@@ -6,5 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class IndemniteAnnuelType extends Model
 {
-    protected $fillable = ['compte_id', 'type_unite_id', 'ecriture_categorie_id', 'montant', 'quantite', 'fonction_id', 'designation'];
+    protected $fillable = ['compte_id', 'ecriture_categorie_id', 'designation'];
+
+    public function indemniteAnnuels()
+    {
+        return $this->hasMany(IndemniteAnnuel::class);
+    }
 }

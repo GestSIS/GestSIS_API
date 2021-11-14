@@ -18,20 +18,13 @@ class CreateIndemniteAnnuelTypesTable extends Migration
             $table->timestamps();
 
             $table->string('designation');
-            $table->unsignedDecimal('montant');
-            $table->unsignedDecimal('quantite');
-
-            $table->unsignedBigInteger('fonction_id');
-            $table->foreign('fonction_id')->references('id')->on('fonctions');
+            $table->boolean('cumulable')->default(False);
 
             $table->unsignedBigInteger('compte_id');
             $table->foreign('compte_id')->references('id')->on('comptes');
 
             $table->unsignedBigInteger('ecriture_categorie_id');
             $table->foreign('ecriture_categorie_id')->references('id')->on('ecriture_categories');
-
-            $table->unsignedBigInteger('type_unite_id');
-            $table->foreign('type_unite_id')->references('id')->on('type_unites');
         });
     }
 

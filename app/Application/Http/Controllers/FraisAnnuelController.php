@@ -5,7 +5,7 @@ namespace App\Application\Http\Controllers;
 use App\Domaine\API\ComptabiliteParamService;
 use Illuminate\Http\Request;
 
-class FraisAnnuelTypeController extends Controller
+class FraisAnnuelController extends Controller
 {
     protected $service;
 
@@ -24,30 +24,34 @@ class FraisAnnuelTypeController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'compte_id' => 'integer',
-            'ecriture_categorie_id' => 'integer',
+            'montant' => 'numeric',
+            'quantite' => 'numeric',
+            'fonction_id' => 'exists:fonctions,id',
+            'frais_annuel_type_id' => 'exists:frais_annuel_types,id',
+            'type_unite_id' => 'exists:type_unites,id'
         ]);
 
-        $frais = $this->service->ajouterFraisAnnuelType($data);
+        $frais = $this->service->ajouterFraisAnnuel($data);
         return response()->json(['data' => $frais]);
     }
 
     public function update(Request $request, $id)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'compte_id' => 'integer',
-            'ecriture_categorie_id' => 'integer',
+            'montant' => 'numeric',
+            'quantite' => 'numeric',
+            'fonction_id' => 'exists:fonctions,id',
+            'frais_annuel_type_id' => 'exists:frais_annuel_types,id',
+            'type_unite_id' => 'exists:type_unites,id'
         ]);
 
-        $frais = $this->service->modifierFraisAnnuelType($id, $data);
+        $frais = $this->service->modifierFraisAnnuel($id, $data);
         return response()->json(['data' => $frais]);
     }
 
     public function destroy($id)
     {
-        $this->service->supprimerFraisAnnuelType($id);
-        return response()->json(['data' => 'ok']);
+        $frais = $this->service->supprimerFraisAnnuel($id);
+        return response()->json(['data' => $frais]);
     }
 }
