@@ -24,7 +24,12 @@ class BaseDataComptabiliteTest extends TestCase
                 'data' => [
                     'annuels' => [
                         '*' => [
-                            'id', 'designation', 'fonction_id', 'quantite', 'montant'
+                            'id', 'designation',
+                            'fraisAnnuels' => [
+                                '*' => [
+                                    'id', 'fonction_id', 'quantite', 'montant'
+                                ]
+                            ]
                         ]
                     ]
                 ]
@@ -47,7 +52,12 @@ class BaseDataComptabiliteTest extends TestCase
                 'data' => [
                     'annuels' => [
                         '*' => [
-                            'id', 'designation', 'fonction_id', 'quantite', 'montant'
+                            'id', 'designation',
+                            'indemniteAnnuels' => [
+                                '*' => [
+                                    'id', 'fonction_id', 'quantite', 'montant'
+                                ]
+                            ]
                         ]
                     ],
                     'exercices' => [
@@ -129,5 +139,4 @@ class BaseDataComptabiliteTest extends TestCase
                 ]
             ]);
     }
-
 }
