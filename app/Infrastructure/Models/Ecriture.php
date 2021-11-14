@@ -27,7 +27,6 @@ class Ecriture extends Model
         'exercice_comptable_id',
         'intervention_id',
         'exercice_id',
-
         'decompte_id',
         'ecriture_categorie_id',
 
