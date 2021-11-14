@@ -29,11 +29,11 @@ class ImputationExerciceTest extends TestCase
 
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "29.01.2019";
-        $this->sapeurOneId = $sapeurService->createSapeur($data)->id;;
+        $this->sapeurOneId = $sapeurService->createSapeur($data)->id;
 
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "29.01.2019";
-        $this->sapeurTwoId = $sapeurService->createSapeur($data)->id;;
+        $this->sapeurTwoId = $sapeurService->createSapeur($data)->id;
 
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "29.01.2019";

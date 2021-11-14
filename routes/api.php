@@ -295,10 +295,12 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('avs-param', 'AvsParamController')->only(['index', 'store']);
         Route::resource('comptes', 'CompteController')->only(['index', 'store', 'update']);
         Route::resource('frais-types', 'FraisTypeController')->only(['index']);
-        Route::resource('indemnites-exercice-types', 'IndemniteExerciceTypeController')->only(['index', 'store', 'update']);
-        Route::resource('indemnites-intervention-types', 'IndemniteInterventionTypeController')->only(['index', 'store', 'update']);
-        Route::resource('indemnites-annuel-types', 'IndemniteAnnuelTypeController')->only(['index', 'store', 'update']);
-        Route::resource('frais-annuel-types', 'FraisAnnuelTypeController')->only(['index', 'store', 'update']);
+        Route::resource('indemnites-exercice-types', 'IndemniteExerciceTypeController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('indemnites-intervention-types', 'IndemniteInterventionTypeController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('indemnites-annuel', 'IndemniteAnnuelController')->only(['store', 'update', 'destroy']);
+        Route::resource('indemnites-annuel-types', 'IndemniteAnnuelTypeController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('frais-annuel', 'FraisAnnuelController')->only(['store', 'update', 'destroy']);
+        Route::resource('frais-annuel-types', 'FraisAnnuelTypeController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('ecriture-categories', 'EcritureCategorieController')->only(['index', 'store', 'update']);
 
         Route::resource('amendes', 'AmendeController')->only(['index', 'store']);

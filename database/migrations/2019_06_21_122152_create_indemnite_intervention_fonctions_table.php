@@ -20,7 +20,7 @@ class CreateIndemniteInterventionFonctionsTable extends Migration
             $table->unsignedDecimal('solde');
 
             $table->unsignedBigInteger('fonction_id');
-            $table->foreign('fonction_id')->references('id')->on('fonctions');
+            $table->foreign('fonction_id')->references('id')->on('fonctions')->onDelete('cascade');
 
             $table->unsignedBigInteger('indemnite_int_id');
             $table->foreign('indemnite_int_id')->references('id')->on('indemnite_intervention_types');

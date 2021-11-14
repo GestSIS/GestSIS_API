@@ -23,8 +23,8 @@ class Ecriture extends Model
         'exercice_comptable_id',
         'intervention_id',
         'exercice_id',
-        'indemnite_annuel_type_id',
-        'frais_annuel_type_id',
+        'indemnite_annuel',
+        'frais_annuel',
         'ecriture_categorie_id',
         'date',
         'heure',
@@ -33,5 +33,4 @@ class Ecriture extends Model
         'amende',
         'avs',
     ];
-
 }

@@ -5,7 +5,7 @@ namespace App\Application\Http\Controllers;
 use App\Domaine\API\ComptabiliteParamService;
 use Illuminate\Http\Request;
 
-class IndemniteAnnuelTypeController extends Controller
+class IndemniteAnnuelController extends Controller
 {
     protected $service;
 
@@ -24,30 +24,34 @@ class IndemniteAnnuelTypeController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'compte_id' => 'integer',
-            'ecriture_categorie_id' => 'integer',
+            'montant' => 'numeric',
+            'quantite' => 'numeric',
+            'fonction_id' => 'exists:fonctions,id',
+            'indemnite_annuel_type_id' => 'exists:indemnite_annuel_types,id',
+            'type_unite_id' => 'exists:type_unites,id'
         ]);
 
-        $indemnite = $this->service->ajouterIndemniteAnnuelType($data);
+        $indemnite = $this->service->ajouterIndemniteAnnuel($data);
         return response()->json(['data' => $indemnite]);
     }
 
     public function update(Request $request, $id)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'compte_id' => 'integer',
-            'ecriture_categorie_id' => 'integer',
+            'montant' => 'numeric',
+            'quantite' => 'numeric',
+            'fonction_id' => 'exists:fonctions,id',
+            'indemnite_annuel_type_id' => 'exists:indemnite_annuel_types,id',
+            'type_unite_id' => 'exists:type_unites,id'
         ]);
 
-        $indemnite = $this->service->modifierIndemniteAnnuelType($id, $data);
+        $indemnite = $this->service->modifierIndemniteAnnuel($id, $data);
         return response()->json(['data' => $indemnite]);
     }
 
     public function destroy($id)
     {
-        $indemnite = $this->service->supprimerIndemniteAnnuelType($id);
+        $indemnite = $this->service->supprimerIndemniteAnnuel($id);
         return response()->json(['data' => $indemnite]);
     }
 }

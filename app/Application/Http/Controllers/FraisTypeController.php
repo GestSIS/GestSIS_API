@@ -25,5 +25,4 @@ class FraisTypeController extends Controller
 
         return response()->json(['data' => $indemnites]);
     }
-
 }

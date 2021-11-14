@@ -19,7 +19,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
                 ->get()
         );
     }
-    
+
     public function listeAmendeForExerciceComptableById($exerciceComptableId)
     {
         return $this->convertCollectionOfEcritures(
@@ -63,7 +63,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         return $this->convertCollectionOfEcritures(
             Ecriture
                 ::where('exercice_comptable_id', $exerciceComptableId)
-                ->whereNotNull('frais_annuel_type_id')
+                ->where('frais_annuel', true)
                 ->get()
         );
     }
@@ -73,7 +73,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         return $this->convertCollectionOfEcritures(
             Ecriture
                 ::where('exercice_comptable_id', $exerciceComptableId)
-                ->whereNotNull('indemnite_annuel_type_id')
+                ->where('indemnite_annuel', true)
                 ->get()
         );
     }
@@ -85,8 +85,8 @@ class EcritureRepositoryEloquent implements EcritureRepository
                 ::where('exercice_comptable_id', $exerciceComptableId)
                 ->where(function ($query) {
                     $query
-                        ->whereNotNull('frais_annuel_type_id')
-                        ->orWhereNotNull('indemnite_annuel_type_id');
+                        ->where('frais_annuel', true)
+                        ->orWhere('indemnite_annuel');
                 })
                 ->get()
         );
@@ -136,8 +136,6 @@ class EcritureRepositoryEloquent implements EcritureRepository
         if (!array_key_exists('exercice_comptable_id', $ecriture)) $ecriture['exercice_comptable_id'] = null;
         if (!array_key_exists('intervention_id', $ecriture)) $ecriture['intervention_id'] = null;
         if (!array_key_exists('exercice_id', $ecriture)) $ecriture['exercice_id'] = null;
-        if (!array_key_exists('indemnite_annuel_type_id', $ecriture)) $ecriture['indemnite_annuel_type_id'] = null;
-        if (!array_key_exists('frais_annuel_type_id', $ecriture)) $ecriture['frais_annuel_type_id'] = null;
         if (!array_key_exists('decompte_id', $ecriture)) $ecriture['decompte_id'] = null;
         if (!array_key_exists('date', $ecriture)) $ecriture['date'] = null;
         if (!array_key_exists('heure', $ecriture)) $ecriture['heure'] = null;
@@ -181,8 +179,8 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->exercice_comptable_id = $ecriture->exercice_comptable_id;
         $object->intervention_id = $ecriture->intervention_id;
         $object->exercice_id = $ecriture->exercice_id;
-        $object->indemnite_annuel_type_id = $ecriture->indemnite_annuel_type_id;
-        $object->frais_annuel_type_id = $ecriture->frais_annuel_type_id;
+        $object->indemnite_annuel = $ecriture->indemnite_annuel;
+        $object->frais_annuel = $ecriture->frais_annuel;
         $object->compte_id = $ecriture->compte_id;
         $object->ecriture_categorie_id = $ecriture->ecriture_categorie_id;
         $object->date = $ecriture->date;
@@ -220,8 +218,8 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->exercice_comptable_id = $ecriture->exercice_comptable_id;
         $object->intervention_id = $ecriture->intervention_id;
         $object->exercice_id = $ecriture->exercice_id;
-        $object->indemnite_annuel_type_id = $ecriture->indemnite_annuel_type_id;
-        $object->frais_annuel_type_id = $ecriture->frais_annuel_type_id;
+        $object->indemnite_annuel = $ecriture->indemnite_annuel;
+        $object->frais_annuel = $ecriture->frais_annuel;
         $object->compte_id = $ecriture->compte_id;
         $object->ecriture_categorie_id = $ecriture->ecriture_categorie_id;
         $object->date = $ecriture->date;

@@ -34,9 +34,9 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
     public function listeIndemniteAnnuelType()
     {
         $temp = $this;
-        return IndemniteAnnuelType::all()
+        return IndemniteAnnuelType::with('indemniteAnnuels')->get()
             ->map(function ($indemnite) use ($temp) {
-                return $temp->convertIndemniteAnnuel($indemnite);
+                return $temp->convertIndemniteAnnuelType($indemnite);
             })->toArray();
     }
 
@@ -54,7 +54,7 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
      * @param $indemnite
      * @return StdClass|null
      */
-    protected function convertIndemniteAnnuel($indemnite)
+    protected function convertIndemniteAnnuelType($indemnite)
     {
         if ($indemnite == null) return null;
 
@@ -62,12 +62,29 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
 
         $object->id = $indemnite->id;
         $object->designation = $indemnite->designation;
-        $object->montant = $indemnite->montant;
-        $object->quantite = $indemnite->quantite;
-        $object->fonction_id = $indemnite->fonction_id;
         $object->compte_id = $indemnite->compte_id;
         $object->ecriture_categorie_id = $indemnite->ecriture_categorie_id;
+
+        $temp = $this;
+        $object->indemniteAnnuels = $indemnite->indemniteAnnuels->map(function ($ind) use ($temp) {
+            return $temp->convertIndemniteAnnuel($ind);
+        })->toArray();
+
+        return $object;
+    }
+
+    protected function convertIndemniteAnnuel($indemnite)
+    {
+        if ($indemnite == null) return null;
+
+        $object = new StdClass();
+        $object->id = $indemnite->id;
+
+        $object->quantite = $indemnite->quantite;
+        $object->montant = $indemnite->montant;
+        $object->fonction_id = $indemnite->fonction_id;
         $object->type_unite_id = $indemnite->type_unite_id;
+        $object->indemnite_annuel_type_id = $indemnite->indemnite_annuel_type_id;
 
         return $object;
     }

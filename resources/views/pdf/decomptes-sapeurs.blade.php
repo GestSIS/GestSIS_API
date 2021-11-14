@@ -47,7 +47,7 @@
     }
     function isAnnuel($e)
     {
-        return $e->indemnite_annuel_type_id !== null || $e->frais_annuel_type_id !== null;
+        return $e->indemnite_annuel !== null || $e->frais_annuel !== null;
     }
 
     function formatNumber($value)

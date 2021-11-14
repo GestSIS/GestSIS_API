@@ -166,7 +166,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
     public function removeCours(int $sapeurId, int $coursId)
     {
-        CoursSapeur::where('sapeur_id', $sapeurId)->where('id', $coursId)->limit(1)->delete();;
+        CoursSapeur::where('sapeur_id', $sapeurId)->where('id', $coursId)->limit(1)->delete();
     }
 
     public function addGrade(int $sapeurId, $data)

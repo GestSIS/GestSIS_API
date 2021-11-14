@@ -182,9 +182,9 @@ class ImputationBusiness
                 'intervention_id' => null,
                 'compte_id' => $amende->compte_id,
                 'exercice_comptable_id' => $exerciceComptableId,
-                'indemnite_annuel_type_id' => null,
                 'ecriture_categorie_id' => $amende->ecriture_categorie_id,
-                'frais_annuel_type_id' => null,
+                'indemnite_annuel' => False,
+                'frais_annuel' => False,
                 'decompte_id' => null,
                 'heure' => null,
                 'date' => $exercice->date,
@@ -230,6 +230,7 @@ class ImputationBusiness
         );
 
         // Génération des indemnités annuels
+        //TODO: Update avec la nouvelle méthode
         foreach ($indemnites as $i) {
             array_map(
                 function ($s) use ($i, $exerciceComptableId) {
@@ -242,6 +243,7 @@ class ImputationBusiness
         }
 
         // Générations des frais annuels
+        //TODO: Update avec la nouvelle méthode
         foreach ($frais as $f) {
             array_map(
                 function ($s) use ($f, $exerciceComptableId) {
@@ -269,7 +271,7 @@ class ImputationBusiness
             'sapeur_id' => $sapeur->id,
             'compte_id' => $indemniteType->compte_id,
             'exercice_comptable_id' => $exerciceComptableId,
-            'indemnite_annuel_type_id' => $indemniteType->id,
+            'indemnite_annuel' => True,
             'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id
         );
 
@@ -291,7 +293,7 @@ class ImputationBusiness
             'sapeur_id' => $sapeur->id,
             'compte_id' => $fraisType->compte_id,
             'exercice_comptable_id' => $exerciceComptableId,
-            'frais_annuel_type_id' => $fraisType->id,
+            'frais_annuel' => True,
             'ecriture_categorie_id' => $fraisType->ecriture_categorie_id,
         );
 
@@ -741,7 +743,6 @@ class ImputationBusiness
                 'date' => $exercice->date,
                 'heure' => $exercice->heure,
             ];
-
         }
         Ecriture::insert($ecritures);
     }

@@ -21,7 +21,7 @@ class CreateIndemniteExerciceFonctionsTable extends Migration
             $table->unsignedDecimal('indemnite');
 
             $table->unsignedBigInteger('fonction_id');
-            $table->foreign('fonction_id')->references('id')->on('fonctions');
+            $table->foreign('fonction_id')->references('id')->on('fonctions')->onDelete('cascade');
 
             $table->unsignedBigInteger('indemnite_exe_id');
             $table->foreign('indemnite_exe_id')->references('id')->on('indemnite_exercice_types');
