@@ -39,9 +39,8 @@ class CreateEcrituresTable extends Migration
 
             $table->boolean('avs')->default(false);
             $table->boolean('amende')->default(false);
-
-            $table->boolean('indemnite_annuel')->default(false);
             $table->boolean('frais_annuel')->default(false);
+            $table->boolean('indemnite_annuel')->default(false);
 
             $table->unsignedBigInteger('compte_id');
             $table->foreign('compte_id')->references('id')->on('comptes');

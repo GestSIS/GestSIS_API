@@ -62,6 +62,7 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
 
         $object->id = $indemnite->id;
         $object->designation = $indemnite->designation;
+        $object->cumulable = $indemnite->cumulable;
         $object->compte_id = $indemnite->compte_id;
         $object->ecriture_categorie_id = $indemnite->ecriture_categorie_id;
 

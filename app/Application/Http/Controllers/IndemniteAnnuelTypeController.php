@@ -27,6 +27,7 @@ class IndemniteAnnuelTypeController extends Controller
             'designation' => 'string|min:1',
             'compte_id' => 'integer',
             'ecriture_categorie_id' => 'integer',
+            'cumulable' => 'boolean',
         ]);
 
         $indemnite = $this->service->ajouterIndemniteAnnuelType($data);
@@ -39,6 +40,7 @@ class IndemniteAnnuelTypeController extends Controller
             'designation' => 'string|min:1',
             'compte_id' => 'integer',
             'ecriture_categorie_id' => 'integer',
+            'cumulable' => 'boolean',
         ]);
 
         $indemnite = $this->service->modifierIndemniteAnnuelType($id, $data);

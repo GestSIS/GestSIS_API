@@ -29,6 +29,7 @@ class FraisTypeRepositoryEloquent implements FraisTypeRepository
 
         $object->id = $frais->id;
         $object->designation = $frais->designation;
+        $object->cumulable = $frais->cumulable;
         $object->compte_id = $frais->compte_id;
         $object->ecriture_categorie_id = $frais->ecriture_categorie_id;
 
