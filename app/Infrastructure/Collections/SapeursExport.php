@@ -36,9 +36,9 @@ class SapeursExport implements FromQuery, WithHeadings
         'civilites.forme_politesse',
         'sapeurs.nom', 'sapeurs.prenom', 'sapeurs.suffixe', 'sapeurs.rue', 'sapeurs.no_rue', 'sapeurs.date_naissance', 'sapeurs.no_avs', 'sapeurs.profession', 'sapeurs.employeur',
         'sapeurs.lieu_de_travail', 'sapeurs.email', 'sapeurs.actif', 'sapeurs.iban', 'sapeurs.remarque',
-        'localites.npa', 'localites.designation',
-        'grades.designation', 'grades.abreviation',
-        'fonctions.nom', 'fonctions.abreviation'
+        'localites.npa as npa', 'localites.designation as localite',
+        'grades.designation as grade_nom', 'grades.abreviation as grade_abr',
+        'fonctions.nom as fonction_nom', 'fonctions.abreviation as fonction_abr'
       ]);
   }
 
