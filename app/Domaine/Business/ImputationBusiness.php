@@ -14,6 +14,7 @@ use App\Infrastructure\Models\Amende;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\ExerciceSapeur;
+use App\Infrastructure\Models\FonctionSapeur;
 
 class ImputationBusiness
 {
@@ -215,85 +216,135 @@ class ImputationBusiness
         // - Ne prend actuellement en compte que la fonction actuelle et non pas la date de l'entrée en vigeure de cette fonction
         // - Prend uniquement les sapeurs actifs
 
-        $indemnites = $this->indemniteRepo->listeIndemniteAnnuelType();
-        $frais = $this->fraisRepo->listeFraisAnnuelType();
+        $indemnitesType = $this->indemniteRepo->listeIndemniteAnnuelType();
+        $fraisType = $this->fraisRepo->listeFraisAnnuelType();
 
+        // FIXME: regénérer que pour les sapeurs ne possédants pas d'indemnités ???
         $ecritures = $this->ecritureRepo->listeEcrituresAnnuelsForExerciceComptableById($exerciceComptableId);
+        Ecriture::where(function ($query) {
+            $query->where('frais_annuel', true);
+            $query->orWhere('indemnite_annuel', true);
+        })->whereNull('decompte_id')->delete();
+        // TODO: Que faire avec les indemnités déjà payées ?
+        // Ne pas générer les indemnités pour ces sapeurs ?
 
-        $sapeurs = array_filter(
-            $this->sapeurRepo->listeSapeurLight(),
-            function ($s) use ($ecritures) {
-                return $s->actif && count(array_filter($ecritures, function ($e) use ($s) {
-                    return $e->sapeur_id === $s->id;
-                })) == 0;
-            }
-        );
+        // Exercice comptable
+        $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
+        $debut = $exerciceComptable->debut;
+        $fin = $exerciceComptable->fin;
 
-        // Génération des indemnités annuels
-        //TODO: Update avec la nouvelle méthode
-        foreach ($indemnites as $i) {
-            array_map(
-                function ($s) use ($i, $exerciceComptableId) {
-                    $this->imputerIndemniteSapeur($i, $s, $exerciceComptableId);
-                },
-                array_filter($sapeurs, function ($s) use ($i) {
-                    return $i->fonction_id === $s->fonction_id;
+        // Fonction gardée si intersect avec exercice comptable actuel
+        $sapeurs = FonctionSapeur::where(function ($query) use ($debut, $fin) {
+            $query
+                ->where([
+                    ['debut', '<=', $debut],
+                    ['fin', '>=', $debut],
+                ])
+                ->orWhere(function ($query) use ($debut) {
+                    $query->where('debut', '<=', $debut);
+                    $query->whereNull('fin');
                 })
-            );
+                ->orWhere([
+                    ['debut', '>=', $debut],
+                    ['debut', '<=', $fin],
+                ]);
+        })
+            ->join('fonctions', 'fonctions.id', '=', 'fonction_sapeur.fonction_id')
+            ->orderBy('fonctions.tri')
+            ->distinct(['sapeur_id', 'fonction_id'])
+            ->select(['sapeur_id', 'fonction_id', 'tri'])->get();
+
+        // Group by sapeur_id
+        $sapeursGrouped = [];
+        foreach ($sapeurs as $sapeur) {
+            $sapeursGrouped[$sapeur->sapeur_id][] = $sapeur->fonction_id;
         }
 
-        // Générations des frais annuels
-        //TODO: Update avec la nouvelle méthode
-        foreach ($frais as $f) {
-            array_map(
-                function ($s) use ($f, $exerciceComptableId) {
-                    $this->imputerFraisSapeur($f, $s, $exerciceComptableId);
-                },
-                array_filter($sapeurs, function ($s) use ($f) {
-                    return $f->fonction_id === $s->fonction_id;
-                })
-            );
+        // Foreach indemnité annuelle
+        foreach ($indemnitesType as $type) {
+            // Génère le mapping -> ["fonction_id" => 'indemnite'];
+            $mapping = array_reduce(array_map(
+                fn ($indemnite) => [$indemnite->fonction_id => $indemnite],
+                $type->indemniteAnnuels
+            ), fn ($a, $b) => $a + $b, []);
+
+            foreach ($sapeursGrouped as $sapeurId => $fonctions) {
+                foreach ($fonctions as $fonctionId) {
+                    if (array_key_exists($fonctionId, $mapping)) {
+                        $indemnite = $mapping[$fonctionId];
+                        $this->imputerIndemniteSapeur($type, $indemnite, $sapeurId, $exerciceComptableId);
+
+                        if (!$type->cumulable) {
+                            // Non-cumulable, on passe au sapeur suivant
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Foreach frais annuel
+        foreach ($fraisType as $type) {
+            // Génére le mapping -> ["fonction_id" => 'indemnite'];
+            $mapping = array_reduce(array_map(
+                fn ($frais) => [$frais->fonction_id => $frais],
+                $type->fraisAnnuels
+            ), fn ($a, $b) => $a + $b, []);
+
+            foreach ($sapeursGrouped as $sapeurId => $fonctions) {
+                foreach ($fonctions as $fonctionId) {
+                    if (array_key_exists($fonctionId, $mapping)) {
+                        $frais = $mapping[$fonctionId];
+                        $this->imputerFraisSapeur($type, $frais, $sapeurId, $exerciceComptableId);
+
+                        if (!$type->cumulable) {
+                            // Non-cumulable, on passe au sapeur suivant
+                            break;
+                        }
+                    }
+                }
+            }
         }
     }
 
-    private function imputerIndemniteSapeur($indemniteType, $sapeur, $exerciceComptableId)
+    private function imputerIndemniteSapeur($indemniteType, $indemnite, $sapeurId, $exerciceComptableId)
     {
-        $total = $indemniteType->montant * $indemniteType->quantite;
+        $total = $indemnite->montant * $indemnite->quantite;
         $ecriture = array(
             'solde' => 0,
-            'indemnite' => $indemniteType->montant,
+            'indemnite' => $indemnite->montant,
             'frais' => 0,
-            'type_unite_id' => $indemniteType->type_unite_id,
+            'type_unite_id' => $indemnite->type_unite_id,
             'designation' => $indemniteType->designation,
             'total' => $total,
-            'tarif' => $indemniteType->montant,
-            'quantite' => $indemniteType->quantite,
-            'sapeur_id' => $sapeur->id,
+            'tarif' => $indemnite->montant,
+            'quantite' => $indemnite->quantite,
+            'sapeur_id' => $sapeurId,
             'compte_id' => $indemniteType->compte_id,
             'exercice_comptable_id' => $exerciceComptableId,
-            'indemnite_annuel' => True,
+            'indemnite_annuel' => true,
             'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id
         );
 
         $this->ecritureRepo->persisteNewEcriture($ecriture);
     }
 
-    private function imputerFraisSapeur($fraisType, $sapeur, $exerciceComptableId)
+    private function imputerFraisSapeur($fraisType, $frais, $sapeurId, $exerciceComptableId)
     {
-        $total = $fraisType->montant * $fraisType->quantite;
+        $total = $frais->montant * $frais->quantite;
         $ecriture = array(
             'solde' => 0,
             'indemnite' => 0,
-            'frais' => $fraisType->montant,
-            'type_unite_id' => $fraisType->type_unite_id,
+            'frais' => $frais->montant,
+            'type_unite_id' => $frais->type_unite_id,
             'designation' => $fraisType->designation,
             'total' => $total,
-            'tarif' => $fraisType->montant,
-            'quantite' => $fraisType->quantite,
-            'sapeur_id' => $sapeur->id,
+            'tarif' => $frais->montant,
+            'quantite' => $frais->quantite,
+            'sapeur_id' => $sapeurId,
             'compte_id' => $fraisType->compte_id,
             'exercice_comptable_id' => $exerciceComptableId,
-            'frais_annuel' => True,
+            'frais_annuel' => true,
             'ecriture_categorie_id' => $fraisType->ecriture_categorie_id,
         );
 

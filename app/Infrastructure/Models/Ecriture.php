@@ -18,19 +18,23 @@ class Ecriture extends Model
         'solde',
         'indemnite',
         'frais',
+
+        'date',
+        'heure',
+
         'sapeur_id',
         'compte_id',
         'exercice_comptable_id',
         'intervention_id',
         'exercice_id',
-        'indemnite_annuel',
-        'frais_annuel',
-        'ecriture_categorie_id',
-        'date',
-        'heure',
-        'decompte_id',
 
+        'decompte_id',
+        'ecriture_categorie_id',
+
+        // Booléen
         'amende',
         'avs',
+        'indemnite_annuel',
+        'frais_annuel',
     ];
 }

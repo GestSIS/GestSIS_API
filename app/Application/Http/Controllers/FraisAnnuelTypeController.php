@@ -27,6 +27,7 @@ class FraisAnnuelTypeController extends Controller
             'designation' => 'string|min:1',
             'compte_id' => 'integer',
             'ecriture_categorie_id' => 'integer',
+            'cumulable' => 'boolean',
         ]);
 
         $frais = $this->service->ajouterFraisAnnuelType($data);
@@ -39,6 +40,7 @@ class FraisAnnuelTypeController extends Controller
             'designation' => 'string|min:1',
             'compte_id' => 'integer',
             'ecriture_categorie_id' => 'integer',
+            'cumulable' => 'boolean',
         ]);
 
         $frais = $this->service->modifierFraisAnnuelType($id, $data);
