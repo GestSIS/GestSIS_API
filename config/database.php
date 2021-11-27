@@ -48,7 +48,7 @@ foreach ($dbs as $db) {
         'host' => env('DB_HOST', 'db'),
         'port' => env('DB_PORT', '3306'),
         'database' => $db,
-        'username' => env('DB_USERNAME', 'gestsis'),
+        'username' => $db,
         'password' => env('DB_PASSWORD', 'pwd'),
         'unix_socket' => env('DB_SOCKET', ''),
         'charset' => 'utf8mb4',
