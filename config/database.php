@@ -26,7 +26,7 @@ foreach ($dbs as $db) {
         'driver' => 'mysql',
         'host' => env('DB_HOST', 'db'),
         'port' => env('DB_PORT', '3306'),
-        'database' => env('DB_DATABASE', $db),
+        'database' => $db,
         'username' => env('DB_USERNAME', 'gestsis'),
         'password' => env('DB_PASSWORD', 'pwd'),
         'unix_socket' => env('DB_SOCKET', ''),
