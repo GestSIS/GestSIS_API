@@ -48,7 +48,7 @@ foreach ($dbs as $db) {
         'host' => env('DB_HOST', 'db'),
         'port' => env('DB_PORT', '3306'),
         'database' => env('DB_PREFIX', '') . $db,
-        'username' => env('DB_USER_PREFIX', '') . $db,
+        'username' => env('APP_ENV', 'production') === 'production' ? env('DB_USER_PREFIX', '') . $db : env('DB_USERNAME', 'gestsis'),
         'password' => env('DB_PASSWORD', 'pwd'),
         'unix_socket' => env('DB_SOCKET', ''),
         'charset' => 'utf8mb4',
