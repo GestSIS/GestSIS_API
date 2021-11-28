@@ -115,6 +115,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         // Statistiques
         Route::get('statistiques/{id}/presence', 'SapeurExerciceController@stat');
+
+        //TODO: Implémenter
+        Route::resource('heure-exercice-types', 'HeureExerciceTypeController')->only(['index']);
+        Route::resource('heure-exercices', 'HeureExerciceController')->only(['index', 'store', 'update', 'destroy']);
     });
 
     Route::group(['middleware' => 'jwtTokenRole:exercice.modification'], function () {
@@ -226,6 +230,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('exercices-comptable', 'ExerciceComptableController')->only(['index', 'store', 'update']);
         //TODO: Regarder que faire avec cloturer, déjà modifiable via la route update pour le moment
         // Route::post('exercice-comptable/{id}/cloturer', 'ExerciceComptableController@cloturer');
+
+        //TODO: Implémenter
+        Route::resource('heure-exercice-types', 'HeureExerciceTypeController')->only(['index', 'store', 'update', 'destroy']);
     });
 
     Route::group(['middleware' => 'jwtTokenRole:comptabilite.tout'], function () {
