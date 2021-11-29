@@ -32,11 +32,11 @@ return [
     |    The environment variables to set while running the wkhtmltopdf process.
     |
     */
-    
+
     'pdf' => [
         'enabled' => true,
         //'binary'  => 'xvfb-run vendor/h4cc/wkhtmltopdf-amd64/bin/wkhtmltopdf-amd64',
-        'binary'  => '/usr/local/bin/wkhtmltopdf',
+        'binary'  => env('WKHTML_PDF', '/usr/local/bin/wkhtmltopdf'),
         'timeout' => false,
         'options' => [],
         'env'     => [],
@@ -44,7 +44,7 @@ return [
 
     'image' => [
         'enabled' => true,
-        'binary'  => '/usr/local/bin/wkhtmltoimage',
+        'binary'  => env('WKHTML_IMAGE', '/usr/local/bin/wkhtmltoimage'),
         'timeout' => false,
         'options' => [],
         'env'     => [],
