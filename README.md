@@ -91,3 +91,12 @@ Défini les besoins qui seront implémentés dans la couche infrastructure. `app
 ### Couche Infrastructure
 
 Ce qui est piloté par le domaine, `app\infrastructure`
+
+
+# Déploiement de wkhtmltox sur le serveur
+
+```sh
+wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox-0.12.6-1.centos8.x86_64.rpm
+rpm2cpio ./wkhtmltox-0.12.6-1.centos8.x86_64.rpm | cpio -idmv
+scp -r usr/local/* user@servers:domaine_name/folder
+```
