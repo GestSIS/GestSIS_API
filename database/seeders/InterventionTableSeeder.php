@@ -135,9 +135,9 @@ class InterventionTableSeeder extends Seeder
             array('id' => 397, 'type_intervention_id' => 2, 'localite_id' => 3, 'exercice_comptable_id' => 3, 'date_debut' => '2019-05-03', 'heure_debut' => '19:45:00', 'lieu' => 'Centre Coop', 'objet' => 'Centre Coop', 'date_fin' => '2019-05-03', 'heure_fin' => '20:15:00', 'rapport_police' => '0', 'sapeur_id' => 1, 'stat_nb' => 0, 'sauve_personne' => 0, 'sauve_animaux' => 0, 'description' => 'Fausse alarme cuisine detecteur no1.<br /><br />Constation suite à la fausse alarme avec le concièrge à la cuisine du restaurant.', 'proprietaire' => 'Centre Coop <br />Abbé-Monnin 81<br />2854 Bassecourt<br />', 'responsable' => 'Concierge X<br /><br />Tel 0324273518', 'degre' => 4, 'stat_federal_id' => 9, 'intervention_traitement_id' => 1, 'statut' => 1)
         );
 
-
         foreach ($interventions as $item) {
             DB::table('interventions')->insert($item);
+            DB::table('phases')->insert(['debut' => null, 'phase_type_id' => 1, 'intervention_id' => $item['id']]);
         }
     }
 }

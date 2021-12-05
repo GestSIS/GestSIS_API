@@ -4,6 +4,7 @@ namespace Database\Factories\Infrastructure\Models;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Infrastructure\Models\Intervention;
+use App\Infrastructure\Models\Phase;
 
 class InterventionFactory extends Factory
 {
@@ -23,7 +24,7 @@ class InterventionFactory extends Factory
     {
         $date = $this->faker->dateTimeThisYear();
         $dateTwo = clone $date;
-    
+
         return [
             'date_debut' => $date->format('Y-m-d'),
             'heure_debut' => $date->format('H:m'),
@@ -41,12 +42,28 @@ class InterventionFactory extends Factory
             'stat_nb' => 1,
             'statut' => 0,
             'exercice_comptable_id' => 4,
-            'localite_id' => $this->faker->randomElement($array = array(3,5,23,44,93)),
+            'localite_id' => $this->faker->randomElement($array = array(3, 5, 23, 44, 93)),
             'type_intervention_id' => $this->faker->numberBetween(1, 5),
             'sapeur_id' => $this->faker->numberBetween(1, 10),
             'stat_federal_id' => $this->faker->numberBetween(1, 5),
             'intervention_traitement_id' => 1,
             'date_imputation' => null
         ];
+    }
+
+    /**
+     * Configure the model factory.
+     *
+     * @return $this
+     */
+    public function configure()
+    {
+        return $this->afterCreating(function (Intervention $intervention) {
+            $phase = new Phase();
+            $phase->intervention_id = $intervention->id;
+            $phase->phase_type_id = 1;
+            $phase->debut = null;
+            $phase->save();
+        });
     }
 }
