@@ -7,4 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class StatIntervention extends Model
 {
     protected $fillable = ['designation', 'tri'];
+    protected $casts = [
+        'tri' => 'integer'
+    ];
 }

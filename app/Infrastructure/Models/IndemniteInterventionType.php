@@ -21,6 +21,11 @@ class IndemniteInterventionType extends Model
         'ecriture_categorie_id',
         'par_fonction',
     ];
+    protected $casts = [
+        'solde' => 'decimal:2', 'solde_min_pour' => 'decimal:2', 'taux_weekend' => 'decimal:2', 'taux_nuit' => 'decimal:2',
+        'compte_id' => 'integer', 'phase_id' => 'integer', 'type_unite_id' => 'integer', 'ecriture_categorie_id' => 'integer',
+        'par_fonction' => 'boolean'
+    ];
 
     public function fonctions()
     {

@@ -7,10 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Exercice extends Model
 {
-    protected $fillable = ['date', 'heure', 'lieu', 'designation', 'communications', 'duree', 'statut', 'exercice_categorie_id', 'localite_id', 'statut'];
+    protected $fillable = ['date', 'heure', 'lieu', 'designation', 'communications', 'duree', 'statut', 'exercice_categorie_id', 'localite_id'];
+    protected $casts = [
+        'duree' => 'integer', 'statut' => 'integer', 'localite_id' => 'integer', 'exercice_categorie_id' => 'integer'
+    ];
 
     use HasFactory;
-    
+
     //Statut:
     // 0 -> Annulé
     // 1 -> A saisir

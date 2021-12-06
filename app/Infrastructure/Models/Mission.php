@@ -10,7 +10,10 @@ class Mission extends Model
     use HasFactory;
 
     protected $fillable = ['debut', 'fin', 'titre', 'resume', 'sapeur_id'];
-   
+    protected $casts = [
+        'sapeur_id' => 'integer',
+    ];
+
     public function sapeur()
     {
         return $this->belongsTo(Sapeur::class);

@@ -10,6 +10,9 @@ class ControleMedical extends Model
     protected $table = 'controles_medicaux';
 
     protected $fillable = ['designation', 'consultation', 'validite', 'accepter', 'en_cours', 'medecin_id', 'controle_medical_type_id'];
+    protected $casts = [
+        'accepter' => 'integer', 'en_cours' => 'integer', 'medecin_id' => 'integer', 'controle_medical_type_id' => 'integer',
+    ];
 
     use HasFactory;
 

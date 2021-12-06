@@ -33,22 +33,27 @@ class Intervention extends Model
         'sapeur_id',
         'type_intervention_id',
     ];
+    protected $casts = [
+        'rapport_police' => 'boolean', 'degre' => 'integer', 'sauve_personne' => 'integer', 'sauve_animaux' => 'integer',
+        'stat_nb' => 'integer', 'statut' => 'integer', 'localite_id' => 'integer', 'intervention_traitement_id' => 'integer',
+        'stat_federal_id' => 'integer', 'sapeur_id' => 'integer', 'type_intervention_id' => 'integer'
+    ];
 
     public function localite()
     {
         return $this->belongsTo(Localite::class);
     }
-    
+
     public function statFederal()
     {
         return $this->belongsTo(StatFederal::class);
     }
-    
+
     public function traitement()
     {
         return $this->belongsTo(InterventionTraitement::class, 'intervention_traitement_id');
     }
-    
+
     public function chefIntervention()
     {
         return $this->belongsTo(Sapeur::class, 'sapeur_id');

@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Compte extends Model
 {
     protected $fillable = ['numero', 'designation', 'actif'];
+    protected $casts = [
+        'actif' => 'integer'
+    ];
 
     /**
      * The cours that belong to the sapeur.

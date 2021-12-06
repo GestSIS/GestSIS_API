@@ -8,4 +8,7 @@ class InterventionSapeur extends Model
 {
     protected $table = 'intervention_sapeur';
     protected $fillable = ['piquet', 'debut', 'fin'];
+    protected $casts = [
+        'piquet' => 'boolean', 'intervention_id' => 'integer', 'sapeur_id' => 'integer'
+    ];
 }

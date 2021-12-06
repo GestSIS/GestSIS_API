@@ -58,7 +58,7 @@ class SapeurTelephoneTest extends TestCase
         $data = array(
             'numero' => '032 546 54 12',
             'telephone_type_id' => 1,
-            'rta' => 0,
+            'rta' => false,
             'priorite' => 1
         );
 
@@ -90,7 +90,7 @@ class SapeurTelephoneTest extends TestCase
         $data = array(
             'numero' => '032 546 54 15',
             'telephone_type_id' => 1,
-            'rta' => 0,
+            'rta' => false,
             'priorite' => 1
         );
 
@@ -99,7 +99,7 @@ class SapeurTelephoneTest extends TestCase
         $data = array(
             'numero' => '032 546 12 18',
             'telephone_type_id' => 2,
-            'rta' => 0,
+            'rta' => true,
             'priorite' => 3
         );
 
