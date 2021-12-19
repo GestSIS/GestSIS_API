@@ -8,6 +8,7 @@ use App\Domaine\Business\ExerciceComptableBusiness;
 use App\Domaine\Business\ExerciceParamBusiness;
 use App\Infrastructure\Models\ExcuseType;
 use App\Infrastructure\Models\ExerciceCategorie;
+use App\Infrastructure\Models\HeureExerciceType;
 
 class ExerciceParamService
 {
@@ -58,4 +59,27 @@ class ExerciceParamService
         return $this->business->supprimerExcuseType($id);
     }
 
+    public function heuresExerciceType()
+    {
+        return HeureExerciceType::all();
+    }
+
+    public function ajouterHeuresExerciceType($data)
+    {
+        $type = new HeureExerciceType();
+        $type->fill($data);
+        $type->save();
+        return $type;
+        return $this->business->ajouterHeuresExerciceType($data);
+    }
+
+    public function modifierHeuresExerciceType($id, $data)
+    {
+        return $this->business->modifierHeuresExerciceType($id, $data);
+    }
+
+    public function supprimerHeuresExerciceType($id)
+    {
+        return $this->business->supprimerHeuresExerciceType($id);
+    }
 }

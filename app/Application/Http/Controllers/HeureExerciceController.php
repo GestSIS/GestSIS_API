@@ -19,10 +19,23 @@ class HeureExerciceController extends Controller
      * 
      * @param int $id id du décompte pour lequelle le fichier doit être créé
      */
-    public function index()
+    public function index($exerciceId)
     {
-        //return $this->service->impressionDecompte($id);
+        return $this->service->heuresExercice();
+    }
+
+    /**
+     * Retourne un décompte
+     * 
+     * @param int $id id du décompte souhaité
+     */
+    public function store(Request $request, $exerciceId)
+    {
         //TODO:
+        $data = [];
+        $heure = $this->service->ajouterHeureExercice($exerciceId, $data);
+
+        return response()->json(['data' => $heure]);
     }
 
     /**
@@ -30,11 +43,13 @@ class HeureExerciceController extends Controller
      * 
      * @param int $id id du décompte souhaité
      */
-    public function store($id)
+    public function update(Request $request, $exerciceId, $id)
     {
-        $decompte = $this->service->getDecompteParId($id);
+        //TODO:
+        $data = [];
+        $heure = $this->service->modifierHeureExercice($exerciceId, $id, $data);
 
-        return response()->json(['data' => $decompte]);
+        return response()->json(['data' => $heure]);
     }
 
     /**
@@ -42,22 +57,10 @@ class HeureExerciceController extends Controller
      * 
      * @param int $id id du décompte souhaité
      */
-    public function update($id)
+    public function destroy($exerciceId, $id)
     {
-        $decompte = $this->service->getDecompteParId($id);
+        $heure = $this->service->supprimerHeureExercice($exerciceId, $id);
 
-        return response()->json(['data' => $decompte]);
-    }
-
-    /**
-     * Retourne un décompte
-     * 
-     * @param int $id id du décompte souhaité
-     */
-    public function destroy($id)
-    {
-        $decompte = $this->service->getDecompteParId($id);
-
-        return response()->json(['data' => $decompte]);
+        return response()->json(['data' => $heure]);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Domaine\Business;
 
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\HeureExercice;
 use Illuminate\Database\Eloquent\Collection;
 
 class ExerciceBusiness
@@ -184,5 +185,25 @@ class ExerciceBusiness
         // et donc que l'exercice n'est pas déjà imputé
         $this->repository->supprimerConvocations($sapeurId, $exerciceSapeursIds);
         return true;
+    }
+
+    public function ajouterHeuresExercice($exerciceId, $data)
+    {
+        $heure = new HeureExercice();
+        $heure->fill($data);
+        $heure->exercice_id = $exerciceId;
+        $heure->save();
+        return $heure;
+    }
+
+    public function modifierHeuresExercice($exerciceId, $id, $data)
+    {
+        HeureExercice::where([['id', $id], ['exercice_id', $exerciceId]])->limit(1)->update($data);
+        return HeureExercice::find($id);
+    }
+
+    public function supprimerHeuresExercice($exerciceId, $id)
+    {
+        HeureExercice::where([['id', $id], ['exercice_id', $exerciceId]])->limit(1)->delete();
     }
 }

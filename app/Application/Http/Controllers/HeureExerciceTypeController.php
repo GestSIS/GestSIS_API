@@ -4,60 +4,65 @@ namespace App\Application\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Domaine\API\PaiementService;
+use App\Domaine\API\ExerciceParamService;
 
 class HeureExerciceTypeController extends Controller
 {
 
-    public function __construct(PaiementService $service)
+    public function __construct(ExerciceParamService $service)
     {
         $this->service = $service;
     }
 
     /**
-     * Créer un fichier iso20022 pour un décompte
+     * Créer un fichier iso20022 pour un type
      * 
-     * @param int $id id du décompte pour lequelle le fichier doit être créé
+     * @param int $id id du type pour lequelle le fichier doit être créé
      */
     public function index()
     {
-        //return $this->service->impressionDecompte($id);
+        return $this->service->heuresExerciceType();
+    }
+
+    /**
+     * Retourne un type
+     * 
+     * @param int $id id du type souhaité
+     */
+    public function store(Request $request, $exerciceId)
+    {
         //TODO:
+        $data = [];
+        $type = $this->service->ajouterHeureExerciceType($exerciceId, $data);
+
+        return response()->json(['data' => $type]);
     }
 
     /**
-     * Retourne un décompte
+     * Retourne un type
      * 
-     * @param int $id id du décompte souhaité
+     * @param int $id id du type souhaité
      */
-    public function store($id)
+    public function update(Request $request, $exerciceId, $id)
     {
-        $decompte = $this->service->getDecompteParId($id);
+        //TODO:
+        $data = [];
+        $type = $this->service->ajouterHeureExerciceType($exerciceId, $id, $data);
 
-        return response()->json(['data' => $decompte]);
+        return response()->json(['data' => $type]);
     }
 
     /**
-     * Retourne un décompte
+     * Retourne un type
      * 
-     * @param int $id id du décompte souhaité
-     */
-    public function update($id)
-    {
-        $decompte = $this->service->getDecompteParId($id);
-
-        return response()->json(['data' => $decompte]);
-    }
-
-    /**
-     * Retourne un décompte
-     * 
-     * @param int $id id du décompte souhaité
+     * @param int $id id du type souhaité
      */
     public function destroy($id)
     {
-        $decompte = $this->service->getDecompteParId($id);
+        //TODO:
+        $data = [];
+        $type = $this->service->ajouterHeureExerciceType($data);
 
-        return response()->json(['data' => $decompte]);
+        return response()->json(['data' => $type]);
     }
 }
