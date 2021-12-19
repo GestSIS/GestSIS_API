@@ -71,6 +71,9 @@ class ConvocationsController extends Controller
             'sapeurs.*.amende' => 'required|boolean',
             'sapeurs.*.remplace' => 'required|boolean',
             'sapeurs.*.excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
+            'sapeurs.*.heures.*.id' => 'nullable|integer',
+            'sapeurs.*.heures.*.montant' => 'required|numeric',
+            'sapeurs.*.heures.*.heure_exercice_type_id' => 'nullable|integer',
         ]);
 
         $sapeur = $this->service->updateSapeurs($exerciceId, $data['sapeurs']);

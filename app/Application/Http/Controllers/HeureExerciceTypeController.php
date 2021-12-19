@@ -29,11 +29,16 @@ class HeureExerciceTypeController extends Controller
      * 
      * @param int $id id du type souhaité
      */
-    public function store(Request $request, $exerciceId)
+    public function store(Request $request)
     {
-        //TODO:
-        $data = [];
-        $type = $this->service->ajouterHeureExerciceType($exerciceId, $data);
+        $data = $request->validate([
+            'designation' => 'string',
+            'montant' => 'numeric',
+            'compte_id' => 'integer|exists:comptes,id',
+            'ecriture_categorie_id' => 'integer|exists:ecriture_categories,id',
+            'type_unite_id' => 'integer|exists:type_unites,id',
+        ]);
+        $type = $this->service->ajouterHeureExerciceType($data);
 
         return response()->json(['data' => $type]);
     }
@@ -43,11 +48,16 @@ class HeureExerciceTypeController extends Controller
      * 
      * @param int $id id du type souhaité
      */
-    public function update(Request $request, $exerciceId, $id)
+    public function update(Request $request, $id)
     {
-        //TODO:
-        $data = [];
-        $type = $this->service->ajouterHeureExerciceType($exerciceId, $id, $data);
+        $data = $request->validate([
+            'designation' => 'string',
+            'montant' => 'numeric',
+            'compte_id' => 'integer|exists:comptes,id',
+            'ecriture_categorie_id' => 'integer|exists:ecriture_categories,id',
+            'type_unite_id' => 'integer|exists:type_unites,id',
+        ]);
+        $type = $this->service->ajouterHeureExerciceType($id, $data);
 
         return response()->json(['data' => $type]);
     }
@@ -59,10 +69,7 @@ class HeureExerciceTypeController extends Controller
      */
     public function destroy($id)
     {
-        //TODO:
-        $data = [];
-        $type = $this->service->ajouterHeureExerciceType($data);
-
-        return response()->json(['data' => $type]);
+        $this->service->ajouterHeureExerciceType($id);
+        return response()->json(['data' => 'ok']);
     }
 }

@@ -8,7 +8,9 @@ use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\ExcuseType;
 use App\Infrastructure\Models\Exercice;
+use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\Fonction;
+use App\Infrastructure\Models\HeureExercice;
 use Illuminate\Database\Eloquent\Collection;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Illuminate\Support\Facades\DB;
@@ -34,11 +36,6 @@ class ExerciceService
     public function listeExercice()
     {
         return $this->repository->listExerciceLight();
-    }
-
-    public function listSapeurOfExerciceById($exerciceId)
-    {
-        return $this->repository->listSapeurOfExerciceById($exerciceId);
     }
 
     public function listExerciceOfSapeurById($exerciceComptableId, $sapeurId)
@@ -81,6 +78,36 @@ class ExerciceService
         return $this->business->validateExercice($exerciceId);
     }
 
+    public function listSapeurOfExerciceById($exerciceId)
+    {
+        $heures = HeureExercice
+            ::where('exercice_id', $exerciceId)
+            ->get()->toArray();
+        $sapeurs = ExerciceSapeur
+            ::where('exercice_id', $exerciceId)
+            ->get()->toArray();
+
+        $dictionary = [];
+        foreach ($sapeurs as $sapeur) {
+            $dictionary[$sapeur['id']] = $sapeur;
+            $dictionary[$sapeur['id']]['heures'] = [];
+        }
+        foreach ($heures as $heure) {
+            if (!array_key_exists($heure['sapeur_id'], $dictionary)) {
+                $dictionary[$heure['sapeur_id']] = [
+                    'convoque' => False,
+                    'present' => False,
+                    'amende' => False,
+                    'remplace' => False,
+                    'excuse_type_id' => null,
+                    'heures' => [],
+                ];
+            }
+            $dictionary[$heure['sapeur_id']]['heures'][] = $heure;
+        }
+        return array_values($dictionary);
+    }
+
     /**
      * Ajout de sapeurs à un exercice
      *
@@ -93,7 +120,7 @@ class ExerciceService
         $statut = $this->business->addSapeurs($exerciceId, $sapeurs);
         return [
             "statut" => $statut,
-            "sapeurs" => $this->repository->listSapeurOfExerciceById($exerciceId)
+            "sapeurs" => $this->listSapeurOfExerciceById($exerciceId)
         ];
     }
 
@@ -109,7 +136,7 @@ class ExerciceService
         $statut = $this->business->updateSapeurs($exerciceId, $sapeurs);
         return [
             'statut' => $statut,
-            'sapeurs' => $this->repository->listSapeurOfExerciceById($exerciceId)
+            'sapeurs' => $this->listSapeurOfExerciceById($exerciceId)
         ];
     }
 
@@ -127,6 +154,21 @@ class ExerciceService
     public function supprimerConvocations($sapeurId, $exerciceSapeursIds)
     {
         return $this->business->supprimerConvocations($sapeurId, $exerciceSapeursIds);
+    }
+
+    public function ajouterHeureExercice($exerciceId, $data)
+    {
+        return $this->business->ajouterHeureExercice($exerciceId, $data);
+    }
+
+    public function modifierHeureExercice($exerciceId, $id, $data)
+    {
+        return $this->business->modifierHeureExercice($exerciceId, $id, $data);
+    }
+
+    public function supprimerHeureExercice($exerciceId, $id)
+    {
+        return $this->business->supprimerHeureExercice($exerciceId, $id);
     }
 
     function listeAppel($exerciceId)
