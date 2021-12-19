@@ -5,6 +5,7 @@ namespace App\Domaine\Business;
 
 use App\Infrastructure\Models\ExerciceCategorie;
 use App\Infrastructure\Models\ExcuseType;
+use App\Infrastructure\Models\HeureExerciceType;
 
 class ExerciceParamBusiness
 {
@@ -44,5 +45,24 @@ class ExerciceParamBusiness
     public static function supprimerExcuseType($id)
     {
         //TODO: Not implemented now
+    }
+
+    public function ajouterHeuresExerciceType($data)
+    {
+        $type = new HeureExerciceType();
+        $type->fill($data);
+        $type->save();
+        return $type;
+    }
+
+    public function modifierHeuresExerciceType($id, $data)
+    {
+        HeureExerciceType::where('id', $id)->limit(1)->update($data);
+        return HeureExerciceType::find($id);
+    }
+
+    public function supprimerHeuresExerciceType($id)
+    {
+        HeureExerciceType::where('id', $id)->limit(1)->delete();
     }
 }
