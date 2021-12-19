@@ -2,9 +2,6 @@
 
 namespace App\Domaine\API;
 
-use App\Infrastructure\Models\ExerciceComptable;
-use App\Domaine\Business\ControleMedicalBusiness;
-use App\Domaine\Business\ExerciceComptableBusiness;
 use App\Domaine\Business\ExerciceParamBusiness;
 use App\Infrastructure\Models\ExcuseType;
 use App\Infrastructure\Models\ExerciceCategorie;

@@ -117,8 +117,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('statistiques/{id}/presence', 'SapeurExerciceController@stat');
 
         //TODO: Implémenter
+        // Route::resource('exercices.heures', 'HeureExerciceController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('heure-exercice-types', 'HeureExerciceTypeController')->only(['index']);
-        Route::resource('heure-exercices', 'HeureExerciceController')->only(['index', 'store', 'update', 'destroy']);
     });
 
     Route::group(['middleware' => 'jwtTokenRole:exercice.modification'], function () {

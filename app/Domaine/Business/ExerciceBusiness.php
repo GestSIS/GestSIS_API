@@ -4,7 +4,9 @@ namespace App\Domaine\Business;
 
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\HeureExercice;
+use App\Infrastructure\Models\HeureExerciceType;
 use Illuminate\Database\Eloquent\Collection;
 
 class ExerciceBusiness
@@ -154,8 +156,45 @@ class ExerciceBusiness
             throw new ArrayException(['message' => 'Impossible de modifier un exercice déjà imputé']);
         }
 
+        $cachedHeures = HeureExercice
+            ::where('exercice_id', $exerciceId)
+            ->get()->toArray();;
+        $cachedHeuresId = array_map(fn ($h) => $h['id'], $cachedHeures);
+
         foreach ($sapeurs as $sapeur) {
-            $this->repository->editSapeurOfExercice($exerciceId, $sapeur);
+            ExerciceSapeur
+                ::where('exercice_id', $exerciceId)
+                ->where('id', $sapeur['id'])
+                ->update($sapeur);
+
+            $heures = array_key_exists('heures', $sapeur) ? $sapeur['heures'] : [];
+            $heuresId = array_filter(array_map(fn ($h) => $h['id'], $heures), fn ($h) => !is_null($h));
+
+            // Heures supprimées
+            $heuresSupprimeesId = array_filter($cachedHeuresId, fn ($id) => !in_array($id, $heuresId));
+            HeureExercice::where('exercice_id', $exerciceId)
+                ->whereIn('id', $heuresSupprimeesId)
+                ->delete();
+
+            // Heures ajoutées
+            $heuresAjoutees = array_filter($heures, fn ($heure) => !array_key_exists('id', $heure));
+            foreach ($heuresAjoutees as $heure) {
+                if (!array_key_exists('heure_exercice_id', $heure)) {
+                    // On ignore l'heure invalide
+                    continue;
+                }
+                $heure['sapeur_id'] = $sapeur['id'];
+                $this->ajouterHeureExercice($exerciceId, $heure);
+            }
+
+            // Heures modifiées
+            $heuresModifiees = array_filter($heures, fn ($heure) => array_key_exists('id', $heure) && !in_array($heure['id'], $heuresSupprimesId));
+            foreach ($heuresModifiees as $heure) {
+                HeureExercice::where('exercice_id', $exerciceId)
+                    ->where('sapeur_id', $sapeur['id'])
+                    ->where('id', $heure['id'])
+                    ->update(['montant' => $heure['montant']]);
+            }
         }
 
         return $this->updateStatut($exerciceId);
@@ -175,6 +214,9 @@ class ExerciceBusiness
         }
 
         $this->repository->removeSapeursFromExercice($exerciceId, $ids);
+        HeureExercice::where('exercice_id', $exerciceId)
+            ->whereIn('sapeur_id', $ids)
+            ->delete();
 
         return $this->updateStatut($exerciceId);
     }
@@ -187,22 +229,25 @@ class ExerciceBusiness
         return true;
     }
 
-    public function ajouterHeuresExercice($exerciceId, $data)
+    public function ajouterHeureExercice($exerciceId, $data)
     {
+        $type = HeureExerciceType::find($data['heure_exercice_id']);
+
         $heure = new HeureExercice();
+        $heure->fill($type);
         $heure->fill($data);
         $heure->exercice_id = $exerciceId;
         $heure->save();
         return $heure;
     }
 
-    public function modifierHeuresExercice($exerciceId, $id, $data)
+    public function modifierHeureExercice($exerciceId, $id, $data)
     {
         HeureExercice::where([['id', $id], ['exercice_id', $exerciceId]])->limit(1)->update($data);
         return HeureExercice::find($id);
     }
 
-    public function supprimerHeuresExercice($exerciceId, $id)
+    public function supprimerHeureExercice($exerciceId, $id)
     {
         HeureExercice::where([['id', $id], ['exercice_id', $exerciceId]])->limit(1)->delete();
     }
