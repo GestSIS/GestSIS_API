@@ -113,10 +113,12 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         // TODO: à implémenter
         // Route::get('exercices/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
 
+        // Convocations
+        Route::post('convocation/{id}', 'ConvocationController@convoquer');
+
         // Statistiques
         Route::get('statistiques/{id}/presence', 'SapeurExerciceController@stat');
 
-        //TODO: Implémenter
         // Route::resource('exercices.heures', 'HeureExerciceController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('heure-exercice-types', 'HeureExerciceTypeController')->only(['index']);
     });

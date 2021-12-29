@@ -37,6 +37,7 @@ class HeureExerciceController extends Controller
             // 'compte_id' => 'integer|exists:comptes,id',
             // 'ecriture_categorie_id' => 'integer|exists:ecriture_categories,id',
             // 'type_unite_id' => 'integer|exists:type_unites,id',
+            // 'indemnite' => 'boolean|required',
             // Addition compare to type
             'montant' => 'numeric',
             'sapeur_id' => 'integer|exists:sapeurs,id',
@@ -60,6 +61,7 @@ class HeureExerciceController extends Controller
             // 'compte_id' => 'integer|exists:comptes,id',
             // 'ecriture_categorie_id' => 'integer|exists:ecriture_categories,id',
             // 'type_unite_id' => 'integer|exists:type_unites,id',
+            // 'indemnite' => 'boolean|required',
             // Addition compare to type
             'montant' => 'numeric',
         ]);

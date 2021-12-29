@@ -46,6 +46,14 @@ class Sapeur extends Model
     }
 
     /**
+     * Les grades du sapeur
+     */
+    public function exercices()
+    {
+        return $this->hasMany('App\Infrastructure\Models\ExerciceSapeur');
+    }
+
+    /**
      * Le grade principal du sapeur
      */
     public function grade()

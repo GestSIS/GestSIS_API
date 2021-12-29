@@ -47,7 +47,7 @@ class ExerciceParamBusiness
         //TODO: Not implemented now
     }
 
-    public function ajouterHeuresExerciceType($data)
+    public function ajouterHeureExerciceType($data)
     {
         $type = new HeureExerciceType();
         $type->fill($data);
@@ -55,13 +55,13 @@ class ExerciceParamBusiness
         return $type;
     }
 
-    public function modifierHeuresExerciceType($id, $data)
+    public function modifierHeureExerciceType($id, $data)
     {
         HeureExerciceType::where('id', $id)->limit(1)->update($data);
         return HeureExerciceType::find($id);
     }
 
-    public function supprimerHeuresExerciceType($id)
+    public function supprimerHeureExerciceType($id)
     {
         HeureExerciceType::where('id', $id)->limit(1)->delete();
     }

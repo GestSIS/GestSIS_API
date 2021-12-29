@@ -32,11 +32,12 @@ class HeureExerciceTypeController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'designation' => 'string',
-            'montant' => 'numeric',
-            'compte_id' => 'integer|exists:comptes,id',
-            'ecriture_categorie_id' => 'integer|exists:ecriture_categories,id',
-            'type_unite_id' => 'integer|exists:type_unites,id',
+            'designation' => 'string|required',
+            'montant' => 'numeric|required',
+            'compte_id' => 'integer|exists:comptes,id|required',
+            'ecriture_categorie_id' => 'integer|exists:ecriture_categories,id|required',
+            'type_unite_id' => 'integer|exists:type_unites,id|required',
+            'indemnite' => 'boolean|required',
         ]);
         $type = $this->service->ajouterHeureExerciceType($data);
 
@@ -51,13 +52,14 @@ class HeureExerciceTypeController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->validate([
-            'designation' => 'string',
-            'montant' => 'numeric',
-            'compte_id' => 'integer|exists:comptes,id',
-            'ecriture_categorie_id' => 'integer|exists:ecriture_categories,id',
-            'type_unite_id' => 'integer|exists:type_unites,id',
+            'designation' => 'string|required',
+            'montant' => 'numeric|required',
+            'compte_id' => 'integer|exists:comptes,id|required',
+            'ecriture_categorie_id' => 'integer|exists:ecriture_categories,id|required',
+            'type_unite_id' => 'integer|exists:type_unites,id|required',
+            'indemnite' => 'boolean|required',
         ]);
-        $type = $this->service->ajouterHeureExerciceType($id, $data);
+        $type = $this->service->modifierHeureExerciceType($id, $data);
 
         return response()->json(['data' => $type]);
     }
@@ -69,7 +71,7 @@ class HeureExerciceTypeController extends Controller
      */
     public function destroy($id)
     {
-        $this->service->ajouterHeureExerciceType($id);
+        $this->service->supprimerHeureExerciceType($id);
         return response()->json(['data' => 'ok']);
     }
 }
