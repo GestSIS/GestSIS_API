@@ -15,6 +15,7 @@ use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\FonctionSapeur;
+use App\Infrastructure\Models\HeureExercice;
 
 class ImputationBusiness
 {
@@ -752,6 +753,80 @@ class ImputationBusiness
         Ecriture::insert($ecritures);
     }
 
+    public function imputerExercice($exerciceId, $data)
+    {
+        $exercice = $this->exerciceRepo->getExerciceByIdWith($exerciceId, ['sapeurs', 'localite']);
+
+        if ($exercice->statut !== ExerciceBusiness::EXERCICE_STATUT_VALIDE) {
+            throw new ArrayException(array("message" => "Impossible d'imputer cet exercice"));
+        }
+
+        $indemniteType = $this->indemniteRepo->findIndemniteExerciceTypeById($data['indemnite_exercice_type_id']);
+
+        $unite = $indemniteType->type_unite_id;
+        $designation = "{$exercice->localite->designation} ({$exercice->lieu}) $exercice->designation";
+        $sapeurs = array_filter($exercice->sapeurs, function ($sap) {
+            return $sap->present;
+        });
+
+        if ($unite === self::UNITE_CHF_PAR_PIECE) {
+            $this->imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation);
+        } elseif ($unite === self::UNITE_CHF_PAR_HEURE && $indemniteType->par_fonction) {
+            $this->imputerExerciceParHeureEtFonction($exercice, $sapeurs, $indemniteType, $designation);
+        } elseif ($unite === self::UNITE_CHF_PAR_HEURE) {
+            $this->imputerExerciceParHeureEtSoldeMin($exercice, $sapeurs, $indemniteType, $designation);
+        } else {
+            dd("ERROR");
+            return false;
+            //TODO: WARNING IN LOGS -> Should never arrive here
+        }
+
+        // TODO: Ajout imputation heure supp !
+        $heures = HeureExercice::where('exercice_id', $exerciceId)->get();
+        $this->imputerExerciceHeureSup($exercice, $heures, $designation);
+
+        // Changer le statut de l'exercice
+        return $this->exerciceRepo->updateExerciceById($exerciceId, ["statut" => ExerciceBusiness::EXERCICE_STATUT_IMPUTE])->statut;
+    }
+
+    private function imputerExerciceHeureSup($exercice, $heures, $designation)
+    {
+        //TODO: solde_min should be null
+        //En minutes
+        $duree = $exercice->duree / 60;
+
+        // Générer écritures
+        foreach ($heures as $heure) {
+            $designationSapeur = $designation . " - " . $heure->designation;
+
+            $solde = $soldeTarif * $duree;
+            $indemnite = $indemniteTarif * $duree;
+
+            //Par heure -> calcul de la durée
+            $ecriture = array(
+                'solde' => $solde,
+                'indemnite' => $indemnite,
+                'frais' => 0,
+                'type_unite_id' => $indemniteType->type_unite_id,
+                'designation' => $designation,
+                'total' => $solde + $indemnite,
+                'tarif' => $soldeTarif + $indemniteTarif,
+                'quantite' => $duree,
+                'solde_min' => $indemniteType->solde_min,
+                'solde_min_pour' => $indemniteType->solde_min_pour,
+                'sapeur_id' => $sapeur->sapeur_id,
+                'compte_id' => $indemniteType->compte_id,
+                'exercice_comptable_id' => $exercice->exercice_comptable_id,
+                'exercice_id' => $exercice->id,
+                'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+                'date' => $exercice->date,
+                'heure' => $exercice->heure,
+            );
+
+            $this->ecritureRepo->persisteNewEcriture($ecriture);
+        }
+    }
+
     private function imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation)
     {
         // TODO: : solde_min should be null
@@ -796,39 +871,6 @@ class ImputationBusiness
             ];
         }
         Ecriture::insert($ecritures);
-    }
-
-    public function imputerExercice($exerciceId, $data)
-    {
-        $exercice = $this->exerciceRepo->getExerciceByIdWith($exerciceId, ['sapeurs', 'localite']);
-
-        if ($exercice->statut !== ExerciceBusiness::EXERCICE_STATUT_VALIDE) {
-            throw new ArrayException(array("message" => "Impossible d'imputer cet exercice"));
-        }
-
-        $indemniteType = $this->indemniteRepo->findIndemniteExerciceTypeById($data['indemnite_exercice_type_id']);
-
-        $unite = $indemniteType->type_unite_id;
-        $designation = "{$exercice->localite->designation} ({$exercice->lieu}) $exercice->designation";
-        $sapeurs = array_filter($exercice->sapeurs, function ($sap) {
-            return $sap->present;
-        });
-        if ($unite === self::UNITE_CHF_PAR_PIECE) {
-            $this->imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation);
-        } elseif ($unite === self::UNITE_CHF_PAR_HEURE && $indemniteType->par_fonction) {
-            $this->imputerExerciceParHeureEtFonction($exercice, $sapeurs, $indemniteType, $designation);
-        } elseif ($unite === self::UNITE_CHF_PAR_HEURE) {
-            $this->imputerExerciceParHeureEtSoldeMin($exercice, $sapeurs, $indemniteType, $designation);
-        } else {
-            dd("ERROR");
-            return false;
-            //TODO: WARNING IN LOGS -> Should never arrive here
-        }
-
-        // Ajout date imputation ??? -> NON car car l'imputation se fait lors d'une autre étape
-
-        // Changer le statut de l'exercice
-        return $this->exerciceRepo->updateExerciceById($exerciceId, ["statut" => ExerciceBusiness::EXERCICE_STATUT_IMPUTE])->statut;
     }
 
     private function imputerExerciceParHeureEtFonction($exercice, $sapeurs, $indemniteType, $designation)

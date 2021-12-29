@@ -61,22 +61,18 @@ class ExerciceParamService
         return HeureExerciceType::all();
     }
 
-    public function ajouterHeuresExerciceType($data)
+    public function ajouterHeureExerciceType($data)
     {
-        $type = new HeureExerciceType();
-        $type->fill($data);
-        $type->save();
-        return $type;
-        return $this->business->ajouterHeuresExerciceType($data);
+        return $this->business->ajouterHeureExerciceType($data);
     }
 
-    public function modifierHeuresExerciceType($id, $data)
+    public function modifierHeureExerciceType($id, $data)
     {
-        return $this->business->modifierHeuresExerciceType($id, $data);
+        return $this->business->modifierHeureExerciceType($id, $data);
     }
 
-    public function supprimerHeuresExerciceType($id)
+    public function supprimerHeureExerciceType($id)
     {
-        return $this->business->supprimerHeuresExerciceType($id);
+        return $this->business->supprimerHeureExerciceType($id);
     }
 }

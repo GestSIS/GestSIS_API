@@ -19,6 +19,9 @@ class CreateHeureExercicesTable extends Migration
 
             $table->unsignedDecimal('quantite');
 
+            //TODO:
+            $table->unsignedInteger('type');
+
             $table->string('designation');
             $table->unsignedDecimal('montant');
 

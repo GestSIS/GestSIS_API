@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTypeUnitesTable extends Migration
+class CreateEcritureCategoriesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,11 @@ class CreateTypeUnitesTable extends Migration
      */
     public function up()
     {
-        Schema::create('type_unites', function (Blueprint $table) {
+        Schema::create('type_ecriture', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->boolean('comptable');
-            $table->string('unite');
-            $table->string('abreviation');
+            $table->string('designation');
         });
     }
 
@@ -30,6 +28,6 @@ class CreateTypeUnitesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('type_unites');
+        Schema::dropIfExists('ecriture_categories');
     }
 }

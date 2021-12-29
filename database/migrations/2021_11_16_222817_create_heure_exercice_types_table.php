@@ -19,6 +19,7 @@ class CreateHeureExerciceTypesTable extends Migration
 
             $table->string('designation');
             $table->unsignedDecimal('montant');
+            $table->unsignedInteger('type');
 
             $table->unsignedBigInteger('compte_id');
             $table->foreign('compte_id')->references('id')->on('comptes');

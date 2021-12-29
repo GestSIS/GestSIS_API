@@ -26,9 +26,11 @@ class DatabaseSeeder extends Seeder
         $this->call(CoursTableSeeder::class);
         $this->call(GroupesTableSeeder::class);
 
+        //Propositions de base
         $this->call(ExcuseTypeTableSeeder::class);
         $this->call(ExerciceCategorieTableSeeder::class);
 
+        /**/
         //Données propres aux SIS de test
         $this->call(ExerciceComptableTableSeeder::class);
         $this->call(SapeursTableSeeder::class);
@@ -68,11 +70,11 @@ class DatabaseSeeder extends Seeder
         $this->call(IndemniteExerciceFonctionTableSeeder::class);
         $this->call(IndemniteInterventionTypeTableSeeder::class);
         $this->call(AmendeTableSeeder::class);
-        
+
         //Params
         $this->call(AvsParamTableSeeder::class);
         $this->call(SisParamTableSeeder::class);
-        
+
         //Controles médicaux
         $this->call(MedecinTableSeeder::class);
         $this->call(ControleMedicauxTypeTableSeeder::class);
@@ -80,5 +82,6 @@ class DatabaseSeeder extends Seeder
 
         $this->call(DecompteTableSeeder::class);
         $this->call(PaiementTableSeeder::class);
+        /**/
     }
 }
