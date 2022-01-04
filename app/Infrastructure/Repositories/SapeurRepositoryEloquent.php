@@ -106,12 +106,11 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
     public function createSapeur($data)
     {
-        if (array_key_exists('suffixe', $data) && $data['suffixe'] === null) {
-            $data['suffixe'] = '';
-        }
-
-        if (array_key_exists('remarque', $data) && $data['remarque'] === null) {
-            $data['remarque'] = '';
+        $nullableFields = ['suffixe', 'remarque', 'profession', 'employeur', 'lieu_de_travail', 'iban', 'email', 'no_avs'];
+        foreach ($nullableFields as $field) {
+            if (array_key_exists($field, $data) && $data[$field] === null) {
+                $data[$field] = '';
+            }
         }
 
         $sapeur = new Sapeur();
@@ -123,7 +122,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
     public function updateSapeurById(int $sapeurId, $data)
     {
-        $nullableFields = ['suffixe', 'remarque', 'profession', 'employeur', 'lieu_de_travail', 'iban'];
+        $nullableFields = ['suffixe', 'remarque', 'profession', 'employeur', 'lieu_de_travail', 'iban', 'email', 'no_avs'];
         foreach ($nullableFields as $field) {
             if (array_key_exists($field, $data) && $data[$field] === null) {
                 $data[$field] = '';

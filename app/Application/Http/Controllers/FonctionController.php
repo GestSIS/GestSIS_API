@@ -29,10 +29,10 @@ class FonctionController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'nom' => 'string|min:1',
-            'abreviation' => 'string|min:1',
-            'cumulable' => 'boolean',
-            'tri' => 'integer'
+            'nom' => 'string|min:1|required',
+            'abreviation' => 'string|min:1|required',
+            'cumulable' => 'boolean|required',
+            'tri' => 'integer|required'
         ]);
 
         $fonction = $this->service->ajouterFonction($data);
@@ -42,10 +42,10 @@ class FonctionController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->validate([
-            'nom' => 'string|min:1',
-            'abreviation' => 'string|min:1',
-            'cumulable' => 'boolean',
-            'tri' => 'integer'
+            'nom' => 'string|min:1|required',
+            'abreviation' => 'string|min:1|required',
+            'cumulable' => 'boolean|required',
+            'tri' => 'integer|required'
         ]);
 
         $fonction = $this->service->modifierFonction($id, $data);

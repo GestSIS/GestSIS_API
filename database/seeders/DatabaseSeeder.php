@@ -21,15 +21,16 @@ class DatabaseSeeder extends Seeder
         $this->call(CommunesTableSeeder::class);
         $this->call(LocalitesTableSeeder::class);
 
-        $this->call(FonctionTableSeeder::class);
         $this->call(GradesTableSeeder::class);
-        $this->call(CoursTableSeeder::class);
-        $this->call(GroupesTableSeeder::class);
 
         //Propositions de base
         $this->call(ExcuseTypeTableSeeder::class);
-        $this->call(ExerciceCategorieTableSeeder::class);
 
+        /**/
+        $this->call(ExerciceCategorieTableSeeder::class);
+        $this->call(FonctionTableSeeder::class);
+        $this->call(CoursTableSeeder::class);
+        $this->call(GroupesTableSeeder::class);
         /**/
         //Données propres aux SIS de test
         $this->call(ExerciceComptableTableSeeder::class);

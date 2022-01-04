@@ -209,6 +209,7 @@ class ImputationBusiness
     public function imputerAnnuel(int $exerciceComptableId)
     {
         // Choix disponible pour une seule imputation annuelle :
+        // FIXME: Actuelle regénère les frais pour tous les sapeurs ! et ne fait pas ce qui est écrit ci-dessous
         // 1. ~~ Si déjà une imputation pour l'année alors ne rien faire~~
         // 2. OUI -> Ajouter des imputations uniquement pour les sapeurs qui n'ont pas de frais pour l'instant
         // 3. ~~ Tout supprimer pour l'année courante et tout regénérer~~
@@ -791,34 +792,37 @@ class ImputationBusiness
 
     private function imputerExerciceHeureSup($exercice, $heures, $designation)
     {
-        //TODO: solde_min should be null
-        //En minutes
-        $duree = $exercice->duree / 60;
-
         // Générer écritures
         foreach ($heures as $heure) {
             $designationSapeur = $designation . " - " . $heure->designation;
+            $total = $heure->quantite * $heure->montant;
 
-            $solde = $soldeTarif * $duree;
-            $indemnite = $indemniteTarif * $duree;
+            $indemnite = $solde = 0;
+            if ($heure->type == 1) {
+                // Solde
+                $solde = $total;
+            } else {
+                // Indemnité
+                $indemnite = $total;
+            }
 
             //Par heure -> calcul de la durée
             $ecriture = array(
                 'solde' => $solde,
                 'indemnite' => $indemnite,
                 'frais' => 0,
-                'type_unite_id' => $indemniteType->type_unite_id,
-                'designation' => $designation,
-                'total' => $solde + $indemnite,
-                'tarif' => $soldeTarif + $indemniteTarif,
-                'quantite' => $duree,
-                'solde_min' => $indemniteType->solde_min,
-                'solde_min_pour' => $indemniteType->solde_min_pour,
-                'sapeur_id' => $sapeur->sapeur_id,
-                'compte_id' => $indemniteType->compte_id,
+                'type_unite_id' => $heure->type_unite_id,
+                'designation' => $designationSapeur,
+                'total' => $total,
+                'tarif' => $heure->montant,
+                'quantite' => $heure->quantite,
+                'solde_min' => null,
+                'solde_min_pour' => null,
+                'sapeur_id' => $heure->sapeur_id,
+                'compte_id' => $heure->compte_id,
                 'exercice_comptable_id' => $exercice->exercice_comptable_id,
                 'exercice_id' => $exercice->id,
-                'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+                'ecriture_categorie_id' => $heure->ecriture_categorie_id,
                 'date' => $exercice->date,
                 'heure' => $exercice->heure,
             );

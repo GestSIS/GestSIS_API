@@ -158,42 +158,51 @@ class ExerciceBusiness
 
         $cachedHeures = HeureExercice
             ::where('exercice_id', $exerciceId)
-            ->get()->toArray();;
-        $cachedHeuresId = array_map(fn ($h) => $h['id'], $cachedHeures);
+            ->get()->toArray();
 
         foreach ($sapeurs as $sapeur) {
             ExerciceSapeur
                 ::where('exercice_id', $exerciceId)
                 ->where('id', $sapeur['id'])
-                ->update($sapeur);
+                ->update([
+                    'convoque' => $sapeur['convoque'],
+                    'present' => $sapeur['present'],
+                    'amende' => $sapeur['amende'],
+                    'remplace' => $sapeur['remplace'],
+                    'excuse_type_id' => $sapeur['excuse_type_id'],
+                ]);
 
-            $heures = array_key_exists('heures', $sapeur) ? $sapeur['heures'] : [];
-            $heuresId = array_filter(array_map(fn ($h) => $h['id'], $heures), fn ($h) => !is_null($h));
+            $heures = array_filter(
+                array_key_exists('heures', $sapeur) ? $sapeur['heures'] : [],
+                fn ($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
+            );
+            $heuresId = array_filter(array_map(fn ($h) => array_key_exists('id', $h) ? $h['id'] : null, $heures), fn ($h) => !is_null($h));
 
             // Heures supprimées
-            $heuresSupprimeesId = array_filter($cachedHeuresId, fn ($id) => !in_array($id, $heuresId));
+            $heuresSupprimeesId = array_map(fn ($h) => $h['id'], array_filter($cachedHeures, fn ($h) => $h['sapeur_id'] == $sapeur['sapeur_id'] && !in_array($h['id'], $heuresId)));
             HeureExercice::where('exercice_id', $exerciceId)
+                ->where('sapeur_id', $sapeur['sapeur_id'])
                 ->whereIn('id', $heuresSupprimeesId)
                 ->delete();
 
             // Heures ajoutées
             $heuresAjoutees = array_filter($heures, fn ($heure) => !array_key_exists('id', $heure));
             foreach ($heuresAjoutees as $heure) {
-                if (!array_key_exists('heure_exercice_id', $heure)) {
+                if (!array_key_exists('heure_exercice_type_id', $heure)) {
                     // On ignore l'heure invalide
                     continue;
                 }
-                $heure['sapeur_id'] = $sapeur['id'];
+                $heure['sapeur_id'] = $sapeur['sapeur_id'];
                 $this->ajouterHeureExercice($exerciceId, $heure);
             }
 
             // Heures modifiées
-            $heuresModifiees = array_filter($heures, fn ($heure) => array_key_exists('id', $heure) && !in_array($heure['id'], $heuresSupprimesId));
+            $heuresModifiees = array_filter($heures, fn ($heure) => array_key_exists('id', $heure) && !in_array($heure['id'], $heuresSupprimeesId));
             foreach ($heuresModifiees as $heure) {
                 HeureExercice::where('exercice_id', $exerciceId)
-                    ->where('sapeur_id', $sapeur['id'])
+                    ->where('sapeur_id', $sapeur['sapeur_id'])
                     ->where('id', $heure['id'])
-                    ->update(['montant' => $heure['montant']]);
+                    ->update(['quantite' => $heure['quantite']]);
             }
         }
 
@@ -231,10 +240,10 @@ class ExerciceBusiness
 
     public function ajouterHeureExercice($exerciceId, $data)
     {
-        $type = HeureExerciceType::find($data['heure_exercice_id']);
+        $type = HeureExerciceType::find($data['heure_exercice_type_id']);
 
         $heure = new HeureExercice();
-        $heure->fill($type);
+        $heure->fill($type->toArray());
         $heure->fill($data);
         $heure->exercice_id = $exerciceId;
         $heure->save();

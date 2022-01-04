@@ -7,6 +7,10 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
+/**
+ * Controller pour la convocation de sapeurs à des exercices
+ * TODO: Fusionner avec ConvocationController
+ */
 class ConvocationsController extends Controller
 {
 
@@ -46,7 +50,10 @@ class ConvocationsController extends Controller
             'sapeurs.*.amende' => 'required|boolean',
             'sapeurs.*.remplace' => 'required|boolean',
             'sapeurs.*.excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
-            'sapeurs.*.sapeur_id' => 'required|integer|exists:sapeurs,id'
+            'sapeurs.*.sapeur_id' => 'required|integer|exists:sapeurs,id',
+            // Actuellement impossible d'ajouter des heures supp directement à l'ajout d'un sapeur
+            // 'sapeurs.*.heures.*.quantite' => 'required|nullable|numeric',
+            // 'sapeurs.*.heures.*.heure_exercice_type_id' => 'required|integer',
         ]);
 
         $sapeur = $this->service->addSapeurs($exerciceId, $data['sapeurs']);
@@ -70,9 +77,10 @@ class ConvocationsController extends Controller
             'sapeurs.*.present' => 'required|boolean',
             'sapeurs.*.amende' => 'required|boolean',
             'sapeurs.*.remplace' => 'required|boolean',
+            'sapeurs.*.sapeur_id' => 'integer|required',
             'sapeurs.*.excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
             'sapeurs.*.heures.*.id' => 'nullable|integer',
-            'sapeurs.*.heures.*.montant' => 'required|numeric',
+            'sapeurs.*.heures.*.quantite' => 'nullable|numeric',
             'sapeurs.*.heures.*.heure_exercice_type_id' => 'nullable|integer',
         ]);
 
