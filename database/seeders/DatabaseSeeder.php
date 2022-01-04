@@ -26,12 +26,12 @@ class DatabaseSeeder extends Seeder
         //Propositions de base
         $this->call(ExcuseTypeTableSeeder::class);
 
-        /**/
+        /*
         $this->call(ExerciceCategorieTableSeeder::class);
         $this->call(FonctionTableSeeder::class);
         $this->call(CoursTableSeeder::class);
         $this->call(GroupesTableSeeder::class);
-        /**/
+        /*
         //Données propres aux SIS de test
         $this->call(ExerciceComptableTableSeeder::class);
         $this->call(SapeursTableSeeder::class);

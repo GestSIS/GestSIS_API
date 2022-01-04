@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class ExcuseType extends Model
 {
-    protected $fillable = ['designation', 'abreviation', 'amende', 'status', 'tri'];
+    protected $fillable = ['designation', 'abreviation', 'amende', 'statut', 'tri'];
     protected $casts = [
-        'status' => 'integer', 'tri' => 'integer', 'amende' => 'boolean'
+        'statut' => 'integer', 'tri' => 'integer', 'amende' => 'boolean'
     ];
 }

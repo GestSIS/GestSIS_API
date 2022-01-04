@@ -20,7 +20,7 @@ class CreateExerciceCategoriesTable extends Migration
             $table->string('designation');
             $table->boolean('amendable');
             $table->integer('duree_base');
-            $table->integer('status');
+            $table->integer('statut');
             $table->integer('tri');
         });
     }

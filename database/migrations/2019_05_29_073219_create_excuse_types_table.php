@@ -20,7 +20,7 @@ class CreateExcuseTypesTable extends Migration
             $table->string('designation');
             $table->string('abreviation');
             $table->integer('amende');
-            $table->integer('status');
+            $table->integer('statut');
             $table->integer('tri');
         });
     }

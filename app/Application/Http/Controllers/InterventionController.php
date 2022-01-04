@@ -120,10 +120,10 @@ class InterventionController extends Controller
     public function valider($id)
     {
         $statut = $this->service->validerInterventionById($id);
-        
+
         return response()->json(['data' => $statut]);
     }
-    
+
     public function rapport(Request $request, $id)
     {
         $params = $request->validate([
@@ -135,7 +135,7 @@ class InterventionController extends Controller
             'vehicules' => 'boolean',
             'materiel' => 'boolean',
             'absents' => 'boolean',
-            'status' => 'boolean',
+            'statut' => 'boolean',
             'missions' => 'boolean',
             'appels' => 'boolean',
         ]);
@@ -151,7 +151,7 @@ class InterventionController extends Controller
     public function destroy($id)
     {
         $statut = $this->service->deleteInterventionById($id);
-        
+
         return response()->json(['data' => $statut]);
     }
 }

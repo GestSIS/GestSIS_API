@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class StatFederal extends Model
 {
-    protected $fillable = ['designation', 'status', 'tri'];
+    protected $fillable = ['designation', 'statut', 'tri'];
     protected $casts = [
-        'status' => 'integer', 'tri' => 'integer'
+        'statut' => 'integer', 'tri' => 'integer'
     ];
 }

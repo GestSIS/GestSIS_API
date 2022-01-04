@@ -15,7 +15,7 @@ class Sapeur extends Model
         'civilite_id', 'cotisation_avs'
     ];
     protected $casts = [
-        'actif' => 'integer', 'iban_status' => 'integer', 'actif' => 'integer', 'cotisation_avs' => 'integer',
+        'actif' => 'integer', 'iban_statut' => 'integer', 'actif' => 'integer', 'cotisation_avs' => 'integer',
         'localite_id' => 'integer', 'civilite_id' => 'integer', 'porteur' => 'integer', 'fonction_id' => 'integer',
         'grade_id' => 'integer'
     ];
