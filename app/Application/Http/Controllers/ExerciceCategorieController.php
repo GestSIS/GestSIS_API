@@ -28,7 +28,7 @@ class ExerciceCategorieController extends Controller
             'designation' => 'string|min:1',
             'amendable' => 'boolean',
             'duree_base' => 'integer',
-            'status' => 'integer',
+            'statut' => 'integer',
             'tri' => 'integer'
         ]);
 
@@ -42,7 +42,7 @@ class ExerciceCategorieController extends Controller
             'designation' => 'string|min:1',
             'amendable' => 'boolean',
             'duree_base' => 'integer',
-            'status' => 'integer',
+            'statut' => 'integer',
             'tri' => 'integer'
         ]);
 

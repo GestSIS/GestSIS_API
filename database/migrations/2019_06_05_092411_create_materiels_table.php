@@ -18,7 +18,7 @@ class CreateMaterielsTable extends Migration
             $table->timestamps();
 
             $table->string('designation');
-            $table->integer('status');
+            $table->integer('statut');
             $table->integer('tri');
             $table->decimal('forfait');
             $table->decimal('unite');

@@ -34,7 +34,7 @@ class ExerciceController extends Controller
             'designation' => 'string',
             'communications' => 'string|nullable',
             'duree' => 'integer|min:1|max:780',
-            'status' => 'integer',
+            'statut' => 'integer',
             'exercice_categorie_id' => 'integer|exists:exercice_categories,id',
             'localite_id' => 'integer|exists:localites,id',
             'exercice_comptable_id' => 'integer|exists:exercice_comptables,id'
@@ -61,7 +61,7 @@ class ExerciceController extends Controller
             'communications' => 'string|nullable',
             'designation' => 'string',
             'duree' => 'integer|min:1|max:780',
-            'status' => 'integer',
+            'statut' => 'integer',
             'exercice_categorie_id' => 'integer|exists:exercice_categories,id',
             'localite_id' => 'integer|exists:localites,id'
         ]);
@@ -84,17 +84,17 @@ class ExerciceController extends Controller
 
         return response()->json(['data' => $exercice]);
     }
-    
+
     function listeAppel($exerciceId)
     {
         return $this->service->listeAppel($exerciceId);
     }
-    
+
     function listeAppelParLocalite($exerciceId)
     {
         return $this->service->listeAppelParLocalite($exerciceId);
     }
-    
+
     function listePresence($exerciceId)
     {
         return $this->service->listePresence($exerciceId);

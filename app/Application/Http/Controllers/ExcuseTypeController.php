@@ -27,7 +27,7 @@ class ExcuseTypeController extends Controller
             'designation' => 'string|min:1',
             'abreviation' => 'string|min:1',
             'amende' => 'integer',
-            'status' => 'integer',
+            'statut' => 'integer',
             'tri' => 'integer'
         ]);
 
@@ -41,7 +41,7 @@ class ExcuseTypeController extends Controller
             'designation' => 'string|min:1',
             'abreviation' => 'string|min:1',
             'amende' => 'integer',
-            'status' => 'integer',
+            'statut' => 'integer',
             'tri' => 'integer'
         ]);
 

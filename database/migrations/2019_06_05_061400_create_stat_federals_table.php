@@ -17,7 +17,7 @@ class CreateStatFederalsTable extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
             $table->string('designation');
-            $table->integer('status');
+            $table->integer('statut');
             $table->integer('tri');
         });
     }

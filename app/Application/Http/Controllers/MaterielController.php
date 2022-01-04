@@ -25,7 +25,7 @@ class MaterielController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
-            'status' => 'integer',
+            'statut' => 'integer',
             'tri' => 'integer',
             'forfait' => 'numeric',
             'unite' => 'numeric',
@@ -40,7 +40,7 @@ class MaterielController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
-            'status' => 'integer',
+            'statut' => 'integer',
             'tri' => 'integer',
             'forfait' => 'numeric',
             'unite' => 'numeric',
