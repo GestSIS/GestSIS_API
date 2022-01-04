@@ -5,6 +5,10 @@ namespace App\Application\Http\Controllers;
 use App\Domaine\API\ConvocationService;
 use Illuminate\Http\Request;
 
+/**
+ * Controller pour la génération des convocations pdf
+ * TODO: Fusionner avec ConvocationsController
+ */
 class ConvocationController extends Controller
 {
     protected $service;

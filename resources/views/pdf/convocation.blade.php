@@ -10,14 +10,11 @@
         .page-break {
             page-break-after: always;
         }
-
-        .column-right {
-            text-align: right !important;
-            padding-right: 1rem !important;
+        html {
+            font-size: 0.8rem;
         }
-
-        .sum-row {
-            background-color: white !important;
+        div.addresse {
+            font-size: 1.2rem !important;
         }
     </style>
 
@@ -39,10 +36,10 @@
         return substr($value, 0, 5);
     }
     ?>
-    <div class=" ">
+    <div>
         @foreach($sapeurs as $sapeur)
         <h1>{{ $params['titre'] }}</h1>
-        <div class="mt-3" style="margin-left:50%">
+        <div class="mt-5 addresse" style="margin-left:50%">
             <div class="col-6">
                 {{-- {{dd($sapeur, $civilites)}} --}}
                 <p class="m-0">{{ $civilites[$sapeur['civilite_id']] }}</p>
@@ -51,8 +48,8 @@
                 <p class="m-0">{{ $localites[$sapeur['localite_id']] }}</p>
             </div>
         </div>
-        <div class="mt-3">
-            <p>
+        <div class="mt-5">
+            <p class="text-justify">
                 @foreach(explode("\n",str_replace(["\r\n","\n\r","\r"],"\n",$params['texteDebut'])) as $line)
                 {{ $line }}<br/>
                 @endforeach
@@ -64,21 +61,29 @@
                 foreach ($sapeur['exercices'] as $convocation) {
                     // dd($convocation['exercice_id'], $exercices);
                     $exercice = $exercices[$convocation['exercice_id']];
+                    $convoque = !!$convocation['convoque'];
+                    $pourInfo = $params['info'] && !$convoque;
+                    $colspan = $pourInfo ? 1 : 2;
                 ?>
                 <tr>
                     <td>{{ formatDate($exercice['date']) }}</td>
                     <td>{{ formatHeure($exercice['heure']) }}</td>
-                    @switch($params['format'])
-                    @case(1)
-                    <td>{{ $localites[$exercice['localite_id']] }} : {{ $exercice['lieu'] }}<br />{{ $categories[$exercice['exercice_categorie_id']] }} : {{ $exercice['communications'] }}</td>
-                    @break;
-                    @case(2)
-                    <td>{{ $localites[$exercice['localite_id']] }} : {{ $exercice['lieu'] }} - {{ $categories[$exercice['exercice_categorie_id']] }}<br />{{ $exercice['communications'] }}</td>
-                    @break;
-                    @case(3)
-                    <td>{{ $localites[$exercice['localite_id']] }} : {{ $exercice['lieu'] }} - {{ $categories[$exercice['exercice_categorie_id']] }} : {{ $exercice['communications'] }}</td>
-                    @break;
-                    @endswitch
+                    <td colspan="{{$colspan}}">
+                        @switch($params['format'])
+                        @case(1)
+                        {{ $localites[$exercice['localite_id']] }} : {{ $exercice['lieu'] }}<br />{{ $categories[$exercice['exercice_categorie_id']] }} : {{ $exercice['communications'] }}
+                        @break;
+                        @case(2)
+                        {{ $localites[$exercice['localite_id']] }} : {{ $exercice['lieu'] }} - {{ $categories[$exercice['exercice_categorie_id']] }}<br />{{ $exercice['communications'] }}
+                        @break;
+                        @case(3)
+                        {{ $localites[$exercice['localite_id']] }} : {{ $exercice['lieu'] }} - {{ $categories[$exercice['exercice_categorie_id']] }} : {{ $exercice['communications'] }}
+                        @break;
+                        @endswitch
+                    </td>
+                    @if($pourInfo)
+                    <td><em>{{ $params['pourInfo'] }}<em></td>
+                    @endif
                 </tr>
                 <?php
                 }
@@ -86,7 +91,7 @@
             </tbody>
         </table>
         <div>
-            <p>
+            <p class="text-justify">
                 @foreach(explode("\n",str_replace(["\r\n","\n\r","\r"],"\n",$params['texteFin'])) as $line)
                 {{$line}}<br />
                 @endforeach
@@ -98,5 +103,4 @@
         @endforeach
     </div>
 </body>
-
 </html>

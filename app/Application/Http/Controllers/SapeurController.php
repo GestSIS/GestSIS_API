@@ -41,13 +41,13 @@ class SapeurController extends Controller
             'rue' => 'string|min:3',
             'no_rue' => 'string',
             'date_naissance' => 'date|before:' . date('Y-m-d'),
-            'incorporation' => 'date',
-            'no_avs' => 'string',
+            'incorporation' => 'date|required',
+            'no_avs' => 'string|nullable',
             'cotisation_avs' => 'boolean',
-            'profession' => 'string|max:80',
-            'employeur' => 'string|max:150',
-            'lieu_de_travail' => 'string|max:100',
-            'email' => 'email',
+            'profession' => 'string|max:80|nullable',
+            'employeur' => 'string|max:150|nullable',
+            'lieu_de_travail' => 'string|max:100|nullable',
+            'email' => 'email|nullable',
             'actif' => 'integer',
             'iban' => 'string|max:100|nullable',
             'remarque' => 'string|max:300|nullable',
@@ -55,12 +55,12 @@ class SapeurController extends Controller
             'localite_id' => 'integer|min:1',
             'civilite_id' => 'integer|min:1'
         ]);
-        
+
         $sapeur = $this->service->createSapeur($data);
 
         return response()->json(['data' => $sapeur]);
     }
-        
+
     /**
      * Display the specified resource.
      *
@@ -72,7 +72,7 @@ class SapeurController extends Controller
         $sapeur = $this->service->getSapeurDetailsById($id);
         return response()->json(['data' => $sapeur]);
     }
-    
+
     /**
      * Update the specified resource in storage.
      *

@@ -89,8 +89,8 @@ class ExerciceService
 
         $dictionary = [];
         foreach ($sapeurs as $sapeur) {
-            $dictionary[$sapeur['id']] = $sapeur;
-            $dictionary[$sapeur['id']]['heures'] = [];
+            $dictionary[$sapeur['sapeur_id']] = $sapeur;
+            $dictionary[$sapeur['sapeur_id']]['heures'] = [];
         }
         foreach ($heures as $heure) {
             if (!array_key_exists($heure['sapeur_id'], $dictionary)) {

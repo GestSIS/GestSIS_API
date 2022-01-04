@@ -7,11 +7,9 @@ use Ds\Set;
 use App\Infrastructure\Models\Civilite;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceCategorie;
-use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\Localite;
 use App\Infrastructure\Models\Sapeur;
 use Barryvdh\Snappy\Facades\SnappyPdf;
-use Illuminate\Support\Arr;
 
 class ConvocationService
 {
@@ -21,11 +19,9 @@ class ConvocationService
         $localites = Localite::all();
         $categories = ExerciceCategorie::all();
 
+        //TODO: Filtrage des personnes "pour info" 
         $exercices = Exercice::with('sapeurs')->where('exercice_comptable_id', $exerciceComptableId)->orderBy('date')->orderBy('heure')->get();
-        // $exerciceIds = array_unique(array_map(fn ($e) => $e['id'], $exercices->toArray()));
-        // $convocations = ExerciceSapeur::whereIn('exercice_id', $exerciceIds)->get();
         $sapeurIds = array_values(array_unique(array_merge(...array_map(fn ($e) => array_map(fn ($c) => $c['sapeur_id'], $e['sapeurs']), $exercices->toArray()))));
-        // $sapeurIds = array_unique(array_map(fn ($c) => $c['sapeur_id'], $convocations->toArray()));
         $sapeurs = Sapeur::whereIn('id', $sapeurIds)->orderBy('nom')->orderBy('prenom')->get(['id', 'nom', 'prenom', 'civilite_id', 'no_rue', 'rue', 'localite_id']);
 
         $civilitesMap = [];

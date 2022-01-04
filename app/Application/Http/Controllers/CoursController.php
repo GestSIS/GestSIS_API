@@ -24,14 +24,14 @@ class CoursController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'abreviation' => 'string|min:1',
-            'designation' => 'string|min:1',
+            'abreviation' => 'string|min:1|required',
+            'designation' => 'string|min:1|required',
             'validite_debut' => 'date|nullable',
             'validite_fin' => 'date|nullable',
             'fonction_id' => 'integer|nullable',
             'grade_id' => 'integer|nullable',
             'precedent_id' => 'integer|nullable',
-            'tri' => 'integer'
+            'tri' => 'integer|required'
         ]);
 
         $cours = $this->service->ajouterCours($data);
