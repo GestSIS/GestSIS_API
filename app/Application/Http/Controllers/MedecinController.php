@@ -24,10 +24,10 @@ class MedecinController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'adresse' => 'string|min:1',
-            'localite_id' => 'integer',
-            'actif' => 'boolean'
+            'designation' => 'string|min:1|required',
+            'adresse' => 'string|min:0|nullable',
+            'localite_id' => 'integer|required',
+            'actif' => 'boolean|required'
         ]);
 
         $medecin = $this->service->ajouterMedecin($data);
@@ -38,7 +38,7 @@ class MedecinController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
-            'adresse' => 'string|min:1',
+            'adresse' => 'string|min:0',
             'localite_id' => 'integer',
             'actif' => 'boolean'
         ]);

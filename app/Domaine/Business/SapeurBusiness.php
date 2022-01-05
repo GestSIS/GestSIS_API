@@ -5,6 +5,8 @@ namespace App\Domaine\Business;
 
 use App\Domaine\SPI\SapeurRepository;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\Grade;
+use App\Infrastructure\Models\GradeSapeur;
 use Carbon\Carbon;
 
 class SapeurBusiness
@@ -50,10 +52,10 @@ class SapeurBusiness
     {
         $cours = $this->repository->addCours($sapeurId, $data);
 
-        $gradeId = $data['grade_id'];
-
         //Add Grade
-        if ($gradeId !== null) {
+        if (array_key_exists('grade_id', $data) && $data['grade_id'] !== null) {
+            $gradeId = $data['grade_id'];
+
             //Add grade if not already there
             $result = array_filter(
                 $this->repository->getSapeurGradesById($sapeurId),
@@ -71,7 +73,7 @@ class SapeurBusiness
         }
 
         //Edit old fonction
-        if ($data['fonction_sapeur_id'] !== null) {
+        if (array_key_exists('fonction_sapeur_id', $data) && $data['fonction_sapeur_id'] !== null) {
             $this->updateFonction(
                 $sapeurId,
                 array(
@@ -83,7 +85,7 @@ class SapeurBusiness
         }
 
         //Add Fonction
-        if ($data['fonction_id'] !== null) {
+        if (array_key_exists('fonction_id', $data) && $data['fonction_id'] !== null) {
             $this->addFonction(
                 $sapeurId,
                 array(
@@ -110,17 +112,12 @@ class SapeurBusiness
 
     public function addGrade(int $sapeurId, $data)
     {
-        $gradeId = $data['grade_id'];
+        $gradeId = intval($data['grade_id']);
 
         //Check si déjà présent
-        $res = array_filter(
-            $this->repository->getSapeurGradesById($sapeurId),
-            function ($grade) use ($gradeId) {
-                return $grade->grade_id === $gradeId;
-            }
-        );
+        $nb = GradeSapeur::where('grade_id', $gradeId)->where('sapeur_id', $sapeurId)->count();
 
-        if (count($res) !== 0) {
+        if ($nb > 0) {
             throw new ArrayException(array('id' => "Grade déjà existant"));
         }
 
@@ -310,8 +307,9 @@ class SapeurBusiness
         }
     }
 
-    private function isStillActif($mutations) {
-        foreach($mutations as $mutation) {
+    private function isStillActif($mutations)
+    {
+        foreach ($mutations as $mutation) {
             if ($mutation->sortie === NULL) {
                 return true;
             }
@@ -343,7 +341,7 @@ class SapeurBusiness
         $this->verifyMutationPeriode($data, $mutations);
 
         $mutation = $this->repository->updateMutation($sapeurId, $data);
-        
+
         // Update actif statut depending of end of all mutation
         array_push($mutations, $mutation);
         $actif = $this->isStillActif($mutations) ? 1 : 0;

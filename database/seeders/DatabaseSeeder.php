@@ -22,16 +22,19 @@ class DatabaseSeeder extends Seeder
         $this->call(LocalitesTableSeeder::class);
 
         $this->call(GradesTableSeeder::class);
+        $this->call(StatFederalTableSeeder::class);
+        $this->call(TypeUniteTableSeeder::class);
+        $this->call(PhaseTypeTableSeeder::class);
 
         //Propositions de base
+        /** */
         $this->call(ExcuseTypeTableSeeder::class);
 
-        /*
         $this->call(ExerciceCategorieTableSeeder::class);
         $this->call(FonctionTableSeeder::class);
         $this->call(CoursTableSeeder::class);
         $this->call(GroupesTableSeeder::class);
-        /*
+        /** */
         //Données propres aux SIS de test
         $this->call(ExerciceComptableTableSeeder::class);
         $this->call(SapeursTableSeeder::class);
@@ -42,14 +45,12 @@ class DatabaseSeeder extends Seeder
 
         $this->call(MaterielTableSeeder::class);
         $this->call(VehiculeTableSeeder::class);
-        $this->call(PhaseTypeTableSeeder::class);
-        $this->call(StatFederalTableSeeder::class);
+        // $this->call(PhaseTypeTableSeeder::class);
         $this->call(StatInterventionTableSeeder::class);
         $this->call(TypeInterventionTableSeeder::class);
         $this->call(InterventionTraitementTableSeeder::class);
 
         //Interventions
-        $this->call(TypeUniteTableSeeder::class);
         $this->call(InterventionTableSeeder::class);
         $this->call(GroupeInterventionTableSeeder::class);
         $this->call(MaterielInterventionTableSeeder::class);
@@ -63,6 +64,7 @@ class DatabaseSeeder extends Seeder
         $this->call(MissionTypeTableSeeder::class);
 
         //Frais
+
         $this->call(CompteTableSeeder::class);
         $this->call(EcritureCategorieTableSeeder::class);
         $this->call(FraisAnnuelTypeTableSeeder::class);

@@ -47,9 +47,9 @@ class ControleMedicalController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'sapeur_id' => 'integer',
-            'medecin_id' => 'integer',
-            'controle_medical_type_id' => 'integer',
+            'sapeur_id' => 'integer|exists:sapeurs,id',
+            'medecin_id' => 'integer|exists:medecins,id',
+            'controle_medical_type_id' => 'integer|exists:controle_medical_types,id',
             'consultation' => 'date',
             'validite' => 'nullable|date|after:consultation',
             'designation' => 'string|nullable',
@@ -74,7 +74,6 @@ class ControleMedicalController extends Controller
     {
         $data = $request->validate([
             'id' => 'integer',
-            'sapeur_id' => 'integer',
             'medecin_id' => 'integer',
             'controle_medical_type_id' => 'integer',
             'consultation' => 'date',

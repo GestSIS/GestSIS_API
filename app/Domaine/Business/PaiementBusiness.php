@@ -2,6 +2,7 @@
 
 namespace App\Domaine\Business;
 
+use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
@@ -110,8 +111,8 @@ class PaiementBusiness
                     $totaux[$p->sapeur_id]['avs_total'] += $p->avs;
                 }
             }
-            //TODO: fetch sapeurs déduction choix
 
+            // TODO: fetch sapeurs déduction choix
             foreach ($totaux as $key => $total) {
                 $solde_imposable = max($total['solde'] + $total['soldeTotal'] - $avsParam->franchise_imposition, 0.0);
                 $total_imposable = $solde_imposable + $total['indemnite'] + $total['indemniteTotal'];
@@ -126,13 +127,13 @@ class PaiementBusiness
             $decompte->save();
         }
 
-        //total à payer
+        // total à payer
         foreach ($totaux as $key => $total) {
             $totaux[$key]['total'] = $total['solde'] + $total['indemnite'] + $total['frais'] - $total['avs'];
         }
 
         $paiements = array();
-        //création paiements
+        // création paiements
         foreach ($totaux as $key => $total) {
             $paiements[] = [
                 'decompte_id' => $decompte->id,

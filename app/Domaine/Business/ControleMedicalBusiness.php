@@ -18,6 +18,9 @@ class ControleMedicalBusiness
 
     public function ajouterMedecin($data)
     {
+        if (!array_key_exists('adresse', $data) or is_null($data['adresse'])) {
+            $data['adresse'] = "";
+        }
         $medecin = new Medecin();
         $medecin->fill($data);
         $medecin->save();
