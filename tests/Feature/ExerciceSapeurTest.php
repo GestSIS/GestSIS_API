@@ -79,7 +79,7 @@ class ExerciceSapeurTest extends TestCase
         );
 
         $response = $this->json('POST', '/api/v2/exercices/' . $exercice->id . '/sapeurs', $sapeurs);
-        
+
         $response
             ->assertStatus(200)
             ->assertJson([
@@ -127,8 +127,8 @@ class ExerciceSapeurTest extends TestCase
 
         $sapeurs = $this->exerciceService->addSapeurs($exercice->id, $sapeurs)['sapeurs'];
 
-        $sapeurs[1]->present = 0;
-        $sapeurs[1]->excuse_type_id = 1;
+        $sapeurs[1]['present'] = 0;
+        $sapeurs[1]['excuse_type_id'] = 1;
 
         $response = $this->json('PUT', '/api/v2/exercices/' . $exercice->id . '/sapeurs/', array("sapeurs" => $sapeurs));
 
@@ -180,7 +180,7 @@ class ExerciceSapeurTest extends TestCase
         $sapeurs = $this->exerciceService->addSapeurs($exercice->id, $sapeurs)['sapeurs'];
 
         $ids = array_map(function ($sap) {
-            return $sap->id;
+            return $sap['id'];
         }, $sapeurs);
 
         $response = $this->json('DELETE', '/api/v2/exercices/' . $exercice->id . '/sapeurs/', array("sapeurs" => $ids));
