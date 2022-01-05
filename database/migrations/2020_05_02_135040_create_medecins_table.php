@@ -18,9 +18,9 @@ class CreateMedecinsTable extends Migration
             $table->timestamps();
 
             $table->string('designation');
-            $table->string('adresse');
+            $table->string('adresse')->default('');
             $table->integer('actif');
-            
+
             // Foreign keys
             $table->unsignedBigInteger('localite_id');
             $table->foreign('localite_id')->references('id')->on('localites');

@@ -19,7 +19,7 @@ class CreateControlesMedicauxTable extends Migration
 
             $table->string('designation');
             $table->date('consultation');
-            $table->date('validite');
+            $table->date('validite')->nullable();
 
             $table->boolean('accepter');
             $table->boolean('en_cours');

@@ -28,16 +28,15 @@ class ExerciceController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'date' => 'date',
-            'heure' => 'date_format:H:i',
+            'date' => 'date|required',
+            'heure' => 'date_format:H:i|required',
             'lieu' => 'string|nullable',
-            'designation' => 'string',
+            'designation' => 'string|required',
             'communications' => 'string|nullable',
-            'duree' => 'integer|min:1|max:780',
-            'statut' => 'integer',
-            'exercice_categorie_id' => 'integer|exists:exercice_categories,id',
-            'localite_id' => 'integer|exists:localites,id',
-            'exercice_comptable_id' => 'integer|exists:exercice_comptables,id'
+            'duree' => 'integer|min:1|max:780|required',
+            'exercice_categorie_id' => 'integer|exists:exercice_categories,id|required',
+            'localite_id' => 'integer|exists:localites,id|required',
+            'exercice_comptable_id' => 'integer|exists:exercice_comptables,id|required'
         ]);
 
         $exercice = $this->service->createExercice($data);
