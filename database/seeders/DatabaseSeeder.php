@@ -28,8 +28,8 @@ class DatabaseSeeder extends Seeder
 
         //Propositions de base
         /** */
+        // Exercices types
         $this->call(ExcuseTypeTableSeeder::class);
-
         $this->call(ExerciceCategorieTableSeeder::class);
         $this->call(FonctionTableSeeder::class);
         $this->call(CoursTableSeeder::class);
@@ -39,10 +39,11 @@ class DatabaseSeeder extends Seeder
         $this->call(ExerciceComptableTableSeeder::class);
         $this->call(SapeursTableSeeder::class);
 
-        //Exercices
+        // Exercices
         $this->call(ExerciceTableSeeder::class);
         $this->call(ExerciceSapeurTableSeeder::class);
 
+        // Param interventions
         $this->call(MaterielTableSeeder::class);
         $this->call(VehiculeTableSeeder::class);
         // $this->call(PhaseTypeTableSeeder::class);
@@ -50,7 +51,7 @@ class DatabaseSeeder extends Seeder
         $this->call(TypeInterventionTableSeeder::class);
         $this->call(InterventionTraitementTableSeeder::class);
 
-        //Interventions
+        // Interventions
         $this->call(InterventionTableSeeder::class);
         $this->call(GroupeInterventionTableSeeder::class);
         $this->call(MaterielInterventionTableSeeder::class);
