@@ -162,7 +162,7 @@ class LocalitesTableSeeder extends Seeder
             array('id' => '145', 'commune_id' => NULL, 'npa' => '2610', 'designation' => 'St-Imier'),
             array('id' => '146', 'commune_id' => '69', 'npa' => '4710', 'designation' => 'Balsthal'),
             array('id' => '147', 'commune_id' => '60', 'npa' => '2829', 'designation' => 'Envelier'),
-            array('id' => '148', 'commune_id' => '0', 'npa' => '25150', 'designation' => 'Goux-Lès-Dambelin'),
+            array('id' => '148', 'commune_id' => NULL, 'npa' => '25150', 'designation' => 'Goux-Lès-Dambelin'),
         );
 
         foreach ($localites as $localite) {
