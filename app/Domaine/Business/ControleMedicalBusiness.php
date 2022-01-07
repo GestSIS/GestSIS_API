@@ -2,7 +2,9 @@
 
 namespace App\Domaine\Business;
 
+use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\SPI\ControleMedicalRepository;
+use App\Infrastructure\Models\ControleMedical;
 use App\Infrastructure\Models\ControleMedicalType;
 use App\Infrastructure\Models\Medecin;
 use Illuminate\Support\Facades\Storage;
@@ -35,7 +37,10 @@ class ControleMedicalBusiness
 
     public function supprimerMedecin($id)
     {
-        // TODO: Implémenter supprimer médecin
+        if (ControleMedical::where('medecin_id', '=', $id)->exists()) {
+            throw new ArrayException(['message' => 'Impossible de supprimer ce médecin, celui-ci est utilisé dans un contrôle médical.']);
+        }
+        Medecin::where('id', $id)->delete();
     }
 
     public function ajouterType($data)
@@ -54,7 +59,10 @@ class ControleMedicalBusiness
 
     public function supprimerType($id)
     {
-        // TODO: Implémenter supprimer médecin
+        if (ControleMedical::where('controle_medical_type_id', '=', $id)->exists()) {
+            throw new ArrayException(['message' => 'Impossible de supprimer ce type de contrôle médical, celui-ci est utilisé dans un contrôle médical.']);
+        }
+        ControleMedicalType::where('id', $id)->delete();
     }
 
     public function createControleMedical($controleMedical)
