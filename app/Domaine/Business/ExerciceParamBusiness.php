@@ -3,8 +3,11 @@
 
 namespace App\Domaine\Business;
 
+use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\ExerciceCategorie;
 use App\Infrastructure\Models\ExcuseType;
+use App\Infrastructure\Models\Exercice;
+use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\HeureExerciceType;
 
 class ExerciceParamBusiness
@@ -25,7 +28,10 @@ class ExerciceParamBusiness
 
     public static function supprimerCategorie($id)
     {
-        //TODO: Not implemented now
+        if (Exercice::where('exercice_categorie_id', '=', $id)->exists()) {
+            throw new ArrayException(['message' => 'Impossible de supprimer cette catégorie, celle-ci est utilisée dans un exercice.']);
+        }
+        ExerciceCategorie::where('id', $id)->delete();
     }
 
     public static function ajouterExcuseType($data)
@@ -44,7 +50,10 @@ class ExerciceParamBusiness
 
     public static function supprimerExcuseType($id)
     {
-        //TODO: Not implemented now
+        if (ExerciceSapeur::where('excuse_type_id', '=', $id)->exists()) {
+            throw new ArrayException(['message' => 'Impossible de supprimer cette excuse, celle-ci est utilisée dans un exercice.']);
+        }
+        ExcuseType::where('id', $id)->delete();
     }
 
     public function ajouterHeureExerciceType($data)

@@ -2,7 +2,11 @@
 
 namespace App\Domaine\Business;
 
+use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\Intervention;
+use App\Infrastructure\Models\InterventionMateriel;
 use App\Infrastructure\Models\InterventionTraitement;
+use App\Infrastructure\Models\InterventionVehicule;
 use App\Infrastructure\Models\Materiel;
 use App\Infrastructure\Models\MissionType;
 use App\Infrastructure\Models\StatFederal;
@@ -29,7 +33,10 @@ class InterventionParamBusiness
 
     public function supprimerStat($id)
     {
-        //TODO: Not implemented now
+        if (TypeIntervention::where('stat_intervention_id', '=', $id)->exists()) {
+            throw new ArrayException(['message' => 'Impossible de supprimer cette catégorie statististique, celle-ci est liée à un type d\'intervention.']);
+        }
+        StatIntervention::where('id', $id)->delete();
     }
 
     public function ajouterStatFederal($data)
@@ -67,7 +74,10 @@ class InterventionParamBusiness
 
     public static function supprimerType($id)
     {
-        //TODO: Not implemented now
+        if (Intervention::where('type_intervention_id', '=', $id)->exists()) {
+            throw new ArrayException(['message' => 'Impossible de supprimer ce type d\'intervention, celui-ci est utilisé dans une intervention.']);
+        }
+        TypeIntervention::where('id', $id)->delete();
     }
 
     public function ajouterMission($data)
@@ -86,7 +96,7 @@ class InterventionParamBusiness
 
     public static function supprimerMission($id)
     {
-        //TODO: Not implemented now
+        MissionType::where('id', $id)->delete();
     }
 
     public function ajouterTelephone($data)
@@ -105,7 +115,7 @@ class InterventionParamBusiness
 
     public static function supprimerTelephone($id)
     {
-        //TODO: Not implemented now
+        Telephone::where('id', $id)->delete();
     }
 
     public function ajouterVehicule($data)
@@ -130,7 +140,10 @@ class InterventionParamBusiness
 
     public static function supprimerVehicule($id)
     {
-        //TODO: Not implemented now
+        if (InterventionVehicule::where('vehicule_id', '=', $id)->exists()) {
+            throw new ArrayException(['message' => 'Impossible de supprimer ce véhicule, celui-ci est utilisé dans une intervention.']);
+        }
+        Vehicule::where('id', $id)->delete();
     }
 
     public function ajouterMateriel($data)
@@ -155,7 +168,10 @@ class InterventionParamBusiness
 
     public static function supprimerMateriel($id)
     {
-        //TODO: Not implemented now
+        if (InterventionMateriel::where('materiel_id', '=', $id)->exists()) {
+            throw new ArrayException(['message' => 'Impossible de supprimer ce matériel, celui-ci est utilisé dans une intervention.']);
+        }
+        Materiel::where('id', $id)->delete();
     }
 
     public function ajouterTraitement($data)
@@ -174,6 +190,9 @@ class InterventionParamBusiness
 
     public static function supprimerTraitement($id)
     {
-        //TODO: Not implemented now
+        if (Intervention::where('intervention_traitement_id', '=', $id)->exists()) {
+            throw new ArrayException(['message' => 'Impossible de supprimer ce traitement, celui-ci est utilisé dans un exercice.']);
+        }
+        InterventionTraitement::where('id', $id)->delete();
     }
 }

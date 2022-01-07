@@ -26,7 +26,7 @@ class ExcuseTypeController extends Controller
         $data = $request->validate([
             'designation' => 'string|min:1',
             'abreviation' => 'string|min:1',
-            'amende' => 'integer',
+            'amende' => 'boolean',
             'statut' => 'integer',
             'tri' => 'integer'
         ]);
@@ -40,7 +40,7 @@ class ExcuseTypeController extends Controller
         $data = $request->validate([
             'designation' => 'string|min:1',
             'abreviation' => 'string|min:1',
-            'amende' => 'integer',
+            'amende' => 'boolean',
             'statut' => 'integer',
             'tri' => 'integer'
         ]);
@@ -51,7 +51,7 @@ class ExcuseTypeController extends Controller
 
     public function destroy($id)
     {
-        $excuseType = $this->service->supprimerExcuseType($id);
-        return response()->json(['data' => $excuseType]);
+        $this->service->supprimerExcuseType($id);
+        return response()->json(['data' => 'ok']);
     }
 }

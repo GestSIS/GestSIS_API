@@ -134,8 +134,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     // Params exercices
     Route::group(['middleware' => 'jwtTokenRole:exercice.config'], function () {
         Route::resource('sis-param', 'SisParamController')->only(['index']);
-        Route::resource('exercice-categories', 'ExerciceCategorieController')->only(['index', 'store', 'update']);
-        Route::resource('excuses-types', 'ExcuseTypeController')->only(['index', 'store', 'update']);
+        Route::resource('exercice-categories', 'ExerciceCategorieController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('excuses-types', 'ExcuseTypeController')->only(['index', 'store', 'update', 'destroy']);
     });
 
     // Interventions
@@ -212,13 +212,13 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     Route::group(['middleware' => 'jwtTokenRole:intervention.config'], function () {
         Route::resource('sis-param', 'SisParamController')->only(['index']);
-        Route::resource('type-intervention', 'TypeInterventionController')->only(['index', 'store', 'update']);
-        Route::resource('vehicules', 'VehiculeController')->only(['index', 'store', 'update']);
-        Route::resource('materiels', 'MaterielController')->only(['index', 'store', 'update']);
-        Route::resource('stat-intervention', 'StatInterventionController')->only(['index', 'store', 'update']);
-        Route::resource('intervention-traitement', 'InterventionTraitementController')->only(['index', 'store', 'update']);
-        Route::resource('telephones', 'TelephoneController')->only(['index', 'store', 'update']);
-        Route::resource('mission-types', 'MissionTypeController')->only(['index', 'store', 'update']);
+        Route::resource('type-intervention', 'TypeInterventionController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('vehicules', 'VehiculeController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('materiels', 'MaterielController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('stat-intervention', 'StatInterventionController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('intervention-traitement', 'InterventionTraitementController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('telephones', 'TelephoneController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('mission-types', 'MissionTypeController')->only(['index', 'store', 'update', 'destroy']);
     });
 
     // Exercices comptables
@@ -329,8 +329,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     Route::group(['middleware' => 'jwtTokenRole:controle_medical.config'], function () {
         Route::resource('sis-param', 'SisParamController')->only(['index']);
-        Route::resource('medecins', 'MedecinController')->only(['index', 'store', 'update']);
-        Route::resource('controles-medicaux-types', 'ControleMedicalTypeController')->only(['index', 'store', 'update']);
+        Route::resource('medecins', 'MedecinController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('controles-medicaux-types', 'ControleMedicalTypeController')->only(['index', 'store', 'update', 'destroy']);
     });
 
     // TODO: Ajouter route type d'unité
