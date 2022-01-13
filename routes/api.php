@@ -84,9 +84,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     // Params Sapeur
     Route::group(['middleware' => 'jwtTokenRole:sapeur.config'], function () {
         Route::resource('sis-param', 'SisParamController')->only(['index']);
-        Route::resource('grades', 'GradeController')->only(['index', 'store', 'update']);
-        Route::resource('fonctions', 'FonctionController')->only(['index', 'store', 'update']);
-        Route::resource('cours', 'CoursController')->only(['index', 'store', 'update']);
+        Route::resource('grades', 'GradeController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('fonctions', 'FonctionController')->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('cours', 'CoursController')->only(['index', 'store', 'update', 'destroy']);
     });
 
     // Param organisation
