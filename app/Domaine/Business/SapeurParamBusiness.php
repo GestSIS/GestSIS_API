@@ -3,10 +3,14 @@
 
 namespace App\Domaine\Business;
 
+use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\Cours;
+use App\Infrastructure\Models\CoursSapeur;
 use App\Infrastructure\Models\Fonction;
+use App\Infrastructure\Models\FonctionSapeur;
 use App\Infrastructure\Models\Grade;
+use App\Infrastructure\Models\GradeSapeur;
 use App\Infrastructure\Models\Groupe;
 
 class SapeurParamBusiness
@@ -35,7 +39,10 @@ class SapeurParamBusiness
 
     public static function supprimerFonction($id)
     {
-        //TODO: Not implemented now
+        if (FonctionSapeur::where('fonction_id', '=', $id)->exists()) {
+            throw new ArrayException(['message' => 'Impossible de supprimer cette fonction, celle-ci est attribuée à un sapeur.']);
+        }
+        Fonction::where('id', $id)->delete();
     }
 
     public static function ajouterCours($data)
@@ -54,7 +61,10 @@ class SapeurParamBusiness
 
     public static function supprimerCours($id)
     {
-        //TODO: Not implemented now
+        if (CoursSapeur::where('cours_id', '=', $id)->exists()) {
+            throw new ArrayException(['message' => 'Impossible de supprimer ce cours, celui-ci est attribué à un sapeur.']);
+        }
+        Cours::where('id', $id)->delete();
     }
 
     public static function ajouterGrade($data)
@@ -73,7 +83,10 @@ class SapeurParamBusiness
 
     public static function supprimerGrade($id)
     {
-        //TODO: Not implemented now
+        if (GradeSapeur::where('grade_id', '=', $id)->exists()) {
+            throw new ArrayException(['message' => 'Impossible de supprimer ce grade, celui-ci est attribué à un sapeur.']);
+        }
+        Grade::where('id', $id)->delete();
     }
 
     public static function ajouterGroupe($data)
