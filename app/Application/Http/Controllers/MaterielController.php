@@ -24,12 +24,12 @@ class MaterielController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'statut' => 'integer',
-            'tri' => 'integer',
-            'forfait' => 'numeric',
-            'unite' => 'numeric',
-            'type_unite_id' => 'integer'
+            'designation' => 'string|min:1|required',
+            'statut' => 'integer|required',
+            'tri' => 'integer|required',
+            'forfait' => 'numeric|required',
+            'unite' => 'numeric|required',
+            'type_unite_id' => 'integer|required'
         ]);
 
         $materiel = $this->service->ajouterMateriel($data);
@@ -39,12 +39,12 @@ class MaterielController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'statut' => 'integer',
-            'tri' => 'integer',
-            'forfait' => 'numeric',
-            'unite' => 'numeric',
-            'type_unite_id' => 'integer'
+            'designation' => 'string|min:1|required',
+            'statut' => 'integer|required',
+            'tri' => 'integer|required',
+            'forfait' => 'numeric|required',
+            'unite' => 'numeric|required',
+            'type_unite_id' => 'integer|required'
         ]);
 
         $materiel = $this->service->modifierMateriel($id, $data);

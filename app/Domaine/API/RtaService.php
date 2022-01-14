@@ -110,9 +110,9 @@ class RtaService
             'sapeurs' => $sapeurs,
         ])->render();
 
-        $url = "http://rta.gestsis.ch/gestionRtaJura/interfaceXML/transfert.php";
+        $url = "https://gestionrta-jura.ch/gestionRtaJura/interfaceXML/transfert.php";
 
-        //TODO: changer nom fichier
+        // Envoie de la requête
         $response = Http::attach(
             'fichier',
             $xml,
@@ -122,7 +122,7 @@ class RtaService
             ->post($url);
 
         if (!str_contains($response->body(), '[TRS]OK')) {
-            throw new ArrayException(["username" => "A vérifier", "password" => "A vérifier", "message" => "Identifiants incorrects"], $response->body());
+            throw new ArrayException(["username" => "A vérifier", "password" => "A vérifier", "message" => "Identifiants incorrects", "api_res" => $response->body()]);
         }
 
         // Suppression, modification et ajout des sapeurs
