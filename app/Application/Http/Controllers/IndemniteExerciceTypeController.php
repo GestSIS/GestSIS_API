@@ -24,14 +24,14 @@ class IndemniteExerciceTypeController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'solde' => 'numeric',
-            'indemnite' => 'numeric',
+            'designation' => 'string|min:1|required',
+            'solde' => 'numeric|required',
+            'indemnite' => 'numeric|required',
             'solde_min' => 'numeric|nullable',
             'solde_min_pour' => 'numeric|nullable',
-            'type_unite_id' => 'integer',
-            'compte_id' => 'integer',
-            'ecriture_categorie_id' => 'integer',
+            'type_unite_id' => 'integer|required',
+            'compte_id' => 'integer|required',
+            'ecriture_categorie_id' => 'integer|required',
             'par_fonction' => 'boolean',
             'fonctions.*.solde' => 'numeric',
             'fonctions.*.indemnite' => 'numeric',
@@ -45,14 +45,14 @@ class IndemniteExerciceTypeController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'solde' => 'numeric',
-            'indemnite' => 'numeric',
+            'designation' => 'string|min:1|required',
+            'solde' => 'numeric|required',
+            'indemnite' => 'numeric|required',
             'solde_min' => 'numeric|nullable',
             'solde_min_pour' => 'numeric|nullable',
-            'type_unite_id' => 'integer',
-            'compte_id' => 'integer',
-            'ecriture_categorie_id' => 'integer',
+            'type_unite_id' => 'integer|required',
+            'compte_id' => 'integer|required',
+            'ecriture_categorie_id' => 'integer|required',
             'par_fonction' => 'boolean',
             'fonctions.*.id' => 'integer|nullable',
             'fonctions.*.solde' => 'numeric',
