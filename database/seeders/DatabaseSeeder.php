@@ -27,14 +27,14 @@ class DatabaseSeeder extends Seeder
         $this->call(PhaseTypeTableSeeder::class);
 
         //Propositions de base
-        /*
+        /**/
         // Exercices types
         $this->call(ExcuseTypeTableSeeder::class);
         $this->call(ExerciceCategorieTableSeeder::class);
         $this->call(FonctionTableSeeder::class);
         $this->call(CoursTableSeeder::class);
         $this->call(GroupesTableSeeder::class);
-        /** 
+        /**/
         //Données propres aux SIS de test
         $this->call(ExerciceComptableTableSeeder::class);
         $this->call(SapeursTableSeeder::class);
