@@ -63,16 +63,16 @@ class SapeurFonctionTest extends TestCase
         );
 
         $response = $this->json('POST', "/api/v2/sapeurs/$this->sapeurId/fonctions", $data);
-
+        // dd($response);
         $response
             ->assertStatus(200)
             ->assertJsonStructure([
-                'data' => [
+                'data' => ['fonction' => [
                     'id', 'fonction_id', 'sapeur_id', 'debut', 'fin'
-                ]
+                ]]
             ]);
 
-        $fonction = $response->getData()->data;
+        $fonction = $response->getData()->data->fonction;
 
         $this->assertTrue($fonction !== null);
         $this->assertTrue(Carbon::parse($data['debut'])->diffInDays($fonction->debut) === 0);
@@ -122,7 +122,7 @@ class SapeurFonctionTest extends TestCase
             'fonction_id' => 2
         );
 
-        $fonction_id = $this->service->addFonction($this->sapeurId, $data)->id;
+        $fonction_id = $this->service->addFonction($this->sapeurId, $data)['fonction']->id;
 
         $data = array(
             'id' => $fonction_id,
@@ -136,12 +136,12 @@ class SapeurFonctionTest extends TestCase
         $response
             ->assertStatus(200)
             ->assertJsonStructure([
-                'data' => [
+                'data' => ['fonction' => [
                     'id', 'fonction_id', 'sapeur_id', 'debut', 'fin'
-                ]
+                ]]
             ]);
 
-        $fonction = $response->getData()->data;
+        $fonction = $response->getData()->data->fonction;
 
         $this->assertTrue(Carbon::parse($data['debut'])->diffInDays($fonction->debut) === 0);
         $this->assertTrue(Carbon::parse($data['fin'])->diffInDays($fonction->fin) === 0);
@@ -163,7 +163,7 @@ class SapeurFonctionTest extends TestCase
             'fonction_id' => 2
         );
 
-        $fonction_id = $this->service->addFonction($this->sapeurId, $data)->id;
+        $fonction_id = $this->service->addFonction($this->sapeurId, $data)['fonction']->id;
 
         $data = array(
             'id' => $fonction_id,
@@ -196,7 +196,7 @@ class SapeurFonctionTest extends TestCase
             'fonction_id' => 2
         );
 
-        $fonction_id = $this->service->addFonction($this->sapeurId, $data)->id;
+        $fonction_id = $this->service->addFonction($this->sapeurId, $data)['fonction']->id;
 
         $response = $this->json('DELETE', "/api/v2/sapeurs/$this->sapeurId/fonctions/$fonction_id");
 
@@ -229,7 +229,7 @@ class SapeurFonctionTest extends TestCase
             'fonction_id' => 2
         );
 
-        $fonction_id = $this->service->addFonction($this->sapeurId, $data)->id;
+        $fonction_id = $this->service->addFonction($this->sapeurId, $data)['fonction']->id;
 
         $data = array(
             "date" => "1960-09-17",

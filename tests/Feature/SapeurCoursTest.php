@@ -54,7 +54,7 @@ class SapeurCoursTest extends TestCase
             'fonction_id' => 2
         );
 
-        $fonctionId = $this->service->addFonction($this->sapeurId, $data)->id;
+        $fonctionId = $this->service->addFonction($this->sapeurId, $data)['fonction']->id;
 
         $data = array(
             'date' => "1958-02-07",
@@ -69,18 +69,19 @@ class SapeurCoursTest extends TestCase
 
         $response = $this->json(
             'POST',
-            "/api/v2/sapeurs/$this->sapeurId/cours", $data
+            "/api/v2/sapeurs/$this->sapeurId/cours",
+            $data
         );
 
         $response
             ->assertStatus(200)
             ->assertJsonStructure([
-                'data' => [
+                'data' => ['cours' => [
                     'id', 'sapeur_id', 'cours_id', 'date', 'localite_id'
-                ]
+                ]]
             ]);
 
-        $cours = $response->getData()->data;
+        $cours = $response->getData()->data->cours;
 
         $fonctions = $this->service->getSapeurFonctionsById($this->sapeurId);
         $grades = $this->service->getSapeurGradesById($this->sapeurId);
@@ -111,7 +112,6 @@ class SapeurCoursTest extends TestCase
         //Validate new fontion
         $this->assertTrue(Carbon::parse($data['date_fonction'])->diffInDays($fonction_new->debut) === 0);
         $this->assertTrue($fonction_new->fin === null);
-
     }
 
     /**
@@ -133,7 +133,7 @@ class SapeurCoursTest extends TestCase
             'fonction_sapeur_id' => null,
         );
 
-        $coursId = $this->service->addCours($this->sapeurId, $data)->id;
+        $coursId = $this->service->addCours($this->sapeurId, $data)['cours']->id;
 
         $data = array(
             'date' => "1958-01-01",
@@ -143,7 +143,8 @@ class SapeurCoursTest extends TestCase
 
         $response = $this->json(
             'PUT',
-            "/api/v2/sapeurs/$this->sapeurId/cours/$coursId", $data
+            "/api/v2/sapeurs/$this->sapeurId/cours/$coursId",
+            $data
         );
 
         $response
@@ -178,7 +179,7 @@ class SapeurCoursTest extends TestCase
             'fonction_sapeur_id' => null,
         );
 
-        $coursId = $this->service->addCours($this->sapeurId, $data)->id;
+        $coursId = $this->service->addCours($this->sapeurId, $data)['cours']->id;
 
         $data = array(
             'date' => "1958-01-01",
@@ -188,7 +189,8 @@ class SapeurCoursTest extends TestCase
 
         $response = $this->json(
             'PUT',
-            "/api/v2/sapeurs/$this->sapeurId/cours/0", $data
+            "/api/v2/sapeurs/$this->sapeurId/cours/0",
+            $data
         );
 
         $response
@@ -217,7 +219,7 @@ class SapeurCoursTest extends TestCase
             'fonction_sapeur_id' => null,
         );
 
-        $coursId = $this->service->addCours($this->sapeurId, $data)->id;
+        $coursId = $this->service->addCours($this->sapeurId, $data)['cours']->id;
 
         $response = $this->json('DELETE', "/api/v2/sapeurs/$this->sapeurId/cours/$coursId");
 
@@ -234,5 +236,4 @@ class SapeurCoursTest extends TestCase
 
         $this->assertTrue(count($cours) === 0);
     }
-
 }

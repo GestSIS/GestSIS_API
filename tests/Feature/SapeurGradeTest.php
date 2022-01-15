@@ -65,12 +65,12 @@ class SapeurGradeTest extends TestCase
         $response
             ->assertStatus(200)
             ->assertJsonStructure([
-                'data' => [
+                'data' => ['grade' => [
                     'id', 'grade_id', 'sapeur_id', 'date'
-                ]
+                ]]
             ]);
 
-        $grade = $response->getData()->data;
+        $grade = $response->getData()->data->grade;
 
         $this->assertTrue($grade !== null);
         $this->assertTrue(Carbon::parse($data['date'])->diffInDays($grade->date) === 0);
@@ -117,7 +117,7 @@ class SapeurGradeTest extends TestCase
             'grade_id' => 4
         );
 
-        $grade_id = $this->service->addGrade($this->sapeurId, $data)->id;
+        $grade_id = $this->service->addGrade($this->sapeurId, $data)['grade']->id;
 
         $data = array(
             'id' => $grade_id,
@@ -130,12 +130,12 @@ class SapeurGradeTest extends TestCase
         $response
             ->assertStatus(200)
             ->assertJsonStructure([
-                'data' => [
+                'data' => ['grade' => [
                     'id', 'grade_id', 'sapeur_id', 'date'
-                ]
+                ]]
             ]);
 
-        $grade = $response->getData()->data;
+        $grade = $response->getData()->data->grade;
 
         $this->assertTrue(Carbon::parse($data['date'])->diffInDays($grade->date) === 0);
         $this->assertTrue($data['remarque'] === $grade->remarque);
@@ -155,7 +155,7 @@ class SapeurGradeTest extends TestCase
             'grade_id' => 6
         );
 
-        $grade_id = $this->service->addGrade($this->sapeurId, $data)->id;
+        $grade_id = $this->service->addGrade($this->sapeurId, $data)['grade']->id;
 
         $data = array(
             'id' => $grade_id,
@@ -186,7 +186,7 @@ class SapeurGradeTest extends TestCase
             'grade_id' => 5
         );
 
-        $grade_id = $this->service->addGrade($this->sapeurId, $data)->id;
+        $grade_id = $this->service->addGrade($this->sapeurId, $data)['grade']->id;
 
         $response = $this->json('DELETE', "/api/v2/sapeurs/$this->sapeurId/grades/$grade_id");
 

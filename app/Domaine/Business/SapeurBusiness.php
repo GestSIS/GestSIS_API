@@ -7,6 +7,7 @@ use App\Domaine\SPI\SapeurRepository;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\Grade;
 use App\Infrastructure\Models\GradeSapeur;
+use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
 
 class SapeurBusiness
@@ -52,11 +53,11 @@ class SapeurBusiness
     {
         $cours = $this->repository->addCours($sapeurId, $data);
 
-        //Add Grade
+        // Add Grade
         if (array_key_exists('grade_id', $data) && $data['grade_id'] !== null) {
             $gradeId = $data['grade_id'];
 
-            //Add grade if not already there
+            // Add grade if not already there
             $result = array_filter(
                 $this->repository->getSapeurGradesById($sapeurId),
                 function ($f) use ($gradeId) {
@@ -72,7 +73,7 @@ class SapeurBusiness
             }
         }
 
-        //Edit old fonction
+        // Edit old fonction
         if (array_key_exists('fonction_sapeur_id', $data) && $data['fonction_sapeur_id'] !== null) {
             $this->updateFonction(
                 $sapeurId,
@@ -84,7 +85,7 @@ class SapeurBusiness
             );
         }
 
-        //Add Fonction
+        // Add Fonction
         if (array_key_exists('fonction_id', $data) && $data['fonction_id'] !== null) {
             $this->addFonction(
                 $sapeurId,
@@ -97,7 +98,8 @@ class SapeurBusiness
             );
         }
 
-        return $cours;
+        $sapeur = Sapeur::where('id', $sapeurId)->first(['fonction_id', 'grade_id']);
+        return ['cours' => $cours, 'main_fonction_id' => $sapeur->fonction_id, 'main_grade_id' => $sapeur->grade_id];
     }
 
     public function updateCours(int $sapeurId, $data)
@@ -122,22 +124,24 @@ class SapeurBusiness
         }
 
         $grade = $this->repository->addGrade($sapeurId, $data);
-        $this->updateMainGrade($sapeurId);
+        $mainGradeId = $this->updateMainGrade($sapeurId);
 
-        return $grade;
+        return ['grade' => $grade, 'main_grade_id' => $mainGradeId];
     }
 
     public function updateGrade(int $sapeurId, $data)
     {
         $grade = $this->repository->updateGrade($sapeurId, $data);
-        $this->updateMainGrade($sapeurId);
-        return $grade;
+        $mainGradeId = $this->updateMainGrade($sapeurId);
+
+        return ['grade' => $grade, 'main_grade_id' => $mainGradeId];
     }
 
     public function removeGrade(int $sapeurId, int $gradeSapeurId)
     {
         $this->repository->removeGrade($sapeurId, $gradeSapeurId);
-        $this->updateMainGrade($sapeurId);
+        $mainGradeId = $this->updateMainGrade($sapeurId);
+        return ['main_grade_id' => $mainGradeId];
     }
 
     public function addFonction(int $sapeurId, $data)
@@ -171,9 +175,9 @@ class SapeurBusiness
         }
 
         $fonction = $this->repository->addFonction($sapeurId, $data);
-        $this->updateFonctionPrincipale($sapeurId);
+        $mainFonctionId = $this->updateFonctionPrincipale($sapeurId);
 
-        return $fonction;
+        return ['fonction' => $fonction, 'main_fonction_id' => $mainFonctionId];
     }
 
     public function updateFonction(int $sapeurId, $data)
@@ -199,7 +203,7 @@ class SapeurBusiness
             }
         );
 
-        //Check si déjà présent
+        // Check si déjà présent
         $startDate = null;
         $endDate = null;
 
@@ -214,7 +218,7 @@ class SapeurBusiness
             $endDate = $fonction->fin;
         }
 
-        //Check overlaps of a fonction
+        // Check overlaps of a fonction
         foreach ($fonctions as $fct) {
             $start = $fct->debut;
             $end = $fct->fin;
@@ -227,23 +231,25 @@ class SapeurBusiness
             }
         }
 
-        //Update fonction
+        // Update fonction
         $fonction = $this->repository->updateFonction($sapeurId, $data);
-        $this->updateFonctionPrincipale($sapeurId);
-        return $fonction;
+        $mainFonctionId = $this->updateFonctionPrincipale($sapeurId);
+
+        return ['fonction' => $fonction, 'main_fonction_id' => $mainFonctionId];
     }
 
     public function removeFonction(int $sapeurId, int $fonctionSapeurId)
     {
         $this->repository->removeFonction($sapeurId, $fonctionSapeurId);
-        $this->updateFonctionPrincipale($sapeurId);
+        $mainFonctionId = $this->updateFonctionPrincipale($sapeurId);
+        return ['main_fonction_id' => $mainFonctionId];
     }
 
     public function finFonctions($sapeurId, $date, $fonctionsId)
     {
         $fonctions = $this->repository->getSapeurFonctionsById($sapeurId);
 
-        //Contrôle que la date de fin ne soit pas antérieur à la date de début
+        // Contrôle que la date de fin ne soit pas antérieur à la date de début
         $dateFin = Carbon::parse($date);
         foreach ($fonctionsId as $id) {
             $fs = array_filter($fonctions, function ($f) use ($id) {
@@ -494,6 +500,7 @@ class SapeurBusiness
         $this->repository->updateSapeurById($sapeurId, array(
             "fonction_id" => $maxId <= 0 ? null : $maxId
         ));
+        return $maxId <= 0 ? null : $maxId;
     }
 
     private function updateMainGrade($sapeurId)
@@ -514,5 +521,6 @@ class SapeurBusiness
         $this->repository->updateSapeurById($sapeurId, array(
             "grade_id" => $maxId <= 0 ? null : $maxId
         ));
+        return $maxId <= 0 ? null : $maxId;
     }
 }
