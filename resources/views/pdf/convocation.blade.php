@@ -39,14 +39,12 @@
     <div>
         @foreach($sapeurs as $sapeur)
         <h1>{{ $params['titre'] }}</h1>
-        <div class="mt-5 addresse" style="margin-left:50%">
-            <div class="col-6">
-                {{-- {{dd($sapeur, $civilites)}} --}}
-                <p class="m-0">{{ $civilites[$sapeur['civilite_id']] }}</p>
-                <p class="m-0">{{ $sapeur['nom'] }} {{ $sapeur['prenom'] }}</p>
-                <p class="m-0">{{ $sapeur['rue'] }} {{ $sapeur['no_rue'] }}</p>
-                <p class="m-0">{{ $localites[$sapeur['localite_id']] }}</p>
-            </div>
+        <div class="mt-5 addresse" style="margin-left:55%">
+            {{-- {{dd($sapeur, $civilites)}} --}}
+            <p class="m-0">{{ $civilites[$sapeur['civilite_id']] }}</p>
+            <p class="m-0">{{ $sapeur['nom'] }} {{ $sapeur['prenom'] }}</p>
+            <p class="m-0">{{ $sapeur['rue'] }} {{ $sapeur['no_rue'] }}</p>
+            <p class="m-0">{{ $localites[$sapeur['localite_id']] }}</p>
         </div>
         <div class="mt-5">
             <p class="text-justify">
@@ -66,7 +64,7 @@
                     $colspan = $pourInfo ? 1 : 2;
                 ?>
                 <tr>
-                    <td>{{ formatDate($exercice['date']) }}</td>
+                    <td style="width: 100px !important;">{{ formatDate($exercice['date']) }}</td>
                     <td>{{ formatHeure($exercice['heure']) }}</td>
                     <td colspan="{{$colspan}}">
                         @switch($params['format'])
@@ -90,7 +88,7 @@
                 ?>
             </tbody>
         </table>
-        <div>
+        <div class="mt-5">
             <p class="text-justify">
                 @foreach(explode("\n",str_replace(["\r\n","\n\r","\r"],"\n",$params['texteFin'])) as $line)
                 {{$line}}<br />
