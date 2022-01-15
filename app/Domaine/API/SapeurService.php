@@ -140,7 +140,7 @@ class SapeurService
 
     public function removeGrade($sapeurId, $gradeId)
     {
-        $this->business->removeGrade($sapeurId, $gradeId);
+        return $this->business->removeGrade($sapeurId, $gradeId);
     }
 
     public function addFonction($sapeurId, $fonction)
@@ -155,7 +155,7 @@ class SapeurService
 
     public function removeFonction($sapeurId, $fonctionId)
     {
-        $this->business->removeFonction($sapeurId, $fonctionId);
+        return $this->business->removeFonction($sapeurId, $fonctionId);
     }
 
     public function finFonctions($sapeurId, $date, $fonctionsId)

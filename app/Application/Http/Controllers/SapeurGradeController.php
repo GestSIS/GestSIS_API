@@ -84,8 +84,8 @@ class SapeurGradeController extends Controller
      */
     public function destroy(int $sapeurId, int $gradeId)
     {
-        $this->service->removeGrade($sapeurId, $gradeId);
+        $res = $this->service->removeGrade($sapeurId, $gradeId);
 
-        return response()->json(['data' => 'success']);
+        return response()->json(['data' => $res]);
     }
 }

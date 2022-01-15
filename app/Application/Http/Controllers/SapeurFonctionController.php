@@ -86,9 +86,9 @@ class SapeurFonctionController extends Controller
      */
     public function destroy(int $sapeurId, int $fonctionId)
     {
-        $this->service->removeFonction($sapeurId, $fonctionId);
+        $res = $this->service->removeFonction($sapeurId, $fonctionId);
 
-        return response()->json(['data' => 'success']);
+        return response()->json(['data' => $res]);
     }
 
     public function fin(Request $request, int $sapeurId)
@@ -99,7 +99,7 @@ class SapeurFonctionController extends Controller
         ]);
 
         $fonctions = $this->service->finFonctions($sapeurId, $data['date'], $data['ids']);
-        
+
         return response()->json(['data' => $fonctions]);
     }
 }
