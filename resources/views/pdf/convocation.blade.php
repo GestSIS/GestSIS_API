@@ -54,7 +54,7 @@
             </p>
         </div>
         <table class="table table-sm table-striped">
-            <tbody>
+            <tbody style="border-bottom: 1px solid rgb(222, 226, 230);">
             <?php
                 foreach ($sapeur['exercices'] as $convocation) {
                     // dd($convocation['exercice_id'], $exercices);
