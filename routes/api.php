@@ -95,9 +95,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('groupes', 'GroupeController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('groupes.sapeurs', 'GroupeSapeursController')->only(['store']);
 
-        Route::get('rta', 'ReferenceRtaController@getReferenceRta')->name('api.v2.rta.get-rta');
         Route::get('rta-gestsis', 'ReferenceRtaController@getReferenceGestSis')->name('api.v2.rta.get-gestsis');
+        Route::get('rta', 'ReferenceRtaController@getReferenceRta')->name('api.v2.rta.get-rta');
         Route::post('rta', 'ReferenceRtaController@setReference')->name('api.v2.rta.set');
+        Route::delete('rta', 'ReferenceRtaController@resetReferenceRta')->name('api.v2.rta.reset-rta');
     });
 
     // Exercices
