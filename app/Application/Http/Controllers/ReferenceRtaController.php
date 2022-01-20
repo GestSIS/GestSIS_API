@@ -35,6 +35,16 @@ class ReferenceRtaController extends Controller
     }
 
     /**
+     * Get the actual gestsis version
+     *
+     * @return Response
+     */
+    public function resetReferenceRta()
+    {
+        return response()->json(["data" => $this->service->resetReferenceRta()]);
+    }
+
+    /**
      * Maj de la référence RTA
      *
      * @return Response
@@ -52,6 +62,7 @@ class ReferenceRtaController extends Controller
             'ajoutes.*.prenom' => 'required|string',
             'ajoutes.*.suffixe' => 'nullable|string',
             'ajoutes.*.localite' => 'required|string',
+            'ajoutes.*.adresse' => 'required|string',
             'ajoutes.*.fonction' => 'nullable|string',
             'ajoutes.*.date_naissance' => 'required|date',
             'ajoutes.*.groupes' => 'required|array|min:1',

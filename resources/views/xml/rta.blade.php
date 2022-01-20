@@ -1,7 +1,10 @@
 <?php echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
+<?php
+use Carbon\Carbon;
+?>
 <Transfert>
 	<SIS>{{ $sis }}</SIS>
-	<DateMutation>{{ $date }}</DateMutation>
+	<DateMutation>{{ Carbon::parse($date)->format('d.m.Y') }}</DateMutation>
 	<Info>{{ $communication }}</Info>
   <Sapeurs>
     @foreach ($sapeurs as $sapeur)
@@ -14,7 +17,8 @@
       <TelPriv>{{ count($sapeur['numeros']) > 1 ? $sapeur['numeros'][1] : '' }}</TelPriv>
       <TelProf>{{ count($sapeur['numeros']) > 2 ? $sapeur['numeros'][2] : ''}}</TelProf>
       <Fonction>{{ $sapeur['fonction'] }}</Fonction>
-      <Date>{{ $sapeur['date_naissance'] }}</Date>
+      <Date>{{ Carbon::parse($sapeur['date_naissance'])->format('d.m.Y') }}</Date>
+      <Adresse>{{ $sapeur['adresse'] }}</Adresse>
       <Localite>{{ $sapeur['localite'] }}</Localite>
       <Groupes>
         @foreach ($sapeur['groupes'] as $groupe)

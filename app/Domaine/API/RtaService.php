@@ -8,6 +8,7 @@ use App\Infrastructure\Models\ReferenceRta;
 use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 
 class RtaService
 {
@@ -28,7 +29,7 @@ class RtaService
                 }
             ])
             ->get(
-                ['id', 'nom', 'prenom', 'fonction_id', 'localite_id', 'date_naissance', 'suffixe']
+                ['id', 'nom', 'prenom', 'fonction_id', 'localite_id', 'date_naissance', 'suffixe', DB::raw('CONCAT(rue," ",no_rue) as adresse')]
             )->toArray();
 
         $sapeurs = array_filter($sapeurs, function ($sapeur) {
@@ -52,6 +53,12 @@ class RtaService
             $s = $s + $data;
             return $s;
         }, $data);
+    }
+
+    public function resetReferenceRta()
+    {
+        ReferenceRta::truncate();
+        return [];
     }
 
     public function setReference($data, $username, $password, $communication, $sis)
@@ -97,6 +104,7 @@ class RtaService
             ...$modifies,
             ...$supprimes
         ];
+        usort($sapeurs, fn ($a, $b) => strcmp($a['nom'] . $a['prenom'], $b['nom'] . $b['prenom']));
 
         if (count($sapeurs) <= 0) {
             throw new ArrayException(["message" => "Aucun sapeur dans la communication rta présente", 'sapeurs' => 'Aucun sapeur'], "Aucun sapeur concerné");
@@ -137,6 +145,7 @@ class RtaService
                 'prenom' => $sapeur['prenom'],
                 'suffixe' => $sapeur['suffixe'],
                 'localite' => $sapeur['localite'],
+                'adresse' => $sapeur['adresse'],
                 'fonction' => $sapeur['fonction'],
                 'date_naissance' => $sapeur['date_naissance'],
                 'groupes' => $sapeur['groupes'],
@@ -155,6 +164,7 @@ class RtaService
                 'prenom' => $sapeur['prenom'],
                 'suffixe' => $sapeur['suffixe'],
                 'localite' => $sapeur['localite'],
+                'adresse' => $sapeur['adresse'],
                 'fonction' => $sapeur['fonction'],
                 'date_naissance' => $sapeur['date_naissance'],
                 'groupes' => $sapeur['groupes'],
