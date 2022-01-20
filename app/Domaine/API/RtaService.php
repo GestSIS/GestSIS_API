@@ -8,6 +8,7 @@ use App\Infrastructure\Models\ReferenceRta;
 use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 
 class RtaService
 {
@@ -28,7 +29,7 @@ class RtaService
                 }
             ])
             ->get(
-                ['id', 'nom', 'prenom', 'fonction_id', 'localite_id', 'date_naissance', 'suffixe', 'CONCAT(rue," ",no_rue) as adresse']
+                ['id', 'nom', 'prenom', 'fonction_id', 'localite_id', 'date_naissance', 'suffixe', DB::raw('CONCAT(rue," ",no_rue) as adresse')]
             )->toArray();
 
         $sapeurs = array_filter($sapeurs, function ($sapeur) {
