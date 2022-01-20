@@ -4,7 +4,7 @@ use Carbon\Carbon;
 ?>
 <Transfert>
 	<SIS>{{ $sis }}</SIS>
-	<DateMutation>{{ Carbopn::parse($date)->format('d.m.Y') }}</DateMutation>
+	<DateMutation>{{ Carbon::parse($date)->format('d.m.Y') }}</DateMutation>
 	<Info>{{ $communication }}</Info>
   <Sapeurs>
     @foreach ($sapeurs as $sapeur)
@@ -17,7 +17,7 @@ use Carbon\Carbon;
       <TelPriv>{{ count($sapeur['numeros']) > 1 ? $sapeur['numeros'][1] : '' }}</TelPriv>
       <TelProf>{{ count($sapeur['numeros']) > 2 ? $sapeur['numeros'][2] : ''}}</TelProf>
       <Fonction>{{ $sapeur['fonction'] }}</Fonction>
-      <Date>{{ Carbopn::parse($sapeur['date_naissance'])->format('d.m.Y') }}</Date>
+      <Date>{{ Carbon::parse($sapeur['date_naissance'])->format('d.m.Y') }}</Date>
       <Adresse>{{ $sapeur['adresse'] }}</Adresse>
       <Localite>{{ $sapeur['localite'] }}</Localite>
       <Groupes>
