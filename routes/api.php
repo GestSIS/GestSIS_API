@@ -335,4 +335,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // TODO: Ajouter route type d'unité
+
+    // Liste des exercices à venir + 30 derniers jours
+    // (optionnel) Liste des dernières interventions (30 derniers jours)
 });
