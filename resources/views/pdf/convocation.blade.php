@@ -14,7 +14,7 @@
             font-size: 0.8rem;
         }
         div.addresse {
-            font-size: 1.2rem !important;
+            font-size: 1.5rem !important;
         }
     </style>
 
@@ -36,10 +36,10 @@
         return substr($value, 0, 5);
     }
     ?>
-    <div>
+    <div class="container">
         @foreach($sapeurs as $sapeur)
         <h1>{{ $params['titre'] }}</h1>
-        <div class="mt-5 addresse" style="margin-left:55%">
+        <div class="addresse" style="margin-top:100px; margin-left:55%">
             {{-- {{dd($sapeur, $civilites)}} --}}
             <p class="m-0">{{ $civilites[$sapeur['civilite_id']] }}</p>
             <p class="m-0">{{ $sapeur['nom'] }} {{ $sapeur['prenom'] }}</p>

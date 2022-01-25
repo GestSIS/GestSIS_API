@@ -36,7 +36,7 @@ return [
     'pdf' => [
         'enabled' => true,
         //'binary'  => 'xvfb-run vendor/h4cc/wkhtmltopdf-amd64/bin/wkhtmltopdf-amd64',
-        'binary'  => env('WKHTML_PDF', '/usr/local/bin/wkhtmltopdf'),
+        'binary'  => env('WKHTML_PDF', '/usr/bin/wkhtmltopdf'),
         'timeout' => false,
         'options' => [],
         'env'     => [],
@@ -44,7 +44,7 @@ return [
 
     'image' => [
         'enabled' => true,
-        'binary'  => env('WKHTML_IMAGE', '/usr/local/bin/wkhtmltoimage'),
+        'binary'  => env('WKHTML_IMAGE', '/usr/bin/wkhtmltoimage'),
         'timeout' => false,
         'options' => [],
         'env'     => [],

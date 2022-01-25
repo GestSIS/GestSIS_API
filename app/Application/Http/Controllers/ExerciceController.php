@@ -18,10 +18,10 @@ class ExerciceController extends Controller
 
     public function index(Request $request)
     {
-        //TODO Refactor to service
+        // TODO: Refactor to service
         $exercice_comptable_id = $request->get('exercice_comptable_id');
-        $exercices = Exercice::where('exercice_comptable_id', $exercice_comptable_id)->get();
 
+        $exercices = Exercice::where('exercice_comptable_id', $exercice_comptable_id)->get();
         return response()->json(['data' => $exercices]);
     }
 
