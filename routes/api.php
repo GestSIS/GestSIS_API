@@ -104,6 +104,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     // Exercices
     Route::group(['middleware' => 'jwtTokenRole:exercice.presence'], function () {
         Route::resource('exercices', 'ExerciceController')->only(['index', 'show', 'store', 'update']);
+        Route::get('exercices-derniers', 'ExerciceController@last')->name('api.v2.exercices.derniers');
         Route::resource('exercices.sapeurs', 'ConvocationsController')->only(['index']);
         Route::post('exercices/{id}/sapeurs', 'ConvocationsController@store')->name('api.v2.exercices.sapeurs.store');
         Route::put('exercices/{id}/sapeurs', 'ConvocationsController@update')->name('api.v2.exercices.sapeurs.update');
@@ -335,7 +336,5 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // TODO: Ajouter route type d'unité
-
-    // Liste des exercices à venir + 30 derniers jours
     // (optionnel) Liste des dernières interventions (30 derniers jours)
 });

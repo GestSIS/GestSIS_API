@@ -4,6 +4,7 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\ExerciceService;
 use App\Infrastructure\Models\Exercice;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ExerciceController extends Controller
@@ -22,6 +23,14 @@ class ExerciceController extends Controller
         $exercice_comptable_id = $request->get('exercice_comptable_id');
 
         $exercices = Exercice::where('exercice_comptable_id', $exercice_comptable_id)->get();
+        return response()->json(['data' => $exercices]);
+    }
+
+    public function last()
+    {
+        // TODO: Refactor to service
+        $threshold = Carbon::now()->subMonth()->toDateTimeString();
+        $exercices = Exercice::where('date', '>=', $threshold)->get();
         return response()->json(['data' => $exercices]);
     }
 
