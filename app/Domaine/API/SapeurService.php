@@ -29,7 +29,7 @@ class SapeurService
     {
         return Sapeur::with('telephones', 'permis', 'fonctions', 'groupes')
             ->where('actif', '=', '1')
-            ->get(['id', 'nom', 'prenom', 'email', 'date_naissance', 'fonction_id', 'grade_id', 'civilite_id'])->toArray();
+            ->get(['id', 'nom', 'prenom', 'email', 'rue', 'no_rue', 'date_naissance', 'fonction_id', 'grade_id', 'civilite_id', 'localite_id'])->toArray();
     }
 
     public function getSapeurDetailsById($sapeurid)
