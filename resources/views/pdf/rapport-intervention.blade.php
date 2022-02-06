@@ -162,7 +162,7 @@
       @endif
       @foreach ($intervention->groupes as $groupe)
       <tr>
-        <td>{{ $groupes[$groupe->groupe_id]->no }} {{ $groupes[$groupe->groupe_id]->designation }}</td>
+        <td>{{ $groupe->no }} {{ $groupe->designation }}</td>
       </tr>
       @endforeach
     </table>

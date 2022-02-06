@@ -25,11 +25,11 @@ class ExerciceCategorieController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'amendable' => 'boolean',
-            'duree_base' => 'integer',
-            'statut' => 'integer',
-            'tri' => 'integer'
+            'designation' => 'string|min:1|required',
+            'amendable' => 'boolean|required',
+            'duree_base' => 'integer|required',
+            'statut' => 'integer|required',
+            'tri' => 'integer|required'
         ]);
 
         $categorie = $this->service->ajouterCategorie($data);
@@ -39,11 +39,11 @@ class ExerciceCategorieController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'amendable' => 'boolean',
-            'duree_base' => 'integer',
-            'statut' => 'integer',
-            'tri' => 'integer'
+            'designation' => 'string|min:1|required',
+            'amendable' => 'boolean|required',
+            'duree_base' => 'integer|required',
+            'statut' => 'integer|required',
+            'tri' => 'integer|required'
         ]);
 
         $categorie = $this->service->modifierCategorie($id, $data);

@@ -13,9 +13,6 @@
         html {
             font-size: 0.8rem;
         }
-        div.addresse {
-            font-size: 1.5rem !important;
-        }
     </style>
 
     <title>Convocation</title>
@@ -39,7 +36,7 @@
     <div class="container">
         @foreach($sapeurs as $sapeur)
         <h1>{{ $params['titre'] }}</h1>
-        <div class="addresse" style="margin-top:100px; margin-left:55%">
+        <div style="margin-top: 90px; margin-left: 55%; font-size: 18px !important;">
             {{-- {{dd($sapeur, $civilites)}} --}}
             <p class="m-0">{{ $civilites[$sapeur['civilite_id']] }}</p>
             <p class="m-0">{{ $sapeur['nom'] }} {{ $sapeur['prenom'] }}</p>
