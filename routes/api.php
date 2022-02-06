@@ -37,7 +37,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('sis-param', 'SisParamController')->only(['index', 'store']);
     });
 
+    // Sapeurs
     Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture'], function () {
+        Route::get('effectif', 'SapeurController@effectif')->name('name');
+
         Route::resource('sapeurs', 'SapeurController')->only(['index', 'show']);
         Route::resource('sapeurs.permis', 'SapeurPermisController')->only(['index']);
         Route::resource('sapeurs.telephones', 'SapeurTelephoneController')->only(['index']);
@@ -65,6 +68,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Sapeurs
     Route::group(['middleware' => 'jwtTokenRole:sapeur.modification'], function () {
+        Route::get('effectif', 'SapeurController@effectif')->name('name');
+
         Route::resource('sapeurs', 'SapeurController')->only(['index', 'show', 'store', 'update']); //, 'destroy']);//->middleware('role:effectif_read');
         Route::resource('sapeurs.groupes', 'SapeurGroupeController')->only(['index']);
         Route::resource('sapeurs.permis', 'SapeurPermisController')->only(['index', 'store', 'update', 'destroy']);

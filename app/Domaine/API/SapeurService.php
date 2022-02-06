@@ -6,6 +6,7 @@ namespace App\Domaine\API;
 
 use App\Domaine\Business\SapeurBusiness;
 use App\Domaine\SPI\SapeurRepository;
+use App\Infrastructure\Models\Sapeur;
 use Illuminate\Support\Facades\Storage;
 
 class SapeurService
@@ -22,6 +23,13 @@ class SapeurService
     public function listeSapeurs()
     {
         return $this->repository->listeSapeurLight();
+    }
+
+    public function effectif()
+    {
+        return Sapeur::with('telephones', 'permis', 'fonctions', 'groupes')
+            ->where('actif', '=', '1')
+            ->get(['id', 'nom', 'prenom', 'email', 'date_naissance', 'fonction_id', 'grade_id', 'civilite_id'])->toArray();
     }
 
     public function getSapeurDetailsById($sapeurid)

@@ -27,6 +27,15 @@ class SapeurController extends Controller
     }
 
     /**
+     * Return the effectif
+     */
+    public function effectif()
+    {
+        //TODO:
+        return response()->json(['data' => $this->service->effectif()]);
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param Request $request

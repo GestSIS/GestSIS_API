@@ -43,6 +43,7 @@ class ImputationBusiness
 
     protected const UNITE_CHF_PAR_PIECE = 1;
     protected const UNITE_CHF_PAR_HEURE = 2;
+    protected const UNITE_CHF_FORFAIT = 6;
 
     public function creerExerciceComptable($data)
     {
@@ -770,19 +771,17 @@ class ImputationBusiness
             return $sap->present;
         });
 
-        if ($unite === self::UNITE_CHF_PAR_PIECE) {
+        if ($unite === self::UNITE_CHF_PAR_PIECE || $unite === self::UNITE_CHF_FORFAIT) {
             $this->imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation);
         } elseif ($unite === self::UNITE_CHF_PAR_HEURE && $indemniteType->par_fonction) {
             $this->imputerExerciceParHeureEtFonction($exercice, $sapeurs, $indemniteType, $designation);
         } elseif ($unite === self::UNITE_CHF_PAR_HEURE) {
             $this->imputerExerciceParHeureEtSoldeMin($exercice, $sapeurs, $indemniteType, $designation);
         } else {
-            dd("ERROR");
-            return false;
-            //TODO: WARNING IN LOGS -> Should never arrive here
+            throw new ArrayException(["message" => "Unité non supportée"]);
         }
 
-        // TODO: Ajout imputation heure supp !
+        // Imputation heure supp !
         $heures = HeureExercice::where('exercice_id', $exerciceId)->get();
         $this->imputerExerciceHeureSup($exercice, $heures, $designation);
 
