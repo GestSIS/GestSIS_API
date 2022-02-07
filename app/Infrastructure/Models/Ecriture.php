@@ -33,8 +33,13 @@ class Ecriture extends Model
         // Booléen
         'amende',
         'avs',
-        'indemnite_annuel',
         'frais_annuel',
+        'indemnite_annuel',
+        'divers',
+
+        // TODO: A ajouter
+        // 'cours',
+        // 'heure'
     ];
 
     protected $casts = [
