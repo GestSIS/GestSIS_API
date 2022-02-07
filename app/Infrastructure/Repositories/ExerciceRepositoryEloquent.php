@@ -54,7 +54,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
             ->where('sapeur_id', $sapeurId)
             ->where('exercice_comptable_id', $exerciceComptableId)
             ->join('exercices', 'exercices.id', '=', 'exercice_sapeur.exercice_id')
-            ->select('exercice_sapeur.*', 'exercices.date', 'exercices.heure', 'exercices.communications', 'exercices.localite_id', 'exercices.exercice_categorie_id')
+            ->select('exercice_sapeur.*', 'exercices.date', 'exercices.heure', 'exercices.communications', 'exercices.designation', 'exercices.localite_id', 'exercices.exercice_categorie_id')
             ->get()
             ->map(function ($sapeur) use ($temp) {
                 return $temp->convertSapeurWithExercicesInfos($sapeur);
@@ -281,6 +281,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         $object->heure = $sapeur->heure;
         $object->localite_id = $sapeur->localite_id;
         $object->communications = $sapeur->communications;
+        $object->designation = $sapeur->designation;
         $object->exercice_categorie_id = $sapeur->exercice_categorie_id;
 
         return $object;
