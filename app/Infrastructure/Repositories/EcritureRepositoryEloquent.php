@@ -3,6 +3,7 @@
 
 namespace App\Infrastructure\Repositories;
 
+use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\SPI\EcritureRepository;
 use App\Infrastructure\Models\Ecriture;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +26,17 @@ class EcritureRepositoryEloquent implements EcritureRepository
         return $this->convertCollectionOfEcritures(
             Ecriture
                 ::where('exercice_comptable_id', $exerciceComptableId)
-                ->where('amende', True)
+                ->where('type', ImputationBusiness::ECRITURE_TYPE_AMENDE)
+                ->get()
+        );
+    }
+
+    public function listeEcritureDiversForExerciceComptableById($exerciceComptableId)
+    {
+        return $this->convertCollectionOfEcritures(
+            Ecriture
+                ::where('exercice_comptable_id', $exerciceComptableId)
+                ->where('type', ImputationBusiness::ECRITURE_TYPE_DIVERS)
                 ->get()
         );
     }
@@ -33,10 +44,10 @@ class EcritureRepositoryEloquent implements EcritureRepository
     public function listeEcritureForCompteAndExerciceComptableById($compteId, $exerciceComptableId)
     {
         return $this->convertCollectionOfEcritures(
-            Ecriture
-                ::where('exercice_comptable_id', $exerciceComptableId)
-                ->where('compte_id', $compteId)
-                ->get()
+            Ecriture::where([
+                ['exercice_comptable_id', '=', $exerciceComptableId],
+                ['type', '=', ImputationBusiness::ECRITURE_TYPE_DIVERS]
+            ])->get()
         );
     }
 
@@ -63,7 +74,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         return $this->convertCollectionOfEcritures(
             Ecriture
                 ::where('exercice_comptable_id', $exerciceComptableId)
-                ->where('frais_annuel', true)
+                ->where('type', ImputationBusiness::ECRITURE_TYPE_FRAIS_ANNUEL)
                 ->get()
         );
     }
@@ -73,7 +84,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         return $this->convertCollectionOfEcritures(
             Ecriture
                 ::where('exercice_comptable_id', $exerciceComptableId)
-                ->where('indemnite_annuel', true)
+                ->where('type', ImputationBusiness::ECRITURE_TYPE_INDEMNITE_ANNUEL)
                 ->get()
         );
     }
@@ -85,8 +96,8 @@ class EcritureRepositoryEloquent implements EcritureRepository
                 ::where('exercice_comptable_id', $exerciceComptableId)
                 ->where(function ($query) {
                     $query
-                        ->where('frais_annuel', true)
-                        ->orWhere('indemnite_annuel');
+                        ->where('type', ImputationBusiness::ECRITURE_TYPE_FRAIS_ANNUEL)
+                        ->orWhere('type', ImputationBusiness::ECRITURE_TYPE_INDEMNITE_ANNUEL);
                 })
                 ->get()
         );
@@ -179,16 +190,21 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->exercice_comptable_id = $ecriture->exercice_comptable_id;
         $object->intervention_id = $ecriture->intervention_id;
         $object->exercice_id = $ecriture->exercice_id;
-        $object->indemnite_annuel = $ecriture->indemnite_annuel;
-        $object->frais_annuel = $ecriture->frais_annuel;
+
         $object->compte_id = $ecriture->compte_id;
         $object->ecriture_categorie_id = $ecriture->ecriture_categorie_id;
         $object->date = $ecriture->date;
         $object->heure = $ecriture->heure;
         $object->decompte_id = $ecriture->decompte_id;
 
+        // Type de l'écriture
+        $object->indemnite_annuel = $ecriture->indemnite_annuel;
+        $object->frais_annuel = $ecriture->frais_annuel;
+        $object->divers = $ecriture->divers;
         $object->amende = $ecriture->amende;
         $object->avs = $ecriture->avs;
+
+        $object->type = $ecriture->type;
 
         return $object;
     }
@@ -218,8 +234,6 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->exercice_comptable_id = $ecriture->exercice_comptable_id;
         $object->intervention_id = $ecriture->intervention_id;
         $object->exercice_id = $ecriture->exercice_id;
-        $object->indemnite_annuel = $ecriture->indemnite_annuel;
-        $object->frais_annuel = $ecriture->frais_annuel;
         $object->compte_id = $ecriture->compte_id;
         $object->ecriture_categorie_id = $ecriture->ecriture_categorie_id;
         $object->date = $ecriture->date;
@@ -230,8 +244,13 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->unite = $ecriture->unite;
         $object->civilite = $ecriture->civilite;
 
+        // TODO: à supprimer
+        $object->indemnite_annuel = $ecriture->indemnite_annuel;
+        $object->frais_annuel = $ecriture->frais_annuel;
         $object->amende = $ecriture->amende;
         $object->avs = $ecriture->avs;
+
+        $object->type = $ecriture->type;
 
         return $object;
     }

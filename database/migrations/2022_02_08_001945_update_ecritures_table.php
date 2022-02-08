@@ -14,7 +14,7 @@ class UpdateEcrituresTable extends Migration
     public function up()
     {
         Schema::table('ecritures', function (Blueprint $table) {
-            $table->boolean('divers')->default(false);
+            $table->unsignedInteger('type')->default(0);
         });
     }
 
@@ -26,7 +26,7 @@ class UpdateEcrituresTable extends Migration
     public function down()
     {
         Schema::table('ecritures', function (Blueprint $table) {
-            $table->dropColumn('divers');
+            $table->dropColumn('type');
         });
     }
 }

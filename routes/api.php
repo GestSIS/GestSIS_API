@@ -262,7 +262,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('ecritures/annuel/{id}', 'EcritureController@annuel');
         Route::get('ecritures/amende/{id}', 'EcritureController@amende');
         Route::get('ecritures/intervention/{id}', 'EcritureController@intervention');
+        Route::get('ecritures/divers/{id}', 'EcritureController@divers');
         Route::get('ecritures/{id}', 'EcritureController@all');
+
+        Route::resource('ecritures', 'EcritureController')->only(['store', 'update', 'destroy']);
 
         Route::get('comptes/{id}/ecritures/{exerciceComptableId}', 'CompteController@ecritures');
 

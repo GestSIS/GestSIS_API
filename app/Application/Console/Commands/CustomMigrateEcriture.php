@@ -2,17 +2,18 @@
 
 namespace App\Application\Console\Commands;
 
+use App\Infrastructure\Models\Ecriture;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
-class CustomMigrate extends Command
+class CustomMigrateEcriture extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'migrate:dbs';
+    protected $signature = 'migrate-ecritures:dbs';
 
     /**
      * The console command description.
@@ -41,12 +42,15 @@ class CustomMigrate extends Command
         $dbs = explode(",", env('DB_LISTE', true));
         foreach ($dbs as $db) {
             printf("DATABASE " . $db . "\n");
-            printf("migrate:reset\n");
-            Artisan::call('migrate:reset --database=' . $db);
             printf("migrate\n");
             Artisan::call('migrate --database=' . $db);
-            printf("db:seed\n");
-            Artisan::call('db:seed --database=' . $db);
+            printf("migrate ecritures\n");
+            Ecriture::whereNotNull('exercice_id')->update(['type' => 1]);
+            Ecriture::whereNotNull('intervention_id')->update(['type' => 2]);
+            Ecriture::whereNotNull('frais_annuel')->update(['type' => 3]);
+            Ecriture::whereNotNull('indemnite_annuel')->update(['type' => 4]);
+            Ecriture::whereNotNull('avs')->update(['type' => 5]);
+            Ecriture::whereNotNull('amende')->update(['type' => 6]);
             printf("\n");
         }
         printf("Migrating done");

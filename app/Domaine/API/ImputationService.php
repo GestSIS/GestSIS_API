@@ -8,6 +8,7 @@ use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\FraisTypeRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
 use App\Infrastructure\Models\Compte;
+use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Sapeur;
 use Barryvdh\Snappy\Facades\SnappyPdf;
@@ -35,6 +36,21 @@ class ImputationService
         $this->business = $business;
     }
 
+    function ajouterEcriture($data)
+    {
+        return $this->business->ajouterEcriture($data);
+    }
+
+    function modifierEcriture($data)
+    {
+        return $this->business->modifierEcriture($data);
+    }
+
+    function supprimerEcriture($data)
+    {
+        return $this->business->supprimerEcriture($data);
+    }
+
     function creerExerciceComptable($data)
     {
         return $this->business->creerExerciceComptable($data);
@@ -43,6 +59,11 @@ class ImputationService
     function getAllEcrituresForExerciceComptableById($exerciceComptableId)
     {
         return $this->ecritureRepo->listeAllEcritureForExerciceComptableById($exerciceComptableId);
+    }
+
+    function getEcrituresDiversForExerciceComptableById($exerciceComptableId)
+    {
+        return $this->ecritureRepo->listeEcritureDiversForExerciceComptableById($exerciceComptableId);
     }
 
     function getEcrituresAmendesForExerciceComptableById($exerciceComptableId)
