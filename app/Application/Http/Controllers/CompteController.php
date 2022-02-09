@@ -32,7 +32,7 @@ class CompteController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
-            'numero' => 'numeric',
+            'numero' => 'string',
             'actif' => 'boolean',
         ]);
 
@@ -44,7 +44,7 @@ class CompteController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
-            'numero' => 'numeric',
+            'numero' => 'string',
             'actif' => 'boolean',
         ]);
 
