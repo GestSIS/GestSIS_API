@@ -252,7 +252,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     // Comptabilite
     Route::group(['middleware' => 'jwtTokenRole:comptabilite.tout'], function () {
         Route::post('imputation/intervention/{id}', 'ImputationController@intervention');
+        Route::delete('imputation/intervention/{id}', 'ImputationController@cancelIntervention');
         Route::post('imputation/exercice/{id}', 'ImputationController@exercice');
+        Route::delete('imputation/exercice/{id}', 'ImputationController@cancelExercice');
         Route::post('imputation/annuel/{id}', 'ImputationController@annuel');
         Route::post('generer-amende/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
         Route::post('generer-amende/{id}', 'AmendeController@annuel');

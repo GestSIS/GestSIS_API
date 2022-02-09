@@ -88,6 +88,14 @@ class ImputationService
         ];
     }
 
+    function annulerImputationExercice($exerciceId)
+    {
+        $statut = $this->business->annulerImputationExercice($exerciceId);
+        return [
+            "statut" => $statut,
+        ];
+    }
+
     function imputationIntervention($interventionId, $data)
     {
         $statut = $this->business->imputerIntervention($interventionId, $data);
@@ -95,6 +103,14 @@ class ImputationService
         return [
             "statut" => $statut,
             "ecritures" => $this->ecritureRepo->listeEcritureForIntervention($interventionId)
+        ];
+    }
+
+    function annulerImputationIntervention($interventionId)
+    {
+        $statut = $this->business->annulerImputationIntervention($interventionId);
+        return [
+            "statut" => $statut,
         ];
     }
 
