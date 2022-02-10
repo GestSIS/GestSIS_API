@@ -3,7 +3,7 @@
   <table class="table table-sm mb-2">
     <tr>
       <th colspan="2">{{ $compte->numero }} {{ $compte->designation }}</th>
-      <td>Etat au {{ date('m.d.y') }}</td>
+      <td>Etat au {{ date('d.m.y') }}</td>
     </tr>
   </table>
   <table class="table table-sm">
