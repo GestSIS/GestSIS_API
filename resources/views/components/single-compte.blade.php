@@ -31,7 +31,7 @@
         <tr>
           <td>{{ str_replace('-', '.', $ecriture->date) }}</td>
           <td>{{ $ecriture->designation }}</td>
-          <td>{{ $ecriture->sapeur_id ? $sapeurs[$ecriture->sapeur_id]->nom.' '.$sapeurs[$ecriture->sapeur_id]->prenom : '-' }}</td>
+          <td>{{ $ecriture->sapeur_id ? $sapeurs[$ecriture->sapeur_id] : '-' }}</td>
           <td>{{ number_format($ecriture->total, 2, '.', "'") }}</td>
         </tr>
       @endforeach

@@ -188,7 +188,7 @@ class ImputationService
         // ]);
         $pdf = SnappyPdf::loadView('pdf/comptes', [
             "comptes" => $comptes,
-            "sapeurs" => $sapeurs,
+            "sapeurs" => $sapeursMap,
         ]);
         return $pdf->download('invoice.pdf');
     }
