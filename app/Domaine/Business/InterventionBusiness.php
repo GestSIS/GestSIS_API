@@ -110,7 +110,7 @@ class InterventionBusiness
         $this->checkIsNotImpute($interventionId);
 
         foreach ($sapeurs as $sapeur) {
-            //TODO Check duplicated period of time
+            // TODO: Check duplicated period of time
 
             $this->repository->addPresence($interventionId, $sapeur);
         }
@@ -133,7 +133,7 @@ class InterventionBusiness
         $this->checkIsNotImpute($interventionId);
 
         foreach ($sapeurs as $sapeur) {
-            //TODO Check period non dupliqué
+            // TODO: Check period non dupliqué
 
             $this->repository->editPresenceInfoById($interventionId, $sapeur['id'], $sapeur);
         }
