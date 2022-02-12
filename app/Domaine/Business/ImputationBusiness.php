@@ -13,10 +13,12 @@ use Carbon\Carbon;
 use App\Infrastructure\Models\Amende;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\Ecriture;
+use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\FonctionSapeur;
 use App\Infrastructure\Models\HeureExercice;
+use App\Infrastructure\Models\Intervention;
 
 class ImputationBusiness
 {
@@ -473,6 +475,44 @@ class ImputationBusiness
         );
 
         $this->ecritureRepo->persisteNewEcriture($ecriture);
+    }
+
+    public function annulerImputationExercice($exerciceId)
+    {
+        // Check si des ecritures sont déjà liées à un décompte
+        if (Ecriture::where('exercice_id', $exerciceId)
+            ->whereNotNull('decompte_id')
+            ->exists()
+        ) {
+            throw new ArrayException(['message' => 'Des écriture sont déjà facturées dans un décompte.']);
+        }
+
+        // Suppression des écritures
+        Ecriture::where('exercice_id', $exerciceId)
+            ->delete();
+
+        // Modification du statut de l'exercice
+        Exercice::where('id', $exerciceId)->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_VALIDE]);
+        return ExerciceBusiness::EXERCICE_STATUT_VALIDE;
+    }
+
+    public function annulerImputationIntervention($interventionId)
+    {
+        // Check si des ecritures sont déjà liées à un décompte
+        if (Ecriture::where('intervention_id', $interventionId)
+            ->whereNotNull('decompte_id')
+            ->exists()
+        ) {
+            throw new ArrayException(['message' => 'Des écriture sont déjà facturées dans un décompte.']);
+        }
+
+        // Suppression des écritures
+        Ecriture::where('intervention_id', $interventionId)
+            ->delete();
+
+        // Modification du statut de l'intervention
+        Intervention::where('id', $interventionId)->update(['statut' => InterventionBusiness::INTERVENTION_STATUT_VALIDE]);
+        return InterventionBusiness::INTERVENTION_STATUT_VALIDE;
     }
 
     /**

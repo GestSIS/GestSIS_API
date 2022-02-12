@@ -36,7 +36,7 @@ class ExerciceBusiness
     private function updateStatut($exerciceId)
     {
         $statut = $this->repository->getExerciceStatutById($exerciceId);
-        if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_SAISI) {
+        if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_VALIDE) {
             return $statut;
         }
 

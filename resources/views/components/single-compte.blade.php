@@ -3,7 +3,7 @@
   <table class="table table-sm mb-2">
     <tr>
       <th colspan="2">{{ $compte->numero }} {{ $compte->designation }}</th>
-      <td>Etat au {{ date('m.d.y') }}</td>
+      <td>Etat au {{ date('d.m.y') }}</td>
     </tr>
   </table>
   <table class="table table-sm">
@@ -31,7 +31,7 @@
         <tr>
           <td>{{ str_replace('-', '.', $ecriture->date) }}</td>
           <td>{{ $ecriture->designation }}</td>
-          <td>{{ $ecriture->sapeur_id ? $sapeurs[$ecriture->sapeur_id]->nom.' '.$sapeurs[$ecriture->sapeur_id]->prenom : '-' }}</td>
+          <td>{{ $ecriture->sapeur_id ? $sapeurs[$ecriture->sapeur_id] : '-' }}</td>
           <td>{{ number_format($ecriture->total, 2, '.', "'") }}</td>
         </tr>
       @endforeach
