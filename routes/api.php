@@ -126,7 +126,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         // Statistiques
         Route::get('statistiques/{id}/presence', 'SapeurExerciceController@stat');
 
-        // Route::resource('exercices.heures', 'HeureExerciceController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('heure-exercice-types', 'HeureExerciceTypeController')->only(['index']);
     });
 

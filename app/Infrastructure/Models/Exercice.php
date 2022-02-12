@@ -14,7 +14,7 @@ class Exercice extends Model
 
     use HasFactory;
 
-    //Statut:
+    // Statut:
     // 0 -> Annulé
     // 1 -> A saisir
     // 2 -> En attente de validation
