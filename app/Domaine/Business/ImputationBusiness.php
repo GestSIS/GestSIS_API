@@ -89,7 +89,7 @@ class ImputationBusiness
                     throw new ArrayException(['message' => 'Total ne correspond pas à la somme des solde, indemnité et frais']);
                 }
 
-                $ecriture = [
+                $ecriture = new Ecriture([
                     'indemnite' => $data['indemnite'],
                     'solde' => $data['solde'],
                     'frais' => $data['frais'],
@@ -102,6 +102,7 @@ class ImputationBusiness
 
                     'sapeur_id' => $data['sapeur_id'],
                     'compte_id' => $data['compte_id'],
+                    'type_unite_id' => $data['type_unite_id'],
                     'exercice_comptable_id' => $data['exercice_comptable_id'],
                     'ecriture_categorie_id' => $data['ecriture_categorie_id'],
 
@@ -109,10 +110,11 @@ class ImputationBusiness
                     'date' => $data['date'], // FIXME: check if null
 
                     'type' => ImputationBusiness::ECRITURE_TYPE_DIVERS,
-                ];
+                ]);
 
-                Ecriture::insert([$ecriture]);
-                break;
+                $ecriture->save();
+                return $ecriture;
+                // break;
 
             default:
                 throw new ArrayException(['message' => 'Type d\'écriture non supporté pour le moment']);
@@ -142,16 +144,75 @@ class ImputationBusiness
                     // TODO: à supprimer
                     'amende' => True,
                 ];
+                return $ecriture;
         }
     }
 
-    public function modifierEcriture($data)
+    public function modifierEcriture($ecritureId, $data)
     {
+        $ecriture = Ecriture::find($ecritureId);
+        // Contrôle que l'écriture n'est pas liée à un décompte
+        if ($ecriture->decoompte_id) {
+            throw new ArrayException(['message' => 'Ecriture déjà payée dans un décompte !']);
+        }
+
+        // Switch between type
+        switch ($data['type']) {
+            case ImputationBusiness::ECRITURE_TYPE_DIVERS:
+
+                $compte = Compte::find($data['compte_id']);
+
+                // Si compte de passif alors pas de type pour l'écriture
+                if ($compte->actif) {
+                    $data['indemnite'] = 0;
+                    $data['solde'] = 0;
+                    $data['frais'] = 0;
+                }
+
+                if (!$compte->actif && $data['indemnite'] + $data['solde'] + $data['frais'] != $data['total']) {
+                    throw new ArrayException(['message' => 'Total ne correspond pas à la somme des solde, indemnité et frais']);
+                }
+
+                $ecriture->update([
+                    'indemnite' => $data['indemnite'],
+                    'solde' => $data['solde'],
+                    'frais' => $data['frais'],
+
+                    'total' => $data['total'],
+
+                    'designation' => $data['designation'],
+                    'tarif' => $data['tarif'],
+                    'quantite' => $data['quantite'],
+
+                    'sapeur_id' => $data['sapeur_id'],
+                    'compte_id' => $data['compte_id'],
+                    'type_unite_id' => $data['type_unite_id'],
+                    'exercice_comptable_id' => $data['exercice_comptable_id'],
+                    'ecriture_categorie_id' => $data['ecriture_categorie_id'],
+
+                    'decompte_id' => null,
+                    'date' => $data['date'], // FIXME: check if null
+                ]);
+
+                $ecriture->save();
+                return $ecriture;
+                // break;
+
+            default:
+                // TODO: Implement
+        }
     }
 
-    public function supprimerEcriture($data)
+    public function supprimerEcriture($ecritureId)
     {
-        // TODO: Contrôler que l'écriture n'est pas liée à un décompte
+        $ecriture = Ecriture::find($ecritureId);
+        // Contrôle que l'écriture n'est pas liée à un décompte
+        if ($ecriture->decoompte_id) {
+            throw new ArrayException(['message' => 'Ecriture déjà payée dans un décompte !']);
+        }
+
+        $ecriture->delete();
+        return 'ok';
     }
 
     /**
