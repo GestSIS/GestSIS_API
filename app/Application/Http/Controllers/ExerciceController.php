@@ -4,6 +4,7 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\ExerciceService;
 use App\Infrastructure\Models\Exercice;
+use App\Infrastructure\Models\HeureExercice;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -30,8 +31,42 @@ class ExerciceController extends Controller
     {
         // TODO: Refactor to service
         $threshold = Carbon::now()->subMonth()->toDateTimeString();
-        $exercices = Exercice::with(['sapeurs'])->where('date', '>=', $threshold)->get();
-        return response()->json(['data' => $exercices]);
+        $exercices = Exercice::with(['sapeurs'])->where('date', '>=', $threshold)->get()->toArray();
+
+        $exerciceIds = array_map(fn ($e) => $e['id'], $exercices);
+        $heures = HeureExercice
+            ::whereIn('exercice_id', $exerciceIds)
+            ->get()->toArray();
+
+        $indexedExercice = [];
+        foreach ($exercices as $exercice) {
+            $exercice['indexedSapeurs'] = [];
+            foreach ($exercice['sapeurs'] as $sapeur) {
+                $exercice['indexedSapeurs'][$sapeur['sapeur_id']] = $sapeur;
+                $exercice['indexedSapeurs'][$sapeur['sapeur_id']]['heures'] = [];
+            }
+            $indexedExercice[$exercice['id']] = $exercice;
+        }
+
+        foreach ($heures as $heure) {
+            if (!array_key_exists($heure['sapeur_id'], $indexedExercice[$heure['exercice_id']]['indexedSapeurs'])) {
+                $indexedExercice[$heure['exercice_id']]['indexedSapeurs'][$heure['sapeur_id']] = [
+                    'convoque' => False,
+                    'present' => False,
+                    'amende' => False,
+                    'remplace' => False,
+                    'excuse_type_id' => null,
+                    'heures' => [],
+                ];
+            }
+            $indexedExercice[$heure['exercice_id']]['indexedSapeurs'][$heure['sapeur_id']]['heures'][] = $heure;
+        }
+
+        return response()->json(['data' => array_map(function ($e) {
+            $e['sapeurs'] = array_values($e['indexedSapeurs']);
+            unset($e['indexedSapeurs']);
+            return $e;
+        }, array_values($indexedExercice))]);
     }
 
     public function store(Request $request)
