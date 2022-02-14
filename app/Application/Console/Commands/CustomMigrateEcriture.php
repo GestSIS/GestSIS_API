@@ -45,12 +45,12 @@ class CustomMigrateEcriture extends Command
             printf("migrate\n");
             Artisan::call('migrate --database=' . $db);
             printf("migrate ecritures\n");
-            Ecriture::whereNotNull('exercice_id')->update(['type' => 1]);
-            Ecriture::whereNotNull('intervention_id')->update(['type' => 2]);
-            Ecriture::whereNotNull('frais_annuel')->update(['type' => 3]);
-            Ecriture::whereNotNull('indemnite_annuel')->update(['type' => 4]);
-            Ecriture::whereNotNull('avs')->update(['type' => 5]);
-            Ecriture::whereNotNull('amende')->update(['type' => 6]);
+            Ecriture::on($db)->whereNotNull('exercice_id')->update(['type' => 1]);
+            Ecriture::on($db)->whereNotNull('intervention_id')->update(['type' => 2]);
+            Ecriture::on($db)->whereNotNull('frais_annuel')->update(['type' => 3]);
+            Ecriture::on($db)->whereNotNull('indemnite_annuel')->update(['type' => 4]);
+            Ecriture::on($db)->whereNotNull('avs')->update(['type' => 5]);
+            Ecriture::on($db)->whereNotNull('amende')->update(['type' => 6]);
             printf("\n");
         }
         printf("Migrating done");
