@@ -33,8 +33,26 @@ class Ecriture extends Model
         // Booléen
         'amende',
         'avs',
-        'indemnite_annuel',
         'frais_annuel',
+        'indemnite_annuel',
+        'divers',
+
+        'type',
+        // Types effectifs:
+        // 0. Divers
+        // 1. Exercice
+        // 2. Intervention
+        // 3. Frais Annuel
+        // 4. Indemnité Annuel
+        // 5. AVS
+        // 6. Amende
+        // 7. Décompte d'heures
+        // 8. Cours
+        // 9. Remboursement à l'employeur ?
+
+        // TODO: A ajouter
+        // 'cours',
+        // 'heure'
     ];
 
     protected $casts = [

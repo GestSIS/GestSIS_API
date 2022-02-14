@@ -30,7 +30,7 @@ class ExerciceController extends Controller
     {
         // TODO: Refactor to service
         $threshold = Carbon::now()->subMonth()->toDateTimeString();
-        $exercices = Exercice::where('date', '>=', $threshold)->get();
+        $exercices = Exercice::with(['sapeurs'])->where('date', '>=', $threshold)->get();
         return response()->json(['data' => $exercices]);
     }
 

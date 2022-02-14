@@ -23,7 +23,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenVali
     Route::get('email-validate', [EmailController::class, 'validateEmail']);
 });
 
-Route::get('pdf-test/{id}', 'CompteController@generatePdf');
+// Route::get('pdf-test/{id}', 'CompteController@generatePdf');
 
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
 
@@ -126,7 +126,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         // Statistiques
         Route::get('statistiques/{id}/presence', 'SapeurExerciceController@stat');
 
-        // Route::resource('exercices.heures', 'HeureExerciceController')->only(['index', 'store', 'update', 'destroy']);
         Route::resource('heure-exercice-types', 'HeureExerciceTypeController')->only(['index']);
     });
 
@@ -233,22 +232,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('exercices-comptable', 'ExerciceComptableController')->only(['index']);
     });
 
-    Route::group(['middleware' => 'jwtTokenRole:comptabilite.config'], function () {
-        Route::resource('sis-param', 'SisParamController')->only(['index']);
-        //TODO: Suppression d'exercices comptable ???
-        Route::resource('exercices-comptable', 'ExerciceComptableController')->only(['index', 'store', 'update']);
-        //TODO: Regarder que faire avec cloturer, déjà modifiable via la route update pour le moment
-        // Route::post('exercice-comptable/{id}/cloturer', 'ExerciceComptableController@cloturer');
-
-        //TODO: Implémenter
-        Route::resource('heure-exercice-types', 'HeureExerciceTypeController')->only(['index', 'store', 'update', 'destroy']);
-    });
-
-    Route::group(['middleware' => 'jwtTokenRole:comptabilite.tout'], function () {
-        Route::get('exercices-comptable/{ExerciceComptableId}/certificat-salaire', 'DecompteController@certificatSalaire');
-        Route::get('exercices-comptable/{ExerciceComptableId}/certificat-salaire/{SapeurId}', 'DecompteController@certificatSalaireSapeur');
-    });
-
     // Comptabilite
     Route::group(['middleware' => 'jwtTokenRole:comptabilite.tout'], function () {
         Route::post('imputation/intervention/{id}', 'ImputationController@intervention');
@@ -264,14 +247,15 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('ecritures/annuel/{id}', 'EcritureController@annuel');
         Route::get('ecritures/amende/{id}', 'EcritureController@amende');
         Route::get('ecritures/intervention/{id}', 'EcritureController@intervention');
+        Route::get('ecritures/divers/{id}', 'EcritureController@divers');
         Route::get('ecritures/{id}', 'EcritureController@all');
+
+        Route::resource('ecritures', 'EcritureController')->only(['store', 'update', 'destroy']);
 
         Route::get('comptes/{id}/ecritures/{exerciceComptableId}', 'CompteController@ecritures');
 
         Route::get('exercices-comptable/{exercieComptableId}/comptes/{compteId}/justificatif', 'CompteController@justificatifIndividuel');
         Route::get('exercices-comptable/{exercieComptableId}/justificatif', 'CompteController@justificatifComplet');
-        // Route::get('comptes/justificatif/{id}', 'CompteController@justificatifIndividuel');
-        // Route::get('comptes/{id}/justificatif/{id}', 'CompteController@justificatifComplet');
 
         // Static param Comptabilite
         Route::get('unites', 'UniteController@index')->name('api.v2.unites');
@@ -306,9 +290,19 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         // Params Amendes
         Route::resource('amendes', 'AmendeController')->only(['index']);
+
+        // Certificats de salaire
+        Route::get('exercices-comptable/{ExerciceComptableId}/certificat-salaire', 'DecompteController@certificatSalaire');
+        Route::get('exercices-comptable/{ExerciceComptableId}/certificat-salaire/{SapeurId}', 'DecompteController@certificatSalaireSapeur');
     });
 
     Route::group(['middleware' => 'jwtTokenRole:comptabilite.config'], function () {
+        Route::resource('sis-param', 'SisParamController')->only(['index']);
+        //TODO: Suppression d'exercices comptable ???
+        Route::resource('exercices-comptable', 'ExerciceComptableController')->only(['index', 'store', 'update']);
+        //TODO: Regarder que faire avec cloturer, déjà modifiable via la route update pour le moment
+        // Route::post('exercice-comptable/{id}/cloturer', 'ExerciceComptableController@cloturer');
+
         Route::resource('sis-param', 'SisParamController')->only(['index']);
         Route::resource('avs-param', 'AvsParamController')->only(['index', 'store']);
         Route::resource('comptes', 'CompteController')->only(['index', 'store', 'update']);
@@ -322,6 +316,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('ecriture-categories', 'EcritureCategorieController')->only(['index', 'store', 'update']);
 
         Route::resource('amendes', 'AmendeController')->only(['index', 'store']);
+        Route::resource('heure-exercice-types', 'HeureExerciceTypeController')->only(['index', 'store', 'update', 'destroy']);
     });
 
     // Controles médicaux

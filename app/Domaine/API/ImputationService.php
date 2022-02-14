@@ -35,6 +35,21 @@ class ImputationService
         $this->business = $business;
     }
 
+    function ajouterEcriture($data)
+    {
+        return $this->business->ajouterEcriture($data);
+    }
+
+    function modifierEcriture($ecritureId, $data)
+    {
+        return $this->business->modifierEcriture($ecritureId, $data);
+    }
+
+    function supprimerEcriture($ecritureId)
+    {
+        return $this->business->supprimerEcriture($ecritureId);
+    }
+
     function creerExerciceComptable($data)
     {
         return $this->business->creerExerciceComptable($data);
@@ -43,6 +58,11 @@ class ImputationService
     function getAllEcrituresForExerciceComptableById($exerciceComptableId)
     {
         return $this->ecritureRepo->listeAllEcritureForExerciceComptableById($exerciceComptableId);
+    }
+
+    function getEcrituresDiversForExerciceComptableById($exerciceComptableId)
+    {
+        return $this->ecritureRepo->listeEcritureDiversForExerciceComptableById($exerciceComptableId);
     }
 
     function getEcrituresAmendesForExerciceComptableById($exerciceComptableId)
