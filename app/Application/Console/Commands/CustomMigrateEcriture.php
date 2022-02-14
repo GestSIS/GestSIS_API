@@ -53,7 +53,7 @@ class CustomMigrateEcriture extends Command
             Ecriture::on($db)->whereNotNull('amende')->update(['type' => 6]);
             printf("\n");
         }
-        printf("Migrating done");
+        printf("Migrating done\n");
         return 0;
     }
 }
