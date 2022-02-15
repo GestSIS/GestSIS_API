@@ -46,7 +46,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         return $this->convertCollectionOfEcritures(
             Ecriture::where([
                 ['exercice_comptable_id', '=', $exerciceComptableId],
-                ['type', '=', ImputationBusiness::ECRITURE_TYPE_DIVERS]
+                ['compte_id', '=', $compteId]
             ])->get()
         );
     }
