@@ -5,14 +5,14 @@ namespace App\Application\Console\Commands;
 use App\Infrastructure\Models\TypeUnite;
 use Illuminate\Console\Command;
 
-class CustomSeedUnite extends Command
+class CustomSeed extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'seed-unites:dbs';
+    protected $signature = 'seed-custom:dbs';
 
     /**
      * The console command description.
@@ -41,8 +41,8 @@ class CustomSeedUnite extends Command
         $dbs = explode(",", env('DB_LISTE', true));
         foreach ($dbs as $db) {
             printf("DATABASE " . $db . "\n");
-            printf("Seed unites\n");
-            TypeUnite::on($db)->insert(['id' => '7', 'comptable' => True, 'unite' => 'mois', 'abreviation' => 'm']);
+            // printf("Seed unites\n");
+            // TypeUnite::on($db)->insert(['id' => '7', 'comptable' => True, 'unite' => 'mois', 'abreviation' => 'm']);
             printf("\n");
         }
         printf("Migrating done");
