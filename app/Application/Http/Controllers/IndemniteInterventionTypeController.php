@@ -25,6 +25,7 @@ class IndemniteInterventionTypeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1|required',
+            'type' => 'integer|required',
             'tarif' => 'numeric|required',
             'tarif_min' => 'numeric|nullable',
             'tarif_min_pour' => 'numeric|nullable|required_unless:tarif_min,null',
@@ -49,6 +50,7 @@ class IndemniteInterventionTypeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1|required',
+            'type' => 'integer|required',
             'tarif' => 'numeric|required',
             'tarif_min' => 'numeric|nullable',
             'tarif_min_pour' => 'numeric|nullable|required_unless:tarif_min,null',
