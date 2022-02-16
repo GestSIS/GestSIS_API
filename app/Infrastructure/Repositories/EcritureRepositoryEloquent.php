@@ -26,7 +26,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         return $this->convertCollectionOfEcritures(
             Ecriture
                 ::where('exercice_comptable_id', $exerciceComptableId)
-                ->where('type', ImputationBusiness::ECRITURE_TYPE_AMENDE)
+                ->where('type', ImputationBusiness::ECRITURE_MODULE_AMENDE)
                 ->get()
         );
     }
@@ -36,7 +36,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         return $this->convertCollectionOfEcritures(
             Ecriture
                 ::where('exercice_comptable_id', $exerciceComptableId)
-                ->where('type', ImputationBusiness::ECRITURE_TYPE_DIVERS)
+                ->where('type', ImputationBusiness::ECRITURE_MODULE_DIVERS)
                 ->get()
         );
     }
@@ -74,7 +74,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         return $this->convertCollectionOfEcritures(
             Ecriture
                 ::where('exercice_comptable_id', $exerciceComptableId)
-                ->where('type', ImputationBusiness::ECRITURE_TYPE_FRAIS_ANNUEL)
+                ->where('type', ImputationBusiness::ECRITURE_MODULE_FRAIS_ANNUEL)
                 ->get()
         );
     }
@@ -84,7 +84,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         return $this->convertCollectionOfEcritures(
             Ecriture
                 ::where('exercice_comptable_id', $exerciceComptableId)
-                ->where('type', ImputationBusiness::ECRITURE_TYPE_INDEMNITE_ANNUEL)
+                ->where('type', ImputationBusiness::ECRITURE_MODULE_INDEMNITE_ANNUEL)
                 ->get()
         );
     }
@@ -96,8 +96,8 @@ class EcritureRepositoryEloquent implements EcritureRepository
                 ::where('exercice_comptable_id', $exerciceComptableId)
                 ->where(function ($query) {
                     $query
-                        ->where('type', ImputationBusiness::ECRITURE_TYPE_FRAIS_ANNUEL)
-                        ->orWhere('type', ImputationBusiness::ECRITURE_TYPE_INDEMNITE_ANNUEL);
+                        ->where('type', ImputationBusiness::ECRITURE_MODULE_FRAIS_ANNUEL)
+                        ->orWhere('type', ImputationBusiness::ECRITURE_MODULE_INDEMNITE_ANNUEL);
                 })
                 ->get()
         );
@@ -137,13 +137,11 @@ class EcritureRepositoryEloquent implements EcritureRepository
      */
     public function persisteNewEcriture($ecriture)
     {
-        if (!array_key_exists('solde_min', $ecriture)) $ecriture['solde_min'] = null;
-        if (!array_key_exists('solde_min_pour', $ecriture)) $ecriture['solde_min_pour'] = null;
+        if (!array_key_exists('tarif_min', $ecriture)) $ecriture['tarif_min'] = null;
+        if (!array_key_exists('tarif_min_pour', $ecriture)) $ecriture['tarif_min_pour'] = null;
         if (!array_key_exists('taux', $ecriture)) $ecriture['taux'] = null;
         if (!array_key_exists('taux_description', $ecriture)) $ecriture['taux_description'] = null;
-        if (!array_key_exists('solde', $ecriture)) $ecriture['solde'] = 0;
-        if (!array_key_exists('indemnite', $ecriture)) $ecriture['indemnite'] = 0;
-        if (!array_key_exists('frais', $ecriture)) $ecriture['frais'] = 0;
+
         if (!array_key_exists('exercice_comptable_id', $ecriture)) $ecriture['exercice_comptable_id'] = null;
         if (!array_key_exists('intervention_id', $ecriture)) $ecriture['intervention_id'] = null;
         if (!array_key_exists('exercice_id', $ecriture)) $ecriture['exercice_id'] = null;
@@ -177,15 +175,12 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->id = $ecriture->id;
         $object->designation = $ecriture->designation;
         $object->total = $ecriture->total;
-        $object->tarif = $ecriture->tarif;
         $object->type_unite_id = $ecriture->type_unite_id;
         $object->quantite = $ecriture->quantite;
-        $object->solde_min = $ecriture->solde_min;
-        $object->solde_min_pour = $ecriture->solde_min_pour;
+        $object->tarif = $ecriture->tarif;
+        $object->tarif_min = $ecriture->tarif_min;
+        $object->tarif_min_pour = $ecriture->tarif_min_pour;
         $object->taux = $ecriture->taux;
-        $object->solde = $ecriture->solde;
-        $object->indemnite = $ecriture->indemnite;
-        $object->frais = $ecriture->frais;
         $object->sapeur_id = $ecriture->sapeur_id;
         $object->exercice_comptable_id = $ecriture->exercice_comptable_id;
         $object->intervention_id = $ecriture->intervention_id;
@@ -196,13 +191,6 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->date = $ecriture->date;
         $object->heure = $ecriture->heure;
         $object->decompte_id = $ecriture->decompte_id;
-
-        // Type de l'écriture
-        $object->indemnite_annuel = $ecriture->indemnite_annuel;
-        $object->frais_annuel = $ecriture->frais_annuel;
-        $object->divers = $ecriture->divers;
-        $object->amende = $ecriture->amende;
-        $object->avs = $ecriture->avs;
 
         $object->type = $ecriture->type;
 
@@ -221,15 +209,12 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->id = $ecriture->id;
         $object->designation = $ecriture->designation;
         $object->total = $ecriture->total;
-        $object->tarif = $ecriture->tarif;
         $object->type_unite_id = $ecriture->type_unite_id;
         $object->quantite = $ecriture->quantite;
-        $object->solde_min = $ecriture->solde_min;
-        $object->solde_min_pour = $ecriture->solde_min_pour;
+        $object->tarif = $ecriture->tarif;
+        $object->tarif_min = $ecriture->tarif_min;
+        $object->tarif_min_pour = $ecriture->tarif_min_pour;
         $object->taux = $ecriture->taux;
-        $object->solde = $ecriture->solde;
-        $object->indemnite = $ecriture->indemnite;
-        $object->frais = $ecriture->frais;
         $object->sapeur_id = $ecriture->sapeur_id;
         $object->exercice_comptable_id = $ecriture->exercice_comptable_id;
         $object->intervention_id = $ecriture->intervention_id;
@@ -243,12 +228,6 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->tri = $ecriture->tri;
         $object->unite = $ecriture->unite;
         $object->civilite = $ecriture->civilite;
-
-        // TODO: à supprimer
-        $object->indemnite_annuel = $ecriture->indemnite_annuel;
-        $object->frais_annuel = $ecriture->frais_annuel;
-        $object->amende = $ecriture->amende;
-        $object->avs = $ecriture->avs;
 
         $object->type = $ecriture->type;
 

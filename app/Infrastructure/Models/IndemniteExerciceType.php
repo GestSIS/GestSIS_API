@@ -8,10 +8,6 @@ class IndemniteExerciceType extends Model
 {
     protected $fillable = [
         'designation',
-        'solde',
-        'indemnite',
-        'solde_min',
-        'solde_min_pour',
         'type_unite_id',
         'compte_id',
         'par_fonction',

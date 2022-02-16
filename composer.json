@@ -10,6 +10,7 @@
     "require": {
         "php": "^7.4",
         "barryvdh/laravel-snappy": "^0.4.6",
+        "doctrine/dbal": "^3.3",
         "facade/ignition": "^2.3.6",
         "fideloper/proxy": "^4.0",
         "firebase/php-jwt": "^5.0",

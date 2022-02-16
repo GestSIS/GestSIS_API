@@ -23,12 +23,9 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
 
     public function listeIndemniteInterventionType()
     {
-        $temp = $this;
         return IndemniteInterventionType::with('fonctions')
             ->get()
-            ->map(function ($indemnite) use ($temp) {
-                return $temp->convertIndemniteIntervention($indemnite);
-            })->toArray();
+            ->toArray();
     }
 
     public function listeIndemniteAnnuelType()
@@ -47,7 +44,7 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
 
     public function findIndemniteInterventionTypeById(int $id)
     {
-        return $this->convertIndemniteIntervention(IndemniteInterventionType::with('fonctions')->find($id));
+        return IndemniteInterventionType::with('fonctions')->find($id);
     }
 
     /**
@@ -134,57 +131,6 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
         $object->fonction_id = $indemnite->fonction_id;
         $object->solde = $indemnite->solde;
         $object->indemnite = $indemnite->indemnite;
-        $object->indemnite_int_id = $indemnite->indemnite_int_id;
-
-        return $object;
-    }
-
-    /**
-     * @param $intervention
-     * @return StdClass|null
-     */
-    protected function convertIndemniteIntervention($intervention)
-    {
-        if ($intervention == null) return null;
-        $object = new StdClass();
-
-        $object->id = $intervention->id;
-
-        $object->designation = $intervention->designation;
-        $object->solde = $intervention->solde;
-        $object->solde_min = $intervention->solde_min;
-        $object->solde_min_pour = $intervention->solde_min_pour;
-        $object->taux_weekend = $intervention->taux_weekend;
-        $object->taux_nuit = $intervention->taux_nuit;
-        $object->debut = $intervention->debut;
-        $object->fin = $intervention->fin;
-        $object->compte_id = $intervention->compte_id;
-        $object->phase_id = $intervention->phase_id;
-        $object->type_unite_id = $intervention->type_unite_id;
-        $object->par_fonction = $intervention->par_fonction;
-        $object->ecriture_categorie_id = $intervention->ecriture_categorie_id;
-
-        $indemnites = array();
-        foreach ($intervention->fonctions as $indemnite) {
-            array_push($indemnites, $this->convertIndemniteInterventionFonction($indemnite));
-        }
-        $object->fonctions = $indemnites;
-
-        return $object;
-    }
-
-    /**
-     * @param $indemnite
-     * @return StdClass|null
-     */
-    protected function convertIndemniteInterventionFonction($indemnite)
-    {
-        if ($indemnite == null) return null;
-
-        $object = new StdClass();
-        $object->id = $indemnite->id;
-        $object->fonction_id = $indemnite->fonction_id;
-        $object->solde = $indemnite->solde;
         $object->indemnite_int_id = $indemnite->indemnite_int_id;
 
         return $object;

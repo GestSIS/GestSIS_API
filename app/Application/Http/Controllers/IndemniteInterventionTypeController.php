@@ -25,9 +25,9 @@ class IndemniteInterventionTypeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1|required',
-            'solde' => 'numeric|required',
-            'solde_min' => 'numeric|nullable',
-            'solde_min_pour' => 'numeric|nullable|required_unless:solde_min,null',
+            'tarif' => 'numeric|required',
+            'tarif_min' => 'numeric|nullable',
+            'tarif_min_pour' => 'numeric|nullable|required_unless:tarif_min,null',
             'taux_weekend' => 'numeric|nullable',
             'taux_nuit' => 'numeric|nullable',
             'debut' => 'date_format:H:i|nullable|required_unless:taux_nuit,null',
@@ -37,8 +37,7 @@ class IndemniteInterventionTypeController extends Controller
             'type_unite_id' => 'integer|required',
             'ecriture_categorie_id' => 'integer|required',
             'par_fonction' => 'boolean',
-            'fonctions.*.solde' => 'numeric',
-            'fonctions.*.indemnite' => 'numeric',
+            'fonctions.*.tarif' => 'numeric',
             'fonctions.*.fonction_id' => 'integer',
         ]);
 
@@ -50,9 +49,9 @@ class IndemniteInterventionTypeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1|required',
-            'solde' => 'numeric|required',
-            'solde_min' => 'numeric|nullable',
-            'solde_min_pour' => 'numeric|nullable|required_unless:solde_min,null',
+            'tarif' => 'numeric|required',
+            'tarif_min' => 'numeric|nullable',
+            'tarif_min_pour' => 'numeric|nullable|required_unless:tarif_min,null',
             'taux_weekend' => 'numeric|nullable',
             'taux_nuit' => 'numeric|nullable',
             'debut' => 'date_format:H:i|nullable|required_unless:taux_nuit,null',
@@ -63,8 +62,7 @@ class IndemniteInterventionTypeController extends Controller
             'ecriture_categorie_id' => 'integer|required',
             'par_fonction' => 'boolean',
             'fonctions.*.id' => 'numeric|nullable',
-            'fonctions.*.solde' => 'numeric',
-            'fonctions.*.indemnite' => 'numeric',
+            'fonctions.*.tarif' => 'numeric',
             'fonctions.*.fonction_id' => 'integer',
         ]);
 

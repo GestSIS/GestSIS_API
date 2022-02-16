@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Compte extends Model
 {
-    protected $fillable = ['numero', 'designation', 'actif'];
+    protected $fillable = ['numero', 'designation', 'produit', 'type'];
     protected $casts = [
-        'actif' => 'integer'
+        'produit' => 'integer', 'type' => 'integer'
     ];
 
     /**
