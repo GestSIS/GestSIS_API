@@ -28,9 +28,6 @@ class CreateIndemniteExerciceTypesTable extends Migration
             $table->unsignedBigInteger('compte_id'); // Supprimé
             $table->foreign('compte_id')->references('id')->on('comptes'); // Supprimé
 
-            // $table->unsignedDecimal('solde_heure_additionelle')->default(0.0);
-            // $table->unsignedDecimal('indemnite_heure_additionelle')->default(0.0);
-
             $table->unsignedBigInteger('type_unite_id');
             $table->foreign('type_unite_id')->references('id')->on('type_unites');
 

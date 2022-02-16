@@ -69,36 +69,12 @@ class EcritureRepositoryEloquent implements EcritureRepository
         );
     }
 
-    public function listeFraisAnnuelByExeComptableId($exerciceComptableId)
-    {
-        return $this->convertCollectionOfEcritures(
-            Ecriture
-                ::where('exercice_comptable_id', $exerciceComptableId)
-                ->where('type', ImputationBusiness::ECRITURE_MODULE_FRAIS_ANNUEL)
-                ->get()
-        );
-    }
-
-    public function listeIndemniteAnnuelByExeComptableId($exerciceComptableId)
-    {
-        return $this->convertCollectionOfEcritures(
-            Ecriture
-                ::where('exercice_comptable_id', $exerciceComptableId)
-                ->where('type', ImputationBusiness::ECRITURE_MODULE_INDEMNITE_ANNUEL)
-                ->get()
-        );
-    }
-
     public function listeEcrituresAnnuelsForExerciceComptableById($exerciceComptableId)
     {
         return $this->convertCollectionOfEcritures(
             Ecriture
                 ::where('exercice_comptable_id', $exerciceComptableId)
-                ->where(function ($query) {
-                    $query
-                        ->where('type', ImputationBusiness::ECRITURE_MODULE_FRAIS_ANNUEL)
-                        ->orWhere('type', ImputationBusiness::ECRITURE_MODULE_INDEMNITE_ANNUEL);
-                })
+                ->where('type', ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)
                 ->get()
         );
     }

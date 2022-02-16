@@ -36,6 +36,8 @@ class UpdateIndemniteExerciceTypesTable extends Migration
             $table->foreign('compte_id')->references('id')->on('comptes');
 
             $table->unsignedBigInteger('fonction_id')->nullable()->change();
+
+            $table->unsignedInteger('type');
         });
     }
 

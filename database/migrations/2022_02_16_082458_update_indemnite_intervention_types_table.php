@@ -17,6 +17,8 @@ class UpdateIndemniteInterventionTypesTable extends Migration
             $table->renameColumn('solde', 'tarif'); // Renommé
             $table->renameColumn('solde_min', 'tarif_min'); // Renommé
             $table->renameColumn('solde_min_pour', 'tarif_min_pour'); // Renommé
+
+            $table->unsignedInteger('type'); // Renommé
         });
         Schema::table('indemnite_intervention_fonctions', function (Blueprint $table) {
             $table->renameColumn('solde', 'tarif'); // 

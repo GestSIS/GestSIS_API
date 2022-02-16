@@ -275,13 +275,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('unites', 'UniteController@index')->name('api.v2.unites');
 
         // Params Comptabilite
-        Route::resource('indemnites-types', 'IndemniteTypeController')->only(['index']);
         Route::resource('comptes', 'CompteController')->only(['index']);
-        Route::resource('frais-types', 'FraisTypeController')->only(['index']);
         Route::resource('indemnites-exercice-types', 'IndemniteExerciceTypeController')->only(['index']);
         Route::resource('indemnites-intervention-types', 'IndemniteInterventionTypeController')->only(['index']);
-        Route::resource('indemnites-annuel-types', 'IndemniteAnnuelTypeController')->only(['index']);
-        Route::resource('frais-annuel-types', 'FraisAnnuelTypeController')->only(['index']);
+        Route::resource('frais-indemnites-types', 'FraisIndemniteTypeController')->only(['index']);
+        Route::resource('frais-indemnites-annuel-types', 'FraisIndemniteAnnuelTypeController')->only(['index']);
         Route::resource('ecriture-categories', 'EcritureCategorieController')->only(['index']);
 
         // Décomptes
@@ -305,7 +303,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('generer-amendes/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
         Route::post('generer-amendes/{id}', 'AmendeSapeurController@annuel');
 
-
         // Certificats de salaire
         Route::get('exercices-comptable/{ExerciceComptableId}/certificat-salaire', 'DecompteController@certificatSalaire');
         Route::get('exercices-comptable/{ExerciceComptableId}/certificat-salaire/{SapeurId}', 'DecompteController@certificatSalaireSapeur');
@@ -320,13 +317,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('avs-param', 'AvsParamController')->only(['index', 'store']);
 
         Route::resource('comptes', 'CompteController')->only(['store', 'update']);
-        Route::resource('frais-types', 'FraisTypeController')->only(['index']);
         Route::resource('indemnites-exercice-types', 'IndemniteExerciceTypeController')->only(['store', 'update', 'destroy']);
         Route::resource('indemnites-intervention-types', 'IndemniteInterventionTypeController')->only(['store', 'update', 'destroy']);
-        Route::resource('indemnites-annuel', 'IndemniteAnnuelController')->only(['store', 'update', 'destroy']);
-        Route::resource('indemnites-annuel-types', 'IndemniteAnnuelTypeController')->only(['store', 'update', 'destroy']);
-        Route::resource('frais-annuel', 'FraisAnnuelController')->only(['store', 'update', 'destroy']);
-        Route::resource('frais-annuel-types', 'FraisAnnuelTypeController')->only(['store', 'update', 'destroy']);
+        Route::resource('frais-indemnites-annuel', 'FraisIndemniteAnnuelController')->only(['store', 'update', 'destroy']);
+        Route::resource('frais-indemnites-annuel-types', 'FraisIndemniteAnnuelTypeController')->only(['store', 'update', 'destroy']);
         Route::resource('ecriture-categories', 'EcritureCategorieController')->only(['store', 'update']);
 
         Route::resource('amendes', 'AmendeController')->only(['store']);

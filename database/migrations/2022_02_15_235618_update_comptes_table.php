@@ -14,14 +14,7 @@ class UpdateComptesTable extends Migration
     public function up()
     {
         Schema::table('comptes', function (Blueprint $table) {
-            $table->unsignedInteger('type')->default(0);
             $table->renameColumn('actif', 'produit');
-            // 0 : autre
-            // 1 : solde
-            // 2 : indemnité
-            // 3 : frais forfaitaire
-            // 4 : frais effectif
-            // 5 : charges AVS/AC
         });
     }
 
@@ -33,7 +26,6 @@ class UpdateComptesTable extends Migration
     public function down()
     {
         Schema::table('comptes', function (Blueprint $table) {
-            $table->dropColumn('type');
             $table->renameColumn('produit', 'actif');
         });
     }

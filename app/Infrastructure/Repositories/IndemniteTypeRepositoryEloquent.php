@@ -4,7 +4,7 @@
 namespace App\Infrastructure\Repositories;
 
 use App\Domaine\SPI\IndemniteTypeRepository;
-use App\Infrastructure\Models\IndemniteAnnuelType;
+use App\Infrastructure\Models\FraisIndemniteAnnuelType;
 use App\Infrastructure\Models\IndemniteExerciceType;
 use App\Infrastructure\Models\IndemniteInterventionType;
 use stdClass;
@@ -28,13 +28,9 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
             ->toArray();
     }
 
-    public function listeIndemniteAnnuelType()
+    public function listeFraisIndemniteAnnuelType()
     {
-        $temp = $this;
-        return IndemniteAnnuelType::with('indemniteAnnuels')->get()
-            ->map(function ($indemnite) use ($temp) {
-                return $temp->convertIndemniteAnnuelType($indemnite);
-            })->toArray();
+        return FraisIndemniteAnnuelType::with('fraisIndemniteAnnuels')->get()->toArray();
     }
 
     public function findIndemniteExerciceTypeById(int $id)
@@ -45,46 +41,6 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
     public function findIndemniteInterventionTypeById(int $id)
     {
         return IndemniteInterventionType::with('fonctions')->find($id);
-    }
-
-    /**
-     * @param $indemnite
-     * @return StdClass|null
-     */
-    protected function convertIndemniteAnnuelType($indemnite)
-    {
-        if ($indemnite == null) return null;
-
-        $object = new StdClass();
-
-        $object->id = $indemnite->id;
-        $object->designation = $indemnite->designation;
-        $object->cumulable = $indemnite->cumulable;
-        $object->compte_id = $indemnite->compte_id;
-        $object->ecriture_categorie_id = $indemnite->ecriture_categorie_id;
-
-        $temp = $this;
-        $object->indemniteAnnuels = $indemnite->indemniteAnnuels->map(function ($ind) use ($temp) {
-            return $temp->convertIndemniteAnnuel($ind);
-        })->toArray();
-
-        return $object;
-    }
-
-    protected function convertIndemniteAnnuel($indemnite)
-    {
-        if ($indemnite == null) return null;
-
-        $object = new StdClass();
-        $object->id = $indemnite->id;
-
-        $object->quantite = $indemnite->quantite;
-        $object->montant = $indemnite->montant;
-        $object->fonction_id = $indemnite->fonction_id;
-        $object->type_unite_id = $indemnite->type_unite_id;
-        $object->indemnite_annuel_type_id = $indemnite->indemnite_annuel_type_id;
-
-        return $object;
     }
 
     /**

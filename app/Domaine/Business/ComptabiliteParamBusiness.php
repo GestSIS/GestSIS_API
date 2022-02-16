@@ -5,10 +5,8 @@ namespace App\Domaine\Business;
 use App\Infrastructure\Models\Amende;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\EcritureCategorie;
-use App\Infrastructure\Models\FraisAnnuel;
-use App\Infrastructure\Models\FraisAnnuelType;
-use App\Infrastructure\Models\IndemniteAnnuel;
-use App\Infrastructure\Models\IndemniteAnnuelType;
+use App\Infrastructure\Models\FraisIndemniteAnnuel;
+use App\Infrastructure\Models\FraisIndemniteAnnuelType;
 use App\Infrastructure\Models\IndemniteExerciceType;
 use App\Infrastructure\Models\IndemniteInterventionType;
 
@@ -50,84 +48,44 @@ class ComptabiliteParamBusiness
         //TODO: Implement this
     }
 
-    public static function ajouterFraisAnnuel($data)
+    public static function ajouterFraisIndemniteAnnuel($data)
     {
-        $frais = new FraisAnnuel();
-        $frais->fill($data);
-        $frais->save();
-        return $frais;
-    }
-
-    public static function modifierFraisAnnuel($id, $data)
-    {
-        FraisAnnuel::where('id', $id)->limit(1)->update($data);
-        return FraisAnnuel::find($id);
-    }
-
-    public static function supprimerFraisAnnuel($id)
-    {
-        FraisAnnuel::where('id', $id)->limit(1)->delete();
-    }
-
-    public static function ajouterFraisAnnuelType($data)
-    {
-        $frais = new FraisAnnuelType();
-        $frais->fill($data);
-        $frais->save();
-        $object = $frais->toArray();
-        $object['fraisAnnuels'] = [];
-        return $object;
-    }
-
-    public static function modifierFraisAnnuelType($id, $data)
-    {
-        FraisAnnuelType::where('id', $id)->limit(1)->update($data);
-        return FraisAnnuelType::with('fraisAnnuels')->find($id);
-    }
-
-    public static function supprimerFraisAnnuelType($id)
-    {
-        FraisAnnuelType::where('id', $id)->limit(1)->delete();
-    }
-
-    public static function ajouterIndemniteAnnuel($data)
-    {
-        $indemnite = new IndemniteAnnuel();
-        $indemnite->fill($data);
-        $indemnite->save();
-        $object = $indemnite->toArray();
-        $object['indemniteAnnuels'] = [];
-        return $object;
-    }
-
-    public static function modifierIndemniteAnnuel($id, $data)
-    {
-        IndemniteAnnuel::where('id', $id)->limit(1)->update($data);
-        return IndemniteAnnuel::find($id);
-    }
-
-    public static function supprimerIndemniteAnnuel($id)
-    {
-        IndemniteAnnuel::where('id', $id)->limit(1)->delete();
-    }
-
-    public static function ajouterIndemniteAnnuelType($data)
-    {
-        $indemnite = new IndemniteAnnuelType();
+        $indemnite = new FraisIndemniteAnnuel();
         $indemnite->fill($data);
         $indemnite->save();
         return $indemnite;
     }
 
-    public static function modifierIndemniteAnnuelType($id, $data)
+    public static function modifierFraisIndemniteAnnuel($id, $data)
     {
-        IndemniteAnnuelType::where('id', $id)->limit(1)->update($data);
-        return IndemniteAnnuelType::with('indemniteAnnuels')->find($id);
+        FraisIndemniteAnnuel::where('id', $id)->limit(1)->update($data);
+        return FraisIndemniteAnnuel::find($id);
     }
 
-    public static function supprimerIndemniteAnnuelType($id)
+    public static function supprimerFraisIndemniteAnnuel($id)
     {
-        IndemniteAnnuelType::where('id', $id)->limit(1)->delete();
+        FraisIndemniteAnnuel::where('id', $id)->limit(1)->delete();
+    }
+
+    public static function ajouterFraisIndemniteAnnuelType($data)
+    {
+        $indemnite = new FraisIndemniteAnnuelType();
+        $indemnite->fill($data);
+        $indemnite->save();
+        $object = $indemnite->toArray();
+        $object['frais_indemnite_annuels'] = [];
+        return $object;
+    }
+
+    public static function modifierFraisIndemniteAnnuelType($id, $data)
+    {
+        FraisIndemniteAnnuelType::where('id', $id)->limit(1)->update($data);
+        return FraisIndemniteAnnuelType::with('fraisIndemniteAnnuels')->find($id);
+    }
+
+    public static function supprimerFraisIndemniteAnnuelType($id)
+    {
+        FraisIndemniteAnnuelType::where('id', $id)->limit(1)->delete();
     }
 
     public static function ajouterIndemniteExercice($data)

@@ -2,7 +2,6 @@
 
 namespace App\Domaine\Business;
 
-use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
