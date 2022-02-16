@@ -40,13 +40,13 @@ class ImputationBusiness
     }
 
     // Unités de GestSIS
-    protected const UNITE_PIECE = 1;
-    protected const UNITE_HEURE = 2;
-    protected const UNITE_AN = 3;
-    protected const UNITE_KM = 4;
-    protected const UNITE_JOUR = 5;
-    protected const UNITE_FORFAIT = 6;
-    protected const UNITE_MOIS = 7;
+    public const UNITE_PIECE = 1;
+    public const UNITE_HEURE = 2;
+    public const UNITE_AN = 3;
+    public const UNITE_KM = 4;
+    public const UNITE_JOUR = 5;
+    public const UNITE_FORFAIT = 6;
+    public const UNITE_MOIS = 7;
 
     // Module ayant généré l'écriture
     public const ECRITURE_MODULE_DIVERS = 0;
