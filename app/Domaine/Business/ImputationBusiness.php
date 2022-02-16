@@ -73,7 +73,7 @@ class ImputationBusiness
         //TODO: Controller exercice comptable non clôturé
 
         // Switch between type
-        switch ($data['type']) {
+        switch ($data['module']) {
             case ImputationBusiness::ECRITURE_MODULE_DIVERS:
 
                 $ecriture = new Ecriture([
@@ -101,26 +101,6 @@ class ImputationBusiness
 
             default:
                 throw new ArrayException(['message' => 'Type d\'écriture non supporté pour le moment']);
-                $ecriture = [
-                    'tarif' => $data['tarif'],
-                    'quantite' => $data['quantite'],
-                    'total' => $data['total'],
-
-                    'designation' => $data['designation'],
-
-                    'sapeur_id' => $data['sapeur_id'],
-                    'exercice_id' => $data['exercice_id'], //FIXME:
-                    'compte_id' => $data['compte_id'],
-                    'exercice_comptable_id' => $data['exercice_comptable_id'],
-                    'ecriture_categorie_id' => $data['ecriture_categorie_id'],
-
-                    'decompte_id' => null,
-                    'heure' => $data['heure'], // FIXME:
-                    'date' => $data['date'],
-
-                    'module' => ImputationBusiness::ECRITURE_MODULE_DIVERS,
-                ];
-                return $ecriture;
         }
     }
 
@@ -133,10 +113,8 @@ class ImputationBusiness
         }
 
         // Switch between type
-        switch ($data['type']) {
+        switch ($data['module']) {
             case ImputationBusiness::ECRITURE_MODULE_DIVERS:
-
-                $compte = Compte::find($data['compte_id']);
 
                 $ecriture->update([
                     'tarif' => $data['tarif'],
@@ -157,10 +135,9 @@ class ImputationBusiness
 
                 $ecriture->save();
                 return $ecriture;
-                // break;
 
             default:
-                // TODO: Implement
+                throw new ArrayException(['message' => 'Type d\'écriture non supporté pour le moment']);
         }
     }
 
@@ -523,7 +500,7 @@ class ImputationBusiness
         if ($indemniteType->taux_weekend > 0 || $indemniteType->taux_nuit > 0) {
             $this->imputerInterventionTaux($interventionId, $intervention, $indemniteType, $data);
         } else {
-            $this->imputerInterventionSoldeMin($interventionId, $intervention, $indemniteType, $data);
+            $this->imputerInterventionTarifMin($interventionId, $intervention, $indemniteType, $data);
         }
 
         // Update statut
@@ -532,10 +509,8 @@ class ImputationBusiness
         ])->statut;
     }
 
-    private function imputerInterventionSoldeMin($interventionId, $intervention, $indemniteType, $data)
+    private function imputerInterventionTarifMin($interventionId, $intervention, $indemniteType, $data)
     {
-        $unite = $indemniteType->type_unite_id;
-
         // Grouper les présences par sapeurs
         $sapeurs = [];
         foreach ($intervention->presences as $presence) {
@@ -547,15 +522,15 @@ class ImputationBusiness
 
         $phases = collect($intervention->phases)->sortByDesc('debut');
 
-        $soldeMinDuree = array();
-        $nonSoldeMinDuree = array();
+        $dureeTarifMin = array();
+        $dureeNonTarifMin = array();
 
         $indemnite_phase_id = $indemniteType->phase_id;
 
         // Sépare les période de chaque sapeur entre les différentes phases
         foreach ($sapeurs as $sapeurId => $presences) {
-            $soldeMinDureeSapeur = 0;
-            $nonSoldeMinDureeSapeur = 0;
+            $dureeTarifMinSapeur = 0;
+            $dureeNonTarifMinSapeur = 0;
             foreach ($presences as $periode) {
                 $debut = Carbon::parse($periode->debut);
                 $fin = Carbon::parse($periode->fin);
@@ -576,42 +551,42 @@ class ImputationBusiness
 
                     // Totalité des périodes restantes pour cette phase
                     if ($indemnite_phase_id == NULL || $indemnite_phase_id == 0 || $phase->phase_type_id == $indemnite_phase_id) {
-                        $soldeMinDureeSapeur += $duree;
+                        $dureeTarifMinSapeur += $duree;
                     } else {
-                        $nonSoldeMinDureeSapeur += $duree;
+                        $dureeNonTarifMinSapeur += $duree;
                     }
                     break;
                 }
             }
-            $soldeMinDuree[$sapeurId] = ($soldeMinDuree[$sapeurId] ?? 0) + $soldeMinDureeSapeur;
-            $nonSoldeMinDuree[$sapeurId] = ($nonSoldeMinDuree[$sapeurId] ?? 0) + $nonSoldeMinDureeSapeur;
+            $dureeTarifMin[$sapeurId] = ($dureeTarifMin[$sapeurId] ?? 0) + $dureeTarifMinSapeur;
+            $dureeNonTarifMin[$sapeurId] = ($dureeNonTarifMin[$sapeurId] ?? 0) + $dureeNonTarifMinSapeur;
         }
 
-        $solde = $indemniteType->solde;
-        $soldeMin = $indemniteType->tarif_min ?? $indemniteType->solde;
-        $soldeMinPour = $indemniteType->tarif_min ?? 1;
+        $tarif = $indemniteType->tarif;
+        $tarifMin = $indemniteType->tarif_min ?? $indemniteType->tarif;
+        $tarifMinPour = $indemniteType->tarif_min ?? 1;
         $designation = "{$intervention->localite->designation} ({$intervention->type->designation}) $intervention->lieu";
 
         $ecritures = array();
-        foreach ($soldeMinDuree as $sapeurId => $duree) {
-            // Duree sans solde min
-            $nonDuree = $nonSoldeMinDuree[$sapeurId];
+        foreach ($dureeTarifMin as $sapeurId => $dureeTarifMinSapeur) {
+            // Duree sans tarif min
+            $dureeNonTarifMinSapeur = $dureeNonTarifMin[$sapeurId];
 
             $total = 0;
 
             //TODO: WARNING!!! Seems strange
-            if ($duree > $soldeMinPour) {
-                $total += $soldeMin;
-                $duree -= $soldeMinPour;
+            if ($dureeTarifMinSapeur > $tarifMinPour) {
+                $total += $tarifMin;
+                $dureeTarifMinSapeur -= $tarifMinPour;
             }
 
-            $total += $indemniteType->solde * $duree;
-            $total += $indemniteType->solde * $nonDuree;
+            $total += $indemniteType->tarif * $dureeTarifMinSapeur;
+            $total += $indemniteType->tarif * $dureeNonTarifMinSapeur;
 
-            if ($duree > 0) {
+            if ($dureeTarifMinSapeur > 0) {
                 $ecritures[] = array(
-                    'tarif' => $solde,
-                    'quantite' => $duree + $nonDuree,
+                    'tarif' => $tarif,
+                    'quantite' => $dureeTarifMinSapeur + $dureeNonTarifMinSapeur,
                     'total' => $total,
                     'tarif_min' => null,
                     'tarif_min_pour' => null,
@@ -629,10 +604,10 @@ class ImputationBusiness
                     'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION
                 );
             }
-            if ($nonDuree) {
+            if ($dureeNonTarifMinSapeur) {
                 $ecritures[] = array(
-                    'tarif' => $solde,
-                    'quantite' => $nonDuree,
+                    'tarif' => $tarif,
+                    'quantite' => $dureeNonTarifMinSapeur,
                     'tarif_min' => null,
                     'tarif_min_pour' => null,
                     'total' => $total,
@@ -699,7 +674,7 @@ class ImputationBusiness
             }
 
             // Récupération des tarifs
-            $soldeTarif = $indemniteType->solde;
+            $tarif = $indemniteType->solde;
             $tauxWeekend = $indemniteType->taux_weekend;
             $tauxNuit = $indemniteType->taux_nuit;
 
@@ -819,30 +794,24 @@ class ImputationBusiness
                 }
             }
 
-            // Calcul des tarifs
-            $soldeStandard = $soldeTarif * $dureeTarifStandard;
-            $soldeNuit = $soldeTarif * $dureeTarifNuit;
-            $soldeWeekend = $soldeTarif * $dureeTarifWeekend;
-
-            // Application des taux
-            $soldeWeekend *= $tauxWeekend;
-            $soldeNuit *= $tauxNuit;
+            // Calcul des totaux
+            $totalTarifStandard = $tarif * $dureeTarifStandard;
+            $totalTarifNuit = $tarif * $dureeTarifNuit * $tauxNuit;
+            $totalTarifWeekend = $tarif * $dureeTarifWeekend * $tauxWeekend;
 
             // Génération des écritures
-            if ($soldeStandard > 0) {
+            if ($totalTarifStandard > 0) {
                 $ecritures[] = array(
-                    'tarif' => $soldeTarif,
+                    'tarif' => $tarif,
                     'quantite' => $dureeTarifStandard,
                     'taux' => null,
                     'taux_description' => null,
-                    'total' => $soldeStandard,
-
+                    'total' => $totalTarifStandard,
 
                     'designation' => $designation,
                     'date' => $intervention->date_debut,
                     'heure' => $intervention->heure_debut,
                     'type_unite_id' => $indemniteType->type_unite_id,
-
 
                     'sapeur_id' => $sapeur_id,
                     'compte_id' => $indemniteType->compte_id,
@@ -854,13 +823,13 @@ class ImputationBusiness
                 );
             }
 
-            if ($soldeNuit > 0) {
+            if ($totalTarifNuit > 0) {
                 $ecritures[] = [
-                    'tarif' => $soldeTarif,
+                    'tarif' => $tarif,
                     'quantite' => $dureeTarifNuit,
                     'taux' => $tauxNuit,
                     'taux_description' => 'Nuit',
-                    'total' => $soldeNuit,
+                    'total' => $totalTarifNuit,
 
                     'designation' => $designation . " - Nuit",
                     'date' => $intervention->date_debut,
@@ -877,13 +846,13 @@ class ImputationBusiness
                 ];
             }
 
-            if ($soldeWeekend > 0) {
+            if ($totalTarifWeekend > 0) {
                 $ecritures[] = [
-                    'tarif' => $soldeTarif,
+                    'tarif' => $tarif,
                     'quantite' => $dureeTarifWeekend,
                     'taux' => $tauxWeekend,
                     'taux_description' => 'Weekend',
-                    'total' => $soldeWeekend,
+                    'total' => $totalTarifWeekend,
 
                     'designation' => $designation . " - Weekend",
                     'date' => $intervention->date_debut,
