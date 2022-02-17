@@ -222,6 +222,7 @@ class PaiementBusiness
      */
     public function iso20022PourDecompte($decompteId, $nom, $bic, $iban)
     {
+        // FIXME: use new fields name
         $paiements = Decompte::find($decompteId)->paiements()->get();
         $paiement = new PaymentInformation(
             "payment-000",
@@ -262,6 +263,7 @@ class PaiementBusiness
      */
     public function iso20022PourPaiement($paiementId, $nom, $bic, $iban)
     {
+        // FIXME: use new fields name
         $paiement = new PaymentInformation(
             "payment-000",
             $nom,
@@ -298,6 +300,7 @@ class PaiementBusiness
 
     public function certificatSalaire($exerciceComptableId, $affichageFrais = false)
     {
+        // FIXME: use new fields name
         //calcul des totaux
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
         $totaux = [];
@@ -347,6 +350,7 @@ class PaiementBusiness
      */
     public function certificatSalaireSapeur($exerciceComptableId, $sapeurId, $affichageFrais = false)
     {
+        // FIXME: use new fields name
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
 
         //Calcul des totaux
@@ -381,6 +385,7 @@ class PaiementBusiness
      */
     private function creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, $enregistrement)
     {
+        // FIXME: use new fields name
         $localite = $sapeur->localite;
         $civilite = $sapeur->civilite;
 
