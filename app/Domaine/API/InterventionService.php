@@ -413,6 +413,7 @@ class InterventionService
         // Chargement des sapeurs et quittances
         $sapeursMap = [];
         $quittancesMap = [];
+        $presences = [];
         if (in_array('presences', $withOptions)) {
             $sapeurs = Sapeur::get(['nom', 'prenom', 'id']);
             foreach ($sapeurs as $sapeur) {

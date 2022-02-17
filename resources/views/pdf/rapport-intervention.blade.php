@@ -70,7 +70,7 @@
       </tr>
     </table>
     {{-- Véhicules --}}
-    @if (array_key_exists("vehicules", $params))
+    @if (array_key_exists("vehicules", $params) && $params["vehicules"])
     <h2 class="h4">Véhicules mobilisés</h2>
     <table class="table table-sm mb-2">
       @if (count($intervention->vehicules) == 0)
@@ -86,7 +86,7 @@
     </table>
     @endif
     {{-- Matériels --}}
-    @if (array_key_exists("vehicules", $params))
+    @if (array_key_exists("materiels", $params) && $params["materiels"])
     <h2 class="h4">Matériel utilisé</h2>
     <table class="table table-sm mb-2">
       @if (count($intervention->materiels) == 0)
@@ -102,7 +102,7 @@
     </table>
     @endif
     {{-- Missions --}}
-    @if (array_key_exists("missions", $params))
+    @if (array_key_exists("missions", $params) && $params["missions"])
     <h2 class="h4">Missions</h2>
     <table class="table table-sm mb-2">
       <tr>
@@ -127,7 +127,7 @@
     </table>
     @endif
     {{-- Appels --}}
-    @if (array_key_exists("appels", $params))
+    @if (array_key_exists("appels", $params) && $params["appels"])
     <h2 class="h4">Partenaires contactés</h2>
     <table class="table table-sm mb-2">
       <tr>
@@ -152,7 +152,7 @@
     </table>
     @endif
     {{-- Groupes --}}
-    @if (array_key_exists("groupes", $params))
+    @if (array_key_exists("groupes", $params) && $params["groupes"])
     <h2 class="h4">Groupes alarmés</h2>
     <table class="table table-sm mb-2">
       @if (count($intervention->groupes) == 0)
@@ -168,7 +168,7 @@
     </table>
     @endif
     {{-- Présences --}}
-    @if (array_key_exists("presences", $params))
+    @if (array_key_exists("presences", $params) && $params["presences"])
     <h2 class="h4">Présences</h2>
     <table class="table table-sm mb-2">
       @if (count($presences) == 0)
