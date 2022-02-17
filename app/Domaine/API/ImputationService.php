@@ -5,7 +5,6 @@ namespace App\Domaine\API;
 use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
-use App\Domaine\SPI\FraisTypeRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\Exercice;
@@ -17,7 +16,6 @@ class ImputationService
     protected $ecritureRepo;
     protected $exerciceRepo;
     protected $indemniteRepo;
-    protected $fraisRepo;
     protected $compteRepo;
     protected $business;
 
@@ -25,13 +23,11 @@ class ImputationService
         EcritureRepository $ecriture,
         ExerciceRepository $exercice,
         IndemniteTypeRepository $indemnite,
-        FraisTypeRepository $frais,
         ImputationBusiness $business
     ) {
         $this->ecritureRepo = $ecriture;
         $this->exerciceRepo = $exercice;
         $this->indemniteRepo = $indemnite;
-        $this->fraisRepo = $frais;
         $this->business = $business;
     }
 
@@ -138,10 +134,7 @@ class ImputationService
     {
         $this->business->imputerAnnuel($exerciceComptableId);
 
-        return [
-            "frais" => $this->ecritureRepo->listeFraisAnnuelByExeComptableId($exerciceComptableId),
-            "indemnites" => $this->ecritureRepo->listeIndemniteAnnuelByExeComptableId($exerciceComptableId),
-        ];
+        return $this->ecritureRepo->listeEcrituresAnnuelsForExerciceComptableById($exerciceComptableId);
     }
 
     function genererAmendesSapeur($exerciceComptableId, $sapeurId)

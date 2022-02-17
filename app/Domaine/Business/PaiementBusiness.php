@@ -2,7 +2,7 @@
 
 namespace App\Domaine\Business;
 
-use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\API\ImputationService;
 use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
@@ -55,31 +55,46 @@ class PaiementBusiness
         $decompte->save();
 
         $totaux = array();
-        //faire les totaux par sapeurs
+        // faire les totaux par sapeurs
         foreach ($ecritures as $ecriture) {
-            //ne pas ajouter une écriture déja payé
+            // ne pas ajouter une écriture déja payé
             if ($ecriture->decompte_id == null) {
                 if (!array_key_exists($ecriture->sapeur_id, $totaux)) {
                     $totaux[$ecriture->sapeur_id] = array(
-                        "solde" => 0.0,
-                        "indemnite" => 0.0,
-                        "frais" => 0.0,
-                        "amende" => 0.0,
-                        "avs" => 0.0,
-                        "total" => 0.0,
-                        "soldeTotal" => 0.0,
-                        "indemniteTotal" => 0.0,
-                        "avs_total" => 0.0
+                        "solde_a_percevoir" => 0.0,
+                        "indemnite_a_percevoir" => 0.0,
+                        "frais_forfaitaire_a_percevoir" => 0.0,
+                        "frais_effectif_a_percevoir" => 0.0,
+                        "avs_ac_a_cotiser" => 0.0,
+                        "amende_a_deduire" => 0.0,
+                        "solde_percue" => 0.0,
+                        "indemnite_percue" => 0.0,
+                        "avs_ac_cotise" => 0.0
                     );
                 }
-                $totaux[$ecriture->sapeur_id]['solde'] += $ecriture->solde;
-                $totaux[$ecriture->sapeur_id]['indemnite'] += $ecriture->indemnite;
-                $totaux[$ecriture->sapeur_id]['frais'] += $ecriture->frais;
-                // pas encore présent dans écriture, mais n'y sera pas
-                //$totaux[$ecriture->sapeur_id]['amende']+=$ecriture->amende;
 
-                // TODO: Attention lors de l'ajout des amendes
-                $decompte->total += $ecriture->total;
+                // TODO: A modifier pour déductions, amende ou autres
+                switch ($ecriture->type) {
+                    case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE:
+                        $totaux[$ecriture->sapeur_id]['solde_a_percevoir'] += $ecriture->total;
+                        $decompte->total += $ecriture->total;
+                        break;
+                    case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_INDEMNITE:
+                        $totaux[$ecriture->sapeur_id]['indemnite_a_percevoir'] += $ecriture->total;
+                        $decompte->total += $ecriture->total;
+                        break;
+                    case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_FRAIS_FORFAITAIRE:
+                        $totaux[$ecriture->sapeur_id]['frais_forfaitaire_a_percevoir'] += $ecriture->total;
+                        $decompte->total += $ecriture->total;
+                        break;
+                    case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_FRAIS_EFFECTIF:
+                        $totaux[$ecriture->sapeur_id]['frais_effectif_a_percevoir'] += $ecriture->total;
+                        $decompte->total += $ecriture->total;
+                        break;
+                }
+
+                // TODO: Modifier code ici pour ajouter déduction d'amendes, code suivant incorrect
+                // $totaux[$ecriture->sapeur_id]['amende']+=$ecriture->amende;
 
                 // $ecriture->date_paiement = $date;
                 $ecriture->decompte_id = $decompte->id;
@@ -87,88 +102,95 @@ class PaiementBusiness
             }
         }
 
-        //déductions
-        $tauxParitaire = ($avsParam->taux_ac + $avsParam->taux_avs) / 2.0;
+        // Déductions
         if ($deduction) {
-            //vérifie si autre décompte sans déduction
+            // Chargement des anciens décomptes pour tenir compte des montants déjà perçus
             foreach (Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get() as $d) {
                 foreach ($d->paiements as $p) {
                     if (!array_key_exists($p->sapeur_id, $totaux)) {
                         $totaux[$p->sapeur_id] = array(
-                            "solde" => 0.0,
-                            "indemnite" => 0.0,
-                            "frais" => 0.0,
-                            "amende" => 0.0,
-                            "avs" => 0.0,
-                            "total" => 0.0,
-                            "soldeTotal" => 0.0,
-                            "indemniteTotal" => 0.0,
-                            "avs_total" => 0.0
+                            "solde_a_percevoir" => 0.0,
+                            "indemnite_a_percevoir" => 0.0,
+                            "frais_forfaitaire_a_percevoir" => 0.0,
+                            "frais_effectif_a_percevoir" => 0.0,
+                            "avs_ac_a_cotiser" => 0.0,
+                            "amende_a_deduire" => 0.0,
+                            "solde_percue" => 0.0,
+                            "indemnite_percue" => 0.0,
+                            "avs_ac_cotise" => 0.0
                         );
                     }
-                    $totaux[$p->sapeur_id]['soldeTotal'] += $p->solde;
-                    $totaux[$p->sapeur_id]['indemniteTotal'] += $p->indemnite;
-                    $totaux[$p->sapeur_id]['avs_total'] += $p->avs;
+                    $totaux[$p->sapeur_id]['solde_percue'] += $p->solde;
+                    $totaux[$p->sapeur_id]['indemnite_percue'] += $p->indemnite;
+                    $totaux[$p->sapeur_id]['avs_ac_cotise'] += $p->avs;
                 }
             }
 
-            // TODO: fetch sapeurs déduction choix
+            // Calcul du taux d'imposition
+            $tauxParitaireAvsAc = ($avsParam->taux_ac + $avsParam->taux_avs) / 2.0;
+
+            // Calcul des déducations AVS/AC sur la part imposable
             foreach ($totaux as $key => $total) {
-                $solde_imposable = max($total['solde'] + $total['soldeTotal'] - $avsParam->franchise_imposition, 0.0);
-                $total_imposable = $solde_imposable + $total['indemnite'] + $total['indemniteTotal'];
+                $solde_imposable = max($total['solde_a_percevoir'] + $total['solde_percue'] - $avsParam->franchise_imposition, 0.0);
+                $total_imposable = $solde_imposable + $total['indemnite_a_percevoir'] + $total['indemnite_percue'];
 
                 // TODO: ou si sapeur en fait la demande
                 if ($total_imposable >= $avsParam->franchise_avs) {
-                    $totaux[$key]['avs'] = ($total_imposable * $tauxParitaire) - $total['avs_total'];
-                    $decompte->avs_total += ($total_imposable * ($avsParam->taux_avs / 2.0)) - (($total['avs_total'] / $tauxParitaire) * ($avsParam->taux_avs / 2.0));
-                    $decompte->ac_total += ($total_imposable * ($avsParam->taux_ac / 2.0)) - (($total['avs_total'] / $tauxParitaire) * ($avsParam->taux_ac / 2.0));
+                    $totaux[$key]['avs_ac_a_cotiser'] = ($total_imposable * $tauxParitaireAvsAc) - $total['avs_ac_cotise'];
+                    $decompte->avs_total += ($total_imposable * ($avsParam->taux_avs / 2.0)) - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_avs / 2.0));
+                    $decompte->ac_total += ($total_imposable * ($avsParam->taux_ac / 2.0)) - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_ac / 2.0));
                 }
             }
             $decompte->save();
         }
 
-        // total à payer
+        // Calcul du total à payer pour chaque sapeur
         foreach ($totaux as $key => $total) {
-            $totaux[$key]['total'] = $total['solde'] + $total['indemnite'] + $total['frais'] - $total['avs'];
+            $totaux[$key]['total_a_percevoir'] =
+                $total['solde_a_percevoir'] + $total['indemnite_a_percevoir'] + $total['frais_forfaitaire_a_percevoir'] + $total['frais_effectif_a_percevoir'] - $total['avs_ac_a_cotiser'];
         }
 
         $paiements = array();
-        // création paiements
+        $ecritureAvsAc = array();
+
+        // Création paiements
         foreach ($totaux as $key => $total) {
             $paiements[] = [
                 'decompte_id' => $decompte->id,
-                'solde' => $total['solde'],
-                'indemnite' => $total['indemnite'],
-                'frais' => $total['frais'],
-                'amende' => $total['amende'],
-                'avs' => $total['avs'],
+                'solde' => $total['solde_a_percevoir'],
+                'indemnite' => $total['indemnite_a_percevoir'],
+                'frais_forfaitaire' => $total['frais_forfaitaire_a_percevoir'],
+                'frais_effectif' => $total['frais_effectif_a_percevoir'],
+                'avs_ac' => $total['avs_ac_a_cotiser'],
+                'amende' => $total['amende_a_deduire'],
                 'total' => $total['total'],
                 'sapeur_id' => $key
             ];
+
+            // Génération écriture AVS/AC
+            if ($deduction && $total['avs_ac_a_cotiser'] > 0) {
+                $ecritureAvsAc[] = [
+                    'tarif' => $total['avs_ac_a_cotiser'],
+                    'quantite' => 1,
+                    'total' => $total['avs_ac_a_cotiser'],
+
+                    'designation' => $designation,
+                    'type_unite_id' => ImputationBusiness::UNITE_FORFAIT,
+                    'exercice_comptable_id' => $exerciceComptableId,
+                    'ecriture_categorie_id' => $avsParam->ecriture_categorie_id,
+                    'date' => $date,
+                    'heure' => "00:00:00",
+
+                    'decompte_id' => $decompte->id,
+                    'compte_id' => $avsParam->compte_id,
+                    'sapeur_id' => $key,
+
+                    'module' => ImputationBusiness::ECRITURE_MODULE_AVS,
+                    'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_CHARGE_AVS_AC,
+                ];
+            }
         }
-        if ($deduction) {
-            Ecriture::insert([
-                'solde' => 0,
-                'indemnite' => 0,
-                'frais' => 0,
-                'avs' => true,
-                'type_unite_id' => null,
-                'designation' => $designation,
-                'total' => $decompte->avs_total + $decompte->ac_total,
-                'tarif' => 0,
-                'quantite' => 1,
-                'solde_min' => null,
-                'solde_min_pour' => null,
-                'sapeur_id' => null,
-                'compte_id' => $avsParam->compte_id,
-                'exercice_comptable_id' => $exerciceComptableId,
-                'ecriture_categorie_id' => $avsParam->ecriture_categorie_id,
-                'intervention_id' => null,
-                'date' => $date,
-                'heure' => "00:00:00",
-                'decompte_id' => $decompte->id,
-            ]);
-        }
+        Ecriture::insert($ecritureAvsAc);
         Paiement::insert($paiements);
 
         return $decompte;
@@ -200,6 +222,7 @@ class PaiementBusiness
      */
     public function iso20022PourDecompte($decompteId, $nom, $bic, $iban)
     {
+        // FIXME: use new fields name
         $paiements = Decompte::find($decompteId)->paiements()->get();
         $paiement = new PaymentInformation(
             "payment-000",
@@ -240,6 +263,7 @@ class PaiementBusiness
      */
     public function iso20022PourPaiement($paiementId, $nom, $bic, $iban)
     {
+        // FIXME: use new fields name
         $paiement = new PaymentInformation(
             "payment-000",
             $nom,
@@ -276,6 +300,7 @@ class PaiementBusiness
 
     public function certificatSalaire($exerciceComptableId, $affichageFrais = false)
     {
+        // FIXME: use new fields name
         //calcul des totaux
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
         $totaux = [];
@@ -325,6 +350,7 @@ class PaiementBusiness
      */
     public function certificatSalaireSapeur($exerciceComptableId, $sapeurId, $affichageFrais = false)
     {
+        // FIXME: use new fields name
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
 
         //Calcul des totaux
@@ -359,6 +385,7 @@ class PaiementBusiness
      */
     private function creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, $enregistrement)
     {
+        // FIXME: use new fields name
         $localite = $sapeur->localite;
         $civilite = $sapeur->civilite;
 

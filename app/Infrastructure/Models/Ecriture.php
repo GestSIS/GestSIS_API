@@ -12,12 +12,10 @@ class Ecriture extends Model
         'tarif',
         'type_unite_id',
         'quantite',
-        'solde_min',
-        'solde_min_pour',
+        'tarif_min',
+        'tarif_min_pour',
         'taux',
-        'solde',
-        'indemnite',
-        'frais',
+        'taux_description',
 
         'date',
         'heure',
@@ -30,15 +28,17 @@ class Ecriture extends Model
         'decompte_id',
         'ecriture_categorie_id',
 
-        // Booléen
-        'amende',
-        'avs',
-        'frais_annuel',
-        'indemnite_annuel',
-        'divers',
-
         'type',
-        // Types effectifs:
+        // Types pour imposition
+        // 0. Autre
+        // 1. Solde
+        // 2. Indemnité
+        // 3. Frais forfaitaire
+        // 4. Frais effectif
+        // 5. Charges AVS/AC
+
+        'module',
+        // Module effectifs:
         // 0. Divers
         // 1. Exercice
         // 2. Intervention
@@ -50,9 +50,9 @@ class Ecriture extends Model
         // 8. Cours
         // 9. Remboursement à l'employeur ?
 
-        // TODO: A ajouter
-        // 'cours',
-        // 'heure'
+        // TODO: Modules à implémenter
+        // cours
+        // décompte d'heure
     ];
 
     protected $casts = [

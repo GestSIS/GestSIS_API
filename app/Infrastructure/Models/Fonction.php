@@ -8,6 +8,6 @@ class Fonction extends Model
 {
     protected $fillable = ['nom', 'abreviation', 'tri', 'cumulable'];
     protected $casts = [
-        'tri' => 'integer', 'cumulable' => 'boolean'
+        'id' => 'integer', 'tri' => 'integer', 'cumulable' => 'boolean'
     ];
 }

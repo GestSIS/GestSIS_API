@@ -4,14 +4,12 @@ namespace App\Domaine\Business;
 
 use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
-use App\Domaine\SPI\FraisTypeRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
 use App\Domaine\SPI\InterventionRepository;
 use App\Domaine\SPI\SapeurRepository;
 use App\Domaine\Exceptions\ArrayException;
 use Carbon\Carbon;
 use App\Infrastructure\Models\Amende;
-use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceComptable;
@@ -24,7 +22,6 @@ class ImputationBusiness
 {
     protected $ecritureRepo;
     protected $indemniteRepo;
-    protected $fraisRepo;
     protected $exerciceRepo;
     protected $interventionRepo;
 
@@ -33,31 +30,42 @@ class ImputationBusiness
         SapeurRepository $sapeur,
         ExerciceRepository $exercice,
         InterventionRepository $intervention,
-        IndemniteTypeRepository $indemnite,
-        FraisTypeRepository $frais
+        IndemniteTypeRepository $indemnite
     ) {
         $this->ecritureRepo = $ecriture;
         $this->exerciceRepo = $exercice;
         $this->sapeurRepo = $sapeur;
         $this->interventionRepo = $intervention;
         $this->indemniteRepo = $indemnite;
-        $this->fraisRepo = $frais;
     }
 
-    protected const UNITE_CHF_PAR_PIECE = 1;
-    protected const UNITE_CHF_PAR_HEURE = 2;
-    protected const UNITE_CHF_FORFAIT = 6;
+    // Unités de GestSIS
+    public const UNITE_PIECE = 1;
+    public const UNITE_HEURE = 2;
+    public const UNITE_AN = 3;
+    public const UNITE_KM = 4;
+    public const UNITE_JOUR = 5;
+    public const UNITE_FORFAIT = 6;
+    public const UNITE_MOIS = 7;
 
-    public const ECRITURE_TYPE_DIVERS = 0;
-    public const ECRITURE_TYPE_EXERCICE = 1;
-    public const ECRITURE_TYPE_INTERVENTION = 2;
-    public const ECRITURE_TYPE_FRAIS_ANNUEL = 3;
-    public const ECRITURE_TYPE_INDEMNITE_ANNUEL = 4;
-    public const ECRITURE_TYPE_AVS = 5;
-    public const ECRITURE_TYPE_AMENDE = 6;
-    public const ECRITURE_TYPE_DECOMPTE_HEURE = 7;
-    public const ECRITURE_TYPE_COURS = 8;
-    public const ECRITURE_TYPE_REMBOURSEMENT = 9;
+    // Module ayant généré l'écriture
+    public const ECRITURE_MODULE_DIVERS = 0;
+    public const ECRITURE_MODULE_EXERCICE = 1;
+    public const ECRITURE_MODULE_INTERVENTION = 2;
+    public const ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL = 3;
+    public const ECRITURE_MODULE_AVS = 4;
+    public const ECRITURE_MODULE_AMENDE = 5;
+    public const ECRITURE_MODULE_DECOMPTE_HEURE = 6;
+    public const ECRITURE_MODULE_COURS = 7;
+    public const ECRITURE_MODULE_REMBOURSEMENT = 8;
+
+    // Type de catégorie d'imposition
+    public const ECRITURE_CATEGORIE_IMPOSITION_AUTRE = 0;
+    public const ECRITURE_CATEGORIE_IMPOSITION_SOLDE = 1;
+    public const ECRITURE_CATEGORIE_IMPOSITION_INDEMNITE = 2;
+    public const ECRITURE_CATEGORIE_IMPOSITION_FRAIS_FORFAITAIRE = 3;
+    public const ECRITURE_CATEGORIE_IMPOSITION_FRAIS_EFFECTIF = 4;
+    public const ECRITURE_CATEGORIE_IMPOSITION_CHARGE_AVS_AC = 5;
 
     public function creerExerciceComptable($data)
     {
@@ -73,32 +81,15 @@ class ImputationBusiness
         //TODO: Controller exercice comptable non clôturé
 
         // Switch between type
-        switch ($data['type']) {
-            case ImputationBusiness::ECRITURE_TYPE_DIVERS:
-
-                $compte = Compte::find($data['compte_id']);
-
-                // Si compte de passif alors pas de type pour l'écriture
-                if ($compte->actif) {
-                    $data['indemnite'] = 0;
-                    $data['solde'] = 0;
-                    $data['frais'] = 0;
-                }
-
-                if ($compte->actif && $data['indemnite'] + $data['solde'] + $data['frais'] != $data['total']) {
-                    throw new ArrayException(['message' => 'Total ne correspond pas à la somme des solde, indemnité et frais']);
-                }
+        switch ($data['module']) {
+            case self::ECRITURE_MODULE_DIVERS:
 
                 $ecriture = new Ecriture([
-                    'indemnite' => $data['indemnite'],
-                    'solde' => $data['solde'],
-                    'frais' => $data['frais'],
-
+                    'tarif' => $data['tarif'],
+                    'quantite' => $data['quantite'],
                     'total' => $data['total'],
 
                     'designation' => $data['designation'],
-                    'tarif' => $data['tarif'],
-                    'quantite' => $data['quantite'],
 
                     'sapeur_id' => $data['sapeur_id'],
                     'compte_id' => $data['compte_id'],
@@ -109,7 +100,8 @@ class ImputationBusiness
                     'decompte_id' => null,
                     'date' => $data['date'], // FIXME: check if null
 
-                    'type' => ImputationBusiness::ECRITURE_TYPE_DIVERS,
+                    'module' => self::ECRITURE_MODULE_DIVERS,
+                    'type' => $data['type'],
                 ]);
 
                 $ecriture->save();
@@ -118,33 +110,6 @@ class ImputationBusiness
 
             default:
                 throw new ArrayException(['message' => 'Type d\'écriture non supporté pour le moment']);
-                $ecriture = [
-                    'indemnite' => $data['indemnite'],
-                    'solde' => $data['solde'],
-                    'frais' => $data['frais'],
-
-                    'total' => $data['total'],
-
-                    'designation' => $data['designation'],
-                    'tarif' => $data['tarif'],
-                    'quantite' => $data['quantite'],
-
-                    'sapeur_id' => $data['sapeur_id'],
-                    'exercice_id' => $data['exercice_id'], //FIXME:
-                    'compte_id' => $data['compte_id'],
-                    'exercice_comptable_id' => $data['exercice_comptable_id'],
-                    'ecriture_categorie_id' => $data['ecriture_categorie_id'],
-
-                    'decompte_id' => null,
-                    'heure' => $data['heure'], // FIXME:
-                    'date' => $data['date'],
-
-                    'type' => ImputationBusiness::ECRITURE_TYPE_DIVERS,
-
-                    // TODO: à supprimer
-                    'amende' => True,
-                ];
-                return $ecriture;
         }
     }
 
@@ -152,37 +117,20 @@ class ImputationBusiness
     {
         $ecriture = Ecriture::find($ecritureId);
         // Contrôle que l'écriture n'est pas liée à un décompte
-        if ($ecriture->decoompte_id) {
+        if ($ecriture->decompte_id) {
             throw new ArrayException(['message' => 'Ecriture déjà payée dans un décompte !']);
         }
 
         // Switch between type
-        switch ($data['type']) {
-            case ImputationBusiness::ECRITURE_TYPE_DIVERS:
-
-                $compte = Compte::find($data['compte_id']);
-
-                // Si compte de passif alors pas de type pour l'écriture
-                if ($compte->actif) {
-                    $data['indemnite'] = 0;
-                    $data['solde'] = 0;
-                    $data['frais'] = 0;
-                }
-
-                if (!$compte->actif && $data['indemnite'] + $data['solde'] + $data['frais'] != $data['total']) {
-                    throw new ArrayException(['message' => 'Total ne correspond pas à la somme des solde, indemnité et frais']);
-                }
+        switch ($data['module']) {
+            case self::ECRITURE_MODULE_DIVERS:
 
                 $ecriture->update([
-                    'indemnite' => $data['indemnite'],
-                    'solde' => $data['solde'],
-                    'frais' => $data['frais'],
-
+                    'tarif' => $data['tarif'],
+                    'quantite' => $data['quantite'],
                     'total' => $data['total'],
 
                     'designation' => $data['designation'],
-                    'tarif' => $data['tarif'],
-                    'quantite' => $data['quantite'],
 
                     'sapeur_id' => $data['sapeur_id'],
                     'compte_id' => $data['compte_id'],
@@ -192,14 +140,14 @@ class ImputationBusiness
 
                     'decompte_id' => null,
                     'date' => $data['date'], // FIXME: check if null
+                    'type' => $data['type'],
                 ]);
 
                 $ecriture->save();
                 return $ecriture;
-                // break;
 
             default:
-                // TODO: Implement
+                throw new ArrayException(['message' => 'Type d\'écriture non supporté pour le moment']);
         }
     }
 
@@ -207,7 +155,7 @@ class ImputationBusiness
     {
         $ecriture = Ecriture::find($ecritureId);
         // Contrôle que l'écriture n'est pas liée à un décompte
-        if ($ecriture->decoompte_id) {
+        if ($ecriture->decompte_id) {
             throw new ArrayException(['message' => 'Ecriture déjà payée dans un décompte !']);
         }
 
@@ -241,7 +189,7 @@ class ImputationBusiness
         Ecriture::where([
             ['exercice_comptable_id', '=', $exerciceComptableId],
             ['sapeur_id', '=', $sapeurId],
-            ['amende', '=', true]
+            ['type', '=', self::ECRITURE_MODULE_AMENDE]
         ])->delete();
 
         // Pour l'instant juste générer de nouvelles amendes
@@ -253,15 +201,11 @@ class ImputationBusiness
 
             // Creation d'une écriture pour chaque exercice amendé
             $ecriture = array(
-                'indemnite' => 0,
-                'solde' => 0,
-                'frais' => 0,
-
+                'tarif' => $amende->montant,
+                'quantite' => 1,
                 'total' => $amende->montant,
 
                 'designation' => $exercice->designation,
-                'tarif' => 0,
-                'quantite' => 0,
 
                 'sapeur_id' => $exercice->sapeur_id,
                 'exercice_id' => $exercice->exercice_id,
@@ -273,10 +217,8 @@ class ImputationBusiness
                 'heure' => null,
                 'date' => $exercice->date,
 
-                'type' => ImputationBusiness::ECRITURE_TYPE_AMENDE,
-
-                // TODO: à supprimer
-                'amende' => True,
+                'module' => self::ECRITURE_MODULE_AMENDE,
+                'type' => self::ECRITURE_CATEGORIE_IMPOSITION_AUTRE,
             );
 
             $ecritures[] = $ecriture;
@@ -315,7 +257,7 @@ class ImputationBusiness
         // Suppression de amendes existantes
         Ecriture::where([
             ['exercice_comptable_id', '=', $exerciceComptableId],
-            ['amende', '=', true]
+            ['type', '=', self::ECRITURE_MODULE_AMENDE]
         ])->delete();
 
         // Pour l'instant juste générer de nouvelles amendes
@@ -333,20 +275,12 @@ class ImputationBusiness
 
             // Creation d'une écriture pour chaque exercice amendé
             $ecriture = array(
-                'solde' => 0,
-                'indemnite' => 0,
-                'frais' => 0,
-
+                'tarif' => $amende->montant,
+                'quantite' => 1,
                 'total' => $amende->montant,
 
-                'solde_min' => null,
-                'solde_min_pour' => null,
-                'taux' => null,
-                'taux_description' => null,
-                'type_unite_id' => null,
+                'type_unite_id' => self::UNITE_PIECE,
                 'designation' => $exercice->designation,
-                'tarif' => 0,
-                'quantite' => 0,
                 'sapeur_id' => $exercice->sapeur_id,
                 'exercice_id' => $exercice->exercice_id,
                 'intervention_id' => null,
@@ -354,15 +288,12 @@ class ImputationBusiness
                 'exercice_comptable_id' => $exerciceComptableId,
                 'ecriture_categorie_id' => $amende->ecriture_categorie_id,
 
-                // TODO: à supprimer
-                'amende' => True,
-                'indemnite_annuel' => False,
-                'frais_annuel' => False,
-
                 'decompte_id' => null,
                 'heure' => null,
                 'date' => $exercice->date,
-                'type' => ImputationBusiness::ECRITURE_TYPE_AMENDE,
+
+                'module' => self::ECRITURE_MODULE_AMENDE,
+                'type' => self::ECRITURE_CATEGORIE_IMPOSITION_AUTRE,
             );
 
             array_push($newEcritures, $ecriture);
@@ -391,15 +322,11 @@ class ImputationBusiness
         // - Ne prend actuellement en compte que la fonction actuelle et non pas la date de l'entrée en vigeure de cette fonction
         // - Prend uniquement les sapeurs actifs
 
-        $indemnitesType = $this->indemniteRepo->listeIndemniteAnnuelType();
-        $fraisType = $this->fraisRepo->listeFraisAnnuelType();
+        $fraisIndemnitesTypes = $this->indemniteRepo->listeFraisIndemniteAnnuelType();
 
         // FIXME: regénérer que pour les sapeurs ne possédants pas d'indemnités ???
         $ecritures = $this->ecritureRepo->listeEcrituresAnnuelsForExerciceComptableById($exerciceComptableId);
-        Ecriture::where(function ($query) {
-            $query->where('frais_annuel', true);
-            $query->orWhere('indemnite_annuel', true);
-        })->whereNull('decompte_id')->delete();
+        Ecriture::where('module', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)->whereNull('decompte_id')->delete();
         // TODO: Que faire avec les indemnités déjà payées ?
         // Ne pas générer les indemnités pour ces sapeurs ?
 
@@ -436,43 +363,21 @@ class ImputationBusiness
         }
 
         // Foreach indemnité annuelle
-        foreach ($indemnitesType as $type) {
+        foreach ($fraisIndemnitesTypes as $type) {
+
             // Génère le mapping -> ["fonction_id" => 'indemnite'];
             $mapping = array_reduce(array_map(
-                fn ($indemnite) => [$indemnite->fonction_id => $indemnite],
-                $type->indemniteAnnuels
+                fn ($indemnite) => [$indemnite['fonction_id'] => $indemnite],
+                $type['frais_indemnite_annuels']
             ), fn ($a, $b) => $a + $b, []);
 
             foreach ($sapeursGrouped as $sapeurId => $fonctions) {
                 foreach ($fonctions as $fonctionId) {
                     if (array_key_exists($fonctionId, $mapping)) {
                         $indemnite = $mapping[$fonctionId];
-                        $this->imputerIndemniteSapeur($type, $indemnite, $sapeurId, $exerciceComptableId);
+                        $this->imputerFraisIndemniteSapeur($type, $indemnite, $sapeurId, $exerciceComptableId);
 
-                        if (!$type->cumulable) {
-                            // Non-cumulable, on passe au sapeur suivant
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        // Foreach frais annuel
-        foreach ($fraisType as $type) {
-            // Génére le mapping -> ["fonction_id" => 'indemnite'];
-            $mapping = array_reduce(array_map(
-                fn ($frais) => [$frais->fonction_id => $frais],
-                $type->fraisAnnuels
-            ), fn ($a, $b) => $a + $b, []);
-
-            foreach ($sapeursGrouped as $sapeurId => $fonctions) {
-                foreach ($fonctions as $fonctionId) {
-                    if (array_key_exists($fonctionId, $mapping)) {
-                        $frais = $mapping[$fonctionId];
-                        $this->imputerFraisSapeur($type, $frais, $sapeurId, $exerciceComptableId);
-
-                        if (!$type->cumulable) {
+                        if (!$type['cumulable']) {
                             // Non-cumulable, on passe au sapeur suivant
                             break;
                         }
@@ -482,57 +387,22 @@ class ImputationBusiness
         }
     }
 
-    private function imputerIndemniteSapeur($indemniteType, $indemnite, $sapeurId, $exerciceComptableId)
+    private function imputerFraisIndemniteSapeur($fraisIndemniteType, $indemnite, $sapeurId, $exerciceComptableId)
     {
-        $total = $indemnite->montant * $indemnite->quantite;
         $ecriture = array(
-            'solde' => 0,
-            'indemnite' => $total,
-            'frais' => 0,
+            'tarif' => $indemnite['montant'],
+            'quantite' => $indemnite['quantite'],
+            'total' => $indemnite['montant'] * $indemnite['quantite'],
 
-            'total' => $total,
-
-            'type_unite_id' => $indemnite->type_unite_id,
-            'designation' => $indemniteType->designation,
-            'tarif' => $indemnite->montant,
-            'quantite' => $indemnite->quantite,
+            'type_unite_id' => $indemnite['type_unite_id'],
+            'designation' => $fraisIndemniteType['designation'],
             'sapeur_id' => $sapeurId,
-            'compte_id' => $indemniteType->compte_id,
+            'compte_id' => $fraisIndemniteType['compte_id'],
             'exercice_comptable_id' => $exerciceComptableId,
-            'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+            'ecriture_categorie_id' => $fraisIndemniteType['ecriture_categorie_id'],
 
-            'type' => ImputationBusiness::ECRITURE_TYPE_INDEMNITE_ANNUEL,
-
-            // TODO: à supprimer
-            'indemnite_annuel' => true,
-        );
-
-        $this->ecritureRepo->persisteNewEcriture($ecriture);
-    }
-
-    private function imputerFraisSapeur($fraisType, $frais, $sapeurId, $exerciceComptableId)
-    {
-        $total = $frais->montant * $frais->quantite;
-        $ecriture = array(
-            'solde' => 0,
-            'indemnite' => 0,
-            'frais' => $total,
-
-            'total' => $total,
-
-            'type_unite_id' => $frais->type_unite_id,
-            'designation' => $fraisType->designation,
-            'tarif' => $frais->montant,
-            'quantite' => $frais->quantite,
-            'sapeur_id' => $sapeurId,
-            'compte_id' => $fraisType->compte_id,
-            'exercice_comptable_id' => $exerciceComptableId,
-            'ecriture_categorie_id' => $fraisType->ecriture_categorie_id,
-
-            'type' => ImputationBusiness::ECRITURE_TYPE_FRAIS_ANNUEL,
-
-            // TODO: à supprimer
-            'frais_annuel' => true,
+            'module' => self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL,
+            'type' => $fraisIndemniteType['type'],
         );
 
         $this->ecritureRepo->persisteNewEcriture($ecriture);
@@ -597,7 +467,7 @@ class ImputationBusiness
         if ($indemniteType->taux_weekend > 0 || $indemniteType->taux_nuit > 0) {
             $this->imputerInterventionTaux($interventionId, $intervention, $indemniteType, $data);
         } else {
-            $this->imputerInterventionSoldeMin($interventionId, $intervention, $indemniteType, $data);
+            $this->imputerInterventionTarifMin($interventionId, $intervention, $indemniteType, $data);
         }
 
         // Update statut
@@ -606,10 +476,8 @@ class ImputationBusiness
         ])->statut;
     }
 
-    private function imputerInterventionSoldeMin($interventionId, $intervention, $indemniteType, $data)
+    private function imputerInterventionTarifMin($interventionId, $intervention, $indemniteType, $data)
     {
-        $unite = $indemniteType->type_unite_id;
-
         // Grouper les présences par sapeurs
         $sapeurs = [];
         foreach ($intervention->presences as $presence) {
@@ -621,15 +489,15 @@ class ImputationBusiness
 
         $phases = collect($intervention->phases)->sortByDesc('debut');
 
-        $soldeMinDuree = array();
-        $nonSoldeMinDuree = array();
+        $dureeTarifMin = array();
+        $dureeNonTarifMin = array();
 
         $indemnite_phase_id = $indemniteType->phase_id;
 
         // Sépare les période de chaque sapeur entre les différentes phases
         foreach ($sapeurs as $sapeurId => $presences) {
-            $soldeMinDureeSapeur = 0;
-            $nonSoldeMinDureeSapeur = 0;
+            $dureeTarifMinSapeur = 0;
+            $dureeNonTarifMinSapeur = 0;
             foreach ($presences as $periode) {
                 $debut = Carbon::parse($periode->debut);
                 $fin = Carbon::parse($periode->fin);
@@ -650,50 +518,48 @@ class ImputationBusiness
 
                     // Totalité des périodes restantes pour cette phase
                     if ($indemnite_phase_id == NULL || $indemnite_phase_id == 0 || $phase->phase_type_id == $indemnite_phase_id) {
-                        $soldeMinDureeSapeur += $duree;
+                        $dureeTarifMinSapeur += $duree;
                     } else {
-                        $nonSoldeMinDureeSapeur += $duree;
+                        $dureeNonTarifMinSapeur += $duree;
                     }
                     break;
                 }
             }
-            $soldeMinDuree[$sapeurId] = ($soldeMinDuree[$sapeurId] ?? 0) + $soldeMinDureeSapeur;
-            $nonSoldeMinDuree[$sapeurId] = ($nonSoldeMinDuree[$sapeurId] ?? 0) + $nonSoldeMinDureeSapeur;
+            $dureeTarifMin[$sapeurId] = ($dureeTarifMin[$sapeurId] ?? 0) + $dureeTarifMinSapeur;
+            $dureeNonTarifMin[$sapeurId] = ($dureeNonTarifMin[$sapeurId] ?? 0) + $dureeNonTarifMinSapeur;
         }
 
-        $solde = $indemniteType->solde;
-        $soldeMin = $indemniteType->solde_min ?? $indemniteType->solde;
-        $soldeMinPour = $indemniteType->solde_min ?? 1;
+        $tarif = $indemniteType->tarif;
+        $tarifMin = $indemniteType->tarif_min ?? $indemniteType->tarif;
+        $tarifMinPour = $indemniteType->tarif_min ?? 1;
         $designation = "{$intervention->localite->designation} ({$intervention->type->designation}) $intervention->lieu";
 
         $ecritures = array();
-        foreach ($soldeMinDuree as $sapeurId => $duree) {
-            $nonDuree = $nonSoldeMinDuree[$sapeurId];
+        foreach ($dureeTarifMin as $sapeurId => $dureeTarifMinSapeur) {
+            // Duree sans tarif min
+            $dureeNonTarifMinSapeur = $dureeNonTarifMin[$sapeurId];
 
             $total = 0;
 
-            if ($duree > $soldeMinPour) {
-                $total += $soldeMin;
-                $duree -= $soldeMinPour;
+            //TODO: WARNING!!! Seems strange
+            if ($dureeTarifMinSapeur > $tarifMinPour) {
+                $total += $tarifMin;
+                $dureeTarifMinSapeur -= $tarifMinPour;
             }
 
-            $total += $indemniteType->solde * $duree;
-            $total += $indemniteType->solde * $nonDuree;
+            $total += $indemniteType->tarif * $dureeTarifMinSapeur;
+            $total += $indemniteType->tarif * $dureeNonTarifMinSapeur;
 
-            if ($duree > 0) {
+            if ($dureeTarifMinSapeur > 0) {
                 $ecritures[] = array(
-                    'solde' => $total,
-                    'indemnite' => 0,
-                    'frais' => 0,
-
+                    'tarif' => $tarif,
+                    'quantite' => $dureeTarifMinSapeur + $dureeNonTarifMinSapeur,
                     'total' => $total,
+                    'tarif_min' => null,
+                    'tarif_min_pour' => null,
 
                     'type_unite_id' => $indemniteType->type_unite_id,
                     'designation' => $designation,
-                    'tarif' => $solde,
-                    'quantite' => $duree + $nonDuree,
-                    'solde_min' => null,
-                    'solde_min_pour' => null,
                     'sapeur_id' => $sapeurId,
                     'compte_id' => $indemniteType->compte_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
@@ -702,23 +568,20 @@ class ImputationBusiness
                     'date' => $intervention->date_debut,
                     'heure' => $intervention->heure_debut,
 
-                    'type' => ImputationBusiness::ECRITURE_TYPE_INTERVENTION
+                    'module' => self::ECRITURE_MODULE_INTERVENTION,
+                    'type' => $indemniteType->type,
                 );
             }
-            if ($nonDuree) {
+            if ($dureeNonTarifMinSapeur) {
                 $ecritures[] = array(
-                    'solde' => $total,
-                    'indemnite' => 0,
-                    'frais' => 0,
-
+                    'tarif' => $tarif,
+                    'quantite' => $dureeNonTarifMinSapeur,
+                    'tarif_min' => null,
+                    'tarif_min_pour' => null,
                     'total' => $total,
 
                     'type_unite_id' => $indemniteType->type_unite_id,
                     'designation' => $designation,
-                    'tarif' => $solde,
-                    'quantite' => $nonDuree,
-                    'solde_min' => null,
-                    'solde_min_pour' => null,
                     'sapeur_id' => $sapeurId,
                     'compte_id' => $indemniteType->compte_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
@@ -727,7 +590,8 @@ class ImputationBusiness
                     'date' => $intervention->date_debut,
                     'heure' => $intervention->heure_debut,
 
-                    'type' => ImputationBusiness::ECRITURE_TYPE_INTERVENTION
+                    'module' => self::ECRITURE_MODULE_INTERVENTION,
+                    'type' => $indemniteType->type,
                 );
             }
         }
@@ -779,7 +643,7 @@ class ImputationBusiness
             }
 
             // Récupération des tarifs
-            $soldeTarif = $indemniteType->solde;
+            $tarif = $indemniteType->solde;
             $tauxWeekend = $indemniteType->taux_weekend;
             $tauxNuit = $indemniteType->taux_nuit;
 
@@ -899,33 +763,24 @@ class ImputationBusiness
                 }
             }
 
-            // Calcul des tarifs
-            $soldeStandard = $soldeTarif * $dureeTarifStandard;
-            $soldeNuit = $soldeTarif * $dureeTarifNuit;
-            $soldeWeekend = $soldeTarif * $dureeTarifWeekend;
-
-            // Application des taux
-            $soldeWeekend *= $tauxWeekend;
-            $soldeNuit *= $tauxNuit;
+            // Calcul des totaux
+            $totalTarifStandard = $tarif * $dureeTarifStandard;
+            $totalTarifNuit = $tarif * $dureeTarifNuit * $tauxNuit;
+            $totalTarifWeekend = $tarif * $dureeTarifWeekend * $tauxWeekend;
 
             // Génération des écritures
-            if ($soldeStandard > 0) {
+            if ($totalTarifStandard > 0) {
                 $ecritures[] = array(
-                    'solde' => $soldeStandard,
-                    'indemnite' => 0,
-                    'frais' => 0,
-
-                    'total' => $soldeStandard,
+                    'tarif' => $tarif,
+                    'quantite' => $dureeTarifStandard,
+                    'taux' => null,
+                    'taux_description' => null,
+                    'total' => $totalTarifStandard,
 
                     'designation' => $designation,
-                    'tarif' => $soldeTarif,
                     'date' => $intervention->date_debut,
                     'heure' => $intervention->heure_debut,
                     'type_unite_id' => $indemniteType->type_unite_id,
-                    'quantite' => $dureeTarifStandard,
-
-                    'taux' => null,
-                    'taux_description' => null,
 
                     'sapeur_id' => $sapeur_id,
                     'compte_id' => $indemniteType->compte_id,
@@ -933,27 +788,23 @@ class ImputationBusiness
                     'intervention_id' => $interventionId,
                     'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
 
-                    'type' => ImputationBusiness::ECRITURE_TYPE_INTERVENTION
+                    'module' => self::ECRITURE_MODULE_INTERVENTION,
+                    'type' => $indemniteType->type,
                 );
             }
 
-            if ($soldeNuit > 0) {
+            if ($totalTarifNuit > 0) {
                 $ecritures[] = [
-                    'solde' => $soldeNuit,
-                    'indemnite' => 0,
-                    'frais' => 0,
-
-                    'total' => $soldeNuit,
+                    'tarif' => $tarif,
+                    'quantite' => $dureeTarifNuit,
+                    'taux' => $tauxNuit,
+                    'taux_description' => 'Nuit',
+                    'total' => $totalTarifNuit,
 
                     'designation' => $designation . " - Nuit",
-                    'tarif' => $soldeTarif,
                     'date' => $intervention->date_debut,
                     'heure' => $intervention->heure_debut,
                     'type_unite_id' => $indemniteType->type_unite_id,
-                    'quantite' => $dureeTarifNuit,
-
-                    'taux' => $tauxNuit,
-                    'taux_description' => 'Nuit',
 
                     'sapeur_id' => $sapeur_id,
                     'compte_id' => $indemniteType->compte_id,
@@ -961,27 +812,23 @@ class ImputationBusiness
                     'intervention_id' => $interventionId,
                     'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
 
-                    'type' => ImputationBusiness::ECRITURE_TYPE_INTERVENTION
+                    'module' => self::ECRITURE_MODULE_INTERVENTION,
+                    'type' => $indemniteType->type,
                 ];
             }
 
-            if ($soldeWeekend > 0) {
+            if ($totalTarifWeekend > 0) {
                 $ecritures[] = [
-                    'solde' => $soldeWeekend,
-                    'indemnite' => 0,
-                    'frais' => 0,
-
-                    'total' => $soldeWeekend,
+                    'tarif' => $tarif,
+                    'quantite' => $dureeTarifWeekend,
+                    'taux' => $tauxWeekend,
+                    'taux_description' => 'Weekend',
+                    'total' => $totalTarifWeekend,
 
                     'designation' => $designation . " - Weekend",
-                    'tarif' => $soldeTarif,
                     'date' => $intervention->date_debut,
                     'heure' => $intervention->heure_debut,
                     'type_unite_id' => $indemniteType->type_unite_id,
-                    'quantite' => $dureeTarifWeekend,
-
-                    'taux' => $tauxWeekend,
-                    'taux_description' => 'Weekend',
 
                     'sapeur_id' => $sapeur_id,
                     'compte_id' => $indemniteType->compte_id,
@@ -989,7 +836,8 @@ class ImputationBusiness
                     'intervention_id' => $interventionId,
                     'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
 
-                    'type' => ImputationBusiness::ECRITURE_TYPE_INTERVENTION
+                    'module' => self::ECRITURE_MODULE_INTERVENTION,
+                    'type' => $indemniteType->type,
                 ];
             }
         }
@@ -1013,12 +861,10 @@ class ImputationBusiness
             return $sap->present;
         });
 
-        if ($unite === self::UNITE_CHF_PAR_PIECE || $unite === self::UNITE_CHF_FORFAIT) {
+        if ($unite === self::UNITE_PIECE || $unite === self::UNITE_FORFAIT) {
             $this->imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation);
-        } elseif ($unite === self::UNITE_CHF_PAR_HEURE && $indemniteType->par_fonction) {
-            $this->imputerExerciceParHeureEtFonction($exercice, $sapeurs, $indemniteType, $designation);
-        } elseif ($unite === self::UNITE_CHF_PAR_HEURE) {
-            $this->imputerExerciceParHeureEtSoldeMin($exercice, $sapeurs, $indemniteType, $designation);
+        } else if ($unite === self::UNITE_HEURE) {
+            $this->imputerExerciceParHeure($exercice, $sapeurs, $indemniteType, $designation);
         } else {
             throw new ArrayException(["message" => "Unité non supportée"]);
         }
@@ -1038,29 +884,16 @@ class ImputationBusiness
             $designationSapeur = $designation . " - " . $heure->designation;
             $total = $heure->quantite * $heure->montant;
 
-            $indemnite = $solde = 0;
-            if ($heure->type == 1) {
-                // Solde
-                $solde = $total;
-            } else {
-                // Indemnité
-                $indemnite = $total;
-            }
-
-            //Par heure -> calcul de la durée
+            // Par heure -> calcul de la durée
             $ecriture = array(
-                'solde' => $solde,
-                'indemnite' => $indemnite,
-                'frais' => 0,
-
-                'total' => $solde + $indemnite,
-
-                'type_unite_id' => $heure->type_unite_id,
-                'designation' => $designationSapeur,
                 'tarif' => $heure->montant,
                 'quantite' => $heure->quantite,
-                'solde_min' => null,
-                'solde_min_pour' => null,
+                'tarif_min' => null,
+                'tarif_min_pour' => null,
+                'total' => $total,
+
+                'designation' => $designationSapeur,
+                'type_unite_id' => $heure->type_unite_id,
                 'sapeur_id' => $heure->sapeur_id,
                 'compte_id' => $heure->compte_id,
                 'exercice_comptable_id' => $exercice->exercice_comptable_id,
@@ -1069,7 +902,8 @@ class ImputationBusiness
                 'date' => $exercice->date,
                 'heure' => $exercice->heure,
 
-                'type' => ImputationBusiness::ECRITURE_TYPE_EXERCICE
+                'module' => self::ECRITURE_MODULE_EXERCICE,
+                'type' => $heure->type,
             );
 
             $this->ecritureRepo->persisteNewEcriture($ecriture);
@@ -1078,157 +912,106 @@ class ImputationBusiness
 
     private function imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation)
     {
-        // TODO: : solde_min should be null
+        // TODO: : tarif_min should be null
 
         // Générer écritures
         $ecritures = [];
         foreach ($sapeurs as $sapeur) {
+            // Utilise uniquement la fonction principale
             $id = $this->sapeurRepo->getSapeurDetailsById($sapeur->sapeur_id)->fonction_id;
 
-            $fonction_tarif = array_filter($indemniteType->fonctions, function ($f) use ($id) {
+            $fonction_tarifs = array_filter($indemniteType->fonctions, function ($f) use ($id) {
                 return $f->fonction_id === $id;
             });
 
-            $solde = 0;
-            $indemnite = 0;
-            if (count($fonction_tarif) > 0) {
-                $tarif = array_pop($fonction_tarif);
-                $solde += $tarif[0]->solde;
-                $indemnite += $tarif[0]->indemnite;
-            } else {
-                $solde += $indemniteType->solde;
-                $indemnite += $indemniteType->indemnite;
+            if (count($fonction_tarifs) == 0) {
+                $fonction_tarifs = array_filter($indemniteType->fonctions, function ($f) {
+                    return $f->fonction_id === null;
+                });
             }
 
-            // Par pièce et pas par fonction -> pas de calcul
-            $ecritures[] = [
-                'solde' => $solde,
-                'indemnite' => $indemnite,
-                'frais' => 0,
+            foreach ($fonction_tarifs as $indemnite) {
+                // Par pièce et pas par fonction -> pas de calcul
+                $ecritures[] = [
+                    'tarif' => $indemnite->tarif,
+                    'quantite' => 1,
+                    'tarif_min' => null,
+                    'tarif_min_pour' => null,
+                    'total' => $indemnite->tarif,
 
-                'total' => $solde + $indemnite,
+                    'compte_id' => $indemnite->compte_id,
 
-                'type_unite_id' => $indemniteType->type_unite_id,
-                'designation' => $designation,
-                'tarif' => $solde + $indemnite,
-                'quantite' => 1,
-                'sapeur_id' => $sapeur->sapeur_id,
-                'compte_id' => $indemniteType->compte_id,
-                'exercice_comptable_id' => $exercice->exercice_comptable_id,
-                'exercice_id' => $exercice->id,
-                'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
-                'date' => $exercice->date,
-                'heure' => $exercice->heure,
+                    'designation' => $designation,
+                    'type_unite_id' => $indemniteType->type_unite_id,
+                    'sapeur_id' => $sapeur->sapeur_id,
+                    'exercice_comptable_id' => $exercice->exercice_comptable_id,
+                    'exercice_id' => $exercice->id,
+                    'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+                    'date' => $exercice->date,
+                    'heure' => $exercice->heure,
 
-                'type' => ImputationBusiness::ECRITURE_TYPE_EXERCICE
-            ];
+                    'module' => self::ECRITURE_MODULE_EXERCICE,
+                    'type' => $indemnite->type,
+                ];
+            }
         }
         Ecriture::insert($ecritures);
     }
 
-    private function imputerExerciceParHeureEtFonction($exercice, $sapeurs, $indemniteType, $designation)
+    private function imputerExerciceParHeure($exercice, $sapeurs, $indemniteType, $designation)
     {
-        //TODO: solde_min should be null
-        //En minutes
         $duree = $exercice->duree / 60;
 
         // Générer écritures
         foreach ($sapeurs as $sapeur) {
             $id = $this->sapeurRepo->getSapeurDetailsById($sapeur->sapeur_id)->fonction_id;
 
-            $fonction_tarif = array_filter($indemniteType->fonctions, function ($f) use ($id) {
+            $fonction_tarifs = array_filter($indemniteType->fonctions, function ($f) use ($id) {
                 return $f->fonction_id === $id;
             });
 
-            $soldeTarif = 0;
-            $indemniteTarif = 0;
-            if (count($fonction_tarif) > 0) {
-                $tarif = array_pop($fonction_tarif);
-                $soldeTarif = $tarif->solde;
-                $indemniteTarif = $tarif->indemnite;
-            } else {
-                $soldeTarif = $indemniteType->solde;
-                $indemniteTarif = $indemniteType->indemnite;
+            if (count($fonction_tarifs) == 0) {
+                $fonction_tarifs = array_filter($indemniteType->fonctions, function ($f) {
+                    return $f->fonction_id === null;
+                });
             }
 
-            $solde = $soldeTarif * $duree;
-            $indemnite = $indemniteTarif * $duree;
+            foreach ($fonction_tarifs as $indemnite) {
 
-            //Par heure -> calcul de la durée
-            $ecriture = array(
-                'solde' => $solde,
-                'indemnite' => $indemnite,
-                'frais' => 0,
+                $total = 0;
+                if ($indemnite->tarif_min == null) {
+                    $total = $indemnite->tarif * $duree;
+                } else if ($duree < $indemnite->tarif_min_pour) {
+                    $total = $indemnite->tarif_min * ($duree / $indemnite->tarif_min_pour);
+                } else {
+                    $total = $indemnite->tarif_min + $indemnite->tarif * ($duree - $indemnite->tarif_min_pour);
+                }
 
-                'total' => $solde + $indemnite,
+                //Par heure -> calcul de la durée
+                $ecriture = array(
+                    'tarif' => $indemnite->tarif,
+                    'quantite' => $duree,
+                    'tarif_min' => $indemniteType->tarif_min,
+                    'tarif_min_pour' => $indemniteType->tarif_min_pour,
+                    'total' => $total,
 
-                'type_unite_id' => $indemniteType->type_unite_id,
-                'designation' => $designation,
-                'tarif' => $soldeTarif + $indemniteTarif,
-                'quantite' => $duree,
-                'solde_min' => $indemniteType->solde_min,
-                'solde_min_pour' => $indemniteType->solde_min_pour,
-                'sapeur_id' => $sapeur->sapeur_id,
-                'compte_id' => $indemniteType->compte_id,
-                'exercice_comptable_id' => $exercice->exercice_comptable_id,
-                'exercice_id' => $exercice->id,
-                'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
-                'date' => $exercice->date,
-                'heure' => $exercice->heure,
+                    'compte_id' => $indemnite->compte_id,
 
-                'type' => ImputationBusiness::ECRITURE_TYPE_EXERCICE
-            );
+                    'designation' => $designation,
+                    'type_unite_id' => $indemniteType->type_unite_id,
+                    'sapeur_id' => $sapeur->sapeur_id,
+                    'exercice_comptable_id' => $exercice->exercice_comptable_id,
+                    'exercice_id' => $exercice->id,
+                    'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+                    'date' => $exercice->date,
+                    'heure' => $exercice->heure,
 
-            $this->ecritureRepo->persisteNewEcriture($ecriture);
-        }
-    }
+                    'module' => self::ECRITURE_MODULE_EXERCICE,
+                    'type' => $indemnite->type,
+                );
 
-    private function imputerExerciceParHeureEtSoldeMin($exercice, $sapeurs, $indemniteType, $designation)
-    {
-        //En minutes
-        $duree = $exercice->duree / 60;
-
-        $solde = 0;
-        if ($indemniteType->solde_min == null) {
-            $indemniteType->solde_min = 0;
-            $indemniteType->solde_min_pour = 0;
-        }
-
-        if ($duree > $indemniteType->solde_min_pour) {
-            $solde += $indemniteType->solde_min;
-            $duree -= $indemniteType->solde_min_pour;
-        }
-
-        $solde += $indemniteType->solde * $duree;
-
-        // Générer écritures
-        foreach ($sapeurs as $sapeur) {
-            //Par heure -> calcul de la durée
-            $ecriture = array(
-                'solde' => $solde,
-                'indemnite' => 0,
-                'frais' => 0,
-
-                'total' => $solde,
-
-                'type_unite_id' => $indemniteType->type_unite_id,
-                'designation' => $designation,
-                'tarif' => $indemniteType->solde,
-                'quantite' => $duree,
-                'solde_min' => $indemniteType->solde_min,
-                'solde_min_pour' => $indemniteType->solde_min_pour,
-                'sapeur_id' => $sapeur->sapeur_id,
-                'compte_id' => $indemniteType->compte_id,
-                'exercice_comptable_id' => $exercice->exercice_comptable_id,
-                'exercice_id' => $exercice->id,
-                'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
-                'date' => $exercice->date,
-                'heure' => $exercice->heure,
-
-                'type' => ImputationBusiness::ECRITURE_TYPE_EXERCICE
-            );
-
-            $this->ecritureRepo->persisteNewEcriture($ecriture);
+                $this->ecritureRepo->persisteNewEcriture($ecriture);
+            }
         }
     }
 }

@@ -5,7 +5,6 @@ namespace App\Domaine\API;
 use App\Domaine\Business\ComptabiliteParamBusiness;
 use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
-use App\Domaine\SPI\FraisTypeRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
 use App\Infrastructure\Models\Amende;
 use App\Infrastructure\Models\Compte;
@@ -16,20 +15,17 @@ class ComptabiliteParamService
     protected $ecritureRepo;
     protected $exerciceRepo;
     protected $indemniteRepo;
-    protected $fraisRepo;
     protected $business;
 
     public function __construct(
         EcritureRepository $ecriture,
         ExerciceRepository $exercice,
         IndemniteTypeRepository $indemnite,
-        FraisTypeRepository $frais,
         ComptabiliteParamBusiness $business
     ) {
         $this->ecritureRepo = $ecriture;
         $this->exerciceRepo = $exercice;
         $this->indemniteRepo = $indemnite;
-        $this->fraisRepo = $frais;
         $this->business = $business;
     }
 
@@ -43,19 +39,12 @@ class ComptabiliteParamService
         return $this->business->updateAmendes($data);
     }
 
-    function indemnitesTypes()
+    function fraisIndemnitesTypes()
     {
         return array(
             "exercices" => $this->indemniteRepo->listeIndemniteExerciceType(),
             "interventions" => $this->indemniteRepo->listeIndemniteInterventionType(),
-            "annuels" => $this->indemniteRepo->listeIndemniteAnnuelType(),
-        );
-    }
-
-    function fraisTypes()
-    {
-        return array(
-            "annuels" => $this->fraisRepo->listeFraisAnnuelType()
+            "annuels" => $this->indemniteRepo->listeFraisIndemniteAnnuelType(),
         );
     }
 
@@ -79,39 +68,39 @@ class ComptabiliteParamService
         return $this->business->supprimerCategorie($id);
     }
 
-    function indemnitesAnnuel()
+    function fraisIndemnitesAnnuel()
     {
-        return $this->indemniteRepo->listeIndemniteAnnuelType();
+        return $this->indemniteRepo->listeFraisIndemniteAnnuelType();
     }
 
-    public function ajouterIndemniteAnnuel($data)
+    public function ajouterFraisIndemniteAnnuel($data)
     {
-        return $this->business->ajouterIndemniteAnnuel($data);
+        return $this->business->ajouterFraisIndemniteAnnuel($data);
     }
 
-    public function modifierIndemniteAnnuel($id, $data)
+    public function modifierFraisIndemniteAnnuel($id, $data)
     {
-        return $this->business->modifierIndemniteAnnuel($id, $data);
+        return $this->business->modifierFraisIndemniteAnnuel($id, $data);
     }
 
-    public function supprimerIndemniteAnnuel($id)
+    public function supprimerFraisIndemniteAnnuel($id)
     {
-        return $this->business->supprimerIndemniteAnnuel($id);
+        return $this->business->supprimerFraisIndemniteAnnuel($id);
     }
 
-    public function ajouterIndemniteAnnuelType($data)
+    public function ajouterFraisIndemniteAnnuelType($data)
     {
-        return $this->business->ajouterIndemniteAnnuelType($data);
+        return $this->business->ajouterFraisIndemniteAnnuelType($data);
     }
 
-    public function modifierIndemniteAnnuelType($id, $data)
+    public function modifierFraisIndemniteAnnuelType($id, $data)
     {
-        return $this->business->modifierIndemniteAnnuelType($id, $data);
+        return $this->business->modifierFraisIndemniteAnnuelType($id, $data);
     }
 
-    public function supprimerIndemniteAnnuelType($id)
+    public function supprimerFraisIndemniteAnnuelType($id)
     {
-        return $this->business->supprimerIndemniteAnnuelType($id);
+        return $this->business->supprimerFraisIndemniteAnnuelType($id);
     }
 
     function indemnitesExercice()
@@ -152,41 +141,6 @@ class ComptabiliteParamService
     public function supprimerIndemniteIntervention($id)
     {
         return $this->business->supprimerIndemniteIntervention($id);
-    }
-
-    function fraisAnnuel()
-    {
-        return $this->fraisRepo->listeFraisAnnuelType();
-    }
-
-    public function ajouterFraisAnnuel($data)
-    {
-        return $this->business->ajouterFraisAnnuel($data);
-    }
-
-    public function modifierFraisAnnuel($id, $data)
-    {
-        return $this->business->modifierFraisAnnuel($id, $data);
-    }
-
-    public function supprimerFraisAnnuel($id)
-    {
-        return $this->business->supprimerFraisAnnuel($id);
-    }
-
-    public function ajouterFraisAnnuelType($data)
-    {
-        return $this->business->ajouterFraisAnnuelType($data);
-    }
-
-    public function modifierFraisAnnuelType($id, $data)
-    {
-        return $this->business->modifierFraisAnnuelType($id, $data);
-    }
-
-    public function supprimerFraisAnnuelType($id)
-    {
-        return $this->business->supprimerFraisAnnuelType($id);
     }
 
     public function comptes()

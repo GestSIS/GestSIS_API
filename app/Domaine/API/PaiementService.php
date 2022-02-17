@@ -17,7 +17,6 @@ class PaiementService
     protected $ecritureRepo;
     protected $exerciceRepo;
     protected $indemniteRepo;
-    protected $fraisRepo;
     protected $compteRepo;
     protected $business;
 

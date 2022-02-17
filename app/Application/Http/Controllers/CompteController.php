@@ -31,9 +31,10 @@ class CompteController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'numero' => 'string',
-            'actif' => 'boolean',
+            'designation' => 'string|min:1|required',
+            'numero' => 'string|required',
+            'produit' => 'boolean|required',
+            'type' => 'integer|required',
         ]);
 
         $compte = $this->paramService->ajouterCompte($data);
@@ -43,9 +44,10 @@ class CompteController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'numero' => 'string',
-            'actif' => 'boolean',
+            'designation' => 'string|min:1|required',
+            'numero' => 'string|required',
+            'produit' => 'boolean|required',
+            'type' => 'integer|required',
         ]);
 
         $compte = $this->paramService->modifierCompte($id, $data);

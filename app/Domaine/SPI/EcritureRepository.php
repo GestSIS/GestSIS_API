@@ -20,10 +20,6 @@ interface EcritureRepository
 
     public function listeEcrituresAnnuelsForExerciceComptableById($exerciceComptableId);
 
-    public function listeFraisAnnuelByExeComptableId($exerciceComptableId);
-
-    public function listeIndemniteAnnuelByExeComptableId($exerciceComptableId);
-
     public function persisteNewEcriture($ecriture);
 
     public function computeEcritureForPersonalDecompte($exerciceComptableId);

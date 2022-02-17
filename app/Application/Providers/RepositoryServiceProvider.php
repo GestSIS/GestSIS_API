@@ -34,10 +34,6 @@ class RepositoryServiceProvider extends ServiceProvider
             'App\Infrastructure\Repositories\IndemniteTypeRepositoryEloquent'
         );
         $this->app->bind(
-            'App\Domaine\SPI\FraisTypeRepository',
-            'App\Infrastructure\Repositories\FraisTypeRepositoryEloquent'
-        );
-        $this->app->bind(
             'App\Domaine\SPI\ControleMedicalRepository',
             'App\Infrastructure\Repositories\ControleMedicalRepositoryEloquent'
         );

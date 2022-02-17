@@ -19,9 +19,9 @@ class CreateIndemniteInterventionTypesTable extends Migration
 
             $table->string('designation');
 
-            $table->unsignedDecimal('solde');
-            $table->unsignedDecimal('solde_min')->nullable();
-            $table->unsignedDecimal('solde_min_pour')->nullable();
+            $table->unsignedDecimal('solde'); // Renommé
+            $table->unsignedDecimal('solde_min')->nullable(); // Renommé
+            $table->unsignedDecimal('solde_min_pour')->nullable(); // Renommé
 
             $table->unsignedDecimal('taux_weekend')->nullable();
             $table->unsignedDecimal('taux_nuit')->nullable();

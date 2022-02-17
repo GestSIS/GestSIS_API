@@ -28,19 +28,19 @@ class CreateEcrituresTable extends Migration
             $table->foreign('type_unite_id')->references('id')->on('type_unites');
 
             $table->decimal('quantite');
-            $table->decimal('solde_min')->nullable();
-            $table->decimal('solde_min_pour')->nullable();
+            $table->decimal('solde_min')->nullable(); // Renommé
+            $table->decimal('solde_min_pour')->nullable(); // Renommé
             $table->decimal('taux')->nullable();
             $table->string('taux_description')->nullable();
 
-            $table->decimal('solde');
-            $table->decimal('indemnite');
-            $table->decimal('frais');
+            $table->decimal('solde'); // Supprimé
+            $table->decimal('indemnite'); // Supprimé
+            $table->decimal('frais'); // Supprimé
 
-            $table->boolean('avs')->default(false);
-            $table->boolean('amende')->default(false);
-            $table->boolean('frais_annuel')->default(false);
-            $table->boolean('indemnite_annuel')->default(false);
+            $table->boolean('avs')->default(false); // Supprimé
+            $table->boolean('amende')->default(false); // Supprimé
+            $table->boolean('frais_annuel')->default(false); // Supprimé
+            $table->boolean('indemnite_annuel')->default(false); // Supprimé
 
             $table->unsignedBigInteger('compte_id');
             $table->foreign('compte_id')->references('id')->on('comptes');

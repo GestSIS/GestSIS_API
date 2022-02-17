@@ -39,8 +39,9 @@ class HeureExerciceController extends Controller
             // 'type_unite_id' => 'integer|exists:type_unites,id',
             // 'indemnite' => 'boolean|required',
             // Addition compare to type
-            'montant' => 'numeric',
-            'sapeur_id' => 'integer|exists:sapeurs,id',
+            'montant' => 'numeric|require',
+            'type' => 'integer|require',
+            'sapeur_id' => 'integer|exists:sapeurs,id|require',
             'heure_exercice_type_id' => 'integer|exists:heure_exercice_types,id',
         ]);
         $heure = $this->service->ajouterHeureExercice($exerciceId, $data);

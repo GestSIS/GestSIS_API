@@ -8,9 +8,9 @@ class IndemniteInterventionType extends Model
 {
     protected $fillable = [
         'designation',
-        'solde',
-        'solde_min',
-        'solde_min_pour',
+        'tarif',
+        'tarif_min',
+        'tarif_min_pour',
         'taux_weekend',
         'taux_nuit',
         'debut',
@@ -20,11 +20,12 @@ class IndemniteInterventionType extends Model
         'type_unite_id',
         'ecriture_categorie_id',
         'par_fonction',
+        'type',
     ];
     protected $casts = [
-        'solde' => 'decimal:2', 'solde_min_pour' => 'decimal:2', 'taux_weekend' => 'decimal:2', 'taux_nuit' => 'decimal:2',
+        'tarif' => 'decimal:2', 'tarif_min_pour' => 'decimal:2', 'taux_weekend' => 'decimal:2', 'taux_nuit' => 'decimal:2',
         'compte_id' => 'integer', 'phase_id' => 'integer', 'type_unite_id' => 'integer', 'ecriture_categorie_id' => 'integer',
-        'par_fonction' => 'boolean'
+        'par_fonction' => 'boolean', 'type' => 'integer'
     ];
 
     public function fonctions()
