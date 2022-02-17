@@ -15,6 +15,11 @@ class IndemniteExerciceFonction extends Model
         'type',
     ];
     protected $casts = [
-        'tarif' => 'decimal:2', 'tarif_min' => 'decimal:2', 'tarif_min_pour' => 'decimal:2', 'fonction_id' => 'integer', 'compte_id' => 'integer', 'type' => 'integer'
+        'tarif' => 'decimal:2',
+        'tarif_min' => 'decimal:2',
+        'tarif_min_pour' => 'decimal:2',
+        'fonction_id' => 'integer',
+        'compte_id' => 'integer',
+        'type' => 'integer'
     ];
 }

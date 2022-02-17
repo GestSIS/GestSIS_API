@@ -72,13 +72,12 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
         $object = new StdClass();
 
         $object->id = $indemnite->id;
-        $object->fonction_id = $indemnite->fonction_id;
-        $object->solde = $indemnite->solde;
-        $object->indemnite = $indemnite->indemnite;
-        $object->solde_min = $indemnite->solde_min;
-        $object->solde_min_pour = $indemnite->solde_min_pour;
-        $object->compte_id = $indemnite->compte_id;
         $object->type = $indemnite->type;
+        $object->tarif = $indemnite->tarif;
+        $object->tarif_min = $indemnite->tarif_min;
+        $object->tarif_min_pour = $indemnite->tarif_min_pour;
+        $object->fonction_id = $indemnite->fonction_id;
+        $object->compte_id = $indemnite->compte_id;
         $object->indemnite_int_id = $indemnite->indemnite_int_id;
 
         return $object;
