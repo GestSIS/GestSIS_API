@@ -13,19 +13,12 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
 {
     public function listeIndemniteExerciceType()
     {
-        $temp = $this;
-        return IndemniteExerciceType::with('fonctions')
-            ->get()
-            ->map(function ($indemnite) use ($temp) {
-                return $temp->convertIndemniteExercice($indemnite);
-            })->toArray();
+        return IndemniteExerciceType::with('fonctions')->get()->toArray();
     }
 
     public function listeIndemniteInterventionType()
     {
-        return IndemniteInterventionType::with('fonctions')
-            ->get()
-            ->toArray();
+        return IndemniteInterventionType::with('fonctions')->get()->toArray();
     }
 
     public function listeFraisIndemniteAnnuelType()
@@ -55,12 +48,7 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
 
         $object->id = $indemnite->id;
         $object->designation = $indemnite->designation;
-        $object->solde = $indemnite->solde;
-        $object->indemnite = $indemnite->indemnite;
-        $object->solde_min = $indemnite->solde_min;
-        $object->solde_min_pour = $indemnite->solde_min_pour;
         $object->type_unite_id = $indemnite->type_unite_id;
-        $object->compte_id = $indemnite->compte_id;
         $object->par_fonction = $indemnite->par_fonction;
         $object->ecriture_categorie_id = $indemnite->ecriture_categorie_id;
 
@@ -87,6 +75,10 @@ class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
         $object->fonction_id = $indemnite->fonction_id;
         $object->solde = $indemnite->solde;
         $object->indemnite = $indemnite->indemnite;
+        $object->solde_min = $indemnite->solde_min;
+        $object->solde_min_pour = $indemnite->solde_min_pour;
+        $object->compte_id = $indemnite->compte_id;
+        $object->type = $indemnite->type;
         $object->indemnite_int_id = $indemnite->indemnite_int_id;
 
         return $object;

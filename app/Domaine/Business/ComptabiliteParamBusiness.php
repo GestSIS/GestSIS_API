@@ -95,12 +95,10 @@ class ComptabiliteParamBusiness
             $data['par_fonction'] = false;
         }
         $indemnite = IndemniteExerciceType::create($data);
-        if ($parFonction) {
-            if (!array_key_exists('fonctions', $data)) {
-                $data['fonctions'] = [];
-            }
-            $indemnite->fonctions()->createMany($data['fonctions']);
+        if (!array_key_exists('fonctions', $data)) {
+            $data['fonctions'] = [];
         }
+        $indemnite->fonctions()->createMany($data['fonctions']);
         $indemnite->fonctions;
         return $indemnite;
     }
@@ -114,17 +112,11 @@ class ComptabiliteParamBusiness
         $indemnite = IndemniteExerciceType::find($id);
         $indemnite->update($data);
 
-        if (!$parFonction) {
-            $indemnite->fonctions()->delete();
-        } else {
-            if (!array_key_exists('fonctions', $data)) {
-                $data['fonctions'] = [];
-            }
-            $indemnite->fonctions()->whereNotIn('fonction_id', array_filter(array_map(fn ($f) => $f['fonction_id'], $data['fonctions']), fn ($f) => !is_null($f)))->delete();
-            foreach ($data['fonctions'] as $f) {
-                $indemnite->fonctions()->updateOrCreate(['fonction_id' => $f['fonction_id']], $f);
-            }
+        $indemnite->fonctions()->delete();
+        if (!array_key_exists('fonctions', $data)) {
+            $data['fonctions'] = [];
         }
+        $indemnite->fonctions()->createMany($data['fonctions']);
 
         $indemnite->fonctions;
         return $indemnite;

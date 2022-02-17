@@ -28,9 +28,10 @@ class IndemniteExerciceTypeController extends Controller
             'type_unite_id' => 'integer|required',
             'ecriture_categorie_id' => 'integer|required',
             'par_fonction' => 'boolean',
+            'fonctions.*.type' => 'numeric|required',
             'fonctions.*.tarif' => 'numeric|required',
-            'fonctions.*.tarif_min' => 'numeric|nullable',
-            'fonctions.*.tarif_min_pour' => 'numeric|nullable',
+            'fonctions.*.tarif_min' => 'numeric|nullable|required_unless:tarif_min_pour,null',
+            'fonctions.*.tarif_min_pour' => 'numeric|nullable|required_unless:tarif_min,null',
             'fonctions.*.compte_id' => 'integer|required',
             'fonctions.*.fonction_id' => 'integer|nullable',
         ]);
@@ -46,12 +47,12 @@ class IndemniteExerciceTypeController extends Controller
             'type_unite_id' => 'integer|required',
             'ecriture_categorie_id' => 'integer|required',
             'par_fonction' => 'boolean',
-            'fonctions.*.id' => 'integer|nullable',
+            'fonctions.*.type' => 'integer|required',
             'fonctions.*.tarif' => 'numeric|required',
-            'fonctions.*.tarif_min' => 'numeric|nullable',
-            'fonctions.*.tarif_min_pour' => 'numeric|nullable',
+            'fonctions.*.tarif_min' => 'numeric|nullable|required_unless:tarif_min_pour,null',
+            'fonctions.*.tarif_min_pour' => 'numeric|nullable|required_unless:tarif_min,null',
             'fonctions.*.compte_id' => 'integer|required',
-            'fonctions.*.fonction_id' => 'integer'
+            'fonctions.*.fonction_id' => 'integer|nullable'
         ]);
 
         $indemnite = $this->service->modifierIndemniteExercice($id, $data);

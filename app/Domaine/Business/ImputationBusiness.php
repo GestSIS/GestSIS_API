@@ -863,10 +863,8 @@ class ImputationBusiness
 
         if ($unite === self::UNITE_PIECE || $unite === self::UNITE_FORFAIT) {
             $this->imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation);
-        } elseif ($unite === self::UNITE_HEURE && $indemniteType->par_fonction) {
-            $this->imputerExerciceParHeureEtFonction($exercice, $sapeurs, $indemniteType, $designation);
-        } elseif ($unite === self::UNITE_HEURE) {
-            $this->imputerExerciceParHeureEtSoldeMin($exercice, $sapeurs, $indemniteType, $designation);
+        } else if ($unite === self::UNITE_HEURE) {
+            $this->imputerExerciceParHeure($exercice, $sapeurs, $indemniteType, $designation);
         } else {
             throw new ArrayException(["message" => "Unité non supportée"]);
         }
@@ -886,29 +884,16 @@ class ImputationBusiness
             $designationSapeur = $designation . " - " . $heure->designation;
             $total = $heure->quantite * $heure->montant;
 
-            $indemnite = $solde = 0;
-            if ($heure->type == 1) {
-                // Solde
-                $solde = $total;
-            } else {
-                // Indemnité
-                $indemnite = $total;
-            }
-
-            //Par heure -> calcul de la durée
+            // Par heure -> calcul de la durée
             $ecriture = array(
-                'solde' => $solde,
-                'indemnite' => $indemnite,
-                'frais' => 0,
-
-                'total' => $solde + $indemnite,
-
-                'type_unite_id' => $heure->type_unite_id,
-                'designation' => $designationSapeur,
                 'tarif' => $heure->montant,
                 'quantite' => $heure->quantite,
                 'tarif_min' => null,
                 'tarif_min_pour' => null,
+                'total' => $total,
+
+                'designation' => $designationSapeur,
+                'type_unite_id' => $heure->type_unite_id,
                 'sapeur_id' => $heure->sapeur_id,
                 'compte_id' => $heure->compte_id,
                 'exercice_comptable_id' => $exercice->exercice_comptable_id,
@@ -932,155 +917,101 @@ class ImputationBusiness
         // Générer écritures
         $ecritures = [];
         foreach ($sapeurs as $sapeur) {
+            // Utilise uniquement la fonction principale
             $id = $this->sapeurRepo->getSapeurDetailsById($sapeur->sapeur_id)->fonction_id;
 
-            $fonction_tarif = array_filter($indemniteType->fonctions, function ($f) use ($id) {
+            $fonction_tarifs = array_filter($indemniteType->fonctions, function ($f) use ($id) {
                 return $f->fonction_id === $id;
             });
 
-            $solde = 0;
-            $indemnite = 0;
-            if (count($fonction_tarif) > 0) {
-                $tarif = array_pop($fonction_tarif);
-                $solde += $tarif[0]->solde;
-                $indemnite += $tarif[0]->indemnite;
-            } else {
-                $solde += $indemniteType->solde;
-                $indemnite += $indemniteType->indemnite;
+            if (count($fonction_tarifs) == 0) {
+                $fonction_tarifs = array_filter($indemniteType->fonctions, function ($f) {
+                    return $f->fonction_id === null;
+                });
             }
 
-            // Par pièce et pas par fonction -> pas de calcul
-            $ecritures[] = [
-                'solde' => $solde,
-                'indemnite' => $indemnite,
-                'frais' => 0,
+            foreach ($fonction_tarifs as $indemnite) {
+                // Par pièce et pas par fonction -> pas de calcul
+                $ecritures[] = [
+                    'tarif' => $indemnite->tarif,
+                    'quantite' => 1,
+                    'tarif_min' => null,
+                    'tarif_min_pour' => null,
+                    'total' => $indemnite->tarif,
 
-                'total' => $solde + $indemnite,
+                    'compte_id' => $indemnite->compte_id,
 
-                'type_unite_id' => $indemniteType->type_unite_id,
-                'designation' => $designation,
-                'tarif' => $solde + $indemnite,
-                'quantite' => 1,
-                'sapeur_id' => $sapeur->sapeur_id,
-                'compte_id' => $indemniteType->compte_id,
-                'exercice_comptable_id' => $exercice->exercice_comptable_id,
-                'exercice_id' => $exercice->id,
-                'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
-                'date' => $exercice->date,
-                'heure' => $exercice->heure,
+                    'designation' => $designation,
+                    'type_unite_id' => $indemniteType->type_unite_id,
+                    'sapeur_id' => $sapeur->sapeur_id,
+                    'exercice_comptable_id' => $exercice->exercice_comptable_id,
+                    'exercice_id' => $exercice->id,
+                    'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+                    'date' => $exercice->date,
+                    'heure' => $exercice->heure,
 
-                'module' => self::ECRITURE_MODULE_EXERCICE,
-                'type' => $indemniteType->type, //FIXME:
-            ];
+                    'module' => self::ECRITURE_MODULE_EXERCICE,
+                    'type' => $indemnite->type,
+                ];
+            }
         }
         Ecriture::insert($ecritures);
     }
 
-    private function imputerExerciceParHeureEtFonction($exercice, $sapeurs, $indemniteType, $designation)
+    private function imputerExerciceParHeure($exercice, $sapeurs, $indemniteType, $designation)
     {
-        //TODO: tarif_min should be null
-        //En minutes
         $duree = $exercice->duree / 60;
 
         // Générer écritures
         foreach ($sapeurs as $sapeur) {
             $id = $this->sapeurRepo->getSapeurDetailsById($sapeur->sapeur_id)->fonction_id;
 
-            $fonction_tarif = array_filter($indemniteType->fonctions, function ($f) use ($id) {
+            $fonction_tarifs = array_filter($indemniteType->fonctions, function ($f) use ($id) {
                 return $f->fonction_id === $id;
             });
 
-            $soldeTarif = 0;
-            $indemniteTarif = 0;
-            if (count($fonction_tarif) > 0) {
-                $tarif = array_pop($fonction_tarif);
-                $soldeTarif = $tarif->solde;
-                $indemniteTarif = $tarif->indemnite;
-            } else {
-                $soldeTarif = $indemniteType->solde;
-                $indemniteTarif = $indemniteType->indemnite;
+            if (count($fonction_tarifs) == 0) {
+                $fonction_tarifs = array_filter($indemniteType->fonctions, function ($f) {
+                    return $f->fonction_id === null;
+                });
             }
 
-            $solde = $soldeTarif * $duree;
-            $indemnite = $indemniteTarif * $duree;
+            foreach ($fonction_tarifs as $indemnite) {
 
-            //Par heure -> calcul de la durée
-            $ecriture = array(
-                'solde' => $solde,
-                'indemnite' => $indemnite,
-                'frais' => 0,
+                $total = 0;
+                if ($indemnite->tarif_min == null) {
+                    $total = $indemnite->tarif * $duree;
+                } else if ($duree < $indemnite->tarif_min_pour) {
+                    $total = $indemnite->tarif_min * ($duree / $indemnite->tarif_min_pour);
+                } else {
+                    $total = $indemnite->tarif_min + $indemnite->tarif * ($duree - $indemnite->tarif_min_pour);
+                }
 
-                'total' => $solde + $indemnite,
+                //Par heure -> calcul de la durée
+                $ecriture = array(
+                    'tarif' => $indemnite->tarif,
+                    'quantite' => $duree,
+                    'tarif_min' => $indemniteType->tarif_min,
+                    'tarif_min_pour' => $indemniteType->tarif_min_pour,
+                    'total' => $total,
 
-                'type_unite_id' => $indemniteType->type_unite_id,
-                'designation' => $designation,
-                'tarif' => $soldeTarif + $indemniteTarif,
-                'quantite' => $duree,
-                'tarif_min' => $indemniteType->tarif_min,
-                'tarif_min_pour' => $indemniteType->tarif_min_pour,
-                'sapeur_id' => $sapeur->sapeur_id,
-                'compte_id' => $indemniteType->compte_id,
-                'exercice_comptable_id' => $exercice->exercice_comptable_id,
-                'exercice_id' => $exercice->id,
-                'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
-                'date' => $exercice->date,
-                'heure' => $exercice->heure,
+                    'compte_id' => $indemnite->compte_id,
 
-                'module' => self::ECRITURE_MODULE_EXERCICE,
-                'type' => $indemniteType->type, //FIXME:
-            );
+                    'designation' => $designation,
+                    'type_unite_id' => $indemniteType->type_unite_id,
+                    'sapeur_id' => $sapeur->sapeur_id,
+                    'exercice_comptable_id' => $exercice->exercice_comptable_id,
+                    'exercice_id' => $exercice->id,
+                    'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+                    'date' => $exercice->date,
+                    'heure' => $exercice->heure,
 
-            $this->ecritureRepo->persisteNewEcriture($ecriture);
-        }
-    }
+                    'module' => self::ECRITURE_MODULE_EXERCICE,
+                    'type' => $indemnite->type,
+                );
 
-    private function imputerExerciceParHeureEtSoldeMin($exercice, $sapeurs, $indemniteType, $designation)
-    {
-        //En minutes
-        $duree = $exercice->duree / 60;
-
-        $solde = 0;
-        if ($indemniteType->tarif_min == null) {
-            $indemniteType->tarif_min = 0;
-            $indemniteType->tarif_min_pour = 0;
-        }
-
-        if ($duree > $indemniteType->tarif_min_pour) {
-            $solde += $indemniteType->tarif_min;
-            $duree -= $indemniteType->tarif_min_pour;
-        }
-
-        $solde += $indemniteType->solde * $duree;
-
-        // Générer écritures
-        foreach ($sapeurs as $sapeur) {
-            //Par heure -> calcul de la durée
-            $ecriture = array(
-                'solde' => $solde,
-                'indemnite' => 0,
-                'frais' => 0,
-
-                'total' => $solde,
-
-                'type_unite_id' => $indemniteType->type_unite_id,
-                'designation' => $designation,
-                'tarif' => $indemniteType->solde,
-                'quantite' => $duree,
-                'tarif_min' => $indemniteType->tarif_min,
-                'tarif_min_pour' => $indemniteType->tarif_min_pour,
-                'sapeur_id' => $sapeur->sapeur_id,
-                'compte_id' => $indemniteType->compte_id,
-                'exercice_comptable_id' => $exercice->exercice_comptable_id,
-                'exercice_id' => $exercice->id,
-                'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
-                'date' => $exercice->date,
-                'heure' => $exercice->heure,
-
-                'module' => self::ECRITURE_MODULE_EXERCICE,
-                'type' => $indemniteType->type, //FIXME:
-            );
-
-            $this->ecritureRepo->persisteNewEcriture($ecriture);
+                $this->ecritureRepo->persisteNewEcriture($ecriture);
+            }
         }
     }
 }
