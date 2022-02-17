@@ -5,14 +5,14 @@ namespace App\Application\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
-class CustomMigrate extends Command
+class CustomInit extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'dbs:migrate';
+    protected $signature = 'dbs:init';
 
     /**
      * The console command description.
@@ -41,12 +41,15 @@ class CustomMigrate extends Command
         $dbs = explode(",", env('DB_LISTE', true));
         foreach ($dbs as $db) {
             printf("DATABASE " . $db . "\n");
+            printf("migrate:reset\n");
+            Artisan::call('migrate:reset --database=' . $db);
             printf("migrate\n");
             Artisan::call('migrate --database=' . $db);
-            // Artisan::call('migrate:rollback --step=1 --database=' . $db);
+            printf("db:seed\n");
+            Artisan::call('db:seed --database=' . $db);
             printf("\n");
         }
-        printf("Migrating done\n");
+        printf("Migrating done");
         return 0;
     }
 }

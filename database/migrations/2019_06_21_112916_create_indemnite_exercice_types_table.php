@@ -19,20 +19,17 @@ class CreateIndemniteExerciceTypesTable extends Migration
 
             $table->string('designation');
 
-            $table->unsignedDecimal('solde');
-            $table->unsignedDecimal('indemnite');
+            $table->unsignedDecimal('solde'); // Supprimé
+            $table->unsignedDecimal('indemnite'); // Supprimé
 
-            // $table->unsignedDecimal('solde_heure_additionelle')->default(0.0);
-            // $table->unsignedDecimal('indemnite_heure_additionelle')->default(0.0);
+            $table->unsignedDecimal('solde_min')->nullable(); // Supprimé 
+            $table->unsignedDecimal('solde_min_pour')->nullable(); // Supprimé
 
-            $table->unsignedDecimal('solde_min')->nullable();
-            $table->unsignedDecimal('solde_min_pour')->nullable();
+            $table->unsignedBigInteger('compte_id'); // Supprimé
+            $table->foreign('compte_id')->references('id')->on('comptes'); // Supprimé
 
             $table->unsignedBigInteger('type_unite_id');
             $table->foreign('type_unite_id')->references('id')->on('type_unites');
-
-            $table->unsignedBigInteger('compte_id');
-            $table->foreign('compte_id')->references('id')->on('comptes');
 
             $table->unsignedBigInteger('ecriture_categorie_id');
             $table->foreign('ecriture_categorie_id')->references('id')->on('ecriture_categories');

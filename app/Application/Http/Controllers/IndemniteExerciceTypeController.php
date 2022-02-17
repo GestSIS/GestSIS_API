@@ -25,17 +25,15 @@ class IndemniteExerciceTypeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1|required',
-            'solde' => 'numeric|required',
-            'indemnite' => 'numeric|required',
-            'solde_min' => 'numeric|nullable',
-            'solde_min_pour' => 'numeric|nullable',
             'type_unite_id' => 'integer|required',
-            'compte_id' => 'integer|required',
             'ecriture_categorie_id' => 'integer|required',
             'par_fonction' => 'boolean',
-            'fonctions.*.solde' => 'numeric',
-            'fonctions.*.indemnite' => 'numeric',
-            'fonctions.*.fonction_id' => 'integer',
+            'fonctions.*.type' => 'numeric|required',
+            'fonctions.*.tarif' => 'numeric|required',
+            'fonctions.*.tarif_min' => 'numeric|nullable|required_unless:tarif_min_pour,null',
+            'fonctions.*.tarif_min_pour' => 'numeric|nullable|required_unless:tarif_min,null',
+            'fonctions.*.compte_id' => 'integer|required',
+            'fonctions.*.fonction_id' => 'integer|nullable',
         ]);
 
         $indemnite = $this->service->ajouterIndemniteExercice($data);
@@ -46,18 +44,15 @@ class IndemniteExerciceTypeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1|required',
-            'solde' => 'numeric|required',
-            'indemnite' => 'numeric|required',
-            'solde_min' => 'numeric|nullable',
-            'solde_min_pour' => 'numeric|nullable',
             'type_unite_id' => 'integer|required',
-            'compte_id' => 'integer|required',
             'ecriture_categorie_id' => 'integer|required',
             'par_fonction' => 'boolean',
-            'fonctions.*.id' => 'integer|nullable',
-            'fonctions.*.solde' => 'numeric',
-            'fonctions.*.indemnite' => 'numeric',
-            'fonctions.*.fonction_id' => 'integer'
+            'fonctions.*.type' => 'integer|required',
+            'fonctions.*.tarif' => 'numeric|required',
+            'fonctions.*.tarif_min' => 'numeric|nullable|required_unless:tarif_min_pour,null',
+            'fonctions.*.tarif_min_pour' => 'numeric|nullable|required_unless:tarif_min,null',
+            'fonctions.*.compte_id' => 'integer|required',
+            'fonctions.*.fonction_id' => 'integer|nullable'
         ]);
 
         $indemnite = $this->service->modifierIndemniteExercice($id, $data);

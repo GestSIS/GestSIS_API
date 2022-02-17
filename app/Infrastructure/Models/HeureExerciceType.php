@@ -8,6 +8,7 @@ class HeureExerciceType extends Model
 {
     protected $fillable = ['designation', 'montant', 'compte_id', 'ecriture_categorie_id', 'type_unite_id', 'type'];
     protected $casts = [
-        'montant' => 'decimal:2', 'compte_id' => 'integer', 'ecriture_categorie_id' => 'integer', 'type_unite_id' => 'integer', 'type' => 'integer'
+        'montant' => 'decimal:2', 'compte_id' => 'integer', 'ecriture_categorie_id' => 'integer', 'type_unite_id' => 'integer',
+        'type' => 'integer'
     ];
 }

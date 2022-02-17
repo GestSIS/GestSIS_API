@@ -37,7 +37,7 @@ class HeureExerciceTypeController extends Controller
             'compte_id' => 'integer|exists:comptes,id|required',
             'ecriture_categorie_id' => 'integer|exists:ecriture_categories,id|required',
             'type_unite_id' => 'integer|exists:type_unites,id|required',
-            'type' => 'integer|required|min:1|max:2',
+            'type' => 'integer|required',
         ]);
         $type = $this->service->ajouterHeureExerciceType($data);
 
@@ -57,7 +57,7 @@ class HeureExerciceTypeController extends Controller
             'compte_id' => 'integer|exists:comptes,id|required',
             'ecriture_categorie_id' => 'integer|exists:ecriture_categories,id|required',
             'type_unite_id' => 'integer|exists:type_unites,id|required',
-            'type' => 'integer|required|min:1|max:2',
+            'type' => 'integer|required',
         ]);
         $type = $this->service->modifierHeureExerciceType($id, $data);
 

@@ -19,7 +19,7 @@ class CreateComptesTable extends Migration
 
             $table->string('numero');
             $table->string('designation');
-            $table->boolean('actif');
+            $table->boolean('actif'); // Renommé
         });
     }
 

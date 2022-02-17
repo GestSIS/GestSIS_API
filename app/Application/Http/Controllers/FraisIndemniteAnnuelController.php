@@ -5,7 +5,7 @@ namespace App\Application\Http\Controllers;
 use App\Domaine\API\ComptabiliteParamService;
 use Illuminate\Http\Request;
 
-class FraisAnnuelController extends Controller
+class FraisIndemniteAnnuelController extends Controller
 {
     protected $service;
 
@@ -16,9 +16,9 @@ class FraisAnnuelController extends Controller
 
     public function index()
     {
-        $frais = $this->service->fraisAnnuel();
+        $indemnites = $this->service->fraisIndemnitesAnnuel();
 
-        return response()->json(['data' => $frais]);
+        return response()->json(['data' => $indemnites]);
     }
 
     public function store(Request $request)
@@ -27,12 +27,12 @@ class FraisAnnuelController extends Controller
             'montant' => 'numeric',
             'quantite' => 'numeric',
             'fonction_id' => 'exists:fonctions,id',
-            'frais_annuel_type_id' => 'exists:frais_annuel_types,id',
+            'frais_indemnite_annuel_type_id' => 'exists:frais_indemnite_annuel_types,id',
             'type_unite_id' => 'exists:type_unites,id'
         ]);
 
-        $frais = $this->service->ajouterFraisAnnuel($data);
-        return response()->json(['data' => $frais]);
+        $indemnite = $this->service->ajouterFraisIndemniteAnnuel($data);
+        return response()->json(['data' => $indemnite]);
     }
 
     public function update(Request $request, $id)
@@ -41,17 +41,17 @@ class FraisAnnuelController extends Controller
             'montant' => 'numeric',
             'quantite' => 'numeric',
             'fonction_id' => 'exists:fonctions,id',
-            'frais_annuel_type_id' => 'exists:frais_annuel_types,id',
+            'frais_indemnite_annuel_type_id' => 'exists:frais_indemnite_annuel_types,id',
             'type_unite_id' => 'exists:type_unites,id'
         ]);
 
-        $frais = $this->service->modifierFraisAnnuel($id, $data);
-        return response()->json(['data' => $frais]);
+        $indemnite = $this->service->modifierFraisIndemniteAnnuel($id, $data);
+        return response()->json(['data' => $indemnite]);
     }
 
     public function destroy($id)
     {
-        $frais = $this->service->supprimerFraisAnnuel($id);
-        return response()->json(['data' => $frais]);
+        $indemnite = $this->service->supprimerFraisIndemniteAnnuel($id);
+        return response()->json(['data' => $indemnite]);
     }
 }
