@@ -21,7 +21,7 @@ class TypeUniteTableSeeder extends Seeder
             array('id' => '4', 'comptable' => True, 'unite' => 'km', 'abreviation' => 'km'),
             array('id' => '5', 'comptable' => True, 'unite' => 'jour', 'abreviation' => 'j'),
             array('id' => '6', 'comptable' => False, 'unite' => 'forfait', 'abreviation' => ''),
-            array('id' => '6', 'comptable' => False, 'unite' => 'mois', 'abreviation' => 'm'),
+            array('id' => '7', 'comptable' => True, 'unite' => 'mois', 'abreviation' => 'm'),
         );
 
         foreach ($unite as $item) {
