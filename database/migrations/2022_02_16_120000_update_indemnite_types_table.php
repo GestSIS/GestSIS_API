@@ -1,7 +1,5 @@
 <?php
 
-use App\Infrastructure\Models\FraisAnnuel;
-use App\Infrastructure\Models\IndemniteAnnuel;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,8 +14,7 @@ class UpdateIndemniteTypesTable extends Migration
     public function up()
     {
         Schema::rename('indemnite_annuel_types', 'frais_indemnite_annuel_types');
-        Schema::rename('indemnite_annuels', 'frais_indemnite_annuel');
-        Schema::rename('frais_indemnite_annuel', 'frais_indemnite_annuels');
+        Schema::rename('indemnite_annuels', 'frais_indemnite_annuels');
 
         Schema::table('frais_indemnite_annuel_types', function (Blueprint $table) {
             $table->unsignedInteger('type')->default(2);
