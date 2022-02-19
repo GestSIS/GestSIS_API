@@ -26,7 +26,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         return $this->convertCollectionOfEcritures(
             Ecriture
                 ::where('exercice_comptable_id', $exerciceComptableId)
-                ->where('type', ImputationBusiness::ECRITURE_MODULE_AMENDE)
+                ->where('module', ImputationBusiness::ECRITURE_MODULE_AMENDE)
                 ->get()
         );
     }
@@ -36,7 +36,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         return $this->convertCollectionOfEcritures(
             Ecriture
                 ::where('exercice_comptable_id', $exerciceComptableId)
-                ->where('type', ImputationBusiness::ECRITURE_MODULE_DIVERS)
+                ->where('module', ImputationBusiness::ECRITURE_MODULE_DIVERS)
                 ->get()
         );
     }
@@ -74,7 +74,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         return $this->convertCollectionOfEcritures(
             Ecriture
                 ::where('exercice_comptable_id', $exerciceComptableId)
-                ->where('type', ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)
+                ->where('module', ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)
                 ->get()
         );
     }
