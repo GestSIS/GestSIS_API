@@ -35,7 +35,7 @@ class EcritureController extends Controller
     {
 
         $data = $request->validate([
-            'type' => 'required|numeric|min:0',
+            'module' => 'required|numeric|min:0',
         ]);
         // Types effectifs:
         // 0. Divers
@@ -49,7 +49,7 @@ class EcritureController extends Controller
         // 8. Cours
         // 9. Remboursement à l'employeur ?
 
-        $type = $request->get('type');
+        $type = $request->get('module');
         $data = null;
 
         switch ($type) {
@@ -75,6 +75,7 @@ class EcritureController extends Controller
                     'ecriture_categorie_id' => 'integer|required',
 
                     'type' => 'integer|min:0|required',
+                    'module' => 'integer|min:0|required',
                 ]);
                 break;
 
