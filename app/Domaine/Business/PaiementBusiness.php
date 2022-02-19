@@ -205,7 +205,7 @@ class PaiementBusiness
      */
     public function supprimerDecompte($decompteId)
     {
-        Ecriture::where('decompte_id', '=', $decompteId)->where('avs', '=', true)->delete();
+        Ecriture::where('decompte_id', '=', $decompteId)->where('type', '=', ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_CHARGE_AVS_AC)->delete();
         Ecriture::where('decompte_id', '=', $decompteId)->update(['decompte_id' => null]);
         Decompte::where('id', '=', $decompteId)->delete(); // Cascade delete des paiements
     }
