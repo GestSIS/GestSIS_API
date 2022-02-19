@@ -2,7 +2,7 @@ FROM php:7.4-fpm
 
 RUN mkdir -p /usr/share/man/man1 \
     && apt-get update \
-    && apt-get install -y --no-install-recommends wkhtmltopdf libfreetype6-dev libjpeg-dev libpng-dev libwebp-dev libzip-dev fontconfig xfonts-base xfonts-75dpi wget libx11-6 libxcb1 libxext6 libxrender1 \
+    && apt-get install -y --no-install-recommends libfreetype6-dev libjpeg-dev libpng-dev libwebp-dev libzip-dev fontconfig xfonts-base xfonts-75dpi wget libx11-6 libxcb1 libxext6 libxrender1 \
     && docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ --with-webp=/usr/include/ \
     && docker-php-ext-install gd \
     # gmp
@@ -17,7 +17,7 @@ RUN mkdir -p /usr/share/man/man1 \
     # clean up
     && apt-get autoclean -y \
     && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /tmp/pear/ \
+    && rm -rf /tmp/pear/
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 

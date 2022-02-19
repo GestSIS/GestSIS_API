@@ -1292,16 +1292,16 @@
         },
         {
             "name": "fruitcake/php-cors",
-            "version": "v1.0.0",
+            "version": "v1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/fruitcake/php-cors.git",
-                "reference": "a9c5d1e86391b17f2cedcdf5ea2c7580c38b9c92"
+                "reference": "07611b4d603a72f097aeeeeb1e67d5ae7a6d0798"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fruitcake/php-cors/zipball/a9c5d1e86391b17f2cedcdf5ea2c7580c38b9c92",
-                "reference": "a9c5d1e86391b17f2cedcdf5ea2c7580c38b9c92",
+                "url": "https://api.github.com/repos/fruitcake/php-cors/zipball/07611b4d603a72f097aeeeeb1e67d5ae7a6d0798",
+                "reference": "07611b4d603a72f097aeeeeb1e67d5ae7a6d0798",
                 "shasum": ""
             },
             "require": {
@@ -1343,7 +1343,7 @@
             ],
             "support": {
                 "issues": "https://github.com/fruitcake/php-cors/issues",
-                "source": "https://github.com/fruitcake/php-cors/tree/v1.0.0"
+                "source": "https://github.com/fruitcake/php-cors/tree/v1.0.1"
             },
             "funding": [
                 {
@@ -1355,7 +1355,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-02-19T14:14:57+00:00"
+            "time": "2022-02-19T16:21:54+00:00"
         },
         {
             "name": "graham-campbell/result-type",
