@@ -189,7 +189,7 @@ class ImputationBusiness
         Ecriture::where([
             ['exercice_comptable_id', '=', $exerciceComptableId],
             ['sapeur_id', '=', $sapeurId],
-            ['type', '=', self::ECRITURE_MODULE_AMENDE]
+            ['module', '=', self::ECRITURE_MODULE_AMENDE]
         ])->delete();
 
         // Pour l'instant juste générer de nouvelles amendes
@@ -257,7 +257,7 @@ class ImputationBusiness
         // Suppression de amendes existantes
         Ecriture::where([
             ['exercice_comptable_id', '=', $exerciceComptableId],
-            ['type', '=', self::ECRITURE_MODULE_AMENDE]
+            ['module', '=', self::ECRITURE_MODULE_AMENDE]
         ])->delete();
 
         // Pour l'instant juste générer de nouvelles amendes
