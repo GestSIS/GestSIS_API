@@ -14,15 +14,16 @@ use Barryvdh\Snappy\Facades\SnappyPdf;
 
 class PaiementService
 {
-    protected $ecritureRepo;
-    protected $exerciceRepo;
-    protected $indemniteRepo;
-    protected $compteRepo;
     protected $business;
 
     public function __construct(PaiementBusiness $business)
     {
         $this->business = $business;
+    }
+
+    function getEcrituresPourDecompte($decompteId)
+    {
+        return Ecriture::where('decompte_id', '=', $decompteId)->get();
     }
 
     /**

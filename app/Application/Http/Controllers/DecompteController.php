@@ -71,6 +71,12 @@ class DecompteController extends Controller
         return response()->json(['data' => $decompte]);
     }
 
+    public function ecritures(Int $decompteId)
+    {
+        $ecritures = $this->service->getEcrituresPourDecompte($decompteId);
+        return response()->json(['data' => $ecritures]);
+    }
+
     /**
      * Supprimer un décompte
      * 

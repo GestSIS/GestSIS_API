@@ -163,7 +163,7 @@ class PaiementBusiness
                 'frais_effectif' => $total['frais_effectif_a_percevoir'],
                 'avs_ac' => $total['avs_ac_a_cotiser'],
                 'amende' => $total['amende_a_deduire'],
-                'total' => $total['total'],
+                'total' => $total['solde_a_percevoir'] + $total['indemnite_a_percevoir'] + $total['frais_forfaitaire_a_percevoir'] + $total['frais_effectif_a_percevoir'] - $total['avs_ac_a_cotiser'] - $total['amende_a_deduire'],
                 'sapeur_id' => $key
             ];
 

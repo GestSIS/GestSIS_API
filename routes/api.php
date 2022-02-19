@@ -283,6 +283,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('ecriture-categories', 'EcritureCategorieController')->only(['index']);
 
         // Décomptes
+        Route::get('decomptes/{id}/ecritures', 'DecompteController@ecritures');
         Route::post('decomptes/creer-annuel', 'DecompteController@creerAnnuel');
         Route::post('decomptes/creer-sapeur', 'DecompteController@creerSapeur');
         Route::post('decomptes/creer-exercice', 'DecompteController@creerExercice');
