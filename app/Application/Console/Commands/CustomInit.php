@@ -41,12 +41,8 @@ class CustomInit extends Command
         $dbs = explode(",", env('DB_LISTE', true));
         foreach ($dbs as $db) {
             printf("DATABASE " . $db . "\n");
-            printf("migrate:reset\n");
-            Artisan::call('migrate:reset --database=' . $db);
-            printf("migrate\n");
-            Artisan::call('migrate --database=' . $db);
-            printf("db:seed\n");
-            Artisan::call('db:seed --database=' . $db);
+            printf("migrate:fresh with seed\n");
+            Artisan::call('migrate:fresh --seed --database=' . $db);
             printf("\n");
         }
         printf("Migrating done");
