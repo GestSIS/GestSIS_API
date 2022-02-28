@@ -144,7 +144,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
     {
         ExerciceSapeur
             ::where('exercice_id', $exerciceId)
-            ->whereIn('id', $ids)
+            ->whereIn('sapeur_id', $ids)
             ->delete();
     }
 

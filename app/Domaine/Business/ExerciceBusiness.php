@@ -235,6 +235,9 @@ class ExerciceBusiness
         // TODO: Check pour chaque exercice s'il est possible de supprimer la convocation
         // et donc que l'exercice n'est pas déjà imputé
         $this->repository->supprimerConvocations($sapeurId, $exerciceSapeursIds);
+        HeureExercice::whereIn('id', $exerciceSapeursIds)
+            ->where('sapeur_id', $sapeurId)
+            ->delete();
         return true;
     }
 
