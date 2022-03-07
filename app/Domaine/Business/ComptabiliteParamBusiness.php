@@ -130,6 +130,9 @@ class ComptabiliteParamBusiness
     public static function ajouterIndemniteIntervention($data)
     {
         $parFonction = array_key_exists('par_fonction', $data) && $data['par_fonction'];
+        if (array_key_exists('phase_id', $data) && $data['phase_id'] == 0) {
+            $data['phase_id'] = NULL;
+        }
         if (!$parFonction) {
             $data['par_fonction'] = false;
         }
@@ -144,6 +147,9 @@ class ComptabiliteParamBusiness
     public static function modifierIndemniteIntervention($id, $data)
     {
         $parFonction = array_key_exists('par_fonction', $data) && $data['par_fonction'];
+        if (array_key_exists('phase_id', $data) && $data['phase_id'] == 0) {
+            $data['phase_id'] = NULL;
+        }
         $indemnite = IndemniteInterventionType::find($id);
         $indemnite->update($data);
         if (!$parFonction) {

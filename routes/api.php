@@ -175,7 +175,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('statistiques/{id}/vehicule', 'InterventionVehiculesController@stat');
     });
 
-    Route::group(['middleware' => 'jwtTokenRole:intervention.modification'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:intervention.modification,intervention.lecture'], function () {
         Route::resource('interventions', 'InterventionController')->only(['index', 'show', 'store', 'update', 'destroy']);
 
         Route::post('interventions/{id}/materiels', 'InterventionMaterielsController@store')->name('api.v2.interventions.materiels.store');
@@ -214,7 +214,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Static Params Intervention
-    Route::group(['middleware' => 'jwtTokenRole:intervention.modification'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:intervention.modification,intervention.modification,comptabilite.tout'], function () {
         // TODO: see to add the correct right for the following routes : 'store', 'update']);
         Route::resource('phase-types', 'PhaseTypeController')->only(['index']);
         Route::resource('stat-federal', 'StatFederalController')->only(['index']);
