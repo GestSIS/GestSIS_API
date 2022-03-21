@@ -86,7 +86,7 @@
     </table>
     @endif
     {{-- Matériels --}}
-    @if (array_key_exists("materiels", $params) && $params["materiels"])
+    @if (array_key_exists("materiel", $params) && $params["materiel"])
     <h2 class="h4">Matériel utilisé</h2>
     <table class="table table-sm mb-2">
       @if (count($intervention->materiels) == 0)
