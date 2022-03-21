@@ -89,6 +89,35 @@ class ConvocationsController extends Controller
         return response()->json(['data' => $sapeur]);
     }
 
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param Request $request
+     * @param int $exerciceId
+     * @return Response
+     * @throws Exception
+     */
+    public function presences(Request $request, int $exerciceId)
+    {
+        $data = $request->validate([
+            'sapeurs.*.id' => 'required|integer',
+            'sapeurs.*.convoque' => 'required|boolean',
+            'sapeurs.*.present' => 'required|boolean',
+            'sapeurs.*.amende' => 'required|boolean',
+            'sapeurs.*.remplace' => 'required|boolean',
+            'sapeurs.*.sapeur_id' => 'integer|required',
+            'sapeurs.*.excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
+            'sapeurs.*.heures.*.id' => 'nullable|integer',
+            'sapeurs.*.heures.*.quantite' => 'nullable|numeric',
+            'sapeurs.*.heures.*.heure_exercice_type_id' => 'nullable|integer',
+        ]);
+
+        $sapeur = $this->service->updatePresences($exerciceId, $data['sapeurs']);
+
+        return response()->json(['data' => $sapeur]);
+    }
+
     /**
      * Remove the specified resource from storage.
      *

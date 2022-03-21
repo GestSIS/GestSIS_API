@@ -137,6 +137,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::put('exercices/{id}/sapeurs', 'ConvocationsController@update')->name('api.v2.exercices.sapeurs.update');
         Route::delete('exercices/{id}/sapeurs', 'ConvocationsController@destroy')->name('api.v2.exercices.sapeurs.delete');
 
+        Route::post('exercices/{id}/presences', 'ConvocationsController@presences')->name('api.v2.exercices.presences');
         // TODO: à implémenter
         // Route::get('exercices/{id}/liste-appel-localite', 'ExerciceController@listeAppelLocalite');
     });
