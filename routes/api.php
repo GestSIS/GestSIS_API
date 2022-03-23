@@ -74,18 +74,30 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Sapeurs
-    Route::group(['middleware' => 'jwtTokenRole:sapeur.modification'], function () {
-        Route::resource('sapeurs', 'SapeurController')->only(['store', 'update']); //, 'destroy']);//->middleware('role:effectif_read');
+    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture'], function () {
         Route::resource('sapeurs.groupes', 'SapeurGroupeController')->only(['index']);
-        Route::resource('sapeurs.permis', 'SapeurPermisController')->only(['index', 'store', 'update', 'destroy']);
-        Route::resource('sapeurs.telephones', 'SapeurTelephoneController')->only(['index', 'store', 'update', 'destroy']);
-        Route::resource('sapeurs.fonctions', 'SapeurFonctionController')->only(['index', 'store', 'update', 'destroy']);
-        Route::resource('sapeurs.grades', 'SapeurGradeController')->only(['index', 'store', 'update', 'destroy']);
-        Route::resource('sapeurs.mutations', 'SapeurMutationController')->only(['index', 'store', 'update', 'destroy']);
-        Route::resource('sapeurs.cours', 'SapeurCoursController')->only(['index', 'store', 'update', 'destroy']);
-        Route::resource('sapeurs.photo', 'SapeurPhotoController')->only(['index', 'store', 'delete']);
+        Route::resource('sapeurs.permis', 'SapeurPermisController')->only(['index']);
+        Route::resource('sapeurs.telephones', 'SapeurTelephoneController')->only(['index']);
+        Route::resource('sapeurs.fonctions', 'SapeurFonctionController')->only(['index']);
+        Route::resource('sapeurs.grades', 'SapeurGradeController')->only(['index']);
+        Route::resource('sapeurs.mutations', 'SapeurMutationController')->only(['index']);
+        Route::resource('sapeurs.cours', 'SapeurCoursController')->only(['index']);
+        Route::resource('sapeurs.photo', 'SapeurPhotoController')->only(['index']);
 
         Route::get('sapeurs/{id}/exercices/{exerciceComptableId}', 'SapeurExerciceController@index');
+    });
+
+    // Sapeurs
+    Route::group(['middleware' => 'jwtTokenRole:sapeur.modification'], function () {
+        Route::resource('sapeurs', 'SapeurController')->only(['store', 'update']); //, 'destroy']);//->middleware('role:effectif_read');
+        Route::resource('sapeurs.permis', 'SapeurPermisController')->only(['store', 'update', 'destroy']);
+        Route::resource('sapeurs.telephones', 'SapeurTelephoneController')->only(['store', 'update', 'destroy']);
+        Route::resource('sapeurs.fonctions', 'SapeurFonctionController')->only(['store', 'update', 'destroy']);
+        Route::resource('sapeurs.grades', 'SapeurGradeController')->only(['store', 'update', 'destroy']);
+        Route::resource('sapeurs.mutations', 'SapeurMutationController')->only(['store', 'update', 'destroy']);
+        Route::resource('sapeurs.cours', 'SapeurCoursController')->only(['store', 'update', 'destroy']);
+        Route::resource('sapeurs.photo', 'SapeurPhotoController')->only(['store', 'delete']);
+
         Route::post('sapeurs/{id}/fin-fonctions', 'SapeurFonctionController@fin');
         Route::post('sapeurs/{id}/quitter-groupes', 'SapeurGroupeController@quitter');
         Route::post('sapeurs/{id}/supprimer-convocations', 'ConvocationsController@supprimerConvocations');
@@ -176,8 +188,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('statistiques/{id}/vehicule', 'InterventionVehiculesController@stat');
     });
 
-    Route::group(['middleware' => 'jwtTokenRole:intervention.modification,intervention.lecture'], function () {
-        Route::resource('interventions', 'InterventionController')->only(['index', 'show', 'store', 'update', 'destroy']);
+    Route::group(['middleware' => 'jwtTokenRole:intervention.modification'], function () {
+        Route::resource('interventions', 'InterventionController')->only(['store', 'update', 'destroy']);
 
         Route::post('interventions/{id}/materiels', 'InterventionMaterielsController@store')->name('api.v2.interventions.materiels.store');
         Route::put('interventions/{id}/materiels', 'InterventionMaterielsController@update')->name('api.v2.interventions.materiels.update');
@@ -215,14 +227,14 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Static Params Intervention
-    Route::group(['middleware' => 'jwtTokenRole:intervention.modification,intervention.modification,comptabilite.tout'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:intervention.lecture,intervention.modification,comptabilite.tout'], function () {
         // TODO: see to add the correct right for the following routes : 'store', 'update']);
         Route::resource('phase-types', 'PhaseTypeController')->only(['index']);
         Route::resource('stat-federal', 'StatFederalController')->only(['index']);
     });
 
     // Params intervention
-    Route::group(['middleware' => 'jwtTokenRole:intervention.modification'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:intervention.lecture'], function () {
         Route::resource('vehicules', 'VehiculeController')->only(['index']);
         Route::resource('materiels', 'MaterielController')->only(['index']);
         Route::resource('type-intervention', 'TypeInterventionController')->only(['index']);
@@ -245,6 +257,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     // Exercices comptables
     Route::group(['middleware' => 'jwtTokenRole'], function () {
         Route::resource('exercices-comptable', 'ExerciceComptableController')->only(['index']);
+
+        // Static param Comptabilite
+        Route::get('unites', 'UniteController@index')->name('api.v2.unites');
     });
 
     // Comptabilite
@@ -271,9 +286,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         Route::get('exercices-comptable/{exercieComptableId}/comptes/{compteId}/justificatif', 'CompteController@justificatifIndividuel');
         Route::get('exercices-comptable/{exercieComptableId}/justificatif', 'CompteController@justificatifComplet');
-
-        // Static param Comptabilite
-        Route::get('unites', 'UniteController@index')->name('api.v2.unites');
 
         // Params Comptabilite
         Route::resource('comptes', 'CompteController')->only(['index']);
