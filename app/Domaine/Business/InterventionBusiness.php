@@ -5,6 +5,7 @@ namespace App\Domaine\Business;
 use App\Domaine\SPI\InterventionRepository;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\Intervention;
+use App\Infrastructure\Models\Mission;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -48,9 +49,49 @@ class InterventionBusiness
         $this->repository->addPhase($intervention->id, array(
             "debut" => null,
             "phase_type_id" => $phaseTypeIntervention,
-            "statut" => self::INTERVENTION_STATUT_EMPTY
         ));
         return $intervention;
+    }
+
+    /**
+     * Import an intervention
+     *
+     * @param $data
+     * @return InterventionBusiness
+     * @throws ArrayException
+     */
+    public function importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel)
+    {
+        $phaseTypeIntervention = 1;
+        $data['statut'] = self::INTERVENTION_STATUT_SAISI;
+
+        $newIntervention = $this->repository->createNewIntervention($intervention);
+
+        // Pour le moment pas de gestion des phases dans GestSIS Mobile
+        $this->repository->addPhase($newIntervention->id, array(
+            "debut" => null,
+            "phase_type_id" => $phaseTypeIntervention,
+        ));
+
+        // Ajout des sapeurs
+        $newIntervention->sapeurs()->insert($sapeurs);
+
+        // Ajout des groupes
+        $newIntervention->groupes()->attach($groupes);
+
+        // Ajout des missions
+        $newIntervention->missions()->insert($missions);
+
+        // Ajout des appels
+        $newIntervention->appels()->insert($appels);
+
+        // Ajout des vehicules
+        $newIntervention->vehicules()->attach($vehicules);
+
+        // Ajout du matériel
+        $newIntervention->materiels()->insert($materiel);
+
+        return $newIntervention;
     }
 
     /**

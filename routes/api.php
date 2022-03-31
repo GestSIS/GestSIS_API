@@ -42,7 +42,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Sapeurs
-    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,organisation.modification,comptabilite.tout'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,exercice.lecture,intervention.lecture,organisation.modification,comptabilite.tout'], function () {
         Route::resource('sapeurs', 'SapeurController')->only(['index', 'show']);
     });
 
@@ -190,6 +190,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     Route::group(['middleware' => 'jwtTokenRole:intervention.modification'], function () {
         Route::resource('interventions', 'InterventionController')->only(['store', 'update', 'destroy']);
+        Route::post('interventions-complet', 'InterventionController@complet')->name('complet');
 
         Route::post('interventions/{id}/materiels', 'InterventionMaterielsController@store')->name('api.v2.interventions.materiels.store');
         Route::put('interventions/{id}/materiels', 'InterventionMaterielsController@update')->name('api.v2.interventions.materiels.update');

@@ -4,6 +4,7 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\InterventionService;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\Sapeur;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -45,6 +46,7 @@ class InterventionController extends Controller
             'lieu' => 'string|nullable',
             'objet' => 'string',
             'rapport_police' => 'boolean',
+            'agent' => 'string',
             'degre' => 'integer|min:1|max:4',
             'sauve_personne' => 'integer|min:0|max:50',
             'sauve_animaux' => 'integer|min:0|max:50',
@@ -62,6 +64,78 @@ class InterventionController extends Controller
         ]);
 
         $intervention = $this->service->createIntervention($data);
+
+        return response()->json(['data' => $intervention]);
+    }
+
+    /**
+     * Store a newly created resource in storage with all data provided
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function complet(Request $request)
+    {
+        $intervention = $request->validate([
+            'date_debut' => 'date',
+            'heure_debut' => 'date_format:H:i',
+            'date_fin' => 'date|after_or_equal:date_debut',
+            'heure_fin' => 'date_format:H:i',
+            'lieu' => 'string|nullable',
+            'objet' => 'string',
+            'rapport_police' => 'boolean',
+            'agent' => 'string',
+            'degre' => 'integer|min:1|max:4',
+            'sauve_personne' => 'integer|min:0|max:50',
+            'sauve_animaux' => 'integer|min:0|max:50',
+            'description' => 'string|nullable',
+            'proprietaire.nom' => 'string|nullable',
+            'proprietaire.prenom' => 'string|nullable',
+            'proprietaire.adresse' => 'string|nullable',
+            'proprietaire.localite_id' => 'ineger|nullable',
+            'proprietaire.telephone' => 'string|nullable',
+            'proprietaire.email' => 'string|nullable',
+            'responsable' => 'string|nullable',
+            'stat_nb' => 'integer|min:0',
+            'statut' => 'boolean',
+            'localite_id' => 'integer|min:1',
+            'exercice_comptable_id' => 'integer|min:1',
+            'intervention_traitement_id' => 'integer|min:1',
+            'stat_federal_id' => 'integer|min:1',
+            'sapeur_id' => 'integer|min:1',
+            'type_intervention_id' => 'integer|min:1',
+        ]);
+        $sapeurs = $request->validate([
+            'sapeurs.*.id' => 'integer|required',
+            'sapeurs.*.debut' => 'datetime|required',
+            'sapeurs.*.fin' => 'datetime|required',
+            'sapeurs.*.piquet' => 'boolean',
+        ]);
+        $missions = $request->validate([
+            'missions.*.titre' => 'string',
+            'missions.*.resume' => 'string',
+            'missions.*.debut' => 'datetime|required',
+            'missions.*.fin' => 'datetime|required',
+            'missions.*.sapeur_id' => 'integer|exists:sapeurs,id',
+        ]);
+        $appels = $request->validate([
+            'appels.*.date' => 'string',
+            'appels.*.numero' => 'string',
+            'appels.*.nom' => 'string',
+            'appels.*.commentaire' => 'string',
+        ]);
+        $vehicules = $request->validate([
+            'vehicules.*' => 'integer',
+        ]);
+        $groupes = $request->validate([
+            'groupes.*' => 'integer',
+        ]);
+        $materiel = $request->validate([
+            'materiels.*.materiel_id' => 'integer|required',
+            'materiels.*.quantite' => 'numeric|required',
+        ]);
+
+        $intervention = $this->service->importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel);
 
         return response()->json(['data' => $intervention]);
     }
@@ -97,6 +171,7 @@ class InterventionController extends Controller
             'lieu' => 'string|nullable',
             'objet' => 'string',
             'rapport_police' => 'boolean',
+            'agent' => 'string',
             'degre' => 'integer|min:1|max:4',
             'sauve_personne' => 'integer|min:0|max:50',
             'sauve_animaux' => 'integer|min:0|max:50',
