@@ -15,6 +15,13 @@ class UpdateInterventionTable extends Migration
     {
         Schema::table('interventions', function (Blueprint $table) {
             $table->string('agent')->default("");
+            $table->boolean('rapport_police')->default(false)->change();
+            $table->string('rapport_police')->default(false)->change();
+
+            $table->string('lieu')->default('')->change();
+            $table->text('description')->default('')->change();
+            $table->text('proprietaire')->default('')->change();
+            $table->text('responsable')->default('')->change();
         });
     }
 
@@ -26,7 +33,7 @@ class UpdateInterventionTable extends Migration
     public function down()
     {
         Schema::table('interventions', function (Blueprint $table) {
-            $table->dropColumn('agent');
+            $table->dropColumn('agent')->default('');
         });
     }
 }

@@ -89,6 +89,14 @@ class Intervention extends Model
     }
 
     /**
+     * Les groupes alarmés
+     */
+    public function groupesInter()
+    {
+        return $this->belongsToMany(Groupe::class);
+    }
+
+    /**
      * Le matériel utilisé
      */
     public function materiels()
@@ -105,11 +113,27 @@ class Intervention extends Model
     }
 
     /**
+     * Les véhicules engagés
+     */
+    public function vehiculesInter()
+    {
+        return $this->belongsToMany(Vehicule::class);
+    }
+
+    /**
      * les quittances
      */
     public function quittances()
     {
         return $this->hasMany(Quittance::class);
+    }
+
+    /**
+     * The mission that belong to the sapeur.
+     */
+    public function sapeurs()
+    {
+        return $this->hasMany(InterventionSapeur::class);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Domaine\Business;
 
 use App\Domaine\SPI\InterventionRepository;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\Intervention;
 use App\Infrastructure\Models\Mission;
 use Carbon\Carbon;
@@ -63,9 +64,37 @@ class InterventionBusiness
     public function importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel)
     {
         $phaseTypeIntervention = 1;
-        $data['statut'] = self::INTERVENTION_STATUT_SAISI;
+        $intervention['statut'] = self::INTERVENTION_STATUT_SAISI;
+        $intervention['intervention_traitement_id'] = 1; // TODO: config à ajouter dans params
 
-        $newIntervention = $this->repository->createNewIntervention($intervention);
+        // Identification de l'exercice comptable à utiliser
+        $exerciceComptable = ExerciceComptable::where([
+            ['debut', '<=', $intervention['date_debut']],
+            ['fin', '>=', $intervention['date_debut']],
+        ])->first();
+
+        // TODO et si année en cours
+        if ($exerciceComptable == NULL) {
+            // TODO Création de l'exercice comptable automatique
+        }
+
+        // TODO: Check pas déjà cloturé
+        if ($exerciceComptable == NULL || $exerciceComptable->boucle) {
+            // TODO Impossible d'ajouter l'intervention
+            throw new ArrayException(["message" => "Exercice comptable inexistant ou déjà bouclé"]);
+        }
+
+        $intervention['exercice_comptable_id'] = $exerciceComptable->id;
+        if (!array_key_exists('lieu', $intervention) || is_null($intervention['lieu'])) $intervention['lieu'] = '';
+        if (!array_key_exists('description', $intervention) || is_null($intervention['description'])) $intervention['description'] = '';
+        if (!array_key_exists('proprietaire', $intervention) || is_null($intervention['proprietaire'])) $intervention['proprietaire'] = '';
+        if (!array_key_exists('responsable', $intervention) || is_null($intervention['responsable'])) $intervention['responsable'] = '';
+
+        $newIntervention = new Intervention();
+        $newIntervention->fill($intervention);
+        $newIntervention->date_imputation = null;
+        $newIntervention->exercice_comptable_id = $intervention['exercice_comptable_id'];
+        $newIntervention->save();
 
         // Pour le moment pas de gestion des phases dans GestSIS Mobile
         $this->repository->addPhase($newIntervention->id, array(
@@ -77,7 +106,7 @@ class InterventionBusiness
         $newIntervention->sapeurs()->insert($sapeurs);
 
         // Ajout des groupes
-        $newIntervention->groupes()->attach($groupes);
+        $newIntervention->groupesInter()->attach($groupes);
 
         // Ajout des missions
         $newIntervention->missions()->insert($missions);
@@ -86,7 +115,7 @@ class InterventionBusiness
         $newIntervention->appels()->insert($appels);
 
         // Ajout des vehicules
-        $newIntervention->vehicules()->attach($vehicules);
+        $newIntervention->vehiculesInter()->attach($vehicules);
 
         // Ajout du matériel
         $newIntervention->materiels()->insert($materiel);

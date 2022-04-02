@@ -23,16 +23,13 @@ class CreateSapeursTable extends Migration
             $table->string('rue');
             $table->string('no_rue');
             $table->date('date_naissance');
-            // $table->date('date_inco'); // TODO: vérifier si nécessaire
-            // $table->date('date_sortie'); //TODO: vérifier si nécessaire
+
             $table->string('no_avs');
             $table->boolean('cotisation_avs')->default(false);
 
             $table->string('profession');
             $table->string('employeur');
             $table->string('lieu_de_travail');
-            
-            // $table->integer('Nip'); // TODO: vérifier a quoi ça sert
 
             $table->string('email');
             $table->integer('actif');
@@ -44,7 +41,7 @@ class CreateSapeursTable extends Migration
             // Iban Status
             $table->string('iban');
             $table->integer('iban_statut');
-            
+
             $table->text('remarque');
             $table->integer('porteur');
 
