@@ -112,7 +112,8 @@ class ExerciceTest extends TestCase
 
         $response = $this->json(
             'PUT',
-            '/api/v2/exercices/' . $exercice->id, $exerciceEdited->toArray()
+            '/api/v2/exercices/' . $exercice->id,
+            $exerciceEdited->toArray()
         );
 
         $response
@@ -152,14 +153,14 @@ class ExerciceTest extends TestCase
         $exercice = Exercice::factory()->create();
 
         $sapeurs = [
-            array(
+            [
                 'sapeur_id' => 1,
                 'convoque' => 1,
                 'present' => 1,
                 'amende' => 0,
                 'remplace' => 0,
                 'excuse_type_id' => null
-            ),
+            ],
         ];
         $this->service->addSapeurs($exercice->id, $sapeurs);
 

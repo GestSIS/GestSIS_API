@@ -45,7 +45,7 @@ class CustomSeed extends Command
             // TypeUnite::on($db)->insert(['id' => '7', 'comptable' => True, 'unite' => 'mois', 'abreviation' => 'm']);
             printf("\n");
         }
-        printf("Migrating done");
+        printf("Migrating done\n");
         return 0;
     }
 }

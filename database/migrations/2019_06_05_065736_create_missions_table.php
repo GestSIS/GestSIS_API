@@ -20,7 +20,7 @@ class CreateMissionsTable extends Migration
             $table->dateTime('debut');
             $table->dateTime('fin')->nullable();
             $table->string('titre');
-            $table->text('resume');
+            $table->text('resume'); // TODO: Ajout default empty string
 
             $table->bigInteger('sapeur_id')->unsigned();
             $table->foreign('sapeur_id')->references('id')->on('sapeurs');

@@ -45,9 +45,10 @@ class InterventionController extends Controller
             'lieu' => 'string|nullable',
             'objet' => 'string',
             'rapport_police' => 'boolean',
+            'agent' => 'string',
             'degre' => 'integer|min:1|max:4',
-            'sauve_personne' => 'integer|min:0|max:50',
-            'sauve_animaux' => 'integer|min:0|max:50',
+            'sauve_personne' => 'integer|min:0',
+            'sauve_animaux' => 'integer|min:0',
             'description' => 'string|nullable',
             'proprietaire' => 'string|nullable',
             'responsable' => 'string|nullable',
@@ -62,6 +63,83 @@ class InterventionController extends Controller
         ]);
 
         $intervention = $this->service->createIntervention($data);
+
+        return response()->json(['data' => $intervention]);
+    }
+
+    /**
+     * Store a newly created resource in storage with all data provided
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function complet(Request $request)
+    {
+        $intervention = $request->validate([
+            'date_debut' => 'date|required',
+            'heure_debut' => 'date_format:H:i|required',
+            'date_fin' => 'date|after_or_equal:date_debut|required',
+            'heure_fin' => 'date_format:H:i|required',
+            'lieu' => 'string|nullable',
+            'objet' => 'string|required',
+            'rapport_police' => 'boolean',
+            'agent' => 'string',
+            'degre' => 'integer|min:1|max:4|required',
+            'sauve_personne' => 'integer|min:0',
+            'sauve_animaux' => 'integer|min:0',
+            'description' => 'string|nullable',
+            'proprietaire' => 'string|nullable',
+            'responsable' => 'string|nullable',
+            'stat_nb' => 'integer|min:0',
+            'statut' => 'boolean',
+            'localite_id' => 'integer|min:1|required',
+            'stat_federal_id' => 'integer|min:1|required',
+            'sapeur_id' => 'integer|min:1|required',
+            'type_intervention_id' => 'integer|min:1|required',
+        ]);
+
+        $sapeurs = $request->validate([
+            'sapeurs.*.id' => 'integer|required',
+            'sapeurs.*.debut' => 'date_format:Y-m-d H:i|required',
+            'sapeurs.*.fin' => 'date_format:Y-m-d H:i|required',
+            'sapeurs.*.piquet' => 'boolean|required',
+        ]);
+        $sapeurs = isset($sapeurs['sapeurs']) ? $sapeurs['sapeurs'] : [];
+
+        $missions = $request->validate([
+            'missions.*.titre' => 'string|required',
+            'missions.*.resume' => 'string|nullable',
+            'missions.*.debut' => 'date_format:Y-m-d H:i|required',
+            'missions.*.fin' => 'date_format:Y-m-d H:i|required',
+            'missions.*.sapeur_id' => 'integer|exists:sapeurs,id',
+        ]);
+        $missions = isset($missions['missions']) ? $missions['missions'] : [];
+
+        $appels = $request->validate([
+            'appels.*.date' => 'string|required',
+            'appels.*.numero' => 'string|required',
+            'appels.*.nom' => 'string|required',
+            'appels.*.commentaire' => 'string|nullable',
+        ]);
+        $appels = isset($appels['appels']) ? $appels['appels'] : [];
+
+        $vehicules = $request->validate([
+            'vehicules.*' => 'integer',
+        ]);
+        $vehicules = isset($vehicules['vehicules']) ? $vehicules['vehicules'] : [];
+
+        $groupes = $request->validate([
+            'groupes.*' => 'integer',
+        ]);
+        $groupes = isset($groupes['groupes']) ? $groupes['groupes'] : [];
+
+        $materiel = $request->validate([
+            'materiel.*.materiel_id' => 'integer|required',
+            'materiel.*.quantite' => 'numeric|required',
+        ]);
+        $materiel = isset($materiel['materiel']) ? $materiel['materiel'] : [];
+
+        $intervention = $this->service->importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel);
 
         return response()->json(['data' => $intervention]);
     }
@@ -97,6 +175,7 @@ class InterventionController extends Controller
             'lieu' => 'string|nullable',
             'objet' => 'string',
             'rapport_police' => 'boolean',
+            'agent' => 'string',
             'degre' => 'integer|min:1|max:4',
             'sauve_personne' => 'integer|min:0|max:50',
             'sauve_animaux' => 'integer|min:0|max:50',

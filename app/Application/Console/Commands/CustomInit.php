@@ -45,7 +45,7 @@ class CustomInit extends Command
             Artisan::call('migrate:fresh --seed --database=' . $db);
             printf("\n");
         }
-        printf("Migrating done");
+        printf("Migrating done\n");
         return 0;
     }
 }

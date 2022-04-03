@@ -7,7 +7,6 @@ use App\Domaine\Business\InterventionBusiness;
 use App\Domaine\SPI\InterventionRepository;
 use App\Infrastructure\Models\Groupe;
 use App\Infrastructure\Models\Intervention;
-use App\Infrastructure\Models\InterventionSapeur;
 use App\Infrastructure\Models\Materiel;
 use App\Infrastructure\Models\Quittance;
 use App\Infrastructure\Models\Sapeur;
@@ -40,6 +39,11 @@ class InterventionService
     public function createIntervention($data)
     {
         return $this->business->createIntervention($data);
+    }
+
+    public function importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel)
+    {
+        return $this->business->importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel);
     }
 
     public function getInterventionAppels($interventionId)

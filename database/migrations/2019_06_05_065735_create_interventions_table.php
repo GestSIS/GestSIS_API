@@ -17,12 +17,14 @@ class CreateInterventionsTable extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
+            // TODO: Merge ?
             $table->date('date_debut');
             $table->time('heure_debut');
-            $table->string('lieu');
-            $table->string('objet');
             $table->date('date_fin');
             $table->time('heure_fin');
+
+            $table->string('lieu');
+            $table->string('objet');
             $table->boolean('rapport_police');
             $table->smallInteger('degre');
             $table->integer('sauve_personne');
@@ -36,9 +38,9 @@ class CreateInterventionsTable extends Migration
 
             $table->dateTime('date_imputation')->nullable();
 
-//            $table->decimal('latitude');
-//            $table->decimal('longitude');
-//            $table->string('gps_info');
+            //            $table->decimal('latitude');
+            //            $table->decimal('longitude');
+            //            $table->string('gps_info');
 
             $table->bigInteger('exercice_comptable_id')->unsigned();
             $table->foreign('exercice_comptable_id')->references('id')->on('exercice_comptables');
@@ -57,7 +59,6 @@ class CreateInterventionsTable extends Migration
 
             $table->bigInteger('intervention_traitement_id')->unsigned();
             $table->foreign('intervention_traitement_id')->references('id')->on('intervention_traitements');
-
         });
     }
 

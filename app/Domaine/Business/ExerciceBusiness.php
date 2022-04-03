@@ -4,9 +4,11 @@ namespace App\Domaine\Business;
 
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\HeureExercice;
 use App\Infrastructure\Models\HeureExerciceType;
+use Ds\Set;
 use Illuminate\Database\Eloquent\Collection;
 
 class ExerciceBusiness
@@ -111,6 +113,43 @@ class ExerciceBusiness
     }
 
     /**
+     * Update presences à partir d'une liste complète saisie
+     *
+     * @param $data
+     * @return Collection
+     * @throws ArrayException
+     */
+    public function updatePresences($exerciceId, $presences)
+    {
+        // Fetch exercice
+        $exercice = Exercice::with("sapeurs")->where('id', '=', $exerciceId)->first();
+
+        // Ignore si l'exercice n'existe plus
+        if ($exercice == NULL) {
+            return;
+        }
+
+        // Ignore si déjà imputé
+        if ($exercice->statut === self::EXERCICE_STATUT_IMPUTE) {
+            return;
+        }
+
+        // Ajout des sapeurs manquants
+        $sapeursIdsActuel = new Set(array_map(function ($e) {
+            return $e['sapeur_id'];
+        }, $exercice->sapeurs->toArray()));
+
+        $sapeursAjoutes = array_filter($presences, fn ($e) => !$sapeursIdsActuel->contains($e['sapeur_id']));
+        $this->addSapeurs($exerciceId, $sapeursAjoutes);
+
+        // Updated sapeurs
+        $sapeursModifies = array_filter($presences, fn ($e) => $sapeursIdsActuel->contains($e['sapeur_id']));
+        $this->updateSapeurs($exerciceId, $sapeursModifies);
+
+        // On ignore les sapeurs déjà saisi mais non présent dans les présences envoyées
+    }
+
+    /**
      * Ajout de sapeurs d'un exercice
      *
      * @param $data
@@ -135,7 +174,21 @@ class ExerciceBusiness
         });
 
         foreach ($sapeurFiltered as $sapeur) {
-            $this->repository->addSapeurToExercice($exerciceId, $sapeur);
+            $sapeur = $this->repository->addSapeurToExercice($exerciceId, $sapeur);
+
+            // Ajout heures sup if any
+            $heures = array_filter(
+                array_key_exists('heures', $sapeur) ? $sapeur['heures'] : [],
+                fn ($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
+            );
+            foreach ($heures as $heure) {
+                if (!HeureExerciceType::where('id', $heure['heure_exercice_type_id'])->exists()) {
+                    // On ignore le type d'heure n'existant plus
+                    continue;
+                }
+                $heure['sapeur_id'] = $sapeur['sapeur_id'];
+                $this->ajouterHeureExercice($exerciceId, $heure);
+            }
         }
 
         return $this->updateStatut($exerciceId);

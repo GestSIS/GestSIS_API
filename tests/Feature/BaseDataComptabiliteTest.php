@@ -14,9 +14,9 @@ class BaseDataComptabiliteTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testFraisTypeIndexOk()
+    public function testFraisIndemnitesTypeIndexOk()
     {
-        $response = $this->json('GET', "/api/v2/frais-types/");
+        $response = $this->json('GET', "/api/v2/frais-indemnites-types/");
 
         $response
             ->assertStatus(200)
@@ -24,50 +24,50 @@ class BaseDataComptabiliteTest extends TestCase
                 'data' => [
                     'annuels' => [
                         '*' => [
-                            'id', 'designation',
-                            'fraisAnnuels' => [
+                            'id', 'designation', 'cumulable', 'compte_id', 'ecriture_categorie_id', 'type',
+                            'frais_indemnite_annuels' => [
                                 '*' => [
-                                    'id', 'fonction_id', 'quantite', 'montant'
+                                    'id', 'fonction_id', 'quantite', 'montant', 'frais_indemnite_annuel_type_id', 'type_unite_id'
                                 ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]);
-    }
-
-    /**
-     * Test index indemnite annuel type
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function testIndemniteTypeIndexOk()
-    {
-        $response = $this->json('GET', "/api/v2/indemnites-types/");
-
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'data' => [
-                    'annuels' => [
-                        '*' => [
-                            'id', 'designation',
-                            'indemniteAnnuels' => [
-                                '*' => [
-                                    'id', 'fonction_id', 'quantite', 'montant'
-                                ]
-                            ]
+                            ],
                         ]
                     ],
                     'exercices' => [
                         '*' => [
-                            'id', 'designation', 'compte_id', 'solde', 'indemnite'
+                            'id', 'designation', 'type_unite_id', 'ecriture_categorie_id', 'par_fonction',
+                            'fonctions' => [
+                                '*' => [
+                                    'tarif',
+                                    'fonction_id',
+                                    'indemnite_exe_id',
+                                    'tarif_min',
+                                    'tarif_min_pour',
+                                    'compte_id',
+                                    'type',
+                                ]
+                            ]
                         ]
                     ],
                     'interventions' => [
                         '*' => [
-                            'id', 'designation', 'compte_id', 'solde'
+                            'id',
+                            'designation',
+                            'compte_id',
+                            'tarif',
+                            'tarif_min',
+                            'tarif_min_pour',
+                            'taux_weekend',
+                            'taux_nuit',
+                            'debut',
+                            'fin',
+                            'phase_id',
+                            'type_unite_id',
+                            'ecriture_categorie_id',
+                            'par_fonction',
+                            'type',
+                            'fonctions' => [
+                                '*' => [] //TODO: See what to write with par fonction
+                            ]
                         ]
                     ]
                 ]
