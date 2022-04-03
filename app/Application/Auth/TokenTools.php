@@ -5,6 +5,7 @@ namespace App\Application\Auth;
 
 use Carbon\Carbon;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -31,7 +32,7 @@ class TokenTools
      */
     public static function createAccessToken($user)
     {
-//        Log::debug("CREATE TOKEN");
+        //        Log::debug("CREATE TOKEN");
 
         $privateKey = Storage::disk('keys')->get(self::PRIVATE_KEY_FILE);
 
@@ -61,7 +62,7 @@ class TokenTools
      */
     public static function createRefreshToken()
     {
-//        Log::debug("CREATE REFRESH TOKEN");
+        //        Log::debug("CREATE REFRESH TOKEN");
 
         //Generate a random string.
         $token = Str::random(self::REFRESH_TOKEN_LENGTH);
@@ -81,9 +82,9 @@ class TokenTools
      */
     public static function validateToken($token)
     {
-//        Log::debug("VALIDATE TOKEN");
+        //        Log::debug("VALIDATE TOKEN");
         $publicKey = Storage::disk('keys')->get(self::PUBLIC_KEY_FILE);
 
-        return JWT::decode($token, $publicKey, array('RS256'));
+        return JWT::decode($token, new Key($publicKey, 'RS256'));
     }
 }

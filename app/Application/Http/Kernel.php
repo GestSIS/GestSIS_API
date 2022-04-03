@@ -19,7 +19,7 @@ class Kernel extends HttpKernel
         \App\Application\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Application\Http\Middleware\TrustProxies::class,
-        \Fruitcake\Cors\HandleCors::class, //TODO: A changer une fois migré vers laravel 9
+        \Illuminate\Http\Middleware\HandleCors::class,
         \Spatie\HttpLogger\Middlewares\HttpLogger::class
     ];
 
