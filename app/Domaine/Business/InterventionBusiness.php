@@ -106,12 +106,21 @@ class InterventionBusiness
         $newIntervention->sapeurs()->insert($sapeurs);
 
         // Ajout des groupes
+        // dd($groupes);
         $newIntervention->groupesInter()->attach($groupes);
 
         // Ajout des missions
+        $missions = array_map(function ($e) {
+            if (!isset($e['resume']) || is_null($e['resume']))  $e['resume'] = '';
+            return $e;
+        }, $missions);
         $newIntervention->missions()->insert($missions);
 
         // Ajout des appels
+        $appels = array_map(function ($e) {
+            if (!isset($e['commentaire']) || is_null($e['commentaire']))  $e['commentaire'] = '';
+            return $e;
+        }, $appels);
         $newIntervention->appels()->insert($appels);
 
         // Ajout des vehicules
