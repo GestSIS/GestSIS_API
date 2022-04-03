@@ -41,7 +41,7 @@ class JwtTokenValidatorRole
 
             if (count(array_intersect($roles, $perms[$sisKey])) == 0) {
                 // if (!in_array($role, $perms[$sisKey])) {
-                return response()->json(["error" => "Au moins 1 des rôles suivant est requis [" . $roles . "]."], 401);
+                return response()->json(["error" => "Au moins 1 des rôles suivant est requis [" . join(", ", $roles) . "]."], 401);
             }
         }
 
