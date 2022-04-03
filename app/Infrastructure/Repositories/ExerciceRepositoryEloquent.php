@@ -130,7 +130,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         $sapeur->sapeur_id = $data['sapeur_id'];
 
         $sapeur->save();
-        return $sapeur;
+        return $sapeur->toArray();
     }
 
     public function editSapeurOfExercice(int $exerciceId, array $sapeur)
