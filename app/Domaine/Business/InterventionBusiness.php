@@ -73,14 +73,22 @@ class InterventionBusiness
             ['fin', '>=', $intervention['date_debut']],
         ])->first();
 
-        // TODO et si année en cours
-        if ($exerciceComptable == NULL) {
-            // TODO Création de l'exercice comptable automatique
+        // Création de l'exercice comptable automatique si année en cours et aucun exercice comptable existant
+        $anneeEnCours = Carbon::now()->year;
+        if ($exerciceComptable == NULL && $anneeEnCours == Carbon::parse($intervention['date_debut'])->year) {
+            // Création de l'exercice comptable
+            $exerciceComptable = new ExerciceComptable();
+            $exerciceComptable->annee = $anneeEnCours;
+            $exerciceComptable->designation = "Année comptable " . $anneeEnCours;
+            $exerciceComptable->debut = Carbon::createFromDate($anneeEnCours, 1, 1);
+            $exerciceComptable->fin = Carbon::createFromDate($anneeEnCours, 12, 31);
+            $exerciceComptable->boucle = false;
+            $exerciceComptable->save();
         }
 
-        // TODO: Check pas déjà cloturé
+        // Check pas déjà cloturé
         if ($exerciceComptable == NULL || $exerciceComptable->boucle) {
-            // TODO Impossible d'ajouter l'intervention
+            // Impossible d'ajouter l'intervention
             throw new ArrayException(["message" => "Exercice comptable inexistant ou déjà bouclé"]);
         }
 
