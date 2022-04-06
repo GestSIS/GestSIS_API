@@ -6,6 +6,7 @@ use App\Domaine\SPI\InterventionRepository;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\Intervention;
+use App\Infrastructure\Models\InterventionSapeur;
 use App\Infrastructure\Models\Mission;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -111,10 +112,14 @@ class InterventionBusiness
         ));
 
         // Ajout des sapeurs
-        $newIntervention->sapeurs()->insert($sapeurs);
+        $mappedSapeurs = array_map(function ($s) use ($newIntervention) {
+            $s['intervention_id'] = $newIntervention->id;
+            return $s;
+        }, $sapeurs);
+        InterventionSapeur::insert($mappedSapeurs);
 
         // Ajout des groupes
-        // dd($groupes);
+        dd($groupes);
         $newIntervention->groupesInter()->attach($groupes);
 
         // Ajout des missions
