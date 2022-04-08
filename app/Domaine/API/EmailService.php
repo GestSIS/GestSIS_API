@@ -17,11 +17,11 @@ class EmailService
         $this->repository = $repository;
         $this->business = $business;
     }
-    
+
     public function checkEmail($email)
     {
         // Iteration sur toutes les bases de données
-        $dbs = explode(",", env('DB_LISTE', true));
+        $dbs = config('database.dbs');
         $res = [];
         foreach ($dbs as $db) {
             DB::reconnect($db);

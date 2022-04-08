@@ -99,7 +99,7 @@ class InterventionController extends Controller
         ]);
 
         $sapeurs = $request->validate([
-            'sapeurs.*.id' => 'integer|required',
+            'sapeurs.*.sapeur_id' => 'integer|required',
             'sapeurs.*.debut' => 'date_format:Y-m-d H:i|required',
             'sapeurs.*.fin' => 'date_format:Y-m-d H:i|required',
             'sapeurs.*.piquet' => 'boolean|required',

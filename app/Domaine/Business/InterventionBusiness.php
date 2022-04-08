@@ -6,6 +6,7 @@ use App\Domaine\SPI\InterventionRepository;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\Intervention;
+use App\Infrastructure\Models\InterventionSapeur;
 use App\Infrastructure\Models\Mission;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -73,14 +74,22 @@ class InterventionBusiness
             ['fin', '>=', $intervention['date_debut']],
         ])->first();
 
-        // TODO et si année en cours
-        if ($exerciceComptable == NULL) {
-            // TODO Création de l'exercice comptable automatique
+        // Création de l'exercice comptable automatique si année en cours et aucun exercice comptable existant
+        $anneeEnCours = Carbon::now()->year;
+        if ($exerciceComptable == NULL && $anneeEnCours == Carbon::parse($intervention['date_debut'])->year) {
+            // Création de l'exercice comptable
+            $exerciceComptable = new ExerciceComptable();
+            $exerciceComptable->annee = $anneeEnCours;
+            $exerciceComptable->designation = "Année comptable " . $anneeEnCours;
+            $exerciceComptable->debut = Carbon::createFromDate($anneeEnCours, 1, 1);
+            $exerciceComptable->fin = Carbon::createFromDate($anneeEnCours, 12, 31);
+            $exerciceComptable->boucle = false;
+            $exerciceComptable->save();
         }
 
-        // TODO: Check pas déjà cloturé
+        // Check pas déjà cloturé
         if ($exerciceComptable == NULL || $exerciceComptable->boucle) {
-            // TODO Impossible d'ajouter l'intervention
+            // Impossible d'ajouter l'intervention
             throw new ArrayException(["message" => "Exercice comptable inexistant ou déjà bouclé"]);
         }
 
@@ -103,10 +112,14 @@ class InterventionBusiness
         ));
 
         // Ajout des sapeurs
-        $newIntervention->sapeurs()->insert($sapeurs);
+        $mappedSapeurs = array_map(function ($s) use ($newIntervention) {
+            $s['intervention_id'] = $newIntervention->id;
+            return $s;
+        }, $sapeurs);
+        InterventionSapeur::insert($mappedSapeurs);
 
         // Ajout des groupes
-        // dd($groupes);
+        dd($groupes);
         $newIntervention->groupesInter()->attach($groupes);
 
         // Ajout des missions

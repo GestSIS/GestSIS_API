@@ -16,7 +16,6 @@ class UpdateInterventionTable extends Migration
         Schema::table('interventions', function (Blueprint $table) {
             $table->string('agent')->default("");
             $table->boolean('rapport_police')->default(false)->change();
-            $table->string('rapport_police')->default(false)->change();
 
             $table->string('lieu')->default('')->change();
             $table->text('description')->default('')->change();
