@@ -112,26 +112,31 @@ class InterventionBusiness
         ));
 
         // Ajout des sapeurs
-        $mappedSapeurs = array_map(function ($s) use ($newIntervention) {
-            $s['intervention_id'] = $newIntervention->id;
-            return $s;
+        $sapeurs = array_map(function ($e) use ($newIntervention) {
+            $e['intervention_id'] = $newIntervention->id;
+            return $e;
         }, $sapeurs);
-        InterventionSapeur::insert($mappedSapeurs);
+        InterventionSapeur::insert($sapeurs);
 
         // Ajout des groupes
-        dd($groupes);
-        $newIntervention->groupesInter()->attach($groupes);
+        $groupes = array_map(function ($e) use ($newIntervention) {
+            $e['intervention_id'] = $newIntervention->id;
+            return $e;
+        }, $groupes);
+        $newIntervention->groupes()->insert($groupes);
 
         // Ajout des missions
-        $missions = array_map(function ($e) {
+        $missions = array_map(function ($e) use ($newIntervention) {
             if (!isset($e['resume']) || is_null($e['resume']))  $e['resume'] = '';
+            $e['intervention_id'] = $newIntervention->id;
             return $e;
         }, $missions);
         $newIntervention->missions()->insert($missions);
 
         // Ajout des appels
-        $appels = array_map(function ($e) {
+        $appels = array_map(function ($e) use ($newIntervention) {
             if (!isset($e['commentaire']) || is_null($e['commentaire']))  $e['commentaire'] = '';
+            $e['intervention_id'] = $newIntervention->id;
             return $e;
         }, $appels);
         $newIntervention->appels()->insert($appels);
@@ -140,6 +145,10 @@ class InterventionBusiness
         $newIntervention->vehiculesInter()->attach($vehicules);
 
         // Ajout du matériel
+        $materiel = array_map(function ($e) use ($newIntervention) {
+            $e['intervention_id'] = $newIntervention->id;
+            return $e;
+        }, $materiel);
         $newIntervention->materiels()->insert($materiel);
 
         return $newIntervention;
