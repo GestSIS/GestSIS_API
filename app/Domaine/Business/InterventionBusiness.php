@@ -151,7 +151,7 @@ class InterventionBusiness
         }, $materiel);
         $newIntervention->materiels()->insert($materiel);
 
-        return $newIntervention;
+        return $newIntervention->toArray();
     }
 
     /**

@@ -4,8 +4,10 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\InterventionService;
 use App\Domaine\Exceptions\ArrayException;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
 class InterventionController extends Controller
 {
@@ -140,7 +142,21 @@ class InterventionController extends Controller
         ]);
         $materiel = isset($materiel['materiel']) ? $materiel['materiel'] : [];
 
-        $intervention = $this->service->importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel);
+        try {
+            $intervention = $this->service->importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel);
+        } catch (Exception $e) {
+            Log::error("Intervention Export", [
+                "intervention" => $intervention,
+                "sapeurs" => $sapeurs,
+                "missions" => $missions,
+                "appels" => $appels,
+                "vehicules" => $vehicules,
+                "groupes" => $groupes,
+                "materiel" => $materiel,
+                "exception" => $e,
+            ]);
+            return response()->json(['error' => 'Une erreur est survenue lors de l\'export de votre intervention, contacter l\'administrateur'], 500);
+        }
 
         return response()->json(['data' => $intervention]);
     }
