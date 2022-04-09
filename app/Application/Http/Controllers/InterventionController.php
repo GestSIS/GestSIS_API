@@ -129,7 +129,8 @@ class InterventionController extends Controller
         $vehicules = isset($vehicules['vehicules']) ? $vehicules['vehicules'] : [];
 
         $groupes = $request->validate([
-            'groupes.*' => 'integer',
+            'groupes.*.no' => 'integer|nullable',
+            'groupes.*.designation' => 'string|required',
         ]);
         $groupes = isset($groupes['groupes']) ? $groupes['groupes'] : [];
 

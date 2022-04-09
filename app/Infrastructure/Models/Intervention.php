@@ -89,14 +89,6 @@ class Intervention extends Model
     }
 
     /**
-     * Les groupes alarmés
-     */
-    public function groupesInter()
-    {
-        return $this->belongsToMany(Groupe::class);
-    }
-
-    /**
      * Le matériel utilisé
      */
     public function materiels()
