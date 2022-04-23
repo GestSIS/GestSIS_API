@@ -59,7 +59,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('publipostage', 'PublipostageController@index')->name('publipostage');
     });
 
-    Route::group(['middleware' => 'jwtTokenRole:effectif.tout,sapeur.lecture,organisation.modification,comptabilite.tout'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:intervention.lecture,effectif.tout,sapeur.lecture,organisation.modification,comptabilite.tout'], function () {
         // Static Params Sapeurs ---
         Route::get('civilites', 'CiviliteController@index')->name('api.v2.civilites');
         Route::get('localites', 'LocaliteController@index')->name('api.v2.localites');
