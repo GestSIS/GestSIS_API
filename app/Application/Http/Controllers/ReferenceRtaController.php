@@ -76,6 +76,7 @@ class ReferenceRtaController extends Controller
             'modifies.*.prenom' => 'string',
             'modifies.*.suffixe' => 'nullable|string',
             'modifies.*.localite' => 'required|string',
+            'modifies.*.adresse' => 'required|string',
             'modifies.*.fonction' => 'nullable|string',
             'modifies.*.date_naissance' => 'date',
             'modifies.*.groupes' => 'required|array|min:1',
@@ -89,6 +90,7 @@ class ReferenceRtaController extends Controller
             'supprimes.*.prenom' => 'string',
             'supprimes.*.suffixe' => 'string|nullable',
             'supprimes.*.localites' => 'string|nullable',
+            'supprimes.*.adresse' => 'string|nullable',
             'supprimes.*.fonction' => 'string|nullable',
             'supprimes.*.date_naissance' => 'date',
         ]);

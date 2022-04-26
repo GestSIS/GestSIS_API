@@ -16,10 +16,10 @@ use Carbon\Carbon;
       <TelNatel>{{ count($sapeur['numeros']) > 0 ? $sapeur['numeros'][0] : '' }}</TelNatel>
       <TelPriv>{{ count($sapeur['numeros']) > 1 ? $sapeur['numeros'][1] : '' }}</TelPriv>
       <TelProf>{{ count($sapeur['numeros']) > 2 ? $sapeur['numeros'][2] : ''}}</TelProf>
-      <Fonction>{{ $sapeur['fonction'] }}</Fonction>
+      <Fonction>{{ isset($sapeur['fonction']) ? $sapeur['fonction'] : '' }}</Fonction>
       <Date>{{ Carbon::parse($sapeur['date_naissance'])->format('d.m.Y') }}</Date>
-      <Adresse>{{ $sapeur['adresse'] }}</Adresse>
-      <Localite>{{ $sapeur['localite'] }}</Localite>
+      <Adresse>{{ isset($sapeur['adresse']) ? $sapeur['adresse'] : '' }}</Adresse>
+      <Localite>{{ isset($sapeur['localite']) ? $sapeur['localite'] : '' }}</Localite>
       <Groupes>
         @foreach ($sapeur['groupes'] as $groupe)
         <Groupe No="{{ $groupe['no'] }}">{{ $groupe['designation'] }}</Groupe>
