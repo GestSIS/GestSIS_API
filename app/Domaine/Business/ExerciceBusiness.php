@@ -138,7 +138,7 @@ class ExerciceBusiness
         $sapeursIdsActuel = new Set(array_map(function ($e) {
             return $e['sapeur_id'];
         }, $exercice->sapeurs->toArray()));
-
+        //FIXME: Sapeurs non présent mais avec des heures pas pris en compte ?
         $sapeursAjoutes = array_filter($presences, fn ($e) => !$sapeursIdsActuel->contains($e['sapeur_id']));
         $this->addSapeurs($exerciceId, $sapeursAjoutes);
 
@@ -182,7 +182,7 @@ class ExerciceBusiness
                 fn ($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
             );
             foreach ($heures as $heure) {
-                if (!HeureExerciceType::where('id', $heure['heure_exercice_type_id'])->exists()) {
+                if (!HeureExerciceType::where('id', '=', $heure['heure_exercice_type_id'])->exists()) {
                     // On ignore le type d'heure n'existant plus
                     continue;
                 }
@@ -239,7 +239,7 @@ class ExerciceBusiness
                 ->delete();
 
             // Heures ajoutées
-            $heuresAjoutees = array_filter($heures, fn ($heure) => !array_key_exists('id', $heure));
+            $heuresAjoutees = array_filter($heures, fn ($heure) => !isset($heure['id']) || !$heure['id']);
             foreach ($heuresAjoutees as $heure) {
                 if (!array_key_exists('heure_exercice_type_id', $heure)) {
                     // On ignore l'heure invalide
@@ -250,13 +250,14 @@ class ExerciceBusiness
             }
 
             // Heures modifiées
-            $heuresModifiees = array_filter($heures, fn ($heure) => array_key_exists('id', $heure) && !in_array($heure['id'], $heuresSupprimeesId));
+            $heuresModifiees = array_filter($heures, fn ($heure) => isset($heure['id']) && $heure['id'] && !in_array($heure['id'], $heuresSupprimeesId));
             foreach ($heuresModifiees as $heure) {
                 HeureExercice::where('exercice_id', $exerciceId)
                     ->where('sapeur_id', $sapeur['sapeur_id'])
                     ->where('id', $heure['id'])
                     ->update(['quantite' => $heure['quantite']]);
             }
+            // throw new ArrayException(['ajoutes' => $heuresAjoutees, 'modifies' => $heuresModifiees, 'supprimes' => $heuresSupprimeesId]);
         }
 
         return $this->updateStatut($exerciceId);
