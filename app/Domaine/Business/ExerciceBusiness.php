@@ -147,6 +147,9 @@ class ExerciceBusiness
         $this->updateSapeurs($exerciceId, $sapeursModifies);
 
         // On ignore les sapeurs déjà saisi mais non présent dans les présences envoyées
+
+        // Modification du status
+        $this->updateStatut($exerciceId);
     }
 
     /**
