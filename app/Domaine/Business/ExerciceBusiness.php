@@ -177,7 +177,7 @@ class ExerciceBusiness
         });
 
         foreach ($sapeurFiltered as $sapeur) {
-            $sapeur = $this->repository->addSapeurToExercice($exerciceId, $sapeur);
+            $this->repository->addSapeurToExercice($exerciceId, $sapeur);
 
             // Ajout heures sup if any
             $heures = array_filter(
@@ -187,6 +187,7 @@ class ExerciceBusiness
             foreach ($heures as $heure) {
                 if (!HeureExerciceType::where('id', '=', $heure['heure_exercice_type_id'])->exists()) {
                     // On ignore le type d'heure n'existant plus
+                    throw new ArrayException(["Message" => "Unknown heure type"]);
                     continue;
                 }
                 $heure['sapeur_id'] = $sapeur['sapeur_id'];

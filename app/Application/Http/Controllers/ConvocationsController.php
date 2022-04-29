@@ -101,7 +101,7 @@ class ConvocationsController extends Controller
     public function presences(Request $request, int $exerciceId)
     {
         $data = $request->validate([
-            'sapeurs.*.id' => 'required|integer',
+            'sapeurs.*.id' => 'nullable|integer',
             'sapeurs.*.convoque' => 'required|boolean',
             'sapeurs.*.present' => 'required|boolean',
             'sapeurs.*.amende' => 'required|boolean',
