@@ -67,6 +67,13 @@ class ImputationBusiness
     public const ECRITURE_CATEGORIE_IMPOSITION_FRAIS_EFFECTIF = 4;
     public const ECRITURE_CATEGORIE_IMPOSITION_CHARGE_AVS_AC = 5;
 
+
+    private function arrondi_5_centimes($number)
+    {
+        $precision = 0.05;
+        return round(round($number / $precision) * $precision, 2);
+    }
+
     public function creerExerciceComptable($data)
     {
         $exerciceComptable = new ExerciceComptable();
@@ -87,7 +94,7 @@ class ImputationBusiness
                 $ecriture = new Ecriture([
                     'tarif' => $data['tarif'],
                     'quantite' => $data['quantite'],
-                    'total' => $data['total'],
+                    'total' => $this->arrondi_5_centimes($data['total']),
 
                     'designation' => $data['designation'],
 
@@ -128,7 +135,7 @@ class ImputationBusiness
                 $ecriture->update([
                     'tarif' => $data['tarif'],
                     'quantite' => $data['quantite'],
-                    'total' => $data['total'],
+                    'total' => $this->arrondi_5_centimes($data['total']),
 
                     'designation' => $data['designation'],
 
@@ -392,7 +399,7 @@ class ImputationBusiness
         $ecriture = array(
             'tarif' => $indemnite['montant'],
             'quantite' => $indemnite['quantite'],
-            'total' => $indemnite['montant'] * $indemnite['quantite'],
+            'total' => $this->arrondi_5_centimes($indemnite['montant'] * $indemnite['quantite']),
 
             'type_unite_id' => $indemnite['type_unite_id'],
             'designation' => $fraisIndemniteType['designation'],
@@ -551,6 +558,8 @@ class ImputationBusiness
             // Calcul du tarif min au pro-rata dans le cas ou la duree effective est plus petite que la duree min
             $total += $tarifMin * $dureeTarifMinSapeur;
             $total += $tarif * $dureeNonTarifMinSapeur;
+
+            $total = $this->arrondi_5_centimes($total);
 
             $ecritures[] = array(
                 'tarif' => $tarif,
@@ -741,16 +750,10 @@ class ImputationBusiness
                 }
             }
 
-            function arrondi_5_centimes($number)
-            {
-                $precision = 0.05;
-                return round(round($number / $precision) * $precision, 2);
-            }
-
             // Calcul des totaux
-            $totalTarifStandard = arrondi_5_centimes($tarif * $dureeTarifStandard);
-            $totalTarifNuit = arrondi_5_centimes($tarif * $dureeTarifNuit * $tauxNuit);
-            $totalTarifWeekend = arrondi_5_centimes($tarif * $dureeTarifWeekend * $tauxWeekend);
+            $totalTarifStandard = $this->arrondi_5_centimes($tarif * $dureeTarifStandard);
+            $totalTarifNuit = $this->arrondi_5_centimes($tarif * $dureeTarifNuit * $tauxNuit);
+            $totalTarifWeekend = $this->arrondi_5_centimes($tarif * $dureeTarifWeekend * $tauxWeekend);
 
             throw new ArrayException([
                 'tarif' => $tarif,
