@@ -529,9 +529,10 @@ class ImputationBusiness
             $dureeNonTarifMin[$sapeurId] = ($dureeNonTarifMin[$sapeurId] ?? 0) + $dureeNonTarifMinSapeur;
         }
 
-        $tarif = $indemniteType->tarif;
-        $tarifMin = $indemniteType->tarif_min ?? $indemniteType->tarif;
-        $tarifMinPour = $indemniteType->tarif_min ?? 1;
+        // Récupération du type de frais
+        $tarif = floatval($indemniteType->tarif);
+        $tarifMin = floatval($indemniteType->tarif_min ?? $indemniteType->tarif);
+        $tarifMinPour = floatval($indemniteType->tarif_min_pour) ?? 1.0;
         $designation = "{$intervention->localite->designation} ({$intervention->type->designation}) $intervention->lieu";
 
         $ecritures = array();
@@ -541,14 +542,16 @@ class ImputationBusiness
 
             $total = 0;
 
-            //TODO: WARNING!!! Seems strange
+            // Application du tarif min
             if ($dureeTarifMinSapeur > $tarifMinPour) {
                 $total += $tarifMin;
-                $dureeTarifMinSapeur -= $tarifMinPour;
+                $dureeNonTarifMinSapeur += $dureeTarifMinSapeur - $tarifMinPour;
+                $dureeTarifMinSapeur = 0;
             }
 
-            $total += $indemniteType->tarif * $dureeTarifMinSapeur;
-            $total += $indemniteType->tarif * $dureeNonTarifMinSapeur;
+            // Calcul du tarif min au pro-rata dans le cas ou la duree effective est plus petite que la duree min
+            $total += $tarif * $dureeTarifMinSapeur;
+            $total += $tarif * $dureeNonTarifMinSapeur;
 
             if ($dureeTarifMinSapeur > 0) {
                 $ecritures[] = array(
