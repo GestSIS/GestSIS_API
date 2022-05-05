@@ -544,59 +544,34 @@ class ImputationBusiness
 
             // Application du tarif min
             if ($dureeTarifMinSapeur > $tarifMinPour) {
-                $total += $tarifMin;
                 $dureeNonTarifMinSapeur += $dureeTarifMinSapeur - $tarifMinPour;
-                $dureeTarifMinSapeur = 0;
+                $dureeTarifMinSapeur = $tarifMinPour;
             }
 
             // Calcul du tarif min au pro-rata dans le cas ou la duree effective est plus petite que la duree min
             $total += $tarifMin * $dureeTarifMinSapeur;
             $total += $tarif * $dureeNonTarifMinSapeur;
 
-            if ($dureeTarifMinSapeur > 0) {
-                $ecritures[] = array(
-                    'tarif' => $tarif,
-                    'quantite' => $dureeTarifMinSapeur + $dureeNonTarifMinSapeur,
-                    'total' => $total,
-                    'tarif_min' => null,
-                    'tarif_min_pour' => null,
+            $ecritures[] = array(
+                'tarif' => $tarif,
+                'quantite' => $dureeTarifMinSapeur + $dureeNonTarifMinSapeur,
+                'total' => $total,
+                'tarif_min' => $tarifMin,
+                'tarif_min_pour' => $tarifMinPour,
 
-                    'type_unite_id' => $indemniteType->type_unite_id,
-                    'designation' => $designation,
-                    'sapeur_id' => $sapeurId,
-                    'compte_id' => $indemniteType->compte_id,
-                    'exercice_comptable_id' => $intervention->exercice_comptable_id,
-                    'intervention_id' => $intervention->id,
-                    'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
-                    'date' => $intervention->date_debut,
-                    'heure' => $intervention->heure_debut,
+                'type_unite_id' => $indemniteType->type_unite_id,
+                'designation' => $designation,
+                'sapeur_id' => $sapeurId,
+                'compte_id' => $indemniteType->compte_id,
+                'exercice_comptable_id' => $intervention->exercice_comptable_id,
+                'intervention_id' => $intervention->id,
+                'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+                'date' => $intervention->date_debut,
+                'heure' => $intervention->heure_debut,
 
-                    'module' => self::ECRITURE_MODULE_INTERVENTION,
-                    'type' => $indemniteType->type,
-                );
-            }
-            if ($dureeNonTarifMinSapeur) {
-                $ecritures[] = array(
-                    'tarif' => $tarif,
-                    'quantite' => $dureeNonTarifMinSapeur,
-                    'tarif_min' => null,
-                    'tarif_min_pour' => null,
-                    'total' => $total,
-
-                    'type_unite_id' => $indemniteType->type_unite_id,
-                    'designation' => $designation,
-                    'sapeur_id' => $sapeurId,
-                    'compte_id' => $indemniteType->compte_id,
-                    'exercice_comptable_id' => $intervention->exercice_comptable_id,
-                    'intervention_id' => $intervention->id,
-                    'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
-                    'date' => $intervention->date_debut,
-                    'heure' => $intervention->heure_debut,
-
-                    'module' => self::ECRITURE_MODULE_INTERVENTION,
-                    'type' => $indemniteType->type,
-                );
-            }
+                'module' => self::ECRITURE_MODULE_INTERVENTION,
+                'type' => $indemniteType->type,
+            );
         }
 
         Ecriture::insert($ecritures);
