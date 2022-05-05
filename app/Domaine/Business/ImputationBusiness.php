@@ -621,9 +621,9 @@ class ImputationBusiness
             }
 
             // Récupération des tarifs
-            $tarif = $indemniteType->solde;
-            $tauxWeekend = $indemniteType->taux_weekend;
-            $tauxNuit = $indemniteType->taux_nuit;
+            $tarif = floatVal($indemniteType->tarif);
+            $tauxWeekend = floatVal($indemniteType->taux_weekend);
+            $tauxNuit = floatVal($indemniteType->taux_nuit);
 
             $testWeekend = $tauxWeekend !== null;
             $testNuit = $tauxNuit !== null;
@@ -741,11 +741,25 @@ class ImputationBusiness
                 }
             }
 
-            // Calcul des totaux
-            $totalTarifStandard = $tarif * $dureeTarifStandard;
-            $totalTarifNuit = $tarif * $dureeTarifNuit * $tauxNuit;
-            $totalTarifWeekend = $tarif * $dureeTarifWeekend * $tauxWeekend;
+            function arrondi_5_centimes($number)
+            {
+                $precision = 0.05;
+                return round(round($number / $precision) * $precision, 2);
+            }
 
+            // Calcul des totaux
+            $totalTarifStandard = arrondi_5_centimes($tarif * $dureeTarifStandard);
+            $totalTarifNuit = arrondi_5_centimes($tarif * $dureeTarifNuit * $tauxNuit);
+            $totalTarifWeekend = arrondi_5_centimes($tarif * $dureeTarifWeekend * $tauxWeekend);
+
+            throw new ArrayException([
+                'tarif' => $tarif,
+                'totalTarifStandard' => $totalTarifStandard,
+                'totalTarifNuit' => $totalTarifNuit,
+                'totalTarifWeekend' => $totalTarifWeekend,
+                'tauxNuit' => $tauxNuit,
+                'tauxWeekend' => $tauxWeekend,
+            ]);
             // Génération des écritures
             if ($totalTarifStandard > 0) {
                 $ecritures[] = array(
