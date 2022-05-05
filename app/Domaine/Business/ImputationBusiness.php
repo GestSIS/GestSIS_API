@@ -550,7 +550,7 @@ class ImputationBusiness
             }
 
             // Calcul du tarif min au pro-rata dans le cas ou la duree effective est plus petite que la duree min
-            $total += $tarif * $dureeTarifMinSapeur;
+            $total += $tarifMin * $dureeTarifMinSapeur;
             $total += $tarif * $dureeNonTarifMinSapeur;
 
             if ($dureeTarifMinSapeur > 0) {
