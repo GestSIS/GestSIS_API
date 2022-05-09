@@ -755,14 +755,6 @@ class ImputationBusiness
             $totalTarifNuit = $this->arrondi_5_centimes($tarif * $dureeTarifNuit * $tauxNuit);
             $totalTarifWeekend = $this->arrondi_5_centimes($tarif * $dureeTarifWeekend * $tauxWeekend);
 
-            throw new ArrayException([
-                'tarif' => $tarif,
-                'totalTarifStandard' => $totalTarifStandard,
-                'totalTarifNuit' => $totalTarifNuit,
-                'totalTarifWeekend' => $totalTarifWeekend,
-                'tauxNuit' => $tauxNuit,
-                'tauxWeekend' => $tauxWeekend,
-            ]);
             // Génération des écritures
             if ($totalTarifStandard > 0) {
                 $ecritures[] = array(
