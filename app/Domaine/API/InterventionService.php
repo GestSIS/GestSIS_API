@@ -494,7 +494,7 @@ class InterventionService
      */
     public function statVehicule(int $exercice_comptable_id)
     {
-        $data = DB::select("SELECT iv.vehicule_id, count(*) as nb
+        $data = DB::select("SELECT iv.vehicule_id, sum(i.stat_nb) as nb
                 FROM intervention_vehicule as iv
                 INNER JOIN interventions as i ON i.id = iv.intervention_id
                 WHERE i.exercice_comptable_id = ? GROUP BY iv.vehicule_id
