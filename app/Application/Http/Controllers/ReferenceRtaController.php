@@ -89,7 +89,7 @@ class ReferenceRtaController extends Controller
             'supprimes.*.nom' => 'string',
             'supprimes.*.prenom' => 'string',
             'supprimes.*.suffixe' => 'string|nullable',
-            'supprimes.*.localites' => 'string|nullable',
+            'supprimes.*.localite' => 'string|required',
             'supprimes.*.adresse' => 'string|nullable',
             'supprimes.*.fonction' => 'string|nullable',
             'supprimes.*.date_naissance' => 'date',
