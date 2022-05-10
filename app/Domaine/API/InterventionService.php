@@ -5,6 +5,7 @@ namespace App\Domaine\API;
 
 use App\Domaine\Business\InterventionBusiness;
 use App\Domaine\SPI\InterventionRepository;
+use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Groupe;
 use App\Infrastructure\Models\Intervention;
 use App\Infrastructure\Models\Materiel;
@@ -378,7 +379,7 @@ class InterventionService
             'missions' => 'missions.sapeur',
             'appels' => 'appels',
         ];
-        // return response()->json($params);
+
         foreach ($params as $param => $value) {
             if ($value && array_key_exists($param, $withMapping)) {
                 $withOptions[] = $withMapping[$param];
@@ -410,6 +411,22 @@ class InterventionService
             foreach ($groupes as $groupe) {
                 $groupesMap[$groupe->id] = $groupe;
             }
+        }
+
+        // Chargement des groupes
+        $ecritures = [];
+        if (isset($params['montants']) && $params['montants']) {
+            // TODO: Total par sapeur
+            $ecritures = Ecriture::where('intervention_id', '=', $interventionId)
+                ->groupBy('sapeur_id')
+                // ->orderBy('sapeur_id')
+                ->selectRaw('sum(total) as total, sapeur_id')
+                ->pluck('total', 'sapeur_id')
+                ->toArray();
+            // return $ecritures;
+
+            $total = array_sum(array_map(fn ($e) => floatval($e), array_values($ecritures)));
+            $ecritures['total'] = $total;
         }
 
         $intervention = Intervention::with($withOptions)->find($interventionId);
@@ -463,6 +480,7 @@ class InterventionService
             "sapeurs" => $sapeursMap,
             "quittances" => $quittancesMap,
             "presences" => $presences,
+            "ecritures" => $ecritures,
         ]);
         return $pdf->download('rapport.pdf');
     }
