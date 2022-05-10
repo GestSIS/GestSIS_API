@@ -181,6 +181,9 @@
           <th>Sapeur</th>
           <th>Quittance</th>
           <th>Présences</th>
+          @if (array_key_exists("montants", $params) && $params["montants"])
+          <th>Total</th>
+          @endif
         </tr>
       </thead>
       @endif
@@ -202,12 +205,18 @@
         <td colspan="2"></td>
         @endif
         <td>{{ \Carbon\Carbon::parse($presence['debut'])->format('d.m H:i') }} - {{ \Carbon\Carbon::parse($presence['fin'])->format('H:i') }}</td>
+        @if ($loop->index == 0 && array_key_exists("montants", $params) && $params["montants"])
+        <td>{{ $ecritures[$sapeur['id']] }} CHF</td>
+        @endif
         @endforeach
       </tr>
       @endforeach
       <thead>
-      <tr>
+        <tr>
           <th colspan="3">Nombre sapeur : {{ count($presences) }}</th>
+          @if (array_key_exists("montants", $params) && $params["montants"])
+          <th>Total : {{ $ecritures['total'] }} CHF</th>
+          @endif
         </tr>
       </thead>
     </table>
