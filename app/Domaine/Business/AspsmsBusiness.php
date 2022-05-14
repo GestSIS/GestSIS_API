@@ -8,7 +8,7 @@ use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
 
-class AspsmsParamBusiness
+class AspsmsBusiness
 {
     public static function updateParams($data)
     {
@@ -22,7 +22,43 @@ class AspsmsParamBusiness
 
     public static function sendSms($numeros, $message, $date)
     {
-        //TODO:
+        // TODO:
+    }
+
+    public static function getParams()
+    {
+        try {
+            $params = AspsmsParam::first();
+            if (!$params) {
+                return [];
+            }
+            $username = Crypt::decryptString($params->username);
+            $password = Crypt::decryptString($params->password);
+
+            return [
+                'username' => $username,
+                'password' => '********',
+                'credit' => self::checkCredit($username, $password)
+            ];
+        } catch (DecryptException $e) {
+            return [];
+        }
+    }
+
+    public static function getCredit()
+    {
+        try {
+            $params = AspsmsParam::first();
+            if (!$params) {
+                return [];
+            }
+            $username = Crypt::decryptString($params->username);
+            $password = Crypt::decryptString($params->password);
+
+            return self::checkCredit($username, $password);
+        } catch (DecryptException $e) {
+            throw new ArrayException(['message' => 'ASPSMS non configuré']);
+        }
     }
 
     private static function checkCredit($username, $password)
@@ -52,25 +88,5 @@ class AspsmsParamBusiness
             return $response->body();
         }
         return 0;
-    }
-
-    public static function getParams()
-    {
-        try {
-            $params = AspsmsParam::first();
-            if (!$params) {
-                return [];
-            }
-            $username = Crypt::decryptString($params->username);
-            $password = Crypt::decryptString($params->password);
-
-            return [
-                'username' => $username,
-                'password' => '********',
-                'credit' => self::checkCredit($username, $password)
-            ];
-        } catch (DecryptException $e) {
-            return [];
-        }
     }
 }

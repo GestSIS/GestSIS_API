@@ -89,7 +89,6 @@ class ConvocationsController extends Controller
         return response()->json(['data' => $sapeur]);
     }
 
-
     /**
      * Update the specified resource in storage.
      *
