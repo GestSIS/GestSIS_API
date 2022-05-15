@@ -2,8 +2,6 @@
 
 namespace App\Domaine\API;
 
-use Ds\Set;
-
 use App\Infrastructure\Models\Civilite;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceCategorie;

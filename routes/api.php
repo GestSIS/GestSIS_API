@@ -157,6 +157,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenRole:exercice.modification'], function () {
         Route::resource('exercices', 'ExerciceController')->only(['store', 'update', 'destroy']);
         Route::get('aspsms-credit', 'AspsmsController@credit')->name('credit');
+        Route::get('sapeurs-convocation', 'SapeurController@convocationSms')->name('sapeurs-convocation');
     });
 
     Route::group(['middleware' => 'jwtTokenRole:exercice.validation'], function () {

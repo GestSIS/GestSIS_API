@@ -28,7 +28,7 @@ class ConvocationsController extends Controller
      */
     public function index($exerciceId)
     {
-        $sapeurs = $this->service->listSapeurOfExerciceById($exerciceId);
+        $sapeurs = $this->service->listeSapeurOfExerciceById($exerciceId);
 
         return response()->json(['data' => $sapeurs]);
     }

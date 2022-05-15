@@ -78,7 +78,7 @@ class ExerciceService
         return $this->business->validateExercice($exerciceId);
     }
 
-    public function listSapeurOfExerciceById($exerciceId)
+    public function listeSapeurOfExerciceById($exerciceId)
     {
         $heures = HeureExercice
             ::where('exercice_id', $exerciceId)
@@ -120,7 +120,7 @@ class ExerciceService
         $statut = $this->business->addSapeurs($exerciceId, $sapeurs);
         return [
             "statut" => $statut,
-            "sapeurs" => $this->listSapeurOfExerciceById($exerciceId)
+            "sapeurs" => $this->listeSapeurOfExerciceById($exerciceId)
         ];
     }
 
@@ -136,7 +136,7 @@ class ExerciceService
         $statut = $this->business->updateSapeurs($exerciceId, $sapeurs);
         return [
             'statut' => $statut,
-            'sapeurs' => $this->listSapeurOfExerciceById($exerciceId)
+            'sapeurs' => $this->listeSapeurOfExerciceById($exerciceId)
         ];
     }
 
@@ -152,7 +152,7 @@ class ExerciceService
         $statut = $this->business->updatePresences($exerciceId, $sapeurs);
         return [
             'statut' => $statut,
-            'sapeurs' => $this->listSapeurOfExerciceById($exerciceId)
+            'sapeurs' => $this->listeSapeurOfExerciceById($exerciceId)
         ];
     }
 
@@ -227,7 +227,7 @@ class ExerciceService
 
     function listeAppelParLocalite($exerciceId)
     {
-        $presences = $this->repository->listSapeurOfExerciceById($exerciceId);
+        $presences = $this->repository->listeSapeurOfExerciceById($exerciceId);
 
         return View('pdf/liste-appel-localite', ["presences" => $presences]);
         $pdf = SnappyPdf::loadView('pdf/decomptes-sapeurs', ["presences" => $presences]);

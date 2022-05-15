@@ -36,7 +36,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
             })->toArray();
     }
 
-    public function listSapeurOfExerciceById(int $exerciceId)
+    public function listeSapeurOfExerciceById(int $exerciceId)
     {
         $temp = $this;
         return ExerciceSapeur

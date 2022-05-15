@@ -43,7 +43,7 @@ class ExerciceBusiness
         }
 
         // Check saisi des présences sont saisies
-        $presences = $this->repository->listSapeurOfExerciceById($exerciceId);
+        $presences = $this->repository->listeSapeurOfExerciceById($exerciceId);
         $presenceIncompletes = array_filter($presences, function ($p) {
             // Si convoqué alors une saisie doit être faite pour chaque sapeur
             return $p->convoque && !$p->present && !$p->amende && !$p->remplace && !$p->excuse_type_id;
@@ -98,7 +98,7 @@ class ExerciceBusiness
         }
 
         // Check saisi des présences sont saisies
-        $presences = $this->repository->listSapeurOfExerciceById($exerciceId);
+        $presences = $this->repository->listeSapeurOfExerciceById($exerciceId);
         $presenceIncompletes = array_filter($presences, function ($p) {
             // Si convoqué alors une saisie doit être faite pour chaque sapeur
             return $p->convoque && !$p->present && !$p->amende && !$p->remplace && !$p->excuse_type_id;
@@ -170,7 +170,7 @@ class ExerciceBusiness
         // Check sapeur not duplicated
         $ids = array_map(function ($sap) {
             return $sap->sapeur_id;
-        }, $this->repository->listSapeurOfExerciceById($exerciceId));
+        }, $this->repository->listeSapeurOfExerciceById($exerciceId));
 
         $sapeurFiltered = array_filter($sapeurs, function ($sap) use ($ids) {
             return !in_array($sap['sapeur_id'], $ids);

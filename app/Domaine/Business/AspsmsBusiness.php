@@ -5,6 +5,7 @@ namespace App\Domaine\Business;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\AspsmsParam;
 use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
 
@@ -63,29 +64,33 @@ class AspsmsBusiness
 
     private static function checkCredit($username, $password)
     {
-        // $response = Http::post('https://json.aspsms.com/ListAllStatusCodes');
-        $response = Http::post('https://json.aspsms.com/CheckCredits', [
-            'UserName' => $username,
-            'Password' => $password,
-        ]);
+        try {
+            // $response = Http::post('https://json.aspsms.com/ListAllStatusCodes');
+            $response = Http::post('https://json.aspsms.com/CheckCredits', [
+                'UserName' => $username,
+                'Password' => $password,
+            ]);
 
-        if ($response->successful()) {
-            switch ($response['StatusCode']) {
-                case "1":
-                    // Valid response
-                    $credit = $response['Credits'];
-                    return $credit;
-                case "2":
-                    // Connect failed
-                case "3":
-                    // Authorization failed
-                    throw new ArrayException(['message' => "Informations de connexion invalides", $username, $password], "Informations de connexion invalides");
-                case "5":
-                    // Credit insuffisant
-                default:
-                    throw new ArrayException(['message' => "Erreur ASPSMS veuillez contacter votre administrateur system"], "Erreur ASPSMS veuillez contacter votre administrateur system");
+            if ($response->successful()) {
+                switch ($response['StatusCode']) {
+                    case "1":
+                        // Valid response
+                        $credit = $response['Credits'];
+                        return $credit;
+                    case "2":
+                        // Connect failed
+                    case "3":
+                        // Authorization failed
+                        throw new ArrayException(['message' => "Informations de connexion invalides", $username, $password], "Informations de connexion invalides");
+                    case "5":
+                        // Credit insuffisant
+                    default:
+                        throw new ArrayException(['message' => "Erreur ASPSMS veuillez contacter votre administrateur system"], "Erreur ASPSMS veuillez contacter votre administrateur system");
+                }
+                return $response->body();
             }
-            return $response->body();
+        } catch (ConnectionException $e) {
+            return 0;
         }
         return 0;
     }

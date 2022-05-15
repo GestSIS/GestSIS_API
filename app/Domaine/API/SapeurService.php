@@ -33,6 +33,14 @@ class SapeurService
             ->get(['id', 'nom', 'prenom', 'email', 'rue', 'no_rue', 'date_naissance', 'fonction_id', 'grade_id', 'civilite_id', 'localite_id'])->toArray();
     }
 
+    public function convocationSms()
+    {
+        return Sapeur::with('telephones')
+            ->where('actif', '=', '1')
+            // ->orWhere() //TODO: Ajout des sapeurs ayant démissionné mais encore actif pour le moment !
+            ->get(['id', 'nom', 'prenom'])->toArray();
+    }
+
     public function getSapeurDetailsById($sapeurid)
     {
         return $this->repository->getSapeurDetailsById($sapeurid);
