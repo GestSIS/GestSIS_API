@@ -21,6 +21,11 @@ class AspsmsService
         return $this->business->getCredit();
     }
 
+    public function send($data)
+    {
+        return $this->business->send($data);
+    }
+
     public function params()
     {
         return $this->business->getParams();

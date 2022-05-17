@@ -20,16 +20,17 @@ class AspsmsController extends Controller
         return response()->json(['data' => $credit]);
     }
 
-    public function sendSms(Request $request)
+    public function send(Request $request)
     {
         $data = $request->validate([
-            'numeros.*' => 'required|string',
             'message' => 'required|string',
             // 'origin' => 'required|string', // Pas pour le moment
-            'date' => 'required|string',
+            'differe' => 'boolean',
+            'date' => 'nullable|string',
+            'numeros.*' => 'required|string',
         ]);
 
-        $params = $this->service->updateParams($data);
+        $params = $this->service->send($data);
 
         return response()->json(['data' => $params]);
     }
