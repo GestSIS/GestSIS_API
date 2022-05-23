@@ -13,6 +13,7 @@ class ArrayException extends Exception
     {
         parent::__construct($message, $code, $previous);
         $this->errors = $errors;
+        $this->errors['message'] = $message;
     }
 
     public function getErrors()

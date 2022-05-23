@@ -5,6 +5,7 @@ namespace App\Application\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Domaine\API\PaiementService;
+use App\Domaine\Exceptions\ArrayException;
 
 class DecompteController extends Controller
 {
@@ -29,7 +30,18 @@ class DecompteController extends Controller
             'designation' => 'required|string|min:1',
         ]);
 
-        $decompte = $this->service->creerDecompteAnnuel($data['exercice_comptable_id'], $data['date'], $data['designation']);
+        $selection = $request->validate([
+            'ecrituresExercice' => 'required|boolean',
+            'ecrituresIntervention' => 'required|boolean',
+            'ecrituresDivers' => 'required|boolean',
+            'ecrituresAnnuel' => 'required|boolean',
+        ]);
+
+        try {
+            $decompte = $this->service->creerDecompteAnnuel($data['exercice_comptable_id'], $data['date'], $data['designation'], $selection);
+        } catch (ArrayException $e) {
+            return response()->json(['error' => $e->getErrors()]);
+        }
         return response()->json(['data' => $decompte]);
     }
 
