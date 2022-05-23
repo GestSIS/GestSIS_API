@@ -18,6 +18,7 @@ class AspsmsParamTableSeeder extends Seeder
             'id' => 1,
             'username' => "fake",
             'password' => "demo",
+            'origin' => "GestSIS",
         ]);
     }
 }

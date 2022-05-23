@@ -26,6 +26,7 @@ class AspsmsParamController extends Controller
         $data = $request->validate([
             'username' => 'required|string',
             'password' => 'required|string',
+            'origin' => 'string|min:1|max:11',
         ]);
 
         $params = $this->service->updateParams($data);

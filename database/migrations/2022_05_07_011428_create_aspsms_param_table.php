@@ -19,6 +19,7 @@ class CreateAspsmsParamTable extends Migration
 
             $table->string('username', 255);
             $table->string('password', 255);
+            $table->string('origin', 11)->default("GestSIS");
         });
     }
 
