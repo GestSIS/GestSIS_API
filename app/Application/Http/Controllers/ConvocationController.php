@@ -32,6 +32,7 @@ class ConvocationController extends Controller
             'pourInfo' => 'string|nullable',
             'texteDebut' => 'string|nullable',
             'texteFin' => 'string|nullable',
+            'sapeurIds.*' => 'integer'
         ]);
 
         return $this->service->convoquer($exerciceComptableId, $data);

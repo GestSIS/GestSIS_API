@@ -156,6 +156,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     Route::group(['middleware' => 'jwtTokenRole:exercice.modification'], function () {
         Route::resource('exercices', 'ExerciceController')->only(['store', 'update', 'destroy']);
+        Route::post('aspsms/send', 'AspsmsController@send')->name('aspsms-send');
+        Route::get('aspsms/credit', 'AspsmsController@credit')->name('credit');
+        Route::get('sapeurs-convocation', 'SapeurController@convocationSms')->name('sapeurs-convocation');
     });
 
     Route::group(['middleware' => 'jwtTokenRole:exercice.validation'], function () {
@@ -166,6 +169,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenRole:exercice.config'], function () {
         Route::resource('exercice-categories', 'ExerciceCategorieController')->only(['store', 'update', 'destroy']);
         Route::resource('excuses-types', 'ExcuseTypeController')->only(['store', 'update', 'destroy']);
+        Route::resource('aspsms/param', 'AspsmsParamController')->only(['index', 'store']);
     });
 
     // Interventions

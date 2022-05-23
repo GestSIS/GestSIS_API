@@ -31,8 +31,15 @@ class SapeurController extends Controller
      */
     public function effectif()
     {
-        //TODO:
         return response()->json(['data' => $this->service->effectif()]);
+    }
+
+    /**
+     * Return the effectif
+     */
+    public function convocationSms()
+    {
+        return response()->json(['data' => $this->service->convocationSms()]);
     }
 
     /**
