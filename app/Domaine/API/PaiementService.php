@@ -3,7 +3,9 @@
 
 namespace App\Domaine\API;
 
+use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Business\PaiementBusiness;
+use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Exercice;
@@ -31,10 +33,27 @@ class PaiementService
      * 
      * @param int $exerciceComptableId - id de l'exercice comptable pour lequel créer les paiements
      */
-    public function creerDecompteAnnuel($exerciceComptableId, $date, $designation)
+    public function creerDecompteAnnuel($exerciceComptableId, $date, $designation, $selection)
     {
         $deduction = true;
-        $ecritures = Ecriture::where('exercice_comptable_id', $exerciceComptableId)->get();
+        $modules = [];
+        if ($selection['ecrituresExercice']) {
+            $modules[] = ImputationBusiness::ECRITURE_MODULE_EXERCICE;
+        }
+        if ($selection['ecrituresIntervention']) {
+            $modules[] = ImputationBusiness::ECRITURE_MODULE_INTERVENTION;
+        }
+        if ($selection['ecrituresDivers']) {
+            $modules[] = ImputationBusiness::ECRITURE_MODULE_DIVERS;
+        }
+        if ($selection['ecrituresAnnuel']) {
+            $modules[] = ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL;
+        }
+
+        $ecritures = Ecriture::where('exercice_comptable_id', $exerciceComptableId)->whereIn('module', $modules)->get();
+        if ($ecritures->count() === 0) {
+            throw new ArrayException([], 'Aucune écriture disponible pour la création du décompte.');
+        }
 
         return $this->business->creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction);
     }
