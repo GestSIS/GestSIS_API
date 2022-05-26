@@ -54,7 +54,7 @@ class SapeurBusiness
         $data['actif'] = 1;
         $data['porteur'] = 0;
         $data['type'] = self::TYPE_POLITIQUE;
-        $data['date_naissance'] = Carbon::now();
+        $data['date_naissance'] = Carbon::yesterday();
         $sapeur = $this->repository->createSapeur($data);
 
         return $sapeur;
