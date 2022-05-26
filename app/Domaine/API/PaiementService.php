@@ -141,7 +141,7 @@ class PaiementService
             $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
         }
 
-        return View('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
+        // return View('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
         $pdf = SnappyPdf::loadView('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
         return $pdf->download('presences.pdf');
     }

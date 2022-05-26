@@ -98,6 +98,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('sapeurs.cours', 'SapeurCoursController')->only(['store', 'update', 'destroy']);
         Route::resource('sapeurs.photo', 'SapeurPhotoController')->only(['store', 'delete']);
 
+        // Route spécial pour les politiques et autres afin de changer leur statut
+        Route::put('sapeurs/{id}/autre-statut', 'SapeurController@autreStatut');
+
         Route::post('sapeurs/{id}/fin-fonctions', 'SapeurFonctionController@fin');
         Route::post('sapeurs/{id}/quitter-groupes', 'SapeurGroupeController@quitter');
         Route::post('sapeurs/{id}/supprimer-convocations', 'ConvocationsController@supprimerConvocations');

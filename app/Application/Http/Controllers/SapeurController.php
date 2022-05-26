@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\SapeurService;
+use App\Domaine\Business\SapeurBusiness;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -50,29 +51,72 @@ class SapeurController extends Controller
      */
     public function store(Request $request)
     {
+        $type = $request->validate([
+            'type' => 'required|integer|min:0|max:1',
+        ])['type'];
+
+        switch ($type) {
+            case SapeurBusiness::TYPE_SAPEUR:
+                $data = $request->validate([
+                    'type' => 'required|integer|min:0|max:1',
+                    'nom' => 'string|min:2',
+                    'prenom' => 'string|min:2',
+                    'suffixe' => 'string|nullable',
+                    'rue' => 'string|min:3',
+                    'no_rue' => 'string',
+                    'date_naissance' => 'date|before:' . date('Y-m-d'),
+                    'incorporation' => 'date|required',
+                    'no_avs' => 'string|nullable',
+                    'cotisation_avs' => 'boolean',
+                    'profession' => 'string|max:80|nullable',
+                    'employeur' => 'string|max:150|nullable',
+                    'lieu_de_travail' => 'string|max:100|nullable',
+                    'email' => 'email|nullable',
+                    'iban' => 'string|max:100|nullable',
+                    'remarque' => 'string|max:300|nullable',
+                    'localite_id' => 'integer|min:1',
+                    'civilite_id' => 'integer|min:1'
+                ]);
+                $sapeur = $this->service->createSapeur($data);
+                return response()->json(['data' => $sapeur]);
+
+            case SapeurBusiness::TYPE_POLITIQUE:
+                $data = $request->validate([
+                    'type' => 'required|integer|min:0|max:1',
+                    'nom' => 'required|string|min:2',
+                    'prenom' => 'required|string|min:2',
+                    'rue' => 'required|string|min:3',
+                    'no_rue' => 'required|string',
+                    'no_avs' => 'string|nullable',
+                    'cotisation_avs' => 'boolean',
+                    'email' => 'email|nullable',
+                    'iban' => 'string|max:100|nullable',
+                    'remarque' => 'string|max:300|nullable',
+                    'localite_id' => 'required|integer|min:1',
+                    'civilite_id' => 'required|integer|min:1'
+                ]);
+                $sapeur = $this->service->createPolitique($data);
+                return response()->json(['data' => $sapeur]);
+
+            default:
+        }
+
+        return response()->json(['error' => ['message' => 'Type invalid']]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function autreStatut(Request $request, $sapeurId)
+    {
         $data = $request->validate([
-            'nom' => 'string|min:2',
-            'prenom' => 'string|min:2',
-            'suffixe' => 'string|nullable',
-            'rue' => 'string|min:3',
-            'no_rue' => 'string',
-            'date_naissance' => 'date|before:' . date('Y-m-d'),
-            'incorporation' => 'date|required',
-            'no_avs' => 'string|nullable',
-            'cotisation_avs' => 'boolean',
-            'profession' => 'string|max:80|nullable',
-            'employeur' => 'string|max:150|nullable',
-            'lieu_de_travail' => 'string|max:100|nullable',
-            'email' => 'email|nullable',
-            'actif' => 'integer',
-            'iban' => 'string|max:100|nullable',
-            'remarque' => 'string|max:300|nullable',
-            'porteur' => 'boolean',
-            'localite_id' => 'integer|min:1',
-            'civilite_id' => 'integer|min:1'
+            'actif' => 'required|integer|min:0|max:1',
         ]);
 
-        $sapeur = $this->service->createSapeur($data);
+        $sapeur = $this->service->updateNonSapeurStatut($sapeurId, $data);
 
         return response()->json(['data' => $sapeur]);
     }
@@ -106,7 +150,7 @@ class SapeurController extends Controller
             'rue' => 'string|min:3',
             'no_rue' => 'string',
             'date_naissance' => 'date|before:' . date('Y-m-d'),
-            'no_avs' => 'string',
+            'no_avs' => 'string|nullable',
             'cotisation_avs' => 'boolean',
             'profession' => 'string|max:80|nullable',
             'employeur' => 'string|max:150|nullable',

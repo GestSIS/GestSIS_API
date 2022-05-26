@@ -16,7 +16,7 @@ use stdClass;
 
 class SapeurRepositoryEloquent implements SapeurRepository
 {
-    private const SAPEUR_LIGHT_COLUMNS = ['id', 'nom', 'prenom', 'actif', 'localite_id', 'fonction_id', 'civilite_id', 'date_naissance'];
+    private const SAPEUR_LIGHT_COLUMNS = ['id', 'nom', 'prenom', 'actif', 'localite_id', 'fonction_id', 'civilite_id', 'date_naissance', 'type'];
 
     public function listeSapeurLight()
     {
@@ -115,6 +115,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
         $sapeur = new Sapeur();
         $sapeur->fill($data);
+        $sapeur['type'] = $data['type'];
         $sapeur->save();
 
         return $this->convertSapeur($sapeur);
@@ -339,6 +340,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $object->civilite_id = $sapeur->civilite_id;
         $object->localite_id = $sapeur->localite_id;
         $object->fonction_id = $sapeur->fonction_id;
+        $object->type = $sapeur->type;
 
         return $object;
     }
@@ -371,6 +373,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $object->civilite_id = $sapeur->civilite_id;
         $object->fonction_id = $sapeur->fonction_id;
         $object->grade_id = $sapeur->grade_id;
+        $object->type = $sapeur->type;
 
         if (in_array('mutations', $with)) {
             $mutations = array();
