@@ -5,7 +5,6 @@ namespace App\Domaine\Business;
 
 use App\Domaine\SPI\SapeurRepository;
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\Grade;
 use App\Infrastructure\Models\GradeSapeur;
 use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
@@ -13,11 +12,19 @@ use Carbon\Carbon;
 class SapeurBusiness
 {
 
+    const TYPE_SAPEUR = 0;
+    const TYPE_POLITIQUE = 1;
+
     protected $repository;
 
     public function __construct(SapeurRepository $repository)
     {
         $this->repository = $repository;
+    }
+
+    private function isSapeur($sapeurId)
+    {
+        return Sapeur::where([['id', '=', $sapeurId], ['type', '=', self::TYPE_SAPEUR]])->exists();
     }
 
     public function createSapeur($data)
@@ -27,6 +34,7 @@ class SapeurBusiness
         $data['iban_statut'] = 1;
         $data['actif'] = 1;
         $data['porteur'] = 0;
+        $data['type'] = self::TYPE_SAPEUR;
         $sapeur = $this->repository->createSapeur($data);
 
         //add new sapeur mutation
@@ -36,6 +44,29 @@ class SapeurBusiness
             "motif" => ""
         ));
         return $sapeur;
+    }
+
+    public function createPolitique($data)
+    {
+        //TODO: Add iban statut système validation
+        //TODO: Add no_avs validation
+        $data['iban_statut'] = 1;
+        $data['actif'] = 1;
+        $data['porteur'] = 0;
+        $data['type'] = self::TYPE_POLITIQUE;
+        $data['date_naissance'] = Carbon::now();
+        $sapeur = $this->repository->createSapeur($data);
+
+        return $sapeur;
+    }
+
+    public function updateNonSapeurStatut($sapeurId, $data)
+    {
+        if ($this->isSapeur($sapeurId)) {
+            throw new ArrayException([], "Impossible de changer le statut d'un sapeur directement sans passer par une mutation.");
+        }
+
+        return $this->repository->updateSapeurById($sapeurId, $data);
     }
 
     public function updateSapeurById(int $sapeurId, $data)
@@ -51,6 +82,9 @@ class SapeurBusiness
 
     public function addCours(int $sapeurId, $data)
     {
+        if (!$this->isSapeur($sapeurId)) {
+            throw new ArrayException([], "Impossible d'ajouter un cours à un politique.");
+        }
         $cours = $this->repository->addCours($sapeurId, $data);
 
         // Add Grade
@@ -114,6 +148,9 @@ class SapeurBusiness
 
     public function addGrade(int $sapeurId, $data)
     {
+        if (!$this->isSapeur($sapeurId)) {
+            throw new ArrayException([], "Impossible d'ajouter un grade à un politique.");
+        }
         $gradeId = intval($data['grade_id']);
 
         //Check si déjà présent
@@ -146,6 +183,9 @@ class SapeurBusiness
 
     public function addFonction(int $sapeurId, $data)
     {
+        if (!$this->isSapeur($sapeurId)) {
+            throw new ArrayException([], "Impossible d'ajouter une fonction à un politique.");
+        }
         //Check duplicated fonction during period of time
         $fonctionId = $data['fonction_id'];
 
@@ -325,6 +365,9 @@ class SapeurBusiness
 
     public function addMutation($sapeurId, $data)
     {
+        if (!$this->isSapeur($sapeurId)) {
+            throw new ArrayException([], "Impossible d'ajouter une mutation à un politique.");
+        }
         $mutations = $this->repository->getSapeurMutationsById($sapeurId);
         $this->verifyMutationPeriode($data, $mutations);
 
@@ -399,12 +442,6 @@ class SapeurBusiness
 
         $telephoneId = $data['id'];
 
-        $telephone = array_filter(
-            $telephones,
-            function ($t) use ($telephoneId) {
-                return $t->id === $telephoneId;
-            }
-        );
         $telephones = array_filter(
             $telephones,
             function ($t) use ($telephoneId) {
@@ -431,6 +468,9 @@ class SapeurBusiness
 
     public function addPermis(int $sapeurId, $data)
     {
+        if (!$this->isSapeur($sapeurId)) {
+            throw new ArrayException([], "Impossible d'ajouter un permis à un politique.");
+        }
         $permisId = $data['permis_type_id'];
         $res = array_filter(
             $this->repository->getSapeurPermisById($sapeurId),

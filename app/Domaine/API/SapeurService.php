@@ -29,6 +29,7 @@ class SapeurService
     {
         return Sapeur::with('telephones', 'permis', 'fonctions', 'groupes')
             ->where('actif', '=', '1')
+            ->where('type', '=', SapeurBusiness::TYPE_SAPEUR)
             // ->orWhere() //TODO: Ajout des sapeurs ayant démissionné mais encore actif pour le moment !
             ->get(['id', 'nom', 'prenom', 'email', 'rue', 'no_rue', 'date_naissance', 'fonction_id', 'grade_id', 'civilite_id', 'localite_id'])->toArray();
     }
@@ -120,9 +121,19 @@ class SapeurService
         return $this->business->createSapeur($data);
     }
 
+    public function createPolitique($data)
+    {
+        return $this->business->createPolitique($data);
+    }
+
     public function editSapeurDetailsById($sapeurId, $data)
     {
         return $this->business->updateSapeurById($sapeurId, $data);
+    }
+
+    public function updateNonSapeurStatut($sapeurId, $data)
+    {
+        return $this->business->updateNonSapeurStatut($sapeurId, $data);
     }
 
     public function deleteSapeurById($sapeurId)
