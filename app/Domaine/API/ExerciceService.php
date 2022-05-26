@@ -131,9 +131,9 @@ class ExerciceService
      * @return Collection
      * @throws ArrayException
      */
-    public function updateSapeurs($exerciceId, $sapeurs)
+    public function updateSapeurs($exerciceId, $sapeurs, $hasValidationPremission)
     {
-        $statut = $this->business->updateSapeurs($exerciceId, $sapeurs);
+        $statut = $this->business->updateSapeurs($exerciceId, $sapeurs, $hasValidationPremission);
         return [
             'statut' => $statut,
             'sapeurs' => $this->listeSapeurOfExerciceById($exerciceId)

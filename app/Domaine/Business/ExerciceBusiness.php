@@ -138,13 +138,14 @@ class ExerciceBusiness
         $sapeursIdsActuel = new Set(array_map(function ($e) {
             return $e['sapeur_id'];
         }, $exercice->sapeurs->toArray()));
-        //FIXME: Sapeurs non présent mais avec des heures pas pris en compte ?
+
+        // Sapeurs non présent mais avec des heures pas pris en compte ?
         $sapeursAjoutes = array_filter($presences, fn ($e) => !$sapeursIdsActuel->contains($e['sapeur_id']));
         $this->addSapeurs($exerciceId, $sapeursAjoutes);
 
         // Updated sapeurs
         $sapeursModifies = array_filter($presences, fn ($e) => $sapeursIdsActuel->contains($e['sapeur_id']));
-        $this->updateSapeurs($exerciceId, $sapeursModifies);
+        $this->updateSapeurs($exerciceId, $sapeursModifies, false);
 
         // On ignore les sapeurs déjà saisi mais non présent dans les présences envoyées
 
@@ -205,17 +206,95 @@ class ExerciceBusiness
      * @return Collection
      * @throws ArrayException
      */
-    public function updateSapeurs($exerciceId, $sapeurs)
+    public function updateSapeurs($exerciceId, $sapeurs, $hasValidatePermission)
     {
         // Check pas déjà imputé
         $statut = $this->repository->getExerciceStatutById($exerciceId);
-        if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_VALIDE) {
-            throw new ArrayException(['message' => 'Impossible de modifier un exercice déjà imputé']);
+
+        if (!$hasValidatePermission && $statut >= self::EXERCICE_STATUT_VALIDE) {
+            throw new ArrayException([], 'Permissions insuffisantes pour modifier les présences.');
         }
 
         $cachedHeures = HeureExercice
             ::where('exercice_id', $exerciceId)
             ->get()->toArray();
+        $indexedHeures = [];
+        foreach ($cachedHeures as $heure) {
+            $indexedHeures[$heure['id']] = $heure;
+        }
+
+        // Check si pas déjà imputé
+        if ($statut >= self::EXERCICE_STATUT_IMPUTE) {
+            // check que les modifications n'ont lieu que sur l'excuse type, remplacé ou amende
+            $heures = HeureExercice
+                ::where('exercice_id', $exerciceId)
+                ->get()->toArray();
+            $exerciceSapeurs = ExerciceSapeur
+                ::where('exercice_id', $exerciceId)
+                ->get()->toArray();
+
+            $dictionary = [];
+            foreach ($exerciceSapeurs as $sapeur) {
+                $dictionary[$sapeur['sapeur_id']] = $sapeur;
+                $dictionary[$sapeur['sapeur_id']]['heures'] = [];
+            }
+            foreach ($heures as $heure) {
+                if (!array_key_exists($heure['sapeur_id'], $dictionary)) {
+                    $dictionary[$heure['sapeur_id']] = [
+                        'convoque' => False,
+                        'present' => False,
+                        'amende' => False,
+                        'remplace' => False,
+                        'excuse_type_id' => null,
+                        'heures' => [],
+                    ];
+                }
+                $dictionary[$heure['sapeur_id']]['heures'][] = $heure;
+            }
+
+            $presencesEffectives = $dictionary;
+
+            // Check si d'autres modifications sont proposées
+            foreach ($sapeurs as $sapeur) {
+                $presenceEffective = $presencesEffectives[$sapeur['sapeur_id']];
+                if ($presenceEffective['present'] != $sapeur['present']) {
+                    throw new ArrayException([], 'Permissions insuffisantes pour modifier les présences.');
+                }
+
+                $heures = array_filter(
+                    array_key_exists('heures', $sapeur) ? $sapeur['heures'] : [],
+                    fn ($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
+                );
+                $heuresId = array_filter(array_map(fn ($h) => array_key_exists('id', $h) ? $h['id'] : null, $heures), fn ($h) => !is_null($h));
+
+                // Heures supprimées
+                $heuresSupprimeesId = array_map(fn ($h) => $h['id'], array_filter($cachedHeures, fn ($h) => $h['sapeur_id'] == $sapeur['sapeur_id'] && !in_array($h['id'], $heuresId)));
+                if (count($heuresSupprimeesId) > 0) {
+                    throw new ArrayException([], 'Permissions insuffisantes pour modifier les présences.');
+                }
+
+                // Heures ajoutées
+                $heuresAjoutees = array_filter($heures, fn ($heure) => !isset($heure['id']) || !$heure['id']);
+                foreach ($heuresAjoutees as $heure) {
+                    if (!array_key_exists('heure_exercice_type_id', $heure)) {
+                        // On ignore l'heure invalide
+                        continue;
+                    }
+                    throw new ArrayException([], 'Permissions insuffisantes pour modifier les présences.');
+                }
+
+                // Heures modifiées
+                $heuresModifiees = array_filter($heures, fn ($heure) => isset($heure['id']) && $heure['id'] && !in_array($heure['id'], $heuresSupprimeesId));
+                foreach ($heuresModifiees as $heure) {
+                    $heureActuelle = $indexedHeures[$heure['id']];
+
+                    // Check qu'aucune heure n'a été modifiée
+                    if ($heureActuelle['quantite'] != $heure['quantite']) {
+                        throw new ArrayException([], 'Permissions insuffisantes pour modifier les présences.');
+                    }
+                }
+            }
+        }
 
         foreach ($sapeurs as $sapeur) {
             ExerciceSapeur

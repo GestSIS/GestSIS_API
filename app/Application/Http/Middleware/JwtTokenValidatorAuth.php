@@ -17,7 +17,7 @@ class JwtTokenValidatorAuth
      */
     public function handle($request, Closure $next)
     {
-        if (env('APP_ENV') === 'testing') {
+        if (config('APP_ENV') === 'testing') {
             return $next($request);
         }
 
