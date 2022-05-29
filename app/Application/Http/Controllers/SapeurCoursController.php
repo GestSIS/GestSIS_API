@@ -39,6 +39,7 @@ class SapeurCoursController extends Controller
     {
         $data = $request->validate([
             'date' => 'required|date',
+            'duree' => 'required|numeric|min:0',
             'localite_id' => 'integer|exists:localites,id',
             'cours_id' => 'required|integer|exists:cours,id',
             'fonction_sapeur_id' => 'integer|nullable',
@@ -69,6 +70,7 @@ class SapeurCoursController extends Controller
 
         $data = $request->validate([
             'id' => 'integer|exists:cours_sapeur,id',
+            'duree' => 'numeric|min:0',
             'date' => 'date',
             'localite_id' => 'integer|exists:localites,id',
         ]);

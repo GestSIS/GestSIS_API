@@ -58,6 +58,7 @@ class SapeurCoursTest extends TestCase
 
         $data = array(
             'date' => "1958-02-07",
+            'duree' => 1,
             'date_fonction' => "1960-06-05",
             'date_grade' => "1965-12-29",
             'localite_id' => 1,
@@ -124,6 +125,7 @@ class SapeurCoursTest extends TestCase
     {
         $data = array(
             'date' => Carbon::createMidnightDate(1958, 1, 1),
+            'duree' => 1,
             'date_fonction' => Carbon::createMidnightDate(1960, 1, 1),
             'date_grade' => Carbon::createMidnightDate(1965, 1, 1),
             'localite_id' => 1,
@@ -170,6 +172,7 @@ class SapeurCoursTest extends TestCase
     {
         $data = array(
             'date' => Carbon::createMidnightDate(1958, 1, 1),
+            'duree' => 1,
             'date_fonction' => Carbon::createMidnightDate(1960, 1, 1),
             'date_grade' => Carbon::createMidnightDate(1965, 1, 1),
             'localite_id' => 1,
@@ -210,6 +213,7 @@ class SapeurCoursTest extends TestCase
     {
         $data = array(
             'date' => Carbon::createMidnightDate(1958, 1, 1),
+            'duree' => 1,
             'date_fonction' => Carbon::createMidnightDate(1960, 1, 1),
             'date_grade' => Carbon::createMidnightDate(1965, 1, 1),
             'localite_id' => 1,

@@ -514,6 +514,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $object->sapeur_id = $cours->sapeur_id;
         $object->localite_id = $cours->localite_id;
         $object->date = $cours->date;
+        $object->duree = $cours->duree;
 
         return $object;
     }

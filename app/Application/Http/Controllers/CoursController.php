@@ -31,7 +31,8 @@ class CoursController extends Controller
             'fonction_id' => 'integer|nullable',
             'grade_id' => 'integer|nullable',
             'precedent_id' => 'integer|nullable',
-            'tri' => 'integer|required'
+            'duree' => 'numeric|required|min:0',
+            'tri' => 'integer|required',
         ]);
 
         $cours = $this->service->ajouterCours($data);
@@ -48,7 +49,8 @@ class CoursController extends Controller
             'fonction_id' => 'integer|nullable',
             'grade_id' => 'integer|nullable',
             'precedent_id' => 'integer|nullable',
-            'tri' => 'integer'
+            'duree' => 'numeric|min:0|nullable',
+            'tri' => 'integer',
         ]);
 
         $cours = $this->service->modifierCours($id, $data);
