@@ -35,6 +35,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     // Sis Params
     Route::group(['middleware' => 'jwtTokenRole:sis.config'], function () {
         Route::resource('sis-param', 'SisParamController')->only(['store']);
+        Route::post('localites-sis', 'LocaliteSisController@store')->name('api.v2.localite-sis-store');
+        Route::delete('localites-sis', 'LocaliteSisController@destroy')->name('api.v2.localites-sis-destroy');
     });
 
     Route::group(['middleware' => 'jwtTokenRole:effectif.tout,sapeur.lecture,sapeur.modification,sapeur.config'], function () {
@@ -63,6 +65,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         // Static Params Sapeurs ---
         Route::get('civilites', 'CiviliteController@index')->name('api.v2.civilites');
         Route::get('localites', 'LocaliteController@index')->name('api.v2.localites');
+        Route::get('localites-sis', 'LocaliteSisController@index')->name('api.v2.localites-sis');
         Route::get('telephone-types', 'TelephoneTypeController@index')->name('api.v2.telephone-types');
         Route::get('permis', 'PermisController@index')->name('api.v2.permis');
 

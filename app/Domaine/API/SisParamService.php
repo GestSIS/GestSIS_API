@@ -23,4 +23,14 @@ class SisParamService
     {
         return $this->business->updateParams($data);
     }
+
+    public function ajouterLocalitesSis($data)
+    {
+        return $this->business->ajouterLocalitesSis($data);
+    }
+
+    public function supprimerLocalitesSis($data)
+    {
+        return $this->business->supprimerLocalitesSis($data);
+    }
 }
