@@ -194,8 +194,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('interventions/{id}/rapport', 'InterventionController@rapport')->name('api.v2.interventions.rapport');
 
         // Statistiques véhicule et matériel
-        Route::get('statistiques/{id}/materiel', 'InterventionMaterielsController@stat');
-        Route::get('statistiques/{id}/vehicule', 'InterventionVehiculesController@stat');
+        Route::get('statistiques/{id}/materiel', 'InterventionStatistiqueController@materiel');
+        Route::get('statistiques/{id}/vehicule', 'InterventionStatistiqueController@vehicule');
+        Route::get('statistiques/{id}/type-intervention', 'InterventionStatistiqueController@typeIntervention');
+        Route::get('statistiques/{id}/stat-federal', 'InterventionStatistiqueController@statFederal');
+        Route::get('statistiques/{id}/intervention-traitement', 'InterventionStatistiqueController@traitement');
     });
 
     Route::group(['middleware' => 'jwtTokenRole:intervention.modification'], function () {
