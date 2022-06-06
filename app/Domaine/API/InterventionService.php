@@ -27,9 +27,9 @@ class InterventionService
         $this->business = $business;
     }
 
-    public function listeIntervention($exercice_comptable_id)
+    public function listeIntervention($exerciceComptableId)
     {
-        return $this->repository->listeIntervention($exercice_comptable_id);
+        return $this->repository->listeIntervention($exerciceComptableId);
     }
 
     public function getInterventionById($interventionId)
@@ -489,16 +489,17 @@ class InterventionService
      * Return le nombre d'intervention par materiel pour l'année comptable
      *
      * @param Request $request
-     * @param int $exercice_comptable_id
+     * @param int $exerciceComptableId
      * @return Response
      */
-    public function statMateriel(int $exercice_comptable_id)
+    public function statMateriel(int $exerciceComptableId)
     {
         $data = DB::select("SELECT im.materiel_id, sum(im.quantite) as nb
                 FROM intervention_materiel as im
                 INNER JOIN interventions as i ON i.id = im.intervention_id
-                WHERE i.exercice_comptable_id = ? GROUP BY im.materiel_id
-            ", [$exercice_comptable_id]);
+                WHERE i.exercice_comptable_id = ?
+                GROUP BY im.materiel_id
+            ", [$exerciceComptableId]);
 
         return $data;
     }
@@ -507,16 +508,74 @@ class InterventionService
      * Return le nombre d'intervention par véhicule pour l'année comptable
      *
      * @param Request $request
-     * @param int $exercice_comptable_id
+     * @param int $exerciceComptableId
      * @return Response
      */
-    public function statVehicule(int $exercice_comptable_id)
+    public function statVehicule(int $exerciceComptableId)
     {
         $data = DB::select("SELECT iv.vehicule_id, sum(i.stat_nb) as nb
                 FROM intervention_vehicule as iv
                 INNER JOIN interventions as i ON i.id = iv.intervention_id
-                WHERE i.exercice_comptable_id = ? GROUP BY iv.vehicule_id
-            ", [$exercice_comptable_id]);
+                WHERE i.exercice_comptable_id = ?
+                GROUP BY iv.vehicule_id
+            ", [$exerciceComptableId]);
+
+        return $data;
+    }
+
+    /**
+     * Return le nombre d'intervention par véhicule pour l'année comptable
+     *
+     * @param Request $request
+     * @param int $exerciceComptableId
+     * @return Response
+     */
+    public function statTypeIntervention($exerciceComptableId)
+    {
+        $data = DB::select("SELECT t.id, COUNT(DISTINCT i.id) AS nb, SUM(TIMESTAMPDIFF(MINUTE, isa.debut, isa.fin) / 60) AS heures
+                FROM type_interventions AS t
+                INNER JOIN interventions AS i ON i.type_intervention_id = t.id
+                LEFT OUTER JOIN intervention_sapeur AS isa ON i.id = isa.intervention_id
+                WHERE i.exercice_comptable_id = ?
+                GROUP BY t.id;
+            ", [$exerciceComptableId]);
+        return $data;
+    }
+
+    /**
+     * Return le nombre d'intervention par stat federal pour l'année comptable
+     *
+     * @param Request $request
+     * @param int $exerciceComptableId
+     * @return Response
+     */
+    public function statFederal($exerciceComptableId)
+    {
+        $data = DB::select("SELECT s.id, COUNT(DISTINCT i.id) AS nb, SUM(TIMESTAMPDIFF(MINUTE, isa.debut, isa.fin) / 60) AS heures
+                FROM stat_federals AS s
+                INNER JOIN interventions AS i ON i.stat_federal_id = s.id
+                LEFT OUTER JOIN intervention_sapeur AS isa ON i.id = isa.intervention_id
+                WHERE i.exercice_comptable_id = ?
+                GROUP BY s.id;
+            ", [$exerciceComptableId]);
+
+        return $data;
+    }
+
+    /**
+     * Return le nombre d'intervention par traitement pour l'année comptable
+     *
+     * @param Request $request
+     * @param int $exerciceComptableId
+     * @return Response
+     */
+    public function statTraitement($exerciceComptableId)
+    {
+        $data = DB::select("SELECT i.intervention_traitement_id AS id, COUNT(i.id) as nb
+                FROM interventions as i
+                WHERE i.exercice_comptable_id = ?
+                GROUP BY i.intervention_traitement_id;
+            ", [$exerciceComptableId]);
 
         return $data;
     }

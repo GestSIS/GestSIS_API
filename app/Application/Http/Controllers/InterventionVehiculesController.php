@@ -66,18 +66,4 @@ class InterventionVehiculesController extends Controller
 
         return response()->json(['data' => 'success']);
     }
-
-    /**
-     * Return le nombre d'intervention par véhicule pour l'année comptable
-     *
-     * @param Request $request
-     * @param int $exercice_comptable_id
-     * @return Response
-     */
-    public function stat(int $exercice_comptable_id)
-    {
-        $data = $this->service->statVehicule($exercice_comptable_id);
-
-        return response()->json(['data' => $data]);
-    }
 }
