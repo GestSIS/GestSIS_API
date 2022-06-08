@@ -73,9 +73,19 @@ class ExerciceService
         $this->business->deleteExerciceById($exerciceId);
     }
 
-    public function validateExercice($exerciceId)
+    public function cancelExerciceById($exerciceId)
     {
-        return $this->business->validateExercice($exerciceId);
+        $this->business->cancelExerciceById($exerciceId);
+    }
+
+    public function reactivateExerciceById($exerciceId)
+    {
+        $this->business->reactivateExerciceById($exerciceId);
+    }
+
+    public function validateExerciceById($exerciceId)
+    {
+        return $this->business->validateExerciceById($exerciceId);
     }
 
     public function listeSapeurOfExerciceById($exerciceId)

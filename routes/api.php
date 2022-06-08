@@ -161,14 +161,17 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     Route::group(['middleware' => 'jwtTokenRole:exercice.modification'], function () {
-        Route::resource('exercices', 'ExerciceController')->only(['store', 'update', 'destroy']);
+        Route::resource('exercices', 'ExerciceController')->only(['store', 'update']);
         Route::post('aspsms/send', 'AspsmsController@send')->name('aspsms-send');
         Route::get('aspsms/credit', 'AspsmsController@credit')->name('credit');
         Route::get('sapeurs-convocation', 'SapeurController@convocationSms')->name('sapeurs-convocation');
     });
 
     Route::group(['middleware' => 'jwtTokenRole:exercice.validation'], function () {
+        Route::resource('exercices', 'ExerciceController')->only(['destroy']);
         Route::post('exercices/{id}/valider', 'ExerciceController@valider')->name('api.v2.exercices.valider');
+        Route::post('exercices/{id}/annuler', 'ExerciceController@annuler')->name('api.v2.exercices.annuler');
+        Route::post('exercices/{id}/reactiver', 'ExerciceController@reactiver')->name('api.v2.exercices.reactiver');
     });
 
     // Params exercices

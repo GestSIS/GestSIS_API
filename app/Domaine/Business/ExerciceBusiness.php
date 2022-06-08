@@ -79,18 +79,41 @@ class ExerciceBusiness
         return $this->repository->createExercice($data);
     }
 
+    public function cancelExerciceById($exerciceId)
+    {
+        $statut = $this->repository->getExerciceStatutById($exerciceId);
+        if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_VALIDE) {
+            return $statut;
+        }
+
+        $this->repository->updateExerciceById($exerciceId, array("statut" => self::EXERCICE_STATUT_ANNULE));
+        return $statut;
+    }
+
+    public function reactivateExerciceById($exerciceId)
+    {
+        $statut = $this->repository->getExerciceStatutById($exerciceId);
+        if ($statut != self::EXERCICE_STATUT_ANNULE) {
+            return $statut;
+        }
+
+        $this->repository->updateExerciceById($exerciceId, array("statut" => self::EXERCICE_STATUT_EMPTY));
+        $statut = $this->updateStatut($exerciceId);
+        return $statut;
+    }
+
     public function deleteExerciceById($exerciceId)
     {
         // Check pas déjà imputé
         $statut = $this->repository->getExerciceStatutById($exerciceId);
-        if ($statut > self::EXERCICE_STATUT_IMPUTE) {
-            throw new ArrayException(['message' => 'Impossible de supprimer un exercice déjà imputé']);
+        if ($statut > self::EXERCICE_STATUT_VALIDE) {
+            throw new ArrayException([], "Impossible de supprimer un exercice déjà imputé");
         }
 
         $this->repository->deleteExerciceById($exerciceId);
     }
 
-    public function validateExercice($exerciceId)
+    public function validateExerciceById($exerciceId)
     {
         $statut = $this->repository->getExerciceStatutById($exerciceId);
         if ($statut !== self::EXERCICE_STATUT_SAISI) {
