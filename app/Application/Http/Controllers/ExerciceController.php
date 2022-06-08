@@ -121,9 +121,23 @@ class ExerciceController extends Controller
         return response()->json(['data' => 'success']);
     }
 
+    public function annuler($id)
+    {
+        $statut = $this->service->cancelExerciceById($id);
+
+        return response()->json(['data' => ['statut' => $statut]]);
+    }
+
+    public function reactiver($id)
+    {
+        $statut = $this->service->reactivateExerciceById($id);
+
+        return response()->json(['data' => ['statut' => $statut]]);
+    }
+
     public function valider($id)
     {
-        $exercice = $this->service->validateExercice($id);
+        $exercice = $this->service->validateExerciceById($id);
 
         return response()->json(['data' => $exercice]);
     }

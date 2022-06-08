@@ -6,6 +6,7 @@ namespace App\Infrastructure\Repositories;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceSapeur;
+use App\Infrastructure\Models\HeureExercice;
 use Illuminate\Support\Facades\DB;
 use StdClass;
 
@@ -68,6 +69,8 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
 
     public function deleteExerciceById($exerciceId)
     {
+        ExerciceSapeur::where('exercice_id', $exerciceId)->delete();
+        HeureExercice::where('exercice_id', $exerciceId)->delete();
         Exercice::where('id', $exerciceId)->delete();
     }
 
