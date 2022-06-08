@@ -87,7 +87,7 @@ class ExerciceBusiness
         }
 
         $this->repository->updateExerciceById($exerciceId, array("statut" => self::EXERCICE_STATUT_ANNULE));
-        return $statut;
+        return self::EXERCICE_STATUT_ANNULE;
     }
 
     public function reactivateExerciceById($exerciceId)

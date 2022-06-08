@@ -125,14 +125,14 @@ class ExerciceController extends Controller
     {
         $statut = $this->service->cancelExerciceById($id);
 
-        return response()->json(['data' => $statut]);
+        return response()->json(['data' => ['statut' => $statut]]);
     }
 
     public function reactiver($id)
     {
         $statut = $this->service->reactivateExerciceById($id);
 
-        return response()->json(['data' => $statut]);
+        return response()->json(['data' => ['statut' => $statut]]);
     }
 
     public function valider($id)
