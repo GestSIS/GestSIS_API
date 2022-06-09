@@ -6,6 +6,7 @@ namespace App\Domaine\API;
 use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Business\PaiementBusiness;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Exercice;
@@ -35,6 +36,12 @@ class PaiementService
      */
     public function creerDecompteAnnuel($exerciceComptableId, $date, $designation, $selection)
     {
+        // Vérifi que les paramètres AVS ont été configurés
+        $avsParam = AvsParam::first();
+        if ($avsParam == NULL) {
+            throw new ArrayException([], 'Erreur, paramètres AVS manquant, veuillez les compléter dans paramètres.');
+        }
+
         $deduction = true;
         $modules = [];
         if ($selection['ecrituresExercice']) {
@@ -127,7 +134,7 @@ class PaiementService
                 $nomFichier
             );
         } catch (\InvalidArgumentException $e) {
-            return response()->json(['data' => ['message' => 'Veuillez vérifier les informations de paiment de votre SIS']], 500);
+            throw new ArrayException([], 'Veuillez vérifier les informations de paiement de votre SIS');
         }
     }
 
