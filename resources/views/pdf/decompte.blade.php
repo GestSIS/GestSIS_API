@@ -1,45 +1,49 @@
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" crossorigin="anonymous">
-    <style>
-        .page-break {
-            page-break-after: always;
-        }
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css"
+    crossorigin="anonymous">
+  <style>
+    .page-break {
+      page-break-after: always;
+    }
 
-        .column-right {
-            text-align: right !important;
-            padding-right: 1rem !important;
-        }
+    .column-right {
+      text-align: right !important;
+      padding-right: 1rem !important;
+    }
 
-        .sum-row {
-            background-color: white !important;
-        }
-    </style>
+    .sum-row {
+      background-color: white !important;
+    }
+  </style>
 
-    <title>Décompte</title>
+  <title>Décompte</title>
 </head>
-<body>
-<div class="">
-  
-  <h1 class="text-center">{{ $decompte->designation }}</h1>
-  <div>Date : {{ formatDate($decompte->date) }}</div>
-  <table class="table table-sm table-striped">
-    <thead>
-      <tr>
-        <th colspan="3">Nature du service</th>
-        <th>Sapeur</th>
-        <th>Tarif</th>
-        <th>Qté</th>
-        <th class="text-center">Total</th>
-      </tr>
-    </thead>
-    <tbody>
 
-    <?php
+<body>
+  <div class="">
+
+    <h1 class="text-center">{{ $decompte->designation }}</h1>
+    <div>Date : {{ formatDate($decompte->date) }}</div>
+    <table class="table table-sm table-striped">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th colspan="3">Nature du service</th>
+          <th>Sapeur</th>
+          <th>Tarif</th>
+          <th>Qté</th>
+          <th class="text-center">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <?php
     //TODO: Finish decompte impressions
     $nbEcritures = count($ecritures);
 
@@ -81,24 +85,26 @@
     foreach ($ecritures as $index => $ecriture) {
     $last = $index + 1 === $nbEcritures;
     ?>
-      <tr>
-        {{-- {{dd([$sapeurs, $ecriture->sapeur_id])}} --}}
+        <tr>
+          {{-- {{dd([$sapeurs, $ecriture->sapeur_id])}} --}}
+          <td>{{ formatDate($ecriture->date) }}</td>
           <td colspan="3">{{ $ecriture->designation }}</td>
           <td>{{ array_key_exists($ecriture->sapeur_id, $sapeurs) ? $sapeurs[$ecriture->sapeur_id] : '-' }}</td>
           <td>{{ formatTarif($ecriture) }}</td>
           <td>{{ formatNumber($ecriture->quantite) }}</td>
           <td class="column-right">{{ formatNumber($ecriture->total) }}</td>
-      </tr>
-      
-      <?php
+        </tr>
+
+        <?php
     }
     ?>
-    </tbody>
+      </tbody>
 
-    @if($nbEcritures === 0)
+      @if ($nbEcritures === 0)
         <h1>Aucune écriture</h1>
-    @endif
-  </table>
-</div>
+      @endif
+    </table>
+  </div>
 </body>
+
 </html>
