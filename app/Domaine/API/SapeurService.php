@@ -1,10 +1,9 @@
 <?php
 
-
 namespace App\Domaine\API;
 
-
 use App\Domaine\Business\SapeurBusiness;
+use App\Domaine\SPI\ControleMedicalRepository;
 use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\Sapeur;
 use Illuminate\Support\Facades\Storage;
@@ -12,11 +11,13 @@ use Illuminate\Support\Facades\Storage;
 class SapeurService
 {
     protected $repository;
+    protected $repositoryControles;
     protected $business;
 
-    public function __construct(SapeurRepository $repository, SapeurBusiness $business)
+    public function __construct(SapeurRepository $repository, ControleMedicalRepository $repositoryControles, SapeurBusiness $business)
     {
         $this->repository = $repository;
+        $this->repositoryControles = $repositoryControles;
         $this->business = $business;
     }
 
@@ -80,6 +81,11 @@ class SapeurService
     public function getSapeurTelephonesById(int $sapeurId)
     {
         return $this->repository->getSapeurTelephonesById($sapeurId);
+    }
+
+    public function getSapeurControlesMedicauxById(int $sapeurId)
+    {
+        return $this->repositoryControles->getSapeurControlesMedicauxById($sapeurId);
     }
 
     private static $ALLOWED_PHOTO_EXTENSION = ['jpg', 'jpeg', 'png'];
