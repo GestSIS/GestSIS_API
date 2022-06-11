@@ -368,6 +368,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         // Params Controles médicaux
         Route::resource('medecins', 'MedecinController')->only(['index']);
         Route::resource('controles-medicaux-types', 'ControleMedicalTypeController')->only(['index']);
+
+        // Controles médicaux pour sapeur
+        Route::resource('sapeurs.controles-medicaux', 'SapeurControleMedicalController')->only(['index']);
     });
 
     Route::group(['middleware' => 'jwtTokenRole:controle_medical.config'], function () {

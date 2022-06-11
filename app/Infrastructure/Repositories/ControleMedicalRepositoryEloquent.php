@@ -26,6 +26,15 @@ class ControleMedicalRepositoryEloquent implements ControleMedicalRepository
         return $this->convertControleMedical(ControleMedical::find($id));
     }
 
+    public function getSapeurControlesMedicauxById($sapeurId)
+    {
+        $temp = $this;
+        return ControleMedical::where('sapeur_id', $sapeurId)->get()
+            ->map(function ($controle) use ($temp) {
+                return $temp->convertControleMedical($controle);
+            })->toArray();
+    }
+
     public function createControleMedical($data)
     {
         if (is_null($data['designation'])) {
@@ -67,7 +76,7 @@ class ControleMedicalRepositoryEloquent implements ControleMedicalRepository
 
     public function getJustificatif($id)
     {
-        $controle = ControleMedical::find($id); 
+        $controle = ControleMedical::find($id);
         $data = $this->convertControleMedical($controle);
         $data->path = $controle->path;
         return $data;

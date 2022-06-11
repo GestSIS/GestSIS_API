@@ -8,6 +8,8 @@ interface ControleMedicalRepository
 
     public function getControleMedical($id);
 
+    public function getSapeurControlesMedicauxById($sapeurId);
+
     public function createControleMedical($controle);
 
     public function deleteControleMedical($id);
