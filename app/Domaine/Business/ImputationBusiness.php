@@ -116,7 +116,7 @@ class ImputationBusiness
                 // break;
 
             default:
-                throw new ArrayException(['message' => 'Type d\'écriture non supporté pour le moment']);
+                throw new ArrayException([], 'Type d\'écriture non supporté pour le moment');
         }
     }
 
@@ -125,7 +125,7 @@ class ImputationBusiness
         $ecriture = Ecriture::find($ecritureId);
         // Contrôle que l'écriture n'est pas liée à un décompte
         if ($ecriture->decompte_id) {
-            throw new ArrayException(['message' => 'Ecriture déjà payée dans un décompte !']);
+            throw new ArrayException([], 'Ecriture déjà payée dans un décompte !');
         }
 
         // Switch between type
@@ -154,7 +154,7 @@ class ImputationBusiness
                 return $ecriture;
 
             default:
-                throw new ArrayException(['message' => 'Type d\'écriture non supporté pour le moment']);
+                throw new ArrayException([], 'Type d\'écriture non supporté pour le moment');
         }
     }
 
@@ -163,7 +163,7 @@ class ImputationBusiness
         $ecriture = Ecriture::find($ecritureId);
         // Contrôle que l'écriture n'est pas liée à un décompte
         if ($ecriture->decompte_id) {
-            throw new ArrayException(['message' => 'Ecriture déjà payée dans un décompte !']);
+            throw new ArrayException([], 'Ecriture déjà payée dans un décompte !');
         }
 
         $ecriture->delete();
@@ -422,7 +422,7 @@ class ImputationBusiness
             ->whereNotNull('decompte_id')
             ->exists()
         ) {
-            throw new ArrayException(['message' => 'Des écriture sont déjà facturées dans un décompte.']);
+            throw new ArrayException([], 'Des écriture sont déjà facturées dans un décompte.');
         }
 
         // Suppression des écritures
@@ -441,7 +441,7 @@ class ImputationBusiness
             ->whereNotNull('decompte_id')
             ->exists()
         ) {
-            throw new ArrayException(['message' => 'Des écriture sont déjà facturées dans un décompte.']);
+            throw new ArrayException([], 'Des écriture sont déjà facturées dans un décompte.');
         }
 
         // Suppression des écritures
