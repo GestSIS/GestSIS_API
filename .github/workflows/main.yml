@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  # Triggers the workflow on push or pull request events but only for the "master" branch
+  push:
+    branches: [ "master" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: "Deploy"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/staging.key
+          chmod 600 ~/.ssh/staging.key
+          cat >>~/.ssh/config <<END
+          Host staging
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/staging.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+
+      - name: Checkout the source
+        run: ssh staging "cd apis.gestsis.ch && git pull"
+
+      - name: Install dependencies
+        run: ssh staging "cd apis.gestsis.ch && composer install --optimize-autoloader --no-dev"
+
+      - name: Optimize build
+        run: ssh staging "cd apis.gestsis.ch && php artisan optimize"
+
+      - name: Run migrations
+        run: ssh staging "cd apis.gestsis.ch && yes | php artisan dbs:migrate"
