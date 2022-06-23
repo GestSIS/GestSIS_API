@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/Ph0tonic/GestSIS_API.svg?token=CpCE2t9dSFqCXfyBr7VR&branch=master)](https://travis-ci.com/Ph0tonic/GestSIS_API)
+[![CI](https://github.com/Ph0tonic/GestSIS_API/actions/workflows/main.yml/badge.svg)](https://github.com/Ph0tonic/GestSIS_API/actions/workflows/main.yml)
 
 # GestSIS_API
 
