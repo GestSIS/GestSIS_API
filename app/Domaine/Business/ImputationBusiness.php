@@ -556,8 +556,8 @@ class ImputationBusiness
             }
 
             // Calcul du tarif min au pro-rata ou pas dans le cas ou la duree effective est plus petite que la duree min
-            if ($indemniteType->tarif_min_pro_rata) {
-                $total += $tarifMin * $dureeTarifMinSapeur;
+            if ($indemniteType->tarif_min_pro_rata && $tarifMinPour > 0) {
+                $total += $tarifMin / $tarifMinPour * $dureeTarifMinSapeur;
             } else {
                 $total += $tarifMin;
             }
