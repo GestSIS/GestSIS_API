@@ -21,11 +21,12 @@ class IndemniteInterventionType extends Model
         'ecriture_categorie_id',
         'par_fonction',
         'type',
+        'tarif_min_pro_rata',
     ];
     protected $casts = [
         'tarif' => 'decimal:2', 'tarif_min_pour' => 'decimal:2', 'taux_weekend' => 'decimal:2', 'taux_nuit' => 'decimal:2',
         'compte_id' => 'integer', 'phase_id' => 'integer', 'type_unite_id' => 'integer', 'ecriture_categorie_id' => 'integer',
-        'par_fonction' => 'boolean', 'type' => 'integer'
+        'par_fonction' => 'boolean', 'type' => 'integer', 'tarif_min_pro_rata' => 'boolean'
     ];
 
     public function fonctions()
