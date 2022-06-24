@@ -115,6 +115,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
     {
         if (!array_key_exists('tarif_min', $ecriture)) $ecriture['tarif_min'] = null;
         if (!array_key_exists('tarif_min_pour', $ecriture)) $ecriture['tarif_min_pour'] = null;
+        if (!array_key_exists('tarif_min_pro_rata', $ecriture)) $ecriture['tarif_min_pro_rata'] = null;
         if (!array_key_exists('taux', $ecriture)) $ecriture['taux'] = null;
         if (!array_key_exists('taux_description', $ecriture)) $ecriture['taux_description'] = null;
 
@@ -156,6 +157,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->tarif = $ecriture->tarif;
         $object->tarif_min = $ecriture->tarif_min;
         $object->tarif_min_pour = $ecriture->tarif_min_pour;
+        $object->tarif_min_pro_rata = $ecriture->tarif_min_pro_rata;
         $object->taux = $ecriture->taux;
         $object->sapeur_id = $ecriture->sapeur_id;
         $object->exercice_comptable_id = $ecriture->exercice_comptable_id;
@@ -190,6 +192,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->tarif = $ecriture->tarif;
         $object->tarif_min = $ecriture->tarif_min;
         $object->tarif_min_pour = $ecriture->tarif_min_pour;
+        $object->tarif_min_pro_rata = $ecriture->tarif_min_pro_rata;
         $object->taux = $ecriture->taux;
         $object->sapeur_id = $ecriture->sapeur_id;
         $object->exercice_comptable_id = $ecriture->exercice_comptable_id;

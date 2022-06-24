@@ -555,8 +555,12 @@ class ImputationBusiness
                 $dureeTarifMinSapeur = $tarifMinPour;
             }
 
-            // Calcul du tarif min au pro-rata dans le cas ou la duree effective est plus petite que la duree min
-            $total += $tarifMin * $dureeTarifMinSapeur;
+            // Calcul du tarif min au pro-rata ou pas dans le cas ou la duree effective est plus petite que la duree min
+            if ($indemniteType->tarif_min_pro_rata) {
+                $total += $tarifMin * $dureeTarifMinSapeur;
+            } else {
+                $total += $tarifMin;
+            }
             $total += $tarif * $dureeNonTarifMinSapeur;
 
             $total = $this->arrondi_5_centimes($total);
@@ -567,6 +571,7 @@ class ImputationBusiness
                 'total' => $total,
                 'tarif_min' => $tarifMin,
                 'tarif_min_pour' => $tarifMinPour,
+                'tarif_min_pro_rata' => $indemniteType->tarif_min_pro_rata,
 
                 'type_unite_id' => $indemniteType->type_unite_id,
                 'designation' => $designation,
