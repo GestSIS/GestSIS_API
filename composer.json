@@ -10,8 +10,8 @@
     "require": {
         "php": "^8.0",
         "barryvdh/laravel-snappy": "^1.0.0",
+        "ch2877/swiss-payment": "^2.0.0",
         "doctrine/dbal": "^3.3",
-        "spatie/laravel-ignition": "^1.0",
         "firebase/php-jwt": "^6.0",
         "guzzlehttp/guzzle": "^7.0.1",
         "laravel/framework": "^9.2",
@@ -21,8 +21,8 @@
         "mikehaertl/php-pdftk": "^0.12",
         "php-ds/php-ds": "^1.4",
         "spatie/laravel-http-logger": "^1.4",
-        "tmw/fpdm": "^2.9",
-        "ch2877/swiss-payment": "^2.0.0"
+        "spatie/laravel-ignition": "^1.0",
+        "tmw/fpdm": "^2.9"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",

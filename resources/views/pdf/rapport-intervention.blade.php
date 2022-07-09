@@ -3,20 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+  
   <style>
     .page-break {
       page-break-after: always;
     }
   </style>
-
+  <link rel="stylesheet" href="/assets/print.css">
   <title>Rapport d'intervention</title>
 </head>
 <body>
   <div class="container-fluid">
     <h1>Rapport d'intervention</h1>
     {{-- En-tête --}}
-    <table class="table table-sm mb-2">
+    <table class="table table-sm table-striped table-bordered mb-2 mt-3">
       <tr>
         <th>Dates & heures</th>
         <td><strong>Début</strong> : {{ str_replace('-', '.', $intervention->date_debut) }} {{ substr($intervention->heure_debut, 0, 5) }}</td>
@@ -29,8 +29,8 @@
     </table>
     {{-- {{ dd($intervention); }} --}}
     {{-- Informations générales --}}
-    <h2 class="h4">Informations générales</h2>
-    <table class="table table-sm mb-2">
+    <h2 class="h3 mt-5">Informations générales</h2>
+    <table class="table table-sm table-bordered table-striped mb-2">
       <tr>
         <th>Type d'intervention</th>
         <td>{{ $intervention->typeIntervention->designation }}</td>
@@ -55,9 +55,9 @@
       </tr>
       <tr>
         <th>Propriétaire</th>
-        <td>{!! str_replace('\n', '<br>', e($intervention->proprietaire)) !!}</td>
+        <td>{!! str_replace(PHP_EOL, '<br>', e($intervention->proprietaire)) !!}</td>
         <th>Responsable</th>
-        <td>{!! str_replace('\n', '<br>', e($intervention->responsable)) !!}</td>
+        <td>{!! str_replace(PHP_EOL, '<br>', e($intervention->responsable)) !!}</td>
       </tr>
     </table>
     {{-- Description --}}
@@ -66,13 +66,13 @@
         <th>Description</th>
       </tr>
       <tr>
-        <td>{!! str_replace('\n', '<br>', e($intervention->description)) !!}</td>
+        <td>{!! str_replace(PHP_EOL, '<br>', e($intervention->description)) !!}</td>
       </tr>
     </table>
     {{-- Véhicules --}}
     @if (array_key_exists("vehicules", $params) && $params["vehicules"])
-    <h2 class="h4">Véhicules mobilisés</h2>
-    <table class="table table-sm mb-2">
+    <h2 class="h3 mt-3">Véhicules mobilisés</h2>
+    <table class="table table-sm table-bordered table-striped mb-2">
       @if (count($intervention->vehicules) == 0)
       <tr>
         <td>Aucun véhicule engagé.</td>
@@ -87,8 +87,8 @@
     @endif
     {{-- Matériels --}}
     @if (array_key_exists("materiel", $params) && $params["materiel"])
-    <h2 class="h4">Matériel utilisé</h2>
-    <table class="table table-sm mb-2">
+    <h2 class="h3 mt-3">Matériel utilisé</h2>
+    <table class="table table-sm table-bordered table-striped mb-2">
       @if (count($intervention->materiels) == 0)
       <tr>
         <td>Aucun matériel engagé.</td>
@@ -103,8 +103,8 @@
     @endif
     {{-- Missions --}}
     @if (array_key_exists("missions", $params) && $params["missions"])
-    <h2 class="h4">Missions</h2>
-    <table class="table table-sm mb-2">
+    <h2 class="h3 mt-3">Missions</h2>
+    <table class="table table-sm table-bordered table-striped mb-2">
       <tr>
         <th>Début</th>
         <th>Quittance</th>
@@ -128,8 +128,8 @@
     @endif
     {{-- Appels --}}
     @if (array_key_exists("appels", $params) && $params["appels"])
-    <h2 class="h4">Partenaires contactés</h2>
-    <table class="table table-sm mb-2">
+    <h2 class="h3 mt-3">Partenaires contactés</h2>
+    <table class="table table-sm table-bordered table-striped mb-2">
       <tr>
         <th>Date</th>
         <th>Nom</th>
@@ -138,7 +138,7 @@
       </tr>
       @if (count($intervention->appels) == 0)
       <tr>
-        <td>Aucun appel effectué.</td>
+        <td colspan="4">Aucun appel effectué.</td>
       </tr>
       @endif
       @foreach ($intervention->appels as $appel)
@@ -153,8 +153,8 @@
     @endif
     {{-- Groupes --}}
     @if (array_key_exists("groupes", $params) && $params["groupes"])
-    <h2 class="h4">Groupes alarmés</h2>
-    <table class="table table-sm mb-2">
+    <h2 class="h3 mt-3">Groupes alarmés</h2>
+    <table class="table table-sm table-bordered table-striped mb-2">
       @if (count($intervention->groupes) == 0)
       <tr>
         <td>Aucun groupe</td>
@@ -169,8 +169,8 @@
     @endif
     {{-- Présences --}}
     @if (array_key_exists("presences", $params) && $params["presences"])
-    <h2 class="h4">Présences</h2>
-    <table class="table table-sm mb-2">
+    <h2 class="h3 mt-3">Présences</h2>
+    <table class="table table-sm table-bordered table-striped mb-2">
       @if (count($presences) == 0)
       <tr>
         <td>Aucune présence saisie pour cette intervention</td>
@@ -179,7 +179,7 @@
       <thead>
         <tr>
           <th>Sapeur</th>
-          <th>Quittance</th>
+          <th class="text-center">Quittance</th>
           <th>Présences</th>
           @if (array_key_exists("montants", $params) && $params["montants"])
           <th>Total</th>
@@ -196,31 +196,31 @@
               checked="checked"
               @endif
               >&#8203;</label>
-          </div>
-        </td>
-        @foreach ($sapeur['presences'] as $presence)
-        @if($loop->index != 0)
-      </tr>
-      <tr>
-        <td colspan="2"></td>
-        @endif
-        <td>{{ \Carbon\Carbon::parse($presence['debut'])->format('d.m H:i') }} - {{ \Carbon\Carbon::parse($presence['fin'])->format('H:i') }}</td>
-        @if ($loop->index == 0 && array_key_exists("montants", $params) && $params["montants"])
-        <td>{{ $ecritures[$sapeur['id']] }} CHF</td>
-        @endif
-        @endforeach
-      </tr>
-      @endforeach
-      <thead>
-        <tr>
-          <th colspan="3">Nombre sapeur : {{ count($presences) }}</th>
-          @if (array_key_exists("montants", $params) && $params["montants"])
-          <th>Total : {{ $ecritures['total'] }} CHF</th>
-          @endif
+            </div>
+          </td>
+          @foreach ($sapeur['presences'] as $presence)
+          @if($loop->index != 0)
         </tr>
-      </thead>
-    </table>
-    @endif
+        <tr>
+          <td colspan="2"></td>
+          @endif
+          <td>{{ \Carbon\Carbon::parse($presence['debut'])->format('d.m H:i') }} - {{ \Carbon\Carbon::parse($presence['fin'])->format('H:i') }}</td>
+          @if ($loop->index == 0 && array_key_exists("montants", $params) && $params["montants"])
+          <td>{{ $ecritures[$sapeur['id']] }} CHF</td>
+          @endif
+          @endforeach
+        </tr>
+        @endforeach
+        <thead>
+          <tr>
+            <th colspan="3">Nombre sapeur : {{ count($presences) }}</th>
+            @if (array_key_exists("montants", $params) && $params["montants"])
+            <th>Total : {{ $ecritures['total'] }} CHF</th>
+            @endif
+          </tr>
+        </thead>
+      </table>
+      @endif
     </table>
   </div>
 </body>

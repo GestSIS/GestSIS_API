@@ -240,8 +240,8 @@ class ExerciceService
         $presences = $this->repository->listeSapeurOfExerciceById($exerciceId);
 
         return View('pdf/liste-appel-localite', ["presences" => $presences]);
-        $pdf = SnappyPdf::loadView('pdf/decomptes-sapeurs', ["presences" => $presences]);
-        return $pdf->download('invoice.pdf');
+        // $pdf = SnappyPdf::loadView('pdf/liste-appel-localite', ["presences" => $presences]);
+        // return $pdf->download('invoice.pdf');
     }
 
     function listePresence($exerciceId)
@@ -273,7 +273,6 @@ class ExerciceService
         $pdf = SnappyPdf::loadView('pdf/liste-presence', ["exercice" => $exercice, "excuses" => $excusesMap]);
         return $pdf->download('presences.pdf');
     }
-
 
     /**
      * Return les statistiques de présence pour les exercices

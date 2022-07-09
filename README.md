@@ -33,7 +33,19 @@ Ajouter le fichier `auth-public.key` dans le dossier `storage/keys` contenant la
 
 Ce fichier doit au préalable avoir été généré dans le projet GestSIS_Auth.
 
-### Configuration génération des PDF
+### Etats de sortie
+
+Tous les états de sorties pour impression sont générés au format `html`, aucun `pdf` n'est généré.
+
+Le service `GestSIS_Print` permet de convertir la version `html` en `pdf` en respectant tous les styles CSS ce qui n'était pas le cas de la précédente solution se basant sur `wkhtmltopdf`.
+
+! Attention, certaines API produisent pour l'instant toujours des PDF et seront migrés au fur et à mesure.
+
+### ~~Configuration génération des PDF~~
+
+*Cette section n'est plus d'actualité, veuillez vous référer au service `GestSIS_Print`.*
+
+! Attention, certaines API produisent pour l'instant toujours des PDF et seront migrés au fur et à mesure.
 
 ```bash
 #### Install all dependencies
