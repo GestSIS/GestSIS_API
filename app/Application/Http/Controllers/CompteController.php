@@ -63,12 +63,6 @@ class CompteController extends Controller
         return response()->json(['data' => $this->service->getEcrituresByCompte($id, $exerciceComptableId)]);
     }
 
-    public function generatePdf(int $exerciceComptableId)
-    {
-        // TODO: Really in this controller ?
-        return $this->service->decompteAnnuelParSapeur($exerciceComptableId);
-    }
-
     public function justificatifIndividuel(int $exerciceComptableId, int $compteId)
     {
         return $this->service->justificatifIndividuel($exerciceComptableId, $compteId);

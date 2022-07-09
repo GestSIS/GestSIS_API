@@ -14,6 +14,7 @@ use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\SisParam;
 use Barryvdh\Snappy\Facades\SnappyPdf;
+use Illuminate\Support\Facades\DB;
 
 class PaiementService
 {
@@ -139,6 +140,61 @@ class PaiementService
     }
 
     public function impressionDecompte($decompteId)
+    {
+        $decompte = Decompte::find($decompteId);
+        $ecritures = Ecriture::where('decompte_id', '=', $decompteId)->orderBy('date')->get();
+        $sapeursMap = [];
+        $sapeurs = Sapeur::get(['id', 'nom', 'prenom']);
+        foreach ($sapeurs as $sapeur) {
+            $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
+        }
+
+        // return View('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
+        $pdf = SnappyPdf::loadView('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
+        return $pdf->download('presences.pdf');
+    }
+
+    public function impressionDecompteParSapeur($decompteId)
+    {
+        $ecritures = DB::table('ecritures')
+            ->join('sapeurs', 'ecritures.sapeur_id', '=', 'sapeurs.id')
+            ->join('ecriture_categories', 'ecritures.ecriture_categorie_id', '=', 'ecriture_categories.id')
+            ->join('type_unites', 'ecritures.type_unite_id', '=', 'type_unites.id')
+            ->join('civilites', 'sapeurs.civilite_id', '=', 'civilites.id')
+            ->where('ecritures.decompte_id', $decompteId)
+            ->select(
+                'ecritures.*',
+                DB::raw('CONCAT(sapeurs.nom, " ", sapeurs.prenom) as sapeur'),
+                'sapeurs.iban',
+                'ecriture_categories.tri',
+                'ecriture_categories.designation AS categorie',
+                'type_unites.abreviation as unite',
+                'civilites.forme_politesse as civilite'
+            )
+            ->orderBy('sapeur')
+            ->orderBy('ecriture_categories.tri', 'ASC')
+            ->orderBy('ecritures.date')
+            ->orderBy('ecritures.heure')
+            ->get();
+
+        //        return View('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
+        $pdf = SnappyPdf::loadView('pdf/decomptes-sapeurs', ["ecritures" => $ecritures]);
+
+        return $pdf->download('invoice.pdf');
+        $decompte = Decompte::find($decompteId);
+        $ecritures = Ecriture::where('decompte_id', '=', $decompteId)->orderBy('date')->get();
+        $sapeursMap = [];
+        $sapeurs = Sapeur::get(['id', 'nom', 'prenom']);
+        foreach ($sapeurs as $sapeur) {
+            $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
+        }
+
+        // return View('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
+        $pdf = SnappyPdf::loadView('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
+        return $pdf->download('presences.pdf');
+    }
+
+    public function impressionDecompteParCompte($decompteId)
     {
         $decompte = Decompte::find($decompteId);
         $ecritures = Ecriture::where('decompte_id', '=', $decompteId)->orderBy('date')->get();

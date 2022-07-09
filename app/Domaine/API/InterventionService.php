@@ -460,16 +460,17 @@ class InterventionService
             //TODO: Trier par nom, prénom
         }
 
-        // return View('pdf/rapport-intervention', [
-        //     "intervention" => $intervention,
-        //     "params" => $params,
-        //     "vehicules" => $vehiculesMap,
-        //     "materiels" => $materielsMap,
-        //     "groupes" => $groupesMap,
-        //     "sapeurs" => $sapeursMap,
-        //     "quittances" => $quittancesMap,
-        //     "presences" => $presences,
-        // ]);
+        return View('pdf/rapport-intervention', [
+            "intervention" => $intervention,
+            "params" => $params,
+            "vehicules" => $vehiculesMap,
+            "materiels" => $materielsMap,
+            "groupes" => $groupesMap,
+            "sapeurs" => $sapeursMap,
+            "quittances" => $quittancesMap,
+            "presences" => $presences,
+            "ecritures" => $ecritures,
+        ]);
 
         $pdf = SnappyPdf::loadView('pdf/rapport-intervention', [
             "intervention" => $intervention,

@@ -123,6 +123,26 @@ class DecompteController extends Controller
     }
 
     /**
+     * Créer un fichier iso20022 pour un décompte
+     * 
+     * @param int $id id du décompte pour lequelle le fichier doit être créé
+     */
+    public function printParSapeur($exerciceComptableId)
+    {
+        return $this->service->impressionDecompteParSapeur($exerciceComptableId);
+    }
+
+    /**
+     * Créer un fichier iso20022 pour un décompte
+     * 
+     * @param int $id id du décompte pour lequelle le fichier doit être créé
+     */
+    public function printParCompte($exerciceComptableId)
+    {
+        return $this->service->impressionDecompteParCompte($exerciceComptableId);
+    }
+
+    /**
      * Retourne un décompte
      * 
      * @param int $id id du décompte souhaité

@@ -23,8 +23,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenVali
     Route::get('email-validate', [EmailController::class, 'validateEmail']);
 });
 
-// Route::get('pdf-test/{id}', 'CompteController@generatePdf');
-
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
 
     // Paramètres accessible pour tout droit config
@@ -194,7 +192,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('interventions.phases', 'InterventionPhasesController')->only(['index']);
 
         // Impressions interventions
-        Route::post('interventions/{id}/rapport', 'InterventionController@rapport')->name('api.v2.interventions.rapport');
+        Route::get('interventions/{id}/rapport', 'InterventionController@rapport')->name('api.v2.interventions.rapport');
 
         // Statistiques véhicule et matériel
         Route::get('statistiques/{id}/materiel', 'InterventionStatistiqueController@materiel');
@@ -320,6 +318,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('decomptes/exercice-comptable/{id}', 'DecompteController@getByExerciceComptable');
         Route::get('decomptes/{id}/iso20022', 'DecompteController@iso20022');
         Route::get('decomptes/{id}/print', 'DecompteController@print');
+        Route::get('decomptes/{id}/print-par-sapeur', 'DecompteController@printParSapeur');
+        Route::get('decomptes/{id}/print-par-compte', 'DecompteController@printParCompte');
         Route::resource('decomptes', 'DecompteController')->only(['show', 'destroy']);
 
         // Params Amendes
