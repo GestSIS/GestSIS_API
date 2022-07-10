@@ -13,7 +13,6 @@ use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\SisParam;
-use Barryvdh\Snappy\Facades\SnappyPdf;
 use Illuminate\Support\Facades\DB;
 
 class PaiementService
@@ -187,9 +186,7 @@ class PaiementService
             $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
         }
 
-        // return View('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
-        $pdf = SnappyPdf::loadView('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
-        return $pdf->download('presences.pdf');
+        return View('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
     }
 
     public function impressionDecompteParCompte($decompteId)

@@ -163,11 +163,6 @@ return [
         Illuminate\View\ViewServiceProvider::class,
 
         /*
-         * Package Service Providers...
-         */
-        Barryvdh\Snappy\ServiceProvider::class,
-
-        /*
          * Application Service Providers...
          */
         App\Application\Providers\AppServiceProvider::class,

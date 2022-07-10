@@ -9,7 +9,6 @@ use App\Domaine\SPI\IndemniteTypeRepository;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Sapeur;
-use Barryvdh\Snappy\Facades\SnappyPdf;
 
 class ImputationService
 {
@@ -151,9 +150,7 @@ class ImputationService
     {
         $ecritures = $this->ecritureRepo->computeEcritureForPersonalDecompte($exerciceComptableId);
 
-        //        return View('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
-        $pdf = SnappyPdf::loadView('pdf/decomptes-sapeurs', ["ecritures" => $ecritures]);
-        return $pdf->download('invoice.pdf');
+        return View('pdf/decomptes-sapeurs', ["ecritures" => $ecritures]);
     }
 
     public function justificatifIndividuel(int $exerciceComptableId, int $compteId)

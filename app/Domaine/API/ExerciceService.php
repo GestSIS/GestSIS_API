@@ -12,7 +12,6 @@ use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\Fonction;
 use App\Infrastructure\Models\HeureExercice;
 use Illuminate\Database\Eloquent\Collection;
-use Barryvdh\Snappy\Facades\SnappyPdf;
 use Illuminate\Support\Facades\DB;
 
 class ExerciceService
@@ -230,9 +229,7 @@ class ExerciceService
             $fonctionsMap[$fonction->id] = $fonction->nom;
         }
 
-        // return View('pdf/liste-appel', ["exercice" => $exercice, "fonctions" => $fonctionsMap, "excuses" => $excusesMap]);
-        $pdf = SnappyPdf::loadView('pdf/liste-appel', ["exercice" => $exercice, "fonctions" => $fonctionsMap, "excuses" => $excusesMap]);
-        return $pdf->download('invoice.pdf');
+        return View('pdf/liste-appel', ["exercice" => $exercice, "fonctions" => $fonctionsMap, "excuses" => $excusesMap]);
     }
 
     function listeAppelParLocalite($exerciceId)
@@ -240,8 +237,6 @@ class ExerciceService
         $presences = $this->repository->listeSapeurOfExerciceById($exerciceId);
 
         return View('pdf/liste-appel-localite', ["presences" => $presences]);
-        // $pdf = SnappyPdf::loadView('pdf/liste-appel-localite', ["presences" => $presences]);
-        // return $pdf->download('invoice.pdf');
     }
 
     function listePresence($exerciceId)
@@ -269,9 +264,7 @@ class ExerciceService
             $excusesMap[$excuse->id] = $excuse->designation;
         }
 
-        // return View('pdf/liste-presence', ["exercice" => $exercice, "excuses" => $excusesMap]);
-        $pdf = SnappyPdf::loadView('pdf/liste-presence', ["exercice" => $exercice, "excuses" => $excusesMap]);
-        return $pdf->download('presences.pdf');
+        return View('pdf/liste-presence', ["exercice" => $exercice, "excuses" => $excusesMap]);
     }
 
     /**

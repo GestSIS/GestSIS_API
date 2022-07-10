@@ -7,7 +7,6 @@ use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceCategorie;
 use App\Infrastructure\Models\Localite;
 use App\Infrastructure\Models\Sapeur;
-use Barryvdh\Snappy\Facades\SnappyPdf;
 
 class ConvocationService
 {
@@ -63,14 +62,5 @@ class ConvocationService
             "localites" => $localitesMap,
             "categories" => $categoriesMap,
         ]);
-        $pdf = SnappyPdf::loadView('pdf/convocation', [
-            "params" => $params,
-            "sapeurs" => $sapeursMap,
-            "exercices" => $exercicesMap,
-            "civilites" => $civilitesMap,
-            "localites" => $localitesMap,
-            "categories" => $categoriesMap,
-        ]);
-        return $pdf->download('convocations.pdf');
     }
 }

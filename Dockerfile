@@ -2,8 +2,7 @@ FROM php:8.0-fpm
 
 RUN mkdir -p /usr/share/man/man1 \
     && apt-get update \
-    && apt-get install -y --no-install-recommends npm wkhtmltopdf libfreetype6-dev libjpeg-dev libpng-dev libwebp-dev libzip-dev fontconfig xfonts-base xfonts-75dpi wget libx11-6 libxcb1 libxext6 libxrender1 \
-    && docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ --with-webp=/usr/include/ \
+    && apt-get install -y --no-install-recommends npm \
     && docker-php-ext-install gd \
     # gmp
     && apt-get install -y --no-install-recommends libgmp-dev \
