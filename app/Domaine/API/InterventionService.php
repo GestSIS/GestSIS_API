@@ -13,7 +13,6 @@ use App\Infrastructure\Models\Quittance;
 use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\Vehicule;
 use Illuminate\Database\Eloquent\Collection;
-use Barryvdh\Snappy\Facades\SnappyPdf;
 use Illuminate\Support\Facades\DB;
 
 class InterventionService
@@ -471,19 +470,6 @@ class InterventionService
             "presences" => $presences,
             "ecritures" => $ecritures,
         ]);
-
-        $pdf = SnappyPdf::loadView('pdf/rapport-intervention', [
-            "intervention" => $intervention,
-            "params" => $params,
-            "vehicules" => $vehiculesMap,
-            "materiels" => $materielsMap,
-            "groupes" => $groupesMap,
-            "sapeurs" => $sapeursMap,
-            "quittances" => $quittancesMap,
-            "presences" => $presences,
-            "ecritures" => $ecritures,
-        ]);
-        return $pdf->download('rapport.pdf');
     }
 
     /**

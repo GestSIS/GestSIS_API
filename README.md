@@ -39,31 +39,6 @@ Tous les états de sorties pour impression sont générés au format `html`, auc
 
 Le service `GestSIS_Print` permet de convertir la version `html` en `pdf` en respectant tous les styles CSS ce qui n'était pas le cas de la précédente solution se basant sur `wkhtmltopdf`.
 
-! Attention, certaines API produisent pour l'instant toujours des PDF et seront migrés au fur et à mesure.
-
-### ~~Configuration génération des PDF~~
-
-*Cette section n'est plus d'actualité, veuillez vous référer au service `GestSIS_Print`.*
-
-! Attention, certaines API produisent pour l'instant toujours des PDF et seront migrés au fur et à mesure.
-
-```bash
-#### Install all dependencies
-apt-get install -y \
-libxrender1 \
-libfontconfig1 \
-libx11-dev \
-libjpeg62 \
-libxtst6 \
-wget \
-&& wget https://github.com/h4cc/wkhtmltopdf-amd64/blob/master/bin/wkhtmltopdf-amd64?raw=true -O /usr/local/bin/wkhtmltopdf \
-&& chmod +x /usr/local/bin/wkhtmltopdf
-```
-
-Regarder l'issue suivante :
-
-- https://github.com/barryvdh/laravel-snappy/issues/68#issuecomment-314012014
-
 ### Serveur de développement
 
 Pour lancer le serveur de dev :

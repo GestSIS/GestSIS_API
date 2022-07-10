@@ -9,7 +9,6 @@ use App\Domaine\SPI\IndemniteTypeRepository;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Sapeur;
-use Barryvdh\Snappy\Facades\SnappyPdf;
 
 class ImputationService
 {
@@ -151,9 +150,7 @@ class ImputationService
     {
         $ecritures = $this->ecritureRepo->computeEcritureForPersonalDecompte($exerciceComptableId);
 
-        //        return View('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
-        $pdf = SnappyPdf::loadView('pdf/decomptes-sapeurs', ["ecritures" => $ecritures]);
-        return $pdf->download('invoice.pdf');
+        return View('pdf/decomptes-sapeurs', ["ecritures" => $ecritures]);
     }
 
     public function justificatifIndividuel(int $exerciceComptableId, int $compteId)
@@ -171,15 +168,10 @@ class ImputationService
             $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
         }
 
-        // return View('pdf/compte', [
-        //     "compte" => $compte,
-        //     "sapeurs" => $sapeursMap,
-        // ]);
-        $pdf = SnappyPdf::loadView('pdf/compte', [
+        return View('pdf/compte', [
             "compte" => $compte,
             "sapeurs" => $sapeursMap,
         ]);
-        return $pdf->download('invoice.pdf');
     }
 
     public function justificatifComplet(int $exerciceComptableId)
@@ -195,14 +187,9 @@ class ImputationService
             $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
         }
 
-        // return View('pdf/comptes', [
-        //     "comptes" => $comptes,
-        //     "sapeurs" => $sapeurs,
-        // ]);
-        $pdf = SnappyPdf::loadView('pdf/comptes', [
+        return View('pdf/comptes', [
             "comptes" => $comptes,
             "sapeurs" => $sapeursMap,
         ]);
-        return $pdf->download('invoice.pdf');
     }
 }
