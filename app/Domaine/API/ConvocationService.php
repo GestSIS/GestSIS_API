@@ -55,15 +55,14 @@ class ConvocationService
             $exercicesMap[$e->id] = $e;
         }
 
-        // return response()->json([$sapeurIds, $sapeurs]);
-        // return View('pdf/convocation', [
-        //     "params" => $params,
-        //     "sapeurs" => $sapeursMap,
-        //     "exercices" => $exercicesMap,
-        //     "civilites" => $civilitesMap,
-        //     "localites" => $localitesMap,
-        //     "categories" => $categoriesMap,
-        // ]);
+        return View('pdf/convocation', [
+            "params" => $params,
+            "sapeurs" => $sapeursMap,
+            "exercices" => $exercicesMap,
+            "civilites" => $civilitesMap,
+            "localites" => $localitesMap,
+            "categories" => $categoriesMap,
+        ]);
         $pdf = SnappyPdf::loadView('pdf/convocation', [
             "params" => $params,
             "sapeurs" => $sapeursMap,

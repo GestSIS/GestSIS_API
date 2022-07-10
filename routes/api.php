@@ -23,6 +23,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenVali
     Route::get('email-validate', [EmailController::class, 'validateEmail']);
 });
 
+// Route::get('exercices-comptable/{exercieComptableId}/justificatif', 'CompteController@justificatifComplet');
+
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
 
     // Paramètres accessible pour tout droit config
@@ -133,7 +135,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('exercices/{id}/liste-appel', 'ExerciceController@listeAppel');
 
         // Convocations
-        Route::post('convocation/{id}', 'ConvocationController@convoquer');
+        Route::get('convocation/{id}', 'ConvocationController@convoquer');
 
         // Statistiques
         Route::get('statistiques/{id}/presence', 'SapeurExerciceController@stat');

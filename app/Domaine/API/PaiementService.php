@@ -149,9 +149,7 @@ class PaiementService
             $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
         }
 
-        // return View('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
-        $pdf = SnappyPdf::loadView('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
-        return $pdf->download('presences.pdf');
+        return View('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
     }
 
     public function impressionDecompteParSapeur($decompteId)
@@ -177,10 +175,10 @@ class PaiementService
             ->orderBy('ecritures.heure')
             ->get();
 
-        //        return View('pdf/decomptes-sapeurs', ["ecritures"=>$ecritures]);
-        $pdf = SnappyPdf::loadView('pdf/decomptes-sapeurs', ["ecritures" => $ecritures]);
+        return View('pdf/decomptes-sapeurs', ["ecritures" => $ecritures]);
 
-        return $pdf->download('invoice.pdf');
+        // TODO: Continue and see what to do next
+
         $decompte = Decompte::find($decompteId);
         $ecritures = Ecriture::where('decompte_id', '=', $decompteId)->orderBy('date')->get();
         $sapeursMap = [];
@@ -204,9 +202,7 @@ class PaiementService
             $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
         }
 
-        // return View('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
-        $pdf = SnappyPdf::loadView('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
-        return $pdf->download('presences.pdf');
+        return View('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
     }
 
     /**

@@ -171,15 +171,10 @@ class ImputationService
             $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
         }
 
-        // return View('pdf/compte', [
-        //     "compte" => $compte,
-        //     "sapeurs" => $sapeursMap,
-        // ]);
-        $pdf = SnappyPdf::loadView('pdf/compte', [
+        return View('pdf/compte', [
             "compte" => $compte,
             "sapeurs" => $sapeursMap,
         ]);
-        return $pdf->download('invoice.pdf');
     }
 
     public function justificatifComplet(int $exerciceComptableId)
@@ -195,14 +190,9 @@ class ImputationService
             $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
         }
 
-        // return View('pdf/comptes', [
-        //     "comptes" => $comptes,
-        //     "sapeurs" => $sapeurs,
-        // ]);
-        $pdf = SnappyPdf::loadView('pdf/comptes', [
+        return View('pdf/comptes', [
             "comptes" => $comptes,
             "sapeurs" => $sapeursMap,
         ]);
-        return $pdf->download('invoice.pdf');
     }
 }

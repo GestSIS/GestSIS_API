@@ -3,12 +3,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  
-  <style>
-    .page-break {
-      page-break-after: always;
-    }
-  </style>
   <link rel="stylesheet" href="/assets/print.css">
   <title>Rapport d'intervention</title>
 </head>
