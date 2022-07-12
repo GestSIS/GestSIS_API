@@ -45,7 +45,7 @@ class AspsmsBusiness
 
             return self::sendTextSMS($username, $password, $message, $origin, $differe, $date, $numeros);
         } catch (DecryptException $e) {
-            throw new ArrayException(['message' => 'ASPSMS non configuré']);
+            throw new ArrayException([], 'ASPSMS non configuré');
         }
     }
 
@@ -81,7 +81,7 @@ class AspsmsBusiness
 
             return self::checkCredit($username, $password);
         } catch (DecryptException $e) {
-            throw new ArrayException(['message' => 'ASPSMS non configuré']);
+            throw new ArrayException([], 'ASPSMS non configuré');
         }
     }
 
@@ -106,11 +106,11 @@ class AspsmsBusiness
                         // Connect failed
                     case "3":
                         // Authorization failed
-                        throw new ArrayException(['message' => "Informations de connexion invalides", $username, $password], "Informations de connexion invalides");
+                        throw new ArrayException([], "Informations de connexion invalides");
                     case "5":
                         // Credit insuffisant
                     default:
-                        throw new ArrayException(['message' => "Erreur ASPSMS veuillez contacter votre administrateur system"], "Erreur ASPSMS veuillez contacter votre administrateur system");
+                        throw new ArrayException([], "Erreur ASPSMS veuillez contacter votre administrateur system");
                 }
                 return $response->body();
             }
@@ -148,17 +148,17 @@ class AspsmsBusiness
                         // Connect failed
                     case "3":
                         // Authorization failed
-                        throw new ArrayException(['message' => "Informations de connexion invalides", $username, $password], "Informations de connexion invalides");
+                        throw new ArrayException([], "Informations de connexion invalides");
                     case "5":
                         // Credit insuffisant
                     default:
-                        throw new ArrayException(['message' => "Erreur ASPSMS veuillez contacter votre administrateur system"], "Erreur ASPSMS veuillez contacter votre administrateur system");
+                        throw new ArrayException([], "Erreur ASPSMS veuillez contacter votre administrateur system");
                 }
                 return $response->body();
             }
         } catch (ConnectionException $e) {
             throw $e;
-            throw new ArrayException(['message' => "Erreur lors de la connexion ASPSMS veuillez contacter votre administrateur system"], "Erreur lors de la connexion ASPSMS veuillez contacter votre administrateur system");
+            throw new ArrayException([], "Erreur lors de la connexion ASPSMS veuillez contacter votre administrateur system");
         }
         return 'OK';
     }

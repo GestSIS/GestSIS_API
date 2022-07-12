@@ -1,6 +1,6 @@
 <div>
   {{-- En-tête --}}
-  <table class="table table-sm table-secondary">
+  <table class="table table-sm table-secondary mt-3">
     <tr>
       <th colspan="2">{{ $compte->numero }} {{ $compte->designation }}</th>
       <td>Etat au {{ date('d.m.y') }}</td>

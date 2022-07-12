@@ -80,7 +80,7 @@ class EcritureController extends Controller
                 break;
 
             default:
-                throw new ArrayException(['message' => 'Type d\'écriture non-supporté']);
+                throw new ArrayException([], 'Type d\'écriture non-supporté');
         }
         return $data;
     }

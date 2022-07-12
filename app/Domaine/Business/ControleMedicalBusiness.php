@@ -38,7 +38,7 @@ class ControleMedicalBusiness
     public function supprimerMedecin($id)
     {
         if (ControleMedical::where('medecin_id', '=', $id)->exists()) {
-            throw new ArrayException(['message' => 'Impossible de supprimer ce médecin, celui-ci est utilisé dans un contrôle médical.']);
+            throw new ArrayException([], 'Impossible de supprimer ce médecin, celui-ci est utilisé dans un contrôle médical.');
         }
         Medecin::where('id', $id)->delete();
     }
@@ -60,7 +60,7 @@ class ControleMedicalBusiness
     public function supprimerType($id)
     {
         if (ControleMedical::where('controle_medical_type_id', '=', $id)->exists()) {
-            throw new ArrayException(['message' => 'Impossible de supprimer ce type de contrôle médical, celui-ci est utilisé dans un contrôle médical.']);
+            throw new ArrayException([], 'Impossible de supprimer ce type de contrôle médical, celui-ci est utilisé dans un contrôle médical.');
         }
         ControleMedicalType::where('id', $id)->delete();
     }
