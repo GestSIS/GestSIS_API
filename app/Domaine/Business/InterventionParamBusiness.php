@@ -34,7 +34,7 @@ class InterventionParamBusiness
     public function supprimerStat($id)
     {
         if (TypeIntervention::where('stat_intervention_id', '=', $id)->exists()) {
-            throw new ArrayException(['message' => 'Impossible de supprimer cette catégorie statististique, celle-ci est liée à un type d\'intervention.']);
+            throw new ArrayException([], 'Impossible de supprimer cette catégorie statististique, celle-ci est liée à un type d\'intervention.');
         }
         StatIntervention::where('id', $id)->delete();
     }
@@ -75,7 +75,7 @@ class InterventionParamBusiness
     public static function supprimerType($id)
     {
         if (Intervention::where('type_intervention_id', '=', $id)->exists()) {
-            throw new ArrayException(['message' => 'Impossible de supprimer ce type d\'intervention, celui-ci est utilisé dans une intervention.']);
+            throw new ArrayException([], 'Impossible de supprimer ce type d\'intervention, celui-ci est utilisé dans une intervention.');
         }
         TypeIntervention::where('id', $id)->delete();
     }
@@ -141,7 +141,7 @@ class InterventionParamBusiness
     public static function supprimerVehicule($id)
     {
         if (InterventionVehicule::where('vehicule_id', '=', $id)->exists()) {
-            throw new ArrayException(['message' => 'Impossible de supprimer ce véhicule, celui-ci est utilisé dans une intervention.']);
+            throw new ArrayException([], 'Impossible de supprimer ce véhicule, celui-ci est utilisé dans une intervention.');
         }
         Vehicule::where('id', $id)->delete();
     }
@@ -169,7 +169,7 @@ class InterventionParamBusiness
     public static function supprimerMateriel($id)
     {
         if (InterventionMateriel::where('materiel_id', '=', $id)->exists()) {
-            throw new ArrayException(['message' => 'Impossible de supprimer ce matériel, celui-ci est utilisé dans une intervention.']);
+            throw new ArrayException([], 'Impossible de supprimer ce matériel, celui-ci est utilisé dans une intervention.');
         }
         Materiel::where('id', $id)->delete();
     }
@@ -191,7 +191,7 @@ class InterventionParamBusiness
     public static function supprimerTraitement($id)
     {
         if (Intervention::where('intervention_traitement_id', '=', $id)->exists()) {
-            throw new ArrayException(['message' => 'Impossible de supprimer ce traitement, celui-ci est utilisé dans un exercice.']);
+            throw new ArrayException([], 'Impossible de supprimer ce traitement, celui-ci est utilisé dans un exercice.');
         }
         InterventionTraitement::where('id', $id)->delete();
     }

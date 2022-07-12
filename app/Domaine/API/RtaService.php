@@ -78,7 +78,7 @@ class RtaService
             return $sapeur['sapeur_id'];
         }, $ajoutes);
         if (ReferenceRta::whereIn('sapeur_id', $ajoutesId)->count() > 0) {
-            throw new ArrayException(['message' => 'Ajout d\'un sapeur déjà présent dans la référence RTA', 'ajoutes' => 'Sapeur déjà présent'], "Ajout de sapeurs à double");
+            throw new ArrayException(['ajoutes' => 'Sapeur déjà présent'], 'Ajout d\'un sapeur déjà présent dans la référence RTA');
         }
 
         // Preparation des données pour fichier xml
@@ -108,7 +108,7 @@ class RtaService
         usort($sapeurs, fn ($a, $b) => strcmp($a['nom'] . $a['prenom'], $b['nom'] . $b['prenom']));
 
         if (count($sapeurs) <= 0) {
-            throw new ArrayException(["message" => "Aucun sapeur dans la communication rta présente", 'sapeurs' => 'Aucun sapeur'], "Aucun sapeur concerné");
+            throw new ArrayException(['sapeurs' => 'Aucun sapeur'], "Aucun sapeur présent dans la communication rta");
         }
 
         // Génération du fichier xml pour RTA
@@ -131,7 +131,7 @@ class RtaService
             ->post($url);
 
         if (!str_contains($response->body(), '[TRS]OK')) {
-            throw new ArrayException(["username" => "A vérifier", "password" => "A vérifier", "message" => "Identifiants incorrects", "api_res" => $response->body()]);
+            throw new ArrayException(["username" => "A vérifier", "password" => "A vérifier", "api_res" => $response->body()], "Identifiants incorrects");
         }
 
         // Suppression, modification et ajout des sapeurs

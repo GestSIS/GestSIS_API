@@ -188,7 +188,7 @@ class ExerciceBusiness
         // Check pas déjà imputé
         $statut = $this->repository->getExerciceStatutById($exerciceId);
         if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_VALIDE) {
-            throw new ArrayException(['message' => 'Impossible de modifier un exercice déjà imputé']);
+            throw new ArrayException([], 'Impossible de modifier un exercice déjà imputé');
         }
 
         // Check sapeur not duplicated
@@ -379,7 +379,7 @@ class ExerciceBusiness
         // Check pas déjà imputé
         $statut = $this->repository->getExerciceStatutById($exerciceId);
         if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_SAISI) {
-            throw new ArrayException(['message' => 'Impossible de modifier un exercice déjà imputé']);
+            throw new ArrayException([], 'Impossible de modifier un exercice déjà imputé');
         }
 
         $this->repository->removeSapeursFromExercice($exerciceId, $ids);

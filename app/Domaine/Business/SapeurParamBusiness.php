@@ -40,7 +40,7 @@ class SapeurParamBusiness
     public static function supprimerFonction($id)
     {
         if (FonctionSapeur::where('fonction_id', '=', $id)->exists()) {
-            throw new ArrayException(['message' => 'Impossible de supprimer cette fonction, celle-ci est attribuée à un sapeur.']);
+            throw new ArrayException([], 'Impossible de supprimer cette fonction, celle-ci est attribuée à un sapeur.');
         }
         Fonction::where('id', $id)->delete();
     }
@@ -62,7 +62,7 @@ class SapeurParamBusiness
     public static function supprimerCours($id)
     {
         if (CoursSapeur::where('cours_id', '=', $id)->exists()) {
-            throw new ArrayException(['message' => 'Impossible de supprimer ce cours, celui-ci est attribué à un sapeur.']);
+            throw new ArrayException([], 'Impossible de supprimer ce cours, celui-ci est attribué à un sapeur.');
         }
         Cours::where('id', $id)->delete();
     }
@@ -84,7 +84,7 @@ class SapeurParamBusiness
     public static function supprimerGrade($id)
     {
         if (GradeSapeur::where('grade_id', '=', $id)->exists()) {
-            throw new ArrayException(['message' => 'Impossible de supprimer ce grade, celui-ci est attribué à un sapeur.']);
+            throw new ArrayException([], 'Impossible de supprimer ce grade, celui-ci est attribué à un sapeur.');
         }
         Grade::where('id', $id)->delete();
     }

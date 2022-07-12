@@ -30,7 +30,7 @@ class InterventionBusiness
     {
         $statut = $this->repository->getInterventionStatutById($interventionId);
         if ($statut >= self::INTERVENTION_STATUT_IMPUTE) {
-            throw new ArrayException(['message' => 'Intervention already impute']);
+            throw new ArrayException([], 'Intervention already impute');
         }
     }
 
