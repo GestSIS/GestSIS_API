@@ -150,6 +150,7 @@ class ImputationService
     {
         $ecritures = $this->ecritureRepo->computeEcritureForPersonalDecompte($exerciceComptableId);
 
+        // FIXME: créer un nouveau décompte avec la date de paiement de chaque écriture
         return View('pdf/decomptes-sapeurs', ["ecritures" => $ecritures]);
     }
 

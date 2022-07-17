@@ -24,6 +24,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenVali
 });
 
 // Route::get('exercices-comptable/{exercieComptableId}/justificatif', 'CompteController@justificatifComplet');
+Route::get('decomptes/{id}/print', 'DecompteController@print');
+Route::get('decomptes/{id}/print-par-sapeur', 'DecompteController@printParSapeur');
+Route::get('decomptes/{id}/print-par-compte', 'DecompteController@printParCompte');
 
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
 

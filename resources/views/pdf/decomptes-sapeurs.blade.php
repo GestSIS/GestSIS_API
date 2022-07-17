@@ -6,17 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="/assets/print.css">
   <style>
-    .column-right {
-      text-align: right !important;
-      padding-right: 1rem !important;
-    }
-
-    .sum-row {
-      background-color: white !important;
+    tfoot tr,
+    tfoot tr th {
+      border-width: 0px !important;
     }
   </style>
 
-  <title>Décomptes sapeurs</title>
+  <title>Décompte sapeurs</title>
 </head>
 
 <body>
@@ -33,6 +29,7 @@
 
     $categorieSousTotal = 0.0;
     $interventionSousTotal = 0.0;
+    $sapeurTotal = 0.0;
 
     function isExercice($e)
     {
@@ -54,7 +51,7 @@
 
     function formatDate($value)
     {
-      return str_replace('-', '.', $value);
+      return implode('.', array_reverse(explode('-', $value)));
     }
 
     function formatTime($value)
@@ -100,52 +97,60 @@
       $interventionSousTotal = $newIntervention ? 0.0 : $interventionSousTotal;
       $interventionSousTotal += $ecriture->total;
 
+      if ($newSapeur){
+        $sapeurTotal = 0.0;
+      }
+      $sapeurTotal += $ecriture->total;
+
+
     ?>
-      @if ($newSapeur)
+    @if ($newSapeur)
       <h1 class="text-center">Décompte de frais</h1>
-      <table class="table table-responsive table-sm">
-        <tr class="table-secondary">
-          <td class="table-secondary">{{ ucfirst($ecriture->civilite) }}</td>
-          <td class="table-secondary">{{ $ecriture->sapeur }}</td>
-          <td class="table-secondary">Versement sur</td>
-          <td class="table-secondary">{{ $ecriture->iban }}</td>
-        </tr>
+      <table class="table table-secondary table-responsive table-sm">
+        <thead>
+          <tr>
+            <td>{{ ucfirst($ecriture->civilite) }}</td>
+            <td>{{ $ecriture->sapeur }}</td>
+            <td>Versement sur</td>
+            <td>{{ $ecriture->iban }}</td>
+          </tr>
+        </thead>
       </table>
       <div></div>
-      @endif
+    @endif
 
-      @if ($newCategorie)
+    @if ($newCategorie)
       <h2>{{ $ecriture->categorie }}</h2>
-      <table class="table table-sm">
-        @endif
+      <table class="table table-sm table-striped table-bordered">
+    @endif
 
-        @if ($isAnnuel)
-        @if ($debutSectionAnnuel)
+    @if ($isAnnuel)
+      @if ($debutSectionAnnuel)
         <thead>
           <tr>
             <th colspan="3">Nature du service</th>
             <th>Tarif</th>
             <th>Qté</th>
-            <th>Date paiement</th>
+            {{-- <th>Date paiement</th> --}}
             <th class="text-center">Total</th>
           </tr>
         </thead>
         <tbody>
-          @endif
-          <tr>
-            <td colspan="3">{{ $ecriture->designation }}</td>
-            <td>{{ formatTarif($ecriture) }}</td>
-            <td>{{ formatNumber($ecriture->quantite) }}</td>
-            {{-- <td>{{ formatDate($ecriture->date_paiement) }}TODO</td> --}}
-            <td class="column-right">{{ formatNumber($ecriture->total) }}</td>
-          </tr>
-          @if ($finSectionAnnuel)
+      @endif
+      <tr>
+        <td colspan="3">{{ $ecriture->designation }}</td>
+        <td>{{ formatTarif($ecriture) }}</td>
+        <td>{{ formatNumber($ecriture->quantite) }}</td>
+        {{-- <td>{{ formatDate($ecriture->date_paiement) }}TODO</td> --}}
+        <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
+      </tr>
+      @if ($finSectionAnnuel)
         </tbody>
-        @endif
-        @endif
+      @endif
+    @endif
 
-        @if ($isExercice)
-        @if ($debutSectionExercice)
+    @if ($isExercice)
+      @if ($debutSectionExercice)
         <thead>
           <tr>
             <th>Date</th>
@@ -153,28 +158,28 @@
             <th>Nature du service</th>
             <th>Tarif</th>
             <th>Qté</th>
-            <th>Date paiement</th>
+            {{-- <th>Date paiement</th> --}}
             <th class="text-center">Total</th>
           </tr>
         </thead>
         <tbody>
-          @endif
-          <tr>
-            <td>{{ formatDate($ecriture->date) }}</td>
-            <td>{{ formatTime($ecriture->heure) }}</td>
-            <td>{{ $ecriture->designation }}</td>
-            <td>{{ formatTarif($ecriture) }}</td>
-            <td>{{ formatNumber($ecriture->quantite) }}</td>
-            {{-- <td>{{ formatDate($ecriture->date_paiement) }}TODO</td> --}}
-            <td class="column-right">{{ formatNumber($ecriture->total) }}</td>
-          </tr>
-          @if ($finSectionExercice)
+      @endif
+      <tr>
+        <td>{{ formatDate($ecriture->date) }}</td>
+        <td>{{ formatTime($ecriture->heure) }}</td>
+        <td>{{ $ecriture->designation }}</td>
+        <td>{{ formatTarif($ecriture) }}</td>
+        <td>{{ formatNumber($ecriture->quantite) }}</td>
+        {{-- <td>{{ formatDate($ecriture->date_paiement) }}TODO</td> --}}
+        <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
+      </tr>
+      @if ($finSectionExercice)
         </tbody>
-        @endif
-        @endif
+      @endif
+    @endif
 
-        @if ($isIntervention)
-        @if ($debutSectionIntervention)
+    @if ($isIntervention)
+      @if ($debutSectionIntervention)
         <thead>
           <tr>
             <th>Date</th>
@@ -182,54 +187,61 @@
             <th>Intervention</th>
             <th>Tarif</th>
             <th>Qté</th>
-            <th>Date paiement</th>
+            {{-- <th>Date paiement</th> --}}
             <th>Total</th>
           </tr>
         </thead>
         <tbody>
-          @endif
+      @endif
 
-          @if ($newIntervention)
-          <tr>
-            <td>{{ formatDate($ecriture->date) }}</td>
-            <td>{{ formatTime($ecriture->heure) }}</td>
-            <td colspan="5">{{ $ecriture->designation }}</td>
-          </tr>
-          @endif
-          <tr>
-            <td colspan="2"></td>
-            <td>TODO Sous-écriture</td>
-            <td>{{ formatTarif($ecriture) }}</td>
-            <td>{{ formatNumber($ecriture->quantite) }}</td>
-            {{-- <td>{{formatDa
+      @if ($newIntervention)
+        <tr>
+          <td>{{ formatDate($ecriture->date) }}</td>
+          <td>{{ formatTime($ecriture->heure) }}</td>
+          <td colspan="5">{{ $ecriture->designation }}</td>
+        </tr>
+      @endif
+      <tr>
+        <td colspan="2"></td>
+        <td>TODO Sous-écriture</td>
+        <td>{{ formatTarif($ecriture) }}</td>
+        <td>{{ formatNumber($ecriture->quantite) }}</td>
+        {{-- <td>{{formatDa
                             te( $ecriture->date_paiement) }}TODO</td> --}}
-            <td class="column-right">{{ $ecriture->total }}</td>
-          </tr>
-          @if($finIntervention)
-          <tr>
-            <td colspan="7" class="column-right">{{ formatNumber($interventionSousTotal) }}</td>
-          </tr>
-          @endif
-
-          @if ($finSectionExercice)
-        </tbody>
-        @endif
-        @endif
-
-        @if ($endCategorie)
-        <tbody>
-          <tr class="sum-row">
-            <th colspan="6" class="column-right">Sous-total</th>
-            <th class="column-right">{{ formatNumber($categorieSousTotal) }}</th>
-          </tr>
-        </tbody>
-      </table>
+        <td class="text-end">{{ $ecriture->total }}</td>
+      </tr>
+      @if ($finIntervention)
+        <tr>
+          <td colspan="7" class="text-end">{{ formatNumber($interventionSousTotal) }}</td>
+        </tr>
       @endif
-      @if($endSapeur && !$last)
-      <p>Paiement le: </p>
-      <p>TODO: Affichage du total par sapeur</p>
+
+      @if ($finSectionExercice)
+        </tbody>
+      @endif
+    @endif
+
+    @if ($endCategorie)
+      <tfoot>
+        <tr>
+          <th colspan="5" class="text-end">Sous-total</th>
+          <th class="text-end">{{ formatNumber($categorieSousTotal) }}</th>
+        </tr>
+        </tbody>
+        </table>
+    @endif
+    @if ($endSapeur)
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-5 text-end">Paiement le : {{ formatDate($decompte->date) }}</div>
+          <div class="col-5 text-end"><strong>Total</strong></div>
+          <div class="col-2 background-secondary text-end p-1">
+            <strong>{{ formatNumber($sapeurTotal) }}</strong>
+          </div>
+        </div>
+      </div>
       <div class="page-break"></div>
-      @endif
+    @endif
     <?php
       $first = false;
       $previousEcriture = $ecriture;
@@ -239,8 +251,8 @@
     }
     ?>
 
-    @if($nbEcritures === 0)
-    <h1>Aucune écriture</h1>
+    @if ($nbEcritures === 0)
+      <h1>Aucune écriture</h1>
     @endif
   </div>
 </body>

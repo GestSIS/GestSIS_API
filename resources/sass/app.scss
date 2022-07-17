@@ -7,6 +7,10 @@
 // Bootstrap
 @import "~bootstrap/scss/bootstrap";
 
+html {
+  -webkit-print-color-adjust: exact;
+}
+
 .page-break {
   page-break-after: always;
 }
