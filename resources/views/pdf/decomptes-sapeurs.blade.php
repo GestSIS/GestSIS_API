@@ -53,6 +53,11 @@
     {
       return implode('.', array_reverse(explode('-', $value)));
     }
+    
+    function formatIban($value)
+    {
+      return chunk_split(str_replace(' ', '', $value), 4, ' ');
+    }
 
     function formatTime($value)
     {
@@ -101,18 +106,16 @@
         $sapeurTotal = 0.0;
       }
       $sapeurTotal += $ecriture->total;
-
-
     ?>
     @if ($newSapeur)
       <h1 class="text-center">Décompte de frais</h1>
       <table class="table table-secondary table-responsive table-sm">
         <thead>
           <tr>
-            <td>{{ ucfirst($ecriture->civilite) }}</td>
-            <td>{{ $ecriture->sapeur }}</td>
-            <td>Versement sur</td>
-            <td>{{ $ecriture->iban }}</td>
+            <td><strong>{{ ucfirst($ecriture->civilite) }}</strong></td>
+            <td><strong>{{ $ecriture->sapeur }}</strong></td>
+            <td class="text-end"><strong>Versement sur :</strong></td>
+            <td><strong>{{ formatIban($ecriture->iban) }}</strong></td>
           </tr>
         </thead>
       </table>
@@ -130,9 +133,9 @@
           <tr>
             <th colspan="3">Nature du service</th>
             <th>Tarif</th>
-            <th>Qté</th>
-            {{-- <th>Date paiement</th> --}}
-            <th class="text-center">Total</th>
+            <th class="col-1">Qté</th>
+            <th class="col-2">Date paiement</th>
+            <th class="text-center col-1">Total</th>
           </tr>
         </thead>
         <tbody>
@@ -141,7 +144,7 @@
         <td colspan="3">{{ $ecriture->designation }}</td>
         <td>{{ formatTarif($ecriture) }}</td>
         <td>{{ formatNumber($ecriture->quantite) }}</td>
-        {{-- <td>{{ formatDate($ecriture->date_paiement) }}TODO</td> --}}
+        <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
         <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
       </tr>
       @if ($finSectionAnnuel)
@@ -157,9 +160,9 @@
             <th>Heure</th>
             <th>Nature du service</th>
             <th>Tarif</th>
-            <th>Qté</th>
-            {{-- <th>Date paiement</th> --}}
-            <th class="text-center">Total</th>
+            <th class="col-1">Qté</th>
+            <th class="col-2">Date paiement</th>
+            <th class="text-center col-1">Total</th>
           </tr>
         </thead>
         <tbody>
@@ -170,7 +173,7 @@
         <td>{{ $ecriture->designation }}</td>
         <td>{{ formatTarif($ecriture) }}</td>
         <td>{{ formatNumber($ecriture->quantite) }}</td>
-        {{-- <td>{{ formatDate($ecriture->date_paiement) }}TODO</td> --}}
+        <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
         <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
       </tr>
       @if ($finSectionExercice)
@@ -186,9 +189,9 @@
             <th>Heure</th>
             <th>Intervention</th>
             <th>Tarif</th>
-            <th>Qté</th>
-            {{-- <th>Date paiement</th> --}}
-            <th>Total</th>
+            <th class="col-1">Qté</th>
+            <th class="col-2">Date paiement</th>
+            <th class="col-1">Total</th>
           </tr>
         </thead>
         <tbody>
@@ -203,18 +206,17 @@
       @endif
       <tr>
         <td colspan="2"></td>
-        <td>TODO Sous-écriture</td>
+        <td>{{ $ecriture->taux_description }}</td>
         <td>{{ formatTarif($ecriture) }}</td>
         <td>{{ formatNumber($ecriture->quantite) }}</td>
-        {{-- <td>{{formatDa
-                            te( $ecriture->date_paiement) }}TODO</td> --}}
+        <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
         <td class="text-end">{{ $ecriture->total }}</td>
       </tr>
-      @if ($finIntervention)
+      {{-- @if ($finIntervention)
         <tr>
-          <td colspan="7" class="text-end">{{ formatNumber($interventionSousTotal) }}</td>
+          <td colspan="8" class="text-end">{{ formatNumber($interventionSousTotal) }}</td>
         </tr>
-      @endif
+      @endif --}}
 
       @if ($finSectionExercice)
         </tbody>
@@ -224,7 +226,7 @@
     @if ($endCategorie)
       <tfoot>
         <tr>
-          <th colspan="5" class="text-end">Sous-total</th>
+          <th colspan="6" class="text-end">Sous-total</th>
           <th class="text-end">{{ formatNumber($categorieSousTotal) }}</th>
         </tr>
         </tbody>
@@ -233,9 +235,9 @@
     @if ($endSapeur)
       <div class="container-fluid">
         <div class="row">
-          <div class="col-5 text-end">Paiement le : {{ formatDate($decompte->date) }}</div>
-          <div class="col-5 text-end"><strong>Total</strong></div>
-          <div class="col-2 background-secondary text-end p-1">
+          <div class="col-5 text-end p-1">Paiement le : {{ formatDate($decompte->date) }}</div>
+          <div class="col-6 text-end p-1"><strong>Total</strong></div>
+          <div class="col-1 background-secondary text-end p-1">
             <strong>{{ formatNumber($sapeurTotal) }}</strong>
           </div>
         </div>

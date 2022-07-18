@@ -174,13 +174,18 @@ class PaiementService
             ->orderBy('ecritures.heure')
             ->get();
 
+
         $decompte = Decompte::find($decompteId);
+        $decomptes = Decompte::where('exercice_comptable_id', $decompte->exercice_comptable_id)->get();
+        foreach ($decomptes as $decompte) {
+            $decomptesMap[$decompte->id] = $decompte;
+        }
         $sapeursMap = [];
         $sapeurs = Sapeur::get(['id', 'nom', 'prenom']);
         foreach ($sapeurs as $sapeur) {
             $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
         }
-        return View('pdf/decomptes-sapeurs', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
+        return View('pdf/decomptes-sapeurs', ["decompte" => $decompte, "decomptes" => $decomptesMap, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
     }
 
     public function impressionDecompteParCompte($decompteId)
