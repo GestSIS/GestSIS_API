@@ -159,6 +159,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->tarif_min_pour = $ecriture->tarif_min_pour;
         $object->tarif_min_pro_rata = $ecriture->tarif_min_pro_rata;
         $object->taux = $ecriture->taux;
+        $object->taux_description = $ecriture->taux_description;
         $object->sapeur_id = $ecriture->sapeur_id;
         $object->exercice_comptable_id = $ecriture->exercice_comptable_id;
         $object->intervention_id = $ecriture->intervention_id;
@@ -194,6 +195,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->tarif_min_pour = $ecriture->tarif_min_pour;
         $object->tarif_min_pro_rata = $ecriture->tarif_min_pro_rata;
         $object->taux = $ecriture->taux;
+        $object->taux_description = $ecriture->taux_description;
         $object->sapeur_id = $ecriture->sapeur_id;
         $object->exercice_comptable_id = $ecriture->exercice_comptable_id;
         $object->intervention_id = $ecriture->intervention_id;
