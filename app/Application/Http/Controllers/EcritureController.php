@@ -56,6 +56,7 @@ class EcritureController extends Controller
             case 0:
                 $data = $request->validate([
                     'designation' => 'string|min:1|required',
+                    'complement' => 'string|nullable',
                     'total' => 'numeric|required',
 
                     'solde' => 'numeric',

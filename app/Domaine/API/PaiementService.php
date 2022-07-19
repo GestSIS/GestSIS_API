@@ -56,6 +56,9 @@ class PaiementService
         if ($selection['ecrituresAnnuel']) {
             $modules[] = ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL;
         }
+        if ($selection['ecrituresAmende']) {
+            $modules[] = ImputationBusiness::ECRITURE_MODULE_AMENDE;
+        }
 
         $ecritures = Ecriture::where('exercice_comptable_id', $exerciceComptableId)->whereIn('module', $modules)->get();
         if ($ecritures->count() === 0) {

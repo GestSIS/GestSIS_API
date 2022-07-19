@@ -60,13 +60,12 @@ class ImputationBusiness
     public const ECRITURE_MODULE_REMBOURSEMENT = 8;
 
     // Type de catégorie d'imposition
-    public const ECRITURE_CATEGORIE_IMPOSITION_AUTRE = 0;
-    public const ECRITURE_CATEGORIE_IMPOSITION_SOLDE = 1;
-    public const ECRITURE_CATEGORIE_IMPOSITION_INDEMNITE = 2;
-    public const ECRITURE_CATEGORIE_IMPOSITION_FRAIS_FORFAITAIRE = 3;
-    public const ECRITURE_CATEGORIE_IMPOSITION_FRAIS_EFFECTIF = 4;
-    public const ECRITURE_CATEGORIE_IMPOSITION_CHARGE_AVS_AC = 5;
-
+    public const ECRITURE_CATEGORIE_IMPOSITION_AUTRE = 0; // Non pris en compte (amendes, ...)
+    public const ECRITURE_CATEGORIE_IMPOSITION_SOLDE = 1; // Franchise configurable non imposable
+    public const ECRITURE_CATEGORIE_IMPOSITION_INDEMNITE = 2; // Imposable dès le premier franc
+    public const ECRITURE_CATEGORIE_IMPOSITION_FRAIS_FORFAITAIRE = 3; // Frais forfaitaire
+    public const ECRITURE_CATEGORIE_IMPOSITION_FRAIS_EFFECTIF = 4; // Frais effectif
+    public const ECRITURE_CATEGORIE_IMPOSITION_CHARGE_AVS_AC = 5; // Charges sociales
 
     private function arrondi_5_centimes($number)
     {
@@ -188,9 +187,10 @@ class ImputationBusiness
             ['sapeur_id', '=', $sapeurId],
             ['amende', '=', 1]
         ])->join('exercices', 'exercices.id', '=', 'exercice_sapeur.exercice_id')
+            ->leftJoin('excuse_types', 'exercice.excuse_type_id', '=', 'excuse_types.id')
             ->where('exercices.exercice_comptable_id', $exerciceComptableId)
             ->orderBy('exercices.date', 'ASC')
-            ->orderBy('exercices.heure')->get();
+            ->orderBy('exercices.heure')->get(['excuse_types.designation AS excuse', 'exercices.*', 'exercice_sapeur.*']);
 
         // Suppression de amendes existantes
         Ecriture::where([
@@ -213,6 +213,7 @@ class ImputationBusiness
                 'total' => $amende->montant,
 
                 'designation' => $exercice->designation,
+                'complement' => $exercice->excuse,
 
                 'sapeur_id' => $exercice->sapeur_id,
                 'exercice_id' => $exercice->exercice_id,
