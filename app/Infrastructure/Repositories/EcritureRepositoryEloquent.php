@@ -113,6 +113,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
      */
     public function persisteNewEcriture($ecriture)
     {
+        if (!array_key_exists('complement', $ecriture)) $ecriture['complement'] = "";
         if (!array_key_exists('tarif_min', $ecriture)) $ecriture['tarif_min'] = null;
         if (!array_key_exists('tarif_min_pour', $ecriture)) $ecriture['tarif_min_pour'] = null;
         if (!array_key_exists('tarif_min_pro_rata', $ecriture)) $ecriture['tarif_min_pro_rata'] = null;
@@ -151,6 +152,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object = new StdClass();
         $object->id = $ecriture->id;
         $object->designation = $ecriture->designation;
+        $object->complement = $ecriture->complement;
         $object->total = $ecriture->total;
         $object->type_unite_id = $ecriture->type_unite_id;
         $object->quantite = $ecriture->quantite;
@@ -187,6 +189,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object = new StdClass();
         $object->id = $ecriture->id;
         $object->designation = $ecriture->designation;
+        $object->complement = $ecriture->complement;
         $object->total = $ecriture->total;
         $object->type_unite_id = $ecriture->type_unite_id;
         $object->quantite = $ecriture->quantite;

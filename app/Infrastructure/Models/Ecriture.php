@@ -8,6 +8,7 @@ class Ecriture extends Model
 {
     protected $fillable = [
         'designation',
+        'complement',
         'total',
         'tarif',
         'type_unite_id',

@@ -91,6 +91,12 @@ class PaiementBusiness
                         $totaux[$ecriture->sapeur_id]['frais_effectif_a_percevoir'] += $ecriture->total;
                         $decompte->total += $ecriture->total;
                         break;
+                    case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_AUTRE:
+                        // FIXME: a implémenter pour amendes
+                        // TODO: décider comment stocker les montants négatifs/positifs
+                        // $totaux[$ecriture->sapeur_id]['autre'] += $ecriture->total;
+                        // $decompte->total += $ecriture->total;
+                        break;
                 }
 
                 // TODO: Modifier code ici pour ajouter déduction d'amendes, code suivant incorrect
