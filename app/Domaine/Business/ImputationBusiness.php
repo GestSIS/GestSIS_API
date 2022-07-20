@@ -11,6 +11,7 @@ use App\Domaine\Exceptions\ArrayException;
 use Carbon\Carbon;
 use App\Infrastructure\Models\Amende;
 use App\Infrastructure\Models\Ecriture;
+use App\Infrastructure\Models\ExcuseType;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\ExerciceSapeur;
@@ -182,15 +183,21 @@ class ImputationBusiness
             throw new ArrayException(['config' => 'Pas de configurations d\'amendes'], "Aucune amende configurée");
         }
 
+        $excusesTypes = ExcuseType::all();
+        $indexedExcuses = [];
+        foreach ($excusesTypes as $excuse) {
+            $indexedExcuses[$excuse->id] = $excuse;
+        }
+
         // Chargement des exercices amendés du sapeur
         $exercices = ExerciceSapeur::where([
             ['sapeur_id', '=', $sapeurId],
             ['amende', '=', 1]
         ])->join('exercices', 'exercices.id', '=', 'exercice_sapeur.exercice_id')
-            ->leftJoin('excuse_types', 'exercice.excuse_type_id', '=', 'excuse_types.id')
             ->where('exercices.exercice_comptable_id', $exerciceComptableId)
             ->orderBy('exercices.date', 'ASC')
-            ->orderBy('exercices.heure')->get(['excuse_types.designation AS excuse', 'exercices.*', 'exercice_sapeur.*']);
+            ->orderBy('exercices.heure')
+            ->get();
 
         // Suppression de amendes existantes
         Ecriture::where([
@@ -213,7 +220,7 @@ class ImputationBusiness
                 'total' => $amende->montant,
 
                 'designation' => $exercice->designation,
-                'complement' => $exercice->excuse,
+                'complement' => $exercice->excuse_type_id ? $indexedExcuses[$exercice->excuse_type_id]->designation : "",
 
                 'sapeur_id' => $exercice->sapeur_id,
                 'exercice_id' => $exercice->exercice_id,
@@ -222,8 +229,8 @@ class ImputationBusiness
                 'ecriture_categorie_id' => $amende->ecriture_categorie_id,
 
                 'decompte_id' => null,
-                'heure' => null,
                 'date' => $exercice->date,
+                'heure' => $exercice->heure,
 
                 'module' => self::ECRITURE_MODULE_AMENDE,
                 'type' => self::ECRITURE_CATEGORIE_IMPOSITION_AUTRE,
@@ -260,7 +267,14 @@ class ImputationBusiness
             ->where('exercices.exercice_comptable_id', $exerciceComptableId)
             ->orderBy('exercice_sapeur.sapeur_id', 'ASC')
             ->orderBy('exercices.date', 'ASC')
-            ->orderBy('exercices.heure')->get();
+            ->orderBy('exercices.heure')
+            ->get();
+
+        $excusesTypes = ExcuseType::all();
+        $indexedExcuses = [];
+        foreach ($excusesTypes as $excuse) {
+            $indexedExcuses[$excuse->id] = $excuse;
+        }
 
         // Suppression de amendes existantes
         Ecriture::where([
@@ -286,9 +300,11 @@ class ImputationBusiness
                 'tarif' => $amende->montant,
                 'quantite' => 1,
                 'total' => $amende->montant,
-
                 'type_unite_id' => self::UNITE_PIECE,
+
                 'designation' => $exercice->designation,
+                'complement' => $exercice->excuse_type_id ? $indexedExcuses[$exercice->excuse_type_id]->designation : "",
+
                 'sapeur_id' => $exercice->sapeur_id,
                 'exercice_id' => $exercice->exercice_id,
                 'intervention_id' => null,
@@ -297,8 +313,8 @@ class ImputationBusiness
                 'ecriture_categorie_id' => $amende->ecriture_categorie_id,
 
                 'decompte_id' => null,
-                'heure' => null,
                 'date' => $exercice->date,
+                'heure' => $exercice->heure,
 
                 'module' => self::ECRITURE_MODULE_AMENDE,
                 'type' => self::ECRITURE_CATEGORIE_IMPOSITION_AUTRE,

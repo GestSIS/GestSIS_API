@@ -4,6 +4,7 @@ namespace App\Domaine\Business;
 
 use App\Domaine\API\ImputationService;
 use App\Infrastructure\Models\AvsParam;
+use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\ExerciceComptable;
@@ -43,6 +44,11 @@ class PaiementBusiness
     public function creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction)
     {
         $avsParam = AvsParam::first();
+        $comptes = Compte::all();
+        $indexedCompte = [];
+        foreach ($comptes as $compte) {
+            $indexedCompte[$compte->id] = $compte;
+        }
 
         $decompte = new Decompte();
         $decompte->designation = $designation;
@@ -66,14 +72,14 @@ class PaiementBusiness
                         "frais_forfaitaire_a_percevoir" => 0.0,
                         "frais_effectif_a_percevoir" => 0.0,
                         "avs_ac_a_cotiser" => 0.0,
-                        "amende_a_deduire" => 0.0,
                         "solde_percue" => 0.0,
                         "indemnite_percue" => 0.0,
-                        "avs_ac_cotise" => 0.0
+                        "avs_ac_cotise" => 0.0,
+                        "autre" => 0.0,
                     );
                 }
 
-                // TODO: A modifier pour déductions, amende ou autres
+                // TODO: A modifier pour déductions ou autres
                 switch ($ecriture->type) {
                     case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE:
                         $totaux[$ecriture->sapeur_id]['solde_a_percevoir'] += $ecriture->total;
@@ -92,10 +98,16 @@ class PaiementBusiness
                         $decompte->total += $ecriture->total;
                         break;
                     case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_AUTRE:
-                        // FIXME: a implémenter pour amendes
-                        // TODO: décider comment stocker les montants négatifs/positifs
+                        // Tous les montants sont positifs, produit/charges défini par le compte
                         // $totaux[$ecriture->sapeur_id]['autre'] += $ecriture->total;
                         // $decompte->total += $ecriture->total;
+                        $compte = $indexedCompte[$ecriture->compte_id];
+                        $total = $ecriture->total;
+                        if ($compte->produit) {
+                            $total = -$total;
+                        }
+                        $totaux[$ecriture->sapeur_id]['autre'] += $total;
+                        $decompte->total += $total;
                         break;
                 }
 
@@ -120,10 +132,10 @@ class PaiementBusiness
                             "frais_forfaitaire_a_percevoir" => 0.0,
                             "frais_effectif_a_percevoir" => 0.0,
                             "avs_ac_a_cotiser" => 0.0,
-                            "amende_a_deduire" => 0.0,
                             "solde_percue" => 0.0,
                             "indemnite_percue" => 0.0,
-                            "avs_ac_cotise" => 0.0
+                            "avs_ac_cotise" => 0.0,
+                            "autre" => 0.0,
                         );
                     }
                     $totaux[$p->sapeur_id]['solde_percue'] += $p->solde;
@@ -152,8 +164,13 @@ class PaiementBusiness
 
         // Calcul du total à payer pour chaque sapeur
         foreach ($totaux as $key => $total) {
-            $totaux[$key]['total_a_percevoir'] =
-                $total['solde_a_percevoir'] + $total['indemnite_a_percevoir'] + $total['frais_forfaitaire_a_percevoir'] + $total['frais_effectif_a_percevoir'] - $total['avs_ac_a_cotiser'];
+            $totaux[$key]['total_final'] =
+                $total['solde_a_percevoir'] +
+                $total['indemnite_a_percevoir'] +
+                $total['frais_forfaitaire_a_percevoir'] +
+                $total['frais_effectif_a_percevoir'] -
+                $total['avs_ac_a_cotiser'] +
+                $total['autre'];
         }
 
         $paiements = array();
@@ -168,8 +185,8 @@ class PaiementBusiness
                 'frais_forfaitaire' => $total['frais_forfaitaire_a_percevoir'],
                 'frais_effectif' => $total['frais_effectif_a_percevoir'],
                 'avs_ac' => $total['avs_ac_a_cotiser'],
-                'amende' => $total['amende_a_deduire'],
-                'total' => $total['solde_a_percevoir'] + $total['indemnite_a_percevoir'] + $total['frais_forfaitaire_a_percevoir'] + $total['frais_effectif_a_percevoir'] - $total['avs_ac_a_cotiser'] - $total['amende_a_deduire'],
+                'autre' => $total['autre'],
+                'total' => $total['total_final'],
                 'sapeur_id' => $key
             ];
 

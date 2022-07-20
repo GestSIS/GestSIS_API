@@ -1,7 +1,5 @@
 <?php
 
-use App\Infrastructure\Models\FraisAnnuel;
-use App\Infrastructure\Models\IndemniteAnnuel;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

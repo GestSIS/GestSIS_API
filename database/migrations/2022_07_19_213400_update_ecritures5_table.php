@@ -16,6 +16,10 @@ class UpdateEcritures5Table extends Migration
         Schema::table('ecritures', function (Blueprint $table) {
             $table->mediumText('complement')->nullable();
         });
+
+        Schema::table('paiements', function (Blueprint $table) {
+            $table->renameColumn('amende', 'autre');
+        });
     }
 
     /**
@@ -27,6 +31,10 @@ class UpdateEcritures5Table extends Migration
     {
         Schema::table('ecritures', function (Blueprint $table) {
             $table->dropColumn('complement');
+        });
+
+        Schema::table('paiements', function (Blueprint $table) {
+            $table->renameColumn('autre', 'amende');
         });
     }
 }

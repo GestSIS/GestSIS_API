@@ -188,7 +188,7 @@
             <th>Heure</th>
             <th>Nature du service</th>
             <th>Motif</th>
-            {{-- <th>Facturé le</th> --}}
+            <th>Facturé le</th>
             <th class="text-center col-1">Montant</th>
           </tr>
         </thead>
@@ -199,7 +199,7 @@
         <td>{{ formatTime($ecriture->heure) }}</td>
         <td>{{ $ecriture->designation }}</td>
         <td>{{ $ecriture->complement }}</td>
-        {{-- <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td> --}}
+        <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
         <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
       </tr>
       @if ($finSection)
@@ -246,7 +246,7 @@
     @if ($finSection)
       <tfoot>
         <tr>
-          <th colspan="6" class="text-end">Sous-total</th>
+          <th colspan="{{ isAmende($ecriture) ? 5 : 6 }}" class="text-end">Sous-total</th>
           <th class="text-end">{{ formatNumber($categorieSousTotal) }}</th>
         </tr>
         </tbody>
