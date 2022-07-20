@@ -207,6 +207,33 @@
       @endif
     @endif
 
+    @if (isDivers($ecriture))
+      @if ($debutSection)
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Désignation</th>
+            <th>Tarif</th>
+            <th>Quantité</th>
+            <th>Payé/Facturé le</th>
+            <th class="text-center col-1">Montant</th>
+          </tr>
+        </thead>
+        <tbody>
+      @endif
+      <tr>
+        <td>{{ formatDate($ecriture->date) }}</td>
+        <td>{{ $ecriture->designation }}</td>
+        <td>{{ formatTarif($ecriture) }}</td>
+        <td>{{ formatNumber($ecriture->quantite) }}</td>
+        <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
+        <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
+      </tr>
+      @if ($finSection)
+        </tbody>
+      @endif
+    @endif
+
     @if (isIntervention($ecriture))
       @if ($debutSection)
         <thead>
@@ -246,7 +273,7 @@
     @if ($finSection)
       <tfoot>
         <tr>
-          <th colspan="{{ isAmende($ecriture) ? 5 : 6 }}" class="text-end">Sous-total</th>
+          <th colspan="{{ isAmende($ecriture) || isDivers($ecriture) ? 5 : 6 }}" class="text-end">Sous-total</th>
           <th class="text-end">{{ formatNumber($categorieSousTotal) }}</th>
         </tr>
         </tbody>
@@ -255,9 +282,8 @@
     @if ($finSapeur)
       <div class="container-fluid">
         <div class="row">
-          TODO: Gérer les écritures amendes
           TODO: Gérer les écritures divers
-          TODO: Déductions AVS/AC
+          TODO: Afficher les déductions AVS/AC
           {{-- TODO: Merge écritures pour exercices avec solde + indemnité -> A priori OK comparé à GestSIS v1.0 --}}
           TODO: Ajout résumé de l'état actuel en clôture du document
           <div class="col-5 text-end p-1">Paiement le : {{ formatDate($decompte->date) }}</div>
