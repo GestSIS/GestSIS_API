@@ -60,7 +60,7 @@ class PaiementService
             $modules[] = ImputationBusiness::ECRITURE_MODULE_AMENDE;
         }
 
-        $ecritures = Ecriture::where('exercice_comptable_id', $exerciceComptableId)->whereIn('module', $modules)->get();
+        $ecritures = Ecriture::whereNull('decompte_id')->where('exercice_comptable_id', $exerciceComptableId)->whereIn('module', $modules)->get();
         if ($ecritures->count() === 0) {
             throw new ArrayException([], 'Aucune écriture disponible pour la création du décompte.');
         }
