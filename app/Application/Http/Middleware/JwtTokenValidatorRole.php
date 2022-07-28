@@ -33,14 +33,16 @@ class JwtTokenValidatorRole
         }
 
         if (count($roles) > 0) {
-            // Check has role for provided sis
-            $perms = (array) $token->data->permissions;
-            if (!array_key_exists($sisKey, $perms)) {
-                return response()->json(["error" => "Aucun droit pour ce sis"], 401);
-            }
+            if ($token->data->admin !== True) {
+                // Check has role for provided sis
+                $perms = (array) $token->data->permissions;
+                if (!array_key_exists($sisKey, $perms)) {
+                    return response()->json(["error" => "Aucun droit pour ce sis"], 401);
+                }
 
-            if (count(array_intersect($roles, $perms[$sisKey])) == 0) {
-                return response()->json(["error" => "Au moins 1 des rôles suivant est requis [" . join(", ", $roles) . "]."], 401);
+                if (count(array_intersect($roles, $perms[$sisKey])) == 0) {
+                    return response()->json(["error" => "Au moins 1 des rôles suivant est requis [" . join(", ", $roles) . "]."], 401);
+                }
             }
         }
 

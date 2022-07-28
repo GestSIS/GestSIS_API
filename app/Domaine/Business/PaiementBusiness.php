@@ -140,7 +140,7 @@ class PaiementBusiness
                     }
                     $totaux[$p->sapeur_id]['solde_percue'] += $p->solde;
                     $totaux[$p->sapeur_id]['indemnite_percue'] += $p->indemnite;
-                    $totaux[$p->sapeur_id]['avs_ac_cotise'] += $p->avs;
+                    $totaux[$p->sapeur_id]['avs_ac_cotise'] += $p->avs_ac;
                 }
             }
 
@@ -154,6 +154,7 @@ class PaiementBusiness
 
                 // TODO: ou si sapeur en fait la demande
                 if ($total_imposable >= $avsParam->franchise_avs) {
+                    // FIXME: Arrondir le montant total
                     $totaux[$key]['avs_ac_a_cotiser'] = ($total_imposable * $tauxParitaireAvsAc) - $total['avs_ac_cotise'];
                     $decompte->avs_total += ($total_imposable * ($avsParam->taux_avs / 2.0)) - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_avs / 2.0));
                     $decompte->ac_total += ($total_imposable * ($avsParam->taux_ac / 2.0)) - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_ac / 2.0));
@@ -339,7 +340,7 @@ class PaiementBusiness
                 }
                 $totaux[$p->sapeur_id]['solde'] += $p->solde;
                 $totaux[$p->sapeur_id]['indemnite'] += $p->indemnite;
-                $totaux[$p->sapeur_id]['deduction'] += $p->avs;
+                $totaux[$p->sapeur_id]['deduction'] += $p->avs_ac;
                 $totaux[$p->sapeur_id]['frais'] += $p->frais;
             }
         }
@@ -387,7 +388,7 @@ class PaiementBusiness
                 if ($p->sapeur_id == $sapeurId) {
                     $total['solde'] += $p->solde;
                     $total['indemnite'] += $p->indemnite;
-                    $total['deduction'] += $p->avs;
+                    $total['deduction'] += $p->avs_ac;
                     $total['frais'] += $p->frais;
                 }
             }

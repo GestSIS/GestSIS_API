@@ -7,6 +7,7 @@ use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Business\PaiementBusiness;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\AvsParam;
+use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Exercice;
@@ -156,6 +157,7 @@ class PaiementService
 
     public function impressionDecompteParSapeur($decompteId)
     {
+        // Pour le moment que les écritures du décompte !
         $ecritures = DB::table('ecritures')
             ->join('sapeurs', 'ecritures.sapeur_id', '=', 'sapeurs.id')
             ->join('ecriture_categories', 'ecritures.ecriture_categorie_id', '=', 'ecriture_categories.id')
@@ -177,12 +179,19 @@ class PaiementService
             ->orderBy('ecritures.heure')
             ->get();
 
-
-        $decompte = Decompte::find($decompteId);
+        $decompte = Decompte::with('paiements')->find($decompteId);
         $decomptes = Decompte::where('exercice_comptable_id', $decompte->exercice_comptable_id)->get();
+        $decomptesMap = [];
         foreach ($decomptes as $decompte) {
             $decomptesMap[$decompte->id] = $decompte;
         }
+
+        $comptes = Compte::all();
+        $comptesMap = [];
+        foreach ($comptes as $compte) {
+            $comptesMap[$compte->id] = $compte;
+        }
+
         $sapeursMap = [];
         $sapeurs = Sapeur::get(['id', 'nom', 'prenom']);
         foreach ($sapeurs as $sapeur) {

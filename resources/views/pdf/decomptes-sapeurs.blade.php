@@ -18,15 +18,6 @@
 <body>
   <div class="">
     <?php
-    $previousEcriture = null;
-    $first = true;
-    $last = false;
-    $nbEcritures = count($ecritures);
-
-    $categorieSousTotal = 0.0;
-    $interventionSousTotal = 0.0;
-    $sapeurTotal = 0.0;
-
     // public const ECRITURE_MODULE_DIVERS = 0;
     // public const ECRITURE_MODULE_EXERCICE = 1;
     // public const ECRITURE_MODULE_INTERVENTION = 2;
@@ -84,7 +75,29 @@
       return "$tarifMin " . formatNumber($ecriture->tarif) . " CHF / $ecriture->unite $tauxSpecial";
     }
 
+    $previousEcriture = null;
+    $first = true;
+    $last = false;
+    $nbEcritures = count($ecritures);
+
+    $categorieSousTotal = 0.0;
+    $interventionSousTotal = 0.0;
+    $sapeurTotal = 0.0;
+    $sapeurTotalAvs = 0.0;
+    $sapeurId = null;
+    $paiement = null;
+
+    $indexedPaiements = [];
+    foreach ($decompte->paiements  as $paiement) {
+      $indexedPaiements[$paiement->sapeur_id] = $paiement;
+    }
+
     foreach ($ecritures as $index => $ecriture) {
+      if ($sapeurId == null || $sapeurId != $ecriture->sapeur_id) {
+        $sapeurId = $ecriture->sapeur_id;
+        $paiement = $indexedPaiements[$ecriture->sapeur_id];
+      }
+
       $last = $index + 1 === $nbEcritures;
       $nextEcriture = $last ? null : $ecritures[$index + 1];
 
@@ -104,6 +117,7 @@
       if ($debutSapeur){
         $sapeurTotal = 0.0;
       }
+      // TODO: Gérer les amendes ainsi que les 
       $sapeurTotal += $ecriture->total;
     ?>
     @if ($debutSapeur)
@@ -127,7 +141,7 @@
     @endif
 
     @if (isAnnuel($ecriture))
-      @if ($debutSectionAnnuel)
+      @if ($debutSection)
         <thead>
           <tr>
             <th colspan="3">Nature du service</th>
@@ -146,7 +160,7 @@
         <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
         <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
       </tr>
-      @if ($finSectionAnnuel)
+      @if ($finSection)
         </tbody>
       @endif
     @endif
@@ -188,7 +202,7 @@
             <th>Heure</th>
             <th>Nature du service</th>
             <th>Motif</th>
-            <th>Facturé le</th>
+            <th class="col-2">Facturé le</th>
             <th class="text-center col-1">Montant</th>
           </tr>
         </thead>
@@ -215,7 +229,7 @@
             <th>Désignation</th>
             <th>Tarif</th>
             <th>Quantité</th>
-            <th>Payé/Facturé le</th>
+            <th class="col-2">Payé /Facturé le</th>
             <th class="text-center col-1">Montant</th>
           </tr>
         </thead>
@@ -282,15 +296,32 @@
     @if ($finSapeur)
       <div class="container-fluid">
         <div class="row">
-          TODO: Gérer les écritures divers
+          TODO: Gérer les écritures divers avec montants négatifs
           TODO: Afficher les déductions AVS/AC
           {{-- TODO: Merge écritures pour exercices avec solde + indemnité -> A priori OK comparé à GestSIS v1.0 --}}
           TODO: Ajout résumé de l'état actuel en clôture du document
-          <div class="col-5 text-end p-1">Paiement le : {{ formatDate($decompte->date) }}</div>
-          <div class="col-6 text-end p-1"><strong>Total</strong></div>
-          <div class="col-1 background-secondary text-end p-1">
-            <strong>{{ formatNumber($sapeurTotal) }}</strong>
+          <div class="col-9"></div>
+          <div class="col-2 p-1">Total</div>
+          <div class="col-1 text-end p-1 bg-light border border-secondary border-bottom-0">
+            {{ formatNumber($sapeurTotal) }}
           </div>
+        </div>
+        <div class="row">
+          <div class="col-9"></div>
+          <div class="col-2 p-1">Déductions AVS/AC</div>
+          <div class="col-1 text-end p-1 border border-secondary border-bottom-0">
+            {{ formatNumber($paiement->avs_ac) }}</div>
+        </div>
+        <div class="row">
+          <div class="col-9"></div>
+          <div class="col-2 p-1">Déjà soldé + Amende</div>
+          <div class="col-1 text-end p-1 border border-secondary border-bottom-0">TODO</div>
+        </div>
+        <div class="row">
+          <div class="col-6 text-end p-1">Paiement le : {{ formatDate($decompte->date) }}</div>
+          <div class="col-3"></div>
+          <div class="col-2 p-1">Total versé</div>
+          <div class="col-1 text-end p-1 bg-light border border-secondary">{{ formatNumber($sapeurTotal) }}</div>
         </div>
       </div>
       <div class="page-break"></div>
