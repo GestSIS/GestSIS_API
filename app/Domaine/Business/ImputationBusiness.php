@@ -68,7 +68,7 @@ class ImputationBusiness
     public const ECRITURE_CATEGORIE_IMPOSITION_FRAIS_EFFECTIF = 4; // Frais effectif
     public const ECRITURE_CATEGORIE_IMPOSITION_CHARGE_AVS_AC = 5; // Charges sociales
 
-    private function arrondi_5_centimes($number)
+    public static function arrondi_5_centimes($number)
     {
         $precision = 0.05;
         return round(round($number / $precision) * $precision, 2);
@@ -94,7 +94,7 @@ class ImputationBusiness
                 $ecriture = new Ecriture([
                     'tarif' => $data['tarif'],
                     'quantite' => $data['quantite'],
-                    'total' => $this->arrondi_5_centimes($data['total']),
+                    'total' => self::arrondi_5_centimes($data['total']),
 
                     'designation' => $data['designation'],
 
@@ -135,7 +135,7 @@ class ImputationBusiness
                 $ecriture->update([
                     'tarif' => $data['tarif'],
                     'quantite' => $data['quantite'],
-                    'total' => $this->arrondi_5_centimes($data['total']),
+                    'total' => self::arrondi_5_centimes($data['total']),
 
                     'designation' => $data['designation'],
 
@@ -416,7 +416,7 @@ class ImputationBusiness
         $ecriture = array(
             'tarif' => $indemnite['montant'],
             'quantite' => $indemnite['quantite'],
-            'total' => $this->arrondi_5_centimes($indemnite['montant'] * $indemnite['quantite']),
+            'total' => self::arrondi_5_centimes($indemnite['montant'] * $indemnite['quantite']),
 
             'type_unite_id' => $indemnite['type_unite_id'],
             'designation' => $fraisIndemniteType['designation'],
@@ -580,7 +580,7 @@ class ImputationBusiness
             }
             $total += $tarif * $dureeNonTarifMinSapeur;
 
-            $total = $this->arrondi_5_centimes($total);
+            $total = self::arrondi_5_centimes($total);
 
             $ecritures[] = array(
                 'tarif' => $tarif,
@@ -773,9 +773,9 @@ class ImputationBusiness
             }
 
             // Calcul des totaux
-            $totalTarifStandard = $this->arrondi_5_centimes($tarif * $dureeTarifStandard);
-            $totalTarifNuit = $this->arrondi_5_centimes($tarif * $dureeTarifNuit * $tauxNuit);
-            $totalTarifWeekend = $this->arrondi_5_centimes($tarif * $dureeTarifWeekend * $tauxWeekend);
+            $totalTarifStandard = self::arrondi_5_centimes($tarif * $dureeTarifStandard);
+            $totalTarifNuit = self::arrondi_5_centimes($tarif * $dureeTarifNuit * $tauxNuit);
+            $totalTarifWeekend = self::arrondi_5_centimes($tarif * $dureeTarifWeekend * $tauxWeekend);
 
             // Génération des écritures
             if ($totalTarifStandard > 0) {

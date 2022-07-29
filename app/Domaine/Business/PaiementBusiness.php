@@ -154,10 +154,11 @@ class PaiementBusiness
 
                 // TODO: ou si sapeur en fait la demande
                 if ($total_imposable >= $avsParam->franchise_avs) {
-                    // FIXME: Arrondir le montant total
-                    $totaux[$key]['avs_ac_a_cotiser'] = ($total_imposable * $tauxParitaireAvsAc) - $total['avs_ac_cotise'];
-                    $decompte->avs_total += ($total_imposable * ($avsParam->taux_avs / 2.0)) - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_avs / 2.0));
-                    $decompte->ac_total += ($total_imposable * ($avsParam->taux_ac / 2.0)) - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_ac / 2.0));
+                    $avs = ImputationBusiness::arrondi_5_centimes($total_imposable * ($avsParam->taux_avs / 2.0)) - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_avs / 2.0));
+                    $ac = ImputationBusiness::arrondi_5_centimes($total_imposable * ($avsParam->taux_ac / 2.0)) - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_ac / 2.0));
+                    $decompte->avs_total += $avs;
+                    $decompte->ac_total += $ac;
+                    $totaux[$key]['avs_ac_a_cotiser'] = $avs + $ac;
                 }
             }
             $decompte->save();
