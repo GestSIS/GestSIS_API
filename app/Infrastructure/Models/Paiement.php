@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Paiement extends Model
 {
-    protected $fillable = ['solde', 'indemnite', 'frais_forfaitaire', 'frais_effectif', 'amende', 'avs_ac', 'total', 'sapeur_id', 'decompte_id'];
+    protected $fillable = ['solde', 'indemnite', 'frais_forfaitaire', 'frais_effectif', 'autre', 'avs_ac', 'total', 'sapeur_id', 'decompte_id'];
     protected $casts = [
-        'solde' => 'decimal:2', 'indemnite' => 'decimal:2', 'frais_forfaitire' => 'decimal:2', 'frais_effectif' => 'decimal:2', 'amende' => 'decimal:2',
+        'solde' => 'decimal:2', 'indemnite' => 'decimal:2', 'frais_forfaitaire' => 'decimal:2', 'frais_effectif' => 'decimal:2', 'autre' => 'decimal:2',
         'avs_ac' => 'decimal:2', 'total' => 'decimal:2', 'sapeur_id' => 'integer', 'decompte_id' => 'integer',
     ];
 
