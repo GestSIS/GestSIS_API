@@ -315,7 +315,7 @@
           <div class="col-9"></div>
           <div class="col-2 p-1">Déjà soldé + Amende</div>
           <div class="col-1 text-end p-1 border border-secondary border-bottom-0">
-            {{ formatNumber($sapeurTotal - $decompte->total) }}
+            {{ formatNumber($sapeurTotal - $paiement->total) }}
           </div>
         </div>
         <div class="row">
