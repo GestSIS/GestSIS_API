@@ -322,7 +322,7 @@
           <div class="col-6 text-end p-1">Paiement le : {{ formatDate($decompte->date) }}</div>
           <div class="col-3"></div>
           <div class="col-2 p-1">Total versé</div>
-          <div class="col-1 text-end p-1 bg-light border border-secondary">{{ formatNumber($decompte->total) }}</div>
+          <div class="col-1 text-end p-1 bg-light border border-secondary">{{ formatNumber($paiement->total) }}</div>
         </div>
       </div>
       <div class="page-break"></div>
