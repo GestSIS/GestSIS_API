@@ -296,10 +296,9 @@
     @if ($finSapeur)
       <div class="container-fluid">
         <div class="row">
-          TODO: Gérer les écritures divers avec montants négatifs
-          TODO: Afficher les déductions AVS/AC
+          {{-- TODO: Gérer les écritures divers avec montants négatifs --}}
           {{-- TODO: Merge écritures pour exercices avec solde + indemnité -> A priori OK comparé à GestSIS v1.0 --}}
-          TODO: Ajout résumé de l'état actuel en clôture du document
+          {{-- TODO: Ajout résumé des paiements en clôture du document --}}
           <div class="col-9"></div>
           <div class="col-2 p-1">Total</div>
           <div class="col-1 text-end p-1 bg-light border border-secondary border-bottom-0">
@@ -315,13 +314,15 @@
         <div class="row">
           <div class="col-9"></div>
           <div class="col-2 p-1">Déjà soldé + Amende</div>
-          <div class="col-1 text-end p-1 border border-secondary border-bottom-0">TODO</div>
+          <div class="col-1 text-end p-1 border border-secondary border-bottom-0">
+            {{ formatNumber($sapeurTotal - $decompte->total) }}
+          </div>
         </div>
         <div class="row">
           <div class="col-6 text-end p-1">Paiement le : {{ formatDate($decompte->date) }}</div>
           <div class="col-3"></div>
           <div class="col-2 p-1">Total versé</div>
-          <div class="col-1 text-end p-1 bg-light border border-secondary">{{ formatNumber($sapeurTotal) }}</div>
+          <div class="col-1 text-end p-1 bg-light border border-secondary">{{ formatNumber($decompte->total) }}</div>
         </div>
       </div>
       <div class="page-break"></div>
