@@ -289,8 +289,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('imputation/exercice/{id}', 'ImputationController@exercice');
         Route::delete('imputation/exercice/{id}', 'ImputationController@cancelExercice');
         Route::post('imputation/annuel/{id}', 'ImputationController@annuel');
-        Route::post('generer-amende/{id}/sapeur/{sapeurId}', 'AmendeController@sapeur');
-        Route::post('generer-amende/{id}', 'AmendeController@annuel');
+        Route::delete('imputation/annuel/{id}', 'ImputationController@cancelAnnuel');
 
         Route::get('ecritures/exercices/{id}', 'EcritureController@exercices');
         Route::get('ecritures/exercice/{id}', 'EcritureController@exercice');

@@ -174,6 +174,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->decompte_id = $ecriture->decompte_id;
 
         $object->type = $ecriture->type;
+        $object->module = $ecriture->module;
 
         return $object;
     }
@@ -214,6 +215,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->civilite = $ecriture->civilite;
 
         $object->type = $ecriture->type;
+        $object->module = $ecriture->module;
 
         return $object;
     }

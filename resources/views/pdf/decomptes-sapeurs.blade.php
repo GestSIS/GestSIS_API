@@ -72,7 +72,7 @@
     {
       $tarifMin = $ecriture->tarif_min === null ? "" : "($ecriture->tarif_min CHF / $ecriture->tarif_min_pour h) +";
       $tauxSpecial = $ecriture->taux === null ? "" : "* " . $ecriture->taux * 100 . "%";
-      return "$tarifMin " . formatNumber($ecriture->tarif) . " CHF ".($ecriture->unite ? "/ $ecriture->unite": "")+" $tauxSpecial";
+      return "$tarifMin " . formatNumber($ecriture->tarif) . " CHF " . ($ecriture->unite ? "/ $ecriture->unite": "") . " $tauxSpecial";
     }
 
     $previousEcriture = null;

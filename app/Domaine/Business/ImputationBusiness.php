@@ -470,6 +470,25 @@ class ImputationBusiness
         return InterventionBusiness::INTERVENTION_STATUT_VALIDE;
     }
 
+    public function annulerImputationAnnuel($exerciceComptableId)
+    {
+        // Check si des ecritures sont déjà liées à un décompte
+        if (Ecriture::where('exercice_comptable_id', '=', $exerciceComptableId)
+            ->where('module', '=', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)
+            ->whereNotNull('decompte_id')
+            ->exists()
+        ) {
+            throw new ArrayException([], 'Des écriture sont déjà facturées dans un décompte.');
+        }
+
+        // Suppression des écritures
+        Ecriture::where('exercice_comptable_id', '=', $exerciceComptableId)
+            ->where('module', '=', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)
+            ->delete();
+
+        return true;
+    }
+
     /**
      * Générer les écritures liés aux présences des sapeurs durant cette intervention
      * 

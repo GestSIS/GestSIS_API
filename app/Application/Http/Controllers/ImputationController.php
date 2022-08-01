@@ -43,15 +43,21 @@ class ImputationController extends Controller
         return response()->json(['data' => $res]);
     }
 
-    public function cancelIntervention(Request $request, int $id)
+    public function cancelIntervention(int $id)
     {
         $res = $this->service->annulerImputationIntervention($id);
         return response()->json(['data' => $res]);
     }
 
-    public function annuel(Request $request, int $id)
+    public function annuel(int $id)
     {
         $res = $this->service->imputationAnnuel($id);
         return response()->json(['data' => $res]);
+    }
+
+    public function cancelAnnuel(int $id)
+    {
+        $res = $this->service->annulerImputationAnnuel($id);
+        return response()->json(['data' => $res ? 'ok' : 'ko']);
     }
 }

@@ -136,6 +136,11 @@ class ImputationService
         return $this->ecritureRepo->listeEcrituresAnnuelsForExerciceComptableById($exerciceComptableId);
     }
 
+    function annulerImputationAnnuel($exerciceComptableId)
+    {
+        return $this->business->annulerImputationAnnuel($exerciceComptableId);
+    }
+
     function genererAmendesSapeur($exerciceComptableId, $sapeurId)
     {
         return $this->business->genererAmendesSapeur($exerciceComptableId, $sapeurId);
