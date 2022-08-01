@@ -352,12 +352,12 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         Route::resource('avs-param', 'AvsParamController')->only(['index', 'store']);
 
-        Route::resource('comptes', 'CompteController')->only(['store', 'update']);
+        Route::resource('comptes', 'CompteController')->only(['store', 'update', 'destroy']);
         Route::resource('indemnites-exercice-types', 'IndemniteExerciceTypeController')->only(['store', 'update', 'destroy']);
         Route::resource('indemnites-intervention-types', 'IndemniteInterventionTypeController')->only(['store', 'update', 'destroy']);
         Route::resource('frais-indemnites-annuel', 'FraisIndemniteAnnuelController')->only(['store', 'update', 'destroy']);
         Route::resource('frais-indemnites-annuel-types', 'FraisIndemniteAnnuelTypeController')->only(['store', 'update', 'destroy']);
-        Route::resource('ecriture-categories', 'EcritureCategorieController')->only(['store', 'update']);
+        Route::resource('ecriture-categories', 'EcritureCategorieController')->only(['store', 'update', 'destroy']);
 
         Route::resource('amendes', 'AmendeController')->only(['store']);
         Route::resource('heure-exercice-types', 'HeureExerciceTypeController')->only(['store', 'update', 'destroy']);

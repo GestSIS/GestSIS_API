@@ -54,8 +54,8 @@ class CompteController extends Controller
 
     public function destroy($id)
     {
-        $compte = $this->paramService->supprimerCompte($id);
-        return response()->json(['data' => $compte]);
+        $this->paramService->supprimerCompte($id);
+        return response()->json(['data' => 'ok']);
     }
 
     public function ecritures(int $id, int $exerciceComptableId)

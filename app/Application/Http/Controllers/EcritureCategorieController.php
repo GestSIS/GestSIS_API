@@ -26,12 +26,12 @@ class EcritureCategorieController extends Controller
         $data = $request->validate([
             'designation' => 'required|string|min:1',
             'tri' => 'required|numeric',
-            ]);
-            
+        ]);
+
         $categorie = $this->service->ajouterCategorie($data);
         return response()->json(['data' => $categorie]);
     }
-    
+
     public function update(Request $request, $id)
     {
         $data = $request->validate([
@@ -45,7 +45,7 @@ class EcritureCategorieController extends Controller
 
     public function destroy($id)
     {
-        $categorie = $this->service->supprimerCategorie($id);
-        return response()->json(['data' => $categorie]);
+        $this->service->supprimerCategorie($id);
+        return response()->json(['data' => 'ok']);
     }
 }
