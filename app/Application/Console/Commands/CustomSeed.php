@@ -13,7 +13,7 @@ class CustomSeed extends Command
      *
      * @var string
      */
-    protected $signature = 'seed-custom:dbs';
+    protected $signature = 'dbs:seed-custom';
 
     /**
      * The console command description.
@@ -39,10 +39,9 @@ class CustomSeed extends Command
      */
     public function handle()
     {
-        $dbs = explode(",", env('DB_LISTE', true));
+        $dbs = config('database.dbs');
         foreach ($dbs as $db) {
             printf("DATABASE " . $db . "\n");
-            // printf("Seed unites\n");
             Localite::on($db)->insert(['id' => '149', 'commune_id' => NULL, 'npa' => '2523', 'designation' => 'Lignières NE']);
             printf("\n");
         }

@@ -38,7 +38,7 @@ class CustomInit extends Command
      */
     public function handle()
     {
-        $dbs = explode(",", env('DB_LISTE', true));
+        $dbs = config('database.dbs');
         foreach ($dbs as $db) {
             printf("DATABASE " . $db . "\n");
             printf("migrate:fresh with seed\n");
