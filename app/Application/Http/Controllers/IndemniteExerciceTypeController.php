@@ -30,8 +30,6 @@ class IndemniteExerciceTypeController extends Controller
             'par_fonction' => 'boolean',
             'fonctions.*.type' => 'numeric|required',
             'fonctions.*.tarif' => 'numeric|required',
-            'fonctions.*.tarif_min' => 'numeric|nullable|required_unless:tarif_min_pour,null',
-            'fonctions.*.tarif_min_pour' => 'numeric|nullable|required_unless:tarif_min,null',
             'fonctions.*.compte_id' => 'integer|required',
             'fonctions.*.fonction_id' => 'integer|nullable',
         ]);
@@ -49,8 +47,6 @@ class IndemniteExerciceTypeController extends Controller
             'par_fonction' => 'boolean',
             'fonctions.*.type' => 'integer|required',
             'fonctions.*.tarif' => 'numeric|required',
-            'fonctions.*.tarif_min' => 'numeric|nullable|required_unless:tarif_min_pour,null',
-            'fonctions.*.tarif_min_pour' => 'numeric|nullable|required_unless:tarif_min,null',
             'fonctions.*.compte_id' => 'integer|required',
             'fonctions.*.fonction_id' => 'integer|nullable'
         ]);

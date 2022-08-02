@@ -897,7 +897,7 @@ class ImputationBusiness
             throw new ArrayException(["message" => "Unité non supportée"]);
         }
 
-        // Imputation heure supp !
+        // Imputation heure supp
         $heures = HeureExercice::where('exercice_id', $exerciceId)->get();
         $this->imputerExerciceHeureSup($exercice, $heures, $designation);
 
@@ -940,8 +940,6 @@ class ImputationBusiness
 
     private function imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation)
     {
-        // TODO: : tarif_min should be null
-
         // Générer écritures
         $ecritures = [];
         foreach ($sapeurs as $sapeur) {
@@ -1005,22 +1003,15 @@ class ImputationBusiness
             }
 
             foreach ($fonction_tarifs as $indemnite) {
-
                 $total = 0;
-                if ($indemnite->tarif_min == null) {
-                    $total = $indemnite->tarif * $duree;
-                } else if ($duree < $indemnite->tarif_min_pour) {
-                    $total = $indemnite->tarif_min * ($duree / $indemnite->tarif_min_pour);
-                } else {
-                    $total = $indemnite->tarif_min + $indemnite->tarif * ($duree - $indemnite->tarif_min_pour);
-                }
+                $total = $indemnite->tarif * $duree;
 
                 //Par heure -> calcul de la durée
                 $ecriture = array(
                     'tarif' => $indemnite->tarif,
                     'quantite' => $duree,
-                    'tarif_min' => $indemniteType->tarif_min,
-                    'tarif_min_pour' => $indemniteType->tarif_min_pour,
+                    'tarif_min' => null,
+                    'tarif_min_pour' => null,
                     'total' => $total,
 
                     'compte_id' => $indemnite->compte_id,
