@@ -2,6 +2,7 @@
 
 namespace App\Application\Console\Commands;
 
+use App\Infrastructure\Models\Localite;
 use App\Infrastructure\Models\TypeUnite;
 use Illuminate\Console\Command;
 
@@ -42,7 +43,7 @@ class CustomSeed extends Command
         foreach ($dbs as $db) {
             printf("DATABASE " . $db . "\n");
             // printf("Seed unites\n");
-            // TypeUnite::on($db)->insert(['id' => '7', 'comptable' => True, 'unite' => 'mois', 'abreviation' => 'm']);
+            Localite::on($db)->insert(['id' => '149', 'commune_id' => NULL, 'npa' => '2523', 'designation' => 'Lignières NE']);
             printf("\n");
         }
         printf("Migrating done\n");
