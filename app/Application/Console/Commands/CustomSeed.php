@@ -43,9 +43,9 @@ class CustomSeed extends Command
         $dbs = config('database.dbs');
         foreach ($dbs as $db) {
             printf("DATABASE " . $db . "\n");
-            Cours::on($db)->where('designation', '=', 'Chef d\'intervention 2')->update(['duree' => 5]);
-            Cours::on($db)->where('designation', '=', 'Chef d\'intervention 1')->update(['duree' => 5]);
-            Cours::on($db)->where('designation', '=', 'Défense hydrocarbure')->update(['duree' => 5]);
+            Cours::on($db)->where('abreviation', '=', 'CI 2')->update(['duree' => 5]);
+            Cours::on($db)->where('abreviation', '=', 'CI 1')->update(['duree' => 5]);
+            Cours::on($db)->where('abreviation', '=', 'DCH')->update(['duree' => 5]);
             Cours::on($db)->where('designation', '=', 'Chef de groupe')->update(['validite_debut' => '2017-01-01', 'duree' => 5]);
             Cours::on($db)->where('designation', '=', 'CG échelles remorquables')->update(['validite_fin' => '2012-12-31']);
             Cours::on($db)->where('designation', '=', 'Electricien')->update(['validite_fin' => '2012-12-31']);
@@ -53,13 +53,13 @@ class CustomSeed extends Command
             Cours::on($db)->where('designation', '=', 'Garde et circulation')->update(['validite_fin' => '2010-12-31']);
             Cours::on($db)->where('designation', '=', 'Rattrapage')->update(['validite_fin' => '2020-12-31']);
             Cours::on($db)->where('designation', '=', 'Porteur')->update(['validite_fin' => '2014-12-31']);
-            Cours::on($db)->where('designation', '=', 'FTB (formation technique de base)')->update(['validite_debut' => '2015-01-01', 'duree' => 3]);
-            Cours::on($db)->where('designation', '=', 'FGB/PR (formation général de base+PR)')->update(['validite_debut' => '2015-01-01', 'duree' => 5]);
+            Cours::on($db)->where('abreviation', '=', 'BA 1')->update(['validite_debut' => '2015-01-01', 'duree' => 5]);
+            Cours::on($db)->where('abreviation', '=', 'BA 2')->update(['validite_debut' => '2015-01-01', 'duree' => 3]);
             Cours::on($db)->where('designation', '=', 'BLS-AED')->update(['duree' => 0.5]);
             Cours::on($db)->where('designation', '=', 'Machiniste')->update(['duree' => 5]);
             Cours::on($db)->where('designation', '=', 'Chef de groupe 1')->update(['validite_fin' => '2016-12-31']);
             Cours::on($db)->where('designation', '=', 'Chef de groupe 2')->update(['validite_fin' => '2016-12-31']);
-            Cours::on($db)->where('designation', '=', 'Cours de base')->update(['validite_fin' => '2014-12-31']);
+            Cours::on($db)->where('abreviation', '=', 'BA')->update(['validite_fin' => '2014-12-31']);
             printf("\n");
         }
         printf("Migrating done\n");
