@@ -208,6 +208,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     Route::group(['middleware' => 'jwtTokenRole:intervention.modification'], function () {
+        Route::resource('alarmes', 'AlarmeController')->only(['index']);
+
         Route::resource('interventions', 'InterventionController')->only(['store', 'update', 'destroy']);
         Route::post('interventions-complet', 'InterventionController@complet')->name('complet');
 
