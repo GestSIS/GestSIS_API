@@ -341,6 +341,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
         $object->proprietaire = $intervention->proprietaire;
         $object->responsable = $intervention->responsable;
         $object->stat_nb = $intervention->stat_nb;
+        $object->wgs84 = $intervention->wgs84;
         $object->statut = $intervention->statut;
         $object->date_imputation = $intervention->date_imputation;
         $object->exercice_comptable_id = $intervention->exercice_comptable_id;
