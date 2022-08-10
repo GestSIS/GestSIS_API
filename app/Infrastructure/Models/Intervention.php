@@ -24,6 +24,7 @@ class Intervention extends Model
         'proprietaire',
         'responsable',
         'stat_nb',
+        'wgs84',
         'statut',
         'date_imputation',
 
