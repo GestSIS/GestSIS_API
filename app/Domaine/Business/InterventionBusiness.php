@@ -8,6 +8,7 @@ use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\Intervention;
 use App\Infrastructure\Models\InterventionSapeur;
 use App\Infrastructure\Models\Mission;
+use App\Infrastructure\Models\Quittance;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -62,7 +63,7 @@ class InterventionBusiness
      * @return InterventionBusiness
      * @throws ArrayException
      */
-    public function importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel)
+    public function importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel, $quittances)
     {
         $phaseTypeIntervention = 1;
         $intervention['statut'] = self::INTERVENTION_STATUT_SAISI;
@@ -110,6 +111,12 @@ class InterventionBusiness
             "debut" => null,
             "phase_type_id" => $phaseTypeIntervention,
         ));
+
+        // Ajout des quittances
+        $quittances = array_map(function ($e) use ($newIntervention) {
+            return ['intervention_id' => $newIntervention->id, 'sapeur_id' => $e];
+        }, array_unique($quittances));
+        Quittance::insert($quittances);
 
         // Ajout des sapeurs
         $sapeurs = array_map(function ($e) use ($newIntervention) {

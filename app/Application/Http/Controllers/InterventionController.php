@@ -55,7 +55,7 @@ class InterventionController extends Controller
             'proprietaire' => 'string|nullable',
             'responsable' => 'string|nullable',
             'stat_nb' => 'integer|min:0',
-            'wgs84' => 'string',
+            'wgs84' => 'string|nullable',
             'statut' => 'boolean',
             'localite_id' => 'integer|min:1',
             'exercice_comptable_id' => 'integer|min:1',
@@ -94,7 +94,7 @@ class InterventionController extends Controller
             'proprietaire' => 'string|nullable',
             'responsable' => 'string|nullable',
             'stat_nb' => 'integer|min:0',
-            'wgs84' => 'string',
+            'wgs84' => 'string|nullable',
             'statut' => 'boolean',
             'localite_id' => 'integer|min:1|required',
             'stat_federal_id' => 'integer|min:1|required',
@@ -102,6 +102,10 @@ class InterventionController extends Controller
             'type_intervention_id' => 'integer|min:1|required',
         ]);
 
+        $quittances = $request->validate([
+            'quittances.*' => 'integer',
+        ]);
+        $quittances = isset($quittances['quittances']) ? $quittances['quittances'] : [];
         $sapeurs = $request->validate([
             'sapeurs.*.sapeur_id' => 'integer|required',
             'sapeurs.*.debut' => 'date_format:Y-m-d H:i|required',
@@ -145,7 +149,7 @@ class InterventionController extends Controller
         $materiel = isset($materiel['materiel']) ? $materiel['materiel'] : [];
 
         try {
-            $intervention = $this->service->importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel);
+            $intervention = $this->service->importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel, $quittances);
         } catch (Exception $e) {
             Log::error("Intervention Export", [
                 "intervention" => $intervention,
@@ -202,7 +206,7 @@ class InterventionController extends Controller
             'proprietaire' => 'string|nullable',
             'responsable' => 'string|nullable',
             'stat_nb' => 'integer|min:0',
-            'wgs84' => 'string',
+            'wgs84' => 'string|nullable',
             'localite_id' => 'integer|min:1',
             'exercice_comptable_id' => 'integer|min:1',
             'intervention_traitement_id' => 'integer|min:1',

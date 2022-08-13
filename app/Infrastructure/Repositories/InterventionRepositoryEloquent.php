@@ -56,6 +56,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
         if (!array_key_exists('description', $data) || $data['description'] === null) $data['description'] = '';
         if (!array_key_exists('proprietaire', $data) || $data['proprietaire'] === null) $data['proprietaire'] = '';
         if (!array_key_exists('responsable', $data) || $data['responsable'] === null) $data['responsable'] = '';
+        if (array_key_exists('wgs84', $data) && $data['wgs84'] === null) $data['wgs84'] = '';
 
         $intervention = new Intervention();
         $intervention->fill($data);
@@ -72,6 +73,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
         if (array_key_exists('description', $infos) && $infos['description'] === null) $infos['description'] = '';
         if (array_key_exists('proprietaire', $infos) && $infos['proprietaire'] === null) $infos['proprietaire'] = '';
         if (array_key_exists('responsable', $infos) && $infos['responsable'] === null) $infos['responsable'] = '';
+        if (array_key_exists('wgs84', $infos) && $infos['wgs84'] === null) $infos['wgs84'] = '';
 
         $intervention = Intervention::find($interventionId);
         $intervention->update($infos);

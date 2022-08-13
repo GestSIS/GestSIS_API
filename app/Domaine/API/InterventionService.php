@@ -41,9 +41,9 @@ class InterventionService
         return $this->business->createIntervention($data);
     }
 
-    public function importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel)
+    public function importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel, $quittances)
     {
-        return $this->business->importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel);
+        return $this->business->importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel, $quittances);
     }
 
     public function getInterventionAppels($interventionId)
