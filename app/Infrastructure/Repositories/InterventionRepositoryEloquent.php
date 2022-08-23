@@ -68,17 +68,17 @@ class InterventionRepositoryEloquent implements InterventionRepository
         return $this->convertIntervention($intervention);
     }
 
-    public function editInterventionInformationsById($interventionId, $infos)
+    public function editInterventionInformationsById($interventionId, $data)
     {
-        if (array_key_exists('lieu', $infos) && $infos['lieu'] === null) $infos['lieu'] = '';
+        if (array_key_exists('lieu', $data) && $data['lieu'] === null) $data['lieu'] = '';
         if (!array_key_exists('agent', $data) || $data['agent'] === null) $data['agent'] = '';
-        if (array_key_exists('description', $infos) && $infos['description'] === null) $infos['description'] = '';
-        if (array_key_exists('proprietaire', $infos) && $infos['proprietaire'] === null) $infos['proprietaire'] = '';
-        if (array_key_exists('responsable', $infos) && $infos['responsable'] === null) $infos['responsable'] = '';
-        if (array_key_exists('wgs84', $infos) && $infos['wgs84'] === null) $infos['wgs84'] = '';
+        if (array_key_exists('description', $data) && $data['description'] === null) $data['description'] = '';
+        if (array_key_exists('proprietaire', $data) && $data['proprietaire'] === null) $data['proprietaire'] = '';
+        if (array_key_exists('responsable', $data) && $data['responsable'] === null) $data['responsable'] = '';
+        if (array_key_exists('wgs84', $data) && $data['wgs84'] === null) $data['wgs84'] = '';
 
         $intervention = Intervention::find($interventionId);
-        $intervention->update($infos);
+        $intervention->update($data);
 
         return $this->convertIntervention($intervention);
     }
