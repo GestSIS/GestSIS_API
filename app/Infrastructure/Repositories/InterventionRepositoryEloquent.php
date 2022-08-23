@@ -53,6 +53,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
     public function createNewIntervention($data)
     {
         if (!array_key_exists('lieu', $data) || $data['lieu'] === null) $data['lieu'] = '';
+        if (!array_key_exists('agent', $data) || $data['agent'] === null) $data['agent'] = '';
         if (!array_key_exists('description', $data) || $data['description'] === null) $data['description'] = '';
         if (!array_key_exists('proprietaire', $data) || $data['proprietaire'] === null) $data['proprietaire'] = '';
         if (!array_key_exists('responsable', $data) || $data['responsable'] === null) $data['responsable'] = '';
@@ -70,6 +71,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
     public function editInterventionInformationsById($interventionId, $infos)
     {
         if (array_key_exists('lieu', $infos) && $infos['lieu'] === null) $infos['lieu'] = '';
+        if (!array_key_exists('agent', $data) || $data['agent'] === null) $data['agent'] = '';
         if (array_key_exists('description', $infos) && $infos['description'] === null) $infos['description'] = '';
         if (array_key_exists('proprietaire', $infos) && $infos['proprietaire'] === null) $infos['proprietaire'] = '';
         if (array_key_exists('responsable', $infos) && $infos['responsable'] === null) $infos['responsable'] = '';
@@ -336,6 +338,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
         $object->date_fin = $intervention->date_fin;
         $object->heure_fin = $intervention->heure_fin;
         $object->rapport_police = $intervention->rapport_police;
+        $object->agent = $intervention->agent;
         $object->degre = $intervention->degre;
         $object->sauve_personne = $intervention->sauve_personne;
         $object->sauve_animaux = $intervention->sauve_animaux;

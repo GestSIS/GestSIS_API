@@ -17,6 +17,7 @@ class Intervention extends Model
         'lieu',
         'objet',
         'rapport_police',
+        'agent',
         'degre',
         'sauve_personne',
         'sauve_animaux',
