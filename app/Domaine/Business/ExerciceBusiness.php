@@ -392,6 +392,7 @@ class ExerciceBusiness
 
     public function supprimerConvocations($sapeurId, $exerciceSapeursIds)
     {
+        throw new ArrayException([], 'Fonctionalités désactivée temporairement, réessayer plus tard !');
         // TODO: Check pour chaque exercice s'il est possible de supprimer la convocation
         // et donc que l'exercice n'est pas déjà imputé
         $this->repository->supprimerConvocations($sapeurId, $exerciceSapeursIds);
