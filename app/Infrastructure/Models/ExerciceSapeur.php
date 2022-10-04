@@ -12,4 +12,9 @@ class ExerciceSapeur extends Model
     protected $casts = ['sapeur_id' => 'integer', 'exercice_id' => 'integer', 'present' => 'integer', 'convoque' => 'integer', 'amende' => 'boolean', 'remplace' => 'integer', 'excuse_type_id' => 'integer'];
 
     use HasFactory;
+
+    public function exercice()
+    {
+        return $this->belongsTo('App\Infrastructure\Models\Exercice');
+    }
 }
