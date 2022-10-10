@@ -253,15 +253,15 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         // TODO: see to add the correct right for the following routes : 'store', 'update']);
         Route::resource('phase-types', 'PhaseTypeController')->only(['index']);
         Route::resource('stat-federal', 'StatFederalController')->only(['index']);
+        Route::resource('type-intervention', 'TypeInterventionController')->only(['index']);
+        Route::resource('stat-intervention', 'StatInterventionController')->only(['index']);
+        Route::resource('intervention-traitement', 'InterventionTraitementController')->only(['index']);
     });
 
     // Params intervention
     Route::group(['middleware' => 'jwtTokenRole:intervention.lecture'], function () {
         Route::resource('vehicules', 'VehiculeController')->only(['index']);
         Route::resource('materiels', 'MaterielController')->only(['index']);
-        Route::resource('type-intervention', 'TypeInterventionController')->only(['index']);
-        Route::resource('stat-intervention', 'StatInterventionController')->only(['index']);
-        Route::resource('intervention-traitement', 'InterventionTraitementController')->only(['index']);
         Route::resource('mission-types', 'MissionTypeController')->only(['index']);
         Route::resource('telephones', 'TelephoneController')->only(['index']);
     });
