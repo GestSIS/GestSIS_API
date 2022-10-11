@@ -2,7 +2,7 @@
 
 namespace App\Domaine\Business;
 
-use App\Domaine\API\ImputationService;
+use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\Decompte;
@@ -44,6 +44,10 @@ class PaiementBusiness
     public function creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction)
     {
         $avsParam = AvsParam::first();
+        if (is_null($avsParam)) {
+            throw new ArrayException(array("message" => "Paramètres AVS non configurés"));
+        }
+
         $comptes = Compte::all();
         $indexedCompte = [];
         foreach ($comptes as $compte) {
