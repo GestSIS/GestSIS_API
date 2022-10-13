@@ -10,25 +10,12 @@ class MaterielEvent extends Model
     use HasFactory;
 
     protected $fillable = [
-        'nom', 'prenom', 'suffixe', 'rue', 'no_rue', 'date_naissance', 'no_avs', 'profession', 'employeur',
-        'lieu_de_travail', 'email', 'actif', 'iban', 'iban_statut', 'remarque', 'porteur', 'localite_id',
-        'civilite_id', 'cotisation_avs'
+        'date', 'remarque', 'succes'
     ];
     protected $casts = [
-        'actif' => 'integer', 'iban_statut' => 'integer', 'actif' => 'integer', 'cotisation_avs' => 'integer',
-        'localite_id' => 'integer', 'civilite_id' => 'integer', 'porteur' => 'integer', 'fonction_id' => 'integer',
-        'grade_id' => 'integer', 'type' => 'integer'
+        'date' => 'datetime', 'succes' => 'integer', 'materiel_nominal_id' => 'integer', 'materiel_event_id' => 'integer'
     ];
 
-    protected $attributes = [
-        'suffixe' => '',
-        'remarque' => '',
-        'profession' => '',
-        'employeur' => '',
-        'lieu_de_travail' => '',
-        'email' => '',
-        'iban' => ''
-    ];
     /**
      * Les cours du sapeurs
      */
