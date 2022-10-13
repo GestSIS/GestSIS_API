@@ -23,7 +23,17 @@ class ModuleMateriel extends Migration
             $table->foreign('materiel_categorie_id')->references('id')->on('materiel_categories');
         });
 
-        Schema::create('materiel_inventaire', function (Blueprint $table) {
+        Schema::create('materiel_types', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->timestamps();
+
+            $table->string('designation');
+
+            $table->bigInteger('materiel_categorie_id')->unsigned()->nullable();
+            $table->foreign('materiel_categorie_id')->references('id')->on('materiel_categories');
+        });
+
+        Schema::create('materiel_inventaires', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
@@ -31,8 +41,8 @@ class ModuleMateriel extends Migration
             $table->unsignedInteger('quantite');
             $table->string('remarque');
 
-            $table->bigInteger('materiel_categorie_id')->unsigned()->nullable();
-            $table->foreign('materiel_categorie_id')->references('id')->on('materiel_categories');
+            $table->bigInteger('materiel_type_id')->unsigned()->nullable();
+            $table->foreign('materiel_type_id')->references('id')->on('materiel_types');
         });
 
         Schema::create('materiel_personnels', function (Blueprint $table) {
@@ -51,8 +61,8 @@ class ModuleMateriel extends Migration
             $table->string('materiel_type');
             $table->bigInteger('materiel_id')->unsigned()->nullable();
 
-            $table->bigInteger('materiel_categorie_id')->unsigned()->nullable();
-            $table->foreign('materiel_categorie_id')->references('id')->on('materiel_categories');
+            $table->bigInteger('materiel_type_id')->unsigned()->nullable();
+            $table->foreign('materiel_type_id')->references('id')->on('materiel_types');
         });
 
         Schema::create('materiel_nominals', function (Blueprint $table) {
@@ -103,8 +113,8 @@ class ModuleMateriel extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->bigInteger('materiel_categorie_id')->unsigned()->nullable();
-            $table->foreign('materiel_categorie_id')->references('id')->on('materiel_categories');
+            $table->bigInteger('materiel_type_id')->unsigned()->nullable();
+            $table->foreign('materiel_type_id')->references('id')->on('materiel_types');
 
             $table->bigInteger('materiel_event_type_id')->unsigned()->unique();
             $table->foreign('materiel_event_type_id')->references('id')->on('materiel_event_types');
@@ -160,7 +170,8 @@ class ModuleMateriel extends Migration
         Schema::dropIfExists('materiel_alerts');
         Schema::dropIfExists('materiel_nominals');
         Schema::dropIfExists('materiel_personnels');
-        Schema::dropIfExists('materiel_inventaire');
+        Schema::dropIfExists('materiel_inventaires');
+        Schema::dropIfExists('materiel_types');
         Schema::dropIfExists('materiel_categories');
     }
 }
