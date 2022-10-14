@@ -1,0 +1,35 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class MatPersoEventTypeTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $events = array(
+            array('id' => 1, 'nom' => 'Lavage', 'description' => '', 'validable' => false),
+            array('id' => 2, 'nom' => 'Réparation', 'description' => '', 'validable' => false),
+            array('id' => 3, 'nom' => 'Contrôle clé/badge', 'description' => 'Pour valider qu\'elle/il n\'est pas perdu.', 'validable' => true),
+        );
+
+        DB::table('materiel_event_types')->insert($events);
+
+        $pour = array(
+            array('id' => 1, 'materiel_event_type_id' => 1, 'materiel_type_id' => 2),
+            array('id' => 2, 'materiel_event_type_id' => 1, 'materiel_type_id' => 4),
+            array('id' => 3, 'materiel_event_type_id' => 2, 'materiel_type_id' => 2),
+            array('id' => 4, 'materiel_event_type_id' => 2, 'materiel_type_id' => 4),
+            array('id' => 5, 'materiel_event_type_id' => 3, 'materiel_type_id' => 15),
+        );
+
+        DB::table('materiel_event_type_pour')->insert($pour);
+    }
+}

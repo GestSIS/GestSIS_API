@@ -18,6 +18,6 @@ class Medecin extends Model
      */
     public function localite()
     {
-        return $this->belongsTo('App\Infrastructure\Models\Localite');
+        return $this->belongsTo(Localite::class);
     }
 }

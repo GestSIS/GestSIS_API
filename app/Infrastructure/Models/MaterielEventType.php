@@ -11,4 +11,14 @@ class MaterielEventType extends Model
 
     protected $fillable = ['nom', 'description', 'validable'];
     protected $casts = ['validable' => 'boolean'];
+
+    function materielTypes()
+    {
+        return $this->belongsToMany(MaterielType::class, 'materiel_event_type_pour');
+    }
+
+    public function materielTypeIds()
+    {
+        return $this->materielTypes()->pluck('materiel_type_id');
+    }
 }

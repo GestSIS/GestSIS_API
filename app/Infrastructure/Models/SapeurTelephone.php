@@ -15,6 +15,6 @@ class SapeurTelephone extends Model
 
     public function telephoneType()
     {
-        return $this->belongsTo('App\Infrastructure\Models\TelephoneType');
+        return $this->belongsTo(TelephoneType::class);
     }
 }

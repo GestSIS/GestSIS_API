@@ -12,11 +12,11 @@ class Decompte extends Model
 
     public function exerciceComptable()
     {
-        return $this->belongsTo('App\Infrastructure\Models\ExerciceComptable');
+        return $this->belongsTo(ExerciceComptable::class);
     }
 
     public function paiements()
     {
-        return $this->hasMany('App\Infrastructure\Models\Paiement');
+        return $this->hasMany(Paiement::class);
     }
 }

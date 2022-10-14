@@ -14,7 +14,7 @@ class FonctionSapeur extends Model
      */
     public function sapeur()
     {
-        return $this->belongsTo('App\Infrastructure\Models\Sapeur');
+        return $this->belongsTo(Sapeur::class);
     }
 
     /**
@@ -22,6 +22,6 @@ class FonctionSapeur extends Model
      */
     public function fonction()
     {
-        return $this->belongsTo('App\Infrastructure\Models\Fonction');
+        return $this->belongsTo(Fonction::class);
     }
 }

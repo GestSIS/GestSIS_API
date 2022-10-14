@@ -19,8 +19,8 @@ class ModuleMateriel extends Migration
 
             $table->string('designation');
 
-            $table->bigInteger('materiel_categorie_id')->unsigned()->nullable();
-            $table->foreign('materiel_categorie_id')->references('id')->on('materiel_categories');
+            $table->unsignedBigInteger('pere_id')->nullable()->default(null);
+            $table->foreign('pere_id')->references('id')->on('materiel_categories');
         });
 
         Schema::create('materiel_types', function (Blueprint $table) {
@@ -30,7 +30,7 @@ class ModuleMateriel extends Migration
             $table->string('designation');
             $table->boolean('taille')->default(true);
 
-            $table->bigInteger('materiel_categorie_id')->unsigned()->nullable();
+            $table->unsignedBigInteger('materiel_categorie_id')->nullable();
             $table->foreign('materiel_categorie_id')->references('id')->on('materiel_categories');
         });
 
@@ -44,15 +44,15 @@ class ModuleMateriel extends Migration
             $table->dateTime('attribution')->nullable()->default(null);
             $table->dateTime('retour')->nullable()->default(null);
 
-            $table->bigInteger('sapeur_id')->unsigned()->nullable()->default(null);
+            $table->unsignedBigInteger('sapeur_id')->nullable()->default(null);
             $table->foreign('sapeur_id')->references('id')->on('sapeurs');
 
-            $table->bigInteger('materiel_type_id')->unsigned();
+            $table->unsignedBigInteger('materiel_type_id');
             $table->foreign('materiel_type_id')->references('id')->on('materiel_types');
 
             // Relation polymorphique
             $table->string('materiel_type');
-            $table->bigInteger('materiel_id')->unsigned()->nullable();
+            $table->unsignedBigInteger('materiel_id')->nullable();
         });
 
         Schema::create('materiel_nominals', function (Blueprint $table) {
@@ -77,7 +77,7 @@ class ModuleMateriel extends Migration
             $table->timestamps();
 
             $table->string('nom');
-            $table->string('description');
+            $table->string('description')->default('');
 
             // Propriétés
             $table->boolean('validable');
@@ -91,55 +91,55 @@ class ModuleMateriel extends Migration
             $table->string('remarque');
             $table->boolean('succes')->default(true);
 
-            $table->bigInteger('materiel_nominal_id')->unsigned()->unique();
-            $table->foreign('materiel_nominal_id')->references('id')->on('materiel_nominals');
+            $table->unsignedBigInteger('materiel_nominal_id');
+            $table->foreign('materiel_nominal_id')->references('id')->on('materiel_nominals')->onDelete('cascade');
 
-            $table->bigInteger('materiel_event_id')->unsigned()->unique();
+            $table->unsignedBigInteger('materiel_event_id');
             $table->foreign('materiel_event_id')->references('id')->on('materiel_events');
         });
 
-        Schema::create('materiel_event_pour_types', function (Blueprint $table) {
+        Schema::create('materiel_event_type_pour', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->bigInteger('materiel_type_id')->unsigned()->nullable();
-            $table->foreign('materiel_type_id')->references('id')->on('materiel_types');
+            $table->unsignedBigInteger('materiel_type_id');
+            $table->foreign('materiel_type_id')->references('id')->on('materiel_types')->onDelete('cascade');
 
-            $table->bigInteger('materiel_event_type_id')->unsigned()->unique();
-            $table->foreign('materiel_event_type_id')->references('id')->on('materiel_event_types');
+            $table->unsignedBigInteger('materiel_event_type_id');
+            $table->foreign('materiel_event_type_id')->references('id')->on('materiel_event_types')->onDelete('cascade');
         });
 
-        Schema::create('materiel_alert_types', function (Blueprint $table) {
+        Schema::create('materiel_alerte_types', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
             $table->string('titre');
-            $table->string('description');
+            $table->string('description')->default('');
 
             $table->integer('seuil_min');
             $table->boolean('dernier');
         });
 
-        Schema::create('materiel_alert_type_pour_events', function (Blueprint $table) {
+        Schema::create('materiel_alerte_type_pour', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->bigInteger('materiel_alert_type_id')->unsigned()->unique();
-            $table->foreign('materiel_alert_type_id')->references('id')->on('materiel_alert_types');
+            $table->unsignedBigInteger('materiel_alerte_type_id');
+            $table->foreign('materiel_alerte_type_id')->references('id')->on('materiel_alerte_types')->onDelete('cascade');
 
-            $table->bigInteger('materiel_event_type_id')->unsigned()->unique();
-            $table->foreign('materiel_event_type_id')->references('id')->on('materiel_event_types');
+            $table->unsignedBigInteger('materiel_event_type_id');
+            $table->foreign('materiel_event_type_id')->references('id')->on('materiel_event_types')->onDelete('cascade');
         });
 
-        Schema::create('materiel_alerts', function (Blueprint $table) {
+        Schema::create('materiel_alertes', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
             $table->string('titre');
-            $table->string('description');
+            $table->string('description')->default('');
 
-            $table->bigInteger('materiel_nominal_id')->unsigned()->unique();
-            $table->foreign('materiel_nominal_id')->references('id')->on('materiel_nominals');
+            $table->unsignedBigInteger('materiel_nominal_id');
+            $table->foreign('materiel_nominal_id')->references('id')->on('materiel_nominals')->onDelete('cascade');
         });
     }
 
@@ -150,13 +150,13 @@ class ModuleMateriel extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('materiel_alert_type_pour_events');
-        Schema::dropIfExists('materiel_alert_types');
-        Schema::dropIfExists('materiel_event_pour_types');
+        Schema::dropIfExists('materiel_alerte_type_pour');
+        Schema::dropIfExists('materiel_alerte_types');
+        Schema::dropIfExists('materiel_event_type_pour');
         Schema::dropIfExists('materiel_events');
         Schema::dropIfExists('materiel_event_types');
         Schema::dropIfExists('materiel_indiscernables');
-        Schema::dropIfExists('materiel_alerts');
+        Schema::dropIfExists('materiel_alertes');
         Schema::dropIfExists('materiel_nominals');
         Schema::dropIfExists('materiel_personnels');
         Schema::dropIfExists('materiel_types');

@@ -14,7 +14,7 @@ class GradeSapeur extends Model
      */
     public function grade()
     {
-        return $this->belongsTo('App\Infrastructure\Models\Grade');
+        return $this->belongsTo(Grade::class);
     }
 
     /**
@@ -22,6 +22,6 @@ class GradeSapeur extends Model
      */
     public function sapeur()
     {
-        return $this->belongsTo('App\Infrastructure\Models\Sapeur');
+        return $this->belongsTo(Sapeur::class);
     }
 }

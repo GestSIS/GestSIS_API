@@ -38,8 +38,6 @@ class CoursTableSeeder extends Seeder
             array('id' => '20', 'duree' => '1', 'precedent_id' => null, 'grade_id' => null, 'fonction_id' => null, 'abreviation' => 'PR', 'designation' => 'Rattrapage', 'Tri' => '45', 'validite_debut' => null, 'validite_fin' => null),
         );
 
-        foreach ($cours as $cours_item) {
-            DB::table('cours')->insert($cours_item);
-        }
+        DB::table('cours')->insert($cours);
     }
 }

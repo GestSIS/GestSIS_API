@@ -34,7 +34,7 @@ class Sapeur extends Model
      */
     public function cours()
     {
-        return $this->hasMany('App\Infrastructure\Models\CoursSapeur');
+        return $this->hasMany(CoursSapeur::class);
     }
 
     /**
@@ -42,7 +42,7 @@ class Sapeur extends Model
      */
     public function grades()
     {
-        return $this->hasMany('App\Infrastructure\Models\GradeSapeur');
+        return $this->hasMany(GradeSapeur::class);
     }
 
     /**
@@ -50,7 +50,7 @@ class Sapeur extends Model
      */
     public function exercices()
     {
-        return $this->hasMany('App\Infrastructure\Models\ExerciceSapeur');
+        return $this->hasMany(ExerciceSapeur::class);
     }
 
     /**
@@ -58,7 +58,7 @@ class Sapeur extends Model
      */
     public function grade()
     {
-        return $this->belongsTo('App\Infrastructure\Models\Grade');
+        return $this->belongsTo(Grade::class);
     }
 
     /**
@@ -66,7 +66,7 @@ class Sapeur extends Model
      */
     public function fonctions()
     {
-        return $this->hasMany('App\Infrastructure\Models\FonctionSapeur');
+        return $this->hasMany(FonctionSapeur::class);
     }
 
     /**
@@ -74,7 +74,7 @@ class Sapeur extends Model
      */
     public function fonction()
     {
-        return $this->belongsTo('App\Infrastructure\Models\Fonction');
+        return $this->belongsTo(Fonction::class);
     }
 
     /**
@@ -82,7 +82,7 @@ class Sapeur extends Model
      */
     public function groupes()
     {
-        return $this->hasMany('App\Infrastructure\Models\GroupeSapeur');
+        return $this->hasMany(GroupeSapeur::class);
     }
 
     /**
@@ -90,7 +90,7 @@ class Sapeur extends Model
      */
     public function permis()
     {
-        return $this->hasMany('App\Infrastructure\Models\Permis');
+        return $this->hasMany(Permis::class);
     }
 
     /**
@@ -98,7 +98,7 @@ class Sapeur extends Model
      */
     public function telephones()
     {
-        return $this->hasMany('App\Infrastructure\Models\SapeurTelephone');
+        return $this->hasMany(SapeurTelephone::class);
     }
 
     /**
@@ -106,7 +106,7 @@ class Sapeur extends Model
      */
     public function mutations()
     {
-        return $this->hasMany('App\Infrastructure\Models\Mutation');
+        return $this->hasMany(Mutation::class);
     }
 
     /**
@@ -114,7 +114,7 @@ class Sapeur extends Model
      */
     public function localite()
     {
-        return $this->belongsTo('App\Infrastructure\Models\Localite');
+        return $this->belongsTo(Localite::class);
     }
 
     /**
@@ -122,6 +122,6 @@ class Sapeur extends Model
      */
     public function civilite()
     {
-        return $this->belongsTo('App\Infrastructure\Models\Civilite');
+        return $this->belongsTo(Civilite::class);
     }
 }

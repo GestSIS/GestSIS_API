@@ -30,7 +30,7 @@ class ControleMedical extends Model
      */
     public function sapeur()
     {
-        return $this->belongsTo('App\Infrastructure\Models\Sapeur');
+        return $this->belongsTo(Sapeur::class);
     }
 
     /**
@@ -38,7 +38,7 @@ class ControleMedical extends Model
      */
     public function medecin()
     {
-        return $this->belongsTo('App\Infrastructure\Models\Medecin');
+        return $this->belongsTo(Medecin::class);
     }
 
     /**
@@ -46,6 +46,6 @@ class ControleMedical extends Model
      */
     public function type()
     {
-        return $this->belongsTo('App\Infrastructure\Models\ControleMedicalType');
+        return $this->belongsTo(ControleMedicalType::class);
     }
 }

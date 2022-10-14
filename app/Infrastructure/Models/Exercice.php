@@ -23,12 +23,12 @@ class Exercice extends Model
 
     public function ecritures()
     {
-        return $this->hasMany('App\Infrastructure\Models\Ecriture');
+        return $this->hasMany(Ecriture::class);
     }
 
     public function localite()
     {
-        return $this->belongsTo('App\Infrastructure\Models\Localite');
+        return $this->belongsTo(Localite::class);
     }
 
     /**
@@ -36,7 +36,7 @@ class Exercice extends Model
      */
     public function sapeurs()
     {
-        return $this->hasMany('App\Infrastructure\Models\ExerciceSapeur');
+        return $this->hasMany(ExerciceSapeur::class);
     }
 
     /**
@@ -44,7 +44,7 @@ class Exercice extends Model
      */
     public function categorie()
     {
-        return $this->belongsTo('App\Infrastructure\Models\ExerciceCategorie');
+        return $this->belongsTo(ExerciceCategorie::class);
     }
 
     /**
@@ -52,6 +52,6 @@ class Exercice extends Model
      */
     public function exerciceComptable()
     {
-        return $this->belongsTo('App\Infrastructure\Models\ExerciceComptable');
+        return $this->belongsTo(ExerciceComptable::class);
     }
 }

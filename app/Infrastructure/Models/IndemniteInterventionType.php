@@ -31,6 +31,6 @@ class IndemniteInterventionType extends Model
 
     public function fonctions()
     {
-        return $this->hasMany('App\Infrastructure\Models\IndemniteInterventionFonction', 'indemnite_int_id');
+        return $this->hasMany(IndemniteInterventionFonction::class, 'indemnite_int_id');
     }
 }

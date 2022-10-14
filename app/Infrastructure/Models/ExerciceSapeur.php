@@ -15,6 +15,6 @@ class ExerciceSapeur extends Model
 
     public function exercice()
     {
-        return $this->belongsTo('App\Infrastructure\Models\Exercice');
+        return $this->belongsTo(Exercice::class);
     }
 }

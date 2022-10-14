@@ -14,11 +14,11 @@ class Paiement extends Model
 
     public function decompte()
     {
-        return $this->belongsTo('App\Infrastructure\Models\Decompte');
+        return $this->belongsTo(Decompte::class);
     }
 
     public function sapeur()
     {
-        return $this->belongsTo('App\Infrastructure\Models\Sapeur');
+        return $this->belongsTo(Sapeur::class);
     }
 }

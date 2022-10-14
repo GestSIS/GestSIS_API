@@ -16,7 +16,7 @@ class Permis extends Model
      */
     public function sapeur()
     {
-        return $this->belongsTo('App\Infrastructure\Models\Sapeur');
+        return $this->belongsTo(Sapeur::class);
     }
 
     /**
@@ -24,6 +24,6 @@ class Permis extends Model
      */
     public function permisType()
     {
-        return $this->belongsTo('App\Infrastructure\Models\PermisType');
+        return $this->belongsTo(PermisType::class);
     }
 }
