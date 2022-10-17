@@ -29,13 +29,8 @@ class MatPersoCategorieController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'titre' => 'string|min:1',
-            'description' => 'string',
-            'seuil_min' => 'integer',
-            'dernier' => 'boolean',
-            'pourEventTypes' => [
-                ''
-            ]
+            'designation' => 'string|min:1|required',
+            'pere_id' => 'integer|nullable'
         ]);
 
         $categorie = $this->service->ajouterCategorie($data);
@@ -45,10 +40,8 @@ class MatPersoCategorieController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->validate([
-            'titre' => 'string|min:1',
-            'description' => 'string',
-            'seuil_min' => 'integer',
-            'dernier' => 'boolean'
+            'designation' => 'string|min:1',
+            'pere_id' => 'integer|nullable'
         ]);
 
         $categorie = $this->service->modifierCategorie($id, $data);
