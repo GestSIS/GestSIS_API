@@ -32,7 +32,9 @@
     <table class="table table-sm table-bordered table-striped mb-2">
       <tr>
         <th>Type d'intervention</th>
-        <td>{{ $intervention->typeIntervention->designation }}</td>
+        <td>
+          {{ $intervention->typeIntervention->designation }}{{ $intervention->stat_nb > 1 ? ' (' . $intervention->stat_nb . 'x)' : '' }}
+        </td>
         <th>Chef d'intervention</th>
         <td>{{ $intervention->chefIntervention->nom }} {{ $intervention->chefIntervention->prenom }}</td>
       </tr>
