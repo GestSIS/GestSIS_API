@@ -66,7 +66,7 @@ class MatPersoParamService
     // Alertes types
     public function alertes()
     {
-        return MaterielAlerteType::get(); //with('eventTypeIds')->get();
+        return MaterielAlerteType::with('eventTypes')->get();
     }
 
     public function ajouterAlerteType($data)
@@ -87,7 +87,7 @@ class MatPersoParamService
     // Events types
     public function events()
     {
-        return MaterielEventType::get(); //with('materielTypeIds')->get();
+        return MaterielEventType::with('materielTypes')->get();
     }
 
     public function ajouterEventType($data)
