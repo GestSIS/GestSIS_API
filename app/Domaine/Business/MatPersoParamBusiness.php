@@ -68,7 +68,7 @@ class MatPersoParamBusiness
 
     public static function modifierAlerteType($id, $data)
     {
-        $alerte = MaterielAlerteType::with('eventTypes')->find($id);
+        $alerte = MaterielAlerteType::find($id);
         $alerte->update($data);
         $alerte->eventTypes()->sync($data['eventTypeIds']);
         return MaterielAlerteType::with('eventTypes')->find($id);
@@ -92,7 +92,7 @@ class MatPersoParamBusiness
 
     public static function modifierEventType($id, $data)
     {
-        $event = MaterielEventType::with('materielTypes')->find($id);
+        $event = MaterielEventType::find($id);
         $event->update($data);
         $event->materielTypes()->sync($data['materielTypeIds']);
         return MaterielEventType::with('materielTypes')->find($id);

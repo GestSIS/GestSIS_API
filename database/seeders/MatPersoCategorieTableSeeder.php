@@ -41,9 +41,11 @@ class MatPersoCategorieTableSeeder extends Seeder
             array('id' => 10, 'designation' => 'F1', 'materiel_categorie_id' => 2),
             array('id' => 11, 'designation' => 'Bottes Haix', 'materiel_categorie_id' => 3),
             array('id' => 12, 'designation' => 'Anneau cousu + mousqueton', 'materiel_categorie_id' => 4),
-            array('id' => 13, 'designation' => 'Cale caoutchouc', 'materiel_categorie_id' => 5),
-            array('id' => 14, 'designation' => 'Couteau', 'materiel_categorie_id' => 5),
-            array('id' => 15, 'designation' => 'Kaba', 'materiel_categorie_id' => 6),
+            array('id' => 13, 'designation' => 'Cale caoutchouc', 'materiel_categorie_id' => 4),
+            array('id' => 14, 'designation' => 'Couteau', 'materiel_categorie_id' => 4),
+            array('id' => 15, 'designation' => 'Kaba', 'materiel_categorie_id' => 5),
+            array('id' => 16, 'designation' => 'Gants de travail', 'materiel_categorie_id' => 6),
+            array('id' => 17, 'designation' => 'Gants feu', 'materiel_categorie_id' => 6),
         );
         DB::table('materiel_types')->insert($types);
     }
