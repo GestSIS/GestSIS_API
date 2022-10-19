@@ -7,6 +7,8 @@ RUN mkdir -p /usr/share/man/man1 \
     # gmp
     && apt-get install -y --no-install-recommends libgmp-dev \
     && docker-php-ext-install gmp \
+    # pdftk
+    && apt-get install -y --no-install-recommends pdftk \
     # pdo_mysql
     && docker-php-ext-install pdo_mysql \
     # opcache

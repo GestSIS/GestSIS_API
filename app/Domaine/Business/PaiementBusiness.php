@@ -12,6 +12,7 @@ use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
 use FPDM;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Z38\SwissPayment\BIC;
 use Z38\SwissPayment\IBAN;
@@ -349,14 +350,7 @@ class PaiementBusiness
         // Emplacement temporaire pour les fichiers
         Storage::makeDirectory("tmp/" . $exerciceComptableId);
         // Utilise https://github.com/mikehaertl/php-pdftk
-        $merged = new Pdf(null, array(
-            // e.g. /project/pdftk/bin/pdftk
-            'command' => config('pdftk.bin_path'),
-            'procEnv' => array(
-                // e.g. /project/pdftk/bin (should contain libgcj.so.10)
-                'LD_LIBRARY_PATH' => config('pdftk.lib_folder')
-            ),
-        ));
+        $merged = new Pdf(null, config('pdftk.config'));
 
         try {
             // Génération du pdf de chaque sapeur
@@ -366,14 +360,18 @@ class PaiementBusiness
             }
 
             // Création du pdf final
-            dd($merged->send(), $merged->getError());
+            $content = $merged->toString();
+
+            $headers = [
+                'Content-type'        => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="certificats_salaire.pdf"',
+            ];
+
+            return Response::make($content, 200, $headers);
         } finally {
             // Supression du dossier même si erreur php
             Storage::deleteDirectory("tmp/" . $exerciceComptableId);
         }
-        return $merged->send();
-        // return file_get_contents((string) $merged->getTmpFile());
-        // return $->Output();
     }
 
     /**
