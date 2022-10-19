@@ -245,7 +245,6 @@ class PaiementBusiness
      */
     public function iso20022PourDecompte($decompteId, $nom, $bic, $iban)
     {
-        // FIXME: use new fields name
         $paiements = Decompte::find($decompteId)->paiements()->get();
         $paiement = new PaymentInformation(
             "payment-000",
@@ -288,7 +287,6 @@ class PaiementBusiness
      */
     public function iso20022PourPaiement($paiementId, $nom, $bic, $iban)
     {
-        // FIXME: use new fields name
         $paiement = new PaymentInformation(
             "payment-000",
             $nom,
@@ -327,8 +325,7 @@ class PaiementBusiness
 
     public function certificatSalaire($exerciceComptableId, $affichageFrais = false)
     {
-        // FIXME: use new fields name
-        //calcul des totaux
+        // Calcul des totaux
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
         $totaux = [];
         foreach (Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get() as $d) {
@@ -337,31 +334,33 @@ class PaiementBusiness
                     $totaux[$p->sapeur_id] = array(
                         "solde" => 0,
                         "indemnite" => 0,
-                        "deduction" => 0,
-                        "frais" => 0
+                        "avs_ac" => 0,
+                        "frais_effectif" => 0,
+                        "frais_forfaitaire" => 0,
                     );
                 }
                 $totaux[$p->sapeur_id]['solde'] += $p->solde;
                 $totaux[$p->sapeur_id]['indemnite'] += $p->indemnite;
-                $totaux[$p->sapeur_id]['deduction'] += $p->avs_ac;
-                $totaux[$p->sapeur_id]['frais'] += $p->frais;
+                $totaux[$p->sapeur_id]['avs_ac'] += $p->avs_ac;
+                $totaux[$p->sapeur_id]['frais_effectif'] += $p->frais_effectif;
+                $totaux[$p->sapeur_id]['frais_forfaitaire'] += $p->frais_forfaitaire;
             }
         }
-        //emplacement temporaire pour les fichiers
+        // Emplacement temporaire pour les fichiers
         Storage::makeDirectory("tmp/" . $exerciceComptableId);
-        //utilise https://github.com/mikehaertl/php-pdftk
+        // Utilise https://github.com/mikehaertl/php-pdftk
         $merged = new Pdf();
         try {
-            //génération du pdf de chaque sapeur
+            // Génération du pdf de chaque sapeur
             foreach (Sapeur::whereIn('id', array_keys($totaux))->with(['localite', 'civilite'])->get() as $sapeur) {
                 $path = $this->creationPdf($sapeur, $exerciceComptable, $totaux[$sapeur->id], $affichageFrais, true);
                 $merged->addFile($path);
             }
 
-            //création du pdf final
+            // Création du pdf final
             $merged->send();
         } finally {
-            //supression du dossier même si erreur php
+            // Supression du dossier même si erreur php
             Storage::deleteDirectory("tmp/" . $exerciceComptableId);
         }
     }
@@ -377,22 +376,23 @@ class PaiementBusiness
      */
     public function certificatSalaireSapeur($exerciceComptableId, $sapeurId, $affichageFrais = false)
     {
-        // FIXME: use new fields name
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
 
-        //Calcul des totaux
+        // Calcul des totaux
         $total['solde'] = 0;
         $total['indemnite'] = 0;
-        $total['deduction'] = 0;
-        $total['frais'] = 0;
+        $total['avs_ac'] = 0;
+        $total['frais_effectif'] = 0;
+        $total['frais_forfaitaire'] = 0;
 
         foreach (Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get() as $d) {
             foreach ($d->paiements as $p) {
                 if ($p->sapeur_id == $sapeurId) {
                     $total['solde'] += $p->solde;
                     $total['indemnite'] += $p->indemnite;
-                    $total['deduction'] += $p->avs_ac;
-                    $total['frais'] += $p->frais;
+                    $total['avs_ac'] += $p->avs_ac;
+                    $total['frais_efectif'] += $p->frais_efectif;
+                    $total['frais_forfaitaire'] += $p->frais_forfaitaire;
                 }
             }
         }
@@ -412,7 +412,6 @@ class PaiementBusiness
      */
     private function creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, $enregistrement)
     {
-        // FIXME: use new fields name
         $localite = $sapeur->localite;
         $civilite = $sapeur->civilite;
 
@@ -426,19 +425,20 @@ class PaiementBusiness
             "HName" => $sapeur->nom . " " . $sapeur->prenom,
             "HAdresse" => $sapeur->rue . " " . $sapeur->no_rue,
             "HPostfach" => $localite->npa . " " . $localite->designation,
-            "1" => $total['solde'] + $total['indemnite'],
-            //rempliassage point 6 - indemnités
-            //"6" => $total['indemnite'],
-            "8" => $total['solde'] + $total['indemnite'],
-            "9" => round($total['deduction']),
-            "11" => ($total['solde'] + $total['indemnite']) - round($total['deduction']),
-            "15-1" => "Répartition:\tSolde\t\t" . $total['solde'],
-            "15-2" => "\t\t\tIndemnité\t" . $total['indemnite'],
+            "1" => round($total['solde'] + $total['indemnite']),
+            // remplissage point 6 - indemnités
+            // "6" => $total['indemnite'],
+            "8" => round($total['solde'] + $total['indemnite']),
+            "9" => round($total['avs_ac']),
+            "11" => round($total['solde'] + $total['indemnite']) - round($total['avs_ac']),
+            "15-1" => "Répartition:\tSolde\t\t" . round($total['solde']),
+            "15-2" => "\t\t\tIndemnité\t" . round($total['indemnite']),
             "OrtDatum" => $this->dateFr()
         );
 
-        if ($total['frais'] > 0 && $affichageFrais) {
-            $fields["13-2-3-2"] = $total['frais'];
+        if ($affichageFrais) {
+            $fields["13-1-2-2"] = round($total['frais_effectif']);
+            $fields["13-2-3-2"] = round($total['frais_forfaitaire']);
         }
 
         $pdf = new FPDM(resource_path('certificatSalaire.pdf'));
