@@ -48,6 +48,22 @@
       return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_AMENDE;
     }
 
+    function sectionTitle($e)
+    {
+      if(isExercice($e)){
+        return "Exercice";
+      }else if(isIntervention($e)){
+        return "Intervention";
+      }else if(isAnnuel($e)){
+        return "Frais & indemnités annuelles";
+      }else if(isDivers($e)){
+        return "Divers";
+      }else if(isAmende($e)){
+        return "Amende";
+      }
+      return "Autres";
+    }
+
     function formatNumber($value)
     {
       return number_format($value, 2, '.', "'");
@@ -114,11 +130,6 @@
       $interventionSousTotal = $debutIntervention ? 0.0 : $interventionSousTotal;
       $interventionSousTotal += $ecriture->total;
 
-      if ($debutSapeur){
-        $sapeurTotal = 0.0;
-      }
-
-      // TODO: Gérer les amendes ainsi que l'avs et les montant négatifs
       if ($comptes[$ecriture->compte_id]->produit) {
         $sapeurTotal -= $ecriture->total;
       } else {
@@ -142,7 +153,7 @@
     @endif
 
     @if ($debutSection)
-      <h2>{{ $ecriture->categorie }}</h2>
+      <h2>{{ sectionTitle($ecriture) }}</h2>
       <table class="table table-sm table-striped table-bordered">
     @endif
 
