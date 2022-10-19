@@ -29,23 +29,23 @@
     // public const ECRITURE_MODULE_REMBOURSEMENT = 8;
     function isExercice($e)
     {
-      return $e->module === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_EXERCICE;
+      return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_EXERCICE;
     }
     function isIntervention($e)
     {
-      return $e->module === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_INTERVENTION;
+      return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_INTERVENTION;
     }
     function isAnnuel($e)
     {
-      return $e->module === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL;
+      return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL;
     }
     function isDivers($e)
     {
-      return $e->module === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_DIVERS;
+      return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_DIVERS;
     }
     function isAmende($e)
     {
-      return $e->module === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_AMENDE;
+      return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_AMENDE;
     }
 
     function formatNumber($value)
@@ -74,7 +74,7 @@
       $tauxSpecial = $ecriture->taux === null ? "" : "* " . $ecriture->taux * 100 . "%";
       return "$tarifMin " . formatNumber($ecriture->tarif) . " CHF " . ($ecriture->unite ? "/ $ecriture->unite": "") . " $tauxSpecial";
     }
-
+    // dd($ecritures);
     $previousEcriture = null;
     $first = true;
     $last = false;
