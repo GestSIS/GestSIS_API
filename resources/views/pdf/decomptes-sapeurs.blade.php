@@ -101,13 +101,13 @@
       $last = $index + 1 === $nbEcritures;
       $nextEcriture = $last ? null : $ecritures[$index + 1];
 
-      $debutSapeur = $first || $previousEcriture->sapeur_id !== $ecriture->sapeur_id;
-      $debutSection = $debutSapeur || $previousEcriture->ecriture_categorie_id !== $ecriture->ecriture_categorie_id;
-      $debutIntervention = $debutSapeur || $previousEcriture->intervention_id !== $ecriture->intervention_id;
+      $debutSapeur = $first || intval($previousEcriture->sapeur_id) !== intval($ecriture->sapeur_id);
+      $debutSection = $debutSapeur || intval($previousEcriture->ecriture_categorie_id) !== intval($ecriture->ecriture_categorie_id);
+      $debutIntervention = $debutSapeur || intval($previousEcriture->intervention_id) !== intval($ecriture->intervention_id);
 
-      $finSapeur = $last || $nextEcriture->sapeur_id !== $ecriture->sapeur_id;
-      $finSection = $finSapeur || $nextEcriture->ecriture_categorie_id !== $ecriture->ecriture_categorie_id;
-      $finIntervention = $finSection || $nextEcriture->intervention_id !== $ecriture->intervention_id;
+      $finSapeur = $last || intval($nextEcriture->sapeur_id) !== intval($ecriture->sapeur_id);
+      $finSection = $finSapeur || intval($nextEcriture->ecriture_categorie_id) !== intval($ecriture->ecriture_categorie_id);
+      $finIntervention = $finSection || intval($nextEcriture->intervention_id) !== intval($ecriture->intervention_id);
 
       $categorieSousTotal = $debutSection ? 0.0 : $categorieSousTotal;
       $categorieSousTotal += $ecriture->total;
