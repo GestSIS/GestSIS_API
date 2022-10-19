@@ -9,6 +9,6 @@ class MaterielAlerte extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['titre', 'description', 'materiel_nominal_id'];
-    protected $casts = ['materiel_nominal_id' => 'integer'];
+    protected $fillable = ['titre', 'description', 'materiel_nominal_id', 'statut', 'remarque'];
+    protected $casts = ['materiel_nominal_id' => 'integer', 'statut' => 'integer'];
 }
