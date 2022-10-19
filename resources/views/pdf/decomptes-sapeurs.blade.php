@@ -117,8 +117,15 @@
       if ($debutSapeur){
         $sapeurTotal = 0.0;
       }
-      // TODO: Gérer les amendes ainsi que les 
-      $sapeurTotal += $ecriture->total;
+
+      // TODO: Gérer les amendes ainsi que l'avs et les montant négatifs
+      if (isDivers($ecriture)) {
+        // TODO: Check le type de compte
+        $sapeurTotal += $ecriture->total;
+      } else if (isAmende($ecriture)) {
+        $sapeurTotal -= $ecriture->total;
+      }
+
     ?>
     @if ($debutSapeur)
       <h1 class="text-center">Décompte de frais</h1>

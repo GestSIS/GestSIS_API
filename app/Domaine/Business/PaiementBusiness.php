@@ -83,7 +83,6 @@ class PaiementBusiness
                     );
                 }
 
-                // TODO: A modifier pour déductions ou autres
                 switch ($ecriture->type) {
                     case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE:
                         $totaux[$ecriture->sapeur_id]['solde_a_percevoir'] += $ecriture->total;
@@ -103,8 +102,6 @@ class PaiementBusiness
                         break;
                     case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_AUTRE:
                         // Tous les montants sont positifs, produit/charges défini par le compte
-                        // $totaux[$ecriture->sapeur_id]['autre'] += $ecriture->total;
-                        // $decompte->total += $ecriture->total;
                         $compte = $indexedCompte[$ecriture->compte_id];
                         $total = $ecriture->total;
                         if ($compte->produit) {
@@ -114,9 +111,6 @@ class PaiementBusiness
                         $decompte->total += $total;
                         break;
                 }
-
-                // TODO: Modifier code ici pour ajouter déduction d'amendes, code suivant incorrect
-                // $totaux[$ecriture->sapeur_id]['amende']+=$ecriture->amende;
 
                 // $ecriture->date_paiement = $date;
                 $ecriture->decompte_id = $decompte->id;
@@ -262,17 +256,19 @@ class PaiementBusiness
         $i = 0;
         foreach ($paiements as $p) {
             $sapeur = $p->sapeur()->get()[0];
-            $transaction = new BankCreditTransfer(
-                "instr-" . $i,
-                "e2e-" . $i,
-                new Money\CHF((int)($p->total * 100)),
-                $sapeur->prenom . " " . $sapeur->nom,
-                new StructuredPostalAddress($sapeur->rue == "" ? null : $sapeur->rue, $sapeur->no_rue == "" ? null : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
-                new IBAN($sapeur->iban),
-                IID::fromIBAN(new IBAN($sapeur->iban))
-            );
-            $paiement->addTransaction($transaction);
-            $i++;
+            if ($p->total > 0) {
+                $transaction = new BankCreditTransfer(
+                    "instr-" . $i,
+                    "e2e-" . $i,
+                    new Money\CHF((int)($p->total * 100)),
+                    $sapeur->prenom . " " . $sapeur->nom,
+                    new StructuredPostalAddress($sapeur->rue == "" ? null : $sapeur->rue, $sapeur->no_rue == "" ? null : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
+                    new IBAN($sapeur->iban),
+                    IID::fromIBAN(new IBAN($sapeur->iban))
+                );
+                $paiement->addTransaction($transaction);
+                $i++;
+            }
         }
 
         $message = new CustomerCreditTransfer('message-001', $nom);
@@ -300,20 +296,22 @@ class PaiementBusiness
             new IBAN($iban)
         );
         $p = Paiement::find($paiementId);
-        $sapeur = $p->sapeur()->get()[0];
-        $transaction = new BankCreditTransfer(
-            "instr-001",
-            "e2e-001",
-            new Money\CHF((int)($p->total * 100)),
-            $sapeur->prenom . " " . $sapeur->nom,
-            new StructuredPostalAddress($sapeur->rue == "" ? null : $sapeur->rue, $sapeur->no_rue == "" ? null : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
-            new IBAN($sapeur->iban),
-            IID::fromIBAN(new IBAN($sapeur->iban))
-        );
-        $paiement->addTransaction($transaction);
+        if ($p->total > 0) {
+            $sapeur = $p->sapeur()->get()[0];
+            $transaction = new BankCreditTransfer(
+                "instr-001",
+                "e2e-001",
+                new Money\CHF((int)($p->total * 100)),
+                $sapeur->prenom . " " . $sapeur->nom,
+                new StructuredPostalAddress($sapeur->rue == "" ? null : $sapeur->rue, $sapeur->no_rue == "" ? null : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
+                new IBAN($sapeur->iban),
+                IID::fromIBAN(new IBAN($sapeur->iban))
+            );
+            $paiement->addTransaction($transaction);
 
-        $message = new CustomerCreditTransfer('message-001', $nom);
-        $message->addPayment($paiement);
+            $message = new CustomerCreditTransfer('message-001', $nom);
+            $message->addPayment($paiement);
+        }
 
         return $message->asXml();
     }
