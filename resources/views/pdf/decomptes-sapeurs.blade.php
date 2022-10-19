@@ -65,7 +65,7 @@
 
     function formatTime($value)
     {
-      return substr($value, 0, 5);
+      return $value != "" && !is_null($value) ? substr($value, 0, 5) : "";
     }
 
     function formatTarif($ecriture)
@@ -74,7 +74,7 @@
       $tauxSpecial = $ecriture->taux === null ? "" : "* " . $ecriture->taux * 100 . "%";
       return "$tarifMin " . formatNumber($ecriture->tarif) . " CHF " . ($ecriture->unite ? "/ $ecriture->unite": "") . " $tauxSpecial";
     }
-    // dd($ecritures);
+
     $previousEcriture = null;
     $first = true;
     $last = false;
@@ -88,7 +88,7 @@
     $paiement = null;
 
     $indexedPaiements = [];
-    foreach ($decompte->paiements  as $paiement) {
+    foreach ($decompte->paiements as $paiement) {
       $indexedPaiements[$paiement->sapeur_id] = $paiement;
     }
 
@@ -119,11 +119,10 @@
       }
 
       // TODO: Gérer les amendes ainsi que l'avs et les montant négatifs
-      if (isDivers($ecriture)) {
-        // TODO: Check le type de compte
-        $sapeurTotal += $ecriture->total;
-      } else if (isAmende($ecriture)) {
+      if ($comptes[$ecriture->compte_id]->produit) {
         $sapeurTotal -= $ecriture->total;
+      } else {
+        $sapeurTotal += $ecriture->total;
       }
 
     ?>
@@ -320,7 +319,7 @@
         </div>
         <div class="row">
           <div class="col-9"></div>
-          <div class="col-2 p-1">Déjà soldé + Amende</div>
+          <div class="col-2 p-1">Déjà soldé</div>
           <div class="col-1 text-end p-1 border border-secondary border-bottom-0">
             {{ formatNumber($sapeurTotal - $paiement->total) }}
           </div>
