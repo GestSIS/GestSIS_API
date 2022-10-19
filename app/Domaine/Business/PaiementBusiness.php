@@ -349,7 +349,15 @@ class PaiementBusiness
         // Emplacement temporaire pour les fichiers
         Storage::makeDirectory("tmp/" . $exerciceComptableId);
         // Utilise https://github.com/mikehaertl/php-pdftk
-        $merged = new Pdf();
+        $merged = new Pdf(null, array(
+            // e.g. /project/pdftk/bin/pdftk
+            'command' => config('pdftk.bin_path'),
+            'procEnv' => array(
+                // e.g. /project/pdftk/bin (should contain libgcj.so.10)
+                'LD_LIBRARY_PATH' => config('pdftk.lib_folder')
+            ),
+        ));
+
         try {
             // Génération du pdf de chaque sapeur
             foreach (Sapeur::whereIn('id', array_keys($totaux))->with(['localite', 'civilite'])->get() as $sapeur) {
@@ -358,11 +366,14 @@ class PaiementBusiness
             }
 
             // Création du pdf final
-            $merged->send();
+            dd($merged->send(), $merged->getError());
         } finally {
             // Supression du dossier même si erreur php
             Storage::deleteDirectory("tmp/" . $exerciceComptableId);
         }
+        return $merged->send();
+        // return file_get_contents((string) $merged->getTmpFile());
+        // return $->Output();
     }
 
     /**
@@ -398,7 +409,7 @@ class PaiementBusiness
         }
 
         $sapeur = Sapeur::with(['localite', 'civilite'])->find($sapeurId);
-        $this->creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, false);
+        return $this->creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, false);
     }
 
     /**
@@ -450,7 +461,7 @@ class PaiementBusiness
             $pdf->Output("F", $path);
             return $path;
         } else {
-            $pdf->Output();
+            return $pdf->Output();
         }
     }
 
