@@ -138,7 +138,7 @@ class ModuleMateriel extends Migration
             $table->string('titre');
             $table->string('description')->default('');
 
-            $table->text('remarque')->default('');
+            $table->string('remarque')->default('');
             $table->integer('statut');
 
             $table->unsignedBigInteger('materiel_nominal_id');
