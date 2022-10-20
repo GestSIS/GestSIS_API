@@ -7,6 +7,7 @@ use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
 use App\Infrastructure\Models\Compte;
+use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Sapeur;
 
@@ -167,16 +168,22 @@ class ImputationService
             $query->where('exercice_comptable_id', $exerciceComptableId)->orderBy('date', 'asc');
         }])->find($compteId);
 
-        // Chargement des groupes
         $sapeursMap = [];
         $sapeurs = Sapeur::get(['id', 'nom', 'prenom']);
         foreach ($sapeurs as $sapeur) {
             $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
         }
 
+        $decomptesMap = [];
+        $decomptes = Decompte::where('exercice_comptable_id', $exerciceComptableId)->get(['id', 'date']);
+        foreach ($decomptes as $decompte) {
+            $decomptesMap[$decompte->id] = $decompte->date;
+        }
+
         return View('pdf/compte', [
             "compte" => $compte,
             "sapeurs" => $sapeursMap,
+            "decomptes" => $decomptesMap,
         ]);
     }
 
@@ -193,9 +200,16 @@ class ImputationService
             $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
         }
 
+        $decomptesMap = [];
+        $decomptes = Decompte::where('exercice_comptable_id', $exerciceComptableId)->get(['id', 'date']);
+        foreach ($decomptes as $decompte) {
+            $decomptesMap[$decompte->id] = $decompte->date;
+        }
+
         return View('pdf/comptes', [
             "comptes" => $comptes,
             "sapeurs" => $sapeursMap,
+            "decomptes" => $decomptesMap,
         ]);
     }
 }

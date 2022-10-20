@@ -13,16 +13,17 @@
         <th>Libellé</th>
         <th>Sapeur</th>
         <th>Montant</th>
+        <th>Payé le</th>
       </tr>
     </thead>
     <tbody>
       <?
       $total = 0;
       ?>
-      @if(count($compte->ecritures) <= 0)
-      <tr>
-        <td colspan="4">Aucune écriture pour ce compte</td>
-      </tr>
+      @if (count($compte->ecritures) <= 0)
+        <tr>
+          <td colspan="4">Aucune écriture pour ce compte</td>
+        </tr>
       @endif
       @foreach ($compte->ecritures as $ecriture)
         <?
@@ -33,6 +34,7 @@
           <td>{{ $ecriture->designation }}</td>
           <td>{{ $ecriture->sapeur_id ? $sapeurs[$ecriture->sapeur_id] : '-' }}</td>
           <td>{{ number_format($ecriture->total, 2, '.', "'") }}</td>
+          <td>{{ $ecriture->decompte_id ? str_replace('-', '.', $decomptes[$ecriture->decompte_id]) : '' }}</td>
         </tr>
       @endforeach
     </tbody>
@@ -40,6 +42,7 @@
       <tr>
         <th colspan="3"></th>
         <th>{{ number_format($total, 2, '.', "'") }}</th>
+        <th></th>
       </tr>
     </tbody>
   </table>

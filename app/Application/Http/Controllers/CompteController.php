@@ -4,7 +4,6 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\ComptabiliteParamService;
 use App\Domaine\API\ImputationService;
-use App\Infrastructure\Models\Sapeur;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
