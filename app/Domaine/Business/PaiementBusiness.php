@@ -12,6 +12,7 @@ use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
 use FPDM;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Z38\SwissPayment\BIC;
 use Z38\SwissPayment\IBAN;
@@ -83,7 +84,6 @@ class PaiementBusiness
                     );
                 }
 
-                // TODO: A modifier pour déductions ou autres
                 switch ($ecriture->type) {
                     case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE:
                         $totaux[$ecriture->sapeur_id]['solde_a_percevoir'] += $ecriture->total;
@@ -103,8 +103,6 @@ class PaiementBusiness
                         break;
                     case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_AUTRE:
                         // Tous les montants sont positifs, produit/charges défini par le compte
-                        // $totaux[$ecriture->sapeur_id]['autre'] += $ecriture->total;
-                        // $decompte->total += $ecriture->total;
                         $compte = $indexedCompte[$ecriture->compte_id];
                         $total = $ecriture->total;
                         if ($compte->produit) {
@@ -114,9 +112,6 @@ class PaiementBusiness
                         $decompte->total += $total;
                         break;
                 }
-
-                // TODO: Modifier code ici pour ajouter déduction d'amendes, code suivant incorrect
-                // $totaux[$ecriture->sapeur_id]['amende']+=$ecriture->amende;
 
                 // $ecriture->date_paiement = $date;
                 $ecriture->decompte_id = $decompte->id;
@@ -251,7 +246,6 @@ class PaiementBusiness
      */
     public function iso20022PourDecompte($decompteId, $nom, $bic, $iban)
     {
-        // FIXME: use new fields name
         $paiements = Decompte::find($decompteId)->paiements()->get();
         $paiement = new PaymentInformation(
             "payment-000",
@@ -262,17 +256,19 @@ class PaiementBusiness
         $i = 0;
         foreach ($paiements as $p) {
             $sapeur = $p->sapeur()->get()[0];
-            $transaction = new BankCreditTransfer(
-                "instr-" . $i,
-                "e2e-" . $i,
-                new Money\CHF((int)($p->total * 100)),
-                $sapeur->prenom . " " . $sapeur->nom,
-                new StructuredPostalAddress($sapeur->rue == "" ? null : $sapeur->rue, $sapeur->no_rue == "" ? null : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
-                new IBAN($sapeur->iban),
-                IID::fromIBAN(new IBAN($sapeur->iban))
-            );
-            $paiement->addTransaction($transaction);
-            $i++;
+            if ($p->total > 0) {
+                $transaction = new BankCreditTransfer(
+                    "instr-" . $i,
+                    "e2e-" . $i,
+                    new Money\CHF((int)($p->total * 100)),
+                    $sapeur->prenom . " " . $sapeur->nom,
+                    new StructuredPostalAddress($sapeur->rue == "" ? null : $sapeur->rue, $sapeur->no_rue == "" ? null : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
+                    new IBAN($sapeur->iban),
+                    IID::fromIBAN(new IBAN($sapeur->iban))
+                );
+                $paiement->addTransaction($transaction);
+                $i++;
+            }
         }
 
         $message = new CustomerCreditTransfer('message-001', $nom);
@@ -292,7 +288,6 @@ class PaiementBusiness
      */
     public function iso20022PourPaiement($paiementId, $nom, $bic, $iban)
     {
-        // FIXME: use new fields name
         $paiement = new PaymentInformation(
             "payment-000",
             $nom,
@@ -300,20 +295,22 @@ class PaiementBusiness
             new IBAN($iban)
         );
         $p = Paiement::find($paiementId);
-        $sapeur = $p->sapeur()->get()[0];
-        $transaction = new BankCreditTransfer(
-            "instr-001",
-            "e2e-001",
-            new Money\CHF((int)($p->total * 100)),
-            $sapeur->prenom . " " . $sapeur->nom,
-            new StructuredPostalAddress($sapeur->rue == "" ? null : $sapeur->rue, $sapeur->no_rue == "" ? null : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
-            new IBAN($sapeur->iban),
-            IID::fromIBAN(new IBAN($sapeur->iban))
-        );
-        $paiement->addTransaction($transaction);
+        if ($p->total > 0) {
+            $sapeur = $p->sapeur()->get()[0];
+            $transaction = new BankCreditTransfer(
+                "instr-001",
+                "e2e-001",
+                new Money\CHF((int)($p->total * 100)),
+                $sapeur->prenom . " " . $sapeur->nom,
+                new StructuredPostalAddress($sapeur->rue == "" ? null : $sapeur->rue, $sapeur->no_rue == "" ? null : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
+                new IBAN($sapeur->iban),
+                IID::fromIBAN(new IBAN($sapeur->iban))
+            );
+            $paiement->addTransaction($transaction);
 
-        $message = new CustomerCreditTransfer('message-001', $nom);
-        $message->addPayment($paiement);
+            $message = new CustomerCreditTransfer('message-001', $nom);
+            $message->addPayment($paiement);
+        }
 
         return $message->asXml();
     }
@@ -329,8 +326,7 @@ class PaiementBusiness
 
     public function certificatSalaire($exerciceComptableId, $affichageFrais = false)
     {
-        // FIXME: use new fields name
-        //calcul des totaux
+        // Calcul des totaux
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
         $totaux = [];
         foreach (Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get() as $d) {
@@ -339,31 +335,41 @@ class PaiementBusiness
                     $totaux[$p->sapeur_id] = array(
                         "solde" => 0,
                         "indemnite" => 0,
-                        "deduction" => 0,
-                        "frais" => 0
+                        "avs_ac" => 0,
+                        "frais_effectif" => 0,
+                        "frais_forfaitaire" => 0,
                     );
                 }
                 $totaux[$p->sapeur_id]['solde'] += $p->solde;
                 $totaux[$p->sapeur_id]['indemnite'] += $p->indemnite;
-                $totaux[$p->sapeur_id]['deduction'] += $p->avs_ac;
-                $totaux[$p->sapeur_id]['frais'] += $p->frais;
+                $totaux[$p->sapeur_id]['avs_ac'] += $p->avs_ac;
+                $totaux[$p->sapeur_id]['frais_effectif'] += $p->frais_effectif;
+                $totaux[$p->sapeur_id]['frais_forfaitaire'] += $p->frais_forfaitaire;
             }
         }
-        //emplacement temporaire pour les fichiers
+        // Emplacement temporaire pour les fichiers
         Storage::makeDirectory("tmp/" . $exerciceComptableId);
-        //utilise https://github.com/mikehaertl/php-pdftk
-        $merged = new Pdf();
+        // Utilise https://github.com/mikehaertl/php-pdftk
+        $merged = new Pdf(null, config('pdftk.config'));
+
         try {
-            //génération du pdf de chaque sapeur
+            // Génération du pdf de chaque sapeur
             foreach (Sapeur::whereIn('id', array_keys($totaux))->with(['localite', 'civilite'])->get() as $sapeur) {
                 $path = $this->creationPdf($sapeur, $exerciceComptable, $totaux[$sapeur->id], $affichageFrais, true);
                 $merged->addFile($path);
             }
 
-            //création du pdf final
-            $merged->send();
+            // Création du pdf final
+            $content = $merged->toString();
+
+            $headers = [
+                'Content-type'        => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="certificats_salaire.pdf"',
+            ];
+
+            return Response::make($content, 200, $headers);
         } finally {
-            //supression du dossier même si erreur php
+            // Supression du dossier même si erreur php
             Storage::deleteDirectory("tmp/" . $exerciceComptableId);
         }
     }
@@ -379,28 +385,29 @@ class PaiementBusiness
      */
     public function certificatSalaireSapeur($exerciceComptableId, $sapeurId, $affichageFrais = false)
     {
-        // FIXME: use new fields name
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
 
-        //Calcul des totaux
+        // Calcul des totaux
         $total['solde'] = 0;
         $total['indemnite'] = 0;
-        $total['deduction'] = 0;
-        $total['frais'] = 0;
+        $total['avs_ac'] = 0;
+        $total['frais_effectif'] = 0;
+        $total['frais_forfaitaire'] = 0;
 
         foreach (Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get() as $d) {
             foreach ($d->paiements as $p) {
                 if ($p->sapeur_id == $sapeurId) {
                     $total['solde'] += $p->solde;
                     $total['indemnite'] += $p->indemnite;
-                    $total['deduction'] += $p->avs_ac;
-                    $total['frais'] += $p->frais;
+                    $total['avs_ac'] += $p->avs_ac;
+                    $total['frais_efectif'] += $p->frais_efectif;
+                    $total['frais_forfaitaire'] += $p->frais_forfaitaire;
                 }
             }
         }
 
         $sapeur = Sapeur::with(['localite', 'civilite'])->find($sapeurId);
-        $this->creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, false);
+        return $this->creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, false);
     }
 
     /**
@@ -414,7 +421,6 @@ class PaiementBusiness
      */
     private function creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, $enregistrement)
     {
-        // FIXME: use new fields name
         $localite = $sapeur->localite;
         $civilite = $sapeur->civilite;
 
@@ -428,19 +434,20 @@ class PaiementBusiness
             "HName" => $sapeur->nom . " " . $sapeur->prenom,
             "HAdresse" => $sapeur->rue . " " . $sapeur->no_rue,
             "HPostfach" => $localite->npa . " " . $localite->designation,
-            "1" => $total['solde'] + $total['indemnite'],
-            //rempliassage point 6 - indemnités
-            //"6" => $total['indemnite'],
-            "8" => $total['solde'] + $total['indemnite'],
-            "9" => round($total['deduction']),
-            "11" => ($total['solde'] + $total['indemnite']) - round($total['deduction']),
-            "15-1" => "Répartition:\tSolde\t\t" . $total['solde'],
-            "15-2" => "\t\t\tIndemnité\t" . $total['indemnite'],
+            "1" => round($total['solde'] + $total['indemnite']),
+            // remplissage point 6 - indemnités
+            // "6" => $total['indemnite'],
+            "8" => round($total['solde'] + $total['indemnite']),
+            "9" => round($total['avs_ac']),
+            "11" => round($total['solde'] + $total['indemnite']) - round($total['avs_ac']),
+            "15-1" => "Répartition:\tSolde\t\t" . round($total['solde']),
+            "15-2" => "\t\t\tIndemnité\t" . round($total['indemnite']),
             "OrtDatum" => $this->dateFr()
         );
 
-        if ($total['frais'] > 0 && $affichageFrais) {
-            $fields["13-2-3-2"] = $total['frais'];
+        if ($affichageFrais) {
+            $fields["13-1-2-2"] = round($total['frais_effectif']);
+            $fields["13-2-3-2"] = round($total['frais_forfaitaire']);
         }
 
         $pdf = new FPDM(resource_path('certificatSalaire.pdf'));
@@ -452,7 +459,7 @@ class PaiementBusiness
             $pdf->Output("F", $path);
             return $path;
         } else {
-            $pdf->Output();
+            return $pdf->Output();
         }
     }
 

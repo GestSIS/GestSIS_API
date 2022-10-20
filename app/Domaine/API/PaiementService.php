@@ -197,7 +197,7 @@ class PaiementService
         foreach ($sapeurs as $sapeur) {
             $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
         }
-        return View('pdf/decomptes-sapeurs', ["decompte" => $decompte, "decomptes" => $decomptesMap, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
+        return View('pdf/decomptes-sapeurs', ["decompte" => $decompte, "decomptes" => $decomptesMap, "sapeurs" => $sapeursMap, "ecritures" => $ecritures, "comptes" => $comptesMap]);
     }
 
     public function impressionDecompteParCompte($decompteId)

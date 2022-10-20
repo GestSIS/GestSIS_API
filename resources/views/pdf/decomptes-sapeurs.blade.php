@@ -29,23 +29,39 @@
     // public const ECRITURE_MODULE_REMBOURSEMENT = 8;
     function isExercice($e)
     {
-      return $e->module === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_EXERCICE;
+      return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_EXERCICE;
     }
     function isIntervention($e)
     {
-      return $e->module === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_INTERVENTION;
+      return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_INTERVENTION;
     }
     function isAnnuel($e)
     {
-      return $e->module === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL;
+      return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL;
     }
     function isDivers($e)
     {
-      return $e->module === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_DIVERS;
+      return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_DIVERS;
     }
     function isAmende($e)
     {
-      return $e->module === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_AMENDE;
+      return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_AMENDE;
+    }
+
+    function sectionTitle($e)
+    {
+      if(isExercice($e)){
+        return "Exercice";
+      }else if(isIntervention($e)){
+        return "Intervention";
+      }else if(isAnnuel($e)){
+        return "Frais & indemnités annuelles";
+      }else if(isDivers($e)){
+        return "Divers";
+      }else if(isAmende($e)){
+        return "Amende";
+      }
+      return "Autres";
     }
 
     function formatNumber($value)
@@ -65,7 +81,7 @@
 
     function formatTime($value)
     {
-      return substr($value, 0, 5);
+      return $value != "" && !is_null($value) ? substr($value, 0, 5) : "";
     }
 
     function formatTarif($ecriture)
@@ -88,7 +104,7 @@
     $paiement = null;
 
     $indexedPaiements = [];
-    foreach ($decompte->paiements  as $paiement) {
+    foreach ($decompte->paiements as $paiement) {
       $indexedPaiements[$paiement->sapeur_id] = $paiement;
     }
 
@@ -101,24 +117,25 @@
       $last = $index + 1 === $nbEcritures;
       $nextEcriture = $last ? null : $ecritures[$index + 1];
 
-      $debutSapeur = $first || $previousEcriture->sapeur_id !== $ecriture->sapeur_id;
-      $debutSection = $debutSapeur || $previousEcriture->ecriture_categorie_id !== $ecriture->ecriture_categorie_id;
-      $debutIntervention = $debutSapeur || $previousEcriture->intervention_id !== $ecriture->intervention_id;
+      $debutSapeur = $first || intval($previousEcriture->sapeur_id) !== intval($ecriture->sapeur_id);
+      $debutSection = $debutSapeur || intval($previousEcriture->module) !== intval($ecriture->module);
+      $debutIntervention = $debutSapeur || intval($previousEcriture->intervention_id) !== intval($ecriture->intervention_id);
 
-      $finSapeur = $last || $nextEcriture->sapeur_id !== $ecriture->sapeur_id;
-      $finSection = $finSapeur || $nextEcriture->ecriture_categorie_id !== $ecriture->ecriture_categorie_id;
-      $finIntervention = $finSection || $nextEcriture->intervention_id !== $ecriture->intervention_id;
+      $finSapeur = $last || intval($nextEcriture->sapeur_id) !== intval($ecriture->sapeur_id);
+      $finSection = $finSapeur || intval($nextEcriture->module) !== intval($ecriture->module);
+      $finIntervention = $finSection || intval($nextEcriture->intervention_id) !== intval($ecriture->intervention_id);
 
       $categorieSousTotal = $debutSection ? 0.0 : $categorieSousTotal;
       $categorieSousTotal += $ecriture->total;
       $interventionSousTotal = $debutIntervention ? 0.0 : $interventionSousTotal;
       $interventionSousTotal += $ecriture->total;
 
-      if ($debutSapeur){
-        $sapeurTotal = 0.0;
+      if ($comptes[$ecriture->compte_id]->produit) {
+        $sapeurTotal -= $ecriture->total;
+      } else {
+        $sapeurTotal += $ecriture->total;
       }
-      // TODO: Gérer les amendes ainsi que les 
-      $sapeurTotal += $ecriture->total;
+
     ?>
     @if ($debutSapeur)
       <h1 class="text-center">Décompte de frais</h1>
@@ -136,7 +153,7 @@
     @endif
 
     @if ($debutSection)
-      <h2>{{ $ecriture->categorie }}</h2>
+      <h2>{{ sectionTitle($ecriture) }}</h2>
       <table class="table table-sm table-striped table-bordered">
     @endif
 
@@ -313,7 +330,7 @@
         </div>
         <div class="row">
           <div class="col-9"></div>
-          <div class="col-2 p-1">Déjà soldé + Amende</div>
+          <div class="col-2 p-1">Déjà soldé</div>
           <div class="col-1 text-end p-1 border border-secondary border-bottom-0">
             {{ formatNumber($sapeurTotal - $paiement->total) }}
           </div>
