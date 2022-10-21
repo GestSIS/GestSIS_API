@@ -21,9 +21,9 @@ class MatPersoAlerteTypeController extends Controller
      */
     public function index()
     {
-        $types = $this->service->alertes();
+        $alertes = $this->service->alertes();
 
-        return response()->json(['data' => $types]);
+        return response()->json(['data' => $alertes]);
     }
 
     public function store(Request $request)

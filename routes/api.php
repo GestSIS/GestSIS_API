@@ -61,6 +61,9 @@ use App\Application\Http\Controllers\JustificatifController;
 use App\Application\Http\Controllers\LocaliteController;
 use App\Application\Http\Controllers\LocaliteSisController;
 use App\Application\Http\Controllers\MaterielController;
+use App\Application\Http\Controllers\MatPersoAlerteController;
+use App\Application\Http\Controllers\MatPersoAlerteTypeController;
+use App\Application\Http\Controllers\MatPersoController;
 use App\Application\Http\Controllers\MatPersoEventTypeController;
 use App\Application\Http\Controllers\MedecinController;
 use App\Application\Http\Controllers\MissionTypeController;
@@ -129,6 +132,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('sapeurs.fonctions', SapeurFonctionController::class)->only(['index']);
         Route::resource('sapeurs.grades', SapeurGradeController::class)->only(['index']);
         Route::resource('sapeurs.mutations', SapeurMutationController::class)->only(['index']);
+        Route::resource('sapeurs.materiels', SapeurMaterielController::class)->only(['index']);
         Route::resource('sapeurs.cours', SapeurCoursController::class)->only(['index']);
         Route::resource('sapeurs.photo', SapeurPhotoController::class)->only(['index']);
 
@@ -464,6 +468,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('mat-perso-types', MatPersoTypeController::class)->only(['index']);
         Route::resource('mat-perso-event-types', MatPersoEventTypeController::class)->only(['index']);
         Route::resource('mat-perso-alerte-types', MatPersoAlerteTypeController::class)->only(['index']);
+
+        Route::get('mat-perso/a-recuperer', [MatPersoController::class, 'aRecuperer'])->name('matperso.a-recuperer');
+        Route::resource('mat-perso-alertes', MatPersoAlerteController::class)->only(['index']);
     });
 
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.modification'], function () {

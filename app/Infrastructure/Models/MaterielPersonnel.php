@@ -10,7 +10,12 @@ class MaterielPersonnel extends Model
     use HasFactory;
 
     protected $fillable = ['taille', 'remarque', 'attribution', 'retour', 'sapeur_id'];
-    protected $casts = ['attribution' => 'datetime', 'retour' => 'datetime', 'sapeur_id' => 'integer'];
+    protected $casts = ['sapeur_id' => 'integer'];
+
+    public function sapeur()
+    {
+        return $this->belongsTo(Sapeur::class);
+    }
 
     public function materiel()
     {

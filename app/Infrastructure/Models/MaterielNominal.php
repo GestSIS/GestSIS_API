@@ -9,7 +9,7 @@ class MaterielNominal extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['uuid', 'numero', 'achat', 'remarque'];
+    protected $fillable = ['uuid', 'numero', 'achat'];
     protected $casts = ['achat' => 'datetime'];
 
     public function materiel()

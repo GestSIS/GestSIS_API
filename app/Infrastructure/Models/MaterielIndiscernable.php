@@ -9,7 +9,7 @@ class MaterielIndiscernable extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['remarque', 'quantite'];
+    protected $fillable = ['quantite'];
     protected $casts = ['quantite' => 'integer'];
 
     public function materiel()

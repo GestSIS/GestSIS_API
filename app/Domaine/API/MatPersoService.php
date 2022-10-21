@@ -8,6 +8,8 @@ use App\Domaine\Business\MatPersoBusiness;
 use App\Domaine\Business\MatPersoParamBusiness;
 use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\SPI\InterventionRepository;
+use App\Infrastructure\Models\MaterielAlerte;
+use App\Infrastructure\Models\MaterielPersonnel;
 use App\Infrastructure\Models\Sapeur;
 use Exception;
 use Illuminate\Support\Facades\Http;
@@ -19,6 +21,16 @@ class MatPersoService
     public function __construct(MatPersoBusiness $business)
     {
         $this->business = $business;
+    }
+
+    public function aRecuperer()
+    {
+        return MaterielPersonnel::whereHas('sapeur', fn ($q) => $q->where('actif', '=', false))->with('materiel')->get();
+    }
+
+    public function alertes()
+    {
+        return MaterielAlerte::with('materiel')->with('materiel')->get();
     }
 
     // public function categories()

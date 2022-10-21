@@ -41,8 +41,8 @@ class ModuleMateriel extends Migration
             $table->string('taille')->default('');
             $table->string('remarque')->default('');
 
-            $table->dateTime('attribution')->nullable()->default(null);
-            $table->dateTime('retour')->nullable()->default(null);
+            $table->date('attribution')->nullable()->default(null);
+            $table->date('retour')->nullable()->default(null);
 
             $table->unsignedBigInteger('sapeur_id')->nullable()->default(null);
             $table->foreign('sapeur_id')->references('id')->on('sapeurs');
