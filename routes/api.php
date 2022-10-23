@@ -394,7 +394,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('decomptes/creer-sapeur', [DecompteController::class, 'creerSapeur']);
         Route::post('decomptes/creer-exercice', [DecompteController::class, 'creerExercice']);
         Route::get('decomptes/exercice-comptable/{id}', [DecompteController::class, 'getByExerciceComptable']);
-        Route::get('decomptes/{id}/iso20022', 'DecompteController@iso20022');
+        Route::get('decomptes/{id}/iso20022', [DecompteController::class, 'iso20022']);
+        Route::get('decomptes/{id}/a-facturer', [DecompteController::class, 'aFacturer']);
         Route::get('decomptes/{id}/print', [DecompteController::class, 'print']);
         Route::get('decomptes/{id}/print-par-sapeur', [DecompteController::class, 'printParSapeur']);
         Route::get('decomptes/{id}/print-par-compte', [DecompteController::class, 'printParCompte']);
