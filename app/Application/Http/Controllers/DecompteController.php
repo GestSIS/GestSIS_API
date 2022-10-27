@@ -144,6 +144,16 @@ class DecompteController extends Controller
     }
 
     /**
+     * Créer un fichier iso20022 pour un décompte
+     * 
+     * @param int $id id du décompte pour lequelle le fichier doit être créé
+     */
+    public function aFacturer($decompteId)
+    {
+        return $this->service->decompteMontantsAFacturer($decompteId);
+    }
+
+    /**
      * Retourne un décompte
      * 
      * @param int $id id du décompte souhaité

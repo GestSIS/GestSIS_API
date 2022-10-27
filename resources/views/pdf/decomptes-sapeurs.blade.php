@@ -96,10 +96,6 @@
     $last = false;
     $nbEcritures = count($ecritures);
 
-    $categorieSousTotal = 0.0;
-    $interventionSousTotal = 0.0;
-    $sapeurTotal = 0.0;
-    $sapeurTotalAvs = 0.0;
     $sapeurId = null;
     $paiement = null;
 
@@ -110,6 +106,11 @@
 
     foreach ($ecritures as $index => $ecriture) {
       if ($sapeurId == null || $sapeurId != $ecriture->sapeur_id) {
+        $categorieSousTotal = 0.0;
+        $interventionSousTotal = 0.0;
+        $sapeurTotal = 0.0;
+        $sapeurTotalAvs = 0.0;
+        
         $sapeurId = $ecriture->sapeur_id;
         $paiement = $indexedPaiements[$ecriture->sapeur_id];
       }

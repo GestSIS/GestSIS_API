@@ -6,6 +6,7 @@ namespace App\Domaine\API;
 use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Business\PaiementBusiness;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Collections\AFacturerExport;
 use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\Decompte;
@@ -15,6 +16,7 @@ use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\SisParam;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PaiementService
 {
@@ -153,6 +155,11 @@ class PaiementService
         }
 
         return View('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
+    }
+
+    public function decompteMontantsAFacturer($decompteId)
+    {
+        return Excel::download(new AFacturerExport($decompteId), 'a_facturer.xlsx');
     }
 
     public function impressionDecompteParSapeur($decompteId)
