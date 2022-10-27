@@ -462,7 +462,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
 
-
     // Matériel personnel
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.lecture'], function () {
         Route::resource('mat-perso-categories', MatPersoCategorieController::class)->only(['index']);
@@ -470,7 +469,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('mat-perso-event-types', MatPersoEventTypeController::class)->only(['index']);
         Route::resource('mat-perso-alerte-types', MatPersoAlerteTypeController::class)->only(['index']);
 
-        Route::get('mat-perso/a-recuperer', [MatPersoController::class, 'aRecuperer'])->name('matperso.a-recuperer');
+        Route::resource('mat-perso', MatPersoController::class)->only(['index']);
+        Route::get('mat-perso/a-recuperer', [MatPersoController::class, 'aRecuperer'])->name('mat-perso.a-recuperer');
         Route::resource('mat-perso-alertes', MatPersoAlerteController::class)->only(['index']);
     });
 

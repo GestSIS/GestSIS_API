@@ -17,16 +17,16 @@ class MatPersoTableSeeder extends Seeder
     public function run()
     {
         $materiels = array(
-            array('id' => 1, 'taille' => 'XL', 'remarque' => '', 'sapeur_id' => 1, 'attribution' => '2014-01-01', 'retour' => '2022-01-12', 'materiel_type_id' => 1, 'materiel_type' => MaterielNominal::class, 'materiel_id' => 1),
-            array('id' => 2, 'taille' => 'XS', 'remarque' => '', 'sapeur_id' => 1, 'attribution' => '2014-01-01', 'retour' => null, 'materiel_type_id' => 1, 'materiel_type' => MaterielNominal::class, 'materiel_id' => 2),
-            array('id' => 3, 'taille' => 'L', 'remarque' => '', 'sapeur_id' => 2, 'attribution' => '2014-01-01', 'retour' => null, 'materiel_type_id' => 1, 'materiel_type' => MaterielNominal::class, 'materiel_id' => 3),
-            array('id' => 4, 'taille' => 'M', 'remarque' => '', 'sapeur_id' => null, 'attribution' => null, 'retour' => null, 'materiel_type_id' => 1, 'materiel_type' => MaterielNominal::class, 'materiel_id' => 4),
-            array('id' => 5, 'taille' => 'S', 'remarque' => '', 'sapeur_id' => null, 'attribution' => null, 'retour' => null, 'materiel_type_id' => 1, 'materiel_type' => MaterielNominal::class, 'materiel_id' => 5),
+            array('id' => 1, 'taille' => 'XL', 'remarque' => '', 'sapeur_id' => 1, 'attribution' => '2014-01-01', 'retour' => '2022-01-12', 'materiel_type_id' => 2, 'materiel_type' => MaterielNominal::class, 'materiel_id' => 1),
+            array('id' => 2, 'taille' => 'XS', 'remarque' => '', 'sapeur_id' => 1, 'attribution' => '2014-01-01', 'retour' => null, 'materiel_type_id' => 4, 'materiel_type' => MaterielNominal::class, 'materiel_id' => 2),
+            array('id' => 3, 'taille' => 'L', 'remarque' => '', 'sapeur_id' => 2, 'attribution' => '2014-01-01', 'retour' => null, 'materiel_type_id' => 5, 'materiel_type' => MaterielNominal::class, 'materiel_id' => 3),
+            array('id' => 4, 'taille' => '', 'remarque' => '', 'sapeur_id' => null, 'attribution' => null, 'retour' => null, 'materiel_type_id' => 14, 'materiel_type' => MaterielNominal::class, 'materiel_id' => 4),
+            array('id' => 5, 'taille' => 'S', 'remarque' => '', 'sapeur_id' => null, 'attribution' => null, 'retour' => null, 'materiel_type_id' => 2, 'materiel_type' => MaterielNominal::class, 'materiel_id' => 5),
             array('id' => 6, 'taille' => 'XL', 'remarque' => '', 'sapeur_id' => 1, 'attribution' => '2014-01-01', 'retour' => null, 'materiel_type_id' => 1, 'materiel_type' => MaterielIndiscernable::class, 'materiel_id' => 1),
-            array('id' => 7, 'taille' => 'XS', 'remarque' => '', 'sapeur_id' => 2, 'attribution' => '2014-01-01', 'retour' => null, 'materiel_type_id' => 1, 'materiel_type' => MaterielIndiscernable::class, 'materiel_id' => 2),
+            array('id' => 7, 'taille' => 'XS', 'remarque' => '', 'sapeur_id' => 2, 'attribution' => '2014-01-01', 'retour' => null, 'materiel_type_id' => 3, 'materiel_type' => MaterielIndiscernable::class, 'materiel_id' => 2),
             array('id' => 8, 'taille' => 'S', 'remarque' => '', 'sapeur_id' => 3, 'attribution' => '2014-01-01', 'retour' => null, 'materiel_type_id' => 1, 'materiel_type' => MaterielIndiscernable::class, 'materiel_id' => 3),
             array('id' => 9, 'taille' => 'M', 'remarque' => '', 'sapeur_id' => null, 'attribution' => null, 'retour' => null, 'materiel_type_id' => 1, 'materiel_type' => MaterielIndiscernable::class, 'materiel_id' => 4),
-            array('id' => 10, 'taille' => 'L', 'remarque' => '', 'sapeur_id' => null, 'attribution' => null, 'retour' => null, 'materiel_type_id' => 1, 'materiel_type' => MaterielIndiscernable::class, 'materiel_id' => 5),
+            array('id' => 10, 'taille' => 'L', 'remarque' => '', 'sapeur_id' => null, 'attribution' => null, 'retour' => null, 'materiel_type_id' => 17, 'materiel_type' => MaterielIndiscernable::class, 'materiel_id' => 5),
         );
         DB::table('materiel_personnels')->insert($materiels);
 

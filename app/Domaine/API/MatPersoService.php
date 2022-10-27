@@ -23,6 +23,11 @@ class MatPersoService
         $this->business = $business;
     }
 
+    public function materiels()
+    {
+        return MaterielPersonnel::with('materiel')->get();
+    }
+
     public function aRecuperer()
     {
         return MaterielPersonnel::whereHas('sapeur', fn ($q) => $q->where('actif', '=', false))->with('materiel')->get();

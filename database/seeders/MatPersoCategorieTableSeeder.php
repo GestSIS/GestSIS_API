@@ -29,16 +29,16 @@ class MatPersoCategorieTableSeeder extends Seeder
         DB::table('materiel_categories')->insert($categories);
 
         $types = array(
-            array('id' => 1, 'designation' => 'Attente F1 + ceinture', 'materiel_categorie_id' => 7),
-            array('id' => 2, 'designation' => 'Feu', 'materiel_categorie_id' => 7),
-            array('id' => 3, 'designation' => 'Attente F1', 'materiel_categorie_id' => 8),
-            array('id' => 4, 'designation' => 'Feu', 'materiel_categorie_id' => 8),
+            array('id' => 1, 'designation' => 'Pantalon attente F1 + ceinture', 'materiel_categorie_id' => 7),
+            array('id' => 2, 'designation' => 'Pantalon feu', 'materiel_categorie_id' => 7),
+            array('id' => 3, 'designation' => 'Veste attente F1', 'materiel_categorie_id' => 8),
+            array('id' => 4, 'designation' => 'Veste feu', 'materiel_categorie_id' => 8),
             array('id' => 5, 'designation' => 'T-Shirt', 'materiel_categorie_id' => 9),
             array('id' => 6, 'designation' => 'Sweatshirt', 'materiel_categorie_id' => 9),
             array('id' => 7, 'designation' => 'Cagoule', 'materiel_categorie_id' => 10),
             array('id' => 8, 'designation' => 'Pull', 'materiel_categorie_id' => 10),
             array('id' => 9, 'designation' => 'Collants', 'materiel_categorie_id' => 10),
-            array('id' => 10, 'designation' => 'F1', 'materiel_categorie_id' => 2),
+            array('id' => 10, 'designation' => 'Casque F1', 'materiel_categorie_id' => 2),
             array('id' => 11, 'designation' => 'Bottes Haix', 'materiel_categorie_id' => 3),
             array('id' => 12, 'designation' => 'Anneau cousu + mousqueton', 'materiel_categorie_id' => 4),
             array('id' => 13, 'designation' => 'Cale caoutchouc', 'materiel_categorie_id' => 4),

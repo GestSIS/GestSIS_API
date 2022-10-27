@@ -19,10 +19,22 @@ class MatPersoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function index()
+    {
+        $materiels = $this->service->materiels();
+
+        return response()->json(['data' => $materiels]);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function aRecuperer()
     {
-        $types = $this->service->aRecuperer();
+        $materiels = $this->service->aRecuperer();
 
-        return response()->json(['data' => $types]);
+        return response()->json(['data' => $materiels]);
     }
 }
