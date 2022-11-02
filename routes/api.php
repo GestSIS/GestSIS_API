@@ -390,6 +390,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         // Décomptes
         Route::get('decomptes/{id}/ecritures', [DecompteController::class, 'ecritures']);
+        Route::post('decomptes/{id}/envoyer-sapeurs', [DecompteController::class, 'envoyer']);
         Route::post('decomptes/creer-annuel', [DecompteController::class, 'creerAnnuel']);
         Route::post('decomptes/creer-sapeur', [DecompteController::class, 'creerSapeur']);
         Route::post('decomptes/creer-exercice', [DecompteController::class, 'creerExercice']);
@@ -398,6 +399,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('decomptes/{id}/a-facturer', [DecompteController::class, 'aFacturer']);
         Route::get('decomptes/{id}/print', [DecompteController::class, 'print']);
         Route::get('decomptes/{id}/print-par-sapeur', [DecompteController::class, 'printParSapeur']);
+        Route::get('decomptes/{id}/print-par-sapeur/{sapeurId}', [DecompteController::class, 'printPourSapeur']);
         Route::get('decomptes/{id}/print-par-compte', [DecompteController::class, 'printParCompte']);
         Route::resource('decomptes', DecompteController::class)->only(['show', 'destroy']);
 

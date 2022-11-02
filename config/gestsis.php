@@ -3,13 +3,13 @@
 return [
 
   /*
-    |--------------------------------------------------------------------------
-    | APP Url
-    |--------------------------------------------------------------------------
-    |
-    | This value is the url of the APP, it will be used to generate the correct validation link URL
-    |
-    */
+   |--------------------------------------------------------------------------
+   | APP Url
+   |--------------------------------------------------------------------------
+   |
+   | These value represents URLs of used micro-services
+   |
+   */
   'alarm_url' => env('APP_GESTSIS_ALARM_URL', ''),
-
+  'print_url' => env('APP_GESTSIS_PRINT_URL', ''),
 ];

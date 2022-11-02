@@ -3,6 +3,7 @@
 
 namespace App\Domaine\API;
 
+use App\Application\Mail\DecompteSapeur as MailDecompteSapeur;
 use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Business\PaiementBusiness;
 use App\Domaine\Exceptions\ArrayException;
@@ -15,7 +16,10 @@ use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\SisParam;
+use Illuminate\Http\Client\Pool;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 
 class PaiementService
@@ -162,6 +166,62 @@ class PaiementService
         return Excel::download(new AFacturerExport($decompteId), 'a_facturer.xlsx');
     }
 
+    public function envoyerDecompteSapeurs($decompteId, $email, $texte, $sapeurIds, $token, $sisId)
+    {
+        // TODO: Checker que chaque sapeur est effectivement présent dans le décompte ?
+        $url = config('gestsis.print_url') . "/api/v1/print";
+
+        $responses = Http::pool(function (Pool $pool) use ($decompteId, $sapeurIds, $url, $token, $sisId) {
+            return collect($sapeurIds)
+                ->map(fn ($sapeurId) => $pool->withToken($token)->withHeaders(['Sis-Id' => $sisId])->get($url, [
+                    'url' => config('app.url') . "/api/v2/decomptes/" . $decompteId . "/print-par-sapeur/" . $sapeurId,
+                ]));
+        });
+
+        foreach ($sapeurIds as $index => $sapeurId) {
+            // return config('app.url') . "/api/v2/decomptes/" . $decompteId . "/print-par-sapeur/" . $sapeurId;
+            $sapeur = Sapeur::find($sapeurId);
+            return $responses[$index];
+            $pdf = $responses[$index];
+
+            // try {
+            $res = Mail::to($sapeur->email)->send(new MailDecompteSapeur($sapeur, $pdf));
+            return $res;
+            // } catch (Exception $e) {
+            //     return $e;
+            // }
+        }
+        return 'OK';
+    }
+
+    public function impressionDecompteSapeur($decompteId, $sapeurId)
+    {
+        // Pour le moment que les écritures du décompte !
+        $ecritures = DB::table('ecritures')
+            ->where('ecritures.sapeur_id', '=', $sapeurId)
+            ->where('ecritures.decompte_id', '=', $decompteId)
+            ->join('sapeurs', 'ecritures.sapeur_id', '=', 'sapeurs.id')
+            ->join('ecriture_categories', 'ecritures.ecriture_categorie_id', '=', 'ecriture_categories.id')
+            ->join('type_unites', 'ecritures.type_unite_id', '=', 'type_unites.id')
+            ->join('civilites', 'sapeurs.civilite_id', '=', 'civilites.id')
+            ->select(
+                'ecritures.*',
+                DB::raw('CONCAT(sapeurs.nom, " ", sapeurs.prenom) as sapeur'),
+                'sapeurs.iban',
+                'ecriture_categories.tri',
+                'ecriture_categories.designation AS categorie',
+                'type_unites.abreviation as unite',
+                'civilites.forme_politesse as civilite'
+            )
+            ->orderBy('sapeur')
+            ->orderBy('ecriture_categories.tri', 'ASC')
+            ->orderBy('ecritures.date')
+            ->orderBy('ecritures.heure')
+            ->get();
+
+        return $this->printDecompteSapeur($ecritures, $decompteId);
+    }
+
     public function impressionDecompteParSapeur($decompteId)
     {
         // Pour le moment que les écritures du décompte !
@@ -186,6 +246,11 @@ class PaiementService
             ->orderBy('ecritures.heure')
             ->get();
 
+        return $this->printDecompteSapeur($ecritures, $decompteId);
+    }
+
+    private function printDecompteSapeur($ecritures, $decompteId)
+    {
         $decompte = Decompte::with('paiements')->find($decompteId);
         $decomptes = Decompte::where('exercice_comptable_id', $decompte->exercice_comptable_id)->get();
         $decomptesMap = [];

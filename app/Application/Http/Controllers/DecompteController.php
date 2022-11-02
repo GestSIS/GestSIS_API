@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Domaine\API\PaiementService;
 use App\Domaine\Exceptions\ArrayException;
+use Exception;
 
 class DecompteController extends Controller
 {
@@ -84,6 +85,32 @@ class DecompteController extends Controller
         return response()->json(['data' => $decompte]);
     }
 
+    /**
+     * Envoie le décompte à chaque sapeur par email
+     * 
+     * @param int $decompteId - id de l'exercice comptable pour lequel créer les paiements
+     * @param email $email - email pour la réponse
+     * @param boolean $texte - texte de l'email
+     */
+    public function envoyer(Request $request, $decompteId)
+    {
+        $data = $request->validate([
+            'email' => 'required|email',
+            'texte' => 'required|string|min:1',
+            'sapeurIds.*' => 'required|integer'
+        ]);
+        $token = null;
+        try {
+            $token = $request->bearerToken();
+            $sisId = $request->header('Sis-Id', '');
+        } catch (Exception $e) {
+            return response()->json(["error" => "Accès refusé"], 401);
+        }
+
+        $result = $this->service->envoyerDecompteSapeurs($decompteId, $data['email'], $data['texte'], $data['sapeurIds'], $token, $sisId);
+        return response()->json(['data' => $result]);
+    }
+
     public function ecritures(Int $decompteId)
     {
         $ecritures = $this->service->getEcrituresPourDecompte($decompteId);
@@ -124,13 +151,23 @@ class DecompteController extends Controller
     }
 
     /**
-     * Créer un fichier iso20022 pour un décompte
+     * Retourne un décompte pour tous les sapeurs
      * 
      * @param int $id id du décompte pour lequelle le fichier doit être créé
      */
-    public function printParSapeur($exerciceComptableId)
+    public function printParSapeur($decompteId)
     {
-        return $this->service->impressionDecompteParSapeur($exerciceComptableId);
+        return $this->service->impressionDecompteParSapeur($decompteId);
+    }
+
+    /**
+     * Retourne un décompte pour 1 sapeur
+     * 
+     * @param int $id id du décompte pour lequelle le fichier doit être créé
+     */
+    public function printPourSapeur($decompteId, $sapeurId)
+    {
+        return $this->service->impressionDecompteSapeur($decompteId, $sapeurId);
     }
 
     /**
