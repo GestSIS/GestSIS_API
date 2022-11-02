@@ -23,13 +23,13 @@ class MatPersoBusiness
             // Load matériel type
 
             // TODO Check si matériel numéroté
-            if ($attribution->quantite === null) {
+            if ($attribution['quantite'] === null) {
                 // Update matériel existant
                 MaterielPersonnel::where('id', '=', $attribution['id'])
                     ->update([
                         'retour' => null,
                         'attribution' => $attribution['date'],
-                        'sapeur_id' => $attribution['sapeurId']
+                        'sapeur_id' => $attribution['sapeur_id']
                     ]);
             } else {
                 $materielReference = MaterielPersonnel::with('materiel')->find($attribution['id']);
@@ -37,18 +37,18 @@ class MatPersoBusiness
 
                 // Ajout du matériel au sapeur
                 $newGenerique = new MaterielGenerique();
-                $newGenerique->update(['quantite' => $attribution['quantite']]);
+                $newGenerique->fill(['quantite' => $attribution['quantite']]);
                 $newGenerique->save();
 
                 $newMateriel = new MaterielPersonnel();
-                $newMateriel->update([
+                $newMateriel->fill([
                     'attribution' => $attribution['date'],
                     'retour' => null,
                     'remarque' => '',
-                    'sapeur_id' => $attribution['sapeurId'],
+                    'sapeur_id' => $attribution['sapeur_id'],
                     'taille' => $materielReference->taille,
-                    'materiel_type_id' => $materielReference->materiel_type_id,
                 ]);
+                $newMateriel->materiel_type_id = $materielReference->materiel_type_id;
                 $newMateriel->materiel_id = $newGenerique->id;
                 $newMateriel->materiel_type = MaterielGenerique::class;
                 $newMateriel->save();

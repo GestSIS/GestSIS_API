@@ -22,13 +22,13 @@ class MatPersoAttributionController extends Controller
     public function attribuer(Request $request)
     {
         $data = $request->validate([
-            'materiel.*.sapeurId' => 'required|integer',
-            'materiel.*.date' => 'required|date',
-            'materiel.*.id' => 'required|integer',
-            'materiel.*.quantite' => 'nullable|integer',
+            'attributions.*.sapeur_id' => 'required|integer',
+            'attributions.*.date' => 'required|date',
+            'attributions.*.id' => 'required|integer',
+            'attributions.*.quantite' => 'nullable|integer|min:1',
         ]);
 
-        $materiels = $this->service->attribuer($data['materiel']);
+        $materiels = $this->service->attribuer($data['attributions']);
 
         return response()->json(['data' => $materiels]);
     }
@@ -45,7 +45,7 @@ class MatPersoAttributionController extends Controller
             'materielIds' => 'string|min:1|max:11',
         ]);
 
-        $materiels = $this->service->materiels();
+        $materiels = $this->service->retour($data['date'], $data['materielIds']);
 
         return response()->json(['data' => $materiels]);
     }

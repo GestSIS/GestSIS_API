@@ -40,12 +40,14 @@ class MatPersoService
 
     public function attribuer($materiels)
     {
-        return $this->business->attribuer($materiels);
+        $this->business->attribuer($materiels);
+        return $this->materiels();
     }
 
-    public function retour($materiels)
+    public function retour($date, $materielIds)
     {
-        return $this->business->retour($materiels);
+        $this->business->retour($date, $materielIds);
+        return $this->materiels();
     }
 
     // public function modifierCategorie($id, $data)

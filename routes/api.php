@@ -63,6 +63,7 @@ use App\Application\Http\Controllers\LocaliteSisController;
 use App\Application\Http\Controllers\MaterielController;
 use App\Application\Http\Controllers\MatPersoAlerteController;
 use App\Application\Http\Controllers\MatPersoAlerteTypeController;
+use App\Application\Http\Controllers\MatPersoAttributionController;
 use App\Application\Http\Controllers\MatPersoController;
 use App\Application\Http\Controllers\MatPersoEventTypeController;
 use App\Application\Http\Controllers\MedecinController;
@@ -476,7 +477,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.modification'], function () {
         Route::post('mat-perso/attribuer', [MatPersoAttributionController::class, 'attribuer'])->name('mat-perso.attribuer');
-        // Route::resource('sapeurs', SapeurController::class)->only(['store', 'update']);
+        Route::post('mat-perso/retour', [MatPersoAttributionController::class, 'retour'])->name('mat-perso.retour');
     });
 
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.config'], function () {
