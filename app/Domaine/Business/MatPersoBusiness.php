@@ -64,10 +64,10 @@ class MatPersoBusiness
 
     public function retour($date, $materielIds)
     {
-        MaterielPersonnel::whereIn($materielIds)->update(['retour' => $date]);
+        MaterielPersonnel::whereIn('id', $materielIds)->update(['retour' => $date]);
 
         // Fetch matériel générique à remettre en stock
-        $materiels = MaterielPersonnel::with('materiel')->whereIn($materielIds)->where('materiel_type', '=', MaterielGenerique::class)->get();
+        $materiels = MaterielPersonnel::with('materiel')->whereIn('id', $materielIds)->where('materiel_type', '=', MaterielGenerique::class)->get();
 
         // Iterate sur le matériel
         foreach ($materiels as $materiel) {

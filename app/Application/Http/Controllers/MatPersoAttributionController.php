@@ -42,7 +42,7 @@ class MatPersoAttributionController extends Controller
     {
         $data = $request->validate([
             'date' => 'required|date',
-            'materielIds' => 'string|min:1|max:11',
+            'materielIds.*' => 'integer|min:1',
         ]);
 
         $materiels = $this->service->retour($data['date'], $data['materielIds']);
