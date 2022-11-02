@@ -5,7 +5,7 @@ namespace App\Infrastructure\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MaterielIndiscernable extends Model
+class MaterielGenerique extends Model
 {
     use HasFactory;
 

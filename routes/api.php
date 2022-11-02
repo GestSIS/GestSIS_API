@@ -475,6 +475,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.modification'], function () {
+        Route::post('mat-perso/attribuer', [MatPersoAttributionController::class, 'attribuer'])->name('mat-perso.attribuer');
         // Route::resource('sapeurs', SapeurController::class)->only(['store', 'update']);
     });
 

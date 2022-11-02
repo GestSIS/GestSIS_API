@@ -65,7 +65,7 @@ class ModuleMateriel extends Migration
             $table->string('achat');
         });
 
-        Schema::create('materiel_indiscernables', function (Blueprint $table) {
+        Schema::create('materiel_generiques', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
@@ -158,7 +158,8 @@ class ModuleMateriel extends Migration
         Schema::dropIfExists('materiel_event_type_pour');
         Schema::dropIfExists('materiel_events');
         Schema::dropIfExists('materiel_event_types');
-        Schema::dropIfExists('materiel_indiscernables');
+        Schema::dropIfExists('materiel_indiscernables'); // TODO: à supprimer une fois déployer
+        Schema::dropIfExists('materiel_generiques');
         Schema::dropIfExists('materiel_alertes');
         Schema::dropIfExists('materiel_nominals');
         Schema::dropIfExists('materiel_personnels');

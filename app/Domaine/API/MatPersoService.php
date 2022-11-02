@@ -38,15 +38,15 @@ class MatPersoService
         return MaterielAlerte::with('materiel')->with('materiel')->get();
     }
 
-    // public function categories()
-    // {
-    //     return ExerciceCategorie::all();
-    // }
+    public function attribuer($materiels)
+    {
+        return $this->business->attribuer($materiels);
+    }
 
-    // public function ajouterCategorie($data)
-    // {
-    //     return $this->business->ajouterCategorie($data);
-    // }
+    public function retour($materiels)
+    {
+        return $this->business->retour($materiels);
+    }
 
     // public function modifierCategorie($id, $data)
     // {
