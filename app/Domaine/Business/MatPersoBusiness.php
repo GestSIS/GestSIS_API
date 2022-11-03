@@ -2,6 +2,7 @@
 
 namespace App\Domaine\Business;
 
+use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\MaterielGenerique;
 use App\Infrastructure\Models\MaterielPersonnel;
 
@@ -76,7 +77,9 @@ class MatPersoBusiness
                 ->where('materiel_type_id', '=', $materiel->materiel_type_id)
                 ->where('taille', '=', $materiel->taille)
                 ->where('sapeur_id', '=', null)
+                ->where('materiel_type', '=', MaterielGenerique::class)
                 ->first();
+
             if ($mat != null) {
                 MaterielGenerique::where('id', '=', $mat->materiel->id)->update(['quantite' => $mat->materiel->quantite + $materiel->materiel->quantite]);
             } else {
