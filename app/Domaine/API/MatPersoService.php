@@ -30,7 +30,7 @@ class MatPersoService
 
     public function aRecuperer()
     {
-        return MaterielPersonnel::whereHas('sapeur', fn ($q) => $q->where('actif', '=', false))->with('materiel')->get();
+        return MaterielPersonnel::where('retour', '=', null)->whereHas('sapeur', fn ($q) => $q->where('actif', '=', false))->with('materiel')->get();
     }
 
     public function alertes()
