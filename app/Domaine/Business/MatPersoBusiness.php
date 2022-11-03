@@ -82,18 +82,18 @@ class MatPersoBusiness
             } else {
                 // Ajout du matériel au sapeur
                 $newGenerique = new MaterielGenerique();
-                $newGenerique->update(['quantite' => $materiel->materiel->quantite]);
+                $newGenerique->fill(['quantite' => $materiel->materiel->quantite]);
                 $newGenerique->save();
 
                 $newMateriel = new MaterielPersonnel();
-                $newMateriel->update([
+                $newMateriel->fill([
                     'taille' => $materiel->taille,
-                    'materiel_type_id' => $materiel->materiel_type_id,
                     'remarque' => '',
                     'sapeur_id' => null,
                     'attribution' => null,
                     'retour' => null,
                 ]);
+                $newMateriel->materiel_type_id = $materiel->materiel_type_id;
                 $newMateriel->materiel_id = $newGenerique->id;
                 $newMateriel->materiel_type = MaterielGenerique::class;
                 $newMateriel->save();
