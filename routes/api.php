@@ -242,9 +242,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     Route::group(['middleware' => 'jwtTokenRole:exercice.modification'], function () {
         Route::resource('exercices', ExerciceController::class)->only(['store', 'update']);
+        Route::get('sapeurs-convocation', [SapeurController::class, 'convocationSms'])->name('sapeurs-convocation');
+
+        // TODO: Nouvelle permission SMS
         Route::post('aspsms/send', [AspsmsController::class, 'send'])->name('aspsms-send');
         Route::get('aspsms/credit', [AspsmsController::class, 'credit'])->name('credit');
-        Route::get('sapeurs-convocation', [SapeurController::class, 'convocationSms'])->name('sapeurs-convocation');
     });
 
     Route::group(['middleware' => 'jwtTokenRole:exercice.validation'], function () {

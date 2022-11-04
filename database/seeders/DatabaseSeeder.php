@@ -90,7 +90,7 @@ class DatabaseSeeder extends Seeder
         $this->call(MatPersoEventTypeTableSeeder::class);
         $this->call(MatPersoAlerteTypeTableSeeder::class);
 
-        $this->call(MatPersoTableSeeder::class);
+        // $this->call(MatPersoTableSeeder::class);
         /**/
     }
 }
