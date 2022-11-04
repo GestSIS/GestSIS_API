@@ -158,7 +158,6 @@ class ModuleMateriel extends Migration
         Schema::dropIfExists('materiel_event_type_pour');
         Schema::dropIfExists('materiel_events');
         Schema::dropIfExists('materiel_event_types');
-        Schema::dropIfExists('materiel_indiscernables'); // TODO: à supprimer une fois déployer
         Schema::dropIfExists('materiel_generiques');
         Schema::dropIfExists('materiel_alertes');
         Schema::dropIfExists('materiel_nominals');

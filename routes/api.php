@@ -478,6 +478,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.modification'], function () {
         Route::post('mat-perso/attribuer', [MatPersoAttributionController::class, 'attribuer'])->name('mat-perso.attribuer');
         Route::post('mat-perso/retour', [MatPersoAttributionController::class, 'retour'])->name('mat-perso.retour');
+
+        // Modifier matériel
+        Route::post('mat-perso', [MatPersoController::class, 'create'])->name('mat-perso.create');
+        Route::put('mat-perso', [MatPersoController::class, 'update'])->name('mat-perso.update');
+        Route::delete('mat-perso', [MatPersoController::class, 'drestroy'])->name('mat-perso.drestroy');
     });
 
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.config'], function () {

@@ -2,12 +2,101 @@
 
 namespace App\Domaine\Business;
 
-use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\MaterielGenerique;
+use App\Infrastructure\Models\MaterielNominal;
 use App\Infrastructure\Models\MaterielPersonnel;
 
 class MatPersoBusiness
 {
+    public function create($materiels)
+    {
+        $base = [];
+
+        foreach ($materiels as $materiel) {
+            if ($materiel['materiel']['quantite'] != null) {
+                $generique = new MaterielGenerique();
+                $generique->numero = $materiel['numero'];
+                $generique->uuid = uniqid($materiel['materiel_type_id'] . "-");
+                $generique->save();
+
+                array_push($base, [
+                    'materiel_type_id' => $materiel['materiel_type_id'],
+                    'materiel_type' => MaterielGenerique::class,
+                    'materiel_id' => $generique->id,
+                    'taille' => $materiel['taille'] ?? '',
+                    'remarque' => $materiel['remarque'] ?? '',
+                    'sapeur_id' => null,
+                    'attribution' => null,
+                    'retour' => null,
+                ]);
+            } else {
+                $nominal = new MaterielNominal();
+                $nominal->quantite = $materiel['quantite'];
+                $nominal->save();
+
+                array_push($base, [
+                    'materiel_type_id' => $materiel['materiel_type_id'],
+                    'materiel_type' => MaterielNominal::class,
+                    'materiel_id' => $nominal->id,
+                    'taille' => $materiel['taille'] ?? '',
+                    'remarque' => $materiel['remarque'] ?? '',
+                    'sapeur_id' => null,
+                    'attribution' => null,
+                    'retour' => null,
+                ]);
+            }
+        }
+
+        MaterielPersonnel::insert($base);
+    }
+
+    public function update($materiels)
+    {
+        $materielIds = [];
+        $indexedMateriel = [];
+        foreach ($materiels as $materiel) {
+            array_push($materielIds, $materiel['id']);
+            $indexedMateriel[$materiel['id']] = $materiel;
+        }
+
+        $references = MaterielPersonnel::whereIn('id', $materielIds)->get();
+        foreach ($references as $reference) {
+            $materiel = $indexedMateriel[$reference->id];
+            MaterielPersonnel::where('id', $reference['id'])->update([
+                'taille' => $materiel['taille'] ?? '',
+                'remarque' => $materiel['remarque'] ?? '',
+            ]);
+            if ($reference->materiel_type === MaterielGenerique::class) {
+                MaterielGenerique::where('id', $reference->materiel_id)->update([
+                    'quantite' => $materiel['materiel']['quantite'] ?? '',
+                ]);
+            } else {
+                MaterielNominal::where('id', $reference->materiel_id)->update([
+                    'numero' => $materiel['materiel']['numero'] ?? '',
+                    'achat' => $materiel['materiel']['achat'] ?? '',
+                ]);
+            }
+        }
+    }
+
+    public function delete($materielIds)
+    {
+        $materiels = MaterielPersonnel::whereIn('id', $materielIds)->get();
+        $generiqueIds = [];
+        $nominalIds = [];
+        foreach ($materiels as $materiel) {
+            if ($materiel->materiel_type === MaterielGenerique::class) {
+                array_push($generiqueIds, $materiel->materiel_id);
+            } else {
+                array_push($nominalIds, $materiel->materiel_id);
+            }
+        }
+
+        MaterielPersonnel::whereIn('id', $materielIds)->delete();
+        MaterielNominal::whereIn('id', $nominalIds)->delete();
+        MaterielGenerique::whereIn('id', $generiqueIds)->delete();
+    }
+
     public function attribuer($attributions)
     {
         // Fetch matériel à attribuer

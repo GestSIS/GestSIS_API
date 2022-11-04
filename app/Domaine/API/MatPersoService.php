@@ -38,6 +38,24 @@ class MatPersoService
         return MaterielAlerte::with('materiel')->with('materiel')->get();
     }
 
+    public function create($materiels)
+    {
+        $this->business->create($materiels);
+        return $this->materiels();
+    }
+
+    public function update($materiels)
+    {
+        $this->business->update($materiels);
+        return $this->materiels();
+    }
+
+    public function delete($materiels)
+    {
+        $this->business->delete($materiels);
+        return $this->materiels();
+    }
+
     public function attribuer($materiels)
     {
         $this->business->attribuer($materiels);

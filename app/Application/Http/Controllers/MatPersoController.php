@@ -37,4 +37,64 @@ class MatPersoController extends Controller
 
         return response()->json(['data' => $materiels]);
     }
+
+    /**
+     * Créer un décompte
+     * 
+     * @param int $exerciceId - id de l'exercice
+     * @param date $date - date de la création du décompte
+     * @param boolean $deduction - true si les déduction doivent être faites sur ce paiement
+     */
+    public function create(Request $request)
+    {
+        $data = $request->validate([
+            'materiels.*.taille' => 'string|nullable',
+            'materiels.*.remarque' => 'string|nullable',
+            'materiels.*.materiel_type_id' => 'string|nullable',
+            'materiels.*.materiel.quantite' => 'integer|nullable',
+            'materiels.*.materiel.numero' => 'string|nullable',
+        ]);
+
+        $materiels = $this->service->create($data['materiels']);
+        return response()->json(['data' => $materiels]);
+    }
+
+    /**
+     * Créer un décompte
+     * 
+     * @param int $exerciceId - id de l'exercice
+     * @param date $date - date de la création du décompte
+     * @param boolean $deduction - true si les déduction doivent être faites sur ce paiement
+     */
+    public function update(Request $request)
+    {
+        $data = $request->validate([
+            'materiels.*.id' => 'required|integer',
+            'materiels.*.taille' => 'string|nullable',
+            'materiels.*.remarque' => 'string|nullable',
+            'materiels.*.materiel.id' => 'required|integer',
+            'materiels.*.materiel.quantite' => 'integer|nullable',
+            'materiels.*.materiel.numero' => 'string|nullable',
+        ]);
+
+        $materiels = $this->service->update($data['materiels']);
+        return response()->json(['data' => $materiels]);
+    }
+
+    /**
+     * Créer un décompte
+     * 
+     * @param int $exerciceId - id de l'exercice
+     * @param date $date - date de la création du décompte
+     * @param boolean $deduction - true si les déduction doivent être faites sur ce paiement
+     */
+    public function destroy(Request $request)
+    {
+        $data = $request->validate([
+            'materielsIds.*' => 'integer',
+        ]);
+
+        $materiels = $this->service->delete($data['materiels']);
+        return response()->json(['data' => $materiels]);
+    }
 }
