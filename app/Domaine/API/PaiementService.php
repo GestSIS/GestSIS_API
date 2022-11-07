@@ -3,7 +3,7 @@
 
 namespace App\Domaine\API;
 
-use App\Application\Mail\DecompteSapeur as MailDecompteSapeur;
+use App\Application\Mail\DecompteSapeur;
 use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Business\PaiementBusiness;
 use App\Domaine\Exceptions\ArrayException;
@@ -185,7 +185,7 @@ class PaiementService
             $pdf = $responses[$index];
 
             // try {
-            $res = Mail::to($sapeur->email)->send(new MailDecompteSapeur($sapeur, $pdf));
+            $res = Mail::to($sapeur->email)->send(new DecompteSapeur($sapeur, $pdf));
             return $res;
             // } catch (Exception $e) {
             //     return $e;
