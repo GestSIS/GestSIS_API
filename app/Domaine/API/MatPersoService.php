@@ -8,6 +8,8 @@ use App\Domaine\Business\MatPersoBusiness;
 use App\Domaine\Business\MatPersoParamBusiness;
 use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\SPI\InterventionRepository;
+use App\Infrastructure\Models\MaterielAlerte;
+use App\Infrastructure\Models\MaterielPersonnel;
 use App\Infrastructure\Models\Sapeur;
 use Exception;
 use Illuminate\Support\Facades\Http;
@@ -21,15 +23,50 @@ class MatPersoService
         $this->business = $business;
     }
 
-    // public function categories()
-    // {
-    //     return ExerciceCategorie::all();
-    // }
+    public function materiels()
+    {
+        return MaterielPersonnel::with('materiel')->get();
+    }
 
-    // public function ajouterCategorie($data)
-    // {
-    //     return $this->business->ajouterCategorie($data);
-    // }
+    public function aRecuperer()
+    {
+        return MaterielPersonnel::where('retour', '=', null)->whereHas('sapeur', fn ($q) => $q->where('actif', '=', false))->with('materiel')->get();
+    }
+
+    public function alertes()
+    {
+        return MaterielAlerte::with('materiel')->with('materiel')->get();
+    }
+
+    public function create($materiels)
+    {
+        $this->business->create($materiels);
+        return $this->materiels();
+    }
+
+    public function update($materiels)
+    {
+        $this->business->update($materiels);
+        return $this->materiels();
+    }
+
+    public function delete($materiels)
+    {
+        $this->business->delete($materiels);
+        return $this->materiels();
+    }
+
+    public function attribuer($materiels)
+    {
+        $this->business->attribuer($materiels);
+        return $this->materiels();
+    }
+
+    public function retour($date, $materielIds)
+    {
+        $this->business->retour($date, $materielIds);
+        return $this->materiels();
+    }
 
     // public function modifierCategorie($id, $data)
     // {

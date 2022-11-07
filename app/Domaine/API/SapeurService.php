@@ -5,6 +5,7 @@ namespace App\Domaine\API;
 use App\Domaine\Business\SapeurBusiness;
 use App\Domaine\SPI\ControleMedicalRepository;
 use App\Domaine\SPI\SapeurRepository;
+use App\Infrastructure\Models\MaterielPersonnel;
 use App\Infrastructure\Models\Sapeur;
 use Illuminate\Support\Facades\Storage;
 
@@ -86,6 +87,11 @@ class SapeurService
     public function getSapeurControlesMedicauxById(int $sapeurId)
     {
         return $this->repositoryControles->getSapeurControlesMedicauxById($sapeurId);
+    }
+
+    public function getSapeurMaterielsById(int $sapeurId)
+    {
+        return MaterielPersonnel::with('materiel')->where('sapeur_id', '=', $sapeurId)->get()->toArray();
     }
 
     private static $ALLOWED_PHOTO_EXTENSION = ['jpg', 'jpeg', 'png'];

@@ -41,8 +41,8 @@ class ModuleMateriel extends Migration
             $table->string('taille')->default('');
             $table->string('remarque')->default('');
 
-            $table->dateTime('attribution')->nullable()->default(null);
-            $table->dateTime('retour')->nullable()->default(null);
+            $table->date('attribution')->nullable()->default(null);
+            $table->date('retour')->nullable()->default(null);
 
             $table->unsignedBigInteger('sapeur_id')->nullable()->default(null);
             $table->foreign('sapeur_id')->references('id')->on('sapeurs');
@@ -65,7 +65,7 @@ class ModuleMateriel extends Migration
             $table->string('achat');
         });
 
-        Schema::create('materiel_indiscernables', function (Blueprint $table) {
+        Schema::create('materiel_generiques', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
@@ -158,7 +158,7 @@ class ModuleMateriel extends Migration
         Schema::dropIfExists('materiel_event_type_pour');
         Schema::dropIfExists('materiel_events');
         Schema::dropIfExists('materiel_event_types');
-        Schema::dropIfExists('materiel_indiscernables');
+        Schema::dropIfExists('materiel_generiques');
         Schema::dropIfExists('materiel_alertes');
         Schema::dropIfExists('materiel_nominals');
         Schema::dropIfExists('materiel_personnels');

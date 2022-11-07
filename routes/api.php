@@ -61,6 +61,10 @@ use App\Application\Http\Controllers\JustificatifController;
 use App\Application\Http\Controllers\LocaliteController;
 use App\Application\Http\Controllers\LocaliteSisController;
 use App\Application\Http\Controllers\MaterielController;
+use App\Application\Http\Controllers\MatPersoAlerteController;
+use App\Application\Http\Controllers\MatPersoAlerteTypeController;
+use App\Application\Http\Controllers\MatPersoAttributionController;
+use App\Application\Http\Controllers\MatPersoController;
 use App\Application\Http\Controllers\MatPersoEventTypeController;
 use App\Application\Http\Controllers\MedecinController;
 use App\Application\Http\Controllers\MissionTypeController;
@@ -129,6 +133,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('sapeurs.fonctions', SapeurFonctionController::class)->only(['index']);
         Route::resource('sapeurs.grades', SapeurGradeController::class)->only(['index']);
         Route::resource('sapeurs.mutations', SapeurMutationController::class)->only(['index']);
+        Route::resource('sapeurs.materiels', SapeurMaterielController::class)->only(['index']);
         Route::resource('sapeurs.cours', SapeurCoursController::class)->only(['index']);
         Route::resource('sapeurs.photo', SapeurPhotoController::class)->only(['index']);
 
@@ -237,9 +242,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     Route::group(['middleware' => 'jwtTokenRole:exercice.modification'], function () {
         Route::resource('exercices', ExerciceController::class)->only(['store', 'update']);
+        Route::get('sapeurs-convocation', [SapeurController::class, 'convocationSms'])->name('sapeurs-convocation');
+
+        // TODO: Nouvelle permission SMS
         Route::post('aspsms/send', [AspsmsController::class, 'send'])->name('aspsms-send');
         Route::get('aspsms/credit', [AspsmsController::class, 'credit'])->name('credit');
-        Route::get('sapeurs-convocation', [SapeurController::class, 'convocationSms'])->name('sapeurs-convocation');
     });
 
     Route::group(['middleware' => 'jwtTokenRole:exercice.validation'], function () {
@@ -460,17 +467,26 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
 
-
     // Matériel personnel
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.lecture'], function () {
         Route::resource('mat-perso-categories', MatPersoCategorieController::class)->only(['index']);
         Route::resource('mat-perso-types', MatPersoTypeController::class)->only(['index']);
         Route::resource('mat-perso-event-types', MatPersoEventTypeController::class)->only(['index']);
         Route::resource('mat-perso-alerte-types', MatPersoAlerteTypeController::class)->only(['index']);
+
+        Route::resource('mat-perso', MatPersoController::class)->only(['index']);
+        Route::get('mat-perso/a-recuperer', [MatPersoController::class, 'aRecuperer'])->name('mat-perso.a-recuperer');
+        Route::resource('mat-perso-alertes', MatPersoAlerteController::class)->only(['index']);
     });
 
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.modification'], function () {
-        // Route::resource('sapeurs', SapeurController::class)->only(['store', 'update']);
+        Route::post('mat-perso/attribuer', [MatPersoAttributionController::class, 'attribuer'])->name('mat-perso.attribuer');
+        Route::post('mat-perso/retour', [MatPersoAttributionController::class, 'retour'])->name('mat-perso.retour');
+
+        // Modifier matériel
+        Route::post('mat-perso', [MatPersoController::class, 'create'])->name('mat-perso.create');
+        Route::put('mat-perso', [MatPersoController::class, 'update'])->name('mat-perso.update');
+        Route::delete('mat-perso', [MatPersoController::class, 'drestroy'])->name('mat-perso.drestroy');
     });
 
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.config'], function () {

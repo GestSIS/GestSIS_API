@@ -11,4 +11,9 @@ class MaterielAlerte extends Model
 
     protected $fillable = ['titre', 'description', 'materiel_nominal_id', 'statut', 'remarque'];
     protected $casts = ['materiel_nominal_id' => 'integer', 'statut' => 'integer'];
+
+    public function materiel()
+    {
+        return $this->belongsTo(MaterielNominal::class);
+    }
 }

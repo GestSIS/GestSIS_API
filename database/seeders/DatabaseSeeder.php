@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        //Données de bases
+        // Données de bases
         $this->call(CiviliteTableSeeder::class);
         $this->call(TelephoneTypeTableSeeder::class);
         $this->call(PermisTypeTableSeeder::class);
@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
         $this->call(TypeUniteTableSeeder::class);
         $this->call(PhaseTypeTableSeeder::class);
 
-        //Propositions de base
+        // Propositions de base
         /**/
         // Exercices types
         $this->call(ExcuseTypeTableSeeder::class);
@@ -35,7 +35,7 @@ class DatabaseSeeder extends Seeder
         $this->call(CoursTableSeeder::class);
         $this->call(GroupesTableSeeder::class);
         /**/
-        //Données propres aux SIS de test
+        // Données propres aux SIS de test
         $this->call(ExerciceComptableTableSeeder::class);
         $this->call(SapeursTableSeeder::class);
 
@@ -64,7 +64,7 @@ class DatabaseSeeder extends Seeder
         $this->call(TelephoneTableSeeder::class);
         $this->call(MissionTypeTableSeeder::class);
 
-        //Frais
+        // Frais
         $this->call(CompteTableSeeder::class);
         $this->call(EcritureCategorieTableSeeder::class);
         $this->call(FraisIndemniteAnnuelTypeTableSeeder::class);
@@ -73,11 +73,11 @@ class DatabaseSeeder extends Seeder
         $this->call(IndemniteInterventionTypeTableSeeder::class);
         $this->call(AmendeTableSeeder::class);
 
-        //Params
+        // Params
         $this->call(AvsParamTableSeeder::class);
         $this->call(SisParamTableSeeder::class);
 
-        //Controles médicaux
+        // Controles médicaux
         $this->call(MedecinTableSeeder::class);
         $this->call(ControleMedicauxTypeTableSeeder::class);
         $this->call(ControleMedicauxTableSeeder::class);
@@ -89,6 +89,8 @@ class DatabaseSeeder extends Seeder
         $this->call(MatPersoCategorieTableSeeder::class);
         $this->call(MatPersoEventTypeTableSeeder::class);
         $this->call(MatPersoAlerteTypeTableSeeder::class);
+
+        $this->call(MatPersoTableSeeder::class);
         /**/
     }
 }
