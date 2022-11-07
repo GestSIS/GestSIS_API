@@ -21,11 +21,11 @@ class DecompteSapeur extends Mailable
      *
      * @return void
      */
-    public function __construct(Sapeur $sapeur, $pdf)
+    public function __construct(Sapeur $sapeur, $pdf, $responseEmail)
     {
         $this->sapeur = $sapeur;
         $this->pdf = $pdf;
-        $this->email = $sapeur->email;
+        $this->email = $responseEmail;
     }
 
     /**

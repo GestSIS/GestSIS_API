@@ -168,28 +168,23 @@ class PaiementService
 
     public function envoyerDecompteSapeurs($decompteId, $email, $texte, $sapeurIds, $token, $sisId)
     {
-        // TODO: Checker que chaque sapeur est effectivement présent dans le décompte ?
+        $officialSapeurIds = Paiement::where('decompte_id', '=', $decompteId)->pluck('sapeur_id')->toArray();
+        $validatedSapeurIds = array_intersect($officialSapeurIds, $sapeurIds);
+
         $url = config('gestsis.print_url') . "/api/v1/print";
 
-        $responses = Http::pool(function (Pool $pool) use ($decompteId, $sapeurIds, $url, $token, $sisId) {
-            return collect($sapeurIds)
+        $responses = Http::pool(function (Pool $pool) use ($decompteId, $validatedSapeurIds, $url, $token, $sisId) {
+            return collect($validatedSapeurIds)
                 ->map(fn ($sapeurId) => $pool->withToken($token)->withHeaders(['Sis-Id' => $sisId])->get($url, [
                     'url' => config('app.url') . "/api/v2/decomptes/" . $decompteId . "/print-par-sapeur/" . $sapeurId,
                 ]));
         });
 
-        foreach ($sapeurIds as $index => $sapeurId) {
-            // return config('app.url') . "/api/v2/decomptes/" . $decompteId . "/print-par-sapeur/" . $sapeurId;
+        foreach ($validatedSapeurIds as $index => $sapeurId) {
             $sapeur = Sapeur::find($sapeurId);
-            return $responses[$index];
-            $pdf = $responses[$index];
+            $pdf = $responses[$index]->body();
 
-            // try {
-            $res = Mail::to($sapeur->email)->send(new DecompteSapeur($sapeur, $pdf));
-            return $res;
-            // } catch (Exception $e) {
-            //     return $e;
-            // }
+            $res = Mail::to($sapeur->email)->send(new DecompteSapeur($sapeur, $pdf, $email));
         }
         return 'OK';
     }
