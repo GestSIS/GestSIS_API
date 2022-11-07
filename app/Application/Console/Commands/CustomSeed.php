@@ -2,9 +2,6 @@
 
 namespace App\Application\Console\Commands;
 
-use App\Infrastructure\Models\Cours;
-use App\Infrastructure\Models\Localite;
-use App\Infrastructure\Models\TypeUnite;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
