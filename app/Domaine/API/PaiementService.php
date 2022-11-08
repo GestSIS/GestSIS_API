@@ -16,11 +16,14 @@ use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\SisParam;
+use GuzzleHttp\Exception\ConnectException;
 use Illuminate\Http\Client\Pool;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
+use Throwable;
 
 class PaiementService
 {
@@ -180,8 +183,14 @@ class PaiementService
                 ]));
         });
 
-        foreach ($validatedSapeurIds as $index => $sapeurId) {
+        foreach (array_values($validatedSapeurIds) as $index => $sapeurId) {
             $sapeur = Sapeur::find($sapeurId);
+            $response = $responses[$index];
+            if ($response instanceof Throwable) {
+                Log::error($sapeurId . " - " . $responses);
+                continue;
+            }
+            Log::debug($sapeurId);
             $pdf = $responses[$index]->body();
 
             $res = Mail::to($sapeur->email)->send(new DecompteSapeur($sapeur, $pdf, $email));
