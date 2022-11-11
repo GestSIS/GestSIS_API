@@ -4,6 +4,7 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\ExerciceService;
 use Illuminate\Http\Response;
+use Illuminate\Http\Request;
 
 class SapeurExerciceController extends Controller
 {

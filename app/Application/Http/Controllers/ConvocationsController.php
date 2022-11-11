@@ -111,6 +111,29 @@ class ConvocationsController extends Controller
     }
 
     /**
+     * Update les présences sans tenir compte d'un exercice en particulier
+     *
+     * @return Response
+     */
+    public function updatePresences(Request $request)
+    {
+        $data = $request->validate([
+            'presences.*.id' => 'integer|min:1',
+            'presences.*.exercice_id' => 'integer|min:1',
+            'presences.*.sapeur_id' => 'integer|min:1',
+            'presences.*.convoque' => 'required|integer',
+            'presences.*.present' => 'required|integer',
+            'presences.*.remplace' => 'required|integer',
+            'presences.*.excuse_type_id' => 'nullable|integer',
+            'presences.*.amende' => 'required|boolean',
+        ]);
+
+        $presences = $this->service->updateSapeurPresences($data['presences']);
+
+        return response()->json(['data' => $presences]);
+    }
+
+    /**
      * Update the specified resource in storage.
      *
      * @param Request $request

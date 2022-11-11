@@ -187,7 +187,7 @@ class PaiementService
             $sapeur = Sapeur::find($sapeurId);
             $response = $responses[$index];
             if ($response instanceof Throwable) {
-                Log::error($sapeurId . " - " . $responses);
+                Log::error($sapeurId . " - " . $response);
                 continue;
             }
             Log::debug($sapeurId);

@@ -142,6 +142,84 @@ class ExerciceBusiness
      * @return Collection
      * @throws ArrayException
      */
+    public function updateSapeurPresences($presences)
+    {
+        $exerciceIds = array_map(fn ($e) => $e['exercice_id'], $presences);
+
+        // fetch exercices status
+        $exercices = Exercice::whereIn('id', $exerciceIds)->get(['id', 'statut'])->toArray();
+        $indexedExercice = [];
+        foreach ($exercices as $exercice) {
+            $indexedExercice[$exercice['id']] = $exercice['statut'];
+        }
+
+        foreach ($presences as $presence) {
+            if ($presence['excuse_type_id'] == 0) {
+                $presence['excuse_type_id'] = null;
+            }
+
+            // Check si statut de l'exercice
+            $exerciceStatut = $exercices[$presence['exercice_id']] ?? null;
+            if ($exerciceStatut == null) {
+                continue;
+            }
+
+            // Check si imputé
+            if ($exerciceStatut === self::EXERCICE_STATUT_IMPUTE) {
+                // Update uniquement de l'excuse type et amende
+                $p = ExerciceSapeur::where([
+                    ['id', '=', $presence['id']],
+                    ['exercice_id', '=', $presence['exercice_id']],
+                    ['present', '=', 0],
+                ])->first();
+
+                // Controller que le statut de present est compatible
+                if ($p != null) {
+                    ExerciceSapeur::where([
+                        ['id', '=', $presence['id']],
+                        ['sapeur_id', '=', $presence['sapeur_id']],
+                        ['exercice_id', '=', $presence['exercice_id']],
+                    ])->update([
+                        'convoque' => $presence['convoque'],
+                        'remplace' => $presence['remplace'],
+                        'excuse_type_id' => $presence['excuse_type_id'],
+                        'amende' => $presence['amende'],
+                    ]);
+                } else {
+                    ExerciceSapeur::where([
+                        ['id', '=', $presence['id']],
+                        ['sapeur_id', '=', $presence['sapeur_id']],
+                        ['exercice_id', '=', $presence['exercice_id']],
+                    ])->update([
+                        'convoque' => $presence['convoque'],
+                    ]);
+                }
+            } else if ($exerciceStatut === self::EXERCICE_STATUT_ANNULE) {
+                continue;
+            } else {
+                // Update all
+                ExerciceSapeur::where([
+                    ['id', '=', $presence['id']],
+                    ['sapeur_id', '=', $presence['sapeur_id']],
+                    ['exercice_id', '=', $presence['exercice_id']],
+                ])->update([
+                    'convoque' => $presence['convoque'],
+                    'present' => $presence['present'],
+                    'remplace' => $presence['remplace'],
+                    'excuse_type_id' => $presence['excuse_type_id'],
+                    'amende' => $presence['amende'],
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Update presences à partir d'une liste complète saisie
+     *
+     * @param $data
+     * @return Collection
+     * @throws ArrayException
+     */
     public function updatePresences($exerciceId, $presences)
     {
         // Fetch exercice
@@ -154,6 +232,7 @@ class ExerciceBusiness
 
         // Ignore si déjà imputé
         if ($exercice->statut === self::EXERCICE_STATUT_IMPUTE) {
+            // FIXME: permettre le changement du type d'excuse/amende
             return;
         }
 

@@ -150,7 +150,7 @@ class ExerciceService
     }
 
     /**
-     * Modification de sapeurs d'un exercice
+     * Modification des présences d'un exercice
      *
      * @param $data
      * @return Collection
@@ -163,6 +163,18 @@ class ExerciceService
             'statut' => $statut,
             'sapeurs' => $this->listeSapeurOfExerciceById($exerciceId)
         ];
+    }
+
+    /**
+     * Modification des présences pour un sapeur
+     *
+     * @param $data
+     * @return Collection
+     * @throws ArrayException
+     */
+    public function updateSapeurPresences($exercices)
+    {
+        return $this->business->updateSapeurPresences($exercices);
     }
 
     /**

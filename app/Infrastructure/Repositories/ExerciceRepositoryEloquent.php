@@ -235,7 +235,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         if ($localite == null) return null;
 
         $object = new StdClass();
-        $object->id = $localite->id;
+        $object->id = intval($localite->id);
 
         $object->npa = $localite->npa;
         $object->designation = $localite->designation;
@@ -252,14 +252,14 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         if ($sapeur == null) return null;
 
         $object = new StdClass();
-        $object->id = $sapeur->id;
-        $object->sapeur_id = $sapeur->sapeur_id;
-        $object->exercice_id = $sapeur->exercice_id;
-        $object->convoque = $sapeur->convoque;
-        $object->present = $sapeur->present;
-        $object->remplace = $sapeur->remplace;
-        $object->amende = $sapeur->amende;
-        $object->excuse_type_id = $sapeur->excuse_type_id;
+        $object->id = intval($sapeur->id);
+        $object->sapeur_id = intval($sapeur->sapeur_id);
+        $object->exercice_id = intval($sapeur->exercice_id);
+        $object->convoque = intval($sapeur->convoque);
+        $object->present = intval($sapeur->present);
+        $object->remplace = intval($sapeur->remplace);
+        $object->amende = boolval($sapeur->amende);
+        $object->excuse_type_id = intval($sapeur->excuse_type_id);
 
         return $object;
     }
@@ -273,21 +273,21 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         if ($sapeur == null) return null;
 
         $object = new StdClass();
-        $object->id = $sapeur->id;
-        $object->sapeur_id = $sapeur->sapeur_id;
-        $object->exercice_id = $sapeur->exercice_id;
-        $object->convoque = $sapeur->convoque;
-        $object->present = $sapeur->present;
-        $object->remplace = $sapeur->remplace;
-        $object->amende = $sapeur->amende;
-        $object->statut = $sapeur->statut;
-        $object->excuse_type_id = $sapeur->excuse_type_id;
+        $object->id = intval($sapeur->id);
+        $object->sapeur_id = intval($sapeur->sapeur_id);
+        $object->exercice_id = intval($sapeur->exercice_id);
+        $object->convoque = intval($sapeur->convoque);
+        $object->present = intval($sapeur->present);
+        $object->remplace = intval($sapeur->remplace);
+        $object->amende = boolval($sapeur->amende);
+        $object->statut = intval($sapeur->statut);
+        $object->excuse_type_id = intval($sapeur->excuse_type_id);
         $object->date = $sapeur->date;
         $object->heure = $sapeur->heure;
-        $object->localite_id = $sapeur->localite_id;
+        $object->localite_id = intval($sapeur->localite_id);
         $object->communications = $sapeur->communications;
         $object->designation = $sapeur->designation;
-        $object->exercice_categorie_id = $sapeur->exercice_categorie_id;
+        $object->exercice_categorie_id = intval($sapeur->exercice_categorie_id);
 
         return $object;
     }

@@ -214,6 +214,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('exercices/{id}/liste-presence', [ExerciceController::class, 'listePresence']);
         Route::get('exercices/{id}/liste-appel', [ExerciceController::class, 'listeAppel']);
 
+
         // Convocations
         Route::get('convocation/{id}', [ConvocationController::class, 'convoquer']);
 
@@ -236,6 +237,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::delete('exercices/{id}/sapeurs', [ConvocationsController::class, 'destroy'])->name('api.v2.exercices.sapeurs.delete');
 
         Route::post('exercices/{id}/presences', [ConvocationsController::class, 'presences'])->name('api.v2.exercices.presences');
+
+        // Présences pour un sapeur
+        Route::put('exercices/sapeurs', [ConvocationsController::class, 'updatePresences']);
+
         // TODO: à implémenter
         // Route::get('exercices/{id}/liste-appel-localite', [ExerciceController::class, 'listeAppelLocalite']);
     });
