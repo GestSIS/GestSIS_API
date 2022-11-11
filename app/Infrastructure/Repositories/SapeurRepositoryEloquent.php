@@ -330,17 +330,17 @@ class SapeurRepositoryEloquent implements SapeurRepository
         if ($sapeur == null) return null;
 
         $object = new StdClass();
-        $object->id = $sapeur->id;
+        $object->id = intval($sapeur->id);
 
         $object->nom = $sapeur->nom;
         $object->prenom = $sapeur->prenom;
-        $object->actif = $sapeur->actif;
-        $object->fonction_id = $sapeur->fonction_id;
+        $object->actif = intval($sapeur->actif);
+        $object->fonction_id = intval($sapeur->fonction_id);
         $object->date_naissance = $sapeur->date_naissance;
-        $object->civilite_id = $sapeur->civilite_id;
-        $object->localite_id = $sapeur->localite_id;
-        $object->fonction_id = $sapeur->fonction_id;
-        $object->type = $sapeur->type;
+        $object->civilite_id = intval($sapeur->civilite_id);
+        $object->localite_id = intval($sapeur->localite_id);
+        $object->fonction_id = intval($sapeur->fonction_id);
+        $object->type = intval($sapeur->type);
 
         return $object;
     }
@@ -350,7 +350,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         if ($sapeur == null) return null;
 
         $object = new StdClass();
-        $object->id = $sapeur->id;
+        $object->id = intval($sapeur->id);
 
         $object->nom = $sapeur->nom;
         $object->prenom = $sapeur->prenom;
@@ -369,11 +369,11 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $object->iban_statut = $sapeur->iban_statut;
         $object->remarque = $sapeur->remarque;
         $object->porteur = $sapeur->porteur;
-        $object->localite_id = $sapeur->localite_id;
-        $object->civilite_id = $sapeur->civilite_id;
-        $object->fonction_id = $sapeur->fonction_id;
-        $object->grade_id = $sapeur->grade_id;
-        $object->type = $sapeur->type;
+        $object->localite_id = intval($sapeur->localite_id);
+        $object->civilite_id = intval($sapeur->civilite_id);
+        $object->fonction_id = intval($sapeur->fonction_id);
+        $object->grade_id = intval($sapeur->grade_id);
+        $object->type = intval($sapeur->type);
 
         if (in_array('mutations', $with)) {
             $mutations = array();
@@ -439,10 +439,10 @@ class SapeurRepositoryEloquent implements SapeurRepository
         if ($fonction == null) return null;
 
         $object = new StdClass();
-        $object->id = $fonction->id;
+        $object->id = intval($fonction->id);
 
-        $object->fonction_id = $fonction->fonction_id;
-        $object->sapeur_id = $fonction->sapeur_id;
+        $object->fonction_id = intval($fonction->fonction_id);
+        $object->sapeur_id = intval($fonction->sapeur_id);
         $object->debut = $fonction->debut;
         $object->fin = $fonction->fin;
         $object->remarque = $fonction->remarque;
