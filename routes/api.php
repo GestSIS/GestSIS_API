@@ -248,11 +248,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenRole:exercice.modification'], function () {
         Route::resource('exercices', ExerciceController::class)->only(['store', 'update']);
         Route::get('sapeurs-convocation', [SapeurController::class, 'convocationSms'])->name('sapeurs-convocation');
-
-        // TODO: Nouvelle permission SMS
-        Route::post('aspsms/send', [AspsmsController::class, 'send'])->name('aspsms-send');
-        Route::get('aspsms/credit', [AspsmsController::class, 'credit'])->name('credit');
     });
+
 
     Route::group(['middleware' => 'jwtTokenRole:exercice.validation'], function () {
         Route::resource('exercices', ExerciceController::class)->only(['destroy']);
@@ -265,6 +262,14 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenRole:exercice.config'], function () {
         Route::resource('exercice-categories', ExerciceCategorieController::class)->only(['store', 'update', 'destroy']);
         Route::resource('excuses-types', ExcuseTypeController::class)->only(['store', 'update', 'destroy']);
+    });
+
+    // SMS
+    Route::group(['middleware' => 'jwtTokenRole:sms.envoie'], function () {
+        Route::post('aspsms/send', [AspsmsController::class, 'send'])->name('aspsms-send');
+        Route::get('aspsms/credit', [AspsmsController::class, 'credit'])->name('credit');
+    });
+    Route::group(['middleware' => 'jwtTokenRole:sms.config'], function () {
         Route::resource('aspsms/param', AspsmsParamController::class)->only(['index', 'store']);
     });
 
