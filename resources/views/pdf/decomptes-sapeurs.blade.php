@@ -27,68 +27,90 @@
     // public const ECRITURE_MODULE_DECOMPTE_HEURE = 6;
     // public const ECRITURE_MODULE_COURS = 7;
     // public const ECRITURE_MODULE_REMBOURSEMENT = 8;
-    function isExercice($e)
-    {
-      return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_EXERCICE;
-    }
-    function isIntervention($e)
-    {
-      return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_INTERVENTION;
-    }
-    function isAnnuel($e)
-    {
-      return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL;
-    }
-    function isDivers($e)
-    {
-      return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_DIVERS;
-    }
-    function isAmende($e)
-    {
-      return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_AMENDE;
-    }
-
-    function sectionTitle($e)
-    {
-      if(isExercice($e)){
-        return "Exercice";
-      }else if(isIntervention($e)){
-        return "Intervention";
-      }else if(isAnnuel($e)){
-        return "Frais & indemnités annuelles";
-      }else if(isDivers($e)){
-        return "Divers";
-      }else if(isAmende($e)){
-        return "Amende";
+    if (! function_exists('isExercice')) {
+      function isExercice($e)
+      {
+        return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_EXERCICE;
       }
-      return "Autres";
+    }
+    if (! function_exists('isIntervention')) {
+      function isIntervention($e)
+      {
+        return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_INTERVENTION;
+      }
+    }
+    if (!function_exists('isAnnuel')) {
+      function isAnnuel($e)
+      {
+        return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL;
+      }
+    }
+    if (!function_exists('isDivers')) {
+      function isDivers($e)
+      {
+        return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_DIVERS;
+      }
+    }
+    if (!function_exists('isAmende')) {
+      function isAmende($e)
+      {
+        return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_AMENDE;
+      }
     }
 
-    function formatNumber($value)
-    {
-      return number_format($value, 2, '.', "'");
+    if(!function_exists('sectionTitle')) {
+      function sectionTitle($e)
+      {
+        if (isExercice($e)) {
+          return "Exercice";
+        
+        }else if(isIntervention($e)){
+          return "Intervention";
+        }else if(isAnnuel($e)){
+          return "Frais & indemnités annuelles";
+        }else if(isDivers($e)){
+          return "Divers";
+        }else if(isAmende($e)){
+          return "Amende";
+        }
+        return "Autres";
+      }
+    }
+    if(!function_exists('formatNumber')) {
+      function formatNumber($value)
+      {
+        return number_format($value, 2, '.', "'");
+      }
     }
 
-    function formatDate($value)
-    {
-      return implode('.', array_reverse(explode('-', $value)));
+    if(!function_exists('formatDate')) {
+      function formatDate($value)
+      {
+        return implode('.', array_reverse(explode('-', $value)));
+      }
     }
     
-    function formatIban($value)
-    {
-      return chunk_split(str_replace(' ', '', $value), 4, ' ');
+    if(!function_exists('formatIban')) {
+      function formatIban($value)
+      {
+        return chunk_split(str_replace(' ', '', $value), 4, ' ');
+      }
     }
 
-    function formatTime($value)
-    {
-      return $value != "" && !is_null($value) ? substr($value, 0, 5) : "";
+    if(!function_exists('formatTime')) {
+      function formatTime($value)
+      {
+        return $value != "" && !is_null($value) ? substr($value, 0, 5) : "";
+      }
     }
 
-    function formatTarif($ecriture)
-    {
-      $tarifMin = $ecriture->tarif_min === null ? "" : "($ecriture->tarif_min CHF / $ecriture->tarif_min_pour h) +";
-      $tauxSpecial = $ecriture->taux === null ? "" : "* " . $ecriture->taux * 100 . "%";
-      return "$tarifMin " . formatNumber($ecriture->tarif) . " CHF " . ($ecriture->unite ? "/ $ecriture->unite": "") . " $tauxSpecial";
+    if(!function_exists('formatTarif')) {
+      function formatTarif($ecriture)
+      {
+        $tarifMin = $ecriture->tarif_min === null ? "" : "($ecriture->tarif_min CHF / $ecriture->tarif_min_pour h) +";
+        $tauxSpecial = $ecriture->taux === null ? "" : "* " . $ecriture->taux * 100 . "%";
+        return "$tarifMin " . formatNumber($ecriture->tarif) . " CHF " . ($ecriture->unite ? "/ $ecriture->unite": "") . " $tauxSpecial";
+      }
     }
 
     $previousEcriture = null;

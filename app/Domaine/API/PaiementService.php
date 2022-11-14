@@ -178,18 +178,20 @@ class PaiementService
 
         $responses = Http::pool(function (Pool $pool) use ($decompteId, $validatedSapeurIds, $url, $token, $sisId) {
             return collect($validatedSapeurIds)
-                ->map(fn ($sapeurId) => $pool->withToken($token)->withHeaders(['Sis-Id' => $sisId])->get($url, [
-                    'url' => config('app.url') . "/api/v2/decomptes/" . $decompteId . "/print-par-sapeur/" . $sapeurId,
+                ->map(fn ($sapeurId) => $pool->withToken($token)->withHeaders(['Sis-Id' => $sisId])->post($url, [
+                    'content' => $this->impressionDecompteSapeur($decompteId, $sapeurId)->render(),
                 ]));
         });
-
         foreach (array_values($validatedSapeurIds) as $index => $sapeurId) {
             $sapeur = Sapeur::find($sapeurId);
             $response = $responses[$index];
+            // throw new ArrayException(['content' => $response->body()]);
+            // return "Test " . $response->body();
             if ($response instanceof Throwable) {
                 Log::error($sapeurId . " - " . $response);
                 continue;
             }
+            // return $response->body();
             Log::debug($sapeurId);
             $pdf = $responses[$index]->body();
 

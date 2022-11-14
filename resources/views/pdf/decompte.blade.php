@@ -42,19 +42,6 @@
     //TODO: Finish decompte impressions
     $nbEcritures = count($ecritures);
 
-    function isExercice($e)
-    {
-        return $e->exercice_id !== null;
-    }
-    function isIntervention($e)
-    {
-        return $e->intervention_id !== null;
-    }
-    function isAnnuel($e)
-    {
-        return $e->indemnite_annuel !== null || $e->frais_annuel !== null;
-    }
-
     function formatNumber($value)
     {
         return number_format($value, 2, '.', "'");
@@ -63,11 +50,6 @@
     function formatDate($value)
     {
         return str_replace('-', '.', $value);
-    }
-
-    function formatTime($value)
-    {
-        return substr($value, 0, 5);
     }
 
     function formatTarif($ecriture)
