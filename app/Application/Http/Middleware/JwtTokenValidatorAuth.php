@@ -10,6 +10,7 @@ class JwtTokenValidatorAuth
 {
     /**
      * Handle an incoming request.
+     * Check que l'utilisateur est authentifié dans le système
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next

@@ -6,12 +6,12 @@ use Closure;
 use App\Application\Auth\TokenTools;
 use Exception;
 
-class JwtTokenValidatorRole
+class JwtTokenValidatorSapeur
 {
     /**
      * Handle an incoming request.
-     * Check que l'utilisateur possède au moins un des droits requis
-     *
+     * Check que l'utilisateur est un sapeur du SIS
+     * 
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
      * @return mixed
@@ -33,19 +33,12 @@ class JwtTokenValidatorRole
             return response()->json(["error" => "Sis non sélectionné"], 401);
         }
 
-        if (count($roles) > 0) {
-            if ($token->data->admin !== True) {
-                // Check has role for provided sis
-                $perms = (array) $token->data->permissions;
-                if (!array_key_exists($sisKey, $perms)) {
-                    return response()->json(["error" => "Aucun droit pour ce sis"], 401);
-                }
-
-                if (count(array_intersect($roles, $perms[$sisKey])) == 0) {
-                    return response()->json(["error" => "Au moins 1 des rôles suivant est requis [" . join(", ", $roles) . "]."], 401);
-                }
-            }
+        // Check is a valid sapeur for the provided sis
+        $sapeurs = (array) $token->data->sapeurs;
+        if (!array_key_exists($sisKey, $sapeurs)) {
+            return response()->json(["error" => "Votre compte n'est pas lié à un sapeur de ce SIS"], 401);
         }
+        $request->attributes->add(['sapeurId' => $sapeurs[$sisKey]]);
 
         return $next($request);
     }

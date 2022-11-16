@@ -100,11 +100,18 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenVali
 });
 
 // Route::get('exercices-comptable/{exercieComptableId}/justificatif', [CompteController::class, 'justificatifComplet']);
-Route::get('decomptes/{id}/print', [DecompteController::class, 'print']);
-Route::get('decomptes/{id}/print-par-sapeur', [DecompteController::class, 'printParSapeur']);
-Route::get('decomptes/{id}/print-par-compte', [DecompteController::class, 'printParCompte']);
+// Route::get('decomptes/{id}/print', [DecompteController::class, 'print']);
+// Route::get('decomptes/{id}/print-par-sapeur', [DecompteController::class, 'printParSapeur']);
+// Route::get('decomptes/{id}/print-par-compte', [DecompteController::class, 'printParCompte']);
 
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
+
+    // Mes infos
+    Route::group(['middleware' => 'jwtTokenSapeur'], function () {
+        Route::resource('mes-infos', MesInfosController::class)->only(['index']);
+        Route::resource('mes-exercices', MesExercicesController::class)->only(['index']);
+        Route::resource('mes-decomptes', MesDecomptesController::class)->only(['index']);
+    });
 
     // Paramètres accessible pour tout droit config
     Route::group(['middleware' => 'jwtTokenRole:utilisateur.config,sis.config,sapeur.config,organisation.modification,exercice.config,intervention.config,comptabilite.config,controle_medical.config'], function () {

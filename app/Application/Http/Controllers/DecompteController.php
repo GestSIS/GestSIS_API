@@ -108,6 +108,7 @@ class DecompteController extends Controller
         }
 
         $result = $this->service->envoyerDecompteSapeurs($decompteId, $data['email'], $data['texte'], $data['sapeurIds'], $token, $sisId);
+        return $result;
         return response()->json(['data' => $result]);
     }
 
