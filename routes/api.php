@@ -167,11 +167,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('fonctions', FonctionController::class)->only(['index']);
         Route::resource('cours', CoursController::class)->only(['index']);
 
-        // Intervention statiques
-        Route::get('statistiques/{id}/type-intervention', [InterventionStatistiqueController::class, 'typeIntervention']);
-        Route::get('statistiques/{id}/stat-federal', [InterventionStatistiqueController::class, 'statFederal']);
+        // Interventions
+        Route::resource('type-intervention', TypeInterventionController::class)->only(['index']);
 
-        // Params
+        // Exercices
         Route::resource('exercice-categories', ExerciceCategorieController::class)->only(['index']);
         Route::resource('excuses-types', ExcuseTypeController::class)->only(['index']);
 
@@ -311,6 +310,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         // Statistiques véhicule et matériel
         Route::get('statistiques/{id}/materiel', [InterventionStatistiqueController::class, 'materiel']);
         Route::get('statistiques/{id}/vehicule', [InterventionStatistiqueController::class, 'vehicule']);
+        Route::get('statistiques/{id}/type-intervention', [InterventionStatistiqueController::class, 'typeIntervention']);
+        Route::get('statistiques/{id}/stat-federal', [InterventionStatistiqueController::class, 'statFederal']);
         Route::get('statistiques/{id}/intervention-traitement', [InterventionStatistiqueController::class, 'traitement']);
     });
 
