@@ -65,6 +65,7 @@ class Kernel extends HttpKernel
         'jwtTokenAuth' => \App\Application\Http\Middleware\JwtTokenValidatorAuth::class,
         'jwtTokenRole' => \App\Application\Http\Middleware\JwtTokenValidatorRole::class,
         'jwtTokenSapeur' => \App\Application\Http\Middleware\JwtTokenValidatorSapeur::class,
+        'jwtTokenSapeurOrRole' => \App\Application\Http\Middleware\JwtTokenValidatorSapeurOrRole::class,
     ];
 
     /**
