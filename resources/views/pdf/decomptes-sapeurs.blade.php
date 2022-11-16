@@ -57,6 +57,12 @@
         return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_AMENDE;
       }
     }
+    if (!function_exists('isAvsAc')) {
+      function isAvsAc($e)
+      {
+        return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_AVS;
+      }
+    }
 
     if(!function_exists('sectionTitle')) {
       function sectionTitle($e)
@@ -153,10 +159,12 @@
       $interventionSousTotal = $debutIntervention ? 0.0 : $interventionSousTotal;
       $interventionSousTotal += $ecriture->total;
 
-      if ($comptes[$ecriture->compte_id]->produit) {
-        $sapeurTotal -= $ecriture->total;
-      } else {
-        $sapeurTotal += $ecriture->total;
+      if (!isAvsAc($ecriture)) {
+        if ($comptes[$ecriture->compte_id]->produit) {
+          $sapeurTotal -= $ecriture->total;
+        } else {
+          $sapeurTotal += $ecriture->total;
+        }
       }
 
     ?>
@@ -175,7 +183,7 @@
       <div></div>
     @endif
 
-    @if ($debutSection)
+    @if ($debutSection && !isAvsAc($ecriture))
       <h2>{{ sectionTitle($ecriture) }}</h2>
       <table class="table table-sm table-striped table-bordered">
     @endif
@@ -324,7 +332,7 @@
       @endif
     @endif
 
-    @if ($finSection)
+    @if ($finSection && !isAvsAc($ecriture))
       <tfoot>
         <tr>
           <th colspan="{{ isAmende($ecriture) || isDivers($ecriture) ? 5 : 6 }}" class="text-end">Sous-total</th>
@@ -337,7 +345,7 @@
       <div class="container-fluid">
         <div class="row">
           {{-- TODO: Gérer les écritures divers avec montants négatifs --}}
-          {{-- TODO: Merge écritures pour exercices avec solde + indemnité -> A priori OK comparé à GestSIS v1.0 --}}
+          {{-- TODO: Ne pas comptabiliser les écritures d'anciens décomptes -> OK à priori --}}
           {{-- TODO: Ajout résumé des paiements en clôture du document --}}
           <div class="col-9"></div>
           <div class="col-2 p-1">Total</div>
@@ -355,7 +363,7 @@
           <div class="col-9"></div>
           <div class="col-2 p-1">Déjà soldé</div>
           <div class="col-1 text-end p-1 border border-secondary border-bottom-0">
-            {{ formatNumber($sapeurTotal - $paiement->total) }}
+            {{ formatNumber($sapeurTotal - $paiement->total - $paiement->avs_ac) }}
           </div>
         </div>
         <div class="row">

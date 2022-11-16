@@ -186,6 +186,7 @@ class PaiementService
             $sapeur = Sapeur::find($sapeurId);
             $response = $responses[$index];
             // throw new ArrayException(['content' => $response->body()]);
+            return             response($response->body())->header('Content-Type', 'application/pdf');
             // return "Test " . $response->body();
             if ($response instanceof Throwable) {
                 Log::error($sapeurId . " - " . $response);
@@ -200,7 +201,7 @@ class PaiementService
         return 'OK';
     }
 
-    public function impressionDecompteSapeur($decompteId, $sapeurId)
+    public static function impressionDecompteSapeur($decompteId, $sapeurId)
     {
         // Pour le moment que les écritures du décompte !
         $ecritures = DB::table('ecritures')
@@ -225,7 +226,7 @@ class PaiementService
             ->orderBy('ecritures.heure')
             ->get();
 
-        return $this->printDecompteSapeur($ecritures, $decompteId);
+        return self::printDecompteSapeur($decompteId, $ecritures);
     }
 
     public function impressionDecompteParSapeur($decompteId)
@@ -252,10 +253,10 @@ class PaiementService
             ->orderBy('ecritures.heure')
             ->get();
 
-        return $this->printDecompteSapeur($ecritures, $decompteId);
+        return $this->printDecompteSapeur($decompteId, $ecritures);
     }
 
-    private function printDecompteSapeur($ecritures, $decompteId)
+    private static function printDecompteSapeur($decompteId, $ecritures)
     {
         $decompte = Decompte::with('paiements')->find($decompteId);
         $decomptes = Decompte::where('exercice_comptable_id', $decompte->exercice_comptable_id)->get();

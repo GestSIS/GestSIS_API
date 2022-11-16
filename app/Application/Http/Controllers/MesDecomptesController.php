@@ -27,4 +27,17 @@ class MesDecomptesController extends Controller
         $data = $this->service->mesDecomptes($sapeurId);
         return response()->json(['data' => $data]);
     }
+
+    /**
+     * Récupération des décomptes du sapeur
+     */
+    public function print(Request $request, $decompteId)
+    {
+        $sapeurId = $request->get('sapeurId');
+        if ($sapeurId === null || intval($sapeurId) <= 0) {
+            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+        }
+
+        return $this->service->printDecompte($sapeurId, $decompteId);
+    }
 }

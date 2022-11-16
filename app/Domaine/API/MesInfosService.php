@@ -8,6 +8,7 @@ use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\Paiement;
+use Illuminate\Support\Facades\DB;
 
 class MesInfosService
 {
@@ -46,16 +47,8 @@ class MesInfosService
         ];
     }
 
-    function imprimerMonDecompte($sapeurId)
+    function printDecompte($sapeurId, $decompteId)
     {
-        $paiements = Paiement::where('sapeur_id', '=', $sapeurId)
-            ->join('decomptes', 'paiement.decompte_id', '=', 'decomptes.id')
-            ->select('paiements.*', 'decomptes.designation as decompte');
-        $ecritures = Ecriture::where('sapeur_id', '=', $sapeurId)->whereNotNull('decompte_id')->get();
-
-        return [
-            'paiements' => $paiements,
-            'ecritures' => $ecritures,
-        ];
+        return PaiementService::impressionDecompteSapeur($decompteId, $sapeurId);
     }
 }

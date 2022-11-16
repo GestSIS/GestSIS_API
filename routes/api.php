@@ -67,6 +67,9 @@ use App\Application\Http\Controllers\MatPersoAttributionController;
 use App\Application\Http\Controllers\MatPersoController;
 use App\Application\Http\Controllers\MatPersoEventTypeController;
 use App\Application\Http\Controllers\MedecinController;
+use App\Application\Http\Controllers\MesDecomptesController;
+use App\Application\Http\Controllers\MesExercicesController;
+use App\Application\Http\Controllers\MesInfosController;
 use App\Application\Http\Controllers\MissionTypeController;
 use App\Application\Http\Controllers\PaiementController;
 use App\Application\Http\Controllers\PermisController;
@@ -111,6 +114,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('mes-infos', MesInfosController::class)->only(['index']);
         Route::resource('mes-exercices', MesExercicesController::class)->only(['index']);
         Route::resource('mes-decomptes', MesDecomptesController::class)->only(['index']);
+        Route::get('mes-decomptes/{decompteId}/print', [MesDecomptesController::class, 'print'])->name('api.v2.mes-decomptes.print');
     });
 
     // Paramètres accessible pour tout droit config
@@ -126,7 +130,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     Route::group(['middleware' => 'jwtTokenRole:effectif.tout,sapeur.lecture,sapeur.modification,sapeur.config'], function () {
-        Route::get('effectif', [SapeurController::class, 'effectif'])->name('name');
+        Route::get('effectif', [SapeurController::class, 'effectif'])->name('api.v2.effectif');
     });
 
     // Sapeurs
