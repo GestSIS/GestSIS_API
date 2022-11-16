@@ -7,6 +7,7 @@ use App\Domaine\Business\PaiementBusiness;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceSapeur;
+use App\Infrastructure\Models\InterventionSapeur;
 use App\Infrastructure\Models\Paiement;
 use Illuminate\Support\Facades\DB;
 
@@ -27,11 +28,27 @@ class MesInfosService
 
     function mesExercices($sapeurId)
     {
-        return Exercice::whereIn('id', function ($query) use ($sapeurId) {
-            $query->select('exercice_id')
-                ->from(with(new ExerciceSapeur())->getTable())
-                ->where('sapeur_id', $sapeurId);
-        })->get()->toArray();
+        return ExerciceSapeur::where('sapeur_id', '=', $sapeurId)
+            ->with('exercice')->get()->toArray();
+    }
+
+    function mesInterventions($sapeurId)
+    {
+        $presences = InterventionSapeur::where('intervention_sapeur.sapeur_id', '=', $sapeurId)
+            ->join('interventions', 'interventions.id', '=', 'intervention_sapeur.intervention_id')
+            ->select(
+                'intervention_sapeur.*',
+                'interventions.date_debut',
+                'interventions.heure_debut',
+                'interventions.date_fin',
+                'interventions.heure_fin',
+                'interventions.lieu',
+                'interventions.objet',
+                'interventions.localite_id',
+                'interventions.stat_federal_id',
+                'interventions.type_intervention_id',
+            )->get()->toArray();
+        return $presences;
     }
 
     function mesDecomptes($sapeurId)
