@@ -361,7 +361,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         // TODO: see to add the correct right for the following routes : 'store', 'update']);
         Route::resource('phase-types', PhaseTypeController::class)->only(['index']);
         Route::resource('stat-federal', StatFederalController::class)->only(['index']);
-        Route::resource('type-intervention', TypeInterventionController::class)->only(['index']);
         Route::resource('stat-intervention', StatInterventionController::class)->only(['index']);
         Route::resource('intervention-traitement', InterventionTraitementController::class)->only(['index']);
     });
