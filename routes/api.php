@@ -384,7 +384,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Exercices comptables
-    Route::group(['middleware' => 'jwtTokenRole'], function () {
+    Route::group(['middleware' => 'jwtTokenSapeurOrRole'], function () {
         Route::resource('exercices-comptable', ExerciceComptableController::class)->only(['index']);
 
         // Static param Comptabilite
