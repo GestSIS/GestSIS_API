@@ -112,10 +112,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Mes infos
     Route::group(['middleware' => 'jwtTokenSapeur'], function () {
-        Route::resource('mes-infos', MesInfosController::class)->only(['index']);
-        Route::resource('mes-exercices/{exerciceComptableId}', MesExercicesController::class)->only(['index']);
-        Route::resource('mes-interventions/{exerciceComptableId}', MesInterventionsController::class)->only(['index']);
-        Route::resource('mes-decomptes/{exerciceComptableId}', MesDecomptesController::class)->only(['index']);
+        Route::get('mes-infos', [MesInfosController::class, 'index'])->name('mes-infos');
+        Route::get('mes-exercices/{exerciceComptableId}', [MesExercicesController::class, 'index'])->name('mes-exercices');
+        Route::get('mes-interventions/{exerciceComptableId}', [MesInterventionsController::class, 'index'])->name('mes-interventions');
+        Route::get('mes-decomptes/{exerciceComptableId}', [MesDecomptesController::class, 'index'])->name('mes-decomptes');
         Route::get('mes-decomptes/{decompteId}/print', [MesDecomptesController::class, 'print'])->name('api.v2.mes-decomptes.print');
     });
 
