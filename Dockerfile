@@ -1,8 +1,10 @@
-FROM php:8.0-fpm
+FROM php:8.1-fpm
+
+RUN apt update && apt install -y zlib1g-dev libpng-dev libzip-dev && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /usr/share/man/man1 \
     && apt-get update \
-    && apt-get install -y --no-install-recommends npm \
+    && apt-get install -y --no-install-recommends curl \
     && docker-php-ext-install gd \
     # gmp
     && apt-get install -y --no-install-recommends libgmp-dev \
@@ -18,8 +20,14 @@ RUN mkdir -p /usr/share/man/man1 \
     # clean up
     && apt-get autoclean -y \
     && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /tmp/pear/ \
-    && npm add -g yarn
+    && rm -rf /tmp/pear/
+
+# Install nvm & node
+SHELL ["/bin/bash", "--login", "-i", "-c"]
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
+RUN source /root/.bashrc && nvm install node 
+RUN npm install --global yarn
+SHELL ["/bin/bash", "--login", "-c"]
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
