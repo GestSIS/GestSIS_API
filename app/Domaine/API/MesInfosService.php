@@ -26,16 +26,19 @@ class MesInfosService
         // return Ecriture::where('decompte_id', '=', $sapeurId)->get();
     }
 
-    function mesExercices($sapeurId)
+    function mesExercices($sapeurId, $exerciceComptableId)
     {
         return ExerciceSapeur::where('sapeur_id', '=', $sapeurId)
-            ->with('exercice')->get()->toArray();
+            ->join('exercices', 'exercices.id',  '=', 'exercice_sapeur.exercice_id')
+            ->where('exercices.exercice_comptable_id', '=', $exerciceComptableId)
+            ->get()->toArray();
     }
 
-    function mesInterventions($sapeurId)
+    function mesInterventions($sapeurId, $exerciceComptableId)
     {
         $presences = InterventionSapeur::where('intervention_sapeur.sapeur_id', '=', $sapeurId)
             ->join('interventions', 'interventions.id', '=', 'intervention_sapeur.intervention_id')
+            ->where('interventions.exercice_comptable_id', '=', $exerciceComptableId)
             ->select(
                 'intervention_sapeur.*',
                 'interventions.date_debut',
@@ -51,10 +54,11 @@ class MesInfosService
         return $presences;
     }
 
-    function mesDecomptes($sapeurId)
+    function mesDecomptes($sapeurId, $exerciceComptableId)
     {
         $paiements = Paiement::where('sapeur_id', '=', $sapeurId)
             ->join('decomptes', 'paiements.decompte_id', '=', 'decomptes.id')
+            ->where('decomptes.exercice_comptable_id', '=', $exerciceComptableId)
             ->select('paiements.*', 'decomptes.date as date', 'decomptes.designation as decompte')->get();
         $ecritures = Ecriture::where('sapeur_id', '=', $sapeurId)->whereNotNull('decompte_id')->get();
 
