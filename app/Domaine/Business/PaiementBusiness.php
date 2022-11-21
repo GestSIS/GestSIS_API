@@ -11,7 +11,9 @@ use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
+use Exception;
 use FPDM;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Z38\SwissPayment\BIC;
@@ -368,7 +370,12 @@ class PaiementBusiness
             ];
 
             return Response::make($content, 200, $headers);
+        } catch (Exception $e) {
+            Log::error("Certificat de salaire creation", [
+                "exception" => $e,
+            ]);
         } finally {
+
             // Supression du dossier même si erreur php
             Storage::deleteDirectory("tmp/" . $exerciceComptableId);
         }
