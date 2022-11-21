@@ -364,6 +364,13 @@ class PaiementBusiness
             // Création du pdf final
             $content = $merged->toString();
 
+            if ($content === false) {
+                Log::error("Certificat de salaire creation", [
+                    "exception" => $merged->getError(),
+                ]);
+                throw new ArrayException(array("message" => "Erreur lors de la génération du pdf"));
+            }
+
             $headers = [
                 'Content-type'        => 'application/pdf',
                 'Content-Disposition' => 'attachment; filename="certificats_salaire.pdf"',
