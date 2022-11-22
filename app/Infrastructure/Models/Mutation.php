@@ -8,6 +8,6 @@ class Mutation extends Model
 {
     protected $fillable = ['incorporation', 'sortie', 'motif', 'localite_id'];
     protected $casts = [
-        'localite_id' => 'integer'
+        'localite_id' => 'integer', 'sapeur_id' => 'integer'
     ];
 }
