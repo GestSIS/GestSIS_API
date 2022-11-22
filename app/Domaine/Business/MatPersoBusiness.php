@@ -99,31 +99,41 @@ class MatPersoBusiness
 
     public function attribuer($attributions)
     {
-        // Fetch matériel à attribuer
-        $ids = array_map(fn ($a) => $a['id'], $attributions);
-        $mats = MaterielPersonnel::with('materiel')->whereIn('id', $ids)->get();
+        // // Fetch matériel à attribuer
+        // $ids = array_map(fn ($a) => $a['id'], $attributions);
+        // $mats = MaterielPersonnel::with('materiel')->whereIn('id', $ids)->get();
 
-        $materielReference = [];
-        foreach ($mats as $mat) {
-            $materielReference[$mat->id] = $mat;
-        }
+        // $materielReference = [];
+        // foreach ($mats as $mat) {
+        //     $materielReference[$mat->id] = $mat;
+        // }
 
         // Itérer sur $attributions
         foreach ($attributions as $attribution) {
             // Load matériel type
 
-            // TODO Check si matériel numéroté
+            // Check si matériel numéroté
             if ($attribution['quantite'] === null) {
                 // Update matériel existant
                 MaterielPersonnel::where('id', '=', $attribution['id'])
                     ->update([
                         'retour' => null,
                         'attribution' => $attribution['date'],
-                        'sapeur_id' => $attribution['sapeur_id']
+                        'sapeur_id' => $attribution['sapeur_id'],
+                        'remarque' => $attribution['remarque'] ?? ''
                     ]);
             } else {
-                $materielReference = MaterielPersonnel::with('materiel')->find($attribution['id']);
-                $quantiteRestante = max($materielReference->materiel->quantite - $attribution['quantite'], 0);
+                // Matériel générique
+                $materielReference = null;
+                if ($attribution['id'] ?? null != null) {
+                    $materielReference = MaterielPersonnel::with('materiel')->find($attribution['id']);
+                } else {
+                    $materielReference = MaterielPersonnel::with('materiel')->where([
+                        ['sapeur_id', '=', null],
+                        ['taille', '=', $attribution['taille'] ?? ''],
+                        ['materiel_type_id', '=', $attribution['materiel_type_id']],
+                    ])->first();
+                }
 
                 // Ajout du matériel au sapeur
                 $newGenerique = new MaterielGenerique();
@@ -134,20 +144,23 @@ class MatPersoBusiness
                 $newMateriel->fill([
                     'attribution' => $attribution['date'],
                     'retour' => null,
-                    'remarque' => '',
+                    'remarque' => $attribution['remarque'] ?? '',
                     'sapeur_id' => $attribution['sapeur_id'],
-                    'taille' => $materielReference->taille,
+                    'taille' => $materielReference->taille ?? $attribution['taille'] ?? '',
                 ]);
-                $newMateriel->materiel_type_id = $materielReference->materiel_type_id;
+                $newMateriel->materiel_type_id = $materielReference->materiel_type_id ?? $attribution['materiel_type_id'];
                 $newMateriel->materiel_id = $newGenerique->id;
                 $newMateriel->materiel_type = MaterielGenerique::class;
                 $newMateriel->save();
 
-                // Adapter la quantité restante dans l'inventaire
-                MaterielGenerique::where('id', $materielReference->materiel->id)
-                    ->update([
-                        'quantite' => $quantiteRestante,
-                    ]);
+                if ($materielReference) {
+                    $quantiteRestante = max($materielReference->materiel->quantite - $attribution['quantite'], 0);
+                    // Adapter la quantité restante dans l'inventaire
+                    MaterielGenerique::where('id', $materielReference->materiel->id)
+                        ->update([
+                            'quantite' => $quantiteRestante,
+                        ]);
+                }
             }
         }
     }

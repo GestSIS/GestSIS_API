@@ -24,8 +24,10 @@ class MatPersoAttributionController extends Controller
         $data = $request->validate([
             'attributions.*.sapeur_id' => 'required|integer',
             'attributions.*.date' => 'required|date',
-            'attributions.*.id' => 'required|integer',
+            'attributions.*.id' => 'nullable|integer',
+            'attributions.*.materiel_type_id' => 'nullable|integer|min:1',
             'attributions.*.quantite' => 'nullable|integer|min:1',
+            'attributions.*.remarque' => 'nullable|string',
         ]);
 
         $materiels = $this->service->attribuer($data['attributions']);
