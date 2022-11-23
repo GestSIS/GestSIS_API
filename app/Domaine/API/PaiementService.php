@@ -221,7 +221,8 @@ class PaiementService
                 'civilites.forme_politesse as civilite'
             )
             ->orderBy('sapeur')
-            ->orderBy('ecriture_categories.tri', 'ASC')
+            // ->orderBy('ecriture_categories.tri', 'ASC')
+            ->orderBy('ecritures.module', 'ASC')
             ->orderBy('ecritures.date')
             ->orderBy('ecritures.heure')
             ->get();
@@ -248,7 +249,8 @@ class PaiementService
                 'civilites.forme_politesse as civilite'
             )
             ->orderBy('sapeur')
-            ->orderBy('ecriture_categories.tri', 'ASC')
+            // ->orderBy('ecriture_categories.tri', 'ASC')
+            ->orderBy('ecritures.module', 'ASC')
             ->orderBy('ecritures.date')
             ->orderBy('ecritures.heure')
             ->get();

@@ -16,4 +16,9 @@ class MaterielNominal extends Model
     {
         return $this->morphOne(MaterielPersonnel::class, 'materiel');
     }
+
+    public function events()
+    {
+        return $this->hasMany(MaterielEvent::class, 'materiel_event_id');
+    }
 }

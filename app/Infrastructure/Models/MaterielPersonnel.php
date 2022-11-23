@@ -21,9 +21,4 @@ class MaterielPersonnel extends Model
     {
         return $this->morphTo();
     }
-
-    public function events()
-    {
-        return $this->hasMany(MaterielEvent::class, 'materiel_event_id');
-    }
 }

@@ -1,18 +1,13 @@
 <?php
 
-
 namespace App\Domaine\API;
 
-use App\Domaine\Business\InterventionBusiness;
 use App\Domaine\Business\MatPersoBusiness;
-use App\Domaine\Business\MatPersoParamBusiness;
-use App\Domaine\Exceptions\ArrayException;
-use App\Domaine\SPI\InterventionRepository;
 use App\Infrastructure\Models\MaterielAlerte;
+use App\Infrastructure\Models\MaterielGenerique;
+use App\Infrastructure\Models\MaterielNominal;
 use App\Infrastructure\Models\MaterielPersonnel;
-use App\Infrastructure\Models\Sapeur;
-use Exception;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class MatPersoService
 {
@@ -25,7 +20,14 @@ class MatPersoService
 
     public function materiels()
     {
-        return MaterielPersonnel::with('materiel')->get();
+        return MaterielPersonnel //::with('materiel')->get();
+            ::with([
+                'materiel' => function (MorphTo $morphTo) {
+                    $morphTo->morphWith([
+                        MaterielNominal::class => ['events'],
+                    ]);
+                }
+            ])->get();
     }
 
     public function aRecuperer()
