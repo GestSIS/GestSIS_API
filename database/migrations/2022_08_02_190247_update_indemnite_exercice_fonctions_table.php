@@ -15,8 +15,8 @@ class UpdateIndemniteExerciceFonctionsTable extends Migration
     public function up()
     {
         Schema::table('indemnite_exercice_fonctions', function (Blueprint $table) {
-            $table->dropColumn('tarif_min')->nullable();
-            $table->dropColumn('tarif_min_pour')->nullable();
+            $table->dropColumn('tarif_min');
+            $table->dropColumn('tarif_min_pour');
         });
     }
 

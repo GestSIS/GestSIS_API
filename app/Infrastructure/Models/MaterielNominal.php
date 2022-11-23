@@ -19,6 +19,6 @@ class MaterielNominal extends Model
 
     public function events()
     {
-        return $this->hasMany(MaterielEvent::class, 'materiel_event_id');
+        return $this->hasMany(MaterielEvent::class, 'materiel_nominal_id');
     }
 }
