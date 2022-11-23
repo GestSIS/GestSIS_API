@@ -67,9 +67,9 @@
     if(!function_exists('sectionTitle')) {
       function sectionTitle($e)
       {
+        return $e->categorie;
         if (isExercice($e)) {
           return "Exercice";
-        
         }else if(isIntervention($e)){
           return "Intervention";
         }else if(isAnnuel($e)){
@@ -147,11 +147,11 @@
       $nextEcriture = $last ? null : $ecritures[$index + 1];
 
       $debutSapeur = $first || intval($previousEcriture->sapeur_id) !== intval($ecriture->sapeur_id);
-      $debutSection = $debutSapeur || intval($previousEcriture->module) !== intval($ecriture->module);
+      $debutSection = $debutSapeur || intval($previousEcriture->ecriture_categorie_id) !== intval($ecriture->ecriture_categorie_id);
       $debutIntervention = $debutSapeur || intval($previousEcriture->intervention_id) !== intval($ecriture->intervention_id);
 
       $finSapeur = $last || intval($nextEcriture->sapeur_id) !== intval($ecriture->sapeur_id);
-      $finSection = $finSapeur || intval($nextEcriture->module) !== intval($ecriture->module);
+      $finSection = $finSapeur || intval($nextEcriture->ecriture_categorie_id) !== intval($ecriture->ecriture_categorie_id);
       $finIntervention = $finSection || intval($nextEcriture->intervention_id) !== intval($ecriture->intervention_id);
 
       $categorieSousTotal = $debutSection ? 0.0 : $categorieSousTotal;
