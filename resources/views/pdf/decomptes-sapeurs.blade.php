@@ -274,7 +274,8 @@
         <thead>
           <tr>
             <th>Date</th>
-            <th>Désignation</th>
+            <th>Heure</th>
+            <th>Nature du service</th>
             <th>Tarif</th>
             <th>Quantité</th>
             <th class="col-2">Payé /Facturé le</th>
@@ -285,6 +286,7 @@
       @endif
       <tr>
         <td>{{ formatDate($ecriture->date) }}</td>
+        <td>{{ formatTime($ecriture->heure) }}</td>
         <td>{{ $ecriture->designation }}</td>
         <td>{{ formatTarif($ecriture) }}</td>
         <td>{{ formatNumber($ecriture->quantite) }}</td>
