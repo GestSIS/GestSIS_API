@@ -24,14 +24,14 @@ class MatPersoEventController extends Controller
     public function create(Request $request)
     {
         $data = $request->validate([
-            'events.*.event_type_id' => 'required|integer',
-            'events.*.materiel_id' => 'string|required',
-            'events.*.date' => 'required| date',
+            'events.*.materiel_event_type_id' => 'required|integer',
+            'events.*.materiel_id' => 'required|integer',
+            'events.*.date' => 'required|date',
             'events.*.remarque' => 'string|nullable',
             'events.*.success' => 'boolean|nullable',
         ]);
 
-        $materiels = $this->service->create($data['materiels']);
+        $materiels = $this->service->createEvents($data['events']);
         return response()->json(['data' => $materiels]);
     }
 }

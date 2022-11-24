@@ -88,7 +88,7 @@ class ModuleMateriel extends Migration
             $table->timestamps();
 
             $table->dateTime('date');
-            $table->string('remarque');
+            $table->string('remarque')->default('');
             $table->boolean('succes')->default(true);
 
             $table->unsignedBigInteger('materiel_nominal_id');

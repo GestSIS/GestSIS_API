@@ -14,11 +14,11 @@ class UpdateMaterielEvent extends Migration
     public function up()
     {
         Schema::table('materiel_events', function (Blueprint $table) {
-            $table->dropForeign(['materiel_event_id']);
-            $table->dropColumn('materiel_event_id');
+            // $table->dropForeign(['materiel_event_id']);
+            // $table->dropColumn('materiel_event_id');
 
-            $table->unsignedBigInteger('materiel_event_type_id');
-            $table->foreign('materiel_event_type_id')->references('id')->on('materiel_event_types');
+            // $table->unsignedBigInteger('materiel_event_type_id');
+            // $table->foreign('materiel_event_type_id')->references('id')->on('materiel_event_types');
         });
     }
 

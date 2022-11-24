@@ -40,6 +40,12 @@ class MatPersoService
         return MaterielAlerte::with('materiel')->with('materiel')->get();
     }
 
+    public function createEvents($events)
+    {
+        $this->business->createEvents($events);
+        return $this->materiels();
+    }
+
     public function create($materiels)
     {
         $this->business->create($materiels);

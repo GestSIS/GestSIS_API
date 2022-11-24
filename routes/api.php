@@ -65,6 +65,7 @@ use App\Application\Http\Controllers\MatPersoAlerteController;
 use App\Application\Http\Controllers\MatPersoAlerteTypeController;
 use App\Application\Http\Controllers\MatPersoAttributionController;
 use App\Application\Http\Controllers\MatPersoController;
+use App\Application\Http\Controllers\MatPersoEventController;
 use App\Application\Http\Controllers\MatPersoEventTypeController;
 use App\Application\Http\Controllers\MedecinController;
 use App\Application\Http\Controllers\MesDecomptesController;

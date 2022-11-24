@@ -2,12 +2,27 @@
 
 namespace App\Domaine\Business;
 
+use App\Infrastructure\Models\MaterielEvent;
 use App\Infrastructure\Models\MaterielGenerique;
 use App\Infrastructure\Models\MaterielNominal;
 use App\Infrastructure\Models\MaterielPersonnel;
 
 class MatPersoBusiness
 {
+    public function createEvents($events)
+    {
+        $items = [];
+
+        foreach ($events as $event) {
+            $e = new MaterielEvent();
+            $e->fill($event);
+            $e->materiel_nominal_id = $event['materiel_id'];
+            $e->remarque = $event['remarque'] ?? '';
+            $e->materiel_event_type_id = $event['materiel_event_type_id'];
+            $e->save();
+        }
+    }
+
     public function create($materiels)
     {
         $base = [];
