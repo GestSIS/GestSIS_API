@@ -385,7 +385,9 @@
     @endif
     <?php
       $first = false;
-      $previousEcriture = $ecriture;
+      if (!isAvsAc($ecriture)) {
+        $previousEcriture = $ecriture;
+      }
     }
     ?>
 
