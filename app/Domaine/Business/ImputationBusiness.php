@@ -15,6 +15,7 @@ use App\Infrastructure\Models\ExcuseType;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\ExerciceSapeur;
+use App\Infrastructure\Models\Fonction;
 use App\Infrastructure\Models\FonctionSapeur;
 use App\Infrastructure\Models\HeureExercice;
 use App\Infrastructure\Models\Intervention;
@@ -348,6 +349,12 @@ class ImputationBusiness
 
         $fraisIndemnitesTypes = $this->indemniteRepo->listeFraisIndemniteAnnuelType();
 
+        $fonctions = Fonction::all();
+        $indexedFonctions = [];
+        foreach ($fonctions as $fonction) {
+            $indexedFonctions[$fonction['id']] = $fonction['nom'];
+        }
+
         // FIXME: regénérer que pour les sapeurs ne possédants pas d'indemnités ???
         $ecritures = $this->ecritureRepo->listeEcrituresAnnuelsForExerciceComptableById($exerciceComptableId);
         Ecriture::where('module', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)->whereNull('decompte_id')->delete();
@@ -399,7 +406,7 @@ class ImputationBusiness
                 foreach ($fonctions as $fonctionId) {
                     if (array_key_exists($fonctionId, $mapping)) {
                         $indemnite = $mapping[$fonctionId];
-                        $this->imputerFraisIndemniteSapeur($type, $indemnite, $sapeurId, $exerciceComptableId);
+                        $this->imputerFraisIndemniteSapeur($type, $indemnite, $sapeurId, $exerciceComptableId, $indexedFonctions);
 
                         if (!$type['cumulable']) {
                             // Non-cumulable, on passe au sapeur suivant
@@ -411,7 +418,7 @@ class ImputationBusiness
         }
     }
 
-    private function imputerFraisIndemniteSapeur($fraisIndemniteType, $indemnite, $sapeurId, $exerciceComptableId)
+    private function imputerFraisIndemniteSapeur($fraisIndemniteType, $indemnite, $sapeurId, $exerciceComptableId, $indexedFonctions)
     {
         $ecriture = array(
             'tarif' => $indemnite['montant'],
@@ -419,7 +426,7 @@ class ImputationBusiness
             'total' => self::arrondi_5_centimes($indemnite['montant'] * $indemnite['quantite']),
 
             'type_unite_id' => $indemnite['type_unite_id'],
-            'designation' => $fraisIndemniteType['designation'],
+            'designation' => $fraisIndemniteType['designation'] . ' (' . ($indexedFonctions[$indemnite['fonction_id']] ?? '') . ")",
             'sapeur_id' => $sapeurId,
             'compte_id' => $fraisIndemniteType['compte_id'],
             'exercice_comptable_id' => $exerciceComptableId,
