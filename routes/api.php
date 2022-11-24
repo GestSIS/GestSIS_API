@@ -515,6 +515,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('mat-perso', [MatPersoController::class, 'create'])->name('mat-perso.create');
         Route::put('mat-perso', [MatPersoController::class, 'update'])->name('mat-perso.update');
         Route::delete('mat-perso', [MatPersoController::class, 'drestroy'])->name('mat-perso.drestroy');
+
+        // Events
+        Route::post('mat-perso-event', [MatPersoEventController::class, 'create'])->name('mat-perso-event.create');
     });
 
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.config'], function () {

@@ -123,6 +123,7 @@
     $first = true;
     $last = false;
     $nbEcritures = count($ecritures);
+    $nbEcritureSections = 0;
 
     $sapeurId = null;
     $paiement = null;
@@ -159,7 +160,12 @@
       $interventionSousTotal = $debutIntervention ? 0.0 : $interventionSousTotal;
       $interventionSousTotal += $ecriture->total;
 
+      if ($debutSection) {
+        $nbEcritureSections = 0;
+      }
+
       if (!isAvsAc($ecriture)) {
+        $nbEcritureSections++;
         if ($comptes[$ecriture->compte_id]->produit) {
           $sapeurTotal -= $ecriture->total;
         } else {
@@ -334,7 +340,7 @@
       @endif
     @endif
 
-    @if ($finSection && !isAvsAc($ecriture))
+    @if ($finSection && $nbEcritureSections > 0)
       <tfoot>
         <tr>
           <th colspan="{{ isAmende($ecriture) || isDivers($ecriture) ? 5 : 6 }}" class="text-end">Sous-total</th>
