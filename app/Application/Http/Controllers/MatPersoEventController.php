@@ -25,7 +25,7 @@ class MatPersoEventController extends Controller
     {
         $data = $request->validate([
             'events.*.materiel_event_type_id' => 'required|integer',
-            'events.*.materiel_id' => 'required|integer',
+            'events.*.materiel_nominal_id' => 'required|integer',
             'events.*.date' => 'required|date',
             'events.*.remarque' => 'string|nullable',
             'events.*.succes' => 'boolean|nullable',

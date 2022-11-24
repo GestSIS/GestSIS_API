@@ -20,7 +20,7 @@ class MatPersoBusiness
         $alertes = MaterielAlerteType::with('eventTypes')->get();
 
         foreach ($events as $event) {
-            $materiel = MaterielNominal::find($event['materiel_id']);
+            $materiel = MaterielNominal::find($event['materiel_nominal_id']);
             if ($materiel == null) {
                 continue;
             }
@@ -32,7 +32,7 @@ class MatPersoBusiness
 
             $e = new MaterielEvent();
             $e->fill($event);
-            $e->materiel_nominal_id = $event['materiel_id'];
+            $e->materiel_nominal_id = $event['materiel_nominal_id'];
             $e->remarque = $event['remarque'] ?? '';
             $e->materiel_event_type_id = $event['materiel_event_type_id'];
             $e->succes = $event['succes'] ?? false;

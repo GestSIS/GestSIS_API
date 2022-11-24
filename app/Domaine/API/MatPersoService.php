@@ -4,7 +4,6 @@ namespace App\Domaine\API;
 
 use App\Domaine\Business\MatPersoBusiness;
 use App\Infrastructure\Models\MaterielAlerte;
-use App\Infrastructure\Models\MaterielGenerique;
 use App\Infrastructure\Models\MaterielNominal;
 use App\Infrastructure\Models\MaterielPersonnel;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -37,7 +36,7 @@ class MatPersoService
 
     public function alertes()
     {
-        return MaterielAlerte::with('materiel')->with('materiel')->get();
+        return MaterielAlerte::with('materielNominal.materiel')->get();
     }
 
     public function createEvents($events)
