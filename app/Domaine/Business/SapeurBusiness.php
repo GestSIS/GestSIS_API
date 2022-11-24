@@ -39,7 +39,7 @@ class SapeurBusiness
     {
         // TODO: Could be optimised via a single SQL Query
         // Sub query 1 -> check if one mutation contains the current date
-        $sapeurs = Sapeur::with('mutations')->get();
+        $sapeurs = Sapeur::where('type', '=', self::TYPE_SAPEUR)->with('mutations')->get();
         foreach ($sapeurs as $sapeur) {
             $sapeur->actif = $this->isActif($sapeur->mutations);
             $sapeur->save();
