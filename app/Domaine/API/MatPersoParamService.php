@@ -4,10 +4,8 @@
 namespace App\Domaine\API;
 
 use App\Domaine\Business\MatPersoParamBusiness;
-use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\MaterielAlerteType;
 use App\Infrastructure\Models\MaterielCategorie;
-use App\Infrastructure\Models\MaterielEvent;
 use App\Infrastructure\Models\MaterielEventType;
 use App\Infrastructure\Models\MaterielType;
 

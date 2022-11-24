@@ -2,25 +2,65 @@
 
 namespace App\Domaine\Business;
 
+use App\Infrastructure\Models\MaterielAlerte;
+use App\Infrastructure\Models\MaterielAlerteType;
 use App\Infrastructure\Models\MaterielEvent;
+use App\Infrastructure\Models\MaterielEventType;
 use App\Infrastructure\Models\MaterielGenerique;
 use App\Infrastructure\Models\MaterielNominal;
 use App\Infrastructure\Models\MaterielPersonnel;
 
 class MatPersoBusiness
 {
+    public const ALERTE_STATUT_OK = 1;
+    public const ALERTE_STATUT_DESACTIVE = 0;
+
     public function createEvents($events)
     {
-        $items = [];
+        $alertes = MaterielAlerteType::with('eventTypes')->get();
 
         foreach ($events as $event) {
+            $materiel = MaterielNominal::find($event['materiel_id']);
+            if ($materiel == null) {
+                continue;
+            }
+
+            $materielEventType = MaterielEventType::with('alerteTypes')->find($event['materiel_event_type_id']);
+            if ($materielEventType == null) {
+                continue;
+            }
+
             $e = new MaterielEvent();
             $e->fill($event);
             $e->materiel_nominal_id = $event['materiel_id'];
             $e->remarque = $event['remarque'] ?? '';
             $e->materiel_event_type_id = $event['materiel_event_type_id'];
             $e->save();
+
+            $alertes = $materielEventType->alerteTypes()->get();
+            foreach ($alertes as $alerte) {
+                // ['titre', 'description', 'seuil_min', 'dernier']
+                $generateAlerte = false;
+                if ($alerte->dernier) {
+                    $generateAlerte = $materiel->events()->where('materiel_event_type_id', '=', $e->materiel_event_type_id)->orderBy('date', 'desc')->first()->success;
+                } else {
+                    $generateAlerte = $materiel->events()->where('materiel_event_type_id', '=', $e->materiel_event_type_id)->count() >= $alerte->seuil_min;
+                }
+
+                if ($generateAlerte) {
+                    $a = new MaterielAlerte();
+                    // ['titre', 'description', 'materiel_nominal_id', 'statut', 'remarque']
+                    $a->titre = $alerte->titre;
+                    $a->description = $alerte->description;
+                    $a->materiel_nominal_id = $e->materiel_nominal_id;
+                    $a->statut = self::ALERTE_STATUT_OK;
+                    $a->remarque = '';
+                    $a->save();
+                }
+            }
         }
+
+        // TODO: Detect nouvelle alertes
     }
 
     public function create($materiels)
@@ -28,10 +68,9 @@ class MatPersoBusiness
         $base = [];
 
         foreach ($materiels as $materiel) {
-            if ($materiel['materiel']['quantite'] != null) {
+            if ($materiel['materiel']['quantite'] ?? null != null) {
                 $generique = new MaterielGenerique();
-                $generique->numero = $materiel['numero'];
-                $generique->uuid = uniqid($materiel['materiel_type_id'] . "-");
+                $generique->quantite = $materiel['quantite'];
                 $generique->save();
 
                 array_push($base, [
@@ -46,7 +85,9 @@ class MatPersoBusiness
                 ]);
             } else {
                 $nominal = new MaterielNominal();
-                $nominal->quantite = $materiel['quantite'];
+                $nominal->numero = $materiel['materiel']['numero'];
+                $nominal->achat = $materiel['materiel']['achat'] ?? '';
+                $nominal->uuid = uniqid($materiel['materiel_type_id'] . "-");
                 $nominal->save();
 
                 array_push($base, [

@@ -50,7 +50,7 @@ class MatPersoController extends Controller
         $data = $request->validate([
             'materiels.*.taille' => 'string|nullable',
             'materiels.*.remarque' => 'string|nullable',
-            'materiels.*.materiel_type_id' => 'string|nullable',
+            'materiels.*.materiel_type_id' => 'integer|nullable',
             'materiels.*.materiel.quantite' => 'integer|nullable',
             'materiels.*.materiel.numero' => 'string|nullable',
         ]);
@@ -75,6 +75,7 @@ class MatPersoController extends Controller
             'materiels.*.materiel.id' => 'required|integer',
             'materiels.*.materiel.quantite' => 'integer|nullable',
             'materiels.*.materiel.numero' => 'string|nullable',
+            'materiels.*.materiel.achat' => 'string|nullable',
         ]);
 
         $materiels = $this->service->update($data['materiels']);
