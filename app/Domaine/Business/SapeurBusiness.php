@@ -376,16 +376,6 @@ class SapeurBusiness
         }
     }
 
-    private function isStillActif($mutations)
-    {
-        foreach ($mutations as $mutation) {
-            if ($mutation->sortie === NULL) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public function addMutation($sapeurId, $data)
     {
         if (!$this->isSapeur($sapeurId)) {
@@ -398,7 +388,7 @@ class SapeurBusiness
 
         // Update actif statut depending of end of all mutation
         array_push($mutations, $mutation);
-        $actif = $this->isStillActif($mutations) ? 1 : 0;
+        $actif = $this->isActif($mutations) ? 1 : 0;
         $this->repository->updateSapeurStatusById($sapeurId, $actif);
         return ["mutation" => $mutation, "actif" => $actif];
     }
@@ -416,7 +406,7 @@ class SapeurBusiness
 
         // Update actif statut depending of end of all mutation
         array_push($mutations, $mutation);
-        $actif = $this->isStillActif($mutations) ? 1 : 0;
+        $actif = $this->isActif($mutations) ? 1 : 0;
         $this->repository->updateSapeurStatusById($sapeurId, $actif);
         return ["mutation" => $mutation, "actif" => $actif];
     }
@@ -439,7 +429,7 @@ class SapeurBusiness
 
         // Update actif statut depending of end of all mutation
         $mutations = $this->repository->getSapeurMutationsById($sapeurId);
-        $actif = $this->isStillActif($mutations) ? 1 : 0;
+        $actif = $this->isActif($mutations) ? 1 : 0;
         $this->repository->updateSapeurStatusById($sapeurId, $actif);
         return $actif;
     }
