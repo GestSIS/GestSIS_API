@@ -24,9 +24,10 @@ class SapeurBusiness
 
     private function isActif($mutations)
     {
+        $now = Carbon::now()->setTime(0, 0);
         foreach ($mutations as $mutation) {
-            if ((Carbon::parse($mutation->sortie)->gte(Carbon::now()) && Carbon::parse($mutation->incorporation)->lte(Carbon::now())) ||
-                ($mutation->sortie === NULL && Carbon::parse($mutation->incorporation)->lte(Carbon::now()))
+            if ((Carbon::parse($mutation->sortie)->gte($now) && Carbon::parse($mutation->incorporation)->lte($now)) ||
+                ($mutation->sortie === NULL && Carbon::parse($mutation->incorporation)->lte($now))
             ) {
                 return true;
             }
