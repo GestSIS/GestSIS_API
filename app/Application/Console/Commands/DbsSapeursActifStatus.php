@@ -2,17 +2,21 @@
 
 namespace App\Application\Console\Commands;
 
+use App\Domaine\Business\SapeurBusiness;
+use App\Infrastructure\Models\Ecriture;
+use App\Infrastructure\Repositories\SapeurRepositoryEloquent;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Config;
 
-class CustomMigrate extends Command
+class DbsSapeursActifStatus extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'dbs:migrate';
+    protected $signature = 'dbs:sapeurs-actif-status';
 
     /**
      * The console command description.
@@ -39,11 +43,12 @@ class CustomMigrate extends Command
     public function handle()
     {
         $dbs = config('database.dbs');
+        $sapeurBusiness = new SapeurBusiness(new SapeurRepositoryEloquent());
         foreach ($dbs as $db) {
-            printf("DATABASE " . $db . "\n");
-            printf("migrate\n");
-            Artisan::call('migrate --database=' . $db);
-            // Artisan::call('migrate:rollback --step=1 --database=' . $db);
+            printf("Recompute for sis=" . $db . "\n");
+            Config::set('database.default', $db);
+            $sapeurBusiness->recomputeSapeurActifStatus();
+
             printf("\n");
         }
         printf("Migrating done\n");

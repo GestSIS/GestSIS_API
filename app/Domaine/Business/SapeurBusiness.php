@@ -6,12 +6,12 @@ namespace App\Domaine\Business;
 use App\Domaine\SPI\SapeurRepository;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\GradeSapeur;
+use App\Infrastructure\Models\Mutation;
 use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
 
 class SapeurBusiness
 {
-
     const TYPE_SAPEUR = 0;
     const TYPE_POLITIQUE = 1;
 
@@ -20,6 +20,29 @@ class SapeurBusiness
     public function __construct(SapeurRepository $repository)
     {
         $this->repository = $repository;
+    }
+
+    private function isActif($mutations)
+    {
+        foreach ($mutations as $mutation) {
+            if ((Carbon::parse($mutation->sortie)->gte(Carbon::now()) && Carbon::parse($mutation->incorporation)->lte(Carbon::now())) ||
+                ($mutation->sortie === NULL && Carbon::parse($mutation->incorporation)->lte(Carbon::now()))
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function recomputeSapeurActifStatus()
+    {
+        // TODO: Could be optimised via a single SQL Query
+        // Sub query 1 -> check if one mutation contains the current date
+        $sapeurs = Sapeur::with('mutations')->get();
+        foreach ($sapeurs as $sapeur) {
+            $sapeur->actif = $this->isActif($sapeur->mutations);
+            $sapeur->save();
+        }
     }
 
     private function isSapeur($sapeurId)
