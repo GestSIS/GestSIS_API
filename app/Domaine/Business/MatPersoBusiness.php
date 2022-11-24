@@ -35,6 +35,7 @@ class MatPersoBusiness
             $e->materiel_nominal_id = $event['materiel_id'];
             $e->remarque = $event['remarque'] ?? '';
             $e->materiel_event_type_id = $event['materiel_event_type_id'];
+            $e->succes = $event['succes'] ?? false;
             $e->save();
 
             $alertes = $materielEventType->alerteTypes()->get();
@@ -42,12 +43,12 @@ class MatPersoBusiness
                 // ['titre', 'description', 'seuil_min', 'dernier']
                 $generateAlerte = false;
                 if ($alerte->dernier) {
-                    $generateAlerte = $materiel->events()->where('materiel_event_type_id', '=', $e->materiel_event_type_id)->orderBy('date', 'desc')->first()->success;
+                    $generateAlerte = !$materiel->events()->where('materiel_event_type_id', '=', $e->materiel_event_type_id)->orderBy('date', 'desc')->first()->succes;
                 } else {
                     $generateAlerte = $materiel->events()->where('materiel_event_type_id', '=', $e->materiel_event_type_id)->count() >= $alerte->seuil_min;
                 }
 
-                if ($generateAlerte) {
+                if ($generateAlerte == true || $generateAlerte == 1) {
                     $a = new MaterielAlerte();
                     // ['titre', 'description', 'materiel_nominal_id', 'statut', 'remarque']
                     $a->titre = $alerte->titre;
@@ -59,8 +60,6 @@ class MatPersoBusiness
                 }
             }
         }
-
-        // TODO: Detect nouvelle alertes
     }
 
     public function create($materiels)

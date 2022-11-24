@@ -13,6 +13,6 @@ class MaterielEvent extends Model
         'date', 'remarque', 'succes'
     ];
     protected $casts = [
-        'date' => 'date', 'succes' => 'integer', 'materiel_nominal_id' => 'integer', 'materiel_event_type_id' => 'integer'
+        'date' => 'date', 'succes' => 'boolean', 'materiel_nominal_id' => 'integer', 'materiel_event_type_id' => 'integer'
     ];
 }

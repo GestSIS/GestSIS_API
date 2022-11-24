@@ -28,7 +28,7 @@ class MatPersoEventController extends Controller
             'events.*.materiel_id' => 'required|integer',
             'events.*.date' => 'required|date',
             'events.*.remarque' => 'string|nullable',
-            'events.*.success' => 'boolean|nullable',
+            'events.*.succes' => 'boolean|nullable',
         ]);
 
         $materiels = $this->service->createEvents($data['events']);
