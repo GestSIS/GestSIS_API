@@ -2,28 +2,25 @@
 
 namespace App\Application\Console\Commands;
 
-use App\Domaine\Business\SapeurBusiness;
+use App\Domaine\Business\ImputationBusiness;
 use App\Infrastructure\Models\Ecriture;
-use App\Infrastructure\Repositories\SapeurRepositoryEloquent;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Config;
 
-class DbsSapeursActifStatus extends Command
+class DbsFixEcrituresAvs extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'dbs:sapeurs-actif-status';
+    protected $signature = 'dbs:fix-ecritures-avs';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Recalcule le status actif/inactif des sapeurs';
+    protected $description = 'Command description';
 
     /**
      * Create a new command instance.
@@ -43,12 +40,11 @@ class DbsSapeursActifStatus extends Command
     public function handle()
     {
         $dbs = config('database.dbs');
-        $sapeurBusiness = new SapeurBusiness(new SapeurRepositoryEloquent());
         foreach ($dbs as $db) {
-            printf("Recompute for sis=" . $db . "\n");
-            Config::set('database.default', $db);
-            $sapeurBusiness->recomputeSapeurActifStatus();
-
+            printf("Fix db=" . $db . "\n");
+            foreach (Ecriture::on($db)->where('module', '=', ImputationBusiness::ECRITURE_MODULE_AVS)->get() as $ecriture) {
+                Ecriture::on($db)->where('id', $ecriture->id)->update(['total' => -$ecriture->total]);
+            }
             printf("\n");
         }
         printf("Migrating done\n");

@@ -19,7 +19,7 @@ class DbsSeed extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Seed les bases de données';
 
     /**
      * Create a new command instance.

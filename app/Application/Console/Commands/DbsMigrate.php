@@ -19,7 +19,7 @@ class DbsMigrate extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Migrate les bases de données';
 
     /**
      * Create a new command instance.

@@ -198,7 +198,7 @@ class PaiementBusiness
                 $ecritureAvsAc[] = [
                     'tarif' => $total['avs_ac_a_cotiser'],
                     'quantite' => 1,
-                    'total' => $total['avs_ac_a_cotiser'],
+                    'total' => -$total['avs_ac_a_cotiser'],
 
                     'designation' => $designation,
                     'type_unite_id' => ImputationBusiness::UNITE_FORFAIT,
