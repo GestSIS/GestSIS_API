@@ -39,7 +39,7 @@
       <div class="mt-5">
         <p class="text-justify">
           @foreach (explode("\n", str_replace(["\r\n", "\n\r", "\r"], "\n", $params['texteDebut'])) as $line)
-            {{ $line }}<br> [NewLine]
+            {{ $line }}<br />
           @endforeach
         </p>
       </div>
@@ -85,7 +85,7 @@
       <div class="mt-5">
         <p class="text-justify">
           @foreach (explode("\n", str_replace(["\r\n", "\n\r", "\r"], "\n", $params['texteFin'])) as $line)
-            {{ $line }}<br>
+            {{ $line }}<br />
           @endforeach
         </p>
       </div>
