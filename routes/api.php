@@ -394,6 +394,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('unites', [UniteController::class, 'index'])->name('api.v2.unites');
     });
 
+    Route::group(['middleware' => 'jwtTokenRole:cours.lecture,comptabilite.tout'], function () {
+        Route::get('cours-sapeurs/{exerciceComptableId}', [CoursSapeurController::class, 'index']);
+    });
+
     // Comptabilite
     Route::group(['middleware' => 'jwtTokenRole:comptabilite.tout'], function () {
         Route::post('imputation/annuel/{id}', [ImputationController::class, 'annuel']);
@@ -419,9 +423,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         Route::get('exercices-comptable/{exercieComptableId}/comptes/{compteId}/justificatif', [CompteController::class, 'justificatifIndividuel']);
         Route::get('exercices-comptable/{exercieComptableId}/justificatif', [CompteController::class, 'justificatifComplet']);
-
-        // Cours à imputer
-        Route::get('cours-sapeurs/{exerciceComptableId}', [CoursSapeurController::class, 'index']);
 
         // Params Comptabilite
         Route::resource('comptes', CompteController::class)->only(['index']);

@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\CoursService;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class CoursSapeurController extends Controller
@@ -17,8 +18,14 @@ class CoursSapeurController extends Controller
      *
      * @return Response
      */
-    public function index($exerciceComptableId)
+    public function index(Request $request, $exerciceComptableId)
     {
-        return response()->json(['data' => $this->service->coursSapeurs($exerciceComptableId)]);
+        // Check si permission comptabilite
+        $admin = $request->get('admin', false);
+        $permissions = $request->get('permissions', []);
+
+        $avecEcritures = $admin || array_key_exists('comptabilite.tout', $permissions);
+
+        return response()->json(['data' => $this->service->coursSapeurs($exerciceComptableId, $avecEcritures)]);
     }
 }

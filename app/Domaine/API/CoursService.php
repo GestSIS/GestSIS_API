@@ -18,14 +18,14 @@ class CoursService
     //     $this->business = $business;
     // }
 
-    public function coursSapeurs($exerciceComptableId)
+    public function coursSapeurs($exerciceComptableId, $avecEcritures)
     {
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
         if ($exerciceComptable == null) {
             return [];
         }
 
-        return CoursSapeur::with(['cours', 'ecritures'])->where([
+        return CoursSapeur::with($avecEcritures ? ['cours', 'ecritures'] : [])->where([
             ['date', '>=', $exerciceComptable->debut],
             ['date', '<=', $exerciceComptable->fin],
         ])->orderBy('date')->get();

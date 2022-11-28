@@ -40,6 +40,11 @@ class JwtTokenValidatorSapeurOrRole
             return response()->json(["error" => "Votre compte n'est pas lié à un sapeur de ce SIS"], 401);
         }
 
+        if ($token->data->admin === True) {
+            $request->attributes->add(['admin' => true]);
+        }
+        $request->attributes->add(['permissions' => $permissions]);
+
         if (array_key_exists($sisKey, $sapeurs)) {
             $request->attributes->add(['sapeurId' => $sapeurs[$sisKey]]);
         }
