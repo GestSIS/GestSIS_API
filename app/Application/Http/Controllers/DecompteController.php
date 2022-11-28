@@ -32,11 +32,12 @@ class DecompteController extends Controller
         ]);
 
         $selection = $request->validate([
+            'ecrituresAmende' => 'required|boolean',
+            'ecrituresAnnuel' => 'required|boolean',
+            'ecrituresCours' => 'required|boolean',
+            'ecrituresDivers' => 'required|boolean',
             'ecrituresExercice' => 'required|boolean',
             'ecrituresIntervention' => 'required|boolean',
-            'ecrituresDivers' => 'required|boolean',
-            'ecrituresAnnuel' => 'required|boolean',
-            'ecrituresAmende' => 'required|boolean',
         ]);
 
         try {

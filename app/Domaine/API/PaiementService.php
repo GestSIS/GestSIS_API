@@ -60,6 +60,9 @@ class PaiementService
         if ($selection['ecrituresIntervention']) {
             $modules[] = ImputationBusiness::ECRITURE_MODULE_INTERVENTION;
         }
+        if ($selection['ecrituresCours']) {
+            $modules[] = ImputationBusiness::ECRITURE_MODULE_COURS;
+        }
         if ($selection['ecrituresDivers']) {
             $modules[] = ImputationBusiness::ECRITURE_MODULE_DIVERS;
         }
