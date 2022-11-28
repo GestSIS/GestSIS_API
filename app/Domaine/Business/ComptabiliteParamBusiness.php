@@ -12,6 +12,7 @@ use App\Infrastructure\Models\ExerciceCategorie;
 use App\Infrastructure\Models\FraisIndemniteAnnuel;
 use App\Infrastructure\Models\FraisIndemniteAnnuelType;
 use App\Infrastructure\Models\HeureExerciceType;
+use App\Infrastructure\Models\IndemniteCoursType;
 use App\Infrastructure\Models\IndemniteExerciceFonction;
 use App\Infrastructure\Models\IndemniteExerciceType;
 use App\Infrastructure\Models\IndemniteInterventionFonction;
@@ -238,5 +239,36 @@ class ComptabiliteParamBusiness
         }
         Compte::where('id', '=', $id)->limit(1)->delete();
         return true;
+    }
+
+    public static function ajouterIndemniteCoursType($data)
+    {
+        $indemnite = IndemniteCoursType::create($data);
+        if (!array_key_exists('fonctions', $data)) {
+            $data['fonctions'] = [];
+        }
+        $indemnite->fonctions()->createMany($data['fonctions']);
+        $indemnite->fonctions;
+        return $indemnite;
+    }
+
+    public static function modifierIndemniteCoursType($id, $data)
+    {
+        $indemnite = IndemniteCoursType::find($id);
+        $indemnite->update($data);
+
+        $indemnite->fonctions()->delete();
+        if (!array_key_exists('fonctions', $data)) {
+            $data['fonctions'] = [];
+        }
+        $indemnite->fonctions()->createMany($data['fonctions']);
+
+        $indemnite->fonctions;
+        return $indemnite;
+    }
+
+    public static function supprimerIndemniteCoursType($id)
+    {
+        IndemniteCoursType::where('id', $id)->limit(1)->delete();
     }
 }

@@ -9,6 +9,7 @@ use App\Domaine\SPI\IndemniteTypeRepository;
 use App\Infrastructure\Models\Amende;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\EcritureCategorie;
+use App\Infrastructure\Models\IndemniteCoursType;
 
 class ComptabiliteParamService
 {
@@ -42,9 +43,10 @@ class ComptabiliteParamService
     function fraisIndemnitesTypes()
     {
         return array(
+            "annuels" => $this->indemniteRepo->listeFraisIndemniteAnnuelType(),
+            "cours" => $this->indemniteRepo->listeIndemniteCoursType(),
             "exercices" => $this->indemniteRepo->listeIndemniteExerciceType(),
             "interventions" => $this->indemniteRepo->listeIndemniteInterventionType(),
-            "annuels" => $this->indemniteRepo->listeFraisIndemniteAnnuelType(),
         );
     }
 
@@ -161,5 +163,20 @@ class ComptabiliteParamService
     public function supprimerCompte($id)
     {
         return $this->business->supprimerCompte($id);
+    }
+
+    public function ajouterIndemniteCoursType($data)
+    {
+        return $this->business->ajouterIndemniteCoursType($data);
+    }
+
+    public function modifierIndemniteCoursType($id, $data)
+    {
+        return $this->business->modifierIndemniteCoursType($id, $data);
+    }
+
+    public function supprimerIndemniteCoursType($id)
+    {
+        return $this->business->supprimerIndemniteCoursType($id);
     }
 }

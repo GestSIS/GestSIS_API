@@ -24,6 +24,7 @@ use App\Application\Http\Controllers\ControleMedicalTypeController;
 use App\Application\Http\Controllers\ConvocationController;
 use App\Application\Http\Controllers\ConvocationsController;
 use App\Application\Http\Controllers\CoursController;
+use App\Application\Http\Controllers\CoursSapeurController;
 use App\Application\Http\Controllers\DecompteController;
 use App\Application\Http\Controllers\EcritureCategorieController;
 use App\Application\Http\Controllers\EcritureController;
@@ -44,6 +45,7 @@ use App\Application\Http\Controllers\GroupeController;
 use App\Application\Http\Controllers\GroupeSapeursController;
 use App\Application\Http\Controllers\HeureExerciceTypeController;
 use App\Application\Http\Controllers\ImputationController;
+use App\Application\Http\Controllers\IndemniteCoursTypeController;
 use App\Application\Http\Controllers\IndemniteExerciceTypeController;
 use App\Application\Http\Controllers\IndemniteInterventionTypeController;
 use App\Application\Http\Controllers\InterventionAppelsController;
@@ -398,6 +400,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::delete('imputation/intervention/{id}', [ImputationController::class, 'cancelIntervention']);
         Route::post('imputation/exercice/{id}', [ImputationController::class, 'exercice']);
         Route::delete('imputation/exercice/{id}', [ImputationController::class, 'cancelExercice']);
+        Route::post('imputation/cours/{id}', [ImputationController::class, 'cours']);
+        Route::delete('imputation/cours/{id}', [ImputationController::class, 'cancelCours']);
         Route::post('imputation/annuel/{id}', [ImputationController::class, 'annuel']);
         Route::delete('imputation/annuel/{id}', [ImputationController::class, 'cancelAnnuel']);
 
@@ -416,10 +420,14 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('exercices-comptable/{exercieComptableId}/comptes/{compteId}/justificatif', [CompteController::class, 'justificatifIndividuel']);
         Route::get('exercices-comptable/{exercieComptableId}/justificatif', [CompteController::class, 'justificatifComplet']);
 
+        // Cours à imputer
+        Route::get('cours-sapeurs/{exerciceComptableId}', [CoursSapeurController::class, 'index']);
+
         // Params Comptabilite
         Route::resource('comptes', CompteController::class)->only(['index']);
         Route::resource('indemnites-exercice-types', IndemniteExerciceTypeController::class)->only(['index']);
         Route::resource('indemnites-intervention-types', IndemniteInterventionTypeController::class)->only(['index']);
+        Route::resource('indemnites-cours-types', IndemniteCoursTypeController::class)->only(['index']);
         Route::resource('frais-indemnites-types', FraisIndemniteTypeController::class)->only(['index']);
         Route::resource('frais-indemnites-annuel-types', FraisIndemniteAnnuelTypeController::class)->only(['index']);
         Route::resource('ecriture-categories', EcritureCategorieController::class)->only(['index']);
@@ -473,6 +481,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         Route::resource('amendes', AmendeController::class)->only(['store']);
         Route::resource('heure-exercice-types', HeureExerciceTypeController::class)->only(['store', 'update', 'destroy']);
+
+        Route::resource('indemnites-cours-types', IndemniteCoursTypeController::class)->only(['store', 'update', 'destroy']);
     });
 
     // Controles médicaux

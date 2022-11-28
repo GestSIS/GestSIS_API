@@ -5,12 +5,18 @@ namespace App\Infrastructure\Repositories;
 
 use App\Domaine\SPI\IndemniteTypeRepository;
 use App\Infrastructure\Models\FraisIndemniteAnnuelType;
+use App\Infrastructure\Models\IndemniteCoursType;
 use App\Infrastructure\Models\IndemniteExerciceType;
 use App\Infrastructure\Models\IndemniteInterventionType;
 use stdClass;
 
 class IndemniteTypeRepositoryEloquent implements IndemniteTypeRepository
 {
+    public function listeIndemniteCoursType()
+    {
+        return IndemniteCoursType::with('fonctions')->get()->toArray();
+    }
+
     public function listeIndemniteExerciceType()
     {
         return IndemniteExerciceType::with('fonctions')->get()->toArray();

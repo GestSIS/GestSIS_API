@@ -10,6 +10,7 @@ use App\Domaine\SPI\SapeurRepository;
 use App\Domaine\Exceptions\ArrayException;
 use Carbon\Carbon;
 use App\Infrastructure\Models\Amende;
+use App\Infrastructure\Models\CoursSapeur;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\ExcuseType;
 use App\Infrastructure\Models\Exercice;
@@ -18,6 +19,7 @@ use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\Fonction;
 use App\Infrastructure\Models\FonctionSapeur;
 use App\Infrastructure\Models\HeureExercice;
+use App\Infrastructure\Models\IndemniteCoursType;
 use App\Infrastructure\Models\Intervention;
 
 class ImputationBusiness
@@ -1039,5 +1041,100 @@ class ImputationBusiness
                 $this->ecritureRepo->persisteNewEcriture($ecriture);
             }
         }
+    }
+
+    /**
+     * Génères des frais annuels pour les sapeurs n'ayant pas encore de frais annuels
+     */
+    public function imputerCours(int $coursSapeurId, $data)
+    {
+        // Chargement du cours
+        $cours = CoursSapeur::with(['cours', 'ecritures'])->find($coursSapeurId);
+
+        // Check que le cours n'est pas déjà imputé
+        if (count($cours->ecritures) > 0) {
+            throw new ArrayException([], "Cours déjà imputé");
+        }
+
+        // Chargement de l'indemnité type
+        $indemniteType = IndemniteCoursType::with('fonctions')->find($data['indemnite_cours_type_id']);
+        if ($indemniteType == null) {
+            throw new ArrayException([], "Indemnité type invalide");
+        }
+
+        $ecritures = [];
+
+        foreach ($indemniteType->fonctions as $fonction) {
+            switch ($fonction->type_unite_id) {
+                case self::UNITE_JOUR:
+                    // Génération de l'écriture
+                    $ecritures[] = [
+                        'tarif' => $fonction->tarif,
+                        'quantite' => $cours->duree,
+                        'total' => $cours->duree * $fonction->tarif,
+
+                        'compte_id' => $fonction->compte_id,
+
+                        'designation' => "Cours " . $cours->cours->designation,
+                        'type_unite_id' => $fonction->type_unite_id,
+                        'sapeur_id' => $cours->sapeur_id,
+                        'cours_sapeur_id' => $coursSapeurId,
+                        'exercice_comptable_id' => $data['exercice_comptable_id'],
+                        'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+                        'date' => $cours->date,
+                        'heure' => '',
+
+                        'module' => self::ECRITURE_MODULE_COURS,
+                        'type' => $fonction->type,
+                    ];
+
+                    break;
+                case self::UNITE_FORFAIT:
+                case self::UNITE_PIECE:
+                    // Génération de l'écriture
+                    $ecritures[] = [
+                        'tarif' => $fonction->tarif,
+                        'quantite' => 1.0,
+                        'total' => $fonction->tarif,
+
+                        'compte_id' => $fonction->compte_id,
+
+                        'designation' => "Cours " . $cours->cours->designation,
+                        'type_unite_id' => $fonction->type_unite_id,
+                        'sapeur_id' => $cours->sapeur_id,
+                        'cours_sapeur_id' => $coursSapeurId,
+                        'exercice_comptable_id' => $data['exercice_comptable_id'],
+                        'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+                        'date' => $cours->date,
+                        'heure' => '',
+
+                        'module' => self::ECRITURE_MODULE_COURS,
+                        'type' => $fonction->type,
+                    ];
+                    break;
+                default:
+                    throw new ArrayException([], "Unité de l'indemnité type invalide");
+            }
+        }
+
+        Ecriture::insert($ecritures);
+        return $ecritures;
+    }
+
+    public function annulerImputationCours($coursSapeurId)
+    {
+        // Check si des ecritures sont déjà liées à un décompte
+        if (Ecriture::where('cours_sapeur_id', $coursSapeurId)
+            ->whereNotNull('decompte_id')
+            ->exists()
+        ) {
+            throw new ArrayException([], 'Des écriture sont déjà facturées dans un décompte.');
+        }
+
+        // Suppression des écritures
+        Ecriture::where('cours_sapeur_id', $coursSapeurId)
+            ->delete();
+
+        return true;
     }
 }

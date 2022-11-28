@@ -60,4 +60,21 @@ class ImputationController extends Controller
         $res = $this->service->annulerImputationAnnuel($id);
         return response()->json(['data' => $res ? 'ok' : 'ko']);
     }
+
+    public function cours(Request $request, int $id)
+    {
+        $data = $request->validate([
+            'indemnite_cours_type_id' => 'integer',
+            'exercice_comptable_id' => 'integer',
+        ]);
+
+        $res = $this->service->imputationCours($id, $data);
+        return response()->json(['data' => $res]);
+    }
+
+    public function cancelCours(int $id)
+    {
+        $res = $this->service->annulerImputationCours($id);
+        return response()->json(['data' => $res]);
+    }
 }

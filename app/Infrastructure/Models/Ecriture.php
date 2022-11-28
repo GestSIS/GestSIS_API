@@ -28,6 +28,7 @@ class Ecriture extends Model
         'exercice_id',
         'decompte_id',
         'ecriture_categorie_id',
+        'cours_sapeur_id',
 
         'type',
         // Types pour imposition
@@ -51,7 +52,6 @@ class Ecriture extends Model
         // 8. Remboursement à l'employeur ?
 
         // TODO: Modules à implémenter
-        // cours
         // décompte d'heure
     ];
 

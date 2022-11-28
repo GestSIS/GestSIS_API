@@ -121,6 +121,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         if (!array_key_exists('taux_description', $ecriture)) $ecriture['taux_description'] = null;
 
         if (!array_key_exists('exercice_comptable_id', $ecriture)) $ecriture['exercice_comptable_id'] = null;
+        if (!array_key_exists('cours_sapeur_id', $ecriture)) $ecriture['cours_sapeur_id'] = null;
         if (!array_key_exists('intervention_id', $ecriture)) $ecriture['intervention_id'] = null;
         if (!array_key_exists('exercice_id', $ecriture)) $ecriture['exercice_id'] = null;
         if (!array_key_exists('decompte_id', $ecriture)) $ecriture['decompte_id'] = null;
@@ -130,6 +131,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $model = new Ecriture();
         $model->fill($ecriture);
         $model->save();
+        return $model;
     }
 
     protected function convertCollectionOfEcritures($ecritures)

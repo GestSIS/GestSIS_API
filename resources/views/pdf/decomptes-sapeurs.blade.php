@@ -18,22 +18,19 @@
 <body>
   <div class="">
     <?php
-    // public const ECRITURE_MODULE_DIVERS = 0;
-    // public const ECRITURE_MODULE_EXERCICE = 1;
-    // public const ECRITURE_MODULE_INTERVENTION = 2;
-    // public const ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL = 3;
-    // public const ECRITURE_MODULE_AVS = 4;
-    // public const ECRITURE_MODULE_AMENDE = 5;
-    // public const ECRITURE_MODULE_DECOMPTE_HEURE = 6;
-    // public const ECRITURE_MODULE_COURS = 7;
-    // public const ECRITURE_MODULE_REMBOURSEMENT = 8;
-    if (! function_exists('isExercice')) {
+    if (!function_exists('isExercice')) {
       function isExercice($e)
       {
         return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_EXERCICE;
       }
     }
-    if (! function_exists('isIntervention')) {
+    if (!function_exists('isCours')) {
+      function isCours($e)
+      {
+        return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_COURS;
+      }
+    }
+    if (!function_exists('isIntervention')) {
       function isIntervention($e)
       {
         return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_INTERVENTION;
@@ -68,18 +65,6 @@
       function sectionTitle($e)
       {
         return $e->categorie;
-        if (isExercice($e)) {
-          return "Exercice";
-        }else if(isIntervention($e)){
-          return "Intervention";
-        }else if(isAnnuel($e)){
-          return "Frais & indemnités annuelles";
-        }else if(isDivers($e)){
-          return "Divers";
-        }else if(isAmende($e)){
-          return "Amende";
-        }
-        return "Autres";
       }
     }
     if(!function_exists('formatNumber')) {
@@ -237,6 +222,35 @@
       <tr>
         <td>{{ formatDate($ecriture->date) }}</td>
         <td>{{ formatTime($ecriture->heure) }}</td>
+        <td>{{ $ecriture->designation }}</td>
+        <td>{{ formatTarif($ecriture) }}</td>
+        <td>{{ formatNumber($ecriture->quantite) }}</td>
+        <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
+        <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
+      </tr>
+      @if ($finSection)
+        </tbody>
+      @endif
+    @endif
+
+    @if (isCours($ecriture))
+      @if ($debutSection)
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Heures</th>
+            <th>Nature du service</th>
+            <th>Tarif</th>
+            <th class="col-1">Quantité</th>
+            <th class="col-2">Payé le</th>
+            <th class="text-center col-1">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+      @endif
+      <tr>
+        <td>{{ formatDate($ecriture->date) }}</td>
+        <td></td>
         <td>{{ $ecriture->designation }}</td>
         <td>{{ formatTarif($ecriture) }}</td>
         <td>{{ formatNumber($ecriture->quantite) }}</td>
