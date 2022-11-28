@@ -28,6 +28,6 @@ class CoursService
         return CoursSapeur::with(['cours', 'ecritures'])->where([
             ['date', '>=', $exerciceComptable->debut],
             ['date', '<=', $exerciceComptable->fin],
-        ])->get();
+        ])->orderBy('date')->get();
     }
 }
