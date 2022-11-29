@@ -5,9 +5,11 @@ namespace App\Domaine\API;
 use App\Domaine\Business\SapeurBusiness;
 use App\Domaine\SPI\ControleMedicalRepository;
 use App\Domaine\SPI\SapeurRepository;
+use App\Infrastructure\Collections\ListeFsspExport;
 use App\Infrastructure\Models\MaterielPersonnel;
 use App\Infrastructure\Models\Sapeur;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SapeurService
 {
@@ -25,6 +27,11 @@ class SapeurService
     public function listeSapeurs()
     {
         return $this->repository->listeSapeurLight();
+    }
+
+    public function listeFssp()
+    {
+        return Excel::download(new ListeFsspExport(), 'liste_fssp.xlsx');
     }
 
     public function effectif()

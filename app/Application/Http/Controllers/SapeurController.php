@@ -36,6 +36,14 @@ class SapeurController extends Controller
     }
 
     /**
+     * Return la liste fssp
+     */
+    public function listeFssp()
+    {
+        return $this->service->listeFssp();
+    }
+
+    /**
      * Return the effectif
      */
     public function convocationSms()

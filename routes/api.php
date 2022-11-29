@@ -134,8 +134,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::delete('localites-sis', [LocaliteSisController::class, 'destroy'])->name('api.v2.localites-sis-destroy');
     });
 
+
     Route::group(['middleware' => 'jwtTokenRole:effectif.tout,sapeur.lecture,sapeur.modification,sapeur.config'], function () {
         Route::get('effectif', [SapeurController::class, 'effectif'])->name('api.v2.effectif');
+        Route::get('liste-fssp', [SapeurController::class, 'listeFssp'])->name('api.v2.liste-fssp');
     });
 
     // Sapeurs
