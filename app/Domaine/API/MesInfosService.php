@@ -32,10 +32,11 @@ class MesInfosService
         $heures = HeureExercice::where('sapeur_id', '=', $sapeurId)->get()->toArray();
         $sapeurs = ExerciceSapeur::where('sapeur_id', '=', $sapeurId)->get()->toArray();
 
-        $exercices = Exercice::whereIn('id', array_merge(
-            array_map(fn ($h) => $h['exercice_id'], $heures),
-            array_map(fn ($h) => $h['exercice_id'], $sapeurs),
-        ))->get()->toArray();
+        $exercices = Exercice::where('exercice_comptable_id', '=', $exerciceComptableId)
+            ->whereIn('id', array_merge(
+                array_map(fn ($h) => $h['exercice_id'], $heures),
+                array_map(fn ($h) => $h['exercice_id'], $sapeurs),
+            ))->get()->toArray();
 
         $dictionary = [];
         foreach ($exercices as $exercice) {
@@ -45,10 +46,14 @@ class MesInfosService
         }
 
         foreach ($sapeurs as $sapeur) {
-            $dictionary[$sapeur['exercice_id']]['presence'] = $sapeur;
+            if (array_key_exists($sapeur['exercice_id'], $dictionary)) {
+                $dictionary[$sapeur['exercice_id']]['presence'] = $sapeur;
+            }
         }
         foreach ($heures as $heure) {
-            $dictionary[$heure['exercice_id']]['heures'][] = $heure;
+            if (array_key_exists($sapeur['exercice_id'], $dictionary)) {
+                $dictionary[$heure['exercice_id']]['heures'][] = $heure;
+            }
         }
         return array_values($dictionary);
     }
