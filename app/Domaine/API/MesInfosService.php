@@ -7,6 +7,7 @@ use App\Domaine\Business\PaiementBusiness;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceSapeur;
+use App\Infrastructure\Models\HeureExercice;
 use App\Infrastructure\Models\InterventionSapeur;
 use App\Infrastructure\Models\Paiement;
 use Illuminate\Support\Facades\DB;
@@ -28,10 +29,28 @@ class MesInfosService
 
     function mesExercices($sapeurId, $exerciceComptableId)
     {
-        return ExerciceSapeur::where('sapeur_id', '=', $sapeurId)
-            ->join('exercices', 'exercices.id',  '=', 'exercice_sapeur.exercice_id')
-            ->where('exercices.exercice_comptable_id', '=', $exerciceComptableId)
-            ->get()->toArray();
+        $heures = HeureExercice::where('sapeur_id', '=', $sapeurId)->get()->toArray();
+        $sapeurs = ExerciceSapeur::where('sapeur_id', '=', $sapeurId)->get()->toArray();
+
+        $exercices = Exercice::whereIn('id', array_merge(
+            array_map(fn ($h) => $h['exercice_id'], $heures),
+            array_map(fn ($h) => $h['exercice_id'], $sapeurs),
+        ))->get()->toArray();
+
+        $dictionary = [];
+        foreach ($exercices as $exercice) {
+            $dictionary[$exercice['id']] = $exercice;
+            $dictionary[$exercice['id']]['heures'] = [];
+            $dictionary[$exercice['id']]['presence'] = null;
+        }
+
+        foreach ($sapeurs as $sapeur) {
+            $dictionary[$sapeur['exercice_id']]['presence'] = $sapeur;
+        }
+        foreach ($heures as $heure) {
+            $dictionary[$heure['exercice_id']]['heures'][] = $heure;
+        }
+        return array_values($dictionary);
     }
 
     function mesInterventions($sapeurId, $exerciceComptableId)
