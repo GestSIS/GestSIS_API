@@ -85,25 +85,10 @@ class ConvocationsController extends Controller
             'sapeurs.*.heures.*.heure_exercice_type_id' => 'nullable|integer',
         ]);
 
-        // Récupération des permissions
-        $sisKey = $request->header('Sis-Id', Null);
-        if (is_null($sisKey)) {
-            return response()->json(["error" => "Sis non sélectionné"], 401);
-        }
-
-        try {
-            $token = TokenTools::validateToken($request->bearerToken());
-        } catch (Exception $e) {
-            return response()->json(["error" => "Accès refusé"], 401);
-        }
-
         // Check has role for provided sis
-        $perms = (array) $token->data->permissions;
-        if (!array_key_exists($sisKey, $perms)) {
-            return response()->json(["error" => "Aucun droit pour ce sis"], 401);
-        }
-        $hasValidationPremission = in_array('exercice.validation', $perms[$sisKey]);
-
+        $admin = $request->get('admin', false);
+        $perms = $request->get('permissions', []);
+        $hasValidationPremission = $admin || in_array('exercice.validation', $perms);
         // Appel du business
         $sapeur = $this->service->updateSapeurs($exerciceId, $data['sapeurs'], $hasValidationPremission);
 

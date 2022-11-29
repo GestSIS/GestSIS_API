@@ -247,7 +247,7 @@ class ExerciceBusiness
 
         // Updated sapeurs
         $sapeursModifies = array_filter($presences, fn ($e) => $sapeursIdsActuel->contains($e['sapeur_id']));
-        $this->updateSapeurs($exerciceId, $sapeursModifies, false);
+        $this->updateSapeurs($exerciceId, $sapeursModifies, false); // TODO: Check permissions
 
         // On ignore les sapeurs déjà saisi mais non présent dans les présences envoyées
 
@@ -314,7 +314,7 @@ class ExerciceBusiness
         $statut = $this->repository->getExerciceStatutById($exerciceId);
 
         if (!$hasValidatePermission && $statut >= self::EXERCICE_STATUT_VALIDE) {
-            throw new ArrayException([], 'Permissions insuffisantes pour modifier les présences.');
+            throw new ArrayException([$statut], 'Permissions insuffisantes pour modifier les présences.');
         }
 
         $cachedHeures = HeureExercice
