@@ -149,7 +149,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
     {
         CoursSapeur::where('sapeur_id', '=', $sapeurId)->delete();
         FonctionSapeur::where('sapeur_id', '=', $sapeurId)->delete();
-        Telephone::where('sapeur_id', '=', $sapeurId)->delete();
+        SapeurTelephone::where('sapeur_id', '=', $sapeurId)->delete();
         ExerciceSapeur::where('sapeur_id', '=', $sapeurId)->delete();
         HeureExercice::where('sapeur_id', '=', $sapeurId)->delete();
         InterventionSapeur::where('sapeur_id', '=', $sapeurId)->delete();

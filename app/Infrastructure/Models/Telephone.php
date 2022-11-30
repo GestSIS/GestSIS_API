@@ -8,6 +8,6 @@ class Telephone extends Model
 {
     protected $fillable = ['tri', 'nom', 'numero'];
     protected $casts = [
-        'tri' => 'integer', 'sapeur_id' => 'integer'
+        'tri' => 'integer'
     ];
 }
