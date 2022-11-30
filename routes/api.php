@@ -203,7 +203,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Sapeurs
     Route::group(['middleware' => 'jwtTokenRole:sapeur.modification'], function () {
-        Route::resource('sapeurs', SapeurController::class)->only(['store', 'update']); //, 'destroy']);//->middleware('role:effectif_read');
+        Route::resource('sapeurs', SapeurController::class)->only(['store', 'update', 'destroy']);
         Route::resource('sapeurs.permis', SapeurPermisController::class)->only(['store', 'update', 'destroy']);
         Route::resource('sapeurs.telephones', SapeurTelephoneController::class)->only(['store', 'update', 'destroy']);
         Route::resource('sapeurs.fonctions', SapeurFonctionController::class)->only(['store', 'update', 'destroy']);
