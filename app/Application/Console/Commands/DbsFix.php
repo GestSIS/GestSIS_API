@@ -6,7 +6,7 @@ use App\Domaine\Business\ImputationBusiness;
 use App\Infrastructure\Models\Ecriture;
 use Illuminate\Console\Command;
 
-class DbsFixEcrituresAvs extends Command
+class DbsFix extends Command
 {
     /**
      * The name and signature of the console command.
