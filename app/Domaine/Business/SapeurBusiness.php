@@ -7,6 +7,8 @@ use App\Domaine\SPI\SapeurRepository;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\GradeSapeur;
+use App\Infrastructure\Models\Intervention;
+use App\Infrastructure\Models\MaterielPersonnel;
 use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
 
@@ -47,7 +49,6 @@ class SapeurBusiness
         $sapeurs = Sapeur::where('type', '=', self::TYPE_SAPEUR)->with('mutations')->get();
         foreach ($sapeurs as $sapeur) {
             $sapeur->actif = $this->isActif($sapeur->mutations);
-            $sapeur->annee_incorporation = $this->anneeIncorporation($sapeur->mutations);
             $sapeur->save();
         }
     }
@@ -107,7 +108,21 @@ class SapeurBusiness
 
     public function deleteSapeurById(int $sapeurId)
     {
-        //TODO Check si données liées
+        if (Ecriture::where('sapeur_id', '=', $sapeurId)->exists()) {
+            throw new ArrayException([], "Impossible de supprimer un sapeur lié à une écriture comptable");
+        }
+
+        if (MaterielPersonnel::where([
+            ['sapeur_id', '=', $sapeurId],
+            ['retour', '=', null]
+        ])->exists()) {
+            throw new ArrayException([], "Impossible de supprimer un sapeur possédant du matériel personnel non rendu");
+        }
+
+        if (Intervention::where('sapeur_id', '=', $sapeurId)->exists()) {
+            throw new ArrayException([], "Impossible de supprimer un sapeur ayant été chef d'intervention");
+        }
+
         $this->repository->deleteSapeurById($sapeurId);
     }
 

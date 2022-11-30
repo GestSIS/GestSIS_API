@@ -4,14 +4,20 @@
 namespace App\Infrastructure\Repositories;
 
 use App\Domaine\SPI\SapeurRepository;
+use App\Infrastructure\Models\ControleMedical;
 use App\Infrastructure\Models\CoursSapeur;
+use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\FonctionSapeur;
 use App\Infrastructure\Models\GradeSapeur;
 use App\Infrastructure\Models\GroupeSapeur;
+use App\Infrastructure\Models\HeureExercice;
+use App\Infrastructure\Models\InterventionSapeur;
+use App\Infrastructure\Models\MaterielPersonnel;
 use App\Infrastructure\Models\Mutation;
 use App\Infrastructure\Models\Permis;
 use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\SapeurTelephone;
+use App\Infrastructure\Models\Telephone;
 use stdClass;
 
 class SapeurRepositoryEloquent implements SapeurRepository
@@ -141,8 +147,17 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
     public function deleteSapeurById($sapeurId)
     {
-        //TODO FIXME !!!
-        Sapeur::destroy($sapeurId);
+        CoursSapeur::where('sapeur_id', '=', $sapeurId)->delete();
+        FonctionSapeur::where('sapeur_id', '=', $sapeurId)->delete();
+        Telephone::where('sapeur_id', '=', $sapeurId)->delete();
+        ExerciceSapeur::where('sapeur_id', '=', $sapeurId)->delete();
+        HeureExercice::where('sapeur_id', '=', $sapeurId)->delete();
+        InterventionSapeur::where('sapeur_id', '=', $sapeurId)->delete();
+        GroupeSapeur::where('sapeur_id', '=', $sapeurId)->delete();
+        MaterielPersonnel::where('sapeur_id', '=', $sapeurId)->delete();
+        ControleMedical::where('sapeur_id', '=', $sapeurId)->delete();
+        Mutation::where('sapeur_id', '=', $sapeurId)->delete();
+        Sapeur::where('id', '=', $sapeurId)->limit(1)->delete();
     }
 
     public function addCours(int $sapeurId, $data)
