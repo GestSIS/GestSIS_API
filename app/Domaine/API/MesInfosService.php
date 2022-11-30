@@ -4,6 +4,7 @@
 namespace App\Domaine\API;
 
 use App\Domaine\Business\PaiementBusiness;
+use App\Domaine\SPI\ExerciceRepository;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceSapeur;
@@ -15,10 +16,12 @@ use Illuminate\Support\Facades\DB;
 class MesInfosService
 {
     protected $paiementBusiness;
+    protected $exerciceRepo;
 
-    public function __construct(PaiementBusiness $paiementBusiness)
+    public function __construct(PaiementBusiness $paiementBusiness, ExerciceRepository $exerciceRepo)
     {
         $this->paiementBusiness = $paiementBusiness;
+        $this->exerciceRepo = $exerciceRepo;
     }
 
     function mesInfos($sapeurId)
@@ -29,33 +32,7 @@ class MesInfosService
 
     function mesExercices($sapeurId, $exerciceComptableId)
     {
-        $heures = HeureExercice::where('sapeur_id', '=', $sapeurId)->get()->toArray();
-        $sapeurs = ExerciceSapeur::where('sapeur_id', '=', $sapeurId)->get()->toArray();
-
-        $exercices = Exercice::where('exercice_comptable_id', '=', $exerciceComptableId)
-            ->whereIn('id', array_merge(
-                array_map(fn ($h) => $h['exercice_id'], $heures),
-                array_map(fn ($h) => $h['exercice_id'], $sapeurs),
-            ))->get()->toArray();
-
-        $dictionary = [];
-        foreach ($exercices as $exercice) {
-            $dictionary[$exercice['id']] = $exercice;
-            $dictionary[$exercice['id']]['heures'] = [];
-            $dictionary[$exercice['id']]['presence'] = null;
-        }
-
-        foreach ($sapeurs as $sapeur) {
-            if (array_key_exists($sapeur['exercice_id'], $dictionary)) {
-                $dictionary[$sapeur['exercice_id']]['presence'] = $sapeur;
-            }
-        }
-        foreach ($heures as $heure) {
-            if (array_key_exists($sapeur['exercice_id'], $dictionary)) {
-                $dictionary[$heure['exercice_id']]['heures'][] = $heure;
-            }
-        }
-        return array_values($dictionary);
+        return $this->exerciceRepo->listExerciceOfSapeurById($exerciceComptableId, $sapeurId);
     }
 
     function mesInterventions($sapeurId, $exerciceComptableId)

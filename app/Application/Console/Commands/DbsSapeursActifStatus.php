@@ -3,10 +3,8 @@
 namespace App\Application\Console\Commands;
 
 use App\Domaine\Business\SapeurBusiness;
-use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Repositories\SapeurRepositoryEloquent;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
 
 class DbsSapeursActifStatus extends Command

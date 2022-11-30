@@ -50,16 +50,33 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
 
     public function listExerciceOfSapeurById(int $exerciceComptableId, int $sapeurId)
     {
-        $temp = $this;
-        return DB::table('exercice_sapeur')
-            ->where('sapeur_id', $sapeurId)
-            ->where('exercice_comptable_id', $exerciceComptableId)
-            ->join('exercices', 'exercices.id', '=', 'exercice_sapeur.exercice_id')
-            ->select('exercice_sapeur.*', 'exercices.date', 'exercices.heure', 'exercices.statut', 'exercices.communications', 'exercices.designation', 'exercices.localite_id', 'exercices.exercice_categorie_id')
-            ->get()
-            ->map(function ($sapeur) use ($temp) {
-                return $temp->convertSapeurWithExercicesInfos($sapeur);
-            })->toArray();
+        $heures = HeureExercice::where('sapeur_id', '=', $sapeurId)->get()->toArray();
+        $sapeurs = ExerciceSapeur::where('sapeur_id', '=', $sapeurId)->get()->toArray();
+
+        $exercices = Exercice::where('exercice_comptable_id', '=', $exerciceComptableId)
+            ->whereIn('id', array_merge(
+                array_map(fn ($h) => $h['exercice_id'], $heures),
+                array_map(fn ($h) => $h['exercice_id'], $sapeurs),
+            ))->get()->toArray();
+
+        $dictionary = [];
+        foreach ($exercices as $exercice) {
+            $dictionary[$exercice['id']] = $exercice;
+            $dictionary[$exercice['id']]['heures'] = [];
+            $dictionary[$exercice['id']]['presence'] = null;
+        }
+
+        foreach ($sapeurs as $sapeur) {
+            if (array_key_exists($sapeur['exercice_id'], $dictionary)) {
+                $dictionary[$sapeur['exercice_id']]['presence'] = $sapeur;
+            }
+        }
+        foreach ($heures as $heure) {
+            if (array_key_exists($sapeur['exercice_id'], $dictionary)) {
+                $dictionary[$heure['exercice_id']]['heures'][] = $heure;
+            }
+        }
+        return array_values($dictionary);
     }
 
     public function getExerciceStatutById(int $exerciceId)
