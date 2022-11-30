@@ -401,7 +401,7 @@ class SapeurBusiness
         // Update actif statut depending of end of all mutation
         array_push($mutations, $mutation);
         $actif = $this->isActif($mutations) ? 1 : 0;
-        $anneeIncorporation = $this->anneeIncorporation($mutations);
+        $anneeIncorporation = $this->anneeIncorporation(collect($mutations));
         $this->repository->updateSapeurStatusById($sapeurId, $actif, $anneeIncorporation);
         return ["mutation" => $mutation, "actif" => $actif, "annee_incorporation" => $anneeIncorporation];
     }
@@ -420,7 +420,7 @@ class SapeurBusiness
         // Update actif statut depending of end of all mutation
         array_push($mutations, $mutation);
         $actif = $this->isActif($mutations) ? 1 : 0;
-        $anneeIncorporation = $this->anneeIncorporation($mutations);
+        $anneeIncorporation = $this->anneeIncorporation(collect($mutations));
         $this->repository->updateSapeurStatusById($sapeurId, $actif, $anneeIncorporation);
         return ["mutation" => $mutation, "actif" => $actif, "annee_incorporation" => $anneeIncorporation];
     }
@@ -444,7 +444,7 @@ class SapeurBusiness
         // Update actif statut depending of end of all mutation
         $mutations = $this->repository->getSapeurMutationsById($sapeurId);
         $actif = $this->isActif($mutations) ? 1 : 0;
-        $anneeIncorporation = $this->anneeIncorporation($mutations);
+        $anneeIncorporation = $this->anneeIncorporation(collect($mutations));
         $this->repository->updateSapeurStatusById($sapeurId, $actif, $anneeIncorporation);
         return ["actif" => $actif, "annee_incorporation" => $anneeIncorporation];
     }
