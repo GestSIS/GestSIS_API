@@ -27,8 +27,8 @@ interface SapeurRepository
     public function createSapeur($data);
 
     public function updateSapeurById(int $sapeurId, $data);
-    public function updateSapeurStatusById(int $sapeurId, $actif);
-    
+    public function updateSapeurStatusById(int $sapeurId, $actif, $anneeIncorporation);
+
     public function deleteSapeurById(int $sapeurId);
 
     public function addCours(int $sapeurId, $data);

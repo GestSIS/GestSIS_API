@@ -13,7 +13,7 @@ class DbsFixEcrituresAvs extends Command
      *
      * @var string
      */
-    protected $signature = 'dbs:fix-ecritures-avs';
+    protected $signature = 'dbs:fix';
 
     /**
      * The console command description.

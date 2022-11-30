@@ -16,7 +16,7 @@ use stdClass;
 
 class SapeurRepositoryEloquent implements SapeurRepository
 {
-    private const SAPEUR_LIGHT_COLUMNS = ['id', 'nom', 'prenom', 'actif', 'localite_id', 'fonction_id', 'civilite_id', 'date_naissance', 'type'];
+    private const SAPEUR_LIGHT_COLUMNS = ['id', 'nom', 'prenom', 'actif', 'localite_id', 'fonction_id', 'civilite_id', 'date_naissance', 'type', 'annee_incorporation'];
 
     public function listeSapeurLight()
     {
@@ -134,9 +134,9 @@ class SapeurRepositoryEloquent implements SapeurRepository
         return $this->convertSapeur(Sapeur::find($sapeurId));
     }
 
-    public function updateSapeurStatusById(int $sapeurId, $actif)
+    public function updateSapeurStatusById(int $sapeurId, $actif, $anneeIncorporation)
     {
-        Sapeur::where('id', $sapeurId)->limit(1)->update(array('actif' => $actif));
+        Sapeur::where('id', $sapeurId)->limit(1)->update(array('actif' => $actif, 'annee_incorporation' => $anneeIncorporation));
     }
 
     public function deleteSapeurById($sapeurId)
@@ -337,6 +337,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $object->actif = intval($sapeur->actif);
         $object->fonction_id = intval($sapeur->fonction_id);
         $object->date_naissance = $sapeur->date_naissance;
+        $object->annee_incorporation = $sapeur->annee_incorporation;
         $object->civilite_id = intval($sapeur->civilite_id);
         $object->localite_id = intval($sapeur->localite_id);
         $object->fonction_id = intval($sapeur->fonction_id);
@@ -358,6 +359,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $object->rue = $sapeur->rue;
         $object->no_rue = $sapeur->no_rue;
         $object->date_naissance = $sapeur->date_naissance;
+        $object->annee_incorporation = $sapeur->annee_incorporation;
         $object->no_avs = $sapeur->no_avs;
         $object->cotisation_avs = $sapeur->cotisation_avs;
         $object->profession = $sapeur->profession;

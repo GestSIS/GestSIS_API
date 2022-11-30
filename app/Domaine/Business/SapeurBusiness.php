@@ -35,6 +35,11 @@ class SapeurBusiness
         return false;
     }
 
+    private function anneeIncorporation($mutations)
+    {
+        return $mutations->map(fn ($m) => Carbon::parse($m->incorporation)->year)->min() ?? '';
+    }
+
     public function recomputeSapeurActifStatus()
     {
         // TODO: Could be optimised via a single SQL Query
@@ -42,6 +47,7 @@ class SapeurBusiness
         $sapeurs = Sapeur::where('type', '=', self::TYPE_SAPEUR)->with('mutations')->get();
         foreach ($sapeurs as $sapeur) {
             $sapeur->actif = $this->isActif($sapeur->mutations);
+            $sapeur->annee_incorporation = $this->anneeIncorporation($sapeur->mutations);
             $sapeur->save();
         }
     }
@@ -57,6 +63,7 @@ class SapeurBusiness
         //TODO: Add no_avs validation
         $data['iban_statut'] = 1;
         $data['actif'] = 1;
+        $data['annee_incorporation'] = Carbon::parse($data['incorporation'])->year;
         $data['porteur'] = 0;
         $data['type'] = self::TYPE_SAPEUR;
         $sapeur = $this->repository->createSapeur($data);
@@ -394,8 +401,9 @@ class SapeurBusiness
         // Update actif statut depending of end of all mutation
         array_push($mutations, $mutation);
         $actif = $this->isActif($mutations) ? 1 : 0;
-        $this->repository->updateSapeurStatusById($sapeurId, $actif);
-        return ["mutation" => $mutation, "actif" => $actif];
+        $anneeIncorporation = $this->anneeIncorporation($mutations);
+        $this->repository->updateSapeurStatusById($sapeurId, $actif, $anneeIncorporation);
+        return ["mutation" => $mutation, "actif" => $actif, "annee_incorporation" => $anneeIncorporation];
     }
 
     public function updateMutation(int $sapeurId, $data)
@@ -412,8 +420,9 @@ class SapeurBusiness
         // Update actif statut depending of end of all mutation
         array_push($mutations, $mutation);
         $actif = $this->isActif($mutations) ? 1 : 0;
-        $this->repository->updateSapeurStatusById($sapeurId, $actif);
-        return ["mutation" => $mutation, "actif" => $actif];
+        $anneeIncorporation = $this->anneeIncorporation($mutations);
+        $this->repository->updateSapeurStatusById($sapeurId, $actif, $anneeIncorporation);
+        return ["mutation" => $mutation, "actif" => $actif, "annee_incorporation" => $anneeIncorporation];
     }
 
     /**
@@ -435,8 +444,9 @@ class SapeurBusiness
         // Update actif statut depending of end of all mutation
         $mutations = $this->repository->getSapeurMutationsById($sapeurId);
         $actif = $this->isActif($mutations) ? 1 : 0;
-        $this->repository->updateSapeurStatusById($sapeurId, $actif);
-        return $actif;
+        $anneeIncorporation = $this->anneeIncorporation($mutations);
+        $this->repository->updateSapeurStatusById($sapeurId, $actif, $anneeIncorporation);
+        return ["actif" => $actif, "annee_incorporation" => $anneeIncorporation];
     }
 
     public function addTelephone(int $sapeurId, $data)

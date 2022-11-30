@@ -12,7 +12,7 @@ class Sapeur extends Model
     protected $fillable = [
         'nom', 'prenom', 'suffixe', 'rue', 'no_rue', 'date_naissance', 'no_avs', 'profession', 'employeur',
         'lieu_de_travail', 'email', 'actif', 'iban', 'iban_statut', 'remarque', 'porteur', 'localite_id',
-        'civilite_id', 'cotisation_avs'
+        'civilite_id', 'cotisation_avs', 'annee_incorporation'
     ];
     protected $casts = [
         'actif' => 'integer', 'iban_statut' => 'integer', 'actif' => 'integer', 'cotisation_avs' => 'integer',
