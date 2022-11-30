@@ -7,7 +7,6 @@ use App\Domaine\SPI\SapeurRepository;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\GradeSapeur;
-use App\Infrastructure\Models\Mutation;
 use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
 
@@ -27,7 +26,7 @@ class SapeurBusiness
     {
         $now = Carbon::now()->setTime(0, 0);
         foreach ($mutations as $mutation) {
-            if ((Carbon::parse($mutation->sortie)->gte($now) && Carbon::parse($mutation->incorporation)->lte($now)) ||
+            if ((Carbon::parse($mutation->sortie)->gte($now) && Carbon::parse($mutation->incorporation)->subMonths(3)->lte($now)) ||
                 ($mutation->sortie === NULL && Carbon::parse($mutation->incorporation)->lte($now))
             ) {
                 return true;
@@ -169,7 +168,7 @@ class SapeurBusiness
     public function removeCours(int $sapeurId, int $coursSapeurId)
     {
         // Check que le cours n'est pas lié à une écriture
-        if (Ecriture::where('cours_sapeur', '=', $coursSapeurId)->count() > 0) {
+        if (Ecriture::where('cours_sapeur_id', '=', $coursSapeurId)->count() > 0) {
             throw new ArrayException([], 'Impossible de supprimer un cours facturé');
         }
         $this->repository->removeCours($sapeurId, $coursSapeurId);
