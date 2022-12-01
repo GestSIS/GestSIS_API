@@ -16,7 +16,6 @@ use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\SisParam;
-use GuzzleHttp\Exception\ConnectException;
 use Illuminate\Http\Client\Pool;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -189,7 +188,7 @@ class PaiementService
             $sapeur = Sapeur::find($sapeurId);
             $response = $responses[$index];
             // throw new ArrayException(['content' => $response->body()]);
-            return             response($response->body())->header('Content-Type', 'application/pdf');
+            return response($response->body())->header('Content-Type', 'application/pdf');
             // return "Test " . $response->body();
             if ($response instanceof Throwable) {
                 Log::error($sapeurId . " - " . $response);

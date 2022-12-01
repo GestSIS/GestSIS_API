@@ -178,6 +178,25 @@ class PaiementBusiness
 
         $paiements = array();
         $ecritureAvsAc = array();
+        $ecritureAvsGlobale = [
+            'tarif' => 0,
+            'quantite' => 1,
+            'total' => 0,
+
+            'designation' => $designation . " - Charges AVS/AI/APG/AC",
+            'type_unite_id' => ImputationBusiness::UNITE_FORFAIT,
+            'exercice_comptable_id' => $exerciceComptableId,
+            'ecriture_categorie_id' => $avsParam->ecriture_categorie_id,
+            'date' => $date,
+            'heure' => "00:00:00",
+
+            'decompte_id' => $decompte->id,
+            'compte_id' => $avsParam->compte_id,
+            'sapeur_id' => null,
+
+            'module' => ImputationBusiness::ECRITURE_MODULE_AVS,
+            'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_CHARGE_AVS_AC,
+        ];
 
         // Création paiements
         foreach ($totaux as $key => $total) {
@@ -193,14 +212,17 @@ class PaiementBusiness
                 'sapeur_id' => $key
             ];
 
-            // Génération écriture AVS/AC
+            // Génération écriture AVS/AC pour le sapeur
             if ($deduction && $total['avs_ac_a_cotiser'] > 0) {
+                $ecritureAvsGlobale['tarif'] += $total['avs_ac_a_cotiser'] * 2;
+                $ecritureAvsGlobale['total'] += $total['avs_ac_a_cotiser'] * 2;
+
                 $ecritureAvsAc[] = [
                     'tarif' => $total['avs_ac_a_cotiser'],
                     'quantite' => 1,
                     'total' => -$total['avs_ac_a_cotiser'],
 
-                    'designation' => $designation,
+                    'designation' => $designation . " - Participation AVS/AI/APG/AC",
                     'type_unite_id' => ImputationBusiness::UNITE_FORFAIT,
                     'exercice_comptable_id' => $exerciceComptableId,
                     'ecriture_categorie_id' => $avsParam->ecriture_categorie_id,
@@ -215,6 +237,11 @@ class PaiementBusiness
                     'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_CHARGE_AVS_AC,
                 ];
             }
+        }
+
+        // Génération écriture AVS/AC pour le décompze
+        if ($deduction && $ecritureAvsGlobale['total'] != 0) {
+            $ecritureAvsAc[] = $ecritureAvsGlobale;
         }
         Ecriture::insert($ecritureAvsAc);
         Paiement::insert($paiements);
