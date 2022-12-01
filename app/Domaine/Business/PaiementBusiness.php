@@ -183,7 +183,7 @@ class PaiementBusiness
             'quantite' => 1,
             'total' => 0,
 
-            'designation' => $designation . " - Charges AVS/AI/APG/AC",
+            'designation' => $designation . " - Charges AVS/AI/APG - AC",
             'type_unite_id' => ImputationBusiness::UNITE_FORFAIT,
             'exercice_comptable_id' => $exerciceComptableId,
             'ecriture_categorie_id' => $avsParam->ecriture_categorie_id,
@@ -222,7 +222,7 @@ class PaiementBusiness
                     'quantite' => 1,
                     'total' => -$total['avs_ac_a_cotiser'],
 
-                    'designation' => $designation . " - Participation AVS/AI/APG/AC",
+                    'designation' => $designation . " - Participation AVS/AI/APG - AC",
                     'type_unite_id' => ImputationBusiness::UNITE_FORFAIT,
                     'exercice_comptable_id' => $exerciceComptableId,
                     'ecriture_categorie_id' => $avsParam->ecriture_categorie_id,
