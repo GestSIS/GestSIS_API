@@ -134,31 +134,12 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::delete('localites-sis', [LocaliteSisController::class, 'destroy'])->name('api.v2.localites-sis-destroy');
     });
 
-
-    Route::group(['middleware' => 'jwtTokenRole:effectif.tout,sapeur.lecture,sapeur.modification,sapeur.config'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:effectif.tout'], function () {
         Route::get('effectif', [SapeurController::class, 'effectif'])->name('api.v2.effectif');
         Route::get('liste-fssp', [SapeurController::class, 'listeFssp'])->name('api.v2.liste-fssp');
     });
 
-    // Sapeurs
-    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,exercice.lecture,intervention.lecture,organisation.modification,comptabilite.tout,cours.lecture'], function () {
-        Route::resource('sapeurs', SapeurController::class)->only(['index', 'show']);
-    });
-
-    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture'], function () {
-        Route::resource('sapeurs.permis', SapeurPermisController::class)->only(['index']);
-        Route::resource('sapeurs.telephones', SapeurTelephoneController::class)->only(['index']);
-        Route::resource('sapeurs.fonctions', SapeurFonctionController::class)->only(['index']);
-        Route::resource('sapeurs.grades', SapeurGradeController::class)->only(['index']);
-        Route::resource('sapeurs.mutations', SapeurMutationController::class)->only(['index']);
-        Route::resource('sapeurs.materiels', SapeurMaterielController::class)->only(['index']);
-        Route::resource('sapeurs.cours', SapeurCoursController::class)->only(['index']);
-        Route::resource('sapeurs.photo', SapeurPhotoController::class)->only(['index']);
-
-        // Publipostage
-        Route::post('publipostage', [PublipostageController::class, 'index'])->name('publipostage');
-    });
-
+    // All
     Route::group(['middleware' => 'jwtTokenSapeurOrRole'], function () {
         // Static Params Sapeurs ---
         Route::get('civilites', [CiviliteController::class, 'index'])->name('api.v2.civilites');
@@ -183,24 +164,27 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('heure-exercice-types', HeureExerciceTypeController::class)->only(['index']);
     });
 
-    Route::group(['middleware' => 'jwtTokenRole:intervention.lecture,effectif.tout,sapeur.lecture,organisation.modification,comptabilite.tout'], function () {
-        Route::resource('groupes', GroupeController::class)->only(['index']);
+    // Sapeurs
+    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,exercice.lecture,intervention.lecture,organisation.modification,comptabilite.tout,cours.lecture'], function () {
+        Route::resource('sapeurs', SapeurController::class)->only(['index', 'show']);
     });
 
-    // Sapeurs
     Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture'], function () {
-        Route::resource('sapeurs.groupes', SapeurGroupeController::class)->only(['index']);
         Route::resource('sapeurs.permis', SapeurPermisController::class)->only(['index']);
         Route::resource('sapeurs.telephones', SapeurTelephoneController::class)->only(['index']);
         Route::resource('sapeurs.fonctions', SapeurFonctionController::class)->only(['index']);
         Route::resource('sapeurs.grades', SapeurGradeController::class)->only(['index']);
         Route::resource('sapeurs.mutations', SapeurMutationController::class)->only(['index']);
+        Route::resource('sapeurs.materiels', SapeurMaterielController::class)->only(['index']);
         Route::resource('sapeurs.cours', SapeurCoursController::class)->only(['index']);
         Route::resource('sapeurs.photo', SapeurPhotoController::class)->only(['index']);
+        Route::resource('sapeurs.groupes', SapeurGroupeController::class)->only(['index']);
+
+        // Publipostage
+        Route::post('publipostage', [PublipostageController::class, 'index'])->name('publipostage');
 
         Route::get('sapeurs/{id}/exercices/{exerciceComptableId}', [SapeurExerciceController::class, 'index']);
     });
-
     // Sapeurs
     Route::group(['middleware' => 'jwtTokenRole:sapeur.modification'], function () {
         Route::resource('sapeurs', SapeurController::class)->only(['store', 'update', 'destroy']);
@@ -211,6 +195,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('sapeurs.mutations', SapeurMutationController::class)->only(['store', 'update', 'destroy']);
         Route::resource('sapeurs.cours', SapeurCoursController::class)->only(['store', 'update', 'destroy']);
         Route::resource('sapeurs.photo', SapeurPhotoController::class)->only(['store', 'delete']);
+        Route::delete('sapeurs/{sapeurId}/photo', [SapeurPhotoController::class, 'destroy'])->name('api.v2.sapeur.photo-destroy');
 
         // Route spécial pour les politiques et autres afin de changer leur statut
         Route::put('sapeurs/{id}/autre-statut', [SapeurController::class, 'autreStatut']);
@@ -225,6 +210,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('grades', GradeController::class)->only(['store', 'update', 'destroy']);
         Route::resource('fonctions', FonctionController::class)->only(['store', 'update', 'destroy']);
         Route::resource('cours', CoursController::class)->only(['store', 'update', 'destroy']);
+    });
+
+    // Organisation
+    Route::group(['middleware' => 'jwtTokenRole:intervention.lecture,effectif.tout,sapeur.lecture,organisation.modification,comptabilite.tout'], function () {
+        Route::resource('groupes', GroupeController::class)->only(['index']);
     });
 
     // Param organisation
