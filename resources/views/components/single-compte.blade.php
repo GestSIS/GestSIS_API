@@ -30,11 +30,13 @@
         $total += $ecriture->total;
         ?>
         <tr>
-          <td>{{ str_replace('-', '.', $ecriture->date) }}</td>
+          <td>{{ implode('.', array_reverse(explode('-', $ecriture->date))) }}</td>
           <td>{{ $ecriture->designation }}</td>
           <td>{{ $ecriture->sapeur_id ? $sapeurs[$ecriture->sapeur_id] : '-' }}</td>
           <td>{{ number_format($ecriture->total, 2, '.', "'") }}</td>
-          <td>{{ $ecriture->decompte_id ? str_replace('-', '.', $decomptes[$ecriture->decompte_id]) : '' }}</td>
+          <td>
+            {{ $ecriture->decompte_id ? implode('.', array_reverse(explode('-', $decomptes[$ecriture->decompte_id]))) : '' }}
+          </td>
         </tr>
       @endforeach
     </tbody>
