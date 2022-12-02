@@ -148,6 +148,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
     public function deleteSapeurById($sapeurId)
     {
         CoursSapeur::where('sapeur_id', '=', $sapeurId)->delete();
+        Permis::where('sapeur_id', '=', $sapeurId)->delete();
         GradeSapeur::where('sapeur_id', '=', $sapeurId)->delete();
         FonctionSapeur::where('sapeur_id', '=', $sapeurId)->delete();
         SapeurTelephone::where('sapeur_id', '=', $sapeurId)->delete();
