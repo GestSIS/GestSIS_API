@@ -427,7 +427,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         // Décomptes
         Route::get('decomptes/{id}/ecritures', [DecompteController::class, 'ecritures']);
-        Route::post('decomptes/{id}/envoyer-sapeurs', [DecompteController::class, 'envoyer']);
         Route::post('decomptes/creer-annuel', [DecompteController::class, 'creerAnnuel']);
         Route::post('decomptes/creer-sapeur', [DecompteController::class, 'creerSapeur']);
         Route::post('decomptes/creer-exercice', [DecompteController::class, 'creerExercice']);
@@ -518,7 +517,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         // Modifier matériel
         Route::post('mat-perso', [MatPersoController::class, 'create'])->name('mat-perso.create');
         Route::put('mat-perso', [MatPersoController::class, 'update'])->name('mat-perso.update');
-        Route::delete('mat-perso', [MatPersoController::class, 'drestroy'])->name('mat-perso.drestroy');
+        Route::delete('mat-perso', [MatPersoController::class, 'destroy'])->name('mat-perso.drestroy');
 
         // Events
         Route::post('mat-perso-event', [MatPersoEventController::class, 'create'])->name('mat-perso-event.create');

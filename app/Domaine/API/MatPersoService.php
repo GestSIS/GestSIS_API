@@ -59,8 +59,7 @@ class MatPersoService
 
     public function delete($materiels)
     {
-        $this->business->delete($materiels);
-        return $this->materiels();
+        return $this->business->delete($materiels);
     }
 
     public function attribuer($materiels)

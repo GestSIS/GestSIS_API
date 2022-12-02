@@ -69,7 +69,7 @@ class MatPersoBusiness
         foreach ($materiels as $materiel) {
             if ($materiel['materiel']['quantite'] ?? null != null) {
                 $generique = new MaterielGenerique();
-                $generique->quantite = $materiel['quantite'];
+                $generique->quantite = $materiel['materiel']['quantite'];
                 $generique->save();
 
                 array_push($base, [

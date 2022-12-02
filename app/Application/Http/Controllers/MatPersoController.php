@@ -51,8 +51,10 @@ class MatPersoController extends Controller
             'materiels.*.taille' => 'string|nullable',
             'materiels.*.remarque' => 'string|nullable',
             'materiels.*.materiel_type_id' => 'integer|nullable',
+            'materiels.*.materiel' => 'required|array',
             'materiels.*.materiel.quantite' => 'integer|nullable',
             'materiels.*.materiel.numero' => 'string|nullable',
+            'materiels.*.materiel.achat' => 'string|nullable',
         ]);
 
         $materiels = $this->service->create($data['materiels']);
@@ -72,6 +74,7 @@ class MatPersoController extends Controller
             'materiels.*.id' => 'required|integer',
             'materiels.*.taille' => 'string|nullable',
             'materiels.*.remarque' => 'string|nullable',
+            'materiels.*.materiel' => 'required|array',
             'materiels.*.materiel.id' => 'required|integer',
             'materiels.*.materiel.quantite' => 'integer|nullable',
             'materiels.*.materiel.numero' => 'string|nullable',
@@ -92,10 +95,11 @@ class MatPersoController extends Controller
     public function destroy(Request $request)
     {
         $data = $request->validate([
-            'materielsIds.*' => 'integer',
+            'materielIds' => 'required|array',
+            'materielIds.*' => 'required|integer',
         ]);
 
-        $materiels = $this->service->delete($data['materiels']);
+        $materiels = $this->service->delete($data['materielIds']);
         return response()->json(['data' => $materiels]);
     }
 }

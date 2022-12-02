@@ -86,33 +86,6 @@ class DecompteController extends Controller
         return response()->json(['data' => $decompte]);
     }
 
-    /**
-     * Envoie le décompte à chaque sapeur par email
-     * 
-     * @param int $decompteId - id de l'exercice comptable pour lequel créer les paiements
-     * @param email $email - email pour la réponse
-     * @param boolean $texte - texte de l'email
-     */
-    public function envoyer(Request $request, $decompteId)
-    {
-        $data = $request->validate([
-            'email' => 'required|email',
-            'texte' => 'required|string|min:1',
-            'sapeurIds.*' => 'required|integer'
-        ]);
-        $token = null;
-        try {
-            $token = $request->bearerToken();
-            $sisId = $request->header('Sis-Id', '');
-        } catch (Exception $e) {
-            return response()->json(["error" => "Accès refusé"], 401);
-        }
-
-        $result = $this->service->envoyerDecompteSapeurs($decompteId, $data['email'], $data['texte'], $data['sapeurIds'], $token, $sisId);
-        return $result;
-        return response()->json(['data' => $result]);
-    }
-
     public function ecritures(Int $decompteId)
     {
         $ecritures = $this->service->getEcrituresPourDecompte($decompteId);

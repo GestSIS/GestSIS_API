@@ -171,38 +171,6 @@ class PaiementService
         return Excel::download(new AFacturerExport($decompteId), 'a_facturer.xlsx');
     }
 
-    public function envoyerDecompteSapeurs($decompteId, $email, $texte, $sapeurIds, $token, $sisId)
-    {
-        $officialSapeurIds = Paiement::where('decompte_id', '=', $decompteId)->pluck('sapeur_id')->toArray();
-        $validatedSapeurIds = array_intersect($officialSapeurIds, $sapeurIds);
-
-        $url = config('gestsis.print_url') . "/api/v1/print";
-
-        $responses = Http::pool(function (Pool $pool) use ($decompteId, $validatedSapeurIds, $url, $token, $sisId) {
-            return collect($validatedSapeurIds)
-                ->map(fn ($sapeurId) => $pool->withToken($token)->withHeaders(['Sis-Id' => $sisId])->post($url, [
-                    'content' => $this->impressionDecompteSapeur($decompteId, $sapeurId)->render(),
-                ]));
-        });
-        foreach (array_values($validatedSapeurIds) as $index => $sapeurId) {
-            $sapeur = Sapeur::find($sapeurId);
-            $response = $responses[$index];
-            // throw new ArrayException(['content' => $response->body()]);
-            return response($response->body())->header('Content-Type', 'application/pdf');
-            // return "Test " . $response->body();
-            if ($response instanceof Throwable) {
-                Log::error($sapeurId . " - " . $response);
-                continue;
-            }
-            // return $response->body();
-            Log::debug($sapeurId);
-            $pdf = $responses[$index]->body();
-
-            $res = Mail::to($sapeur->email)->send(new DecompteSapeur($sapeur, $pdf, $email));
-        }
-        return 'OK';
-    }
-
     public static function impressionDecompteSapeur($decompteId, $sapeurId)
     {
         // Pour le moment que les écritures du décompte !
