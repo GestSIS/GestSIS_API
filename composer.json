@@ -20,8 +20,7 @@
         "mikehaertl/php-pdftk": "^0.12",
         "php-ds/php-ds": "^1.4",
         "spatie/laravel-http-logger": "^1.4",
-        "spatie/laravel-ignition": "^1.0",
-        "tmw/fpdm": "^2.9"
+        "spatie/laravel-ignition": "^1.0"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",

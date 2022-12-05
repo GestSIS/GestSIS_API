@@ -12,7 +12,6 @@ use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
 use Exception;
-use FPDM;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
@@ -466,7 +465,7 @@ class PaiementBusiness
         $civilite = $sapeur->civilite;
 
         $fields = array(
-            'A' => "checked",
+            "A" => "Ja",
             "C2" => $sapeur->no_avs,
             "D" => $exerciceComptable->annee,
             "E-von" => "01.01." . $exerciceComptable->annee,
@@ -491,16 +490,18 @@ class PaiementBusiness
             $fields["13-2-3-2"] = round($total['frais_forfaitaire']);
         }
 
-        $pdf = new FPDM(resource_path('certificatSalaire.pdf'));
-        $pdf->useCheckboxParser = true;
-        $pdf->load($fields, true);
-        $pdf->merge();
+        $pdf = new Pdf(resource_path('certificatSalaire.pdf'));
+
         if ($enregistrement) {
             $path = Storage::path("tmp/" . $exerciceComptable->id . "/" . $sapeur->id . ".pdf");
-            $pdf->Output("F", $path);
+            $result = $pdf->fillForm($fields)
+                ->needAppearances()
+                ->saveAs($path);
+            // TODO: Check result
             return $path;
         } else {
-            return $pdf->Output();
+            // TODO: Not supported for now
+            throw new ArrayException([], "Not suported for now");
         }
     }
 
