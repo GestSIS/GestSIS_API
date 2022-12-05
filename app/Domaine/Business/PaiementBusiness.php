@@ -490,7 +490,7 @@ class PaiementBusiness
             $fields["13-2-3-2"] = round($total['frais_forfaitaire']);
         }
 
-        $pdf = new Pdf(resource_path('certificatSalaire.pdf'));
+        $pdf = new Pdf(resource_path('certificatSalaire.pdf'), config('pdftk.config'));
 
         if ($enregistrement) {
             $path = Storage::path("tmp/" . $exerciceComptable->id . "/" . $sapeur->id . ".pdf");
