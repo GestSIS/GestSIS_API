@@ -165,18 +165,36 @@ class MatPersoBusiness
 
         // Itérer sur $attributions
         foreach ($attributions as $attribution) {
-            // Load matériel type
-
             // Check si matériel numéroté
             if ($attribution['quantite'] === null) {
-                // Update matériel existant
-                MaterielPersonnel::where('id', '=', $attribution['id'])
-                    ->update([
-                        'retour' => null,
-                        'attribution' => $attribution['date'],
+                if ($attribution['id'] ?? null) {
+                    // Update matériel existant
+                    MaterielPersonnel::where('id', '=', $attribution['id'])
+                        ->update([
+                            'retour' => null,
+                            'attribution' => $attribution['date'],
+                            'sapeur_id' => $attribution['sapeur_id'],
+                            'remarque' => $attribution['remarque'] ?? ''
+                        ]);
+                } else {
+                    // TODO: Créer le nouveau matériel
+                    $nominal = new MaterielNominal();
+                    $nominal->numero = $attribution['numero'];
+                    $nominal->achat = $attribution['achat'] ?? '';
+                    $nominal->uuid = uniqid($attribution['materiel_type_id'] . "-");
+                    $nominal->save();
+
+                    MaterielPersonnel::insert([
+                        'materiel_type_id' => $attribution['materiel_type_id'],
+                        'materiel_type' => MaterielNominal::class,
+                        'materiel_id' => $nominal->id,
+                        'taille' => $attribution['taille'] ?? '',
+                        'remarque' => $attribution['remarque'] ?? '',
                         'sapeur_id' => $attribution['sapeur_id'],
-                        'remarque' => $attribution['remarque'] ?? ''
+                        'attribution' => $attribution['date'],
+                        'retour' => null,
                     ]);
+                }
             } else {
                 // Matériel générique
                 $materielReference = null;

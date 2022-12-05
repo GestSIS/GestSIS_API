@@ -28,6 +28,8 @@ class MatPersoAttributionController extends Controller
             'attributions.*.materiel_type_id' => 'nullable|integer|min:1',
             'attributions.*.quantite' => 'nullable|integer|min:1',
             'attributions.*.remarque' => 'nullable|string',
+            'attributions.*.numero' => 'nullable|string',
+            'attributions.*.achat' => 'nullable|string',
         ]);
 
         $materiels = $this->service->attribuer($data['attributions']);
