@@ -44,6 +44,14 @@
         </p>
       </div>
       <table class="table table-sm table-striped">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Heure</th>
+            <th>Durée [min]</th>
+            <th>Lieu</th>
+          </tr>
+        </thead>
         <tbody style="border-bottom: 1px solid rgb(222, 226, 230);">
           <?php
                 foreach ($sapeur['exercices'] as $convocation) {
@@ -56,6 +64,7 @@
           <tr>
             <td style="width: 100px !important;">{{ formatDate($exercice['date']) }}</td>
             <td>{{ formatHeure($exercice['heure']) }}</td>
+            <td>{{ $exercice['duree'] }}</td>
             <td colspan="{{ $colspan }}">
               @switch($params['format'])
                 @case(1)
