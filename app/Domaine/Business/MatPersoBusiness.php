@@ -177,7 +177,7 @@ class MatPersoBusiness
                             'remarque' => $attribution['remarque'] ?? ''
                         ]);
                 } else {
-                    // TODO: Créer le nouveau matériel
+                    // Créer le nouveau matériel
                     $nominal = new MaterielNominal();
                     $nominal->numero = $attribution['numero'];
                     $nominal->achat = $attribution['achat'] ?? '';
