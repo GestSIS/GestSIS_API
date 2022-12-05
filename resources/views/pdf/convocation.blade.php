@@ -49,6 +49,7 @@
             <th>Date</th>
             <th>Heure</th>
             <th>Durée [min]</th>
+            <th>Événement</th>
             <th>Lieu</th>
           </tr>
         </thead>
@@ -65,6 +66,7 @@
             <td style="width: 100px !important;">{{ formatDate($exercice['date']) }}</td>
             <td>{{ formatHeure($exercice['heure']) }}</td>
             <td>{{ $exercice['duree'] }}</td>
+            <td>{{ $exercice['designation'] }}</td>
             <td colspan="{{ $colspan }}">
               @switch($params['format'])
                 @case(1)
