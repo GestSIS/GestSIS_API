@@ -21,9 +21,10 @@
       return Carbon::parse($value)->translatedFormat('D j.m.y');
   }
   
-  function formatHeure($value)
+  function formatHeureDuree($heure, $duree)
   {
-      return substr($value, 0, 5);
+      $end = Carbon::parse($heure)->addMinutes($duree);
+      return substr($heure, 0, 5) . ' - ' . $end->format('H:i');
   }
   ?>
   <div class="container">
@@ -48,7 +49,6 @@
           <tr>
             <th>Date</th>
             <th>Heure</th>
-            <th>Durée [min]</th>
             <th>Événement</th>
             <th>Lieu</th>
           </tr>
@@ -64,23 +64,22 @@
                 ?>
           <tr>
             <td style="width: 100px !important;">{{ formatDate($exercice['date']) }}</td>
-            <td>{{ formatHeure($exercice['heure']) }}</td>
-            <td>{{ $exercice['duree'] }}</td>
-            <td>{{ $exercice['designation'] }}</td>
+            <td>{{ formatHeureDuree($exercice['heure'], $exercice['duree']) }}</td>
+            <td>{{ $categories[$exercice['exercice_categorie_id']] }} : {{ $exercice['designation'] }}</td>
             <td colspan="{{ $colspan }}">
               @switch($params['format'])
                 @case(1)
                   {{ $localites[$exercice['localite_id']] }} :
-                  {{ $exercice['lieu'] }}<br />{{ $categories[$exercice['exercice_categorie_id']] }} :
+                  {{ $exercice['lieu'] }}<br />
                   {{ $exercice['communications'] }}
                 @break;
                 @case(2)
-                  {{ $localites[$exercice['localite_id']] }} : {{ $exercice['lieu'] }} -
-                  {{ $categories[$exercice['exercice_categorie_id']] }}<br />{{ $exercice['communications'] }}
+                  {{ $localites[$exercice['localite_id']] }} : {{ $exercice['lieu'] }}
+                  <br />{{ $exercice['communications'] }}
                 @break;
                 @case(3)
                   {{ $localites[$exercice['localite_id']] }} : {{ $exercice['lieu'] }} -
-                  {{ $categories[$exercice['exercice_categorie_id']] }} : {{ $exercice['communications'] }}
+                  {{ $exercice['communications'] }}
                 @break;
               @endswitch
             </td>
