@@ -70,11 +70,7 @@
               {{ $exercice['communications'] }}
             </td>
             <td colspan="{{ $colspan }}">
-              {{-- @switch($params['format'])
-                @case(1) --}}
               {{ $localites[$exercice['localite_id']] }} : {{ $exercice['lieu'] }}
-              {{-- @break;
-              @endswitch --}}
             </td>
             @if ($pourInfo)
               <td><em>{{ $params['pourInfo'] }}<em></td>

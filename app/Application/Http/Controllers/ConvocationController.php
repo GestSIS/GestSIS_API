@@ -26,7 +26,6 @@ class ConvocationController extends Controller
             'telephone' => 'boolean',
             'adresse' => 'boolean',
             'details' => 'boolean',
-            'format' => 'integer|required',
             'titre' => 'string|required',
             'info' => 'boolean',
             'pourInfo' => 'string|nullable',
