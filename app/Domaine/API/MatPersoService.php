@@ -62,9 +62,9 @@ class MatPersoService
         return $this->business->delete($materiels);
     }
 
-    public function attribuer($materiels)
+    public function attribuer($materiels, $depuisInventaire)
     {
-        $this->business->attribuer($materiels);
+        $this->business->attribuer($materiels, $depuisInventaire);
         return $this->materiels();
     }
 

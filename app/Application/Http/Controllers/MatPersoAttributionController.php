@@ -27,14 +27,15 @@ class MatPersoAttributionController extends Controller
             'attributions.*.sapeur_id' => 'required|integer',
             'attributions.*.date' => 'required|date',
             'attributions.*.id' => 'nullable|integer',
-            'attributions.*.materiel_type_id' => 'nullable|integer|min:1',
+            'attributions.*.materiel_type_id' => 'required_if:depuisInventaire,false|integer|min:1',
+            'attributions.*.taille' => 'nullable|string',
             'attributions.*.quantite' => 'nullable|integer|min:1',
             'attributions.*.remarque' => 'nullable|string',
             'attributions.*.numero' => 'nullable|string',
             'attributions.*.achat' => 'nullable|string',
         ]);
 
-        $materiels = $this->service->attribuer($data['attributions']);
+        $materiels = $this->service->attribuer($data['attributions'], $data['depuisInventaire'] ?? true);
 
         return response()->json(['data' => $materiels]);
     }

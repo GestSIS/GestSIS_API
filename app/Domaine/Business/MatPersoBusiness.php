@@ -76,7 +76,7 @@ class MatPersoBusiness
                     'materiel_type_id' => $materiel['materiel_type_id'],
                     'materiel_type' => MaterielGenerique::class,
                     'materiel_id' => $generique->id,
-                    'taille' => $materiel['taille'] ?? '',
+                    'taille' => trim($materiel['taille'] ?? ''),
                     'remarque' => $materiel['remarque'] ?? '',
                     'sapeur_id' => null,
                     'attribution' => null,
@@ -93,7 +93,7 @@ class MatPersoBusiness
                     'materiel_type_id' => $materiel['materiel_type_id'],
                     'materiel_type' => MaterielNominal::class,
                     'materiel_id' => $nominal->id,
-                    'taille' => $materiel['taille'] ?? '',
+                    'taille' => trim($materiel['taille'] ?? ''),
                     'remarque' => $materiel['remarque'] ?? '',
                     'sapeur_id' => null,
                     'attribution' => null,
@@ -118,7 +118,7 @@ class MatPersoBusiness
         foreach ($references as $reference) {
             $materiel = $indexedMateriel[$reference->id];
             MaterielPersonnel::where('id', $reference['id'])->update([
-                'taille' => $materiel['taille'] ?? '',
+                'taille' => trim($materiel['taille'] ?? ''),
                 'remarque' => $materiel['remarque'] ?? '',
             ]);
             if ($reference->materiel_type === MaterielGenerique::class) {
@@ -152,49 +152,29 @@ class MatPersoBusiness
         MaterielGenerique::whereIn('id', $generiqueIds)->delete();
     }
 
-    public function attribuer($attributions)
+    public function attribuer($attributions, $depuisInventaire)
     {
-        // // Fetch matériel à attribuer
-        // $ids = array_map(fn ($a) => $a['id'], $attributions);
-        // $mats = MaterielPersonnel::with('materiel')->whereIn('id', $ids)->get();
+        if ($depuisInventaire) {
+            $this->attribuerDepuisInventaire($attributions);
+        } else {
+            $this->attribuerHorsInventaire($attributions);
+        }
+    }
 
-        // $materielReference = [];
-        // foreach ($mats as $mat) {
-        //     $materielReference[$mat->id] = $mat;
-        // }
-
+    private function attribuerDepuisInventaire($attributions)
+    {
         // Itérer sur $attributions
         foreach ($attributions as $attribution) {
             // Check si matériel numéroté
             if ($attribution['quantite'] === null) {
-                if ($attribution['id'] ?? null) {
-                    // Update matériel existant
-                    MaterielPersonnel::where('id', '=', $attribution['id'])
-                        ->update([
-                            'retour' => null,
-                            'attribution' => $attribution['date'],
-                            'sapeur_id' => $attribution['sapeur_id'],
-                            'remarque' => $attribution['remarque'] ?? ''
-                        ]);
-                } else {
-                    // Créer le nouveau matériel
-                    $nominal = new MaterielNominal();
-                    $nominal->numero = $attribution['numero'];
-                    $nominal->achat = $attribution['achat'] ?? '';
-                    $nominal->uuid = uniqid($attribution['materiel_type_id'] . "-");
-                    $nominal->save();
-
-                    MaterielPersonnel::insert([
-                        'materiel_type_id' => $attribution['materiel_type_id'],
-                        'materiel_type' => MaterielNominal::class,
-                        'materiel_id' => $nominal->id,
-                        'taille' => $attribution['taille'] ?? '',
-                        'remarque' => $attribution['remarque'] ?? '',
-                        'sapeur_id' => $attribution['sapeur_id'],
-                        'attribution' => $attribution['date'],
+                // Update matériel existant
+                MaterielPersonnel::where('id', '=', $attribution['id'])
+                    ->update([
                         'retour' => null,
+                        'attribution' => $attribution['date'],
+                        'sapeur_id' => $attribution['sapeur_id'],
+                        'remarque' => $attribution['remarque'] ?? ''
                     ]);
-                }
             } else {
                 // Matériel générique
                 $materielReference = null;
@@ -202,10 +182,9 @@ class MatPersoBusiness
                     $materielReference = MaterielPersonnel::with('materiel')->find($attribution['id']);
                 } else {
                     $materielReference = MaterielPersonnel::with('materiel')->where([
-                        ['sapeur_id', '=', null],
-                        ['taille', '=', $attribution['taille'] ?? ''],
+                        ['taille', '=', trim($attribution['taille'] ?? '')],
                         ['materiel_type_id', '=', $attribution['materiel_type_id']],
-                    ])->first();
+                    ])->whereNull('sapeur_id')->first();
                 }
 
                 // Ajout du matériel au sapeur
@@ -219,7 +198,7 @@ class MatPersoBusiness
                     'retour' => null,
                     'remarque' => $attribution['remarque'] ?? '',
                     'sapeur_id' => $attribution['sapeur_id'],
-                    'taille' => $materielReference->taille ?? $attribution['taille'] ?? '',
+                    'taille' => $materielReference->taille ?? trim($attribution['taille'] ?? ''),
                 ]);
                 $newMateriel->materiel_type_id = $materielReference->materiel_type_id ?? $attribution['materiel_type_id'];
                 $newMateriel->materiel_id = $newGenerique->id;
@@ -234,6 +213,51 @@ class MatPersoBusiness
                             'quantite' => $quantiteRestante,
                         ]);
                 }
+            }
+        }
+    }
+
+    private function attribuerHorsInventaire($attributions)
+    {
+        // Itérer sur $attributions
+        foreach ($attributions as $attribution) {
+            // Check si matériel numéroté
+            if ($attribution['quantite'] === null) {
+                // Créer le nouveau matériel
+                $nominal = new MaterielNominal();
+                $nominal->numero = $attribution['numero'];
+                $nominal->achat = $attribution['achat'] ?? '';
+                $nominal->uuid = uniqid($attribution['materiel_type_id'] . "-");
+                $nominal->save();
+
+                MaterielPersonnel::insert([
+                    'materiel_type_id' => $attribution['materiel_type_id'],
+                    'materiel_type' => MaterielNominal::class,
+                    'materiel_id' => $nominal->id,
+                    'taille' => trim($attribution['taille'] ?? ''),
+                    'remarque' => $attribution['remarque'] ?? '',
+                    'sapeur_id' => $attribution['sapeur_id'],
+                    'attribution' => $attribution['date'],
+                    'retour' => null,
+                ]);
+            } else {
+                // Ajout du matériel au sapeur
+                $newGenerique = new MaterielGenerique();
+                $newGenerique->fill(['quantite' => $attribution['quantite']]);
+                $newGenerique->save();
+
+                $newMateriel = new MaterielPersonnel();
+                $newMateriel->fill([
+                    'attribution' => $attribution['date'],
+                    'retour' => null,
+                    'remarque' => $attribution['remarque'] ?? '',
+                    'sapeur_id' => $attribution['sapeur_id'],
+                    'taille' => trim($attribution['taille'] ?? ''),
+                ]);
+                $newMateriel->materiel_type_id = $attribution['materiel_type_id'];
+                $newMateriel->materiel_id = $newGenerique->id;
+                $newMateriel->materiel_type = MaterielGenerique::class;
+                $newMateriel->save();
             }
         }
     }
