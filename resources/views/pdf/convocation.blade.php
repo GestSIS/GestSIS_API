@@ -65,23 +65,16 @@
           <tr>
             <td style="width: 100px !important;">{{ formatDate($exercice['date']) }}</td>
             <td>{{ formatHeureDuree($exercice['heure'], $exercice['duree']) }}</td>
-            <td>{{ $categories[$exercice['exercice_categorie_id']] }} : {{ $exercice['designation'] }}</td>
+            <td>
+              {{ $categories[$exercice['exercice_categorie_id']] }} : {{ $exercice['designation'] }}<br />
+              {{ $exercice['communications'] }}
+            </td>
             <td colspan="{{ $colspan }}">
-              @switch($params['format'])
-                @case(1)
-                  {{ $localites[$exercice['localite_id']] }} :
-                  {{ $exercice['lieu'] }}<br />
-                  {{ $exercice['communications'] }}
-                @break;
-                @case(2)
-                  {{ $localites[$exercice['localite_id']] }} : {{ $exercice['lieu'] }}
-                  <br />{{ $exercice['communications'] }}
-                @break;
-                @case(3)
-                  {{ $localites[$exercice['localite_id']] }} : {{ $exercice['lieu'] }} -
-                  {{ $exercice['communications'] }}
-                @break;
-              @endswitch
+              {{-- @switch($params['format'])
+                @case(1) --}}
+              {{ $localites[$exercice['localite_id']] }} : {{ $exercice['lieu'] }}
+              {{-- @break;
+              @endswitch --}}
             </td>
             @if ($pourInfo)
               <td><em>{{ $params['pourInfo'] }}<em></td>
