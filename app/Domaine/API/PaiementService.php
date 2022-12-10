@@ -149,7 +149,7 @@ class PaiementService
                 $nomFichier
             );
         } catch (\InvalidArgumentException $e) {
-            throw new ArrayException([], 'Veuillez vérifier les informations de paiement de votre SIS');
+            throw new ArrayException(['e' => $e], 'Veuillez vérifier les informations de paiement de votre SIS',);
         }
     }
 

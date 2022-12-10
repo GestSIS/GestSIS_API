@@ -233,6 +233,7 @@ class ExerciceBusiness
         // Ignore si déjà imputé
         if ($exercice->statut === self::EXERCICE_STATUT_IMPUTE) {
             // FIXME: permettre le changement du type d'excuse/amende
+
             return;
         }
 
