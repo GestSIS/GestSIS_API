@@ -297,7 +297,7 @@ class PaiementBusiness
                         $sapeur->prenom . " " . $sapeur->nom,
                         new StructuredPostalAddress($sapeur->rue == "" ? null : $sapeur->rue, $sapeur->no_rue == "" ? null : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
                         new IBAN($sapeur->iban),
-                        IID::fromIBAN(new IBAN($sapeur->iban))
+                        $sapeur->iban == 'CH20 0078 9100 0021 7000 8' ? new BIC('BCJUCH22XXX') : IID::fromIBAN(new IBAN($sapeur->iban))
                     );
                 } catch (Exception $e) {
                     dd('Test', $e->getTrace(), $sapeur->iban, $sapeur->prenom . " " . $sapeur->nom);
