@@ -47,9 +47,6 @@ class JwtTokenValidatorRole
 
                 $request->attributes->add(['permissions' => $perms]);
             }
-            if ($token->data->admin === True) {
-                $request->attributes->add(['admin' => true]);
-            }
         }
 
         if ($token->data->admin === True) {
