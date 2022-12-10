@@ -383,7 +383,7 @@ class PaiementBusiness
 
         try {
             // Génération du pdf de chaque sapeur
-            foreach (Sapeur::whereIn('id', array_keys($totaux))->with(['localite', 'civilite'])->get() as $sapeur) {
+            foreach (Sapeur::whereIn('id', array_keys($totaux))->with(['localite', 'civilite'])->orderBy('nom')->get() as $sapeur) {
                 $path = $this->creationPdf($sapeur, $exerciceComptable, $totaux[$sapeur->id], $affichageFrais, true);
                 $merged->addFile($path);
             }
