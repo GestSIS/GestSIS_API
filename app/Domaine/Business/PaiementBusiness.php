@@ -300,7 +300,7 @@ class PaiementBusiness
                         IID::fromIBAN(new IBAN($sapeur->iban))
                     );
                 } catch (Exception $e) {
-                    dd('Test', $e->getTrace());
+                    dd('Test', $e->getTrace(), $sapeur->iban, $sapeur->prenom . " " . $sapeur->nom);
                 }
                 $paiement->addTransaction($transaction);
                 $i++;
