@@ -307,8 +307,12 @@ class PaiementBusiness
             }
         }
 
-        $message = new CustomerCreditTransfer('message-001', $nom);
-        $message->addPayment($paiement);
+        try {
+            $message = new CustomerCreditTransfer('message-001', $nom);
+            $message->addPayment($paiement);
+        } catch (Exception $e) {
+            dd('Yop', $e);
+        }
 
         return $message->asXml();
     }
