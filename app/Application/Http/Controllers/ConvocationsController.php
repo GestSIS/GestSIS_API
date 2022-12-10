@@ -86,8 +86,8 @@ class ConvocationsController extends Controller
         ]);
 
         // Check has role for provided sis
-        $admin = $request->get('admin', false);
-        $perms = $request->get('permissions', []);
+        $admin = $request->attributes->get('admin', false);
+        $perms = $request->attributes->get('permissions', []);
         $hasValidationPremission = $admin || in_array('exercice.validation', $perms);
         // Appel du business
         $sapeur = $this->service->updateSapeurs($exerciceId, $data['sapeurs'], $hasValidationPremission);

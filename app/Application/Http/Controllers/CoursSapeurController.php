@@ -21,8 +21,8 @@ class CoursSapeurController extends Controller
     public function index(Request $request, $exerciceComptableId)
     {
         // Check si permission comptabilite
-        $admin = $request->get('admin', false);
-        $permissions = $request->get('permissions', []);
+        $admin = $request->attributes->get('admin', false);
+        $permissions = $request->attributes->get('permissions', []);
 
         $avecEcritures = $admin || array_key_exists('comptabilite.tout', $permissions);
 
