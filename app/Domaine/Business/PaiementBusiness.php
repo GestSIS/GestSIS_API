@@ -275,25 +275,33 @@ class PaiementBusiness
     public function iso20022PourDecompte($decompteId, $nom, $bic, $iban)
     {
         $paiements = Decompte::find($decompteId)->paiements()->get();
-        $paiement = new PaymentInformation(
-            "payment-000",
-            $nom,
-            new BIC($bic),
-            new IBAN($iban)
-        );
+        try {
+            $paiement = new PaymentInformation(
+                "payment-000",
+                $nom,
+                new BIC($bic),
+                new IBAN($iban)
+            );
+        } catch (Exception $e) {
+            dd('Yep', $e);
+        }
         $i = 0;
         foreach ($paiements as $p) {
             $sapeur = $p->sapeur()->get()[0];
             if ($p->total > 0) {
-                $transaction = new BankCreditTransfer(
-                    "instr-" . $i,
-                    "e2e-" . $i,
-                    new Money\CHF((int)($p->total * 100)),
-                    $sapeur->prenom . " " . $sapeur->nom,
-                    new StructuredPostalAddress($sapeur->rue == "" ? null : $sapeur->rue, $sapeur->no_rue == "" ? null : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
-                    new IBAN($sapeur->iban),
-                    IID::fromIBAN(new IBAN($sapeur->iban))
-                );
+                try {
+                    $transaction = new BankCreditTransfer(
+                        "instr-" . $i,
+                        "e2e-" . $i,
+                        new Money\CHF((int)($p->total * 100)),
+                        $sapeur->prenom . " " . $sapeur->nom,
+                        new StructuredPostalAddress($sapeur->rue == "" ? null : $sapeur->rue, $sapeur->no_rue == "" ? null : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
+                        new IBAN($sapeur->iban),
+                        IID::fromIBAN(new IBAN($sapeur->iban))
+                    );
+                } catch (Exception $e) {
+                    dd('Test', $e);
+                }
                 $paiement->addTransaction($transaction);
                 $i++;
             }
