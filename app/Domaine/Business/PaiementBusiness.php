@@ -25,6 +25,7 @@ use Z38\SwissPayment\StructuredPostalAddress;
 use Z38\SwissPayment\TransactionInformation\BankCreditTransfer;
 use Z38\SwissPayment\Money;
 use mikehaertl\pdftk\Pdf;
+use Z38\SwissPayment\Text;
 
 /**
  * PaiementBusiness
@@ -294,7 +295,8 @@ class PaiementBusiness
                     "instr-" . $i,
                     "e2e-" . $i,
                     new Money\CHF((int)($p->total * 100)),
-                    $sapeur->prenom . " " . $sapeur->nom,
+                    // TODO: Could be improved en remplacant les charactères accentués par leur version non accentué
+                    Text::sanitize($sapeur->prenom . " " . $sapeur->nom, 70),
                     new StructuredPostalAddress($sapeur->rue == "" ? null : $sapeur->rue, $sapeur->no_rue == "" ? null : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
                     new IBAN($sapeur->iban),
                     IID::fromIBAN(new IBAN($sapeur->iban))
