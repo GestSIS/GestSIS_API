@@ -150,6 +150,7 @@ class PaiementService
                 $nomFichier
             );
         } catch (Exception $e) {
+            dd($e);
             throw new ArrayException([], 'Veuillez vérifier les informations de paiement de votre SIS');
         }
     }
@@ -324,17 +325,17 @@ class PaiementService
         $iban = $params->iban;
 
         $nomFichier = "paiement.xml";
-        try {
-            $content = $this->business->iso20022PourPaiement($paiementId, $nom, $bic, $iban);
-            return response()->streamDownload(
-                function () use ($content) {
-                    echo $content;
-                },
-                $nomFichier
-            );
-        } catch (\InvalidArgumentException $e) {
-            return response()->json(['data' => ['message' => 'Veuillez vérifier les informations de paiement de votre SIS']], 500);
-        }
+        // try {
+        $content = $this->business->iso20022PourPaiement($paiementId, $nom, $bic, $iban);
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            $nomFichier
+        );
+        // } catch (\InvalidArgumentException $e) {
+        //     return response()->json(['data' => ['message' => 'Veuillez vérifier les informations de paiement de votre SIS']], 500);
+        // }
     }
 
     /**

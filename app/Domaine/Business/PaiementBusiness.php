@@ -11,6 +11,7 @@ use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
+use DateTime;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
@@ -274,6 +275,7 @@ class PaiementBusiness
      */
     public function iso20022PourDecompte($decompteId, $nom, $bic, $iban)
     {
+        $decompte = Decompte::find($decompteId);
         $paiements = Decompte::find($decompteId)->paiements()->get();
         $paiement = new PaymentInformation(
             "payment-000",
@@ -281,6 +283,8 @@ class PaiementBusiness
             new BIC($bic),
             new IBAN($iban)
         );
+
+        $paiement->setExecutionDate(DateTime::createFromFormat('Y-m-d', $decompte->date));
 
         $i = 0;
         foreach ($paiements as $p) {
