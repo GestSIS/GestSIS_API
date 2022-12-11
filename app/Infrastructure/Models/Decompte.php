@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Decompte extends Model
 {
     protected $casts = [
-        'exercice-comptable_id' => 'integer', 'avs_total' => 'decimal:2', 'ac_total' => 'decimal:2', 'total' => 'decimal:2'
+        'exercice-comptable_id' => 'integer', 'avs_total' => 'decimal:2', 'ac_total' => 'decimal:2', 'total' => 'decimal:2',
+        'a_payer_total' => 'decimal:2', 'a_facturer_total' => 'decimal:2'
     ];
 
     public function exerciceComptable()

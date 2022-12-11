@@ -44,6 +44,18 @@ class DbsFix extends Command
         $dbs = config('database.dbs');
         foreach ($dbs as $db) {
             printf("Fix db=" . $db . "\n");
+            foreach (Decompte::on($db)->with('paiements')->get() as $decompte) {
+                $decompte->a_payer_total = 0.0;
+                $decompte->a_facturer_total = 0.0;
+                foreach ($decompte->paiements  as $paiement) {
+                    if ($paiement->total > 0) {
+                        $decompte->a_payer_total += $paiement->total;
+                    } else {
+                        $decompte->a_facturer_total += $paiement->total;
+                    }
+                }
+                $decompte->save();
+            }
             // Ecriture::on($db)->update();
             printf("\n");
         }

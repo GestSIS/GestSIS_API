@@ -65,6 +65,8 @@ class PaiementBusiness
         $decompte->date = $date;
         $decompte->avs_total = 0;
         $decompte->ac_total = 0;
+        $decompte->a_payer_total = 0;
+        $decompte->a_facturer_total = 0;
         $decompte->total = 0;
         $decompte->save();
 
@@ -90,21 +92,18 @@ class PaiementBusiness
                 switch ($ecriture->type) {
                     case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE:
                         $totaux[$ecriture->sapeur_id]['solde_a_percevoir'] += $ecriture->total;
-                        $decompte->total += $ecriture->total;
                         break;
                     case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_INDEMNITE:
                         $totaux[$ecriture->sapeur_id]['indemnite_a_percevoir'] += $ecriture->total;
-                        $decompte->total += $ecriture->total;
                         break;
                     case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_FRAIS_FORFAITAIRE:
                         $totaux[$ecriture->sapeur_id]['frais_forfaitaire_a_percevoir'] += $ecriture->total;
-                        $decompte->total += $ecriture->total;
                         break;
                     case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_FRAIS_EFFECTIF:
                         $totaux[$ecriture->sapeur_id]['frais_effectif_a_percevoir'] += $ecriture->total;
-                        $decompte->total += $ecriture->total;
                         break;
                     case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_AUTRE:
+                    default:
                         // Tous les montants sont positifs, produit/charges défini par le compte
                         $compte = $indexedCompte[$ecriture->compte_id];
                         $total = $ecriture->total;
@@ -112,7 +111,6 @@ class PaiementBusiness
                             $total = -$total;
                         }
                         $totaux[$ecriture->sapeur_id]['autre'] += $total;
-                        $decompte->total += $total;
                         break;
                 }
 
@@ -163,7 +161,6 @@ class PaiementBusiness
                     $totaux[$key]['avs_ac_a_cotiser'] = $avs + $ac;
                 }
             }
-            $decompte->save();
         }
 
         // Calcul du total à payer pour chaque sapeur
@@ -213,6 +210,14 @@ class PaiementBusiness
                 'sapeur_id' => $key
             ];
 
+            // Maj décompte
+            $decompte->total += $total['total_final'];
+            if ($total['total_final'] > 0) {
+                $decompte->a_payer_total += $total['total_final'];
+            } else {
+                $decompte->a_facturer_total += $total['total_final'];
+            }
+
             // Génération écriture AVS/AC pour le sapeur
             if ($deduction && $total['avs_ac_a_cotiser'] > 0) {
                 $ecritureAvsGlobale['tarif'] += $total['avs_ac_a_cotiser'] * 2;
@@ -239,6 +244,7 @@ class PaiementBusiness
                 ];
             }
         }
+        $decompte->save();
 
         // Génération écriture AVS/AC pour le décompze
         if ($deduction && $ecritureAvsGlobale['total'] != 0) {
