@@ -21,18 +21,18 @@ class TravauxParamService
         return TravailType::all();
     }
 
-    public function ajouterTravailType($data)
+    public function ajouterType($data)
     {
-        return $this->business->ajouterTravailType($data);
+        return $this->business->ajouterType($data);
     }
 
-    public function modifierTravailType($id, $data)
+    public function modifierType($id, $data)
     {
-        return $this->business->modifierTravailType($id, $data);
+        return $this->business->modifierType($id, $data);
     }
 
-    public function supprimerTravailType($id)
+    public function supprimerType($id)
     {
-        return $this->business->supprimerTravailType($id);
+        return $this->business->supprimerType($id);
     }
 }

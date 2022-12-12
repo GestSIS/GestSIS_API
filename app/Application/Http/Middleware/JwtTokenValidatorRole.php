@@ -53,6 +53,10 @@ class JwtTokenValidatorRole
             $request->attributes->add(['admin' => true]);
         }
 
+        // Récupération du sapeur potentiellement lié
+        $sapeurs = (array) $token->data->sapeurs;
+        $request->attributes->add(['sapeurId' => $sapeurs[$sisKey] ?? null]);
+
         return $next($request);
     }
 }

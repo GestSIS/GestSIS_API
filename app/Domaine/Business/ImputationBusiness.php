@@ -59,7 +59,7 @@ class ImputationBusiness
     public const ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL = 3;
     public const ECRITURE_MODULE_AVS = 4;
     public const ECRITURE_MODULE_AMENDE = 5;
-    public const ECRITURE_MODULE_DECOMPTE_HEURE = 6;
+    public const ECRITURE_MODULE_FICHE_TRAVAIL = 6;
     public const ECRITURE_MODULE_COURS = 7;
     public const ECRITURE_MODULE_REMBOURSEMENT = 8;
 

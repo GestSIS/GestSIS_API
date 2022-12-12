@@ -37,11 +37,16 @@ class ModuleTravail extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->string('designation');
-            $table->integer('status');
-            $table->date('date_demande');
             $table->date('date');
+            $table->string('designation');
+            $table->decimal('quantite');
+
+            $table->date('date_demande');
             $table->string('justification');
+            $table->integer('statut');
+
+            $table->unsignedBigInteger('exercice_comptable_id');
+            $table->foreign('exercice_comptable_id')->references('id')->on('exercice_comptables');
 
             $table->unsignedBigInteger('sapeur_id');
             $table->foreign('sapeur_id')->references('id')->on('sapeurs');

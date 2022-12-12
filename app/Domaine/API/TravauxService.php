@@ -3,35 +3,40 @@
 
 namespace App\Domaine\API;
 
-use App\Domaine\Business\InterventionBusiness;
-use App\Domaine\SPI\InterventionRepository;
+use App\Domaine\Business\TravauxBusiness;
+use App\Infrastructure\Models\Travail;
 
 class TravauxService
 {
     protected $business;
 
-    public function __construct(InterventionBusiness $business)
+    public function __construct(TravauxBusiness $business)
     {
         $this->business = $business;
     }
 
-    public function ajout($travaux)
+    public function travaux($exerciceComptableId)
     {
-        // TODO: check status du travail
+        return Travail::where('exercice_comptable_id', '=', $exerciceComptableId)->get();
     }
 
-    public function modifier($travaux)
+    public function ajouter($travaux, $auteurId, $hasSaisieCommunePermission)
     {
-        // TODO: check status du travail
+        $this->business->ajouter($travaux, $auteurId, $hasSaisieCommunePermission);
     }
 
-    public function supprimer($travaux)
+    public function modifier($travailId, $travail, $sapeurId)
     {
-        // TODO: check status du travail
+        $this->business->modifier($travailId, $travail, $sapeurId);
     }
 
-    public function valider($id, $status, $justification)
+    public function supprimer($travaux, $sapeurId)
     {
-        // TODO: check status du travail
+        $this->business->supprimer($travaux, $sapeurId);
+    }
+
+    public function review($id, $accepte, $justification, $quantite)
+    {
+        $this->business->review($id, $accepte, $justification, $quantite);
     }
 }

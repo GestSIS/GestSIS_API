@@ -278,6 +278,29 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('excuses-types', ExcuseTypeController::class)->only(['store', 'update', 'destroy']);
     });
 
+
+    // Fiche de travail
+    Route::group(['middleware' => 'jwtTokenRole:fiche_travail.lecture,fiche_travail.saisie_perso,fiche_travail.saisie_commune'], function () {
+        Route::resource('fiche-travail-types', TravailTypeController::class)->only(['index']);
+    });
+
+    Route::group(['middleware' => 'jwtTokenRole:fiche_travail.lecture'], function () {
+        // TODO: Change controlelr
+        Route::get('fiches-travail/{id}', [TravailController::class, 'last'])->name('api.v2.exercices.derniers');
+    });
+
+    Route::group(['middleware' => 'jwtTokenRole:fiche_travail.saisie_perso,fiche_travail.saisie_commune'], function () {
+        Route::resource('fiches-travail', TravailController::class)->only(['store', 'update', 'destroy']);
+    });
+
+    Route::group(['middleware' => 'jwtTokenRole:fiche_travail.validation'], function () {
+        Route::post('fiches-travail/{id}/review', [TravailController::class, 'review'])->name('api.v2.fiches-travail.review');
+    });
+
+    Route::group(['middleware' => 'jwtTokenRole:fiche_travail.config'], function () {
+        Route::resource('fiche-travail-types', TravailTypeController::class)->only(['store', 'update', 'destroy']);
+    });
+
     // SMS
     Route::group(['middleware' => 'jwtTokenRole:sms.envoie'], function () {
         Route::post('aspsms/send', [AspsmsController::class, 'send'])->name('aspsms-send');

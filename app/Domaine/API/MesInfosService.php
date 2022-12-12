@@ -11,6 +11,7 @@ use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\HeureExercice;
 use App\Infrastructure\Models\InterventionSapeur;
 use App\Infrastructure\Models\Paiement;
+use App\Infrastructure\Models\Travail;
 use Illuminate\Support\Facades\DB;
 
 class MesInfosService
@@ -33,6 +34,14 @@ class MesInfosService
     function mesExercices($sapeurId, $exerciceComptableId)
     {
         return $this->exerciceRepo->listExerciceOfSapeurById($exerciceComptableId, $sapeurId);
+    }
+
+    function mesTravaux($sapeurId, $exerciceComptableId)
+    {
+        return Travail::where([
+            ['sapeur_id', '=', $sapeurId],
+            ['exercice_comptable_id', '=', $exerciceComptableId]
+        ])->get();
     }
 
     function mesInterventions($sapeurId, $exerciceComptableId)
