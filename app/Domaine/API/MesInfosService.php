@@ -10,6 +10,7 @@ use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\HeureExercice;
 use App\Infrastructure\Models\InterventionSapeur;
+use App\Infrastructure\Models\MaterielPersonnel;
 use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Travail;
 use Illuminate\Support\Facades\DB;
@@ -34,6 +35,11 @@ class MesInfosService
     function mesExercices($sapeurId, $exerciceComptableId)
     {
         return $this->exerciceRepo->listExerciceOfSapeurById($exerciceComptableId, $sapeurId);
+    }
+
+    function monMateriel($sapeurId)
+    {
+        return MaterielPersonnel::with('materiel')->where('sapeur_id', '=', $sapeurId)->get()->toArray();
     }
 
     function mesTravaux($sapeurId, $exerciceComptableId)
