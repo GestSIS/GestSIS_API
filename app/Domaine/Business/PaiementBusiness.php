@@ -244,12 +244,13 @@ class PaiementBusiness
                 ];
             }
         }
-        $decompte->save();
 
         // Génération écriture AVS/AC pour le décompze
         if ($deduction && $ecritureAvsGlobale['total'] != 0) {
+            $decompte->total += $ecritureAvsGlobale['total'];
             $ecritureAvsAc[] = $ecritureAvsGlobale;
         }
+        $decompte->save();
         Ecriture::insert($ecritureAvsAc);
         Paiement::insert($paiements);
 
