@@ -103,6 +103,7 @@ class ConvocationsController extends Controller
     public function updatePresences(Request $request)
     {
         $data = $request->validate([
+            'presences' => 'array',
             'presences.*.id' => 'integer|min:1',
             'presences.*.exercice_id' => 'integer|min:1',
             'presences.*.sapeur_id' => 'integer|min:1',
@@ -113,7 +114,10 @@ class ConvocationsController extends Controller
             'presences.*.amende' => 'required|boolean',
         ]);
 
-        $presences = $this->service->updateSapeurPresences($data['presences']);
+        $admin = $request->attributes->get('admin');
+        $perms = $request->attributes->get('permissions', []);
+        $hasValidationPremission = $admin || in_array('exercice.validation', $perms);
+        $presences = $this->service->updateSapeurPresences($data['presences'], $hasValidationPremission);
 
         return response()->json(['data' => $presences]);
     }
