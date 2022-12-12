@@ -7,8 +7,6 @@ use Illuminate\Http\Request;
 
 class MesDecomptesController extends Controller
 {
-
-
     public function __construct(MesInfosService $service)
     {
         $this->service = $service;
@@ -19,7 +17,7 @@ class MesDecomptesController extends Controller
      */
     public function index(Request $request, $exerciceComptableId)
     {
-        $sapeurId = $request->get('sapeurId');
+        $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
@@ -33,7 +31,7 @@ class MesDecomptesController extends Controller
      */
     public function print(Request $request, $decompteId)
     {
-        $sapeurId = $request->get('sapeurId');
+        $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }

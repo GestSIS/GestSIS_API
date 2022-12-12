@@ -11,6 +11,7 @@ use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
+use DateTime;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
@@ -24,6 +25,7 @@ use Z38\SwissPayment\StructuredPostalAddress;
 use Z38\SwissPayment\TransactionInformation\BankCreditTransfer;
 use Z38\SwissPayment\Money;
 use mikehaertl\pdftk\Pdf;
+use Z38\SwissPayment\Text;
 
 /**
  * PaiementBusiness
@@ -63,6 +65,8 @@ class PaiementBusiness
         $decompte->date = $date;
         $decompte->avs_total = 0;
         $decompte->ac_total = 0;
+        $decompte->a_payer_total = 0;
+        $decompte->a_facturer_total = 0;
         $decompte->total = 0;
         $decompte->save();
 
@@ -88,21 +92,18 @@ class PaiementBusiness
                 switch ($ecriture->type) {
                     case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE:
                         $totaux[$ecriture->sapeur_id]['solde_a_percevoir'] += $ecriture->total;
-                        $decompte->total += $ecriture->total;
                         break;
                     case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_INDEMNITE:
                         $totaux[$ecriture->sapeur_id]['indemnite_a_percevoir'] += $ecriture->total;
-                        $decompte->total += $ecriture->total;
                         break;
                     case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_FRAIS_FORFAITAIRE:
                         $totaux[$ecriture->sapeur_id]['frais_forfaitaire_a_percevoir'] += $ecriture->total;
-                        $decompte->total += $ecriture->total;
                         break;
                     case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_FRAIS_EFFECTIF:
                         $totaux[$ecriture->sapeur_id]['frais_effectif_a_percevoir'] += $ecriture->total;
-                        $decompte->total += $ecriture->total;
                         break;
                     case ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_AUTRE:
+                    default:
                         // Tous les montants sont positifs, produit/charges défini par le compte
                         $compte = $indexedCompte[$ecriture->compte_id];
                         $total = $ecriture->total;
@@ -110,7 +111,6 @@ class PaiementBusiness
                             $total = -$total;
                         }
                         $totaux[$ecriture->sapeur_id]['autre'] += $total;
-                        $decompte->total += $total;
                         break;
                 }
 
@@ -161,7 +161,6 @@ class PaiementBusiness
                     $totaux[$key]['avs_ac_a_cotiser'] = $avs + $ac;
                 }
             }
-            $decompte->save();
         }
 
         // Calcul du total à payer pour chaque sapeur
@@ -211,6 +210,14 @@ class PaiementBusiness
                 'sapeur_id' => $key
             ];
 
+            // Maj décompte
+            $decompte->total += $total['total_final'];
+            if ($total['total_final'] > 0) {
+                $decompte->a_payer_total += $total['total_final'];
+            } else {
+                $decompte->a_facturer_total += $total['total_final'];
+            }
+
             // Génération écriture AVS/AC pour le sapeur
             if ($deduction && $total['avs_ac_a_cotiser'] > 0) {
                 $ecritureAvsGlobale['tarif'] += $total['avs_ac_a_cotiser'] * 2;
@@ -240,8 +247,10 @@ class PaiementBusiness
 
         // Génération écriture AVS/AC pour le décompze
         if ($deduction && $ecritureAvsGlobale['total'] != 0) {
+            $decompte->total += $ecritureAvsGlobale['total'] / 2.0;
             $ecritureAvsAc[] = $ecritureAvsGlobale;
         }
+        $decompte->save();
         Ecriture::insert($ecritureAvsAc);
         Paiement::insert($paiements);
 
@@ -274,6 +283,7 @@ class PaiementBusiness
      */
     public function iso20022PourDecompte($decompteId, $nom, $bic, $iban)
     {
+        $decompte = Decompte::find($decompteId);
         $paiements = Decompte::find($decompteId)->paiements()->get();
         $paiement = new PaymentInformation(
             "payment-000",
@@ -281,6 +291,9 @@ class PaiementBusiness
             new BIC($bic),
             new IBAN($iban)
         );
+
+        $paiement->setExecutionDate(DateTime::createFromFormat('Y-m-d', $decompte->date));
+
         $i = 0;
         foreach ($paiements as $p) {
             $sapeur = $p->sapeur()->get()[0];
@@ -289,16 +302,17 @@ class PaiementBusiness
                     "instr-" . $i,
                     "e2e-" . $i,
                     new Money\CHF((int)($p->total * 100)),
-                    $sapeur->prenom . " " . $sapeur->nom,
+                    // TODO: Could be improved en remplacant les charactères accentués par leur version non accentué
+                    Text::sanitize($sapeur->prenom . " " . $sapeur->nom, 70),
                     new StructuredPostalAddress($sapeur->rue == "" ? null : $sapeur->rue, $sapeur->no_rue == "" ? null : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
                     new IBAN($sapeur->iban),
                     IID::fromIBAN(new IBAN($sapeur->iban))
                 );
+
                 $paiement->addTransaction($transaction);
                 $i++;
             }
         }
-
         $message = new CustomerCreditTransfer('message-001', $nom);
         $message->addPayment($paiement);
 
@@ -382,7 +396,7 @@ class PaiementBusiness
 
         try {
             // Génération du pdf de chaque sapeur
-            foreach (Sapeur::whereIn('id', array_keys($totaux))->with(['localite', 'civilite'])->get() as $sapeur) {
+            foreach (Sapeur::whereIn('id', array_keys($totaux))->with(['localite', 'civilite'])->orderBy('nom')->get() as $sapeur) {
                 $path = $this->creationPdf($sapeur, $exerciceComptable, $totaux[$sapeur->id], $affichageFrais, true);
                 $merged->addFile($path);
             }

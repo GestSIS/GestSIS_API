@@ -172,9 +172,9 @@ class ExerciceService
      * @return Collection
      * @throws ArrayException
      */
-    public function updateSapeurPresences($exercices)
+    public function updateSapeurPresences($exercices, $hasValidationPremission)
     {
-        return $this->business->updateSapeurPresences($exercices);
+        return $this->business->updateSapeurPresences($exercices, $hasValidationPremission);
     }
 
     /**

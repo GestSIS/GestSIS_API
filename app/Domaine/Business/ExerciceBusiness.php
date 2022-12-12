@@ -142,7 +142,7 @@ class ExerciceBusiness
      * @return Collection
      * @throws ArrayException
      */
-    public function updateSapeurPresences($presences)
+    public function updateSapeurPresences($presences, $hasValidationPremission)
     {
         $exerciceIds = array_map(fn ($e) => $e['exercice_id'], $presences);
 
@@ -159,13 +159,12 @@ class ExerciceBusiness
             }
 
             // Check si statut de l'exercice
-            $exerciceStatut = $exercices[$presence['exercice_id']] ?? null;
+            $exerciceStatut = $indexedExercice[$presence['exercice_id']] ?? null;
             if ($exerciceStatut == null) {
                 continue;
             }
-
             // Check si imputé
-            if ($exerciceStatut === self::EXERCICE_STATUT_IMPUTE) {
+            if ($exerciceStatut === self::EXERCICE_STATUT_IMPUTE && $hasValidationPremission) {
                 // Update uniquement de l'excuse type et amende
                 $p = ExerciceSapeur::where([
                     ['id', '=', $presence['id']],
@@ -196,7 +195,7 @@ class ExerciceBusiness
                 }
             } else if ($exerciceStatut === self::EXERCICE_STATUT_ANNULE) {
                 continue;
-            } else {
+            } else if ($exerciceStatut === self::EXERCICE_STATUT_VALIDE && $hasValidationPremission || $exerciceStatut < self::EXERCICE_STATUT_VALIDE) {
                 // Update all
                 ExerciceSapeur::where([
                     ['id', '=', $presence['id']],
@@ -233,6 +232,7 @@ class ExerciceBusiness
         // Ignore si déjà imputé
         if ($exercice->statut === self::EXERCICE_STATUT_IMPUTE) {
             // FIXME: permettre le changement du type d'excuse/amende
+
             return;
         }
 

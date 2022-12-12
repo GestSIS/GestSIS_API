@@ -18,7 +18,7 @@ class MesInterventionsController extends Controller
      */
     public function index(Request $request, $exerciceComptableId)
     {
-        $sapeurId = $request->get('sapeurId');
+        $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
