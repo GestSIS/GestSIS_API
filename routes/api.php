@@ -284,24 +284,19 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Fiche de travail
     Route::group(['middleware' => 'jwtTokenRole:fiche_travail.lecture,fiche_travail.saisie_perso,fiche_travail.saisie_commune'], function () {
-        Route::resource('fiche-travail-types', TravailTypeController::class)->only(['index']);
+        Route::resource('travail-types', TravailTypeController::class)->only(['index']);
     });
-
     Route::group(['middleware' => 'jwtTokenRole:fiche_travail.lecture'], function () {
-        // TODO: Change controlelr
-        Route::get('fiches-travail/{id}', [TravailController::class, 'last'])->name('api.v2.exercices.derniers');
+        Route::get('travaux/{id}', [TravailController::class, 'last'])->name('api.v2.exercices.derniers');
     });
-
     Route::group(['middleware' => 'jwtTokenRole:fiche_travail.saisie_perso,fiche_travail.saisie_commune'], function () {
-        Route::resource('fiches-travail', TravailController::class)->only(['store', 'update', 'destroy']);
+        Route::resource('travaux', TravailController::class)->only(['store', 'update', 'destroy']);
     });
-
     Route::group(['middleware' => 'jwtTokenRole:fiche_travail.validation'], function () {
-        Route::post('fiches-travail/{id}/review', [TravailController::class, 'review'])->name('api.v2.fiches-travail.review');
+        Route::post('travaux/{id}/review', [TravailController::class, 'review'])->name('api.v2.travaux.review');
     });
-
     Route::group(['middleware' => 'jwtTokenRole:fiche_travail.config'], function () {
-        Route::resource('fiche-travail-types', TravailTypeController::class)->only(['store', 'update', 'destroy']);
+        Route::resource('travail-types', TravailTypeController::class)->only(['store', 'update', 'destroy']);
     });
 
     // SMS

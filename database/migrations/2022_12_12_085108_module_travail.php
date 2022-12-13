@@ -13,12 +13,9 @@ class ModuleTravail extends Migration
      */
     public function up()
     {
-        Schema::create('travail_types', function (Blueprint $table) {
+        Schema::create('travail_type_fonctions', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
-
-            $table->string('designation');
-            $table->boolean('actif');
 
             $table->unsignedDecimal('tarif');
             $table->unsignedInteger('type');
@@ -28,6 +25,17 @@ class ModuleTravail extends Migration
 
             $table->unsignedBigInteger('compte_id');
             $table->foreign('compte_id')->references('id')->on('comptes');
+        });
+
+        Schema::create('travail_types', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->timestamps();
+
+            $table->string('designation');
+            $table->boolean('actif');
+
+            $table->unsignedBigInteger('travail_type_fonction_id');
+            $table->foreign('travail_type_fonction_id')->references('id')->on('travail_type_fonctions');
 
             $table->unsignedBigInteger('ecriture_categorie_id');
             $table->foreign('ecriture_categorie_id')->references('id')->on('ecriture_categories');
