@@ -16,6 +16,7 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
 use Z38\SwissPayment\BIC;
 use Z38\SwissPayment\IBAN;
 use Z38\SwissPayment\IID;
@@ -285,12 +286,16 @@ class PaiementBusiness
     {
         $decompte = Decompte::find($decompteId);
         $paiements = Decompte::find($decompteId)->paiements()->get();
-        $paiement = new PaymentInformation(
-            "payment-000",
-            $nom,
-            new BIC($bic),
-            new IBAN($iban)
-        );
+        try {
+            $paiement = new PaymentInformation(
+                "payment-000",
+                $nom,
+                new BIC($bic),
+                new IBAN($iban)
+            );
+        } catch (Exception $e) {
+            throw new ArrayException([], 'Veuillez vérifier les informations de paiement de votre SIS');
+        }
 
         $paiement->setExecutionDate(DateTime::createFromFormat('Y-m-d', $decompte->date));
 
@@ -298,19 +303,26 @@ class PaiementBusiness
         foreach ($paiements as $p) {
             $sapeur = $p->sapeur()->get()[0];
             if ($p->total > 0) {
-                $transaction = new BankCreditTransfer(
-                    "instr-" . $i,
-                    "e2e-" . $i,
-                    new Money\CHF((int)($p->total * 100)),
-                    // TODO: Could be improved en remplacant les charactères accentués par leur version non accentué
-                    Text::sanitize($sapeur->prenom . " " . $sapeur->nom, 70),
-                    new StructuredPostalAddress($sapeur->rue == "" ? null : $sapeur->rue, $sapeur->no_rue == "" ? null : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
-                    new IBAN($sapeur->iban),
-                    IID::fromIBAN(new IBAN($sapeur->iban))
-                );
+                if ($sapeur->iban == "") {
+                    throw new ArrayException([], "Numéro IBAN manquant pour '$sapeur->nom $sapeur->prenom'");
+                }
+                try {
+                    $transaction = new BankCreditTransfer(
+                        "instr-" . $i,
+                        "e2e-" . $i,
+                        new Money\CHF((int)($p->total * 100)),
+                        // TODO: Could be improved en remplacant les charactères accentués par leur version non accentué
+                        Text::sanitize($sapeur->prenom . " " . $sapeur->nom, 70),
+                        new StructuredPostalAddress($sapeur->rue == "" ? null : $sapeur->rue, $sapeur->no_rue == "" ? null : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
+                        new IBAN($sapeur->iban),
+                        IID::fromIBAN(new IBAN($sapeur->iban))
+                    );
 
-                $paiement->addTransaction($transaction);
-                $i++;
+                    $paiement->addTransaction($transaction);
+                    $i++;
+                } catch (InvalidArgumentException) {
+                    throw new ArrayException([], "Informations de paiement pour '$sapeur->nom $sapeur->prenom' invalides : $sapeur->iban");
+                }
             }
         }
         $message = new CustomerCreditTransfer('message-001', $nom);

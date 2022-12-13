@@ -141,18 +141,14 @@ class PaiementService
         $iban = $params->iban;
 
         $nomFichier = Decompte::find($decompteId)->designation . ".xml";
-        try {
-            $content = $this->business->iso20022PourDecompte($decompteId, $nom, $bic, $iban);
-            return response()->streamDownload(
-                function () use ($content) {
-                    echo $content;
-                },
-                $nomFichier
-            );
-        } catch (Exception $e) {
-            dd($e);
-            throw new ArrayException([], 'Veuillez vérifier les informations de paiement de votre SIS');
-        }
+
+        $content = $this->business->iso20022PourDecompte($decompteId, $nom, $bic, $iban);
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            $nomFichier
+        );
     }
 
     public function impressionDecompte($decompteId)
