@@ -303,6 +303,9 @@ class PaiementBusiness
         foreach ($paiements as $p) {
             $sapeur = $p->sapeur()->get()[0];
             if ($p->total > 0) {
+                if ($sapeur->iban == "") {
+                    throw new ArrayException([], "Numéro IBAN manquant pour '$sapeur->nom $sapeur->prenom'");
+                }
                 try {
                     $transaction = new BankCreditTransfer(
                         "instr-" . $i,
