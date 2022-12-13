@@ -15,9 +15,13 @@ class TravailTypeController extends Controller
         $this->service = $service;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $type = $this->service->travailTypes();
+        $admin = $request->attributes->get('admin');
+        $perms = $request->attributes->get('permissions', []);
+        $avecTarifs = $admin || in_array('fiche_travail.config', $perms) || in_array('comptabilite.tout', $perms);
+
+        $type = $this->service->travailTypes($avecTarifs);
 
         return response()->json(['data' => $type]);
     }

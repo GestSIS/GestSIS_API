@@ -31,6 +31,9 @@ class ModuleTravail extends Migration
             $table->unsignedDecimal('tarif');
             $table->unsignedInteger('type');
 
+            $table->unsignedBigInteger('fonction_id')->nullable()->default(null);
+            $table->foreign('fonction_id')->references('id')->on('fonctions');
+
             $table->unsignedBigInteger('type_unite_id');
             $table->foreign('type_unite_id')->references('id')->on('type_unites');
 
@@ -79,7 +82,7 @@ class ModuleTravail extends Migration
     public function down()
     {
         Schema::dropIfExists('travaux');
-        Schema::dropIfExists('travail_types_fonctions');
+        Schema::dropIfExists('travail_type_fonctions');
         Schema::dropIfExists('travail_types');
 
         Schema::table('ecritures', function (Blueprint $table) {

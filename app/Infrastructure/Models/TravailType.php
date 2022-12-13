@@ -7,10 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class TravailType extends Model
 {
-    protected $fillable = ['designation', 'tarif', 'type', 'type_unite_id', 'actif', 'compte_id', 'ecriture_categorie_id'];
+    use HasFactory;
+
+    protected $fillable = ['designation', 'actif', 'ecriture_categorie_id'];
     protected $casts = [
-        'tarif' => 'decimal', 'type' => 'integer', 'type_unite_id' => 'integer', 'actif' => 'boolean', 'compte_id' => 'integer', 'ecriture_categorie_id' => 'integer'
+        'actif' => 'boolean', 'ecriture_categorie_id' => 'integer'
     ];
 
-    use HasFactory;
+    public function fonctions()
+    {
+        return $this->hasMany(TravailTypeFonction::class, 'travail_type_id');
+    }
 }

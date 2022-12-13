@@ -14,9 +14,18 @@ class TravailController extends Controller
         $this->service = $service;
     }
 
-    public function index($exerciceComptableId)
+    public function index(Request $request, $exerciceComptableId)
     {
-        $travaux = $this->service->travaux($exerciceComptableId);
+        // Auteur
+        $admin = $request->attributes->get('admin');
+        $perms = $request->attributes->get('permissions', []);
+        $hasLectureOuValidationPermission = $admin || in_array('fiche_travail.validation', $perms) || in_array('fiche_travail.lecture', $perms);
+
+        $sapeurId = $request->attributes->get('sapeurId');
+        if (!$hasLectureOuValidationPermission && !$sapeurId) {
+            return response()->json(['error' => ['message' => 'Permissions insuffisantes']], 200);
+        }
+        $travaux = $this->service->travaux($exerciceComptableId, $hasLectureOuValidationPermission ? null : $sapeurId);
 
         return response()->json(['data' => $travaux]);
     }

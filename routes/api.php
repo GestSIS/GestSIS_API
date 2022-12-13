@@ -98,6 +98,7 @@ use App\Application\Http\Controllers\StatFederalController;
 use App\Application\Http\Controllers\StatInterventionController;
 use App\Application\Http\Controllers\TelephoneController;
 use App\Application\Http\Controllers\TelephoneTypeController;
+use App\Application\Http\Controllers\TravailController;
 use App\Application\Http\Controllers\TypeInterventionController;
 use App\Application\Http\Controllers\UniteController;
 use App\Application\Http\Controllers\VehiculeController;
@@ -231,6 +232,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::delete('rta', [ReferenceRtaController::class, 'resetReferenceRta'])->name('api.v2.rta.reset-rta');
     });
 
+    // Exercices
     Route::group(['middleware' => 'jwtTokenRole:exercice.lecture,exercice.presence,comptabilite.tout'], function () {
         Route::resource('exercices', ExerciceController::class)->only(['index', 'show']);
         Route::resource('exercices.sapeurs', ConvocationsController::class)->only(['index']);
@@ -238,15 +240,12 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('exercices/{id}/liste-presence', [ExerciceController::class, 'listePresence']);
         Route::get('exercices/{id}/liste-appel', [ExerciceController::class, 'listeAppel']);
 
-
         // Convocations
         Route::get('convocation/{id}', [ConvocationController::class, 'convoquer']);
 
         // Statistiques
         Route::get('statistiques/{id}/presence', [SapeurExerciceController::class, 'stat']);
     });
-
-    // Exercices
     Route::group(['middleware' => 'jwtTokenRole:exercice.presence'], function () {
         Route::get('exercices-derniers', [ExerciceController::class, 'last'])->name('api.v2.exercices.derniers');
         Route::post('exercices/{id}/sapeurs', [ConvocationsController::class, 'store'])->name('api.v2.exercices.sapeurs.store');
@@ -261,36 +260,26 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         // TODO: à implémenter
         // Route::get('exercices/{id}/liste-appel-localite', [ExerciceController::class, 'listeAppelLocalite']);
     });
-
     Route::group(['middleware' => 'jwtTokenRole:exercice.modification'], function () {
         Route::resource('exercices', ExerciceController::class)->only(['store', 'update']);
         Route::get('sapeurs-convocation', [SapeurController::class, 'convocationSms'])->name('sapeurs-convocation');
     });
-
-
     Route::group(['middleware' => 'jwtTokenRole:exercice.validation'], function () {
         Route::resource('exercices', ExerciceController::class)->only(['destroy']);
         Route::post('exercices/{id}/valider', [ExerciceController::class, 'valider'])->name('api.v2.exercices.valider');
         Route::post('exercices/{id}/annuler', [ExerciceController::class, 'annuler'])->name('api.v2.exercices.annuler');
         Route::post('exercices/{id}/reactiver', [ExerciceController::class, 'reactiver'])->name('api.v2.exercices.reactiver');
     });
-
-    // Params exercices
     Route::group(['middleware' => 'jwtTokenRole:exercice.config'], function () {
         Route::resource('exercice-categories', ExerciceCategorieController::class)->only(['store', 'update', 'destroy']);
         Route::resource('excuses-types', ExcuseTypeController::class)->only(['store', 'update', 'destroy']);
     });
 
-
     // Fiche de travail
-    Route::group(['middleware' => 'jwtTokenRole:fiche_travail.lecture,fiche_travail.saisie_perso,fiche_travail.saisie_commune'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation,fiche_travail.lecture'], function () {
         Route::resource('travail-types', TravailTypeController::class)->only(['index']);
-    });
-    Route::group(['middleware' => 'jwtTokenRole:fiche_travail.lecture'], function () {
-        Route::get('travaux/{id}', [TravailController::class, 'last'])->name('api.v2.exercices.derniers');
-    });
-    Route::group(['middleware' => 'jwtTokenRole:fiche_travail.saisie_perso,fiche_travail.saisie_commune'], function () {
-        Route::resource('travaux', TravailController::class)->only(['store', 'update', 'destroy']);
+        Route::resource('travaux', TravailController::class)->only(['index', 'store', 'update', 'destroy']);
+        Route::get('travaux/{exerciceComptableId}', [TravailController::class, 'index'])->name('api.v2.travaux.index');
     });
     Route::group(['middleware' => 'jwtTokenRole:fiche_travail.validation'], function () {
         Route::post('travaux/{id}/review', [TravailController::class, 'review'])->name('api.v2.travaux.review');
@@ -330,7 +319,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('statistiques/{id}/stat-federal', [InterventionStatistiqueController::class, 'statFederal']);
         Route::get('statistiques/{id}/intervention-traitement', [InterventionStatistiqueController::class, 'traitement']);
     });
-
     Route::group(['middleware' => 'jwtTokenRole:intervention.modification'], function () {
         Route::resource('alarmes', AlarmeController::class)->only(['index']);
 
@@ -366,13 +354,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::put('interventions/{id}/phases', [InterventionPhasesController::class, 'update'])->name('api.v2.interventions.phases.update');
         Route::delete('interventions/{id}/phases', [InterventionPhasesController::class, 'destroy'])->name('api.v2.interventions.phases.delete');
     });
-
-    // Intervention validation
     Route::group(['middleware' => 'jwtTokenRole:intervention.validation'], function () {
         Route::post('interventions/{id}/valider', [InterventionController::class, 'valider'])->name('api.v2.interventions.valider');
     });
-
-    // Static Params Intervention
     Route::group(['middleware' => 'jwtTokenRole:intervention.lecture,intervention.modification,comptabilite.tout'], function () {
         // TODO: see to add the correct right for the following routes : 'store', 'update']);
         Route::resource('phase-types', PhaseTypeController::class)->only(['index']);
@@ -380,15 +364,12 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('stat-intervention', StatInterventionController::class)->only(['index']);
         Route::resource('intervention-traitement', InterventionTraitementController::class)->only(['index']);
     });
-
-    // Params intervention
     Route::group(['middleware' => 'jwtTokenRole:intervention.lecture'], function () {
         Route::resource('vehicules', VehiculeController::class)->only(['index']);
         Route::resource('materiels', MaterielController::class)->only(['index']);
         Route::resource('mission-types', MissionTypeController::class)->only(['index']);
         Route::resource('telephones', TelephoneController::class)->only(['index']);
     });
-
     Route::group(['middleware' => 'jwtTokenRole:intervention.config'], function () {
         Route::resource('type-intervention', TypeInterventionController::class)->only(['store', 'update', 'destroy']);
         Route::resource('vehicules', VehiculeController::class)->only(['store', 'update', 'destroy']);

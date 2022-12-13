@@ -16,9 +16,13 @@ class TravauxParamService
         $this->business = $business;
     }
 
-    public function travailTypes()
+    public function travailTypes($withTarifs)
     {
-        return TravailType::all();
+        if ($withTarifs) {
+            return TravailType::with('fonctions')->get();
+        } else {
+            return TravailType::all();
+        }
     }
 
     public function ajouterType($data)
