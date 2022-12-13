@@ -74,6 +74,7 @@ use App\Application\Http\Controllers\MesDecomptesController;
 use App\Application\Http\Controllers\MesExercicesController;
 use App\Application\Http\Controllers\MesInfosController;
 use App\Application\Http\Controllers\MesInterventionsController;
+use App\Application\Http\Controllers\MesTravauxController;
 use App\Application\Http\Controllers\MissionTypeController;
 use App\Application\Http\Controllers\MonMaterielController;
 use App\Application\Http\Controllers\PaiementController;
@@ -120,9 +121,12 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenSapeur'], function () {
         Route::get('mes-infos', [MesInfosController::class, 'index'])->name('mes-infos');
         Route::get('mon-materiel', [MonMaterielController::class, 'index'])->name('mon-materiel');
+
+        Route::get('mes-travaux/{exerciceComptableId}', [MesTravauxController::class, 'index'])->name('mes-travaux');
         Route::get('mes-exercices/{exerciceComptableId}', [MesExercicesController::class, 'index'])->name('mes-exercices');
-        Route::get('mes-interventions/{exerciceComptableId}', [MesInterventionsController::class, 'index'])->name('mes-interventions');
         Route::get('mes-decomptes/{exerciceComptableId}', [MesDecomptesController::class, 'index'])->name('mes-decomptes');
+        Route::get('mes-interventions/{exerciceComptableId}', [MesInterventionsController::class, 'index'])->name('mes-interventions');
+
         Route::get('mes-decomptes/{decompteId}/print', [MesDecomptesController::class, 'print'])->name('api.v2.mes-decomptes.print');
     });
 

@@ -14,16 +14,16 @@ class MesTravauxController extends Controller
     }
 
     /**
-     * Récupération des exercices du sapeur
+     * Récupère les informations du sapeur
      */
-    public function index(Request $request, $exerciceComptableId)
+    public function index(Request $request)
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        $data = $this->service->mesTravaux($sapeurId, $exerciceComptableId);
+        $data = $this->service->mesTravaux($sapeurId);
         return response()->json(['data' => $data]);
     }
 }
