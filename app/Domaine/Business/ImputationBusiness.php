@@ -19,6 +19,7 @@ use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\Fonction;
 use App\Infrastructure\Models\FonctionSapeur;
 use App\Infrastructure\Models\HeureExercice;
+use App\Infrastructure\Models\HeureExerciceType;
 use App\Infrastructure\Models\IndemniteCoursType;
 use App\Infrastructure\Models\Intervention;
 
@@ -916,31 +917,39 @@ class ImputationBusiness
 
     private function imputerExerciceHeureSup($exercice, $heures, $designation)
     {
+        $heureTypes = HeureExerciceType::all();
+        $indexedTypes = [];
+        foreach ($heureTypes as $type) {
+            $indexedTypes[$type->id] = $type;
+        }
+
         // Générer écritures
         foreach ($heures as $heure) {
             $designationSapeur = $designation . " - " . $heure->designation;
-            $total = $heure->quantite * $heure->montant;
+            $tarifType = $indexedTypes[$heure->heure_exercice_type_id] ?? $heure;
+
+            $total = $heure->quantite * $tarifType->montant;
 
             // Par heure -> calcul de la durée
             $ecriture = array(
-                'tarif' => $heure->montant,
+                'tarif' => $tarifType->montant,
                 'quantite' => $heure->quantite,
                 'tarif_min' => null,
                 'tarif_min_pour' => null,
                 'total' => $total,
 
                 'designation' => $designationSapeur,
-                'type_unite_id' => $heure->type_unite_id,
+                'type_unite_id' => $tarifType->type_unite_id,
                 'sapeur_id' => $heure->sapeur_id,
-                'compte_id' => $heure->compte_id,
+                'compte_id' => $tarifType->compte_id,
                 'exercice_comptable_id' => $exercice->exercice_comptable_id,
                 'exercice_id' => $exercice->id,
-                'ecriture_categorie_id' => $heure->ecriture_categorie_id,
+                'ecriture_categorie_id' => $tarifType->ecriture_categorie_id,
                 'date' => $exercice->date,
                 'heure' => $exercice->heure,
 
                 'module' => self::ECRITURE_MODULE_EXERCICE,
-                'type' => $heure->type,
+                'type' => $tarifType->type,
             );
 
             $this->ecritureRepo->persisteNewEcriture($ecriture);
