@@ -22,6 +22,8 @@ use App\Infrastructure\Models\HeureExercice;
 use App\Infrastructure\Models\HeureExerciceType;
 use App\Infrastructure\Models\IndemniteCoursType;
 use App\Infrastructure\Models\Intervention;
+use App\Infrastructure\Models\Travail;
+use App\Infrastructure\Models\TravailType;
 
 class ImputationBusiness
 {
@@ -1142,6 +1144,71 @@ class ImputationBusiness
 
         // Suppression des écritures
         Ecriture::where('cours_sapeur_id', $coursSapeurId)
+            ->delete();
+
+        return true;
+    }
+
+    /**
+     * Génères des frais annuels pour les sapeurs n'ayant pas encore de frais annuels
+     */
+    public function imputerTravaux($ids)
+    {
+        $travaux = Travail::whereIn('id', $ids)->where('statut', '=', TravauxBusiness::TRAVAIL_STATUT_VALIDE)->get();
+
+        // Chargement des travaux type
+        $types = TravailType::with(['fonctions'])->get();
+        $indexedTypes = [];
+        foreach ($types as $type) {
+            $indexedTypes[$type->id] = $type;
+        }
+
+        $ecritures = [];
+
+        foreach ($travaux as $travail) {
+            $type = $indexedTypes[$travail->travail_type_id];
+            foreach ($type->fonctions as $fonction) {
+                // Génération de l'écriture
+                $ecritures[] = [
+                    'tarif' => $fonction->tarif,
+                    'quantite' => $travail->quantite,
+                    'total' => $travail->quantite * $fonction->tarif,
+
+                    'compte_id' => $fonction->compte_id,
+
+                    'designation' => $travail->designation,
+                    'type_unite_id' => $fonction->type_unite_id,
+                    'sapeur_id' => $travail->sapeur_id,
+                    'travail_id' => $travail->id,
+                    'exercice_comptable_id' => $travail->exercice_comptable_id,
+                    'ecriture_categorie_id' => $type->ecriture_categorie_id,
+                    'date' => $travail->date,
+                    'heure' => '',
+
+                    'module' => self::ECRITURE_MODULE_FICHE_TRAVAIL,
+                    'type' => $fonction->type,
+                ];
+
+                break;
+            }
+        }
+
+        Ecriture::insert($ecritures);
+        return $ecritures;
+    }
+
+    public function annulerImputationTravail($travailId)
+    {
+        // Check si des ecritures sont déjà liées à un décompte
+        if (Ecriture::where('travail_id', $travailId)
+            ->whereNotNull('decompte_id')
+            ->exists()
+        ) {
+            throw new ArrayException([], 'Des écriture sont déjà facturées dans un décompte.');
+        }
+
+        // Suppression des écritures
+        Ecriture::where('travail_id', $travailId)
             ->delete();
 
         return true;

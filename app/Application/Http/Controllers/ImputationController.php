@@ -77,4 +77,21 @@ class ImputationController extends Controller
         $res = $this->service->annulerImputationCours($id);
         return response()->json(['data' => $res]);
     }
+
+    public function travail(Request $request)
+    {
+        $data = $request->validate([
+            'ids' => 'array|required',
+            'ids.*' => 'integer|required',
+        ]);
+
+        $res = $this->service->imputationTravail($data['ids']);
+        return response()->json(['data' => $res]);
+    }
+
+    public function cancelTravail(int $id)
+    {
+        $res = $this->service->annulerImputationTravail($id);
+        return response()->json(['data' => $res]);
+    }
 }

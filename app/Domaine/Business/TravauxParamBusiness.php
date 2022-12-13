@@ -8,25 +8,37 @@ use App\Infrastructure\Models\TravailType;
 
 class TravauxParamBusiness
 {
-
-    public function ajouterType($data)
+    public static function ajouterType($data)
     {
-        $travailType = new TravailType($data);
-        $travailType->save();
-        return $travailType;
+        $type = TravailType::create($data);
+        if (!array_key_exists('fonctions', $data)) {
+            $data['fonctions'] = [];
+        }
+        $type->fonctions()->createMany($data['fonctions']);
+        $type->fonctions;
+        return $type;
     }
 
-    public function modifierType($id, $data)
+    public static function modifierType($id, $data)
     {
-        TravailType::where('id', $id)->limit(1)->update($data);
-        return TravailType::find($id);
+        $type = TravailType::find($id);
+        $type->update($data);
+
+        $type->fonctions()->delete();
+        if (!array_key_exists('fonctions', $data)) {
+            $data['fonctions'] = [];
+        }
+        $type->fonctions()->createMany($data['fonctions']);
+
+        $type->fonctions;
+        return $type;
     }
 
-    public function supprimerType($id)
+    public static function supprimerType($id)
     {
         if (Travail::where('travail_type_id', '=', $id)->exists()) {
             throw new ArrayException([], 'Impossible de supprimer ce travail type, des travaux ont été saisie');
         }
-        TravailType::where('id', $id)->delete();
+        TravailType::where('id', $id)->limit(1)->delete();
     }
 }

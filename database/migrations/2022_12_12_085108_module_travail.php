@@ -13,6 +13,17 @@ class ModuleTravail extends Migration
      */
     public function up()
     {
+        Schema::create('travail_types', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->timestamps();
+
+            $table->string('designation');
+            $table->boolean('actif');
+
+            $table->unsignedBigInteger('ecriture_categorie_id');
+            $table->foreign('ecriture_categorie_id')->references('id')->on('ecriture_categories');
+        });
+
         Schema::create('travail_type_fonctions', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
@@ -25,20 +36,9 @@ class ModuleTravail extends Migration
 
             $table->unsignedBigInteger('compte_id');
             $table->foreign('compte_id')->references('id')->on('comptes');
-        });
 
-        Schema::create('travail_types', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->timestamps();
-
-            $table->string('designation');
-            $table->boolean('actif');
-
-            $table->unsignedBigInteger('travail_type_fonction_id');
-            $table->foreign('travail_type_fonction_id')->references('id')->on('travail_type_fonctions');
-
-            $table->unsignedBigInteger('ecriture_categorie_id');
-            $table->foreign('ecriture_categorie_id')->references('id')->on('ecriture_categories');
+            $table->unsignedBigInteger('travail_type_id');
+            $table->foreign('travail_type_id')->references('id')->on('travail_types');
         });
 
         Schema::create('travaux', function (Blueprint $table) {
@@ -65,6 +65,10 @@ class ModuleTravail extends Migration
             $table->unsignedBigInteger('travail_type_id');
             $table->foreign('travail_type_id')->references('id')->on('travail_types');
         });
+
+        Schema::table('ecritures', function (Blueprint $table) {
+            $table->unsignedBigInteger('travail_id')->nullable()->default(null);
+        });
     }
 
     /**
@@ -75,6 +79,11 @@ class ModuleTravail extends Migration
     public function down()
     {
         Schema::dropIfExists('travaux');
+        Schema::dropIfExists('travail_types_fonctions');
         Schema::dropIfExists('travail_types');
+
+        Schema::table('ecritures', function (Blueprint $table) {
+            $table->dropColumn('travail_id');
+        });
     }
 }

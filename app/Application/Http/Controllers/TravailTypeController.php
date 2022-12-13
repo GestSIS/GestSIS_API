@@ -26,12 +26,13 @@ class TravailTypeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'required|string|min:1',
-            'tarif' => 'required|decimal',
-            'type' => 'required|integer|min:1|max:',
-            'type_unite_id' => 'required|integer',
             'actif' => 'required|boolean',
-            'compte_id' => 'required|integer',
-            'ecriture_categorie_id' => 'required|integer'
+            'ecriture_categorie_id' => 'required|integer',
+            'fonctions.*.type' => 'numeric|required',
+            'fonctions.*.tarif' => 'numeric|required',
+            'fonctions.*.compte_id' => 'integer|required',
+            'fonctions.*.fonction_id' => 'integer|nullable',
+            'fonctions.*.type_unite_id' => 'integer|required',
         ]);
 
         $type = $this->service->ajouterType($data);
@@ -42,12 +43,13 @@ class TravailTypeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'required|string|min:1',
-            'tarif' => 'required|decimal',
-            'type' => 'required|integer',
-            'type_unite_id' => 'required|integer',
             'actif' => 'required|boolean',
-            'compte_id' => 'required|integer',
-            'ecriture_categorie_id' => 'required|integer'
+            'ecriture_categorie_id' => 'required|integer',
+            'fonctions.*.type' => 'numeric|required',
+            'fonctions.*.tarif' => 'numeric|required',
+            'fonctions.*.compte_id' => 'integer|required',
+            'fonctions.*.fonction_id' => 'integer|nullable',
+            'fonctions.*.type_unite_id' => 'integer|required',
         ]);
 
         $type = $this->service->modifierType($id, $data);

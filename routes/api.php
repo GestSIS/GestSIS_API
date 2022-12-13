@@ -417,6 +417,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::delete('imputation/annuel/{id}', [ImputationController::class, 'cancelAnnuel']);
         Route::post('imputation/cours/{id}', [ImputationController::class, 'cours']);
         Route::delete('imputation/cours/{id}', [ImputationController::class, 'cancelCours']);
+        Route::post('imputation/travail', [ImputationController::class, 'travail']);
+        Route::delete('imputation/travail/{id}', [ImputationController::class, 'cancelTravail']);
         Route::post('imputation/exercice/{id}', [ImputationController::class, 'exercice']);
         Route::delete('imputation/exercice/{id}', [ImputationController::class, 'cancelExercice']);
         Route::post('imputation/intervention/{id}', [ImputationController::class, 'intervention']);
