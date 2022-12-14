@@ -15,17 +15,21 @@ class TravauxService
         $this->business = $business;
     }
 
-    public function travaux($exerciceComptableId, $sapeurId)
+    public function travaux($exerciceComptableId, $sapeurId, $withEcritures)
     {
-        if ($sapeurId == null) {
-            return Travail::where('exercice_comptable_id', '=', $exerciceComptableId)->get();
-        } else {
-            return Travail::where('exercice_comptable_id', '=', $exerciceComptableId)
+        $query = Travail::where('exercice_comptable_id', '=', $exerciceComptableId);
+
+        if ($sapeurId != null) {
+            $query = $query->with('ecritures');
+        }
+        if ($sapeurId != null) {
+            $query =  $query
                 ->where(function ($query) use ($sapeurId) {
                     $query->where('auteur_id', '=', $sapeurId)
                         ->orWhere('sapeur_id', '=', $sapeurId);
-                })->get();
+                });
         }
+        return $query->get();
     }
 
     public function ajouter($travaux, $auteurId, $hasSaisieCommunePermission)
