@@ -20,6 +20,9 @@ class ModuleTravail extends Migration
             $table->string('designation');
             $table->boolean('actif');
 
+            $table->unsignedBigInteger('type_unite_id');
+            $table->foreign('type_unite_id')->references('id')->on('type_unites');
+
             $table->unsignedBigInteger('ecriture_categorie_id');
             $table->foreign('ecriture_categorie_id')->references('id')->on('ecriture_categories');
         });
@@ -33,9 +36,6 @@ class ModuleTravail extends Migration
 
             $table->unsignedBigInteger('fonction_id')->nullable()->default(null);
             $table->foreign('fonction_id')->references('id')->on('fonctions');
-
-            $table->unsignedBigInteger('type_unite_id');
-            $table->foreign('type_unite_id')->references('id')->on('type_unites');
 
             $table->unsignedBigInteger('compte_id');
             $table->foreign('compte_id')->references('id')->on('comptes');

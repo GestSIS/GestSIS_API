@@ -32,11 +32,11 @@ class TravailTypeController extends Controller
             'designation' => 'required|string|min:1',
             'actif' => 'required|boolean',
             'ecriture_categorie_id' => 'required|integer',
+            'type_unite_id' => 'integer|required',
             'fonctions.*.type' => 'numeric|required',
             'fonctions.*.tarif' => 'numeric|required',
             'fonctions.*.compte_id' => 'integer|required',
             'fonctions.*.fonction_id' => 'integer|nullable',
-            'fonctions.*.type_unite_id' => 'integer|required',
         ]);
 
         $type = $this->service->ajouterType($data);
@@ -49,11 +49,11 @@ class TravailTypeController extends Controller
             'designation' => 'required|string|min:1',
             'actif' => 'required|boolean',
             'ecriture_categorie_id' => 'required|integer',
+            'type_unite_id' => 'integer|required',
             'fonctions.*.type' => 'numeric|required',
             'fonctions.*.tarif' => 'numeric|required',
             'fonctions.*.compte_id' => 'integer|required',
             'fonctions.*.fonction_id' => 'integer|nullable',
-            'fonctions.*.type_unite_id' => 'integer|required',
         ]);
 
         $type = $this->service->modifierType($id, $data);
