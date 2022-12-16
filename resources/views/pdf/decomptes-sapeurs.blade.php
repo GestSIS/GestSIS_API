@@ -303,7 +303,7 @@
       @endif
       <tr>
         <td>{{ formatDate($ecriture->date) }}</td>
-        <td>{{ formatTime($ecriture->heure) }}</td>
+        <td></td>
         <td>{{ $ecriture->designation }}</td>
         <td>{{ formatTarif($ecriture) }}</td>
         <td>{{ formatNumber($ecriture->quantite) }}</td>

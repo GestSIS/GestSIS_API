@@ -1177,7 +1177,7 @@ class ImputationBusiness
 
                     'compte_id' => $fonction->compte_id,
 
-                    'designation' => $travail->designation,
+                    'designation' => $type->designation . " - " . $travail->designation,
                     'type_unite_id' => $type->type_unite_id,
                     'sapeur_id' => $travail->sapeur_id,
                     'travail_id' => $travail->id,
