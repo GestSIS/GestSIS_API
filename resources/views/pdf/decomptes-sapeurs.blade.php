@@ -48,6 +48,12 @@
         return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_DIVERS;
       }
     }
+    if (!function_exists('isTravail')) {
+      function isTravail($e)
+      {
+        return intval($e->module) === \App\Domaine\Business\ImputationBusiness::ECRITURE_MODULE_FICHE_TRAVAIL;
+      }
+    }
     if (!function_exists('isAmende')) {
       function isAmende($e)
       {
@@ -280,6 +286,35 @@
       @endif
     @endif
 
+    @if (isTravail($ecriture))
+      @if ($debutSection)
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Heure</th>
+            <th>Nature du service</th>
+            <th>Tarif</th>
+            <th>Quantité</th>
+            <th class="col-2">Payé / Facturé le</th>
+            <th class="text-center col-1">Montant</th>
+          </tr>
+        </thead>
+        <tbody>
+      @endif
+      <tr>
+        <td>{{ formatDate($ecriture->date) }}</td>
+        <td>{{ formatTime($ecriture->heure) }}</td>
+        <td>{{ $ecriture->designation }}</td>
+        <td>{{ formatTarif($ecriture) }}</td>
+        <td>{{ formatNumber($ecriture->quantite) }}</td>
+        <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
+        <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
+      </tr>
+      @if ($finSection)
+        </tbody>
+      @endif
+    @endif
+
     @if (isDivers($ecriture))
       @if ($debutSection)
         <thead>
@@ -289,7 +324,7 @@
             <th>Nature du service</th>
             <th>Tarif</th>
             <th>Quantité</th>
-            <th class="col-2">Payé /Facturé le</th>
+            <th class="col-2">Payé / Facturé le</th>
             <th class="text-center col-1">Montant</th>
           </tr>
         </thead>

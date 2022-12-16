@@ -72,6 +72,9 @@ class PaiementService
         if ($selection['ecrituresAmende']) {
             $modules[] = ImputationBusiness::ECRITURE_MODULE_AMENDE;
         }
+        if ($selection['ecrituresTravaux']) {
+            $modules[] = ImputationBusiness::ECRITURE_MODULE_FICHE_TRAVAIL;
+        }
 
         $ecritures = Ecriture::whereNull('decompte_id')->where('exercice_comptable_id', $exerciceComptableId)->whereIn('module', $modules)->get();
         if ($ecritures->count() === 0) {

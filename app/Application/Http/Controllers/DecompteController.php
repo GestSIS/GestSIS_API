@@ -36,6 +36,7 @@ class DecompteController extends Controller
             'ecrituresAnnuel' => 'required|boolean',
             'ecrituresCours' => 'required|boolean',
             'ecrituresDivers' => 'required|boolean',
+            'ecrituresTravaux' => 'required|boolean',
             'ecrituresExercice' => 'required|boolean',
             'ecrituresIntervention' => 'required|boolean',
         ]);
