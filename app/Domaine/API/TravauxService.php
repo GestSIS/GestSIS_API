@@ -34,21 +34,26 @@ class TravauxService
 
     public function ajouter($travaux, $auteurId, $hasSaisieCommunePermission)
     {
-        $this->business->ajouter($travaux, $auteurId, $hasSaisieCommunePermission);
+        return $this->business->ajouter($travaux, $auteurId, $hasSaisieCommunePermission);
     }
 
     public function modifier($travailId, $travail, $sapeurId)
     {
-        $this->business->modifier($travailId, $travail, $sapeurId);
+        return $this->business->modifier($travailId, $travail, $sapeurId);
     }
 
     public function supprimer($travaux, $sapeurId)
     {
-        $this->business->supprimer($travaux, $sapeurId);
+        return $this->business->supprimer($travaux, $sapeurId);
     }
 
     public function review($id, $accepte, $justification, $quantite)
     {
-        $this->business->review($id, $accepte, $justification, $quantite);
+        return $this->business->review($id, $accepte, $justification, $quantite);
+    }
+
+    public function cancelReview($id)
+    {
+        return $this->business->cancelReview($id);
     }
 }

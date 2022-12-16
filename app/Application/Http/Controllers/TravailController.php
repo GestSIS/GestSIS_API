@@ -37,9 +37,10 @@ class TravailController extends Controller
             'travaux' => 'array',
             'travaux.*.designation' => 'required|string|min:1',
             'travaux.*.date' => 'required|date',
-            'travaux.*.sapeur_id' => 'required|integer|exist:sapeurs,id',
-            'travaux.*.travail_type_id' => 'required|integer|exist:travail_types,id',
-            'travaux.*.exercice_comptable_id' => 'required|integer|exist:exercice_comptables,id',
+            'travaux.*.quantite' => 'required|numeric',
+            'travaux.*.sapeur_id' => 'required|integer|exists:sapeurs,id',
+            'travaux.*.travail_type_id' => 'required|integer|exists:travail_types,id',
+            'travaux.*.exercice_comptable_id' => 'required|integer|exists:exercice_comptables,id',
         ]);
 
         // Auteur
@@ -60,7 +61,9 @@ class TravailController extends Controller
         $data = $request->validate([
             'designation' => 'required|string|min:1',
             'date' => 'required|date',
-            'travail_type_id' => 'required|integer|exist:travail_types,id',
+            'quantite' => 'required|numeric',
+            'sapeur_id' => 'required|integer|exists:sapeurs,id',
+            'travail_type_id' => 'required|integer|exists:travail_types,id',
         ]);
 
         $sapeurId = $request->attributes->get('sapeurId', []);
@@ -72,12 +75,18 @@ class TravailController extends Controller
     public function review(Request $request, $travailId)
     {
         $data = $request->validate([
-            'justification' => 'integer|string',
+            'justification' => 'string|nullable',
             'accepte' => 'boolean|required',
-            'quantite' => 'decimal|nullable',
+            // 'quantite' => 'decimal|nullable',
         ]);
 
-        $travail = $this->service->modifier($travailId, $data['accepte'], $data['justification'], $data['quantite'] ?? null);
+        $travail = $this->service->review($travailId, $data['accepte'], $data['justification'] ?? '', $data['quantite'] ?? null);
+        return response()->json(['data' => $travail]);
+    }
+
+    public function cancelReview(Request $request, $travailId)
+    {
+        $travail = $this->service->cancelReview($travailId);
         return response()->json(['data' => $travail]);
     }
 

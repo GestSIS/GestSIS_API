@@ -16,24 +16,26 @@ class TravauxBusiness
     public function ajouter($travaux, $auteurId, $hasSaisieCommunePermission)
     {
         // Check que l'auteur a saisie commune si nécessaire
-        if (count(array_filter($travaux, fn ($t) => $t->sapeur_id != $auteurId)) > 0 && !$hasSaisieCommunePermission) {
+        if (count(array_filter($travaux, fn ($t) => $t['sapeur_id'] != $auteurId)) > 0 && !$hasSaisieCommunePermission) {
             throw new ArrayException([], 'Permission insufisante pour saisir des travaux pour d\'autres sapeurs');
         }
 
         // Création des travaux
-        $travaux = array_map(fn ($t) => [
-            ...$t,
-            'auteur_id' => $auteurId,
-            'statut' => self::TRAVAIL_STATUT_SAISI,
-            'date_demande' => Carbon::now(),
-            'justification' => ''
-        ], $travaux);
-        Travail::insert($travaux);
+        $newTravaux = [];
+        foreach ($travaux as $travail) {
+            $newTravaux[] = Travail::create([
+                ...$travail,
+                'auteur_id' => $auteurId,
+                'statut' => self::TRAVAIL_STATUT_SAISI,
+                'date_demande' => Carbon::now(),
+                'justification' => ''
+            ]);
+        }
 
-        return 'ok';
+        return $newTravaux;
     }
 
-    public function modifier($travailId, $travail, $sapeurId)
+    public function modifier($travailId, $data, $sapeurId)
     {
         // Check status du travail
         $travail = Travail::find($travailId);
@@ -49,7 +51,7 @@ class TravauxBusiness
             throw new ArrayException([], 'Impossible de modifier un travail dont vous n\'êtes pas l\'auteur');
         }
 
-        $travail->fill($travail);
+        $travail->fill($data);
         $travail->save();
         return $travail;
     }
@@ -62,7 +64,7 @@ class TravauxBusiness
             throw new ArrayException([], 'Travail introuvable');
         }
 
-        if ($travail->statut != self::TRAVAIL_STATUT_SAISI) {
+        if ($travail->statut <= self::TRAVAIL_STATUT_SAISI) {
             throw new ArrayException([], 'Travail déjà traité');
         }
 
@@ -89,6 +91,23 @@ class TravauxBusiness
         if ($quantite) {
             $travail->quantite = $quantite;
         }
+        $travail->save();
+        return $travail;
+    }
+
+    public function cancelReview($travailId)
+    {
+        $travail = Travail::find($travailId);
+        if ($travail == null) {
+            throw new ArrayException([], 'Travail introuvable');
+        }
+
+        if ($travail->statut == self::TRAVAIL_STATUT_IMPUTE) {
+            throw new ArrayException([], 'Travail déjà imputé');
+        }
+
+        $travail->statut = self::TRAVAIL_STATUT_SAISI;
+        $travail->justification = '';
         $travail->save();
         return $travail;
     }
