@@ -119,16 +119,6 @@
     }
 
     foreach ($ecritures as $index => $ecriture) {
-      if ($sapeurId == null || $sapeurId != $ecriture->sapeur_id) {
-        $categorieSousTotal = 0.0;
-        $interventionSousTotal = 0.0;
-        $sapeurTotal = 0.0;
-        $sapeurTotalAvs = 0.0;
-        
-        $sapeurId = $ecriture->sapeur_id;
-        $paiement = $indexedPaiements[$ecriture->sapeur_id];
-      }
-
       $last = $index + 1 === $nbEcritures;
       $nextEcriture = $last ? null : $ecritures[$index + 1];
 
@@ -140,12 +130,13 @@
       $finSection = $finSapeur || intval($nextEcriture->ecriture_categorie_id) !== intval($ecriture->ecriture_categorie_id);
       $finIntervention = $finSection || intval($nextEcriture->intervention_id) !== intval($ecriture->intervention_id);
 
-      $categorieSousTotal = $debutSection ? 0.0 : $categorieSousTotal;
+      if ($debutSapeur) {
+        $sapeurTotal = 0.0;
+        $paiement = $indexedPaiements[$ecriture->sapeur_id];
+      }
       
-      $interventionSousTotal = $debutIntervention ? 0.0 : $interventionSousTotal;
-      $interventionSousTotal += $ecriture->total;
-
       if ($debutSection) {
+        $categorieSousTotal = 0.0;
         $nbEcritureSections = 0;
       }
 
