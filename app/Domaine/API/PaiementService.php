@@ -72,7 +72,7 @@ class PaiementService
         if ($selection['ecrituresAmende']) {
             $modules[] = ImputationBusiness::ECRITURE_MODULE_AMENDE;
         }
-        if ($selection['ecrituresTravaux']) {
+        if ($selection['ecrituresTravail']) {
             $modules[] = ImputationBusiness::ECRITURE_MODULE_FICHE_TRAVAIL;
         }
 
