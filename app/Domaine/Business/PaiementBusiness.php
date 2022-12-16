@@ -460,16 +460,21 @@ class PaiementBusiness
         $total['frais_effectif'] = 0;
         $total['frais_forfaitaire'] = 0;
 
+        $count = 0;
         foreach (Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get() as $d) {
+            $count++;
             foreach ($d->paiements as $p) {
                 if ($p->sapeur_id == $sapeurId) {
                     $total['solde'] += $p->solde;
                     $total['indemnite'] += $p->indemnite;
                     $total['avs_ac'] += $p->avs_ac;
-                    $total['frais_efectif'] += $p->frais_efectif;
+                    $total['frais_effectif'] += $p->frais_effectif;
                     $total['frais_forfaitaire'] += $p->frais_forfaitaire;
                 }
             }
+        }
+        if ($count == 0) {
+            throw new ArrayException([], "Impossible de générer le certificat de salaire, aucun décompte trouvé !");
         }
 
         $sapeur = Sapeur::with(['localite', 'civilite'])->find($sapeurId);
@@ -523,11 +528,18 @@ class PaiementBusiness
             $result = $pdf->fillForm($fields)
                 ->needAppearances()
                 ->saveAs($path);
-            // TODO: Check result
+            if ($result == false) {
+                throw new ArrayException([], "Une erreur est survenue durant la génération du certificat de salaire.");
+            }
             return $path;
         } else {
-            // TODO: Not supported for now
-            throw new ArrayException([], "Not suported for now");
+            $result = $pdf->fillForm($fields)
+                ->needAppearances()
+                ->toString();
+            if ($result == false) {
+                throw new ArrayException([], "Une erreur est survenue durant la génération du certificat de salaire.");
+            }
+            return $result;
         }
     }
 

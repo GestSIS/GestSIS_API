@@ -3,13 +3,18 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\MesInfosService;
+use App\Domaine\API\PaiementService;
 use Illuminate\Http\Request;
 
 class MesDecomptesController extends Controller
 {
-    public function __construct(MesInfosService $service)
+    protected $mesInfosService;
+    protected $paiementService;
+
+    public function __construct(MesInfosService $mesInfosService, PaiementService $paiementService)
     {
-        $this->service = $service;
+        $this->mesInfosService = $mesInfosService;
+        $this->paiementService = $paiementService;
     }
 
     /**
@@ -22,7 +27,7 @@ class MesDecomptesController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        $data = $this->service->mesDecomptes($sapeurId, $exerciceComptableId);
+        $data = $this->mesInfosService->mesDecomptes($sapeurId, $exerciceComptableId);
         return response()->json(['data' => $data]);
     }
 
@@ -36,6 +41,19 @@ class MesDecomptesController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        return $this->service->printDecompte($sapeurId, $decompteId);
+        return $this->mesInfosService->printDecompte($sapeurId, $decompteId);
+    }
+
+    /**
+     * Récupération des décomptes du sapeur
+     */
+    public function certificatSalaire(Request $request, $exerciceComptableId)
+    {
+        $sapeurId = $request->attributes->get('sapeurId');
+        if ($sapeurId === null || intval($sapeurId) <= 0) {
+            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+        }
+
+        return $this->paiementService->certificatSalaireSapeur($exerciceComptableId, $sapeurId);
     }
 }
