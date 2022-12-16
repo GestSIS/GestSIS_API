@@ -129,7 +129,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         Route::get('mes-decomptes/{decompteId}/print', [MesDecomptesController::class, 'print'])->name('api.v2.mes-decomptes.print');
 
-        Route::get('mon-certificat-salaire/{exerciceComptableId}', [MesDecomptesController::class, 'certificatSalaire'])->name('api.v2.mes-decomptes.print');
+        Route::get('mon-certificat-salaire/{exerciceComptableId}', [MesDecomptesController::class, 'certificatSalaire'])->name('api.v2.mon-certificat-salaire');
     });
 
     // Paramètres accessible pour tout droit config
