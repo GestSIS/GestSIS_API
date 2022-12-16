@@ -282,7 +282,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     // Fiche de travail
     Route::group(['middleware' => 'jwtTokenRole:fiche_travail.validation'], function () {
         Route::post('travaux/{id}/review', [TravailController::class, 'review'])->name('api.v2.travaux.review');
-        Route::delete('travaux/{id}/review', [TravailController::class, 'review'])->name('api.v2.travaux.review');
+        Route::delete('travaux/{id}/review', [TravailController::class, 'cancelReview'])->name('api.v2.travaux.cancel-review');
     });
     Route::group(['middleware' => 'jwtTokenRole:fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation,fiche_travail.lecture'], function () {
         Route::resource('travail-types', TravailTypeController::class)->only(['index']);

@@ -19,7 +19,7 @@ class TravauxService
     {
         $query = Travail::where('exercice_comptable_id', '=', $exerciceComptableId);
 
-        if ($sapeurId != null) {
+        if ($withEcritures) {
             $query = $query->with('ecritures');
         }
         if ($sapeurId != null) {

@@ -89,7 +89,7 @@ class ImputationController extends Controller
         return response()->json(['data' => $res]);
     }
 
-    public function cancelTravail(int $id)
+    public function cancelTravail($id)
     {
         $res = $this->service->annulerImputationTravail($id);
         return response()->json(['data' => $res]);

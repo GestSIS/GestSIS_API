@@ -110,7 +110,6 @@
     $nbEcritures = count($ecritures);
     $nbEcritureSections = 0;
 
-    $sapeurId = null;
     $paiement = null;
 
     $indexedPaiements = [];

@@ -2,6 +2,7 @@
 
 namespace App\Domaine\Business;
 
+use App\Domaine\API\TravauxService;
 use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
@@ -1194,6 +1195,9 @@ class ImputationBusiness
         }
 
         Ecriture::insert($ecritures);
+        Travail::whereIn('id', $ids)
+            ->where('statut', '=', TravauxBusiness::TRAVAIL_STATUT_VALIDE)
+            ->update(['statut' => TravauxBusiness::TRAVAIL_STATUT_IMPUTE]);
         return $ecritures;
     }
 
@@ -1210,7 +1214,9 @@ class ImputationBusiness
         // Suppression des écritures
         Ecriture::where('travail_id', $travailId)
             ->delete();
+        Travail::where('id', '=',  $travailId)
+            ->update(['statut' => TravauxBusiness::TRAVAIL_STATUT_VALIDE]);
 
-        return true;
+        return ['statut' => TravauxBusiness::TRAVAIL_STATUT_VALIDE];
     }
 }
