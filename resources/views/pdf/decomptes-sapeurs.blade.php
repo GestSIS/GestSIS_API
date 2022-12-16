@@ -141,7 +141,7 @@
       $finIntervention = $finSection || intval($nextEcriture->intervention_id) !== intval($ecriture->intervention_id);
 
       $categorieSousTotal = $debutSection ? 0.0 : $categorieSousTotal;
-      $categorieSousTotal += $ecriture->total;
+      
       $interventionSousTotal = $debutIntervention ? 0.0 : $interventionSousTotal;
       $interventionSousTotal += $ecriture->total;
 
@@ -150,6 +150,7 @@
       }
 
       if (!isAvsAc($ecriture)) {
+        $categorieSousTotal += $ecriture->total;
         $nbEcritureSections++;
         if ($comptes[$ecriture->compte_id]->produit) {
           $sapeurTotal -= $ecriture->total;
@@ -357,7 +358,7 @@
     @if ($finSection && $nbEcritureSections > 0)
       <tfoot>
         <tr>
-          <th colspan="{{ isAmende($ecriture) || isDivers($ecriture) ? 5 : 6 }}" class="text-end">Sous-total</th>
+          <th colspan="{{ isAmende($ecriture) ? 5 : 6 }}" class="text-end">Sous-total</th>
           <th class="text-end">{{ formatNumber($categorieSousTotal) }}</th>
         </tr>
         </tbody>
