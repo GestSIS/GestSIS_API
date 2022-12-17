@@ -45,7 +45,7 @@ class JwtTokenValidatorRole
                     return response()->json(["error" => "Au moins 1 des rôles suivant est requis [" . join(", ", $roles) . "]."], 401);
                 }
 
-                $request->attributes->add(['permissions' => $perms]);
+                $request->attributes->add(['permissions' => $perms[$sisKey] ?? []]);
             }
         }
 

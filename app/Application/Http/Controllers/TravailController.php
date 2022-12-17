@@ -50,6 +50,7 @@ class TravailController extends Controller
         }
         $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
+        dd($perms, $admin);
         $hasSaisieCommunePermission = $admin || in_array('fiche_travail.saisie_commune', $perms);
 
         $travail = $this->service->ajouter($data['travaux'], $sapeurId, $hasSaisieCommunePermission);

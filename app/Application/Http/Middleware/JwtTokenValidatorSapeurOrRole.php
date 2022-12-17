@@ -43,7 +43,7 @@ class JwtTokenValidatorSapeurOrRole
         if ($token->data->admin === True) {
             $request->attributes->add(['admin' => true]);
         }
-        $request->attributes->add(['permissions' => $permissions]);
+        $request->attributes->add(['permissions' => $permissions[$sisKey] ?? []]);
         $request->attributes->add(['sapeurId' => $sapeurs[$sisKey] ?? null]);
 
         return $next($request);
