@@ -48,7 +48,7 @@ class TravailController extends Controller
         if (!$sapeurId) {
             return response()->json(['error' => ['message' => 'Permissions insuffisantes']], 200);
         }
-        $admin = $request->attributes->get('admin');
+        $admin = $request->attributes->get('admin', false);
         $perms = $request->attributes->get('permissions', []);
 
         $hasSaisieCommunePermission = $admin || in_array('fiche_travail.saisie_commune', $perms);

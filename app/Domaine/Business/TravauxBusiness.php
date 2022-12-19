@@ -64,7 +64,7 @@ class TravauxBusiness
             throw new ArrayException([], 'Travail introuvable');
         }
 
-        if ($travail->statut <= self::TRAVAIL_STATUT_SAISI) {
+        if ($travail->statut != self::TRAVAIL_STATUT_SAISI) {
             throw new ArrayException([], 'Travail déjà traité');
         }
 
