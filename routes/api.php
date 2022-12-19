@@ -120,6 +120,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     // Mes infos
     Route::group(['middleware' => 'jwtTokenSapeur'], function () {
         Route::get('mes-infos', [MesInfosController::class, 'index'])->name('mes-infos');
+        Route::get('mes-fonctions', [MesInfosController::class, 'fonctions'])->name('mes-infos');
+        Route::get('mes-mutations', [MesInfosController::class, 'mutations'])->name('mes-infos');
+        Route::get('mes-grades', [MesInfosController::class, 'grades'])->name('mes-infos');
+        Route::get('mes-cours', [MesInfosController::class, 'cours'])->name('mes-infos');
+        Route::get('mes-groupes', [MesInfosController::class, 'groupes'])->name('mes-infos');
         Route::get('mon-materiel', [MonMaterielController::class, 'index'])->name('mon-materiel');
 
         Route::get('mes-travaux/{exerciceComptableId}', [MesTravauxController::class, 'index'])->name('mes-travaux');

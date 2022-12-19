@@ -5,6 +5,7 @@ namespace App\Domaine\API;
 
 use App\Domaine\Business\PaiementBusiness;
 use App\Domaine\SPI\ExerciceRepository;
+use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceSapeur;
@@ -19,17 +20,43 @@ class MesInfosService
 {
     protected $paiementBusiness;
     protected $exerciceRepo;
+    protected $sapeurRepo;
 
-    public function __construct(PaiementBusiness $paiementBusiness, ExerciceRepository $exerciceRepo)
+    public function __construct(PaiementBusiness $paiementBusiness, ExerciceRepository $exerciceRepo, SapeurRepository $sapeurRepo)
     {
         $this->paiementBusiness = $paiementBusiness;
         $this->exerciceRepo = $exerciceRepo;
+        $this->sapeurRepo = $sapeurRepo;
     }
 
     function mesInfos($sapeurId)
     {
-        // TODO
-        // return Ecriture::where('decompte_id', '=', $sapeurId)->get();
+        return $this->sapeurRepo->getSapeurDetailsById($sapeurId, 'telephones');
+    }
+
+    function mesFonctions($sapeurId)
+    {
+        return $this->sapeurRepo->getSapeurFonctionsById($sapeurId);
+    }
+
+    function mesMutations($sapeurId)
+    {
+        return $this->sapeurRepo->getSapeurMutationsById($sapeurId);
+    }
+
+    function mesGrades($sapeurId)
+    {
+        return $this->sapeurRepo->getSapeurGradesById($sapeurId);
+    }
+
+    function mesCours($sapeurId)
+    {
+        return $this->sapeurRepo->getSapeurCoursById($sapeurId);
+    }
+
+    function mesGroupes($sapeurId)
+    {
+        return $this->sapeurRepo->getSapeurGroupesbyId($sapeurId);
     }
 
     function mesExercices($sapeurId, $exerciceComptableId)

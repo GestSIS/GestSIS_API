@@ -18,6 +18,7 @@ use App\Infrastructure\Models\Permis;
 use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\SapeurTelephone;
 use App\Infrastructure\Models\Telephone;
+use App\Infrastructure\Models\Travail;
 use stdClass;
 
 class SapeurRepositoryEloquent implements SapeurRepository
@@ -159,6 +160,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         MaterielPersonnel::where('sapeur_id', '=', $sapeurId)->delete();
         ControleMedical::where('sapeur_id', '=', $sapeurId)->delete();
         Mutation::where('sapeur_id', '=', $sapeurId)->delete();
+        Travail::where('sapeur_id', '=', $sapeurId)->delete();
         Sapeur::where('id', '=', $sapeurId)->limit(1)->delete();
     }
 
