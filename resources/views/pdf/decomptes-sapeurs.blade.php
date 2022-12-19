@@ -146,13 +146,12 @@
       }
 
       if (!isAvsAc($ecriture)) {
-        $categorieSousTotal += $ecriture->total;
         $nbEcritureSections++;
         if ($comptes[$ecriture->compte_id]->produit) {
-          $sapeurTotal -= $ecriture->total;
-        } else {
-          $sapeurTotal += $ecriture->total;
+          $ecriture->total = -$ecriture->total;
         }
+        $sapeurTotal += $ecriture->total;
+        $categorieSousTotal += $ecriture->total;
       }
 
     ?>
