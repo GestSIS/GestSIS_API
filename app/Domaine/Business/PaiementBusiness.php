@@ -325,7 +325,7 @@ class PaiementBusiness
                 }
             }
         }
-        $message = new CustomerCreditTransfer('decompte-' + $decompteId, $nom);
+        $message = new CustomerCreditTransfer('decompte-' . $decompteId, $nom);
         $message->addPayment($paiement);
 
         return $message->asXml();
