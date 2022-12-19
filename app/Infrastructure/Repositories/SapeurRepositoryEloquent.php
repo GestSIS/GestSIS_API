@@ -429,7 +429,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         }
 
         if (in_array('telephones', $with)) {
-            $grades = array();
+            $telephones = array();
             foreach ($sapeur->telephones as $telephone) {
                 array_push($telephones, $this->convertSapeurTelephone($telephone));
             }

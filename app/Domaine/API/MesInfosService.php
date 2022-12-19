@@ -31,7 +31,7 @@ class MesInfosService
 
     function mesInfos($sapeurId)
     {
-        return $this->sapeurRepo->getSapeurDetailsById($sapeurId, 'telephones');
+        return $this->sapeurRepo->getSapeurDetailsById($sapeurId, ['telephones']);
     }
 
     function mesFonctions($sapeurId)
