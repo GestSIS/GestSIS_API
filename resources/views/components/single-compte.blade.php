@@ -22,7 +22,7 @@
       ?>
       @if (count($compte->ecritures) <= 0)
         <tr>
-          <td colspan="4">Aucune écriture pour ce compte</td>
+          <td colspan="5">Aucune écriture</td>
         </tr>
       @endif
       @foreach ($compte->ecritures as $ecriture)
