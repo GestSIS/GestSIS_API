@@ -115,6 +115,7 @@
     $last = false;
     $nbEcritures = count($ecritures);
     $nbEcritureSections = 0;
+    $nbSapeur = 0;
 
     $paiement = null;
 
@@ -136,6 +137,7 @@
       $finIntervention = $finSection || intval($nextEcriture->intervention_id) !== intval($ecriture->intervention_id);
 
       if ($debutSapeur) {
+        $nbSapeur++;
         $sapeurTotal = 0.0;
         $paiement = $indexedPaiements[$ecriture->sapeur_id];
       }
@@ -432,6 +434,73 @@
 
     @if ($nbEcritures === 0)
       <h1>Aucune écriture</h1>
+    @elseif($nbSapeur > 0)
+      <h1>Récapitulatif</h1>
+      <table class="table table-sm table-striped">
+        <thead>
+          <tr>
+            <th>Sapeur</th>
+            <th class="text-center">Solde</th>
+            <th class="text-center">Indemnité</th>
+            <th class="text-center">Charge AVS/AI/APG - AC</th>
+            <th class="text-center">Frais effectif</th>
+            <th class="text-center">Frais forfaitaire</th>
+            <th class="text-center">Autre</th>
+            <th class="text-center">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php
+          $sapeurId = null;
+          $total_solde = 0.0;
+          $total_indemnite = 0.0;
+          $total_avs_ac = 0.0;
+          $total_frais_effectif = 0.0;
+          $total_frais_forfaitaire = 0.0;
+          $total_autre = 0.0;
+          $total_total = 0.0;
+
+          foreach ($ecritures as $ecriture) {
+           if($ecriture->sapeur_id != $sapeurId){
+            $sapeurId = $ecriture->sapeur_id;
+            $paiement = $indexedPaiements[$ecriture->sapeur_id];
+
+            $total_solde += $paiement->solde;
+            $total_indemnite += $paiement->indemnite;
+            $total_avs_ac += $paiement->avs_ac;
+            $total_frais_effectif += $paiement->frais_effectif;
+            $total_frais_forfaitaire += $paiement->frais_forfaitaire;
+            $total_autre += $paiement->autre;
+            $total_total += $paiement->total;
+          ?>
+          <tr>
+            <td>{{ $ecriture->sapeur }}</td>
+            <td class="text-end">{{ formatNumber($paiement->solde) }}</td>
+            <td class="text-end">{{ formatNumber($paiement->indemnite) }}</td>
+            <td class="text-end">{{ formatNumber($paiement->avs_ac) }}</td>
+            <td class="text-end">{{ formatNumber($paiement->frais_effectif) }}</td>
+            <td class="text-end">{{ formatNumber($paiement->frais_forfaitaire) }}</td>
+            <td class="text-end">{{ formatNumber($paiement->autre) }}</td>
+            <th class="text-end">{{ formatNumber($paiement->total) }}</th>
+          </tr>
+          <?php
+            }
+          }
+          ?>
+        </tbody>
+        <tfoot>
+          <tr>
+            <th>Total</th>
+            <th class="text-end">{{ formatNumber($total_solde) }}</th>
+            <th class="text-end">{{ formatNumber($total_indemnite) }}</th>
+            <th class="text-end">{{ formatNumber($total_avs_ac) }}</th>
+            <th class="text-end">{{ formatNumber($total_frais_effectif) }}</th>
+            <th class="text-end">{{ formatNumber($total_frais_forfaitaire) }}</th>
+            <th class="text-end">{{ formatNumber($total_autre) }}</th>
+            <th class="text-end">{{ formatNumber($total_total) }}</th>
+          </tr>
+        </tfoot>
+      </table>
     @endif
   </div>
 </body>
