@@ -46,6 +46,8 @@ class DbsSapeursActifStatus extends Command
             printf("Recompute for sis=" . $db . "\n");
             Config::set('database.default', $db);
             $sapeurBusiness->recomputeSapeurActifStatus();
+            $sapeurBusiness->recomputeSapeurFonctionPrincipale();
+            $sapeurBusiness->recomputeSapeurGradePrincipal();
 
             printf("\n");
         }

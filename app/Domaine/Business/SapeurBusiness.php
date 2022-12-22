@@ -53,6 +53,39 @@ class SapeurBusiness
         }
     }
 
+    public function recomputeSapeurFonctionPrincipale()
+    {
+        $now = Carbon::now();
+        $sapeurs = Sapeur::where('type', '=', self::TYPE_SAPEUR)->with(['fonctions' => function ($query) use ($now) {
+            $query->where('debut', '<=', $now)->where(function ($query) use ($now) {
+                $query->where('fin', '=', null)
+                    ->orWhere('fin', '>=', $now);
+            })
+                ->join('fonctions', 'fonctions.id', '=', 'fonction_sapeur.fonction_id')
+                ->orderBy('fonctions.tri');
+        }])->get();
+
+        foreach ($sapeurs as $sapeur) {
+            $sapeur->fonction_id = $sapeur->fonctions[0]->fonction_id ?? null;
+            $sapeur->save();
+        }
+    }
+
+    public function recomputeSapeurGradePrincipal()
+    {
+        $now = Carbon::now();
+        $sapeurs = Sapeur::where('type', '=', self::TYPE_SAPEUR)->with(['grades' => function ($query) use ($now) {
+            $query->where('date', '<=', $now)
+                ->join('grades', 'grades.id', '=', 'grade_sapeur.grade_id')
+                ->orderBy('grades.tri');
+        }])->get();
+
+        foreach ($sapeurs as $sapeur) {
+            $sapeur->grade_id = $sapeur->grades[0]->grade_id ?? null;
+            $sapeur->save();
+        }
+    }
+
     private function isSapeur($sapeurId)
     {
         return Sapeur::where([['id', '=', $sapeurId], ['type', '=', self::TYPE_SAPEUR]])->exists();
@@ -565,11 +598,14 @@ class SapeurBusiness
         $maxTri = -1;
         $maxId = -1;
 
-        //FIXME Recupérer avec fonctions pour le tri
+        // Recupérer avec fonctions pour le tri
+        $now = Carbon::now();
         $fonctions = array_filter(
             $this->repository->getSapeurFonctionsById($sapeurId, true),
-            function ($fonction) {
-                return $fonction->fin === null;
+            function ($fonction) use ($now) {
+                return $now->gte($fonction->debut) && ($fonction->fin === null ||
+                    $now->lte($fonction->fin)
+                );
             }
         );
 
@@ -591,8 +627,14 @@ class SapeurBusiness
         $maxTri = -1;
         $maxId = -1;
 
-        //FIXME Recupérer avec grades pour le tri
-        $grades = $this->repository->getSapeurGradesById($sapeurId, true);
+        // Recupérer avec grades pour le tri
+        $now = Carbon::now();
+        $grades = array_filter(
+            $this->repository->getSapeurGradesById($sapeurId, true),
+            function ($grade) use ($now) {
+                return $now->gte($grade->date);
+            }
+        );
 
         foreach ($grades as $gradeSapeur) {
             if ($gradeSapeur->grade->tri > $maxTri) {
