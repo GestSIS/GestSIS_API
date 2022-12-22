@@ -29,9 +29,9 @@ class SapeurService
         return $this->repository->listeSapeurLight();
     }
 
-    public function listeFssp()
+    public function listeFssp($date)
     {
-        return Excel::download(new ListeFsspExport(), 'liste_fssp.xlsx');
+        return Excel::download(new ListeFsspExport($date), 'liste_fssp.xlsx');
     }
 
     public function effectif()

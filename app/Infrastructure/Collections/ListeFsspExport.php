@@ -13,10 +13,19 @@ class ListeFsspExport implements FromCollection, WithHeadings
 {
   use Exportable;
 
+  protected $date;
+
+  public function __construct($date)
+  {
+    $this->date = $date;
+  }
+
   public function collection()
   {
+    $date = $this->date;
     $data = Sapeur::query()
       ->where('sapeurs.actif', True)->where('sapeurs.type', '=', SapeurBusiness::TYPE_SAPEUR)
+      ->leftJoin('mutations', 'sapeurs.id', '=', 'mutations.sapeur_id')
       ->leftJoin('localites', 'localites.id', '=', 'sapeurs.localite_id')
       ->leftJoin('sapeur_telephone', 'sapeur_telephone.sapeur_id', '=', 'sapeurs.id')
       ->select([
@@ -24,6 +33,11 @@ class ListeFsspExport implements FromCollection, WithHeadings
         DB::Raw('CONCAT(localites.npa, \' \', localites.designation) AS localite'),
         'sapeur_telephone.numero', 'sapeurs.email',
       ])
+      ->where('mutations.incorporation', '<=', $date)
+      ->where(function ($query) use ($date) {
+        $query->where('mutations.sortie', '=', null)
+          ->orWhere('mutations.sortie', '<=', $date);
+      })
       ->orderBy('sapeurs.nom', 'ASC')
       ->orderBy('sapeurs.prenom', 'ASC')
       ->get()

@@ -4,6 +4,7 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\SapeurService;
 use App\Domaine\Business\SapeurBusiness;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -38,9 +39,10 @@ class SapeurController extends Controller
     /**
      * Return la liste fssp
      */
-    public function listeFssp()
+    public function listeFssp(Request $request)
     {
-        return $this->service->listeFssp();
+        $date = $request->get('date', Carbon::now());
+        return $this->service->listeFssp($date);
     }
 
     /**
