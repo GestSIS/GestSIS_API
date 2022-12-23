@@ -434,7 +434,7 @@
 
     @if ($nbEcritures === 0)
       <h1>Aucune écriture</h1>
-    @elseif($nbSapeur > 0)
+    @elseif($nbSapeur > 1)
       <h1>Récapitulatif</h1>
       <table class="table table-sm table-striped">
         <thead>
