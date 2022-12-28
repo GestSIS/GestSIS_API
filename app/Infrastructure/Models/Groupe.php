@@ -8,7 +8,7 @@ class Groupe extends Model
 {
     protected $fillable = ['type', 'no', 'designation', 'tri', 'pere_id'];
     protected $casts = [
-        'no' => 'integer', 'tri' => 'integer', 'pere_id' => 'integer'
+        'no' => 'integer', 'tri' => 'integer', 'pere_id' => 'integer', 'type' => 'integer'
     ];
 
 
