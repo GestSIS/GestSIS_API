@@ -17,8 +17,8 @@ use App\Infrastructure\Models\Mutation;
 use App\Infrastructure\Models\Permis;
 use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\SapeurTelephone;
-use App\Infrastructure\Models\Telephone;
 use App\Infrastructure\Models\Travail;
+use Carbon\Carbon;
 use stdClass;
 
 class SapeurRepositoryEloquent implements SapeurRepository
@@ -28,7 +28,14 @@ class SapeurRepositoryEloquent implements SapeurRepository
     public function listeSapeurLight()
     {
         $temp = $this;
-        return Sapeur::all(self::SAPEUR_LIGHT_COLUMNS)
+        $now = Carbon::now();
+        $oneMonthFurther = Carbon::now()->addMonths(1);
+        return Sapeur::with(['fonctions' => function ($query) use ($oneMonthFurther, $now) {
+            $query->where('debut', '<=', $oneMonthFurther)->where(function ($query) use ($now) {
+                $query->where('fin', '=', null)
+                    ->orWhere('fin', '>=', $now);
+            });
+        }])->get(self::SAPEUR_LIGHT_COLUMNS)
             ->map(function ($sapeur) use ($temp) {
                 return $temp->convertSapeurLight($sapeur);
             })->toArray();
@@ -360,6 +367,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $object->civilite_id = intval($sapeur->civilite_id);
         $object->localite_id = intval($sapeur->localite_id);
         $object->fonction_id = intval($sapeur->fonction_id);
+        $object->fonctions = $sapeur->fonctions->map(fn ($f) => intval($f->fonction_id));
         $object->type = intval($sapeur->type);
 
         return $object;
