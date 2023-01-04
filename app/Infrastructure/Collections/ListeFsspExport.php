@@ -24,7 +24,7 @@ class ListeFsspExport implements FromCollection, WithHeadings
   {
     $date = $this->date;
     $data = Sapeur::query()
-      ->where('sapeurs.actif', True)->where('sapeurs.type', '=', SapeurBusiness::TYPE_SAPEUR)
+      ->where('sapeurs.type', '=', SapeurBusiness::TYPE_SAPEUR)
       ->leftJoin('mutations', 'sapeurs.id', '=', 'mutations.sapeur_id')
       ->leftJoin('localites', 'localites.id', '=', 'sapeurs.localite_id')
       ->leftJoin('sapeur_telephone', 'sapeur_telephone.sapeur_id', '=', 'sapeurs.id')
@@ -36,7 +36,7 @@ class ListeFsspExport implements FromCollection, WithHeadings
       ->where('mutations.incorporation', '<=', $date)
       ->where(function ($query) use ($date) {
         $query->where('mutations.sortie', '=', null)
-          ->orWhere('mutations.sortie', '<=', $date);
+          ->orWhere('mutations.sortie', '>=', $date);
       })
       ->orderBy('sapeurs.nom', 'ASC')
       ->orderBy('sapeurs.prenom', 'ASC')
