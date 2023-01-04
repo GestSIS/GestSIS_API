@@ -62,7 +62,7 @@ class SapeurBusiness
                     ->orWhere('fin', '>=', $now);
             })
                 ->join('fonctions', 'fonctions.id', '=', 'fonction_sapeur.fonction_id')
-                ->orderBy('fonctions.tri');
+                ->orderBy('fonctions.tri', 'DESC');
         }])->get();
 
         foreach ($sapeurs as $sapeur) {
