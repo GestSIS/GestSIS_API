@@ -40,8 +40,8 @@ class InterventionMissionsController extends Controller
     public function store(Request $request, int $intervention_id)
     {
         $data = $request->validate([
-            'missions.*.sapeur_id' => 'nullable|integer|exists:sapeurs,id',
-            'missions.*.sapeur' => 'nullable|string',
+            'missions.*.sapeur_id' => 'integer|exists:sapeurs,id|required_without:missions.*.sapeur',
+            'missions.*.sapeur' => 'string|required_without:missions.*.sapeur_id',
             'missions.*.debut' => 'required|date_format:Y-m-d H:i',
             'missions.*.fin' => 'required|date_format:Y-m-d H:i|after:missions.*.debut',
             'missions.*.titre' => 'string',
@@ -65,8 +65,8 @@ class InterventionMissionsController extends Controller
     {
         $data = $request->validate([
             'missions.*.id' => 'integer|exists:missions,id',
-            'missions.*.sapeur_id' => 'nullable|integer|exists:sapeurs,id',
-            'missions.*.sapeur' => 'nullable|string',
+            'missions.*.sapeur_id' => 'integer|exists:sapeurs,id|required_without:missions.*.sapeur',
+            'missions.*.sapeur' => 'string|required_without:missions.*.sapeur_id',
             'missions.*.debut' => 'date_format:Y-m-d H:i',
             'missions.*.fin' => 'date_format:Y-m-d H:i|after:missions.*.debut',
             'missions.*.titre' => 'string',
