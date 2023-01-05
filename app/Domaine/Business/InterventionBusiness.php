@@ -134,7 +134,7 @@ class InterventionBusiness
 
         // Ajout des missions
         $missions = array_map(function ($e) use ($newIntervention) {
-            if (!isset($e['resume']) || is_null($e['resume']))  $e['resume'] = '';
+            if (!isset($e['resume']) || is_null($e['resume'])) $e['resume'] = '';
             $e['intervention_id'] = $newIntervention->id;
             return $e;
         }, $missions);
@@ -142,7 +142,7 @@ class InterventionBusiness
 
         // Ajout des appels
         $appels = array_map(function ($e) use ($newIntervention) {
-            if (!isset($e['commentaire']) || is_null($e['commentaire']))  $e['commentaire'] = '';
+            if (!isset($e['commentaire']) || is_null($e['commentaire'])) $e['commentaire'] = '';
             $e['intervention_id'] = $newIntervention->id;
             return $e;
         }, $appels);

@@ -119,7 +119,8 @@ class InterventionController extends Controller
             'missions.*.resume' => 'string|nullable',
             'missions.*.debut' => 'date_format:Y-m-d H:i|required',
             'missions.*.fin' => 'date_format:Y-m-d H:i|required',
-            'missions.*.sapeur_id' => 'integer|exists:sapeurs,id',
+            'missions.*.sapeur_id' => 'nullable|integer|exists:sapeurs,id',
+            'missions.*.sapeur' => 'nullable|string',
         ]);
         $missions = isset($missions['missions']) ? $missions['missions'] : [];
 

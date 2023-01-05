@@ -449,6 +449,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
         $object->titre = $mission->titre;
         $object->resume = $mission->resume;
         $object->sapeur_id = $mission->sapeur_id;
+        $object->sapeur = $mission->sapeur;
         $object->intervention_id = $mission->intervention_id;
 
         return $object;

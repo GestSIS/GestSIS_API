@@ -9,7 +9,7 @@ class Mission extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['debut', 'fin', 'titre', 'resume', 'sapeur_id'];
+    protected $fillable = ['debut', 'fin', 'titre', 'resume', 'sapeur_id', 'sapeur'];
     protected $casts = [
         'sapeur_id' => 'integer',
     ];
