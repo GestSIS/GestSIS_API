@@ -23,14 +23,14 @@ use stdClass;
 
 class SapeurRepositoryEloquent implements SapeurRepository
 {
-    private const SAPEUR_LIGHT_COLUMNS = ['id', 'nom', 'prenom', 'actif', 'localite_id', 'fonction_id', 'civilite_id', 'date_naissance', 'type', 'annee_incorporation'];
+    private const SAPEUR_LIGHT_COLUMNS = ['id', 'nom', 'prenom', 'actif', 'localite_id', 'fonction_id', 'grade_id', 'civilite_id', 'date_naissance', 'type', 'annee_incorporation'];
 
     public function listeSapeurLight()
     {
         $temp = $this;
         $now = Carbon::now();
         $oneMonthFurther = Carbon::now()->addMonths(1);
-        return Sapeur::with(['fonctions' => function ($query) use ($oneMonthFurther, $now) {
+        return Sapeur::with(['permis', 'fonctions' => function ($query) use ($oneMonthFurther, $now) {
             $query->where('debut', '<=', $oneMonthFurther)->where(function ($query) use ($now) {
                 $query->where('fin', '=', null)
                     ->orWhere('fin', '>=', $now);
@@ -361,13 +361,14 @@ class SapeurRepositoryEloquent implements SapeurRepository
         $object->nom = $sapeur->nom;
         $object->prenom = $sapeur->prenom;
         $object->actif = intval($sapeur->actif);
-        $object->fonction_id = intval($sapeur->fonction_id);
         $object->date_naissance = $sapeur->date_naissance;
         $object->annee_incorporation = $sapeur->annee_incorporation;
         $object->civilite_id = intval($sapeur->civilite_id);
         $object->localite_id = intval($sapeur->localite_id);
         $object->fonction_id = intval($sapeur->fonction_id);
+        $object->grade_id = intval($sapeur->grade_id);
         $object->fonctions = $sapeur->fonctions->map(fn ($f) => intval($f->fonction_id));
+        $object->permis = $sapeur->permis->map(fn ($f) => intval($f->permis_type_id));
         $object->type = intval($sapeur->type);
 
         return $object;
