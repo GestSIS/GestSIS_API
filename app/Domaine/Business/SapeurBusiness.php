@@ -77,7 +77,7 @@ class SapeurBusiness
         $sapeurs = Sapeur::where('type', '=', self::TYPE_SAPEUR)->with(['grades' => function ($query) use ($now) {
             $query->where('date', '<=', $now)
                 ->join('grades', 'grades.id', '=', 'grade_sapeur.grade_id')
-                ->orderBy('grades.tri');
+                ->orderBy('grades.tri', 'DESC');
         }])->get();
 
         foreach ($sapeurs as $sapeur) {
