@@ -138,7 +138,7 @@
             @if ($mission->sapeur)
               <td>{{ $mission->sapeur }}</td>
             @else
-              <td>{{ $mission->sapeurObject->nom }} {{ $mission->sapeurObject->prenom }}</td>
+              <td>{{ $mission->sapeurObject?->nom }} {{ $mission->sapeurObject?->prenom }}</td>
             @endif
           </tr>
         @endforeach

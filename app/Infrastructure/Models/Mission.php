@@ -14,9 +14,9 @@ class Mission extends Model
         'sapeur_id' => 'integer',
     ];
 
-    public function sapeur()
+    public function sapeurObject()
     {
-        return $this->belongsTo(Sapeur::class);
+        return $this->belongsTo(Sapeur::class, 'sapeur_id');
     }
 
     public function intervention()

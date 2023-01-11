@@ -375,7 +375,7 @@ class InterventionService
             // 'montants' => 'boolean',
             'vehicules' => 'vehicules',
             'materiel' => 'materiels',
-            'missions' => 'missions.sapeur',
+            'missions' => 'missions.sapeurObject',
             'appels' => 'appels',
         ];
 
@@ -418,11 +418,9 @@ class InterventionService
             // TODO: Total par sapeur
             $ecritures = Ecriture::where('intervention_id', '=', $interventionId)
                 ->groupBy('sapeur_id')
-                // ->orderBy('sapeur_id')
                 ->selectRaw('sum(total) as total, sapeur_id')
                 ->pluck('total', 'sapeur_id')
                 ->toArray();
-            // return $ecritures;
 
             $total = array_sum(array_map(fn ($e) => floatval($e), array_values($ecritures)));
             $ecritures['total'] = $total;
