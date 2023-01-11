@@ -135,7 +135,11 @@
             <td>{{ \Carbon\Carbon::parse($mission->debut)->format('d.m H:i') }}</td>
             <td>{{ \Carbon\Carbon::parse($mission->fin)->format('d.m H:i') }}</td>
             <td>{{ $mission->titre }}</td>
-            <td>{{ $mission->sapeur->nom }} {{ $mission->sapeur->prenom }}</td>
+            @if ($mission->sapeur)
+              <td>{{ $mission->sapeur }}</td>
+            @else
+              <td>{{ $mission->sapeurObject->nom }} {{ $mission->sapeurObject->prenom }}</td>
+            @endif
           </tr>
         @endforeach
       </table>
