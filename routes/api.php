@@ -180,7 +180,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Sapeurs
-    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,exercice.lecture,intervention.lecture,organisation.modification,comptabilite.tout,cours.lecture'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,exercice.lecture,intervention.lecture,organisation.modification,comptabilite.tout,cours.lecture,mat_perso.lecture'], function () {
         Route::resource('sapeurs', SapeurController::class)->only(['index', 'show']);
     });
 
