@@ -62,11 +62,7 @@ class MatPersoController extends Controller
     }
 
     /**
-     * Créer un décompte
-     * 
-     * @param int $exerciceId - id de l'exercice
-     * @param date $date - date de la création du décompte
-     * @param boolean $deduction - true si les déduction doivent être faites sur ce paiement
+     * Modifier du matériel
      */
     public function update(Request $request)
     {
@@ -86,11 +82,7 @@ class MatPersoController extends Controller
     }
 
     /**
-     * Créer un décompte
-     * 
-     * @param int $exerciceId - id de l'exercice
-     * @param date $date - date de la création du décompte
-     * @param boolean $deduction - true si les déduction doivent être faites sur ce paiement
+     * Supprimer du matériel personnel
      */
     public function destroy(Request $request)
     {

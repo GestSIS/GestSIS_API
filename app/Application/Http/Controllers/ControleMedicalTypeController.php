@@ -6,7 +6,7 @@ use App\Domaine\API\ControleMedicalService;
 use Illuminate\Http\Request;
 
 class ControleMedicalTypeController extends Controller
-{    
+{
     protected $service;
 
     public function __construct(ControleMedicalService $service)
@@ -30,6 +30,7 @@ class ControleMedicalTypeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
+            'remarque' => 'string|nullable',
             'duree_validite' => 'integer|min:1',
             'expirable' => 'boolean',
             'tri' => 'integer'
@@ -43,6 +44,7 @@ class ControleMedicalTypeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
+            'remarque' => 'string|nullable',
             'duree_validite' => 'integer|min:1',
             'expirable' => 'boolean',
             'tri' => 'integer'

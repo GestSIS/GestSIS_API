@@ -45,6 +45,7 @@ class ControleMedicalBusiness
 
     public function ajouterType($data)
     {
+        $data['remarque'] = $data['remarque'] ?? '';
         $type = new ControleMedicalType();
         $type->fill($data);
         $type->save();
@@ -53,6 +54,7 @@ class ControleMedicalBusiness
 
     public function modifierType($id, $data)
     {
+        $data['remarque'] = $data['remarque'] ?? '';
         ControleMedicalType::where('id', $id)->limit(1)->update($data);
         return ControleMedicalType::find($id);
     }
