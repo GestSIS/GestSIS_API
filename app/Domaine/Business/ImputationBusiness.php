@@ -31,6 +31,7 @@ class ImputationBusiness
     protected $ecritureRepo;
     protected $indemniteRepo;
     protected $exerciceRepo;
+    protected $sapeurRepo;
     protected $interventionRepo;
 
     public function __construct(

@@ -18,6 +18,7 @@ use App\Application\Http\Controllers\AspsmsController;
 use App\Application\Http\Controllers\AspsmsParamController;
 use App\Application\Http\Controllers\AvsParamController;
 use App\Application\Http\Controllers\CiviliteController;
+use App\Application\Http\Controllers\ComptabiliteStatistiqueController;
 use App\Application\Http\Controllers\CompteController;
 use App\Application\Http\Controllers\ControleMedicalController;
 use App\Application\Http\Controllers\ControleMedicalTypeController;
@@ -473,6 +474,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         // Certificats de salaire
         Route::get('exercices-comptable/{ExerciceComptableId}/certificat-salaire', [DecompteController::class, 'certificatSalaire']);
         Route::get('exercices-comptable/{ExerciceComptableId}/certificat-salaire/{SapeurId}', [DecompteController::class, 'certificatSalaireSapeur']);
+
+        // Statistiques
+        Route::get('statistiques/{id}/categorie-comptable', [ComptabiliteStatistiqueController::class, 'categorie']);
+        Route::get('statistiques/{id}/compte', [ComptabiliteStatistiqueController::class, 'compte']);
+        Route::get('statistiques/{id}/module-comptable', [ComptabiliteStatistiqueController::class, 'module']);
     });
 
     Route::group(['middleware' => 'jwtTokenRole:comptabilite.config'], function () {
