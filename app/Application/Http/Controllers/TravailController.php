@@ -44,8 +44,8 @@ class TravailController extends Controller
         ]);
 
         // Auteur
-        $sapeurId = $request->attributes->get('sapeurId');
-        if (!$sapeurId) {
+        $auteurId = $request->attributes->get('sapeurId');
+        if (!$auteurId) {
             return response()->json(['error' => ['message' => 'Permissions insuffisantes']], 200);
         }
         $admin = $request->attributes->get('admin', false);
@@ -53,7 +53,7 @@ class TravailController extends Controller
 
         $hasSaisieCommunePermission = $admin || in_array('fiche_travail.saisie_commune', $perms);
 
-        $travail = $this->service->ajouter($data['travaux'], $sapeurId, $hasSaisieCommunePermission);
+        $travail = $this->service->ajouter($data['travaux'], $auteurId, $hasSaisieCommunePermission);
         return response()->json(['data' => $travail]);
     }
 

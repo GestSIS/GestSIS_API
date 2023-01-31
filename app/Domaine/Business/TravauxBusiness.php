@@ -27,7 +27,7 @@ class TravauxBusiness
                 ...$travail,
                 'auteur_id' => $auteurId,
                 'statut' => self::TRAVAIL_STATUT_SAISI,
-                'date_demande' => Carbon::now(),
+                'date_demande' => Carbon::now()->toDateString(),
                 'justification' => ''
             ]);
         }
