@@ -29,6 +29,11 @@ class SapeurService
         return $this->repository->listeSapeurLight();
     }
 
+    public function telephones()
+    {
+        return Sapeur::with('telephones')->get(['id'])->toArray();
+    }
+
     public function listeFssp($date)
     {
         return Excel::download(new ListeFsspExport($date), 'liste_fssp.xlsx');
@@ -39,14 +44,14 @@ class SapeurService
         return Sapeur::with('telephones', 'permis', 'fonctions', 'groupes')
             ->where('actif', '=', '1')
             ->where('type', '=', SapeurBusiness::TYPE_SAPEUR)
-            ->get(['id', 'nom', 'prenom', 'email', 'annee_incorporation', 'rue', 'no_rue', 'date_naissance', 'fonction_id', 'grade_id', 'civilite_id', 'localite_id'])->toArray();
+            ->get(['id', 'nom', 'prenom', 'email', 'annee_incorporation', 'rue', 'no_rue', 'date_naissance', 'fonction_id', 'grade_id', 'civilite_id', 'localite_id'])
+            ->toArray();
     }
 
     public function convocationSms()
     {
         return Sapeur::with('telephones')
             ->where('actif', '=', '1')
-            // ->orWhere() //TODO: Ajout des sapeurs ayant démissionné mais encore actif pour le moment !
             ->get(['id', 'nom', 'prenom'])->toArray();
     }
 

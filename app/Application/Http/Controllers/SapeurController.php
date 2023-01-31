@@ -46,6 +46,14 @@ class SapeurController extends Controller
     }
 
     /**
+     * Return la liste des téléphones
+     */
+    public function sapeursTelephones()
+    {
+        return response()->json(['data' => $this->service->telephones()]);
+    }
+
+    /**
      * Return the effectif
      */
     public function convocationSms()

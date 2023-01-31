@@ -306,6 +306,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // SMS
     Route::group(['middleware' => 'jwtTokenRole:sms.envoie'], function () {
+        Route::get('sapeurs-telephones', [SapeurController::class, 'sapeursTelephones'])->name('sapeurs-telephones');
         Route::post('aspsms/send', [AspsmsController::class, 'send'])->name('aspsms-send');
         Route::get('aspsms/credit', [AspsmsController::class, 'credit'])->name('credit');
     });
