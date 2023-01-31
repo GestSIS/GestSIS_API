@@ -5,6 +5,7 @@ namespace App\Domaine\Business;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\Travail;
 use App\Infrastructure\Models\TravailType;
+use App\Infrastructure\Models\TravailTypeFonction;
 
 class TravauxParamBusiness
 {
@@ -39,6 +40,7 @@ class TravauxParamBusiness
         if (Travail::where('travail_type_id', '=', $id)->exists()) {
             throw new ArrayException([], 'Impossible de supprimer ce travail type, des travaux ont été saisie');
         }
+        TravailTypeFonction::where('travail_type_id', $id)->delete();
         TravailType::where('id', $id)->limit(1)->delete();
     }
 }
