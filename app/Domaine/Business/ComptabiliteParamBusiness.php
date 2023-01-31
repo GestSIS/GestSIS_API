@@ -12,6 +12,7 @@ use App\Infrastructure\Models\ExerciceCategorie;
 use App\Infrastructure\Models\FraisIndemniteAnnuel;
 use App\Infrastructure\Models\FraisIndemniteAnnuelType;
 use App\Infrastructure\Models\HeureExerciceType;
+use App\Infrastructure\Models\IndemniteCoursFonction;
 use App\Infrastructure\Models\IndemniteCoursType;
 use App\Infrastructure\Models\IndemniteExerciceFonction;
 use App\Infrastructure\Models\IndemniteExerciceType;
@@ -269,6 +270,7 @@ class ComptabiliteParamBusiness
 
     public static function supprimerIndemniteCoursType($id)
     {
+        IndemniteCoursFonction::where('indemnite_cours_id', $id)->delete();
         IndemniteCoursType::where('id', $id)->limit(1)->delete();
     }
 }
