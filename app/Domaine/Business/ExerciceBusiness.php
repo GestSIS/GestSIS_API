@@ -469,16 +469,16 @@ class ExerciceBusiness
         return $this->updateStatut($exerciceId);
     }
 
-    public function supprimerConvocations($sapeurId, $exerciceSapeursIds)
+    public function supprimerConvocations($sapeurId, $exercicesIds)
     {
-        $this->repository->supprimerConvocations($sapeurId, $exerciceSapeursIds);
-        HeureExercice::whereIn('id', $exerciceSapeursIds)
+        $this->repository->supprimerConvocations($sapeurId, $exercicesIds);
+        HeureExercice::whereIn('exercice_id', $exercicesIds)
             ->where('sapeur_id', $sapeurId)
-            ->whereHas(["exercice" => function ($q) {
+            ->whereHas("exercice", function ($q) {
                 // Check pour chaque exercice s'il est possible de supprimer la convocation et donc que l'exercice n'est pas déjà imputé
                 $q->where('statut', '>', self::EXERCICE_STATUT_ANNULE)
                     ->where('statut', '<=', self::EXERCICE_STATUT_SAISI);
-            }])
+            })
             ->delete();
         return true;
     }

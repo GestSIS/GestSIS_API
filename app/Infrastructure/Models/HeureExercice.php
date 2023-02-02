@@ -11,4 +11,9 @@ class HeureExercice extends Model
         'montant' => 'decimal:2', 'quantite' => 'decimal:2', 'compte_id' => 'integer', 'ecriture_categorie_id' => 'integer', 'type_unite_id' => 'integer',
         'exercice_id' => 'integer', 'sapeur_id' => 'integer', 'heure_exercice_type_id' => 'integer', 'type' => 'integer'
     ];
+
+    public function exercice()
+    {
+        return $this->belongsTo(Exercice::class);
+    }
 }
