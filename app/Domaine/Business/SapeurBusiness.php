@@ -375,9 +375,9 @@ class SapeurBusiness
         // Contrôle que la date de fin ne soit pas antérieur à la date de début
         $dateFin = Carbon::parse($date);
         foreach ($fonctionsId as $id) {
-            $fs = array_filter($fonctions, function ($f) use ($id) {
+            $fs = array_values(array_filter($fonctions, function ($f) use ($id) {
                 return $f->id === intval($id);
-            });
+            }));
             if (count($fs) !== 1 || Carbon::parse($fs[0]->debut)->gte($dateFin)) {
                 throw new ArrayException([
                     'fin' => 'Date de fin invalide',
@@ -386,9 +386,9 @@ class SapeurBusiness
         }
 
         foreach ($fonctionsId as $id) {
-            $fs = array_filter($fonctions, function ($f) use ($id) {
-                return $f->id === $id;
-            });
+            $fs = array_values(array_filter($fonctions, function ($f) use ($id) {
+                return $f->id === intval($id);
+            }));
             if (count($fs) === 1) {
                 $f = $fs[0];
                 $f->fin = $date;
