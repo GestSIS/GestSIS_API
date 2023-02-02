@@ -205,9 +205,9 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         $sap->save();
     }
 
-    public function supprimerConvocations(int $sapeurId, array $exerciceSapeursIds)
+    public function supprimerConvocations(int $sapeurId, $exercicesIds)
     {
-        ExerciceSapeur::where('sapeur_id', $sapeurId)->whereIn('id', $exerciceSapeursIds)->delete();
+        ExerciceSapeur::where('sapeur_id', $sapeurId)->whereIn('exercice_id', $exercicesIds)->delete();
     }
 
     /**

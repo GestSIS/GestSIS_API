@@ -50,8 +50,10 @@ class ConvocationsController extends Controller
             'sapeurs.*.present' => 'required|boolean',
             'sapeurs.*.amende' => 'required|boolean',
             'sapeurs.*.remplace' => 'required|boolean',
-            'sapeurs.*.excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
             'sapeurs.*.sapeur_id' => 'required|integer|exists:sapeurs,id',
+            'sapeurs.*.excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
+
+
             // Actuellement impossible d'ajouter des heures supp directement à l'ajout d'un sapeur
             // 'sapeurs.*.heures.*.quantite' => 'required|nullable|numeric',
             // 'sapeurs.*.heures.*.heure_exercice_type_id' => 'required|integer',
@@ -179,8 +181,8 @@ class ConvocationsController extends Controller
      */
     public function supprimerConvocations(Request $request, int $sapeurId)
     {
-
         $data = $request->validate([
+            'convocations' => 'array|required',
             'convocations.*' => 'integer'
         ]);
 
