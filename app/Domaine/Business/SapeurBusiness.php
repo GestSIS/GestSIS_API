@@ -376,7 +376,7 @@ class SapeurBusiness
         $dateFin = Carbon::parse($date);
         foreach ($fonctionsId as $id) {
             $fs = array_filter($fonctions, function ($f) use ($id) {
-                return $f->id === $id;
+                return $f->id === intval($id);
             });
             if (count($fs) !== 1 || Carbon::parse($fs[0]->debut)->gte($dateFin)) {
                 throw new ArrayException([
