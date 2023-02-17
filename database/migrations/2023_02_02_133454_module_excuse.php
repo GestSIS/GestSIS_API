@@ -47,5 +47,17 @@ return new class extends Migration
      */
     public function down()
     {
+        Schema::table('exercice_sapeur', function (Blueprint $table) {
+            $table->dropColumn('excuse_statut');
+
+            $table->dropColumn('date_demande');
+            $table->dropColumn('justificatif');
+            $table->dropColumn('remarque');
+
+            $table->dropColumn('date_validation');
+            $table->dropColumn('justification');
+        });
+
+        Schema::drop('excuse_params');
     }
 };
