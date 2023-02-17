@@ -165,4 +165,4 @@ class ModuleMateriel extends Migration
         Schema::dropIfExists('materiel_types');
         Schema::dropIfExists('materiel_categories');
     }
-}
+};

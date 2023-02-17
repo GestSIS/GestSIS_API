@@ -43,4 +43,4 @@ class UpdateIndemnitesTypes extends Migration
         Schema::dropIfExists('materiel_types');
         Schema::dropIfExists('materiel_categories');
     }
-}
+};

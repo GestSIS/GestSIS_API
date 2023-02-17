@@ -64,4 +64,4 @@ class ModuleCours extends Migration
             $table->dropColumn('cours_sapeur_id');
         });
     }
-}
+};

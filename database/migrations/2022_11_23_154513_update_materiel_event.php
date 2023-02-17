@@ -37,4 +37,4 @@ class UpdateMaterielEvent extends Migration
             $table->foreign('materiel_event_id')->references('id')->on('materiel_events');
         });
     }
-}
+};
