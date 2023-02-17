@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateIndemniteExerciceTypesTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -47,4 +47,4 @@ class CreateIndemniteExerciceTypesTable extends Migration
     {
         Schema::dropIfExists('indemnite_exercice_types');
     }
-}
+};

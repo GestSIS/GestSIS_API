@@ -89,4 +89,4 @@ class ModuleTravail extends Migration
             $table->dropColumn('travail_id');
         });
     }
-}
+};
