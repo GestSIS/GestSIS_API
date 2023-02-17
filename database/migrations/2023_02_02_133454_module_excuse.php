@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class ModuleTravail extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -21,13 +21,13 @@ class ModuleTravail extends Migration
 
             // Saisie par le sapeur
             // excuse_type_id -> déjà ok
-            $table->date('date_demande')->default('');
+            $table->date('date_demande')->nullable()->default(null);
             $table->string('justificatif')->default('');
             $table->string('remarque')->default('');
 
             // Saisie lors de la validation
-            $table->date('date_validation')->default('');
-            $table->date('justification')->default('');
+            $table->date('date_validation')->nullable()->default(null);
+            $table->string('justification')->default('');
         });
 
         Schema::create('excuse_params', function (Blueprint $table) {
@@ -48,4 +48,4 @@ class ModuleTravail extends Migration
     public function down()
     {
     }
-}
+};
