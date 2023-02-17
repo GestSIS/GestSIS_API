@@ -10,4 +10,14 @@ class SisParam extends Model
     protected $casts = [
         'localite_id' => 'integer', 'sapeur_id' => 'integer'
     ];
+
+    public function localite()
+    {
+        return $this->belongsTo(Localite::class);
+    }
+
+    public function sapeur()
+    {
+        return $this->belongsTo(Sapeur::class);
+    }
 }

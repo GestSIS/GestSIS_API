@@ -8,8 +8,10 @@ use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\ExerciceComptable;
+use App\Infrastructure\Models\Localite;
 use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Sapeur;
+use App\Infrastructure\Models\SisParam;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
@@ -382,6 +384,11 @@ class PaiementBusiness
     {
         // Calcul des totaux
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
+        $sisParam = SisParam::with(['sapeur', 'localite'])->first();
+        if ($sisParam == null) {
+            throw new ArrayException([], "Paramètres global du SIS non configuré");
+        }
+
         $totaux = [];
         foreach (Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get() as $d) {
             foreach ($d->paiements as $p) {
@@ -409,7 +416,7 @@ class PaiementBusiness
         try {
             // Génération du pdf de chaque sapeur
             foreach (Sapeur::whereIn('id', array_keys($totaux))->with(['localite', 'civilite'])->orderBy('nom')->get() as $sapeur) {
-                $path = $this->creationPdf($sapeur, $exerciceComptable, $totaux[$sapeur->id], $affichageFrais, true);
+                $path = $this->creationPdf($sapeur, $exerciceComptable, $totaux[$sapeur->id], $affichageFrais, true, $sisParam);
                 $merged->addFile($path);
             }
 
@@ -452,6 +459,10 @@ class PaiementBusiness
     public function certificatSalaireSapeur($exerciceComptableId, $sapeurId, $affichageFrais = false)
     {
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
+        $sisParam = SisParam::with(['sapeur', 'localite'])->first();
+        if ($sisParam == null) {
+            throw new ArrayException([], "Paramètres global du SIS non configuré");
+        }
 
         // Calcul des totaux
         $total['solde'] = 0;
@@ -478,7 +489,7 @@ class PaiementBusiness
         }
 
         $sapeur = Sapeur::with(['localite', 'civilite'])->find($sapeurId);
-        return $this->creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, false);
+        return $this->creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, false, $sisParam);
     }
 
     /**
@@ -490,7 +501,7 @@ class PaiementBusiness
      * @param bool $affichageFrais true si les frais doivent apparaitre
      * @param bool $enregistrement true si le fichier doit 'etre enregistré, sortie navigateur sinon
      */
-    private function creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, $enregistrement)
+    private function creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, $enregistrement, $sisParam)
     {
         $localite = $sapeur->localite;
         $civilite = $sapeur->civilite;
@@ -513,7 +524,12 @@ class PaiementBusiness
             "11" => round($total['solde'] + $total['indemnite']) - round($total['avs_ac']),
             "15-1" => "Répartition:\tSolde\t\t" . round($total['solde']),
             "15-2" => "\t\t\tIndemnité\t" . round($total['indemnite']),
-            "OrtDatum" => $this->dateFr()
+            "OrtDatum" => $this->dateFr(),
+            "Unterschrift10" => $sisParam->nom,
+            "Unterschrift11" => $sisParam->sapeur->nom . " " . $sisParam->sapeur->prenom,
+            "Unterschrift12" => "$sisParam->rue $sisParam->numero",
+            "Unterschrift13" => $sisParam->localite->npa . " " . $sisParam->localite->designation,
+            "Unterschrift14" => $sisParam->telephone,
         );
 
         if ($affichageFrais) {

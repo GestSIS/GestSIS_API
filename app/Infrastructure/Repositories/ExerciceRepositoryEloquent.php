@@ -72,7 +72,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
             }
         }
         foreach ($heures as $heure) {
-            if (array_key_exists($sapeur['exercice_id'], $dictionary)) {
+            if (array_key_exists($heure['exercice_id'], $dictionary)) {
                 $dictionary[$heure['exercice_id']]['heures'][] = $heure;
             }
         }
