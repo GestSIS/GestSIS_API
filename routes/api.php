@@ -34,6 +34,7 @@ use Spatie\HttpLogger\Middlewares\HttpLogger;
 use App\Application\Http\Middleware\DbSelector;
 
 use App\Application\Http\Controllers\EmailController;
+use App\Application\Http\Controllers\ExcuseParamController;
 use App\Application\Http\Controllers\ExcuseTypeController;
 use App\Application\Http\Controllers\ExerciceCategorieController;
 use App\Application\Http\Controllers\ExerciceComptableController;
@@ -246,6 +247,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Exercices
     Route::group(['middleware' => 'jwtTokenRole:exercice.lecture,exercice.presence,comptabilite.tout'], function () {
+        Route::resource('excuse-param', ExcuseParamController::class)->only(['index']);
+
         Route::resource('exercices', ExerciceController::class)->only(['index', 'show']);
         Route::resource('exercices.sapeurs', ConvocationsController::class)->only(['index']);
 
@@ -285,6 +288,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenRole:exercice.config'], function () {
         Route::resource('exercice-categories', ExerciceCategorieController::class)->only(['store', 'update', 'destroy']);
         Route::resource('excuses-types', ExcuseTypeController::class)->only(['store', 'update', 'destroy']);
+
+        Route::resource('excuse-param', ExcuseParamController::class)->only(['store']);
     });
 
     // Fiche de travail
