@@ -68,7 +68,7 @@ class ExerciceComptableController extends Controller
         $exercice = $this->service->supprimer($id);
         return response()->json(['data' => $exercice]);
     }
-    
+
     public function cloturer($id)
     {
         $exercice = $this->service->cloturer($id);

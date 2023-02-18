@@ -13,7 +13,7 @@ class EmailController extends Controller
     {
         $this->service = $service;
     }
-    
+
     public function validateEmail(Request $request)
     {
         // Check for multiple sis

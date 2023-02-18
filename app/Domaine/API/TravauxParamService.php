@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Domaine\API;
 
 use App\Domaine\Business\TravauxParamBusiness;

@@ -57,7 +57,9 @@ class SapeurPermisTest extends TestCase
     {
         $permis_type = 9;
 
-        $response = $this->json('POST', "/api/v2/sapeurs/$this->sapeurId/permis",
+        $response = $this->json(
+            'POST',
+            "/api/v2/sapeurs/$this->sapeurId/permis",
             ['permis_type_id' => $permis_type, 'date' => '1958-01-01']
         );
 
@@ -87,7 +89,9 @@ class SapeurPermisTest extends TestCase
 
         $this->service->addPermis($this->sapeurId, ['permis_type_id' => $permis_type, 'date' => $date]);
 
-        $response = $this->json('POST', "/api/v2/sapeurs/$this->sapeurId/permis",
+        $response = $this->json(
+            'POST',
+            "/api/v2/sapeurs/$this->sapeurId/permis",
             ['permis_type_id' => $permis_type, 'date' => '1958-01-01']
         );
 
@@ -112,7 +116,9 @@ class SapeurPermisTest extends TestCase
         $permis = $this->service->addPermis($this->sapeurId, ['permis_type_id' => $permis_type, 'date' => $date]);
         $date = "1999-11-21";
 
-        $response = $this->json('PUT', "/api/v2/sapeurs/$this->sapeurId/permis/$permis->id",
+        $response = $this->json(
+            'PUT',
+            "/api/v2/sapeurs/$this->sapeurId/permis/$permis->id",
             ['id' => $permis->id, 'date' => $date]
         );
 
@@ -144,7 +150,9 @@ class SapeurPermisTest extends TestCase
         $permis = $this->service->addPermis($this->sapeurId, ['permis_type_id' => $permis_type, 'date' => $date]);
         $date = "1999-11-21";
 
-        $response = $this->json('PUT', "/api/v2/sapeurs/$this->sapeurId/permis/0",
+        $response = $this->json(
+            'PUT',
+            "/api/v2/sapeurs/$this->sapeurId/permis/0",
             ['id' => $permis->id, 'date' => $date]
         );
 

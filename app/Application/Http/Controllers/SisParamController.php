@@ -36,7 +36,7 @@ class SisParamController extends Controller
             'iban' => 'required|string',
             'bic' => 'required|string',
         ]);
-        
+
         $params = $this->service->updateParams($data);
 
         return response()->json(['data' => $params]);

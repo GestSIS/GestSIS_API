@@ -83,7 +83,8 @@ class InterventionVehiculeTest extends TestCase
                 'data' => true
             ])
             ->assertJsonCount(
-                count($vehicules), 'data'
+                count($vehicules),
+                'data'
             );
     }
 

@@ -79,13 +79,17 @@ class InterventionPhaseTest extends TestCase
     public function testEditInterventionPhases()
     {
         $res = $this->interventionService->getInterventionPhases($this->interventionId);
-        $res = array_map(function ($s) {
-            $s->debut = '2019-12-12 13:00';
-            return $s;
-        }, array_filter($res,
+        $res = array_map(
+            function ($s) {
+                $s->debut = '2019-12-12 13:00';
+                return $s;
+            },
+            array_filter(
+                $res,
                 function ($p) {
                     return $p->debut === null;
-                })
+                }
+            )
         );
 
         $response = $this->json('PUT', '/api/v2/interventions/' . $this->interventionId . '/phases', ['phases' => $res]);
@@ -111,9 +115,11 @@ class InterventionPhaseTest extends TestCase
             'intervention_id' => $this->interventionId,
         ]];
 
-        $ids = array_map(function ($s) {
-            return $s->id;
-        }, array_filter(
+        $ids = array_map(
+            function ($s) {
+                return $s->id;
+            },
+            array_filter(
                 $this->interventionService->addPhases($this->interventionId, $phases),
                 function ($phase) {
                     return $phase->debut !== null;

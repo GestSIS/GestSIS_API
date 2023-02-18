@@ -40,7 +40,7 @@ class InterventionParamService
     {
         return $this->business->supprimerStat($id);
     }
-    
+
     public function statsFederal()
     {
         return StatFederal::all();
@@ -60,7 +60,7 @@ class InterventionParamService
     {
         return $this->business->supprimerStatFederal($id);
     }
-    
+
     public function types()
     {
         return TypeIntervention::all();
@@ -80,7 +80,7 @@ class InterventionParamService
     {
         return $this->business->supprimerType($id);
     }
-    
+
     public function missions()
     {
         return MissionType::all();
@@ -100,7 +100,7 @@ class InterventionParamService
     {
         return $this->business->supprimerMission($id);
     }
-    
+
     public function telephones()
     {
         return Telephone::all();
@@ -120,7 +120,7 @@ class InterventionParamService
     {
         return $this->business->supprimerTelephone($id);
     }
-    
+
     public function vehicules()
     {
         return Vehicule::all();
@@ -140,7 +140,7 @@ class InterventionParamService
     {
         return $this->business->supprimerVehicule($id);
     }
-    
+
     public function materiels()
     {
         return Materiel::all();
@@ -160,7 +160,7 @@ class InterventionParamService
     {
         return $this->business->supprimerMateriel($id);
     }
-    
+
     public function traitements()
     {
         return InterventionTraitement::all();
