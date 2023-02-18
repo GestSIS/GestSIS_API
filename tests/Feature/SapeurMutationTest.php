@@ -107,7 +107,9 @@ class SapeurMutationTest extends TestCase
             'localite_id' => 2
         );
 
-        $response = $this->json('PUT', "/api/v2/sapeurs/$this->sapeurId/mutations/$mutation_id",
+        $response = $this->json(
+            'PUT',
+            "/api/v2/sapeurs/$this->sapeurId/mutations/$mutation_id",
             array_merge($data, ['id' => $mutation_id])
         );
 
@@ -152,7 +154,9 @@ class SapeurMutationTest extends TestCase
             'localite_id' => 2
         );
 
-        $response = $this->json('PUT', "/api/v2/sapeurs/$this->sapeurId/mutations/0",
+        $response = $this->json(
+            'PUT',
+            "/api/v2/sapeurs/$this->sapeurId/mutations/0",
             array_merge($data, ['id' => $mutation_id])
         );
 

@@ -17,7 +17,6 @@ class InterventionTest extends TestCase
         parent::setUp();
 
         $this->service = $this->app->make('App\Domaine\API\InterventionService');
-
     }
 
     /**
@@ -153,7 +152,8 @@ class InterventionTest extends TestCase
 
         $response = $this->json(
             'PUT',
-            '/api/v2/interventions/' . $intervention->id, $interventionEdited->toArray()
+            '/api/v2/interventions/' . $intervention->id,
+            $interventionEdited->toArray()
         );
 
         $response

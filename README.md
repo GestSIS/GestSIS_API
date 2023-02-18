@@ -64,7 +64,7 @@ Se compose de 3 couches les API's, le business et les SPI's.
 
 ### API's
 
-Cette couche se compose de services qui définissent les entrés du code métier, toute action à destination du métier passe par là. `app\domaine\API`
+Cette couche se compose de services qui définissent les entrés du code métier, toute action à destination du métier passe par là. `App\Domaine\API`
 Toute action de modification doit être passée à la couche Business. Seul les actions de listing peuvent directemenet être résolues.
 
 ### Business

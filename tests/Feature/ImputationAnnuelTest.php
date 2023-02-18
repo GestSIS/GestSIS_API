@@ -53,7 +53,6 @@ class ImputationAnnuelTest extends TestCase
             'fin' => null,
             'remarque' => 'Deserve it'
         ]);
-
     }
 
     /**
@@ -74,5 +73,4 @@ class ImputationAnnuelTest extends TestCase
                 'data'
             ]);
     }
-
 }
