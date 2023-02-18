@@ -5,6 +5,8 @@ namespace App\Application\Http\Middleware;
 use Closure;
 use App\Application\Auth\TokenTools;
 use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class JwtTokenValidatorSapeurOrRole
 {
@@ -12,11 +14,9 @@ class JwtTokenValidatorSapeurOrRole
      * Handle an incoming request.
      * Check que l'utilisateur est un sapeur du SIS
      * 
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return mixed
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle($request, Closure $next, ...$roles)
+    public function handle(Request $request, Closure $next, ...$roles)
     {
         if (env('APP_ENV') === 'testing') {
             return $next($request);
@@ -25,7 +25,7 @@ class JwtTokenValidatorSapeurOrRole
         try {
             $token = TokenTools::validateToken($request->bearerToken());
         } catch (Exception $e) {
-            return response()->json(["error" => "Accès refusé"], 401);
+            return response()->json(["error" => "Accès refusé", "test" => $e->__toString()], 401);
         }
 
         $sisKey = $request->header('Sis-Id', Null);

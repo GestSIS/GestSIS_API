@@ -10,9 +10,10 @@ export default defineConfig({
         }
     },
     plugins: [
-        laravel([
-            'resources/sass/app.scss',
-        ]),
+        laravel({
+            input: ['resources/sass/app.scss'],
+            refresh: true,
+        }),
     ],
     resolve: {
         alias: {

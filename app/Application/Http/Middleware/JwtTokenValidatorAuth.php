@@ -5,6 +5,8 @@ namespace App\Application\Http\Middleware;
 use Closure;
 use App\Application\Auth\TokenTools;
 use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class JwtTokenValidatorAuth
 {
@@ -12,11 +14,9 @@ class JwtTokenValidatorAuth
      * Handle an incoming request.
      * Check que l'utilisateur est authentifié dans le système
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return mixed
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next)
     {
         if (config('APP_ENV') === 'testing') {
             return $next($request);
@@ -25,7 +25,7 @@ class JwtTokenValidatorAuth
         try {
             $token = TokenTools::validateToken($request->bearerToken());
         } catch (Exception $e) {
-            return response()->json(["error" => "Accès refusé"], 401);
+            return response()->json(["error" => "Accès refusé --"], 401);
         }
 
         // Check has role for provided sis

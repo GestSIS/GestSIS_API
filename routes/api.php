@@ -6,10 +6,15 @@
 |--------------------------------------------------------------------------
 |
 | Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "api" middleware group. Make something great!
 |
 */
+
+use Illuminate\Support\Facades\Route;
+use Spatie\HttpLogger\Middlewares\HttpLogger;
+use App\Application\Http\Middleware\DbSelector;
+use App\Application\Http\Middleware\JwtTokenValidatorAuth;
 
 use App\Application\Http\Controllers\AlarmeController;
 use App\Application\Http\Controllers\AmendeController;
@@ -29,10 +34,6 @@ use App\Application\Http\Controllers\CoursSapeurController;
 use App\Application\Http\Controllers\DecompteController;
 use App\Application\Http\Controllers\EcritureCategorieController;
 use App\Application\Http\Controllers\EcritureController;
-use Illuminate\Support\Facades\Route;
-use Spatie\HttpLogger\Middlewares\HttpLogger;
-use App\Application\Http\Middleware\DbSelector;
-
 use App\Application\Http\Controllers\EmailController;
 use App\Application\Http\Controllers\ExcuseParamController;
 use App\Application\Http\Controllers\ExcuseTypeController;
@@ -68,9 +69,11 @@ use App\Application\Http\Controllers\MaterielController;
 use App\Application\Http\Controllers\MatPersoAlerteController;
 use App\Application\Http\Controllers\MatPersoAlerteTypeController;
 use App\Application\Http\Controllers\MatPersoAttributionController;
+use App\Application\Http\Controllers\MatPersoCategorieController;
 use App\Application\Http\Controllers\MatPersoController;
 use App\Application\Http\Controllers\MatPersoEventController;
 use App\Application\Http\Controllers\MatPersoEventTypeController;
+use App\Application\Http\Controllers\MatPersoTypeController;
 use App\Application\Http\Controllers\MedecinController;
 use App\Application\Http\Controllers\MesDecomptesController;
 use App\Application\Http\Controllers\MesExercicesController;
@@ -102,10 +105,10 @@ use App\Application\Http\Controllers\StatInterventionController;
 use App\Application\Http\Controllers\TelephoneController;
 use App\Application\Http\Controllers\TelephoneTypeController;
 use App\Application\Http\Controllers\TravailController;
+use App\Application\Http\Controllers\TravailTypeController;
 use App\Application\Http\Controllers\TypeInterventionController;
 use App\Application\Http\Controllers\UniteController;
 use App\Application\Http\Controllers\VehiculeController;
-use App\Application\Http\Middleware\JwtTokenValidatorAuth;
 
 // Route spécial pour le serveur d'authentification
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenValidatorAuth::class]], function () {

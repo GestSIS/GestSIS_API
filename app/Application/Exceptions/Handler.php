@@ -6,59 +6,49 @@ use App\Domaine\Exceptions\ArrayException;
 use Throwable;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 
 class Handler extends ExceptionHandler
 {
     /**
+     * A list of exception types with their corresponding custom log levels.
+     *
+     * @var array<class-string<\Throwable>, \Psr\Log\LogLevel::*>
+     */
+    protected $levels = [
+        //
+    ];
+
+    /**
      * A list of the exception types that are not reported.
      *
-     * @var array
+     * @var array<int, class-string<\Throwable>>
      */
     protected $dontReport = [
         //
     ];
 
     /**
-     * A list of the inputs that are never flashed for validation exceptions.
+     * A list of the inputs that are never flashed to the session validation exceptions.
      *
-     * @var array
+     * @var array<int, string>
      */
     protected $dontFlash = [
+        'current_password',
         'password',
         'password_confirmation',
     ];
 
     /**
-     * Report or log an exception.
-     *
-     * @param Exception $exception
-     * @return void
-     * @throws Exception
+     * Register the exception handling callbacks for the application.
      */
-    public function report(Throwable $exception)
+    public function register(): void
     {
-        parent::report($exception);
-    }
-
-    /**
-     * Render an exception into an HTTP response.
-     *
-     * @param Request $request
-     * @param Exception $exception
-     * @return Response
-     */
-    public function render($request, Throwable $exception)
-    {
-        if ($exception instanceof ArrayException) {
-            return response()->json(['error' => $exception->getErrors()], 200);
-        }
-
-        if ($exception instanceof ValidationException) {
-            return response()->json(['error' => $exception->errors()], 200);
-        }
-
-        return parent::render($request, $exception);
+        $this->renderable(function (ArrayException $e, Request $request) {
+            return response()->json(['error' => $e->getErrors()], 200);
+        });
+        $this->renderable(function (ValidationException $e, Request $request) {
+            return response()->json(['error' => $e->errors()], 200);
+        });
     }
 }
