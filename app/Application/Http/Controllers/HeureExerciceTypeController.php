@@ -8,6 +8,7 @@ use App\Domaine\API\ExerciceParamService;
 
 class HeureExerciceTypeController extends Controller
 {
+    private $service = null;
 
     public function __construct(ExerciceParamService $service)
     {

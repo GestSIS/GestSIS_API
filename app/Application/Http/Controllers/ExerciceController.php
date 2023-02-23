@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 
 class ExerciceController extends Controller
 {
-
     protected $service;
 
     public function __construct(ExerciceService $service)
@@ -25,6 +24,13 @@ class ExerciceController extends Controller
 
         $exercices = Exercice::where('exercice_comptable_id', $exercice_comptable_id)->get();
         return response()->json(['data' => $exercices]);
+    }
+
+    public function absences($exercice_comptable_id)
+    {
+        $absences = $this->service->absences($exercice_comptable_id);
+
+        return response()->json(['data' => $absences]);
     }
 
     public function last()

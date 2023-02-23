@@ -9,7 +9,10 @@ class ExerciceSapeur extends Model
 {
     protected $table = 'exercice_sapeur';
     protected $fillable = ['convoque', 'present', 'amende', 'remplace', 'excuse_type_id'];
-    protected $casts = ['sapeur_id' => 'integer', 'exercice_id' => 'integer', 'present' => 'integer', 'convoque' => 'integer', 'amende' => 'boolean', 'remplace' => 'integer', 'excuse_type_id' => 'integer'];
+    protected $casts = [
+        'sapeur_id' => 'integer', 'exercice_id' => 'integer', 'present' => 'integer', 'convoque' => 'integer',
+        'amende' => 'boolean', 'remplace' => 'integer', 'excuse_type_id' => 'integer', 'excuse_statut' => 'integer'
+    ];
 
     use HasFactory;
 

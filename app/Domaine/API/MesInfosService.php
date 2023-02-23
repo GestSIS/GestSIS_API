@@ -3,6 +3,7 @@
 
 namespace App\Domaine\API;
 
+use App\Domaine\Business\ExerciceBusiness;
 use App\Domaine\Business\PaiementBusiness;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\SapeurRepository;
@@ -19,12 +20,14 @@ use Illuminate\Support\Facades\DB;
 class MesInfosService
 {
     protected $paiementBusiness;
+    protected $exerciceBusiness;
     protected $exerciceRepo;
     protected $sapeurRepo;
 
-    public function __construct(PaiementBusiness $paiementBusiness, ExerciceRepository $exerciceRepo, SapeurRepository $sapeurRepo)
+    public function __construct(PaiementBusiness $paiementBusiness, ExerciceBusiness $exerciceBusiness, ExerciceRepository $exerciceRepo, SapeurRepository $sapeurRepo)
     {
         $this->paiementBusiness = $paiementBusiness;
+        $this->exerciceBusiness = $exerciceBusiness;
         $this->exerciceRepo = $exerciceRepo;
         $this->sapeurRepo = $sapeurRepo;
     }
@@ -62,6 +65,11 @@ class MesInfosService
     function mesExercices($sapeurId, $exerciceComptableId)
     {
         return $this->exerciceRepo->listExerciceOfSapeurById($exerciceComptableId, $sapeurId);
+    }
+
+    function creerExcuse($sapeurId, $exerciceId, $data, $file, $sisKey)
+    {
+        return $this->exerciceBusiness->creerExcuse($sapeurId, $exerciceId, $data, $file, $sisKey);
     }
 
     function monMateriel($sapeurId)

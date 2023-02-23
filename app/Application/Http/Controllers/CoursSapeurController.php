@@ -8,6 +8,8 @@ use Illuminate\Http\Response;
 
 class CoursSapeurController extends Controller
 {
+    private $service = null;
+
     public function __construct(CoursService $service)
     {
         $this->service = $service;

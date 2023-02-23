@@ -9,7 +9,6 @@ use Illuminate\Http\Response;
 
 class InterventionSapeursController extends Controller
 {
-
     protected $service;
 
     public function __construct(InterventionService $service)

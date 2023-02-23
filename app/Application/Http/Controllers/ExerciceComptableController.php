@@ -8,7 +8,6 @@ use Illuminate\Http\Response;
 
 class ExerciceComptableController extends Controller
 {
-
     protected $service;
 
     public function __construct(ExerciceComptableService $service)

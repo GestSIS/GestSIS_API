@@ -165,6 +165,11 @@ class ComptabiliteParamService
         return $this->business->supprimerCompte($id);
     }
 
+    function indemnitesCoursTypes()
+    {
+        return $this->indemniteRepo->listeIndemniteCoursType();
+    }
+
     public function ajouterIndemniteCoursType($data)
     {
         return $this->business->ajouterIndemniteCoursType($data);

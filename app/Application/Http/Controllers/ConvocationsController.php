@@ -90,11 +90,55 @@ class ConvocationsController extends Controller
         // Check has role for provided sis
         $admin = $request->attributes->get('admin', false);
         $perms = $request->attributes->get('permissions', []);
-        $hasValidationPremission = $admin || in_array('exercice.validation', $perms);
+        $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
         // Appel du business
-        $sapeur = $this->service->updateSapeurs($exerciceId, $data['sapeurs'], $hasValidationPremission);
+        // FIXME:
+        $sapeur = $this->service->updatePresence($exerciceId, $data['sapeurs'], $hasValidationPermission);
 
         return response()->json(['data' => $sapeur]);
+    }
+
+    /**
+     * Update les présences sans tenir compte d'un exercice en particulier
+     *
+     * @return Response
+     */
+    public function updatePresence(Request $request, $id)
+    {
+        $data = $request->validate([
+            'id' => 'integer|min:1',
+            'convoque' => 'required|integer',
+            'present' => 'required|integer',
+            'remplace' => 'required|integer',
+
+            // Auto
+            // 'date_demande' => 'required|boolean',
+            // 'date_validation' => 'required|boolean',
+
+            'excuse_type_id' => 'nullable|integer',
+            'remarque' => 'nullable|string',
+            // 'justificatif_filename' => 'required|boolean', // Nom du fichier
+            // 'justificatif_path' => 'required|boolean', // Nom du fichier
+
+            'excuse_statut' => 'integer',
+            'justification' => 'string',
+            'amende' => 'boolean',
+        ]);
+
+
+        if (!$request->hasFile('justificatif_file') || !$request->file('justificatif_file')->isValid()) {
+            return response()->json(['error' => 'Fichier justificatif_file manquant']);
+        }
+
+        $file = $request->file('justificatif_file');
+
+        $sisKey = $request->header('Sis-Id', Null);
+        $admin = $request->attributes->get('admin');
+        $perms = $request->attributes->get('permissions', []);
+        $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
+        $presences = $this->service->updatePresence($id, $data, $file, $hasValidationPermission, $sisKey);
+
+        return response()->json(['data' => $presences]);
     }
 
     /**
@@ -118,8 +162,8 @@ class ConvocationsController extends Controller
 
         $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
-        $hasValidationPremission = $admin || in_array('exercice.validation', $perms);
-        $presences = $this->service->updateSapeurPresences($data['presences'], $hasValidationPremission);
+        $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
+        $presences = $this->service->updateSapeurPresences($data['presences'], $hasValidationPermission);
 
         return response()->json(['data' => $presences]);
     }

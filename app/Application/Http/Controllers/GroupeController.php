@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 
 class GroupeController extends Controller
 {
-
     protected $service;
 
     public function __construct(GroupeService $service)

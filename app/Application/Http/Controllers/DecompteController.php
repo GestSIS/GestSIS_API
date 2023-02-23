@@ -10,6 +10,7 @@ use Exception;
 
 class DecompteController extends Controller
 {
+    private $service = null;
 
     public function __construct(PaiementService $service)
     {

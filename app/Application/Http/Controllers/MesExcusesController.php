@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Application\Http\Controllers;
+
+use App\Domaine\API\MesInfosService;
+use App\Infrastructure\Models\ExcuseParam;
+use Illuminate\Http\Request;
+
+class MesExcusesController extends Controller
+{
+    private $service = null;
+
+    public function __construct(MesInfosService $service)
+    {
+        $this->service = $service;
+    }
+
+    /**
+     * S'excuser à un exercice
+     */
+    public function update(Request $request, $exerciceId)
+    {
+        $sapeurId = $request->attributes->get('sapeurId');
+        if ($sapeurId === null || intval($sapeurId) <= 0) {
+            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+        }
+
+        $data = $request->validate([
+            'excuse_type_id' => 'nullable|integer',
+            'remarque' => 'nullable|string',
+            // 'justificatif_filename' => 'required|boolean', // Nom du fichier
+            // 'justificatif_path' => 'required|boolean', // Nom du fichier
+        ]);
+
+        if ($request->hasFile('justificatif_file') && !$request->file('justificatif_file')->isValid()) {
+            return response()->json(['error' => 'Fichier justificatif invalide']);
+        }
+
+        $file = $request->file('justificatif_file');
+
+        $sisKey = $request->header('Sis-Id', Null);
+
+        $data = $this->service->creerExcuse($sapeurId, $exerciceId, $data, $file, $sisKey);
+        return response()->json(['data' => $data]);
+    }
+}

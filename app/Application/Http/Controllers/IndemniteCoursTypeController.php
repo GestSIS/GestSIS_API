@@ -8,6 +8,7 @@ use App\Domaine\API\ComptabiliteParamService;
 
 class IndemniteCoursTypeController extends Controller
 {
+    private $service = null;
 
     public function __construct(ComptabiliteParamService $service)
     {
@@ -15,9 +16,7 @@ class IndemniteCoursTypeController extends Controller
     }
 
     /**
-     * Créer un fichier iso20022 pour un type
-     * 
-     * @param int $id id du type pour lequelle le fichier doit être créé
+     * Liste des indemnités de cours types
      */
     public function index()
     {

@@ -86,9 +86,9 @@ class ControleMedicalService
         return $this->business->removeControleMedical($id);
     }
 
-    public function addJustificatif($controleId, $file, $sisId)
+    public function addJustificatif($controleId, $file, $sisKey)
     {
-        return $this->business->addJustificatif($controleId, $file, $sisId);
+        return $this->business->addJustificatif($controleId, $file, $sisKey);
     }
 
     public function getJustificatif($controleId)

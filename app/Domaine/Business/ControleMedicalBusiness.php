@@ -88,13 +88,13 @@ class ControleMedicalBusiness
         return $this->repository->deleteControleMedical($controleId);
     }
 
-    public function addJustificatif($controleMedicalId, $file, $sisId)
+    public function addJustificatif($controleMedicalId, $file, $sisKey)
     {
         //First remove potential already existing document
         $this->removeJustificatif($controleMedicalId);
 
-        //Then add the new one
-        $path = $file->store('documents/' . $sisId . '/controles_medicaux');
+        // Then add the new one
+        $path = $file->store('documents/' . $sisKey . '/controles_medicaux');
         return $this->repository->addJustificatif($controleMedicalId, $file->getClientOriginalName(), $path);
     }
 

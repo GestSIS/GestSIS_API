@@ -107,10 +107,10 @@ class SapeurService
 
     private static $ALLOWED_PHOTO_EXTENSION = ['jpg', 'jpeg', 'png'];
 
-    public function getPhotoSapeur($sapeurId, $sisId)
+    public function getPhotoSapeur($sapeurId, $sisKey)
     {
         foreach (self::$ALLOWED_PHOTO_EXTENSION as $extension) {
-            $path = 'photos/' . $sisId . '/' . $sapeurId . '.' . $extension;
+            $path = 'photos/' . $sisKey . '/' . $sapeurId . '.' . $extension;
             if (Storage::exists($path)) {
                 // return response()->json(storage_path($path));
                 // return response()->file(storage_path('app/' . $path));
@@ -120,23 +120,23 @@ class SapeurService
         return response()->json(Null);
     }
 
-    public function deletePhotoSapeur($sapeurId, $sisId)
+    public function deletePhotoSapeur($sapeurId, $sisKey)
     {
-        $path = 'photos/' . $sisId . '/' . $sapeurId . '.';
+        $path = 'photos/' . $sisKey . '/' . $sapeurId . '.';
         $files = array_map(function ($extension) use ($path) {
             return $path . $extension;
         }, self::$ALLOWED_PHOTO_EXTENSION);
         Storage::delete($files);
     }
 
-    public function uploadPhotoSapeur($image, $sapeurId, $sisId)
+    public function uploadPhotoSapeur($image, $sapeurId, $sisKey)
     {
         //Supprime toute potentielle image précédente
-        $this->deletePhotoSapeur($sapeurId, $sisId);
+        $this->deletePhotoSapeur($sapeurId, $sisKey);
 
         // Ajout de l'image
         $extension = strtolower($image->extension());
-        return $image->storeAs('photos/' . $sisId,  $sapeurId . "." . $extension);
+        return $image->storeAs('photos/' . $sisKey,  $sapeurId . "." . $extension);
     }
 
     public function createSapeur($data)
