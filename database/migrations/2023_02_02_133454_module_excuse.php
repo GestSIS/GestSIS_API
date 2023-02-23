@@ -22,8 +22,9 @@ return new class extends Migration
             // Saisie par le sapeur
             // excuse_type_id -> déjà ok
             $table->date('date_demande')->nullable()->default(null);
-            $table->string('justificatif')->default('');
             $table->string('remarque')->default('');
+            $table->string('justificatif_path')->default('');
+            $table->string('justificatif_filename')->default('');
 
             // Saisie lors de la validation
             $table->date('date_validation')->nullable()->default(null);
@@ -34,6 +35,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
+            $table->boolean('actif'); // Nb jours pour s'excuser
             $table->integer('delai_excuse'); // Nb jours pour s'excuser
             $table->boolean('email_rappel');
             $table->string('texte_email_rappel');
@@ -51,8 +53,9 @@ return new class extends Migration
             $table->dropColumn('excuse_statut');
 
             $table->dropColumn('date_demande');
-            $table->dropColumn('justificatif');
             $table->dropColumn('remarque');
+            $table->dropColumn('justificatif_path');
+            $table->dropColumn('justificatif_filename');
 
             $table->dropColumn('date_validation');
             $table->dropColumn('justification');

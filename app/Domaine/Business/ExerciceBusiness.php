@@ -4,12 +4,15 @@ namespace App\Domaine\Business;
 
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\ExcuseParam;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\HeureExercice;
 use App\Infrastructure\Models\HeureExerciceType;
+use Carbon\Carbon;
 use Ds\Set;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class ExerciceBusiness
 {
@@ -24,6 +27,10 @@ class ExerciceBusiness
     public const EXERCICE_STATUT_SAISI = 2;
     public const EXERCICE_STATUT_VALIDE = 3;
     public const EXERCICE_STATUT_IMPUTE = 4;
+
+    public const EXCUSE_STATUT_REFUSEE = -1;
+    public const EXCUSE_STATUT_A_TRAITER = 0;
+    public const EXCUSE_STATUT_ACCEPTEE = 1;
 
     protected $repository;
 
@@ -144,6 +151,7 @@ class ExerciceBusiness
      */
     public function updateSapeurPresences($presences, $hasValidationPremission)
     {
+        // FIXME:update sapeurs presences 
         $exerciceIds = array_map(fn ($e) => $e['exercice_id'], $presences);
 
         // fetch exercices status
@@ -212,6 +220,66 @@ class ExerciceBusiness
         }
     }
 
+    public function creerExcuse($sapeurId, $exerciceId, $excuse, $file, $sisKey)
+    {
+        $param = ExcuseParam::first();
+
+        // Check que le module est activé
+        $param = ExcuseParam::first();
+        if (!$param || !$param->actif) {
+            return response()->json(['error' => 'Module excuse non activé']);
+        }
+
+        // Charger la présence
+        $exerciceSapeur = ExerciceSapeur::with('exercice')
+            ->where('sapeur_id', '=', $sapeurId)
+            ->where('exercice_id', '=', $exerciceId)
+            ->first()->get();
+
+        // Check que le délai de réponse n'est pas dépassé
+        $now = Carbon::now()->setTime(0, 0);
+        if (Carbon::parse($exerciceSapeur->exercice->date)->addDays($param->delai_excuse)->gt($now)) {
+            return response()->json(['error' => "Délai d'excuse expiré, $param->delai_excuse jours"]);
+        }
+
+        // Vérifier que l'excuse n'a pas encore été traité
+        if (!$exerciceSapeur) {
+            throw new ArrayException([], "Convocation introuvable");
+        }
+
+        // Vérifier que le délai d'excuse n'est pas dépassé
+        if (!$exerciceSapeur->convoque) {
+            throw new ArrayException([], "Vous n'êtes pas convoqué à cet exercice");
+        }
+
+        // Vérifier que l'excuse n'a pas encore été traité
+        if (!$exerciceSapeur->convoque) {
+            throw new ArrayException([], "Vous n'êtes pas convoqué à cet exercice");
+        }
+
+        // Vérifier que l'excuse n'a pas encore été traité
+        if ($exerciceSapeur->excuse_statut != self::EXCUSE_STATUT_A_TRAITER) {
+            throw new ArrayException([], "Excuse déjà traitée, impossible de la modifier");
+        }
+
+        // Check si justificatif
+        if ($file) {
+            if ($exerciceSapeur->justificatif_path) {
+                Storage::delete($exerciceSapeur->justificatif_path);
+            }
+            // Then add the new one
+            $exerciceSapeur['justificatif_path'] = $file->store('documents/' . $sisKey . '/excuses');
+            $exerciceSapeur['justificatif_filename'] = $file->getClientOriginalName();
+        }
+
+        $exerciceSapeur['excuse_type_id'] = $excuse['excuse_type_id'];
+        $exerciceSapeur['raison'] = $excuse['raison'];
+
+        // Créer excuse
+        $exerciceSapeur->save();
+        return $exerciceSapeur;
+    }
+
     /**
      * Update presences à partir d'une liste complète saisie
      *
@@ -221,6 +289,8 @@ class ExerciceBusiness
      */
     public function updatePresences($exerciceId, $presences)
     {
+        // FIXME:update presences
+
         // Fetch exercice
         $exercice = Exercice::with("sapeurs")->where('id', '=', $exerciceId)->first();
 
@@ -232,7 +302,6 @@ class ExerciceBusiness
         // Ignore si déjà imputé
         if ($exercice->statut === self::EXERCICE_STATUT_IMPUTE) {
             // FIXME: permettre le changement du type d'excuse/amende
-
             return;
         }
 
@@ -247,7 +316,7 @@ class ExerciceBusiness
 
         // Updated sapeurs
         $sapeursModifies = array_filter($presences, fn ($e) => $sapeursIdsActuel->contains($e['sapeur_id']));
-        $this->updateSapeurs($exerciceId, $sapeursModifies, false); // TODO: Check permissions
+        $this->updateSapeurs($exerciceId, $sapeursModifies, false);
 
         // On ignore les sapeurs déjà saisi mais non présent dans les présences envoyées
 
@@ -256,7 +325,175 @@ class ExerciceBusiness
     }
 
     /**
-     * Ajout de sapeurs d'un exercice
+     * Update presences à partir d'une liste complète saisie
+     *
+     * @param $data
+     * @return Collection
+     * @throws ArrayException
+     */
+    public function updatePresence($presenceId, $presence, $file, $hasValidationPermission, $sisKey)
+    {
+        $exerciceSapeur = ExerciceSapeur::with('exercice')->find($presenceId);
+
+        // Ignore si l'exercice n'existe plus
+        if ($exerciceSapeur == NULL) {
+            return;
+        }
+
+        $exercice = $exerciceSapeur->exercice;
+        $sapeurId = $exerciceSapeur->sapeur_id;
+        $exerciceId = $exercice->id;
+
+        // Ignore si déjà imputé
+        if (!$hasValidationPermission && $exercice->statut >= self::EXERCICE_STATUT_VALIDE) {
+            throw new ArrayException([$exercice->statut], 'Permissions insuffisantes pour modifier les présences.');
+        }
+
+        $cachedHeures = HeureExercice
+            ::where('exercice_id', $exerciceId)
+            ->get()->toArray();
+        $indexedHeures = [];
+        foreach ($cachedHeures as $heure) {
+            $indexedHeures[$heure['id']] = $heure;
+        }
+
+        // Check si pas déjà imputé
+        if ($exercice->statut >= self::EXERCICE_STATUT_IMPUTE) {
+            $this->checkValiditeChangementsSiImpute($presenceId, $exerciceId, $sapeurId, $presence);
+        }
+
+        // Check si justificatif
+        if ($file) {
+            if ($exerciceSapeur->justificatif_path) {
+                Storage::delete($exerciceSapeur->justificatif_path);
+            }
+            // Then add the new one
+            $presence['justificatif_path'] = $file->store('documents/' . $sisKey . '/excuses');
+            $presence['justificatif_filename'] = $file->getClientOriginalName();
+        } else {
+            $presence['justificatif_path'] = $exerciceSapeur->justificatif_path;
+            $presence['justificatif_filename'] = $exerciceSapeur->justificatif_filename;
+        }
+
+        // Changement de la présence
+        {
+            // Permission: Saisie présence 
+            ExerciceSapeur
+                ::where('exercice_id', $exerciceId)
+                ->where('id', $presence['id'])
+                ->update([
+                    'convoque' => $presence['convoque'],
+                    'present' => $presence['present'],
+                    'amende' => $presence['amende'],
+                    'remplace' => $presence['remplace'],
+                    'excuse_type_id' => $presence['excuse_type_id'],
+
+                    'raison' => $presence['raison'],
+                    'justificatif_path' => $presence['justificatif_path'],
+                    'justificatif_filename' => $presence['justificatif_filename'],
+
+                    ...($hasValidationPermission ? [
+                        'excuse_statut' => $presence['excuse_statut'],
+                        'justification' => $presence['justification'],
+                    ] : [])
+                ]);
+        }
+
+        // Mise à jour des heures
+        {
+            $heuresEffectives = array_filter(
+                $presence['heures'] ?? [],
+                fn ($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
+            );
+            $heuresId = array_filter(array_map(fn ($h) => array_key_exists('id', $h) ? $h['id'] : null, $heuresEffectives), fn ($h) => !is_null($h));
+
+            // Heures supprimées
+            $heuresSupprimeesId = array_map(fn ($h) => $h['id'], array_filter($cachedHeures, fn ($h) => $h['sapeur_id'] == $presence['sapeur_id'] && !in_array($h['id'], $heuresId)));
+            HeureExercice::where('exercice_id', $exerciceId)
+                ->where('sapeur_id', $presence['sapeur_id'])
+                ->whereIn('id', $heuresSupprimeesId)
+                ->delete();
+
+            // Heures ajoutées
+            $heuresAjoutees = array_filter($heuresEffectives, fn ($heure) => !isset($heure['id']) || !$heure['id']);
+            foreach ($heuresAjoutees as $heure) {
+                if (!array_key_exists('heure_exercice_type_id', $heure)) {
+                    // On ignore l'heure invalide
+                    continue;
+                }
+                $heure['sapeur_id'] = $presence['sapeur_id'];
+                $this->ajouterHeureExercice($exerciceId, $heure);
+            }
+
+            // Heures modifiées
+            $heuresModifiees = array_filter($heuresEffectives, fn ($heure) => isset($heure['id']) && $heure['id'] && !in_array($heure['id'], $heuresSupprimeesId));
+            foreach ($heuresModifiees as $heure) {
+                HeureExercice::where('exercice_id', $exerciceId)
+                    ->where('sapeur_id', $presence['sapeur_id'])
+                    ->where('id', $heure['id'])
+                    ->update(['quantite' => $heure['quantite']]);
+            }
+        }
+
+        return $this->updateStatut($exerciceId);
+    }
+
+    private function checkValiditeChangementsSiImpute($exerciceSapeurId, $exerciceId, $sapeurId, $presenceEffective)
+    {
+        // check que les modifications n'ont lieu que sur l'excuse type, remplacé ou amende
+        $presenceReference = ExerciceSapeur
+            ::find('id', $exerciceSapeurId);
+        $heuresReferences = HeureExercice
+            ::where('exercice_id', $exerciceId)
+            ->where('sapeur_id', $sapeurId)
+            ->get()->toArray();
+
+        // Check si d'autres modifications sont proposées
+        if ($presenceEffective['present'] != $presenceReference['present']) {
+            throw new ArrayException([], 'Permissions insuffisantes pour modifier les présences.');
+        }
+
+        $heuresEffectives = array_filter(
+            $presenceEffective['heures'],
+            fn ($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
+        );
+        $heuresEffectivesId = array_filter(array_map(fn ($h) => array_key_exists('id', $h) ? $h['id'] : null, $heuresEffectives), fn ($h) => !is_null($h));
+
+        // Heures supprimées
+        $heuresSupprimeesIds = array_map(
+            fn ($h) => $h['id'],
+            array_filter($heuresReferences, fn ($h) => !in_array($h['id'], $heuresEffectivesId))
+        );
+        if (count($heuresSupprimeesIds) > 0) {
+            throw new ArrayException([], 'Permissions insuffisantes pour supprimer des heures.');
+        }
+
+        // Heures ajoutées
+        $heuresAjoutees = array_filter($heuresEffectives, fn ($heure) => !isset($heure['id']) || !$heure['id']);
+        foreach ($heuresAjoutees as $heure) {
+            throw new ArrayException([], 'Permissions insuffisantes pour ajouter des heures.');
+        }
+
+        // Heures modifiées
+        $heuresModifiees = array_filter(
+            $heuresEffectives,
+            fn ($heure) => isset($heure['id']) && $heure['id'] && !in_array($heure['id'], $heuresSupprimeesIds)
+        );
+        foreach ($heuresModifiees as $heure) {
+            $heureReference = array_filter(
+                $heuresReferences,
+                fn ($h) => $h['id'] == $heure['id']
+            );
+
+            // Check qu'aucune heure n'a été modifiée
+            if (!$heureReference || $heureReference['quantite'] != $heure['quantite']) {
+                throw new ArrayException([], 'Permissions insuffisantes pour modifier une heure.');
+            }
+        }
+    }
+
+    /**
+     * Ajout de sapeurs à un exercice
      *
      * @param $data
      * @return Collection
@@ -308,12 +545,13 @@ class ExerciceBusiness
      * @return Collection
      * @throws ArrayException
      */
-    public function updateSapeurs($exerciceId, $sapeurs, $hasValidatePermission)
+    public function updateSapeurs($exerciceId, $sapeurs, $hasValidationPermission)
     {
+        // FIXME:update sapeurs d'un exercice
         // Check pas déjà imputé
         $statut = $this->repository->getExerciceStatutById($exerciceId);
 
-        if (!$hasValidatePermission && $statut >= self::EXERCICE_STATUT_VALIDE) {
+        if (!$hasValidationPermission && $statut >= self::EXERCICE_STATUT_VALIDE) {
             throw new ArrayException([$statut], 'Permissions insuffisantes pour modifier les présences.');
         }
 

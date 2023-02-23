@@ -11,6 +11,7 @@ use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\Fonction;
 use App\Infrastructure\Models\HeureExercice;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -35,6 +36,19 @@ class ExerciceService
     public function listeExercice()
     {
         return $this->repository->listExerciceLight();
+    }
+
+    public function absences($exerciceComptableId)
+    {
+        return ExerciceSapeur::join('exercices', 'exercices.id', '=', 'exercice_sapeur.exercice_id')
+            ->where('exercices.exercice_comptable_id', '=', $exerciceComptableId)
+            ->where('exercices.date', '<=', Carbon::now())
+            ->where(function ($q) {
+                $q->where('exercice_sapeur.present', '=', 0)
+                    ->orWhere('exercice_sapeur.excuse_type_id');
+            })
+            ->select('exercice_sapeur.*')
+            ->get()->toArray();
     }
 
     public function listExerciceOfSapeurById($exerciceComptableId, $sapeurId)
@@ -163,6 +177,19 @@ class ExerciceService
             'statut' => $statut,
             'sapeurs' => $this->listeSapeurOfExerciceById($exerciceId)
         ];
+    }
+
+
+    /**
+     * Modification des présences d'un exercice
+     *
+     * @param $data
+     * @return Collection
+     * @throws ArrayException
+     */
+    public function updatePresence($presenceId, $presence, $file, $hasValidationPermission, $sisKey)
+    {
+        return $this->business->updatePresence($presenceId, $presence, $file, $hasValidationPermission, $sisKey);
     }
 
     /**

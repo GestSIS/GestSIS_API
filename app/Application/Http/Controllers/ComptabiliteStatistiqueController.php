@@ -8,7 +8,6 @@ use Illuminate\Http\Response;
 
 class ComptabiliteStatistiqueController extends Controller
 {
-
     protected $service;
 
     public function __construct(ImputationService $service)

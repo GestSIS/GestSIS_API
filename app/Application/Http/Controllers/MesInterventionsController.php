@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 class MesInterventionsController extends Controller
 {
+    private $service = null;
 
     public function __construct(MesInfosService $service)
     {

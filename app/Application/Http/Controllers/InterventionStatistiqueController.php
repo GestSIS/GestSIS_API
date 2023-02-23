@@ -8,7 +8,6 @@ use Illuminate\Http\Response;
 
 class InterventionStatistiqueController extends Controller
 {
-
     protected $service;
 
     public function __construct(InterventionService $service)

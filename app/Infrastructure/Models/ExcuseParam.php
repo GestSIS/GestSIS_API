@@ -6,6 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class ExcuseParam extends Model
 {
-    protected $fillable = ['delai_excuse', 'email_rappel', 'texte_email_rappel'];
-    protected $casts = ['delai_excuse' => 'integer', 'email_rappel' => 'boolean'];
+    protected $fillable = ['actif', 'delai_excuse', 'email_rappel', 'texte_email_rappel'];
+    protected $casts = ['actif' => 'boolean', 'delai_excuse' => 'integer', 'email_rappel' => 'boolean'];
 }

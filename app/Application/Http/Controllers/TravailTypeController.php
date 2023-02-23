@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 
 class TravailTypeController extends Controller
 {
-
     protected $service;
 
     public function __construct(TravauxParamService $service)

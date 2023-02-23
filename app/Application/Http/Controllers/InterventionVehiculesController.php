@@ -10,7 +10,6 @@ use Validator;
 
 class InterventionVehiculesController extends Controller
 {
-
     protected $service;
 
     public function __construct(InterventionService $service)

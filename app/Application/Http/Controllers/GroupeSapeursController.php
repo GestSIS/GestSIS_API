@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 
 class GroupeSapeursController extends Controller
 {
-
     protected $service;
 
     public function __construct(GroupeService $service)
