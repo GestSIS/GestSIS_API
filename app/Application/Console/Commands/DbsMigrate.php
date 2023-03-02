@@ -42,7 +42,7 @@ class DbsMigrate extends Command
         foreach ($dbs as $db) {
             printf("DATABASE " . $db . "\n");
             printf("migrate\n");
-            Artisan::call('migrate:rollback --step=1 --database=' . $db);
+            // Artisan::call('migrate:rollback --step=1 --database=' . $db);
             Artisan::call('migrate --database=' . $db);
             printf("\n");
         }

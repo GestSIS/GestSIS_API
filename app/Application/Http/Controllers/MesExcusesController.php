@@ -18,12 +18,17 @@ class MesExcusesController extends Controller
     /**
      * S'excuser à un exercice
      */
-    public function update(Request $request, $exerciceId)
+    public function update(Request $request, int $exerciceId)
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
+
+        $request->merge([
+            'excuse_type_id' => (int) $request->get('excuse_type_id'),
+            // 'remarque' => (string) $request->get('remarque'),
+        ]);
 
         $data = $request->validate([
             'excuse_type_id' => 'nullable|integer',

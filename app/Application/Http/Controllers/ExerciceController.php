@@ -59,6 +59,7 @@ class ExerciceController extends Controller
                 $indexedExercice[$heure['exercice_id']]['indexedSapeurs'][$heure['sapeur_id']] = [
                     'convoque' => False,
                     'present' => False,
+                    'absent' => False,
                     'amende' => False,
                     'remplace' => False,
                     'excuse_type_id' => null,

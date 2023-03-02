@@ -23,14 +23,4 @@ class ExcuseParamService
     {
         return $this->business->updateParams($data);
     }
-
-    public function ajouterLocalitesExcuse($data)
-    {
-        return $this->business->ajouterLocalitesExcuse($data);
-    }
-
-    public function supprimerLocalitesExcuse($data)
-    {
-        return $this->business->supprimerLocalitesExcuse($data);
-    }
 }

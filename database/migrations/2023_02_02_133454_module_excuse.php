@@ -14,6 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('exercice_sapeur', function (Blueprint $table) {
+            $table->smallInteger('absent')->default(0);
+
             // -1 -> Refusée
             // 0 -> A traiter
             // 1 -> Acceptée
@@ -38,7 +40,7 @@ return new class extends Migration
             $table->boolean('actif'); // Nb jours pour s'excuser
             $table->integer('delai_excuse'); // Nb jours pour s'excuser
             $table->boolean('email_rappel');
-            $table->string('texte_email_rappel');
+            $table->string('texte_email_rappel')->default('');
         });
     }
 
@@ -50,6 +52,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('exercice_sapeur', function (Blueprint $table) {
+            $table->dropColumn('absent');
             $table->dropColumn('excuse_statut');
 
             $table->dropColumn('date_demande');

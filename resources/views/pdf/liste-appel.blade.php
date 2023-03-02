@@ -1,11 +1,13 @@
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="/assets/print.css">
   <title>Liste d'appel</title>
 </head>
+
 <body>
   <div class="container-fluid">
     <h1>Liste d'appel</h1>
@@ -28,6 +30,7 @@
           <th>Nom prénom</th>
           <th class="text-center">Fonction</th>
           <th class="text-center">Présent</th>
+          <th class="text-center">Absent</th>
           <th class="text-center">Remplacé</th>
           <th class="text-center">Excusé</th>
         </tr>
@@ -40,6 +43,14 @@
           <td>
             <div class="form-check text-center">
               <label class="form-check-label" for="present-{{$presence->sapeur_id}}"><input type="checkbox" class="form-check-input" id="present-{{$presence->sapeur_id}}" @if ($presence->present)
+                checked="checked"
+                @endif
+                >&#8203;</label>
+            </div>
+          </td>
+          <td>
+            <div class="form-check text-center">
+              <label class="form-check-label" for="absent-{{$presence->sapeur_id}}"><input type="checkbox" class="form-check-input" id="absent-{{$presence->sapeur_id}}" @if ($presence->absent)
                 checked="checked"
                 @endif
                 >&#8203;</label>
@@ -66,7 +77,7 @@
       </tbody>
       <thead>
         <tr>
-          <th colspan="5">Nombre : {{ count($exercice->sapeurs) }}</th>
+          <th colspan="6">Nombre : {{ count($exercice->sapeurs) }}</th>
         </tr>
       </thead>
     </table>

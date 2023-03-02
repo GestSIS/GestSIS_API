@@ -120,6 +120,7 @@ class ExerciceService
                 $dictionary[$heure['sapeur_id']] = [
                     'convoque' => False,
                     'present' => False,
+                    'absent' => False,
                     'amende' => False,
                     'remplace' => False,
                     'excuse_type_id' => null,
@@ -154,13 +155,41 @@ class ExerciceService
      * @return Collection
      * @throws ArrayException
      */
-    public function updateSapeurs($exerciceId, $sapeurs, $hasValidationPremission)
+    public function updateSapeurs($exerciceId, $sapeurs, $hasValidationPermission)
     {
-        $statut = $this->business->updateSapeurs($exerciceId, $sapeurs, $hasValidationPremission);
+        $statut = $this->business->updateSapeurs($exerciceId, $sapeurs, $hasValidationPermission);
         return [
             'statut' => $statut,
             'sapeurs' => $this->listeSapeurOfExerciceById($exerciceId)
         ];
+    }
+
+    /**
+     * Modification de sapeurs d'un exercice
+     *
+     * @param $data
+     * @return Collection
+     * @throws ArrayException
+     */
+    public function updateExcuse($exerciceId, $sapeurs, $hasValidationPermission)
+    {
+        $statut = $this->business->updateSapeurs($exerciceId, $sapeurs, $hasValidationPermission);
+        return [
+            'statut' => $statut,
+            'sapeurs' => $this->listeSapeurOfExerciceById($exerciceId)
+        ];
+    }
+
+    /**
+     * Modification de sapeurs d'un exercice
+     *
+     * @param $data
+     * @return Collection
+     * @throws ArrayException
+     */
+    public function removeExcuse($convocationId, $hasValidationPermission)
+    {
+        $statut = $this->business->removeExcuse($convocationId, $hasValidationPermission);
     }
 
     /**
@@ -199,9 +228,9 @@ class ExerciceService
      * @return Collection
      * @throws ArrayException
      */
-    public function updateSapeurPresences($exercices, $hasValidationPremission)
+    public function updateSapeurPresences($exercices, $hasValidationPermission)
     {
-        return $this->business->updateSapeurPresences($exercices, $hasValidationPremission);
+        return $this->business->updateSapeurPresences($exercices, $hasValidationPermission);
     }
 
     /**

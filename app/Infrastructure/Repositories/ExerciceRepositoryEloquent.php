@@ -274,6 +274,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         $object->exercice_id = intval($sapeur->exercice_id);
         $object->convoque = intval($sapeur->convoque);
         $object->present = intval($sapeur->present);
+        $object->absent = intval($sapeur->absent);
         $object->remplace = intval($sapeur->remplace);
         $object->amende = boolval($sapeur->amende);
         $object->excuse_type_id = intval($sapeur->excuse_type_id);
