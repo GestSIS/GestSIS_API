@@ -46,6 +46,7 @@ class ImputationExerciceTest extends TestCase
                 'sapeur_id' => $this->sapeurOneId,
                 'convoque' => 1,
                 'present' => 1,
+                'absent' => 0,
                 'amende' => 0,
                 'remplace' => 0,
                 'excuse_type_id' => null
@@ -54,6 +55,7 @@ class ImputationExerciceTest extends TestCase
                 'sapeur_id' => $this->sapeurTwoId,
                 'convoque' => 1,
                 'present' => 0,
+                'absent' => 0,
                 'amende' => 1,
                 'remplace' => 0,
                 'excuse_type_id' => 4
@@ -62,6 +64,7 @@ class ImputationExerciceTest extends TestCase
                 'sapeur_id' => $this->sapeurThreeId,
                 'convoque' => 1,
                 'present' => 1,
+                'absent' => 0,
                 'amende' => 0,
                 'remplace' => 0,
                 'excuse_type_id' => null

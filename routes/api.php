@@ -141,7 +141,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('mes-decomptes/{decompteId}/print', [MesDecomptesController::class, 'print'])->name('api.v2.mes-decomptes.print');
         Route::get('mon-certificat-salaire/{exerciceComptableId}', [MesDecomptesController::class, 'certificatSalaire'])->name('api.v2.mon-certificat-salaire');
 
-        Route::put('mes-excuses/{exerciceId}', [MesExcusesController::class, 'update'])->name('creer-excuse');
+        Route::post('mes-excuses/{exerciceId}', [MesExcusesController::class, 'store'])->name('creer-excuse');
     });
 
     // Paramètres accessible pour tout droit config
@@ -251,9 +251,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Exercices
-    Route::group(['middleware' => 'jwtTokenRole:exercice.lecture,exercice.presence,comptabilite.tout'], function () {
+    Route::group(['middleware' => 'jwtTokenSapeurOrRole:exercice.lecture,exercice.presence,comptabilite.tout'], function () {
+        // Paramètres publiques car nécessaire pour le frontend
         Route::resource('excuse-param', ExcuseParamController::class)->only(['index']);
-
+    });
+    Route::group(['middleware' => 'jwtTokenRole:exercice.lecture,exercice.presence,comptabilite.tout'], function () {
         Route::resource('exercices', ExerciceController::class)->only(['index', 'show']);
         Route::resource('exercices.sapeurs', ConvocationsController::class)->only(['index']);
 
@@ -277,6 +279,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::put('exercices/{id}/sapeurs', [ConvocationsController::class, 'update'])->name('api.v2.exercices.sapeurs.update');
         Route::delete('exercices/{id}/sapeurs', [ConvocationsController::class, 'destroy'])->name('api.v2.exercices.sapeurs.delete');
 
+        // TODO: New routes
+        Route::post('exercices/presence/{presenceId}', [ConvocationsController::class, 'updatePresence'])->name('api.v2.exercices.presence.update');
+
         // FIXME: Mobile
         Route::post('exercices/{id}/presences', [ConvocationsController::class, 'presences'])->name('api.v2.exercices.presences');
 
@@ -284,7 +289,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         // FIXME:
         Route::put('exercices/sapeurs', [ConvocationsController::class, 'updatePresences']);
 
-        Route::put('exercices-sapeurs/{id}', [ConvocationsController::class, 'updatePresence']);
+        Route::post('exercices/{convocationId}/excuses', [ExcusesController::class, 'store'])->name('api.v2.excuses.store');
+        Route::put('exercices/{convocationId}/excuses', [ExcusesController::class, 'update'])->name('api.v2.excuses.update');
+        Route::delete('exercices/{convocationId}/excuses', [ExcusesController::class, 'destroy'])->name('api.v2.excuses.delete');
 
         // TODO: à implémenter
         // Route::get('exercices/{id}/liste-appel-localite', [ExerciceController::class, 'listeAppelLocalite']);

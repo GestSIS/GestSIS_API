@@ -8,6 +8,7 @@ class ExcuseParamBusiness
 {
     public static function updateParams($data)
     {
+        $data['texte_email_rappel'] = $data['texte_email_rappel'] ?? '';
         ExcuseParam::updateOrCreate([], $data);
         return ExcuseParam::first();
     }

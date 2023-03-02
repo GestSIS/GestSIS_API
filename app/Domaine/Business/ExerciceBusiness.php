@@ -149,7 +149,7 @@ class ExerciceBusiness
      * @return Collection
      * @throws ArrayException
      */
-    public function updateSapeurPresences($presences, $hasValidationPremission)
+    public function updateSapeurPresences($presences, $hasValidationPermission)
     {
         // FIXME:update sapeurs presences 
         $exerciceIds = array_map(fn ($e) => $e['exercice_id'], $presences);
@@ -172,7 +172,7 @@ class ExerciceBusiness
                 continue;
             }
             // Check si imputé
-            if ($exerciceStatut === self::EXERCICE_STATUT_IMPUTE && $hasValidationPremission) {
+            if ($exerciceStatut === self::EXERCICE_STATUT_IMPUTE && $hasValidationPermission) {
                 // Update uniquement de l'excuse type et amende
                 $p = ExerciceSapeur::where([
                     ['id', '=', $presence['id']],
@@ -203,7 +203,7 @@ class ExerciceBusiness
                 }
             } else if ($exerciceStatut === self::EXERCICE_STATUT_ANNULE) {
                 continue;
-            } else if ($exerciceStatut === self::EXERCICE_STATUT_VALIDE && $hasValidationPremission || $exerciceStatut < self::EXERCICE_STATUT_VALIDE) {
+            } else if ($exerciceStatut === self::EXERCICE_STATUT_VALIDE && $hasValidationPermission || $exerciceStatut < self::EXERCICE_STATUT_VALIDE) {
                 // Update all
                 ExerciceSapeur::where([
                     ['id', '=', $presence['id']],
@@ -212,6 +212,7 @@ class ExerciceBusiness
                 ])->update([
                     'convoque' => $presence['convoque'],
                     'present' => $presence['present'],
+                    'absent' => $presence['absent'],
                     'remplace' => $presence['remplace'],
                     'excuse_type_id' => $presence['excuse_type_id'],
                     'amende' => $presence['amende'],
@@ -227,19 +228,21 @@ class ExerciceBusiness
         // Check que le module est activé
         $param = ExcuseParam::first();
         if (!$param || !$param->actif) {
-            return response()->json(['error' => 'Module excuse non activé']);
+            throw new ArrayException([], 'Module excuse non activé');
         }
 
         // Charger la présence
         $exerciceSapeur = ExerciceSapeur::with('exercice')
             ->where('sapeur_id', '=', $sapeurId)
             ->where('exercice_id', '=', $exerciceId)
-            ->first()->get();
+            ->first();
 
         // Check que le délai de réponse n'est pas dépassé
-        $now = Carbon::now()->setTime(0, 0);
-        if (Carbon::parse($exerciceSapeur->exercice->date)->addDays($param->delai_excuse)->gt($now)) {
-            return response()->json(['error' => "Délai d'excuse expiré, $param->delai_excuse jours"]);
+        $now = Carbon::now();
+        $now->setTime(0, 0);
+
+        if (Carbon::createFromFormat("Y-m-d", $exerciceSapeur->exercice->date)->addDays($param->delai_excuse)->lt($now)) {
+            throw new ArrayException([], "Délai d'excuse expiré, $param->delai_excuse jours");
         }
 
         // Vérifier que l'excuse n'a pas encore été traité
@@ -273,7 +276,7 @@ class ExerciceBusiness
         }
 
         $exerciceSapeur['excuse_type_id'] = $excuse['excuse_type_id'];
-        $exerciceSapeur['raison'] = $excuse['raison'];
+        $exerciceSapeur['remarque'] = $excuse['remarque'] ?? '';
 
         // Créer excuse
         $exerciceSapeur->save();
@@ -384,17 +387,18 @@ class ExerciceBusiness
                 ->update([
                     'convoque' => $presence['convoque'],
                     'present' => $presence['present'],
-                    'amende' => $presence['amende'],
+                    'absent' => $presence['absent'],
                     'remplace' => $presence['remplace'],
+                    'amende' => $presence['amende'],
                     'excuse_type_id' => $presence['excuse_type_id'],
 
-                    'raison' => $presence['raison'],
+                    'remarque' => $presence['remarque'] ?? '',
                     'justificatif_path' => $presence['justificatif_path'],
                     'justificatif_filename' => $presence['justificatif_filename'],
 
                     ...($hasValidationPermission ? [
                         'excuse_statut' => $presence['excuse_statut'],
-                        'justification' => $presence['justification'],
+                        'justification' => $presence['justification'] ?? '',
                     ] : [])
                 ]);
         }
@@ -410,7 +414,7 @@ class ExerciceBusiness
             // Heures supprimées
             $heuresSupprimeesId = array_map(fn ($h) => $h['id'], array_filter($cachedHeures, fn ($h) => $h['sapeur_id'] == $presence['sapeur_id'] && !in_array($h['id'], $heuresId)));
             HeureExercice::where('exercice_id', $exerciceId)
-                ->where('sapeur_id', $presence['sapeur_id'])
+                ->where('sapeur_id', $sapeurId)
                 ->whereIn('id', $heuresSupprimeesId)
                 ->delete();
 
@@ -421,7 +425,7 @@ class ExerciceBusiness
                     // On ignore l'heure invalide
                     continue;
                 }
-                $heure['sapeur_id'] = $presence['sapeur_id'];
+                $heure['sapeur_id'] = $sapeurId;
                 $this->ajouterHeureExercice($exerciceId, $heure);
             }
 
@@ -429,7 +433,7 @@ class ExerciceBusiness
             $heuresModifiees = array_filter($heuresEffectives, fn ($heure) => isset($heure['id']) && $heure['id'] && !in_array($heure['id'], $heuresSupprimeesId));
             foreach ($heuresModifiees as $heure) {
                 HeureExercice::where('exercice_id', $exerciceId)
-                    ->where('sapeur_id', $presence['sapeur_id'])
+                    ->where('sapeur_id', $sapeurId)
                     ->where('id', $heure['id'])
                     ->update(['quantite' => $heure['quantite']]);
             }
@@ -583,6 +587,7 @@ class ExerciceBusiness
                     $dictionary[$heure['sapeur_id']] = [
                         'convoque' => False,
                         'present' => False,
+                        'absent' => False,
                         'amende' => False,
                         'remplace' => False,
                         'excuse_type_id' => null,
@@ -643,6 +648,7 @@ class ExerciceBusiness
                 ->update([
                     'convoque' => $sapeur['convoque'],
                     'present' => $sapeur['present'],
+                    'absent' => $sapeur['absent'],
                     'amende' => $sapeur['amende'],
                     'remplace' => $sapeur['remplace'],
                     'excuse_type_id' => $sapeur['excuse_type_id'],
@@ -691,6 +697,42 @@ class ExerciceBusiness
      *
      * @param $data
      */
+    public function removeExcuse($presenceId, $hasValidationPermission)
+    {
+        $exerciceSapeur = ExerciceSapeur::with('exercice')->find($presenceId);
+
+        // Ignore si l'exercice n'existe plus
+        if ($exerciceSapeur == NULL) {
+            return;
+        }
+
+        $exercice = $exerciceSapeur->exercice;
+
+        // Ignore si déjà imputé
+        if (!$hasValidationPermission && ($exercice->statut >= self::EXERCICE_STATUT_VALIDE || $exerciceSapeur->excuse_statut != self::EXCUSE_STATUT_A_TRAITER)) {
+            throw new ArrayException([$exercice->statut], 'Permissions insuffisantes pour supprimer cette excuse.');
+        }
+
+        // Suppression justificatif
+        if ($exerciceSapeur->justificatif_path) {
+            Storage::delete($exerciceSapeur->justificatif_path);
+        }
+
+        // Then add the new one
+        $exerciceSapeur->justificatif_path = null;
+        $exerciceSapeur->justificatif_filename = null;
+        $exerciceSapeur->excuse_statut = 0;
+        $exerciceSapeur->excuse_type_id = null;
+        $exerciceSapeur->date_validation = null;
+        $exerciceSapeur->justification = null;
+        $exerciceSapeur->save();
+    }
+
+    /**
+     * Suppression de sapeurs d'un exercice
+     *
+     * @param $data
+     */
     public function removeSapeurs($exerciceId, $ids)
     {
         // Check pas déjà imputé
@@ -698,6 +740,8 @@ class ExerciceBusiness
         if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_SAISI) {
             throw new ArrayException([], 'Impossible de modifier un exercice déjà imputé');
         }
+
+        // FIXME: Supprimer excuse si existante
 
         $this->repository->removeSapeursFromExercice($exerciceId, $ids);
         HeureExercice::where('exercice_id', $exerciceId)

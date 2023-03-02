@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/assets/print.css">
   <title>Liste de présence</title>
 </head>
+
 <body>
   <div class="container-fluid">
     <h1>Présences</h1>
@@ -29,6 +30,7 @@
           <th>Nom prénom</th>
           <th class="text-center">Convoqué</th>
           <th class="text-center">Présent</th>
+          <th class="text-center">Absent</th>
           <th class="text-center">Remplacé</th>
           <th class="text-center">Excusé</th>
           <th class="text-center">Amende</th>
@@ -39,6 +41,7 @@
         $nb = 0;
         $convoque = 0;
         $present = 0;
+        $absent = 0;
         $excuse = 0;
         $remplace = 0;
         $amende = 0;
@@ -47,6 +50,7 @@
         <?
         $nb++;
         if ($presence->present) $present++;
+        if ($presence->absent) $absent++;
         if ($presence->convoque) $convoque++;
         if ($presence->remplace) $remplace++;
         if ($presence->excuse_type_id) $excuse++;
@@ -64,6 +68,14 @@
           <td>
             <div class="form-check text-center">
               <label class="form-check-label" for="present-{{$presence->sapeur_id}}"><input type="checkbox" class="form-check-input" id="present-{{$presence->sapeur_id}}" @if ($presence->present)
+                checked="checked"
+                @endif
+                >&#8203;</label>
+            </div>
+          </td>
+          <td>
+            <div class="form-check text-center">
+              <label class="form-check-label" for="absent-{{$presence->sapeur_id}}"><input type="checkbox" class="form-check-input" id="absent-{{$presence->sapeur_id}}" @if ($presence->absent)
                 checked="checked"
                 @endif
                 >&#8203;</label>
@@ -101,6 +113,7 @@
           <th>Nombre : {{ $nb }}</th>
           <th class="text-center">{{ $convoque }}</th>
           <th class="text-center">{{ $present }}</th>
+          <th class="text-center">{{ $absent }}</th>
           <th class="text-center">{{ $remplace }}</th>
           <th class="text-center">{{ $excuse }}</th>
           <th class="text-center">{{ $amende }}</th>

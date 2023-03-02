@@ -48,11 +48,11 @@ class ConvocationsController extends Controller
         $data = $request->validate([
             'sapeurs.*.convoque' => 'required|boolean',
             'sapeurs.*.present' => 'required|boolean',
-            'sapeurs.*.amende' => 'required|boolean',
+            'sapeurs.*.absent' => 'required|boolean',
             'sapeurs.*.remplace' => 'required|boolean',
+            'sapeurs.*.amende' => 'required|boolean',
             'sapeurs.*.sapeur_id' => 'required|integer|exists:sapeurs,id',
             'sapeurs.*.excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
-
 
             // Actuellement impossible d'ajouter des heures supp directement à l'ajout d'un sapeur
             // 'sapeurs.*.heures.*.quantite' => 'required|nullable|numeric',
@@ -78,6 +78,7 @@ class ConvocationsController extends Controller
             'sapeurs.*.id' => 'required|integer',
             'sapeurs.*.convoque' => 'required|boolean',
             'sapeurs.*.present' => 'required|boolean',
+            'sapeurs.*.absent' => 'required|boolean',
             'sapeurs.*.amende' => 'required|boolean',
             'sapeurs.*.remplace' => 'required|boolean',
             'sapeurs.*.sapeur_id' => 'integer|required',
@@ -105,10 +106,22 @@ class ConvocationsController extends Controller
      */
     public function updatePresence(Request $request, $id)
     {
+        $request->merge([
+            'id' => (int) $request->get('id'),
+            'convoque' => (int) $request->get('convoque'),
+            'present' => (int) $request->get('present'),
+            'absent' => (int) $request->get('absent'),
+            'remplace' => (int) $request->get('remplace'),
+            'excuse_type_id' => (int) $request->get('excuse_type_id'),
+            'excuse_statut' => (int) $request->get('excuse_statut'),
+            'amende' => (bool) $request->get('amende'),
+        ]);
+
         $data = $request->validate([
             'id' => 'integer|min:1',
             'convoque' => 'required|integer',
             'present' => 'required|integer',
+            'absent' => 'required|integer',
             'remplace' => 'required|integer',
 
             // Auto
@@ -121,13 +134,13 @@ class ConvocationsController extends Controller
             // 'justificatif_path' => 'required|boolean', // Nom du fichier
 
             'excuse_statut' => 'integer',
-            'justification' => 'string',
+            'justification' => 'nullable|string',
             'amende' => 'boolean',
         ]);
 
 
-        if (!$request->hasFile('justificatif_file') || !$request->file('justificatif_file')->isValid()) {
-            return response()->json(['error' => 'Fichier justificatif_file manquant']);
+        if ($request->hasFile('justificatif_file') && !$request->file('justificatif_file')->isValid()) {
+            return response()->json(['error' => 'Fichier justificatif_file invalide']);
         }
 
         $file = $request->file('justificatif_file');
@@ -155,6 +168,7 @@ class ConvocationsController extends Controller
             'presences.*.sapeur_id' => 'integer|min:1',
             'presences.*.convoque' => 'required|integer',
             'presences.*.present' => 'required|integer',
+            'presences.*.absent' => 'required|integer',
             'presences.*.remplace' => 'required|integer',
             'presences.*.excuse_type_id' => 'nullable|integer',
             'presences.*.amende' => 'required|boolean',
@@ -180,11 +194,12 @@ class ConvocationsController extends Controller
     {
         $data = $request->validate([
             'sapeurs.*.id' => 'nullable|integer',
+            'sapeurs.*.sapeur_id' => 'integer|required',
             'sapeurs.*.convoque' => 'required|boolean',
             'sapeurs.*.present' => 'required|boolean',
-            'sapeurs.*.amende' => 'required|boolean',
+            'sapeurs.*.absent' => 'required|boolean',
             'sapeurs.*.remplace' => 'required|boolean',
-            'sapeurs.*.sapeur_id' => 'integer|required',
+            'sapeurs.*.amende' => 'required|boolean',
             'sapeurs.*.excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
             'sapeurs.*.heures.*.id' => 'nullable|integer',
             'sapeurs.*.heures.*.quantite' => 'nullable|numeric',

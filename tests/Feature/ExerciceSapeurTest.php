@@ -55,6 +55,7 @@ class ExerciceSapeurTest extends TestCase
                     'sapeur_id' => 1,
                     'convoque' => 1,
                     'present' => 1,
+                    'absent' => 0,
                     'amende' => 0,
                     'remplace' => 0,
                     'excuse_type_id' => null
@@ -63,6 +64,7 @@ class ExerciceSapeurTest extends TestCase
                     'sapeur_id' => 2,
                     'convoque' => 1,
                     'present' => 0,
+                    'absent' => 0,
                     'amende' => 1,
                     'remplace' => 0,
                     'excuse_type_id' => 4
@@ -71,6 +73,7 @@ class ExerciceSapeurTest extends TestCase
                     'sapeur_id' => 3,
                     'convoque' => 1,
                     'present' => 0,
+                    'absent' => 0,
                     'amende' => 0,
                     'remplace' => 0,
                     'excuse_type_id' => null
@@ -103,6 +106,7 @@ class ExerciceSapeurTest extends TestCase
                 'sapeur_id' => 1,
                 'convoque' => 1,
                 'present' => 1,
+                'absent' => 0,
                 'amende' => 0,
                 'remplace' => 0,
                 'excuse_type_id' => null
@@ -111,6 +115,7 @@ class ExerciceSapeurTest extends TestCase
                 'sapeur_id' => 2,
                 'convoque' => 1,
                 'present' => 0,
+                'absent' => 0,
                 'amende' => 1,
                 'remplace' => 0,
                 'excuse_type_id' => 4
@@ -119,6 +124,7 @@ class ExerciceSapeurTest extends TestCase
                 'sapeur_id' => 3,
                 'convoque' => 1,
                 'present' => 0,
+                'absent' => 0,
                 'amende' => 0,
                 'remplace' => 0,
                 'excuse_type_id' => null
@@ -155,6 +161,7 @@ class ExerciceSapeurTest extends TestCase
                 'sapeur_id' => 1,
                 'convoque' => 1,
                 'present' => 1,
+                'absent' => 0,
                 'amende' => 0,
                 'remplace' => 0,
                 'excuse_type_id' => null
@@ -163,6 +170,7 @@ class ExerciceSapeurTest extends TestCase
                 'sapeur_id' => 2,
                 'convoque' => 1,
                 'present' => 0,
+                'absent' => 0,
                 'amende' => 1,
                 'remplace' => 0,
                 'excuse_type_id' => 4
@@ -171,6 +179,7 @@ class ExerciceSapeurTest extends TestCase
                 'sapeur_id' => 3,
                 'convoque' => 1,
                 'present' => 0,
+                'absent' => 0,
                 'amende' => 0,
                 'remplace' => 0,
                 'excuse_type_id' => null
