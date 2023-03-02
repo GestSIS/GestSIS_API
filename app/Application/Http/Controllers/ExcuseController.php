@@ -7,12 +7,9 @@ use App\Domaine\API\ExerciceService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 
-/**
- * Controller pour la convocation de sapeurs à des exercices
- * TODO: Fusionner avec ConvocationController
- */
-class ConvocationsController extends Controller
+class ExcuseController extends Controller
 {
 
     protected $service;
@@ -20,6 +17,19 @@ class ConvocationsController extends Controller
     public function __construct(ExerciceService $service)
     {
         $this->service = $service;
+    }
+
+    public function downloadJustificatif(int $exerciceId, int $sapeurId)
+    {
+        $justificatif = $this->service->getJustificatifExcuse($exerciceId, $sapeurId);
+
+        $headers = array(
+            'Content-Type: application/pdf',
+            'Cache-Control: no-cache private',
+            'Content-Description: File Transfer',
+            'Content-Transfer-Encoding: binary'
+        );
+        return Storage::download($justificatif['path'], $justificatif['filename'], $headers);
     }
 
     /**
@@ -72,9 +82,12 @@ class ConvocationsController extends Controller
      * @param int $exerciceId
      * @return Response
      */
-    public function destroy(int $convocationId)
+    public function destroy(Request $request, int $convocationId)
     {
-        $statut = $this->service->removeExcuse($convocationId);
+        $admin = $request->attributes->get('admin');
+        $perms = $request->attributes->get('permissions', []);
+        $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
+        $statut = $this->service->removeExcuse($convocationId, $hasValidationPermission);
 
         return response()->json(['data' => $statut]);
     }

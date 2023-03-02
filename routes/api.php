@@ -35,6 +35,7 @@ use App\Application\Http\Controllers\DecompteController;
 use App\Application\Http\Controllers\EcritureCategorieController;
 use App\Application\Http\Controllers\EcritureController;
 use App\Application\Http\Controllers\EmailController;
+use App\Application\Http\Controllers\ExcuseController;
 use App\Application\Http\Controllers\ExcuseParamController;
 use App\Application\Http\Controllers\ExcuseTypeController;
 use App\Application\Http\Controllers\ExerciceCategorieController;
@@ -282,6 +283,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         // TODO: New routes
         Route::post('exercices/presence/{presenceId}', [ConvocationsController::class, 'updatePresence'])->name('api.v2.exercices.presence.update');
+        Route::get('exercices/{exerciceId}/excuse/{sapeurId}/justificatif', [ExcuseController::class, 'downloadJustificatif'])->name('api.v2.exercices.excuse.justificatif');
 
         // FIXME: Mobile
         Route::post('exercices/{id}/presences', [ConvocationsController::class, 'presences'])->name('api.v2.exercices.presences');
@@ -290,9 +292,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         // FIXME:
         Route::put('exercices/sapeurs', [ConvocationsController::class, 'updatePresences']);
 
-        Route::post('exercices/{convocationId}/excuses', [ExcusesController::class, 'store'])->name('api.v2.excuses.store');
-        Route::put('exercices/{convocationId}/excuses', [ExcusesController::class, 'update'])->name('api.v2.excuses.update');
-        Route::delete('exercices/{convocationId}/excuses', [ExcusesController::class, 'destroy'])->name('api.v2.excuses.delete');
+        Route::post('exercices/{convocationId}/excuses', [ExcuseController::class, 'store'])->name('api.v2.excuses.store');
+        Route::delete('exercices/{convocationId}/excuses', [ExcuseController::class, 'destroy'])->name('api.v2.excuses.delete');
 
         // TODO: à implémenter
         // Route::get('exercices/{id}/liste-appel-localite', [ExerciceController::class, 'listeAppelLocalite']);
