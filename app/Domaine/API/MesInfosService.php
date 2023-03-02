@@ -5,6 +5,7 @@ namespace App\Domaine\API;
 
 use App\Domaine\Business\ExerciceBusiness;
 use App\Domaine\Business\PaiementBusiness;
+use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\Ecriture;
@@ -70,6 +71,16 @@ class MesInfosService
     function creerExcuse($sapeurId, $exerciceId, $data, $file, $sisKey)
     {
         return $this->exerciceBusiness->creerExcuse($sapeurId, $exerciceId, $data, $file, $sisKey);
+    }
+
+    function getJustificatif($exerciceId, $sapeurId)
+    {
+        $presence = ExerciceSapeur::where([['exercice_id', '=', $exerciceId], ['sapeur_id', '=', $sapeurId]])->first();
+        if ($presence == null || !$presence->justificatif_filename) {
+            throw new ArrayException([], "Aucun justificatif !");
+        }
+
+        return ['path' => $presence->justificatif_path, 'filename' => $presence->justificatif_filename];
     }
 
     function monMateriel($sapeurId)
