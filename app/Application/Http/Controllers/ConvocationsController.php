@@ -65,41 +65,6 @@ class ConvocationsController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param int $exerciceId
-     * @return Response
-     * @throws Exception
-     */
-    public function update(Request $request, int $exerciceId)
-    {
-        $data = $request->validate([
-            'sapeurs.*.id' => 'required|integer',
-            'sapeurs.*.convoque' => 'required|boolean',
-            'sapeurs.*.present' => 'required|boolean',
-            'sapeurs.*.absent' => 'required|boolean',
-            'sapeurs.*.amende' => 'required|boolean',
-            'sapeurs.*.remplace' => 'required|boolean',
-            'sapeurs.*.sapeur_id' => 'integer|required',
-            'sapeurs.*.excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
-            'sapeurs.*.heures.*.id' => 'nullable|integer',
-            'sapeurs.*.heures.*.quantite' => 'nullable|numeric',
-            'sapeurs.*.heures.*.heure_exercice_type_id' => 'nullable|integer',
-        ]);
-
-        // Check has role for provided sis
-        $admin = $request->attributes->get('admin', false);
-        $perms = $request->attributes->get('permissions', []);
-        $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
-        // Appel du business
-        // FIXME:
-        $sapeur = $this->service->updatePresence($exerciceId, $data['sapeurs'], $hasValidationPermission);
-
-        return response()->json(['data' => $sapeur]);
-    }
-
-    /**
      * Update les présences sans tenir compte d'un exercice en particulier
      *
      * @return Response

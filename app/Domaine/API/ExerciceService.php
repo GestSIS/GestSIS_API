@@ -33,6 +33,16 @@ class ExerciceService
         return $this->repository->getExerciceByIdWith($exerciceId, ['sapeurs']);
     }
 
+    public function getJustificatifExcuse($exerciceId, $sapeurId)
+    {
+        $presence = ExerciceSapeur::where([['exercice_id', '=', $exerciceId], ['sapeur_id', '=', $sapeurId]])->first();
+        if ($presence == null || !$presence->justificatif_filename) {
+            throw new ArrayException([], "Aucun justificatif !");
+        }
+
+        return ['path' => $presence->justificatif_path, 'filename' => $presence->justificatif_filename];
+    }
+
     public function listeExercice()
     {
         return $this->repository->listExerciceLight();
@@ -132,6 +142,33 @@ class ExerciceService
         return array_values($dictionary);
     }
 
+    public function sapeurOfExerciceById($exerciceId, $sapeurId)
+    {
+        $heures = HeureExercice
+            ::where('exercice_id', $exerciceId)
+            ->where('sapeur_id', $sapeurId)
+            ->get()->toArray();
+        $sapeur = ExerciceSapeur
+            ::where('exercice_id', $exerciceId)
+            ->where('sapeur_id', $sapeurId)
+            ->first()->toArray();
+
+        if (!$sapeur) {
+            $sapeur = [
+                'convoque' => False,
+                'present' => False,
+                'absent' => False,
+                'amende' => False,
+                'remplace' => False,
+                'excuse_type_id' => null,
+                'heures' => [],
+            ];
+        }
+        $sapeur['heures'] = $heures;
+
+        return $sapeur;
+    }
+
     /**
      * Ajout de sapeurs à un exercice
      *
@@ -189,7 +226,7 @@ class ExerciceService
      */
     public function removeExcuse($convocationId, $hasValidationPermission)
     {
-        $statut = $this->business->removeExcuse($convocationId, $hasValidationPermission);
+        return $this->business->removeExcuse($convocationId, $hasValidationPermission);
     }
 
     /**
@@ -218,7 +255,12 @@ class ExerciceService
      */
     public function updatePresence($presenceId, $presence, $file, $hasValidationPermission, $sisKey)
     {
-        return $this->business->updatePresence($presenceId, $presence, $file, $hasValidationPermission, $sisKey);
+        $statut = $this->business->updatePresence($presenceId, $presence, $file, $hasValidationPermission, $sisKey);
+        $exerciceSapeur = ExerciceSapeur::with('exercice')->find($presenceId);
+        return [
+            'statut' => $statut,
+            'sapeur' => $this->sapeurOfExerciceById($exerciceSapeur->exercice_id, $exerciceSapeur->sapeur_id),
+        ];
     }
 
     /**
