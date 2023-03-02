@@ -141,7 +141,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('mes-decomptes/{decompteId}/print', [MesDecomptesController::class, 'print'])->name('api.v2.mes-decomptes.print');
         Route::get('mon-certificat-salaire/{exerciceComptableId}', [MesDecomptesController::class, 'certificatSalaire'])->name('api.v2.mon-certificat-salaire');
 
-        Route::post('mes-excuses/{exerciceId}', [MesExcusesController::class, 'store'])->name('creer-excuse');
+        Route::post('mes-excuses/{exerciceId}', [MesExcusesController::class, 'store'])->name('api.v2.creer-excuse');
+        Route::get('mes-excuses/{exerciceId}/justificatif', [MesExcusesController::class, 'download'])->name('api.v2.download-excuse-justificatif');
     });
 
     // Paramètres accessible pour tout droit config

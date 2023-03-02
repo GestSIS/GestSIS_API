@@ -5,6 +5,7 @@ namespace App\Application\Http\Controllers;
 use App\Domaine\API\MesInfosService;
 use App\Infrastructure\Models\ExcuseParam;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class MesExcusesController extends Controller
 {
@@ -47,5 +48,20 @@ class MesExcusesController extends Controller
 
         $data = $this->service->creerExcuse($sapeurId, $exerciceId, $data, $file, $sisKey);
         return response()->json(['data' => $data]);
+    }
+
+    public function download(Request $request, int $exerciceId)
+    {
+        $sapeurId = $request->attributes->get('sapeurId');
+
+        $justificatif = $this->service->getJustificatif($exerciceId, $sapeurId);
+
+        $headers = array(
+            'Content-Type: application/pdf',
+            'Cache-Control: no-cache private',
+            'Content-Description: File Transfer',
+            'Content-Transfer-Encoding: binary'
+        );
+        return Storage::download($justificatif['path'], $justificatif['filename'], $headers);
     }
 }
