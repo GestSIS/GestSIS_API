@@ -20,15 +20,15 @@ class ExerciceController extends Controller
     public function index(Request $request)
     {
         // TODO: Refactor to service
-        $exercice_comptable_id = $request->get('exercice_comptable_id');
+        $exerciceComptableId = $request->get('exercice_comptable_id');
 
-        $exercices = Exercice::where('exercice_comptable_id', $exercice_comptable_id)->get();
+        $exercices = Exercice::where('exercice_comptable_id', $exerciceComptableId)->get();
         return response()->json(['data' => $exercices]);
     }
 
-    public function absences($exercice_comptable_id)
+    public function absences(int $exerciceComptableId)
     {
-        $absences = $this->service->absences($exercice_comptable_id);
+        $absences = $this->service->absences($exerciceComptableId);
 
         return response()->json(['data' => $absences]);
     }

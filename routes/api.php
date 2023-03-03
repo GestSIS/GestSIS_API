@@ -264,7 +264,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('exercices/{id}/liste-presence', [ExerciceController::class, 'listePresence']);
         Route::get('exercices/{id}/liste-appel', [ExerciceController::class, 'listeAppel']);
 
-        Route::resource('exercices-absences/{exerciceComptableId}', ConvocationsController::class)->only(['index']);
+        Route::get('exercices-absences/{exerciceComptableId}', [ExerciceController::class, 'absences']);
 
         // Convocations
         Route::get('convocation/{id}', [ConvocationController::class, 'convoquer']);

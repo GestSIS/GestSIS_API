@@ -53,6 +53,7 @@ class ExerciceService
         return ExerciceSapeur::join('exercices', 'exercices.id', '=', 'exercice_sapeur.exercice_id')
             ->where('exercices.exercice_comptable_id', '=', $exerciceComptableId)
             ->where('exercices.date', '<=', Carbon::now())
+            ->where('exercices.statut', '<>', ExerciceBusiness::EXERCICE_STATUT_ANNULE)
             ->where(function ($q) {
                 $q->where('exercice_sapeur.present', '=', 0)
                     ->orWhere('exercice_sapeur.excuse_type_id');
