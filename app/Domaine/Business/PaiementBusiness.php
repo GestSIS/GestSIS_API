@@ -201,53 +201,61 @@ class PaiementBusiness
 
         // Création paiements
         foreach ($totaux as $key => $total) {
-            $paiements[] = [
-                'decompte_id' => $decompte->id,
-                'solde' => $total['solde_a_percevoir'],
-                'indemnite' => $total['indemnite_a_percevoir'],
-                'frais_forfaitaire' => $total['frais_forfaitaire_a_percevoir'],
-                'frais_effectif' => $total['frais_effectif_a_percevoir'],
-                'avs_ac' => $total['avs_ac_a_cotiser'],
-                'autre' => $total['autre'],
-                'total' => $total['total_final'],
-                'sapeur_id' => $key
-            ];
-
-            // Maj décompte
-            $decompte->total += $total['total_final'];
-            if ($total['total_final'] > 0) {
-                $decompte->a_payer_total += $total['total_final'];
-            } else {
-                $decompte->a_facturer_total += $total['total_final'];
-            }
-
-            // Génération écriture AVS/AC pour le sapeur
-            if ($deduction && $total['avs_ac_a_cotiser'] > 0.0) {
-                $ecritureAvsGlobale['tarif'] += $total['avs_ac_a_cotiser'] * 2;
-                $ecritureAvsGlobale['total'] += $total['avs_ac_a_cotiser'] * 2;
-
-                $ecritureAvsAc[] = [
-                    'tarif' => $total['avs_ac_a_cotiser'],
-                    'quantite' => 1,
-                    'total' => -$total['avs_ac_a_cotiser'],
-
-                    'designation' => $designation . " - Participation AVS/AI/APG - AC",
-                    'type_unite_id' => ImputationBusiness::UNITE_FORFAIT,
-                    'exercice_comptable_id' => $exerciceComptableId,
-                    'ecriture_categorie_id' => $avsParam->ecriture_categorie_id,
-                    'date' => $date,
-                    'heure' => "00:00:00",
-
+            if (
+                $total['solde_a_percevoir'] != 0.0 ||
+                $total['indemnite_a_percevoir'] != 0.0 ||
+                $total['frais_forfaitaire_a_percevoir'] != 0.0 ||
+                $total['avs_ac_a_cotiser'] != 0.0 ||
+                $total['autre'] != 0.0
+            ) {
+                $paiements[] = [
                     'decompte_id' => $decompte->id,
-                    'compte_id' => $avsParam->compte_id,
-                    'sapeur_id' => $key,
-
-                    'module' => ImputationBusiness::ECRITURE_MODULE_AVS,
-                    'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_CHARGE_AVS_AC,
+                    'solde' => $total['solde_a_percevoir'],
+                    'indemnite' => $total['indemnite_a_percevoir'],
+                    'frais_forfaitaire' => $total['frais_forfaitaire_a_percevoir'],
+                    'frais_effectif' => $total['frais_effectif_a_percevoir'],
+                    'avs_ac' => $total['avs_ac_a_cotiser'],
+                    'autre' => $total['autre'],
+                    'total' => $total['total_final'],
+                    'sapeur_id' => $key
                 ];
+
+                // Maj décompte
+                $decompte->total += $total['total_final'];
+                if ($total['total_final'] > 0) {
+                    $decompte->a_payer_total += $total['total_final'];
+                } else {
+                    $decompte->a_facturer_total += $total['total_final'];
+                }
+
+                // Génération écriture AVS/AC pour le sapeur
+                if ($deduction && $total['avs_ac_a_cotiser'] > 0.0) {
+                    $ecritureAvsGlobale['tarif'] += $total['avs_ac_a_cotiser'] * 2;
+                    $ecritureAvsGlobale['total'] += $total['avs_ac_a_cotiser'] * 2;
+
+                    $ecritureAvsAc[] = [
+                        'tarif' => $total['avs_ac_a_cotiser'],
+                        'quantite' => 1,
+                        'total' => -$total['avs_ac_a_cotiser'],
+
+                        'designation' => $designation . " - Participation AVS/AI/APG - AC",
+                        'type_unite_id' => ImputationBusiness::UNITE_FORFAIT,
+                        'exercice_comptable_id' => $exerciceComptableId,
+                        'ecriture_categorie_id' => $avsParam->ecriture_categorie_id,
+                        'date' => $date,
+                        'heure' => "00:00:00",
+
+                        'decompte_id' => $decompte->id,
+                        'compte_id' => $avsParam->compte_id,
+                        'sapeur_id' => $key,
+
+                        'module' => ImputationBusiness::ECRITURE_MODULE_AVS,
+                        'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_CHARGE_AVS_AC,
+                    ];
+                }
             }
         }
-
+        return $ecritureAvsAc;
         // Génération écriture AVS/AC pour le décompze
         if ($deduction && $ecritureAvsGlobale['total'] != 0) {
             $decompte->total += $ecritureAvsGlobale['total'] / 2.0;
