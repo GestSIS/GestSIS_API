@@ -697,9 +697,12 @@ class ExerciceBusiness
      *
      * @param $data
      */
-    public function removeExcuse($presenceId, $hasValidationPermission)
+    public function removeExcuse($sapeurId, $exerciceId, $hasValidationPermission)
     {
-        $exerciceSapeur = ExerciceSapeur::with('exercice')->find($presenceId);
+        $exerciceSapeur = ExerciceSapeur::with('exercice')->where([
+            ['sapeur_id', '=', $sapeurId],
+            ['exercice_id', '=', $exerciceId]
+        ])->first();
 
         // Ignore si l'exercice n'existe plus
         if ($exerciceSapeur == NULL) {
@@ -719,13 +722,14 @@ class ExerciceBusiness
         }
 
         // Then add the new one
-        $exerciceSapeur->justificatif_path = null;
-        $exerciceSapeur->justificatif_filename = null;
+        $exerciceSapeur->justificatif_path = '';
+        $exerciceSapeur->justificatif_filename = '';
         $exerciceSapeur->excuse_statut = 0;
         $exerciceSapeur->excuse_type_id = null;
         $exerciceSapeur->date_validation = null;
-        $exerciceSapeur->justification = null;
+        $exerciceSapeur->justification = '';
         $exerciceSapeur->save();
+        return $exerciceSapeur;
     }
 
     /**

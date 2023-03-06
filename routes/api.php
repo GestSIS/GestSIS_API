@@ -143,6 +143,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('mon-certificat-salaire/{exerciceComptableId}', [MesDecomptesController::class, 'certificatSalaire'])->name('api.v2.mon-certificat-salaire');
 
         Route::post('mes-excuses/{exerciceId}', [MesExcusesController::class, 'store'])->name('api.v2.creer-excuse');
+        Route::delete('mes-excuses/{exerciceId}', [MesExcusesController::class, 'delete'])->name('api.v2.delete-excuse');
         Route::get('mes-excuses/{exerciceId}/justificatif', [MesExcusesController::class, 'download'])->name('api.v2.download-excuse-justificatif');
     });
 
