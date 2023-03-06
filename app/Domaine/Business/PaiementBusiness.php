@@ -222,7 +222,7 @@ class PaiementBusiness
             }
 
             // Génération écriture AVS/AC pour le sapeur
-            if ($deduction && $total['avs_ac_a_cotiser'] > 0) {
+            if ($deduction && $total['avs_ac_a_cotiser'] > 0.0) {
                 $ecritureAvsGlobale['tarif'] += $total['avs_ac_a_cotiser'] * 2;
                 $ecritureAvsGlobale['total'] += $total['avs_ac_a_cotiser'] * 2;
 
