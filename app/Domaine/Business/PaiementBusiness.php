@@ -150,15 +150,21 @@ class PaiementBusiness
             // Calcul du taux d'imposition
             $tauxParitaireAvsAc = ($avsParam->taux_ac + $avsParam->taux_avs) / 2.0;
 
-            // Calcul des déducations AVS/AC sur la part imposable
+            // Calcul des déductions AVS/AC sur la part imposable
             foreach ($totaux as $key => $total) {
                 $solde_imposable = max($total['solde_a_percevoir'] + $total['solde_percue'] - $avsParam->franchise_imposition, 0.0);
                 $total_imposable = $solde_imposable + $total['indemnite_a_percevoir'] + $total['indemnite_percue'];
 
                 // TODO: ou si sapeur en fait la demande
                 if ($total_imposable >= $avsParam->franchise_avs) {
-                    $avs = ImputationBusiness::arrondi_5_centimes($total_imposable * ($avsParam->taux_avs / 2.0)) - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_avs / 2.0));
-                    $ac = ImputationBusiness::arrondi_5_centimes($total_imposable * ($avsParam->taux_ac / 2.0)) - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_ac / 2.0));
+                    $avs = ImputationBusiness::arrondi_5_centimes(
+                        ImputationBusiness::arrondi_5_centimes($total_imposable * ($avsParam->taux_avs / 2.0))
+                            - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_avs / 2.0))
+                    );
+                    $ac = ImputationBusiness::arrondi_5_centimes(
+                        ImputationBusiness::arrondi_5_centimes($total_imposable * ($avsParam->taux_ac / 2.0))
+                            - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_ac / 2.0))
+                    );
                     $decompte->avs_total += $avs;
                     $decompte->ac_total += $ac;
                     $totaux[$key]['avs_ac_a_cotiser'] = $avs + $ac;
