@@ -73,6 +73,11 @@ class MesInfosService
         return $this->exerciceBusiness->creerExcuse($sapeurId, $exerciceId, $data, $file, $sisKey);
     }
 
+    function removeExcuse($sapeurId, $exerciceId, $hasValidationPermission)
+    {
+        return $this->exerciceBusiness->removeExcuse($sapeurId, $exerciceId, $hasValidationPermission);
+    }
+
     function getJustificatif($exerciceId, $sapeurId)
     {
         $presence = ExerciceSapeur::where([['exercice_id', '=', $exerciceId], ['sapeur_id', '=', $sapeurId]])->first();

@@ -19,7 +19,7 @@ class MesExcusesController extends Controller
     /**
      * S'excuser à un exercice
      */
-    public function update(Request $request, int $exerciceId)
+    public function store(Request $request, int $exerciceId)
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
@@ -47,6 +47,24 @@ class MesExcusesController extends Controller
         $sisKey = $request->header('Sis-Id', Null);
 
         $data = $this->service->creerExcuse($sapeurId, $exerciceId, $data, $file, $sisKey);
+        return response()->json(['data' => $data]);
+    }
+
+    /**
+     * S'excuser à un exercice
+     */
+    public function delete(Request $request, int $exerciceId)
+    {
+        $sapeurId = $request->attributes->get('sapeurId');
+        if ($sapeurId === null || intval($sapeurId) <= 0) {
+            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+        }
+
+        $admin = $request->attributes->get('admin');
+        $perms = $request->attributes->get('permissions', []);
+        $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
+
+        $data = $this->service->removeExcuse($sapeurId, $exerciceId, $hasValidationPermission);
         return response()->json(['data' => $data]);
     }
 
