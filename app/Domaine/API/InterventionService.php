@@ -131,7 +131,7 @@ class InterventionService
     }
 
     /**
-     * Modification de sapeurs d'un intervention
+     * Modification de sapeurs d'une intervention
      *
      * @param $data
      * @return Collection

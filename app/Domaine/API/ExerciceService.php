@@ -203,7 +203,7 @@ class ExerciceService
     }
 
     /**
-     * Modification de sapeurs d'un exercice
+     * Modification d'une excuse
      *
      * @param $data
      * @return Collection
@@ -219,7 +219,7 @@ class ExerciceService
     }
 
     /**
-     * Modification de sapeurs d'un exercice
+     * Suppression d'une excuse
      *
      * @param $data
      * @return Collection
