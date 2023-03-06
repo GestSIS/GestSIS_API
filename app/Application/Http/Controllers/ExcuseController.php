@@ -82,13 +82,13 @@ class ExcuseController extends Controller
      * @param int $exerciceId
      * @return Response
      */
-    public function destroy(Request $request, int $convocationId)
+    public function destroy(Request $request, int $exerciceId, int $sapeurId)
     {
         $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
         $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
-        $statut = $this->service->removeExcuse($convocationId, $hasValidationPermission);
+        $presence = $this->service->removeExcuse($sapeurId, $exerciceId, $hasValidationPermission);
 
-        return response()->json(['data' => $statut]);
+        return response()->json(['data' => $presence]);
     }
 }

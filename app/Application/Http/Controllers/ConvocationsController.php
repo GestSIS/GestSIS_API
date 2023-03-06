@@ -79,11 +79,10 @@ class ConvocationsController extends Controller
             'remplace' => (int) $request->get('remplace'),
             'excuse_type_id' => (int) $request->get('excuse_type_id'),
             'excuse_statut' => (int) $request->get('excuse_statut'),
-            'amende' => (bool) $request->get('amende'),
+            'amende' => $request->get('amende') == "true",
         ]);
 
         $data = $request->validate([
-            'id' => 'integer|min:1',
             'convoque' => 'required|integer',
             'present' => 'required|integer',
             'absent' => 'required|integer',
@@ -120,34 +119,6 @@ class ConvocationsController extends Controller
     }
 
     /**
-     * Update les présences sans tenir compte d'un exercice en particulier
-     *
-     * @return Response
-     */
-    public function updatePresences(Request $request)
-    {
-        $data = $request->validate([
-            'presences' => 'array',
-            'presences.*.id' => 'integer|min:1',
-            'presences.*.exercice_id' => 'integer|min:1',
-            'presences.*.sapeur_id' => 'integer|min:1',
-            'presences.*.convoque' => 'required|integer',
-            'presences.*.present' => 'required|integer',
-            'presences.*.absent' => 'required|integer',
-            'presences.*.remplace' => 'required|integer',
-            'presences.*.excuse_type_id' => 'nullable|integer',
-            'presences.*.amende' => 'required|boolean',
-        ]);
-
-        $admin = $request->attributes->get('admin');
-        $perms = $request->attributes->get('permissions', []);
-        $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
-        $presences = $this->service->updateSapeurPresences($data['presences'], $hasValidationPermission);
-
-        return response()->json(['data' => $presences]);
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param Request $request
@@ -155,7 +126,7 @@ class ConvocationsController extends Controller
      * @return Response
      * @throws Exception
      */
-    public function presences(Request $request, int $exerciceId)
+    public function updatePresences(Request $request, int $exerciceId)
     {
         $data = $request->validate([
             'sapeurs.*.id' => 'nullable|integer',
