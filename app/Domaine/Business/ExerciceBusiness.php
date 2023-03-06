@@ -383,14 +383,14 @@ class ExerciceBusiness
             // Permission: Saisie présence 
             ExerciceSapeur
                 ::where('exercice_id', $exerciceId)
-                ->where('id', $presence['id'])
+                ->where('id', $presenceId)
                 ->update([
                     'convoque' => $presence['convoque'],
                     'present' => $presence['present'],
                     'absent' => $presence['absent'],
                     'remplace' => $presence['remplace'],
                     'amende' => $presence['amende'],
-                    'excuse_type_id' => $presence['excuse_type_id'],
+                    'excuse_type_id' => $presence['excuse_type_id'] == 0 ? null : $presence['excuse_type_id'],
 
                     'remarque' => $presence['remarque'] ?? '',
                     'justificatif_path' => $presence['justificatif_path'],
@@ -727,6 +727,7 @@ class ExerciceBusiness
         $exerciceSapeur->excuse_statut = 0;
         $exerciceSapeur->excuse_type_id = null;
         $exerciceSapeur->date_validation = null;
+        $exerciceSapeur->remarque = '';
         $exerciceSapeur->justification = '';
         $exerciceSapeur->save();
         return $exerciceSapeur;

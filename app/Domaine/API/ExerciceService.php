@@ -225,9 +225,9 @@ class ExerciceService
      * @return Collection
      * @throws ArrayException
      */
-    public function removeExcuse($convocationId, $hasValidationPermission)
+    public function removeExcuse($sapeurId, $exerciceId,  $hasValidationPermission)
     {
-        return $this->business->removeExcuse($convocationId, $hasValidationPermission);
+        return $this->business->removeExcuse($sapeurId, $exerciceId, $hasValidationPermission);
     }
 
     /**

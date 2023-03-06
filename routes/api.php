@@ -278,23 +278,16 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('exercices-absences/{exerciceComptableId}', [exerciceController::class, 'absences'])->name('api.v2.exercices.absences');
 
         Route::post('exercices/{id}/sapeurs', [ConvocationsController::class, 'store'])->name('api.v2.exercices.sapeurs.store');
-        // FIXME:
-        Route::put('exercices/{id}/sapeurs', [ConvocationsController::class, 'update'])->name('api.v2.exercices.sapeurs.update');
         Route::delete('exercices/{id}/sapeurs', [ConvocationsController::class, 'destroy'])->name('api.v2.exercices.sapeurs.delete');
 
         // TODO: New routes
         Route::post('exercices/presence/{presenceId}', [ConvocationsController::class, 'updatePresence'])->name('api.v2.exercices.presence.update');
-        Route::get('exercices/{exerciceId}/excuse/{sapeurId}/justificatif', [ExcuseController::class, 'downloadJustificatif'])->name('api.v2.exercices.excuse.justificatif');
-
         // FIXME: Mobile
-        Route::post('exercices/{id}/presences', [ConvocationsController::class, 'presences'])->name('api.v2.exercices.presences');
+        Route::post('exercices/{id}/presences', [ConvocationsController::class, 'updatePresences'])->name('api.v2.exercices.presences');
 
-        // Présences pour un sapeur
-        // FIXME:
-        Route::put('exercices/sapeurs', [ConvocationsController::class, 'updatePresences']);
-
-        Route::post('exercices/{convocationId}/excuses', [ExcuseController::class, 'store'])->name('api.v2.excuses.store');
-        Route::delete('exercices/{convocationId}/excuses', [ExcuseController::class, 'destroy'])->name('api.v2.excuses.delete');
+        // Route::post('exercices/{convocationId}/excuses', [ExcuseController::class, 'store'])->name('api.v2.excuses.store');
+        Route::delete('exercices/{exerciceId}/excuses/{sapeurId}', [ExcuseController::class, 'destroy'])->name('api.v2.excuses.delete');
+        Route::get('exercices/{exerciceId}/excuses/{sapeurId}/justificatif', [ExcuseController::class, 'downloadJustificatif'])->name('api.v2.exercices.excuse.justificatif');
 
         // TODO: à implémenter
         // Route::get('exercices/{id}/liste-appel-localite', [ExerciceController::class, 'listeAppelLocalite']);
