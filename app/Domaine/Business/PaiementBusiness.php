@@ -255,7 +255,7 @@ class PaiementBusiness
                 }
             }
         }
-        return $ecritureAvsAc;
+
         // Génération écriture AVS/AC pour le décompze
         if ($deduction && $ecritureAvsGlobale['total'] != 0) {
             $decompte->total += $ecritureAvsGlobale['total'] / 2.0;
