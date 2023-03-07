@@ -275,7 +275,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
     Route::group(['middleware' => 'jwtTokenRole:exercice.presence'], function () {
         Route::get('exercices-derniers', [ExerciceController::class, 'last'])->name('api.v2.exercices.derniers');
-        Route::get('exercices-absences/{exerciceComptableId}', [exerciceController::class, 'absences'])->name('api.v2.exercices.absences');
 
         Route::post('exercices/{id}/sapeurs', [ConvocationsController::class, 'store'])->name('api.v2.exercices.sapeurs.store');
         Route::delete('exercices/{id}/sapeurs', [ConvocationsController::class, 'destroy'])->name('api.v2.exercices.sapeurs.delete');

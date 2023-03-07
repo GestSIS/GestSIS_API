@@ -56,6 +56,7 @@ class ExerciceService
             ->where('exercices.statut', '<>', ExerciceBusiness::EXERCICE_STATUT_ANNULE)
             ->where(function ($q) {
                 $q->where('exercice_sapeur.present', '=', 0)
+                    ->where('exercice_sapeur.convoque', '=', 1)
                     ->where('exercice_sapeur.remplace', '=', 0)
                     ->orWhereNotNull('exercice_sapeur.excuse_type_id');
             })
