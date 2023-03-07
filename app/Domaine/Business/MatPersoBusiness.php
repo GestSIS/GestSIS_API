@@ -120,6 +120,7 @@ class MatPersoBusiness
             MaterielPersonnel::where('id', $reference['id'])->update([
                 'taille' => trim($materiel['taille'] ?? ''),
                 'remarque' => $materiel['remarque'] ?? '',
+                'attribution' => $materiel['attribution'],
             ]);
             if ($reference->materiel_type === MaterielGenerique::class) {
                 MaterielGenerique::where('id', $reference->materiel_id)->update([
