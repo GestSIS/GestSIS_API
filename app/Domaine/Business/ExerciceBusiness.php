@@ -446,7 +446,7 @@ class ExerciceBusiness
     {
         // check que les modifications n'ont lieu que sur l'excuse type, remplacé ou amende
         $presenceReference = ExerciceSapeur
-            ::find('id', $exerciceSapeurId);
+            ::find($exerciceSapeurId);
         $heuresReferences = HeureExercice
             ::where('exercice_id', $exerciceId)
             ->where('sapeur_id', $sapeurId)
