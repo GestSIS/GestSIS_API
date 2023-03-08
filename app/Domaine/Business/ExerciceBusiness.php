@@ -457,41 +457,43 @@ class ExerciceBusiness
             throw new ArrayException([], 'Permissions insuffisantes pour modifier les présences.');
         }
 
-        $heuresEffectives = array_filter(
-            $presenceEffective['heures'],
-            fn ($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
-        );
-        $heuresEffectivesId = array_filter(array_map(fn ($h) => array_key_exists('id', $h) ? $h['id'] : null, $heuresEffectives), fn ($h) => !is_null($h));
-
-        // Heures supprimées
-        $heuresSupprimeesIds = array_map(
-            fn ($h) => $h['id'],
-            array_filter($heuresReferences, fn ($h) => !in_array($h['id'], $heuresEffectivesId))
-        );
-        if (count($heuresSupprimeesIds) > 0) {
-            throw new ArrayException([], 'Permissions insuffisantes pour supprimer des heures.');
-        }
-
-        // Heures ajoutées
-        $heuresAjoutees = array_filter($heuresEffectives, fn ($heure) => !isset($heure['id']) || !$heure['id']);
-        foreach ($heuresAjoutees as $heure) {
-            throw new ArrayException([], 'Permissions insuffisantes pour ajouter des heures.');
-        }
-
-        // Heures modifiées
-        $heuresModifiees = array_filter(
-            $heuresEffectives,
-            fn ($heure) => isset($heure['id']) && $heure['id'] && !in_array($heure['id'], $heuresSupprimeesIds)
-        );
-        foreach ($heuresModifiees as $heure) {
-            $heureReference = array_filter(
-                $heuresReferences,
-                fn ($h) => $h['id'] == $heure['id']
+        if (array_key_exists('heures', $presenceEffective)) {
+            $heuresEffectives = array_filter(
+                $presenceEffective['heures'],
+                fn ($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
             );
+            $heuresEffectivesId = array_filter(array_map(fn ($h) => array_key_exists('id', $h) ? $h['id'] : null, $heuresEffectives), fn ($h) => !is_null($h));
 
-            // Check qu'aucune heure n'a été modifiée
-            if (!$heureReference || $heureReference['quantite'] != $heure['quantite']) {
-                throw new ArrayException([], 'Permissions insuffisantes pour modifier une heure.');
+            // Heures supprimées
+            $heuresSupprimeesIds = array_map(
+                fn ($h) => $h['id'],
+                array_filter($heuresReferences, fn ($h) => !in_array($h['id'], $heuresEffectivesId))
+            );
+            if (count($heuresSupprimeesIds) > 0) {
+                throw new ArrayException([], 'Permissions insuffisantes pour supprimer des heures.');
+            }
+
+            // Heures ajoutées
+            $heuresAjoutees = array_filter($heuresEffectives, fn ($heure) => !isset($heure['id']) || !$heure['id']);
+            foreach ($heuresAjoutees as $heure) {
+                throw new ArrayException([], 'Permissions insuffisantes pour ajouter des heures.');
+            }
+
+            // Heures modifiées
+            $heuresModifiees = array_filter(
+                $heuresEffectives,
+                fn ($heure) => isset($heure['id']) && $heure['id'] && !in_array($heure['id'], $heuresSupprimeesIds)
+            );
+            foreach ($heuresModifiees as $heure) {
+                $heureReference = array_filter(
+                    $heuresReferences,
+                    fn ($h) => $h['id'] == $heure['id']
+                );
+
+                // Check qu'aucune heure n'a été modifiée
+                if (!$heureReference || $heureReference['quantite'] != $heure['quantite']) {
+                    throw new ArrayException([], 'Permissions insuffisantes pour modifier une heure.');
+                }
             }
         }
     }
