@@ -234,8 +234,8 @@ class PaiementService
         $decompte = Decompte::with('paiements')->find($decompteId);
         $decomptes = Decompte::where('exercice_comptable_id', $decompte->exercice_comptable_id)->get();
         $decomptesMap = [];
-        foreach ($decomptes as $decompte) {
-            $decomptesMap[$decompte->id] = $decompte;
+        foreach ($decomptes as $d) {
+            $decomptesMap[$d->id] = $d;
         }
 
         $comptes = Compte::all();
