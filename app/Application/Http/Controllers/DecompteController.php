@@ -122,6 +122,16 @@ class DecompteController extends Controller
      * 
      * @param int $id id du décompte pour lequelle le fichier doit être créé
      */
+    public function exportEcritures($id)
+    {
+        return $this->service->exportEcritures($id);
+    }
+
+    /**
+     * Créer un fichier iso20022 pour un décompte
+     * 
+     * @param int $id id du décompte pour lequelle le fichier doit être créé
+     */
     public function print($id)
     {
         return $this->service->impressionDecompte($id);

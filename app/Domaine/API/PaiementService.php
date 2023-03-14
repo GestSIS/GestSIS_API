@@ -8,6 +8,7 @@ use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Business\PaiementBusiness;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Collections\AFacturerExport;
+use App\Infrastructure\Collections\EcrituresExport;
 use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\Decompte;
@@ -152,6 +153,11 @@ class PaiementService
             },
             $nomFichier
         );
+    }
+
+    public function exportEcritures($decompteId)
+    {
+        return Excel::download(new EcrituresExport($decompteId), 'ecritures.xlsx');
     }
 
     public function impressionDecompte($decompteId)
