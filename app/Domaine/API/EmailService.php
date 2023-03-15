@@ -25,7 +25,7 @@ class EmailService
         $res = [];
         foreach ($dbs as $db) {
             DB::reconnect($db);
-            $sapeur = DB::connection($db)->table('sapeurs')->where('type', '=', 0)->where('email', '=', $email)->select('sapeurs.id')->first();
+            $sapeur = DB::connection($db)->table('sapeurs')->where('email', '=', $email)->select('sapeurs.id')->first();
             if (!is_null($sapeur)) {
                 $res[$db] = $sapeur->id;
             }
