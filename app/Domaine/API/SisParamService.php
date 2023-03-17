@@ -24,6 +24,16 @@ class SisParamService
         return $this->business->updateParams($data);
     }
 
+    public function getLogo($sisKey)
+    {
+        return $this->business->getLogo($sisKey);
+    }
+
+    public function updateLogo($sisKey, $file)
+    {
+        return $this->business->updateLogo($sisKey, $file);
+    }
+
     public function ajouterLocalitesSis($data)
     {
         return $this->business->ajouterLocalitesSis($data);

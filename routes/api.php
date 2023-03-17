@@ -101,6 +101,7 @@ use App\Application\Http\Controllers\SapeurMutationController;
 use App\Application\Http\Controllers\SapeurPermisController;
 use App\Application\Http\Controllers\SapeurPhotoController;
 use App\Application\Http\Controllers\SapeurTelephoneController;
+use App\Application\Http\Controllers\SisLogoController;
 use App\Application\Http\Controllers\SisParamController;
 use App\Application\Http\Controllers\StatFederalController;
 use App\Application\Http\Controllers\StatInterventionController;
@@ -121,6 +122,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenVali
 // Route::get('decomptes/{id}/print', [DecompteController::class, 'print']);
 // Route::get('decomptes/{id}/print-par-sapeur', [DecompteController::class, 'printParSapeur']);
 // Route::get('decomptes/{id}/print-par-compte', [DecompteController::class, 'printParCompte']);
+Route::group(['prefix' => 'v2'], function () {
+    Route::resource('sis-logo', SisLogoController::class)->only(['show']);
+});
 
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
 
@@ -155,6 +159,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     // Sis Params
     Route::group(['middleware' => 'jwtTokenRole:sis.config'], function () {
         Route::resource('sis-param', SisParamController::class)->only(['store']);
+        Route::resource('sis-logo', SisLogoController::class)->only(['store']);
         Route::post('localites-sis', [LocaliteSisController::class, 'store'])->name('api.v2.localite-sis-store');
         Route::delete('localites-sis', [LocaliteSisController::class, 'destroy'])->name('api.v2.localites-sis-destroy');
     });
