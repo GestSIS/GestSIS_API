@@ -100,6 +100,7 @@ use App\Application\Http\Controllers\SapeurMaterielController;
 use App\Application\Http\Controllers\SapeurMutationController;
 use App\Application\Http\Controllers\SapeurPermisController;
 use App\Application\Http\Controllers\SapeurPhotoController;
+use App\Application\Http\Controllers\SapeurStatistiqueController;
 use App\Application\Http\Controllers\SapeurTelephoneController;
 use App\Application\Http\Controllers\SisLogoController;
 use App\Application\Http\Controllers\SisParamController;
@@ -197,6 +198,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     // Sapeurs
     Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,exercice.lecture,intervention.lecture,organisation.modification,comptabilite.tout,cours.lecture,mat_perso.lecture,fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation,fiche_travail.lecture'], function () {
         Route::resource('sapeurs', SapeurController::class)->only(['index', 'show']);
+
+        Route::get('statistiques/{id}/civilite', [SapeurStatistiqueController::class, 'civilite']);
+        Route::get('statistiques/{id}/fonction', [SapeurStatistiqueController::class, 'fonction']);
+        Route::get('statistiques/{id}/grade', [SapeurStatistiqueController::class, 'grade']);
+        Route::get('statistiques/{id}/permis', [SapeurStatistiqueController::class, 'permis']);
     });
 
     Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture'], function () {
