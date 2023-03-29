@@ -147,9 +147,9 @@ class SapeurService
         return $this->business->createSapeur($data);
     }
 
-    public function createPolitique($data)
+    public function createCivil($data)
     {
-        return $this->business->createPolitique($data);
+        return $this->business->createCivil($data);
     }
 
     public function editSapeurDetailsById($sapeurId, $data)

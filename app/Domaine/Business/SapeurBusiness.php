@@ -15,7 +15,7 @@ use Carbon\Carbon;
 class SapeurBusiness
 {
     const TYPE_SAPEUR = 0;
-    const TYPE_POLITIQUE = 1;
+    const TYPE_CIVIL = 1;
 
     protected $repository;
 
@@ -111,14 +111,14 @@ class SapeurBusiness
         return $sapeur;
     }
 
-    public function createPolitique($data)
+    public function createCivil($data)
     {
         //TODO: Add iban statut système validation
         //TODO: Add no_avs validation
         $data['iban_statut'] = 1;
         $data['actif'] = 1;
         $data['porteur'] = 0;
-        $data['type'] = self::TYPE_POLITIQUE;
+        $data['type'] = self::TYPE_CIVIL;
         $data['date_naissance'] = Carbon::yesterday();
         $sapeur = $this->repository->createSapeur($data);
 
@@ -162,7 +162,7 @@ class SapeurBusiness
     public function addCours(int $sapeurId, $data)
     {
         if (!$this->isSapeur($sapeurId)) {
-            throw new ArrayException([], "Impossible d'ajouter un cours à un politique.");
+            throw new ArrayException([], "Impossible d'ajouter un cours à un civil.");
         }
         $cours = $this->repository->addCours($sapeurId, $data);
 
@@ -232,7 +232,7 @@ class SapeurBusiness
     public function addGrade(int $sapeurId, $data)
     {
         if (!$this->isSapeur($sapeurId)) {
-            throw new ArrayException([], "Impossible d'ajouter un grade à un politique.");
+            throw new ArrayException([], "Impossible d'ajouter un grade à un civil.");
         }
         $gradeId = intval($data['grade_id']);
 
@@ -267,7 +267,7 @@ class SapeurBusiness
     public function addFonction(int $sapeurId, $data)
     {
         if (!$this->isSapeur($sapeurId)) {
-            throw new ArrayException([], "Impossible d'ajouter une fonction à un politique.");
+            throw new ArrayException([], "Impossible d'ajouter une fonction à un civil.");
         }
         //Check duplicated fonction during period of time
         $fonctionId = $data['fonction_id'];
@@ -439,7 +439,7 @@ class SapeurBusiness
     public function addMutation($sapeurId, $data)
     {
         if (!$this->isSapeur($sapeurId)) {
-            throw new ArrayException([], "Impossible d'ajouter une mutation à un politique.");
+            throw new ArrayException([], "Impossible d'ajouter une mutation à un civil.");
         }
         $mutations = $this->repository->getSapeurMutationsById($sapeurId);
         $this->verifyMutationPeriode($data, $mutations);
@@ -481,7 +481,7 @@ class SapeurBusiness
     public function removeMutation(int $sapeurId, int $mutationId)
     {
         // Check at least one mutation
-        // Attention, quand on ajoutera les politiques, il faudra enlever cette limitation pour ce type de personnes
+        // Attention, quand on ajoutera les civils, il faudra enlever cette limitation pour ce type de personnes
         if (count($this->repository->getSapeurMutationsById($sapeurId)) === 0) {
             throw new ArrayException([
                 "info" => "Au moins une mutation nécessaire",
@@ -545,7 +545,7 @@ class SapeurBusiness
     public function addPermis(int $sapeurId, $data)
     {
         if (!$this->isSapeur($sapeurId)) {
-            throw new ArrayException([], "Impossible d'ajouter un permis à un politique.");
+            throw new ArrayException([], "Impossible d'ajouter un permis à un civil.");
         }
         $permisId = $data['permis_type_id'];
         $res = array_filter(

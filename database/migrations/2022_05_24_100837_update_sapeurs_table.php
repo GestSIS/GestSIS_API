@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::table('sapeurs', function (Blueprint $table) {
             $table->smallInteger('type')->default(0);
             // 0 -> Sapeur
-            // 1 -> Politique
+            // 1 -> Civil
             // 2 -> ...
         });
     }

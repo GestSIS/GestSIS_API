@@ -98,7 +98,7 @@ class SapeurController extends Controller
                 $sapeur = $this->service->createSapeur($data);
                 return response()->json(['data' => $sapeur]);
 
-            case SapeurBusiness::TYPE_POLITIQUE:
+            case SapeurBusiness::TYPE_CIVIL:
                 $data = $request->validate([
                     'type' => 'required|integer|min:0|max:1',
                     'nom' => 'required|string|min:2',
@@ -113,7 +113,7 @@ class SapeurController extends Controller
                     'localite_id' => 'required|integer|min:1',
                     'civilite_id' => 'required|integer|min:1'
                 ]);
-                $sapeur = $this->service->createPolitique($data);
+                $sapeur = $this->service->createCivil($data);
                 return response()->json(['data' => $sapeur]);
 
             default:
