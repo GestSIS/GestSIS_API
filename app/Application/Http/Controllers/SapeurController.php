@@ -173,7 +173,7 @@ class SapeurController extends Controller
             'profession' => 'string|max:80|nullable',
             'employeur' => 'string|max:150|nullable',
             'lieu_de_travail' => 'string|max:100|nullable',
-            'email' => 'email',
+            'email' => 'email|nullable',
             'actif' => 'integer',
             'iban' => 'string|max:100|nullable',
             'remarque' => 'string|max:300|nullable',
