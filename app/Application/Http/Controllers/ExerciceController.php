@@ -95,14 +95,14 @@ class ExerciceController extends Controller
         return response()->json(['data' => $exercice]);
     }
 
-    public function show($id)
+    public function show(int $id)
     {
         $exercice = $this->service->getExerciceById($id);
 
         return response()->json(['data' => $exercice]);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
         $data = $request->validate([
             'date' => 'date',

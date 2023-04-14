@@ -28,7 +28,7 @@ class ExerciceService
         $this->business = $business;
     }
 
-    public function getExerciceById($exerciceId)
+    public function getExerciceById(int $exerciceId)
     {
         return $this->repository->getExerciceByIdWith($exerciceId, ['sapeurs']);
     }
