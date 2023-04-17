@@ -135,7 +135,7 @@ class InterventionBusiness
         // Ajout des missions
         $missions = array_map(function ($e) use ($newIntervention) {
             if (!isset($e['resume']) || is_null($e['resume'])) $e['resume'] = '';
-            if (!isset($e['sapeur_id']) && $e['resume'] == 'CR') $e['sapeur_id'] = null;
+            if (!isset($e['sapeur_id'])) $e['sapeur_id'] = null;
             $e['intervention_id'] = $newIntervention->id;
             return $e;
         }, $missions);
