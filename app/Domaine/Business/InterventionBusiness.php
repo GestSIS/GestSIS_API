@@ -136,9 +136,11 @@ class InterventionBusiness
         $missions = array_map(function ($e) use ($newIntervention) {
             if (!isset($e['resume']) || is_null($e['resume'])) $e['resume'] = '';
             if (!isset($e['sapeur_id'])) $e['sapeur_id'] = null;
+            if (!isset($e['sapeur'])) $e['sapeur'] = null;
             $e['intervention_id'] = $newIntervention->id;
             return $e;
         }, $missions);
+
         $newIntervention->missions()->insert($missions);
 
         // Ajout des appels
