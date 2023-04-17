@@ -25,7 +25,7 @@ class AspsmsBusiness
 
     public static function send($data)
     {
-        $message = $data['message'];
+        $message = iconv('UTF-8', 'ASCII//TRANSLIT', $data['message']);
         $origin = "GestSIS"; // $data['origin']; // Pas pour le moment
         $differe = $data['differe'];
         $date = isset($data['date']) ? $data['date'] : "";
