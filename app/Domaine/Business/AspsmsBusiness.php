@@ -25,6 +25,7 @@ class AspsmsBusiness
 
     public static function send($data)
     {
+        // TODO: A corriger, sans conversion en ascii, apostrophes manquantes
         $message = iconv('UTF-8', 'ASCII//TRANSLIT', $data['message']);
         $origin = "GestSIS"; // $data['origin']; // Pas pour le moment
         $differe = $data['differe'];
