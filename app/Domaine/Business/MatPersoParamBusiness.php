@@ -24,14 +24,19 @@ class MatPersoParamBusiness
 
     public static function modifierCategorie($id, $data)
     {
-        // TODO: Controller récursivity du parent
+        if ($data['pere_id'] == $id) {
+            throw new ArrayException([], "Récursivité illégale détectée");
+        }
+        // TODO: Controller récursivity du parent multi-niveau
         MaterielCategorie::where('id', $id)->limit(1)->update($data);
         return MaterielCategorie::find($id);
     }
 
     public static function supprimerCategorie($id)
     {
-        // TODO: Controller qu'il n'y a aucun enfant
+        if (MaterielCategorie::where('pere_id', $id)->exists() || MaterielType::where('materiel_categorie_id', $id)->exists()) {
+            throw new ArrayException([], "Veuillez d'abord supprimer les catégories ou matériels types enfant");
+        }
         MaterielCategorie::where('id', $id)->delete();
     }
 
