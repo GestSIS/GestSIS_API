@@ -291,6 +291,21 @@ class ExerciceService
         return $this->business->removeSapeurs($exerciceId, $ids);
     }
 
+    public function createHeure($heure, $hasValidationPermission)
+    {
+        return $this->business->createHeure($heure, $hasValidationPermission);
+    }
+
+    public function updateHeure($heureId, $heure, $hasValidationPermission)
+    {
+        return $this->business->updateHeure($heureId, $heure, $hasValidationPermission);
+    }
+
+    public function removeHeure($heureId, $hasValidationPermission)
+    {
+        return $this->business->removeHeure($heureId, $hasValidationPermission);
+    }
+
     public function supprimerConvocations($sapeurId, $exerciceSapeursIds)
     {
         return $this->business->supprimerConvocations($sapeurId, $exerciceSapeursIds);

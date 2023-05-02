@@ -772,26 +772,66 @@ class ExerciceBusiness
         return true;
     }
 
-    public function ajouterHeureExercice($exerciceId, $data)
+    public function createHeure($data, $hasValidationPermission)
     {
+        $statut = $this->repository->getExerciceStatutById($data['exercice_id']);
+        if ($statut == self::EXERCICE_STATUT_ANNULE) {
+            throw new ArrayException([], "Impossible de modifier un exercice annulé");
+        }
+        if ($statut > self::EXERCICE_STATUT_VALIDE) {
+            throw new ArrayException([], "Impossible de modifier un exercice déjà imputé");
+        }
+        if ($statut == self::EXERCICE_STATUT_VALIDE && !$hasValidationPermission) {
+            throw new ArrayException([], "Permissions insuffisantes");
+        }
+
         $type = HeureExerciceType::find($data['heure_exercice_type_id']);
 
         $heure = new HeureExercice();
         $heure->fill($type->toArray());
         $heure->fill($data);
-        $heure->exercice_id = $exerciceId;
         $heure->save();
         return $heure;
     }
 
-    public function modifierHeureExercice($exerciceId, $id, $data)
+    public function updateHeure($heureId, $data, $hasValidationPermission)
     {
-        HeureExercice::where([['id', $id], ['exercice_id', $exerciceId]])->limit(1)->update($data);
-        return HeureExercice::find($id);
+        $heure = HeureExercice::find($heureId);
+        if ($heure == NULL) {
+            throw new ArrayException([], "Heure inexistante");
+        }
+        $statut = $this->repository->getExerciceStatutById($heure->exercice_id);
+        if ($statut == self::EXERCICE_STATUT_ANNULE) {
+            throw new ArrayException([], "Impossible de modifier un exercice annulé");
+        }
+        if ($statut > self::EXERCICE_STATUT_VALIDE) {
+            throw new ArrayException([], "Impossible de modifier un exercice déjà imputé");
+        }
+        if ($statut == self::EXERCICE_STATUT_VALIDE && !$hasValidationPermission) {
+            throw new ArrayException([], "Permissions insuffisantes");
+        }
+
+        HeureExercice::where('id', '=', $heureId)->limit(1)->update($data);
+        return HeureExercice::find($heureId);
     }
 
-    public function supprimerHeureExercice($exerciceId, $id)
+    public function removeHeure($heureId, $hasValidationPermission)
     {
-        HeureExercice::where([['id', $id], ['exercice_id', $exerciceId]])->limit(1)->delete();
+        $heure = HeureExercice::find($heureId);
+        if ($heure == NULL) {
+            throw new ArrayException([], "Heure inexistante");
+        }
+        $statut = $this->repository->getExerciceStatutById($heure->exercice_id);
+        if ($statut == self::EXERCICE_STATUT_ANNULE) {
+            throw new ArrayException([], "Impossible de modifier un exercice annulé");
+        }
+        if ($statut > self::EXERCICE_STATUT_VALIDE) {
+            throw new ArrayException([], "Impossible de modifier un exercice déjà imputé");
+        }
+        if ($statut == self::EXERCICE_STATUT_VALIDE && !$hasValidationPermission) {
+            throw new ArrayException([], "Permissions insuffisantes");
+        }
+
+        HeureExercice::where('id', '=', $heureId)->limit(1)->delete();
     }
 }

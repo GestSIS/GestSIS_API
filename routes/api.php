@@ -289,10 +289,15 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         Route::post('exercices/{id}/sapeurs', [ConvocationsController::class, 'store'])->name('api.v2.exercices.sapeurs.store');
         Route::delete('exercices/{id}/sapeurs', [ConvocationsController::class, 'destroy'])->name('api.v2.exercices.sapeurs.delete');
-
-        // TODO: New routes
+        // Update presence
         Route::post('exercices/presence/{presenceId}', [ConvocationsController::class, 'updatePresence'])->name('api.v2.exercices.presence.update');
-        // FIXME: Mobile
+
+        // Heures supp
+        Route::post('exercices/heures', [ConvocationsController::class, 'createHeure'])->name('api.v2.exercices.heures.create');
+        Route::put('exercices/heures/{heureId}', [ConvocationsController::class, 'updateHeure'])->name('api.v2.exercices.heures.update');
+        Route::delete('exercices/heures/{heureId}', [ConvocationsController::class, 'destroyHeure'])->name('api.v2.exercices.heures.remove');
+
+        // Mobile
         Route::post('exercices/{id}/presences', [ConvocationsController::class, 'updatePresences'])->name('api.v2.exercices.presences');
 
         // Route::post('exercices/{convocationId}/excuses', [ExcuseController::class, 'store'])->name('api.v2.excuses.store');

@@ -120,6 +120,7 @@ class ConvocationsController extends Controller
 
     /**
      * Update the specified resource in storage.
+     * WARNING GestSIS Mobile
      *
      * @param Request $request
      * @param int $exerciceId
@@ -166,6 +167,68 @@ class ConvocationsController extends Controller
         return response()->json(['data' => $statut]);
     }
 
+    /**
+     * Update les présences sans tenir compte d'un exercice en particulier
+     *
+     * @return Response
+     */
+    public function createHeure(Request $request)
+    {
+        $data = $request->validate([
+            'exercice_id' => 'integer|required',
+            'sapeur_id' => 'integer|required',
+            'quantite' => 'nullable|numeric',
+            'heure_exercice_type_id' => 'nullable|integer',
+        ]);
+
+        $admin = $request->attributes->get('admin');
+        $perms = $request->attributes->get('permissions', []);
+        $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
+        $heure = $this->service->createHeure($data, $hasValidationPermission);
+
+        return response()->json(['data' => $heure]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param Request $request
+     * @param int $exerciceId
+     * @return Response
+     * @throws Exception
+     */
+    public function updateHeure(Request $request, int $heureId)
+    {
+        // TODO: à implémenter
+        $data = $request->validate([
+            'id' => 'integer|required',
+            'quantite' => 'nullable|numeric',
+        ]);
+
+        $admin = $request->attributes->get('admin');
+        $perms = $request->attributes->get('permissions', []);
+        $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
+        $heure = $this->service->updateHeure($heureId, $data, $hasValidationPermission);
+
+        return response()->json(['data' => $heure]);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param Request $request
+     * @param int $exerciceId
+     * @return Response
+     */
+    public function destroyHeure(Request $request, int $heureId)
+    {
+        $admin = $request->attributes->get('admin');
+        $perms = $request->attributes->get('permissions', []);
+        $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
+        $statut = $this->service->removeHeure($heureId, $hasValidationPermission);
+
+        return response()->json(['data' => $statut]);
+    }
 
     /**
      * Annule la présence de sapeurs
