@@ -42,6 +42,7 @@ use App\Application\Http\Controllers\ExerciceCategorieController;
 use App\Application\Http\Controllers\ExerciceComptableController;
 use App\Application\Http\Controllers\ExerciceController;
 use App\Application\Http\Controllers\FonctionController;
+use App\Application\Http\Controllers\FraisIndemniteAnnuelController;
 use App\Application\Http\Controllers\FraisIndemniteAnnuelTypeController;
 use App\Application\Http\Controllers\FraisIndemniteTypeController;
 use App\Application\Http\Controllers\GradeController;
