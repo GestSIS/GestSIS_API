@@ -163,6 +163,7 @@ class LocalitesTableSeeder extends Seeder
             array('id' => '146', 'commune_id' => '69', 'npa' => '4710', 'designation' => 'Balsthal'),
             array('id' => '147', 'commune_id' => '60', 'npa' => '2829', 'designation' => 'Envelier'),
             array('id' => '148', 'commune_id' => NULL, 'npa' => '25150', 'designation' => 'Goux-Lès-Dambelin'),
+            array('id' => '149', 'commune_id' => NULL, 'npa' => '2827', 'designation' => 'La Scheulte'),
         );
 
         foreach ($localites as $localite) {

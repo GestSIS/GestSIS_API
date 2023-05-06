@@ -6,6 +6,7 @@ use App\Domaine\Business\ImputationBusiness;
 use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
+use App\Infrastructure\Models\Localite;
 use Illuminate\Console\Command;
 
 class DbsFix extends Command
@@ -44,21 +45,7 @@ class DbsFix extends Command
         $dbs = config('database.dbs');
         foreach ($dbs as $db) {
             printf("Fix db=" . $db . "\n");
-            foreach (Decompte::on($db)->with('paiements')->get() as $decompte) {
-                $decompte->a_payer_total = 0.0;
-                $decompte->a_facturer_total = 0.0;
-                $decompte->total = $decompte->avs_total + $decompte->ac_total;
-                foreach ($decompte->paiements  as $paiement) {
-                    $decompte->total += $paiement->total;
-                    if ($paiement->total > 0) {
-                        $decompte->a_payer_total += $paiement->total;
-                    } else {
-                        $decompte->a_facturer_total += $paiement->total;
-                    }
-                }
-                $decompte->save();
-            }
-            // Ecriture::on($db)->update();
+            Localite::on($db)->insert(array('id' => '149', 'commune_id' => NULL, 'npa' => '2827', 'designation' => 'La Scheulte'));
             printf("\n");
         }
         printf("Migrating done\n");
