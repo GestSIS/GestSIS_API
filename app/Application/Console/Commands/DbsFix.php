@@ -45,7 +45,11 @@ class DbsFix extends Command
         $dbs = config('database.dbs');
         foreach ($dbs as $db) {
             printf("Fix db=" . $db . "\n");
-            Localite::on($db)->insert(array('id' => '149', 'commune_id' => NULL, 'npa' => '2827', 'designation' => 'La Scheulte'));
+            Localite::on($db)->insert(
+                array('id' => '147', 'commune_id' => '60', 'npa' => '2829', 'designation' => 'Envelier'),
+                array('id' => '148', 'commune_id' => NULL, 'npa' => '25150', 'designation' => 'Goux-Lès-Dambelin'),
+                array('id' => '150', 'commune_id' => NULL, 'npa' => '2827', 'designation' => 'La Scheulte'),
+            );
             printf("\n");
         }
         printf("Migrating done\n");
