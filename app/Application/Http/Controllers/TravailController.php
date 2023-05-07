@@ -78,10 +78,10 @@ class TravailController extends Controller
         $data = $request->validate([
             'justification' => 'string|nullable',
             'accepte' => 'boolean|required',
-            // 'quantite' => 'decimal|nullable',
+            'quantite' => 'numeric|required',
         ]);
 
-        $travail = $this->service->review($travailId, $data['accepte'], $data['justification'] ?? '', $data['quantite'] ?? null);
+        $travail = $this->service->review($travailId, $data['accepte'], $data['justification'] ?? '', $data['quantite']);
         return response()->json(['data' => $travail]);
     }
 
