@@ -24,6 +24,7 @@ class MatPersoAttributionController extends Controller
 
         $data = $request->validate([
             'depuisInventaire' => 'boolean',
+            'attributions' => 'required|array',
             'attributions.*.sapeur_id' => 'required|integer',
             'attributions.*.date' => 'required|date',
             'attributions.*.id' => 'nullable|integer',

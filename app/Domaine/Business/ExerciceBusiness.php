@@ -352,14 +352,6 @@ class ExerciceBusiness
             throw new ArrayException([$exercice->statut], 'Permissions insuffisantes pour modifier les présences.');
         }
 
-        $cachedHeures = HeureExercice
-            ::where('exercice_id', $exerciceId)
-            ->get()->toArray();
-        $indexedHeures = [];
-        foreach ($cachedHeures as $heure) {
-            $indexedHeures[$heure['id']] = $heure;
-        }
-
         // Check si pas déjà imputé
         if ($exercice->statut >= self::EXERCICE_STATUT_IMPUTE) {
             $this->checkValiditeChangementsSiImpute($presenceId, $exerciceId, $sapeurId, $presence);
@@ -401,42 +393,6 @@ class ExerciceBusiness
                         'justification' => $presence['justification'] ?? '',
                     ] : [])
                 ]);
-        }
-
-        // Mise à jour des heures
-        {
-            $heuresEffectives = array_filter(
-                $presence['heures'] ?? [],
-                fn ($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
-            );
-            $heuresId = array_filter(array_map(fn ($h) => array_key_exists('id', $h) ? $h['id'] : null, $heuresEffectives), fn ($h) => !is_null($h));
-
-            // Heures supprimées
-            $heuresSupprimeesId = array_map(fn ($h) => $h['id'], array_filter($cachedHeures, fn ($h) => $h['sapeur_id'] == $presence['sapeur_id'] && !in_array($h['id'], $heuresId)));
-            HeureExercice::where('exercice_id', $exerciceId)
-                ->where('sapeur_id', $sapeurId)
-                ->whereIn('id', $heuresSupprimeesId)
-                ->delete();
-
-            // Heures ajoutées
-            $heuresAjoutees = array_filter($heuresEffectives, fn ($heure) => !isset($heure['id']) || !$heure['id']);
-            foreach ($heuresAjoutees as $heure) {
-                if (!array_key_exists('heure_exercice_type_id', $heure)) {
-                    // On ignore l'heure invalide
-                    continue;
-                }
-                $heure['sapeur_id'] = $sapeurId;
-                $this->ajouterHeureExercice($exerciceId, $heure);
-            }
-
-            // Heures modifiées
-            $heuresModifiees = array_filter($heuresEffectives, fn ($heure) => isset($heure['id']) && $heure['id'] && !in_array($heure['id'], $heuresSupprimeesId));
-            foreach ($heuresModifiees as $heure) {
-                HeureExercice::where('exercice_id', $exerciceId)
-                    ->where('sapeur_id', $sapeurId)
-                    ->where('id', $heure['id'])
-                    ->update(['quantite' => $heure['quantite']]);
-            }
         }
 
         return $this->updateStatut($exerciceId);
