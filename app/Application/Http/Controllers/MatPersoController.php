@@ -70,7 +70,7 @@ class MatPersoController extends Controller
             'materiels.*.id' => 'required|integer',
             'materiels.*.taille' => 'string|nullable',
             'materiels.*.remarque' => 'string|nullable',
-            'materiels.*.attribution' => 'required|date',
+            'materiels.*.attribution' => 'date|nullable',
             'materiels.*.materiel' => 'required|array',
             'materiels.*.materiel.id' => 'required|integer',
             'materiels.*.materiel.quantite' => 'integer|nullable',
