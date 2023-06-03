@@ -559,7 +559,7 @@ class PaiementBusiness
                 ->needAppearances()
                 ->saveAs($path);
             if ($result == false) {
-                throw new ArrayException([], "Une erreur est survenue durant la génération du certificat de salaire.");
+                throw new ArrayException(['error' => $pdf->getError()], "Une erreur est survenue durant la génération du certificat de salaire.");
             }
             return $path;
         } else {
@@ -567,7 +567,7 @@ class PaiementBusiness
                 ->needAppearances()
                 ->toString();
             if ($result == false) {
-                throw new ArrayException([], "Une erreur est survenue durant la génération du certificat de salaire.");
+                throw new ArrayException(['error' => $pdf->getError()], "Une erreur est survenue durant la génération du certificat de salaire.");
             }
             return $result;
         }
