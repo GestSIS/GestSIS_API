@@ -35,9 +35,12 @@ Ce fichier doit au préalable avoir été généré dans le projet GestSIS_Auth.
 
 ### Etats de sortie
 
-Tous les états de sorties pour impression sont générés au format `html`, aucun `pdf` n'est généré.
+Tous les états de sorties pour impression sont générés au format `html`, aucun `pdf` n'est généré excepté pour les certificats de salaire.
 
 Le service `GestSIS_Print` permet de convertir la version `html` en `pdf` en respectant tous les styles CSS ce qui n'était pas le cas de la précédente solution se basant sur `wkhtmltopdf`.
+
+En ce qui concerne les certificats de salaire, `pdftk` est utilisé afin de remplir le fomulaire du template officiel. Référence pour pdftk :
+- https://github.com/lob/lambda-pdftk-example
 
 ### Serveur de développement
 
