@@ -60,4 +60,25 @@ class InterventionStatistiqueController extends Controller
 
         return response()->json(['data' => $materiels]);
     }
+
+    public function heuresParTrancheHoraire($exerciceComptableId)
+    {
+        $materiels = $this->service->statHeuresHoraire($exerciceComptableId);
+
+        return response()->json(['data' => $materiels]);
+    }
+
+    public function heuresParJour($exerciceComptableId)
+    {
+        $materiels = $this->service->statHeuresJournalier($exerciceComptableId);
+
+        return response()->json(['data' => $materiels]);
+    }
+
+    public function heureParMois($exerciceComptableId)
+    {
+        $materiels = $this->service->statHeuresMensuel($exerciceComptableId);
+
+        return response()->json(['data' => $materiels]);
+    }
 }

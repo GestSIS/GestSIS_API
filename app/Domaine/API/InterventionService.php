@@ -473,95 +473,132 @@ class InterventionService
     /**
      * Return le nombre d'intervention par materiel pour l'année comptable
      *
-     * @param Request $request
      * @param int $exerciceComptableId
-     * @return Response
+     * @return array
      */
     public function statMateriel(int $exerciceComptableId)
     {
-        $data = DB::select("SELECT im.materiel_id, sum(im.quantite) as nb
+        return DB::select("SELECT im.materiel_id, sum(im.quantite) as nb
                 FROM intervention_materiel as im
                 INNER JOIN interventions as i ON i.id = im.intervention_id
                 WHERE i.exercice_comptable_id = ?
                 GROUP BY im.materiel_id
             ", [$exerciceComptableId]);
-
-        return $data;
     }
 
     /**
      * Return le nombre d'intervention par véhicule pour l'année comptable
      *
-     * @param Request $request
      * @param int $exerciceComptableId
-     * @return Response
+     * @return array
      */
     public function statVehicule(int $exerciceComptableId)
     {
-        $data = DB::select("SELECT iv.vehicule_id, sum(i.stat_nb) as nb
+        return DB::select("SELECT iv.vehicule_id, sum(i.stat_nb) as nb
                 FROM intervention_vehicule as iv
                 INNER JOIN interventions as i ON i.id = iv.intervention_id
                 WHERE i.exercice_comptable_id = ?
                 GROUP BY iv.vehicule_id
             ", [$exerciceComptableId]);
-
-        return $data;
     }
 
     /**
      * Return le nombre d'intervention par véhicule pour l'année comptable
      *
-     * @param Request $request
      * @param int $exerciceComptableId
-     * @return Response
+     * @return array
      */
     public function statTypeIntervention($exerciceComptableId)
     {
-        $data = DB::select("SELECT t.id, COUNT(DISTINCT i.id) AS nb, SUM(TIMESTAMPDIFF(MINUTE, isa.debut, isa.fin) / 60) AS heures
+        return DB::select("SELECT t.id, COUNT(DISTINCT i.id) AS nb, SUM(TIMESTAMPDIFF(MINUTE, isa.debut, isa.fin) / 60) AS heures
                 FROM type_interventions AS t
                 INNER JOIN interventions AS i ON i.type_intervention_id = t.id
                 LEFT OUTER JOIN intervention_sapeur AS isa ON i.id = isa.intervention_id
                 WHERE i.exercice_comptable_id = ?
                 GROUP BY t.id;
             ", [$exerciceComptableId]);
-        return $data;
     }
 
     /**
      * Return le nombre d'intervention par stat federal pour l'année comptable
      *
-     * @param Request $request
      * @param int $exerciceComptableId
      * @return Response
      */
     public function statFederal($exerciceComptableId)
     {
-        $data = DB::select("SELECT s.id, COUNT(DISTINCT i.id) AS nb, SUM(TIMESTAMPDIFF(MINUTE, isa.debut, isa.fin) / 60) AS heures
+        return DB::select("SELECT s.id, COUNT(DISTINCT i.id) AS nb, SUM(TIMESTAMPDIFF(MINUTE, isa.debut, isa.fin) / 60) AS heures
                 FROM stat_federals AS s
                 INNER JOIN interventions AS i ON i.stat_federal_id = s.id
                 LEFT OUTER JOIN intervention_sapeur AS isa ON i.id = isa.intervention_id
                 WHERE i.exercice_comptable_id = ?
                 GROUP BY s.id;
             ", [$exerciceComptableId]);
-
-        return $data;
     }
 
     /**
      * Return le nombre d'intervention par traitement pour l'année comptable
      *
-     * @param Request $request
      * @param int $exerciceComptableId
      * @return Response
      */
     public function statTraitement($exerciceComptableId)
     {
-        $data = DB::select("SELECT i.intervention_traitement_id AS id, COUNT(i.id) as nb
+        return DB::select("SELECT i.intervention_traitement_id AS id, COUNT(i.id) as nb
                 FROM interventions as i
                 WHERE i.exercice_comptable_id = ?
                 GROUP BY i.intervention_traitement_id;
             ", [$exerciceComptableId]);
+    }
 
-        return $data;
+    /**
+     * Return le nombre d'intervention par heures horaires
+     *
+     * @param int $exerciceComptableId
+     * @return Response
+     */
+    public function statHeuresHoraire($exerciceComptableId)
+    {
+        // (durée modulo la période voulue) * (nb heures passées)
+        $presences = DB::select("SELECT isa.debut, TIMESTAMPDIFF(MINUTE, isa.debut, isa.fin) / 60 AS heures
+                FROM interventions AS i
+                FROM intervention_sapeur AS isa ON i.id = isa.intervention_id
+                WHERE i.exercice_comptable_id = ?;
+            ", [$exerciceComptableId]);
+
+        // TODO: Compute stats
+        foreach ($presences as $presence) {
+            // TODO:
+        }
+    }
+
+    /**
+     * Return le nombre d'intervention par heures journalier
+     *
+     * @param int $exerciceComptableId
+     * @return Response
+     */
+    public function statHeuresJournalier($exerciceComptableId)
+    {
+        return DB::select("SELECT i.intervention_traitement_id AS id, COUNT(i.id) as nb
+                FROM interventions as i
+                WHERE i.exercice_comptable_id = ?
+                GROUP BY i.intervention_traitement_id;
+            ", [$exerciceComptableId]);
+    }
+
+    /**
+     * Return le nombre d'intervention par heures mensuel
+     *
+     * @param int $exerciceComptableId
+     * @return Response
+     */
+    public function statHeuresMensuel($exerciceComptableId)
+    {
+        return DB::select("SELECT i.intervention_traitement_id AS id, COUNT(i.id) as nb
+                FROM interventions as i
+                WHERE i.exercice_comptable_id = ?
+                GROUP BY i.intervention_traitement_id;
+            ", [$exerciceComptableId]);
     }
 }
