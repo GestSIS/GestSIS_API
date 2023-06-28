@@ -302,7 +302,7 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     public function removeVehiculesById($interventionId, array $ids)
     {
-        InterventionVehicule::where('intervention_id', $interventionId)->whereIn('id', $ids)->delete();
+        InterventionVehicule::where('intervention_id', $interventionId)->whereIn('vehicule_id', $ids)->delete();
     }
 
     public function addGroupe($interventionId, $no, $designation)
