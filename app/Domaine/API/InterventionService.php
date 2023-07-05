@@ -559,6 +559,7 @@ class InterventionService
      */
     public function statHeuresHoraire($exerciceComptableId)
     {
+        // TODO:
         // (durée modulo la période voulue) * (nb heures passées)
         $presences = DB::select("SELECT isa.debut, TIMESTAMPDIFF(MINUTE, isa.debut, isa.fin) / 60 AS heures
                 FROM interventions AS i
@@ -580,6 +581,7 @@ class InterventionService
      */
     public function statHeuresJournalier($exerciceComptableId)
     {
+        // TODO:
         return DB::select("SELECT i.intervention_traitement_id AS id, COUNT(i.id) as nb
                 FROM interventions as i
                 WHERE i.exercice_comptable_id = ?
@@ -595,6 +597,7 @@ class InterventionService
      */
     public function statHeuresMensuel($exerciceComptableId)
     {
+        // TODO:
         return DB::select("SELECT i.intervention_traitement_id AS id, COUNT(i.id) as nb
                 FROM interventions as i
                 WHERE i.exercice_comptable_id = ?
