@@ -530,7 +530,7 @@ class SapeurBusiness
                 trim(preg_replace('/\s+/', ' ', $tel->numero)),
                 trim(preg_replace('/\s+/', ' ', $data['numero']))
             ) === 0) {
-                throw new ArrayException(['numero' => 'Duplicated numero']);
+                throw new ArrayException(['numéro' => 'Numéro à double'], 'Numéro déjà existant');
             }
         }
 

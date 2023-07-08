@@ -17,9 +17,9 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
+            $table->string('designation');
             $table->unsignedDecimal('quantite');
 
-            $table->string('designation');
             $table->unsignedDecimal('montant');
             $table->unsignedInteger('type');
 
