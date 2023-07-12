@@ -11,6 +11,7 @@
 |
 */
 
+use App\Application\Http\Controllers\AbsenceController;
 use Illuminate\Support\Facades\Route;
 use Spatie\HttpLogger\Middlewares\HttpLogger;
 use App\Application\Http\Middleware\DbSelector;
@@ -251,7 +252,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Absences
     Route::group(['middleware' => 'jwtTokenRole:absence.lecture'], function () {
-        Route::resource('absences', AbsenceController::class)->only(['index']);
+        Route::get('absences/{exerciceComptableId}', [AbsenceController::class, 'index'])->name('absences.index');
         Route::resource('absence-param', AbsenceController::class)->only(['index']);
     });
     Route::group(['middleware' => 'jwtTokenRole:absence.modification'], function () {

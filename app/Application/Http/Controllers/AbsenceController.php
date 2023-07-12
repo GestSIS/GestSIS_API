@@ -20,9 +20,9 @@ class AbsenceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(int $exerciceComptableId)
     {
-        $absences = $this->service->listeAbsence();
+        $absences = $this->service->listeAbsence($exerciceComptableId);
         return response()->json(['data' => $absences]);
     }
 

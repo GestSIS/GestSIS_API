@@ -4,6 +4,8 @@ namespace App\Domaine\API;
 
 use App\Domaine\Business\AbsenceBusiness;
 use App\Infrastructure\Models\Absence;
+use App\Infrastructure\Models\ExerciceComptable;
+use Illuminate\Support\Collection;
 
 class AbsenceService
 {
@@ -14,10 +16,15 @@ class AbsenceService
     $this->business = $business;
   }
 
-  public function listeAbsence($exerciceComptableId)
+  public function listeAbsence(int $exerciceComptableId): Collection
   {
+    $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
+
     // TODO: ajout marge de date pour absences
-    return Absence::with('sapeurIds')->where([])->get();
+    return Absence::with('sapeurIds')->where([
+      ['debut', '<', $exerciceComptable->fin],
+      ['fin', '>', $exerciceComptable->debut]
+    ])->get();
   }
 
   public function ajouterAbsence($data)
@@ -33,10 +40,5 @@ class AbsenceService
   public function supprimerAbsence($groupeId)
   {
     return $this->business->supprimerAbsence($groupeId);
-  }
-
-  public function modifierAbsenceSapeurs($groupeId, $sapeurIds)
-  {
-    return $this->business->modifierAbsenceSapeurs($groupeId, $sapeurIds);
   }
 }
