@@ -37,7 +37,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->boolean('actif'); // Nb jours pour s'excuser
+            $table->boolean('actif'); // Pour permettre à tous les sapeurs de s'excuser
             $table->integer('delai_excuse'); // Nb jours pour s'excuser
             $table->boolean('email_rappel');
             $table->string('texte_email_rappel')->default('');

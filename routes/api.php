@@ -249,6 +249,18 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('cours', CoursController::class)->only(['store', 'update', 'destroy']);
     });
 
+    // Absences
+    Route::group(['middleware' => 'jwtTokenRole:absence.lecture'], function () {
+        Route::resource('absences', AbsenceController::class)->only(['index']);
+        Route::resource('absence-param', AbsenceController::class)->only(['index']);
+    });
+    Route::group(['middleware' => 'jwtTokenRole:absence.modification'], function () {
+        Route::resource('absences', AbsenceController::class)->only(['store', 'update', 'destroy']);
+    });
+    Route::group(['middleware' => 'jwtTokenRole:absence.config'], function () {
+        Route::resource('absence-param', AbsenceController::class)->only(['store']);
+    });
+
     // Organisation
     Route::group(['middleware' => 'jwtTokenRole:intervention.lecture,effectif.tout,sapeur.lecture,organisation.modification,comptabilite.tout'], function () {
         Route::resource('groupes', GroupeController::class)->only(['index']);
