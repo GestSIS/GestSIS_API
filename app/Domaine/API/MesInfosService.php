@@ -3,13 +3,16 @@
 
 namespace App\Domaine\API;
 
+use App\Domaine\Business\AbsenceBusiness;
 use App\Domaine\Business\ExerciceBusiness;
 use App\Domaine\Business\PaiementBusiness;
 use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\SapeurRepository;
+use App\Infrastructure\Models\Absence;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Exercice;
+use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\HeureExercice;
 use App\Infrastructure\Models\InterventionSapeur;
@@ -22,13 +25,15 @@ class MesInfosService
 {
     protected $paiementBusiness;
     protected $exerciceBusiness;
+    protected $absenceBusiness;
     protected $exerciceRepo;
     protected $sapeurRepo;
 
-    public function __construct(PaiementBusiness $paiementBusiness, ExerciceBusiness $exerciceBusiness, ExerciceRepository $exerciceRepo, SapeurRepository $sapeurRepo)
+    public function __construct(PaiementBusiness $paiementBusiness, ExerciceBusiness $exerciceBusiness, AbsenceBusiness $absenceBusiness, ExerciceRepository $exerciceRepo, SapeurRepository $sapeurRepo)
     {
         $this->paiementBusiness = $paiementBusiness;
         $this->exerciceBusiness = $exerciceBusiness;
+        $this->absenceBusiness = $absenceBusiness;
         $this->exerciceRepo = $exerciceRepo;
         $this->sapeurRepo = $sapeurRepo;
     }
@@ -86,6 +91,41 @@ class MesInfosService
         }
 
         return ['path' => $presence->justificatif_path, 'filename' => $presence->justificatif_filename];
+    }
+
+    function mesAbsences($sapeurId, $exerciceComptableId)
+    {
+        $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
+
+        return Absence::where('sapeur_id', '=', $sapeurId)->where([
+            ['debut', '<', $exerciceComptable->fin],
+            ['fin', '>', $exerciceComptable->debut]
+        ])->get();
+    }
+
+    function creerAbsence($sapeurId, $data)
+    {
+        $data['sapeur_id'] = $sapeurId;
+        return $this->absenceBusiness->ajouterAbsence($data);
+    }
+
+    function modifierAbsence($sapeurId, $absenceId, $data)
+    {
+        $absence = Absence::find($absenceId);
+        if ($absence->sapeur_id !== $sapeurId) {
+            throw new ArrayException([], 'Absence invalide');
+        }
+        $data['sapeur_id'] = $sapeurId;
+        return $this->absenceBusiness->modifierAbsence($absenceId, $data);
+    }
+
+    function supprimerAbsence($sapeurId, $absenceId)
+    {
+        $absence = Absence::find($absenceId);
+        if ($absence?->sapeur_id !== $sapeurId) {
+            throw new ArrayException([], 'Absence invalide');
+        }
+        return $this->absenceBusiness->supprimerAbsence($absenceId);
     }
 
     function monMateriel($sapeurId)

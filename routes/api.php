@@ -12,6 +12,7 @@
 */
 
 use App\Application\Http\Controllers\AbsenceController;
+use App\Application\Http\Controllers\AbsenceParamController;
 use Illuminate\Support\Facades\Route;
 use Spatie\HttpLogger\Middlewares\HttpLogger;
 use App\Application\Http\Middleware\DbSelector;
@@ -78,6 +79,7 @@ use App\Application\Http\Controllers\MatPersoEventController;
 use App\Application\Http\Controllers\MatPersoEventTypeController;
 use App\Application\Http\Controllers\MatPersoTypeController;
 use App\Application\Http\Controllers\MedecinController;
+use App\Application\Http\Controllers\MesAbsencesController;
 use App\Application\Http\Controllers\MesDecomptesController;
 use App\Application\Http\Controllers\MesExcusesController;
 use App\Application\Http\Controllers\MesExercicesController;
@@ -143,6 +145,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         Route::get('mes-travaux/{exerciceComptableId}', [MesTravauxController::class, 'index'])->name('mes-travaux');
         Route::get('mes-exercices/{exerciceComptableId}', [MesExercicesController::class, 'index'])->name('mes-exercices');
+        Route::get('mes-absences/{exerciceComptableId}', [MesAbsencesController::class, 'index'])->name('mes-absences');
         Route::get('mes-decomptes/{exerciceComptableId}', [MesDecomptesController::class, 'index'])->name('mes-decomptes');
         Route::get('mes-interventions/{exerciceComptableId}', [MesInterventionsController::class, 'index'])->name('mes-interventions');
 
@@ -152,6 +155,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('mes-excuses/{exerciceId}', [MesExcusesController::class, 'store'])->name('api.v2.creer-excuse');
         Route::delete('mes-excuses/{exerciceId}', [MesExcusesController::class, 'delete'])->name('api.v2.delete-excuse');
         Route::get('mes-excuses/{exerciceId}/justificatif', [MesExcusesController::class, 'download'])->name('api.v2.download-excuse-justificatif');
+
+        Route::post('mes-absences', [MesAbsencesController::class, 'store'])->name('api.v2.creer-absence');
+        Route::put('mes-absences/{absenceId}', [MesAbsencesController::class, 'update'])->name('api.v2.update-absence');
+        Route::delete('mes-absences/{absenceId}', [MesAbsencesController::class, 'delete'])->name('api.v2.delete-absence');
     });
 
     // Paramètres accessible pour tout droit config
@@ -253,13 +260,13 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     // Absences
     Route::group(['middleware' => 'jwtTokenRole:absence.lecture'], function () {
         Route::get('absences/{exerciceComptableId}', [AbsenceController::class, 'index'])->name('absences.index');
-        Route::resource('absence-param', AbsenceController::class)->only(['index']);
+        Route::resource('absence-param', AbsenceParamController::class)->only(['index']);
     });
     Route::group(['middleware' => 'jwtTokenRole:absence.modification'], function () {
         Route::resource('absences', AbsenceController::class)->only(['store', 'update', 'destroy']);
     });
     Route::group(['middleware' => 'jwtTokenRole:absence.config'], function () {
-        Route::resource('absence-param', AbsenceController::class)->only(['store']);
+        Route::resource('absence-param', AbsenceParamController::class)->only(['store']);
     });
 
     // Organisation

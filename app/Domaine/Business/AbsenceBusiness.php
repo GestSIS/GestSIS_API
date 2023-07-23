@@ -12,6 +12,7 @@ class AbsenceBusiness
     {
         $absence = new Absence();
         $absence->fill($data);
+        $absence->sapeur_id = $data['sapeur_id'];
         $absence->save();
         return $absence;
     }
