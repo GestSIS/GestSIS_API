@@ -49,7 +49,7 @@ class DbsFix extends Command
             Fonction::on($db)->whereNotIn(
                 'abreviation',
                 [
-                    'Cdt', 'V-Cdt', 'CG1', 'CG2', 'CG', 'CI', 'CI1', 'CI2', 'Sap', 'SAP', 'PR', 'PAR', 'Cand'
+                    'Cdt', 'RCdt', 'CG1', 'CG2', 'CG', 'CI', 'CI1', 'CI2', 'Sap', 'SAP', 'PR', 'PAR', 'Cand'
                 ]
             )->update(['cumulable' => True]);
             Fonction::on($db)->whereIn(

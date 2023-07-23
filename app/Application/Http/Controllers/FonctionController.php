@@ -32,6 +32,7 @@ class FonctionController extends Controller
             'nom' => 'string|min:1|required',
             'abreviation' => 'string|min:1|required',
             'cumulable' => 'boolean|required',
+            'actif' => 'boolean|required',
             'tri' => 'integer|required'
         ]);
 
@@ -45,6 +46,7 @@ class FonctionController extends Controller
             'nom' => 'string|min:1|required',
             'abreviation' => 'string|min:1|required',
             'cumulable' => 'boolean|required',
+            'actif' => 'boolean|required',
             'tri' => 'integer|required'
         ]);
 
