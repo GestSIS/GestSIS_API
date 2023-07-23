@@ -6,6 +6,7 @@ use App\Domaine\Business\ImputationBusiness;
 use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
+use App\Infrastructure\Models\Fonction;
 use App\Infrastructure\Models\Localite;
 use Illuminate\Console\Command;
 
@@ -45,11 +46,18 @@ class DbsFix extends Command
         $dbs = config('database.dbs');
         foreach ($dbs as $db) {
             printf("Fix db=" . $db . "\n");
-            Localite::on($db)->insert(
-                array('id' => '147', 'commune_id' => '60', 'npa' => '2829', 'designation' => 'Envelier'),
-                array('id' => '148', 'commune_id' => NULL, 'npa' => '25150', 'designation' => 'Goux-Lès-Dambelin'),
-                array('id' => '150', 'commune_id' => NULL, 'npa' => '2827', 'designation' => 'La Scheulte'),
-            );
+            Fonction::on($db)->whereNotIn(
+                'abreviation',
+                [
+                    'Cdt', 'V-Cdt', 'CG1', 'CG2', 'CG', 'CI', 'CI1', 'CI2', 'Sap', 'SAP', 'PR', 'PAR', 'Cand'
+                ]
+            )->update(['cumulable' => True]);
+            Fonction::on($db)->whereIn(
+                'abreviation',
+                [
+                    'CG1', 'CG2', 'CG', 'CI', 'CI1', 'CI2', 'Sap', 'SAP', 'Cand'
+                ]
+            )->update(['cumulable' => False]);
             printf("\n");
         }
         printf("Migrating done\n");
