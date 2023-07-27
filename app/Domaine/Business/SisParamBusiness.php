@@ -2,7 +2,9 @@
 
 namespace App\Domaine\Business;
 
+use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\LocaliteSis;
+use App\Infrastructure\Models\SisContact;
 use App\Infrastructure\Models\SisParam;
 use Illuminate\Support\Facades\Storage;
 
@@ -24,6 +26,25 @@ class SisParamBusiness
     {
         LocaliteSis::whereIn('localite_id', $data)->delete();
         return LocaliteSis::pluck('localite_id')->toArray();
+    }
+
+    public static function ajouterContactSis($data)
+    {
+        if (SisContact::where([
+            ['email', '=', $data['email']],
+            ['liste', '=', $data['liste']],
+        ])->exists()) {
+            throw new ArrayException(['email' => 'Email déjà saisi pour cette liste de diffusion'], 'Saisie à double');
+        }
+        $contact = new SisContact($data);
+        $contact->fill($data);
+        $contact->save();
+        return $contact;
+    }
+
+    public static function supprimerContactSis(int $id)
+    {
+        SisContact::where('id', '=', $id)->delete();
     }
 
     public function getLogo($sisKey)

@@ -106,6 +106,7 @@ use App\Application\Http\Controllers\SapeurPermisController;
 use App\Application\Http\Controllers\SapeurPhotoController;
 use App\Application\Http\Controllers\SapeurStatistiqueController;
 use App\Application\Http\Controllers\SapeurTelephoneController;
+use App\Application\Http\Controllers\SisContactController;
 use App\Application\Http\Controllers\SisLogoController;
 use App\Application\Http\Controllers\SisParamController;
 use App\Application\Http\Controllers\StatFederalController;
@@ -168,6 +169,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Sis Params
     Route::group(['middleware' => 'jwtTokenRole:sis.config'], function () {
+        Route::resource('sis-contacts', SisContactController::class)->only(['index', 'store', 'destroy']);
         Route::resource('sis-param', SisParamController::class)->only(['store']);
         Route::resource('sis-logo', SisLogoController::class)->only(['store']);
         Route::post('localites-sis', [LocaliteSisController::class, 'store'])->name('api.v2.localite-sis-store');

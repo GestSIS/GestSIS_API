@@ -3,6 +3,7 @@
 namespace App\Domaine\API;
 
 use App\Domaine\Business\SisParamBusiness;
+use App\Infrastructure\Models\SisContact;
 use App\Infrastructure\Models\SisParam;
 
 class SisParamService
@@ -39,8 +40,23 @@ class SisParamService
         return $this->business->ajouterLocalitesSis($data);
     }
 
-    public function supprimerLocalitesSis($data)
+    public function supprimerLocalitesSis($ids)
     {
-        return $this->business->supprimerLocalitesSis($data);
+        return $this->business->supprimerLocalitesSis($ids);
+    }
+
+    public function contacts()
+    {
+        return SisContact::all();
+    }
+
+    public function ajouterContactSis($data)
+    {
+        return $this->business->ajouterContactSis($data);
+    }
+
+    public function supprimerContactSis(int $id)
+    {
+        return $this->business->supprimerContactSis($id);
     }
 }
