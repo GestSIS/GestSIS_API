@@ -165,11 +165,12 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     // Paramètres accessible pour tout droit config
     Route::group(['middleware' => 'jwtTokenRole:utilisateur.config,sis.config,sapeur.config,organisation.modification,exercice.config,intervention.config,comptabilite.config,controle_medical.config'], function () {
         Route::resource('sis-param', SisParamController::class)->only(['index']);
+        Route::resource('sis-contacts', SisContactController::class)->only(['index']);
     });
 
     // Sis Params
     Route::group(['middleware' => 'jwtTokenRole:sis.config'], function () {
-        Route::resource('sis-contacts', SisContactController::class)->only(['index', 'store', 'destroy']);
+        Route::resource('sis-contacts', SisContactController::class)->only(['store', 'destroy']);
         Route::resource('sis-param', SisParamController::class)->only(['store']);
         Route::resource('sis-logo', SisLogoController::class)->only(['store']);
         Route::post('localites-sis', [LocaliteSisController::class, 'store'])->name('api.v2.localite-sis-store');
