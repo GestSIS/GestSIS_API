@@ -261,9 +261,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Absences
+    Route::group(['middleware' => 'jwtTokenSapeurOrRole:absence.lecture'], function () {
+        Route::resource('absence-param', AbsenceParamController::class)->only(['index']);
+    });
     Route::group(['middleware' => 'jwtTokenRole:absence.lecture'], function () {
         Route::get('absences/{exerciceComptableId}', [AbsenceController::class, 'index'])->name('absences.index');
-        Route::resource('absence-param', AbsenceParamController::class)->only(['index']);
     });
     Route::group(['middleware' => 'jwtTokenRole:absence.modification'], function () {
         Route::resource('absences', AbsenceController::class)->only(['store', 'update', 'destroy']);
