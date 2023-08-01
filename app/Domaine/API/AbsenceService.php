@@ -20,7 +20,6 @@ class AbsenceService
   {
     $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
 
-    // TODO: ajout marge de date pour absences
     return Absence::where([
       ['debut', '<', $exerciceComptable->fin],
       ['fin', '>', $exerciceComptable->debut]
