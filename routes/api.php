@@ -13,6 +13,7 @@
 
 use App\Application\Http\Controllers\AbsenceController;
 use App\Application\Http\Controllers\AbsenceParamController;
+use App\Application\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 use Spatie\HttpLogger\Middlewares\HttpLogger;
 use App\Application\Http\Middleware\DbSelector;
@@ -122,6 +123,8 @@ use App\Application\Http\Controllers\VehiculeController;
 // Route spécial pour le serveur d'authentification
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenValidatorAuth::class]], function () {
     Route::get('email-validate', [EmailController::class, 'validateEmail']);
+
+    Route::get('sis-contacts-tous', [AdminController::class, 'sisContacts']);
 });
 
 // Route::get('exercices-comptable/{exercieComptableId}/justificatif', [CompteController::class, 'justificatifComplet']);
