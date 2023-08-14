@@ -23,7 +23,7 @@ return new class extends Migration
 
         // Value
         // 0 -> non-dispo
-        // 1 -> obligatoire
+        // 1 -> obligatoire (si aussi configuré pour inter, alors soit l'un ou l'autre de requis)
         // 2 -> optionnel
         Schema::table('travail_types', function (Blueprint $table) {
             $table->smallInteger('dispo_pour_exercice')->default(0);
