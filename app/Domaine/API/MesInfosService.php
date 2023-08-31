@@ -4,36 +4,46 @@
 namespace App\Domaine\API;
 
 use App\Domaine\Business\AbsenceBusiness;
+use App\Domaine\Business\ControleMedicalBusiness;
 use App\Domaine\Business\ExerciceBusiness;
 use App\Domaine\Business\PaiementBusiness;
 use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\SPI\ControleMedicalRepository;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\Absence;
 use App\Infrastructure\Models\Ecriture;
-use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\ExerciceSapeur;
-use App\Infrastructure\Models\HeureExercice;
 use App\Infrastructure\Models\InterventionSapeur;
 use App\Infrastructure\Models\MaterielPersonnel;
 use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Travail;
-use Illuminate\Support\Facades\DB;
 
 class MesInfosService
 {
     protected $paiementBusiness;
     protected $exerciceBusiness;
     protected $absenceBusiness;
+    protected $controleMedicalBusiness;
+    protected $controleMedicalRepo;
     protected $exerciceRepo;
     protected $sapeurRepo;
 
-    public function __construct(PaiementBusiness $paiementBusiness, ExerciceBusiness $exerciceBusiness, AbsenceBusiness $absenceBusiness, ExerciceRepository $exerciceRepo, SapeurRepository $sapeurRepo)
-    {
+    public function __construct(
+        PaiementBusiness $paiementBusiness,
+        ExerciceBusiness $exerciceBusiness,
+        AbsenceBusiness $absenceBusiness,
+        ControleMedicalBusiness $controleMedicalBusiness,
+        ControleMedicalRepository $controleMedicalRepo,
+        ExerciceRepository $exerciceRepo,
+        SapeurRepository $sapeurRepo
+    ) {
+        $this->controleMedicalRepo = $controleMedicalRepo;
         $this->paiementBusiness = $paiementBusiness;
         $this->exerciceBusiness = $exerciceBusiness;
         $this->absenceBusiness = $absenceBusiness;
+        $this->controleMedicalBusiness = $controleMedicalBusiness;
         $this->exerciceRepo = $exerciceRepo;
         $this->sapeurRepo = $sapeurRepo;
     }
@@ -66,6 +76,20 @@ class MesInfosService
     function mesGroupes($sapeurId)
     {
         return $this->sapeurRepo->getSapeurGroupesbyId($sapeurId);
+    }
+
+    function mesControlesMedicaux($sapeurId)
+    {
+        return $this->controleMedicalRepo->getSapeurControlesMedicauxById($sapeurId);
+    }
+
+    function monJustificatifMedical($sapeurId, $controleMedicalId)
+    {
+        $controle = $this->controleMedicalRepo->getControleMedical($controleMedicalId);
+        if ($sapeurId !== $controle->sapeur_id) {
+            throw new ArrayException([], 'Accès refusé');
+        }
+        return $this->controleMedicalBusiness->getJustificatif($controleMedicalId);
     }
 
     function mesExercices($sapeurId, $exerciceComptableId)

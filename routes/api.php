@@ -81,6 +81,7 @@ use App\Application\Http\Controllers\MatPersoEventTypeController;
 use App\Application\Http\Controllers\MatPersoTypeController;
 use App\Application\Http\Controllers\MedecinController;
 use App\Application\Http\Controllers\MesAbsencesController;
+use App\Application\Http\Controllers\MesControlesMedicauxController;
 use App\Application\Http\Controllers\MesDecomptesController;
 use App\Application\Http\Controllers\MesExcusesController;
 use App\Application\Http\Controllers\MesExercicesController;
@@ -147,6 +148,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('mes-groupes', [MesInfosController::class, 'groupes'])->name('mes-groupes');
         Route::get('mon-materiel', [MonMaterielController::class, 'index'])->name('mon-materiel');
 
+        Route::get('mes-controles-medicaux', [MesControlesMedicauxController::class, 'index'])->name('mes-controles-medicaux');
+        Route::get('mon-justificatif/{controleMedicalId}', [MesControlesMedicauxController::class, 'justificatif'])->name('mon-justificatif');
+
         Route::get('mes-travaux/{exerciceComptableId}', [MesTravauxController::class, 'index'])->name('mes-travaux');
         Route::get('mes-exercices/{exerciceComptableId}', [MesExercicesController::class, 'index'])->name('mes-exercices');
         Route::get('mes-absences/{exerciceComptableId}', [MesAbsencesController::class, 'index'])->name('mes-absences');
@@ -205,6 +209,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         // Exercices
         Route::resource('exercice-categories', ExerciceCategorieController::class)->only(['index']);
         Route::resource('excuses-types', ExcuseTypeController::class)->only(['index']);
+
+        // Contrôles médicaux
+        Route::resource('medecins', MedecinController::class)->only(['index']);
+        Route::resource('controles-medicaux-types', ControleMedicalTypeController::class)->only(['index']);
 
         // Heures supp
         Route::resource('heure-exercice-types', HeureExerciceTypeController::class)->only(['index']);
@@ -576,10 +584,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('controles-medicaux/{id}/justificatif', [JustificatifController::class, 'show']);
         Route::post('controles-medicaux/{id}/justificatif', [JustificatifController::class, 'store']);
         Route::delete('controles-medicaux/{id}/justificatif', [JustificatifController::class, 'destroy']);
-
-        // Params Controles médicaux
-        Route::resource('medecins', MedecinController::class)->only(['index']);
-        Route::resource('controles-medicaux-types', ControleMedicalTypeController::class)->only(['index']);
 
         // Controles médicaux pour sapeur
         Route::resource('sapeurs.controles-medicaux', SapeurControleMedicalController::class)->only(['index']);
