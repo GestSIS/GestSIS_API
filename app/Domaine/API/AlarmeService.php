@@ -116,6 +116,5 @@ class AlarmeService
             dd($e);
             throw new ArrayException([], "Une erreur est survenue lors de la récupération des alarmes");
         }
-        // return $this->repository->listeIntervention($exerciceComptableId);
     }
 }
