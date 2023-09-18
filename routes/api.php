@@ -222,6 +222,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,exercice.lecture,intervention.lecture,organisation.modification,comptabilite.tout,cours.lecture,mat_perso.lecture,fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation,fiche_travail.lecture'], function () {
         Route::resource('sapeurs', SapeurController::class)->only(['index', 'show']);
 
+        Route::get('sapeurs/{id}/fiche', [SapeurController::class, 'fiche']);
+
         Route::get('statistiques/{id}/civilite', [SapeurStatistiqueController::class, 'civilite']);
         Route::get('statistiques/{id}/fonction', [SapeurStatistiqueController::class, 'fonction']);
         Route::get('statistiques/{id}/grade', [SapeurStatistiqueController::class, 'grade']);

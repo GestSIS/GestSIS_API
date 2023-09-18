@@ -12,6 +12,11 @@ class CoursSapeur extends Model
     ];
     protected $table = 'cours_sapeur';
 
+    public function localite()
+    {
+        return $this->belongsTo(Localite::class);
+    }
+
     public function cours()
     {
         return $this->belongsTo(Cours::class);

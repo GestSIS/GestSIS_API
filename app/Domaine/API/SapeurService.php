@@ -6,8 +6,12 @@ use App\Domaine\Business\SapeurBusiness;
 use App\Domaine\SPI\ControleMedicalRepository;
 use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Collections\ListeFsspExport;
+use App\Infrastructure\Models\CoursSapeur;
 use App\Infrastructure\Models\ExerciceComptable;
+use App\Infrastructure\Models\FonctionSapeur;
+use App\Infrastructure\Models\GradeSapeur;
 use App\Infrastructure\Models\MaterielPersonnel;
+use App\Infrastructure\Models\Mutation;
 use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +29,18 @@ class SapeurService
         $this->repository = $repository;
         $this->repositoryControles = $repositoryControles;
         $this->business = $business;
+    }
+
+    public function fiche($sapeurId)
+    {
+        $sapeur = Sapeur::with(['localite', 'civilite', 'fonction', 'grade'])->find($sapeurId);
+        return View('pdf/fiche-sapeur', [
+            "sapeur" => $sapeur,
+            "fonctions" => FonctionSapeur::with('fonction')->where('sapeur_id', '=', $sapeurId)->orderBy('debut')->get(),
+            "grades" => GradeSapeur::with('grade')->where('sapeur_id', '=', $sapeurId)->orderBy('date')->get(),
+            "mutations" => Mutation::with('localite')->where('sapeur_id', '=', $sapeurId)->orderBy('incorporation')->get(),
+            "cours" => CoursSapeur::with(['localite', 'cours'])->where('sapeur_id', '=', $sapeurId)->orderBy('date')->get(),
+        ]);
     }
 
     public function listeSapeurs()

@@ -29,6 +29,14 @@ class SapeurController extends Controller
     }
 
     /**
+     * Return la fiche sapeur
+     */
+    public function fiche($sapeurId)
+    {
+        return $this->service->fiche($sapeurId);
+    }
+
+    /**
      * Return the effectif
      */
     public function effectif()
