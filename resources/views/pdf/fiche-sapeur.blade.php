@@ -72,8 +72,7 @@ if (!function_exists('formatDate')) {
       <div class="col-6">
         <label for="m-sap-cotisation_avs">Cotisation AVS</label>
         <div class="form-check text-center col-6">
-          <input id="m-sap-cotisation_avs" value="{{ $sapeur->cotisation_avs }}" type="checkbox"
-            :disabled="!hasEditPermission" class="form-check-input" />
+          <input id="m-sap-cotisation_avs" @checked($sapeur->cotisation_avs) type="checkbox" class="form-check-input" />
           <label class="form-check-label" for="m-sap-cotisation_avs"></label>
         </div>
       </div>
