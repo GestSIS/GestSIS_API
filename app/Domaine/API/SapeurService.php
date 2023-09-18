@@ -13,6 +13,7 @@ use App\Infrastructure\Models\GradeSapeur;
 use App\Infrastructure\Models\MaterielPersonnel;
 use App\Infrastructure\Models\Mutation;
 use App\Infrastructure\Models\Sapeur;
+use App\Infrastructure\Models\SapeurTelephone;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -40,6 +41,7 @@ class SapeurService
             "grades" => GradeSapeur::with('grade')->where('sapeur_id', '=', $sapeurId)->orderBy('date')->get(),
             "mutations" => Mutation::with('localite')->where('sapeur_id', '=', $sapeurId)->orderBy('incorporation')->get(),
             "cours" => CoursSapeur::with(['localite', 'cours'])->where('sapeur_id', '=', $sapeurId)->orderBy('date')->get(),
+            "telephones" => SapeurTelephone::with(['telephoneType'])->where('sapeur_id', '=', $sapeurId)->orderBy('priorite')->get(),
         ]);
     }
 

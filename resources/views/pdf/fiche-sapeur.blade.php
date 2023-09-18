@@ -100,6 +100,29 @@ if (!function_exists('formatDate')) {
         name="remarques"></textarea>
     </div>
 
+    <h2 class="h3">Téléphone</h2>
+    <table class="table table-sm table-bordered table-striped mb-2">
+      <tr>
+        <th>Priorité</th>
+        <th>Numéro</th>
+        <th>Type</th>
+        <th>Export RTA</th>
+      </tr>
+      @if (count($telephones) == 0)
+        <tr>
+          <td colspan="4">Aucun téléphone</td>
+        </tr>
+      @endif
+      @foreach ($telephones as $t)
+        <tr>
+          <td>{{ $t->priorite }}</td>
+          <td>{{ $t->numero }}</td>
+          <td>{{ $t->telephoneType->type }}</td>
+          <td><input @checked($t->rta) type="checkbox" class="form-check-input" /></td>
+        </tr>
+      @endforeach
+    </table>
+
     <h2 class="h3">Références professionnelles</h2>
     <div class="row mb-3">
       <div class="col-4">
