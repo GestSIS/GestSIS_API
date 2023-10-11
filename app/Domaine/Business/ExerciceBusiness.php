@@ -53,7 +53,7 @@ class ExerciceBusiness
         $presences = $this->repository->listeSapeurOfExerciceById($exerciceId);
         $presenceIncompletes = array_filter($presences, function ($p) {
             // Si convoqué alors une saisie doit être faite pour chaque sapeur
-            return $p->convoque && !$p->present && !$p->amende && !$p->remplace && !$p->excuse_type_id;
+            return $p->convoque && !$p->present && !$p->absent && !$p->amende && !$p->remplace && !$p->excuse_type_id;
         });
 
         // Update statut si l'exercice est incomplet
