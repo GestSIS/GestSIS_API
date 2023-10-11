@@ -42,7 +42,7 @@ class ExerciceBusiness
     /**
      * Modifie le statut à saisi si toutes les présences ont été saisies
      */
-    private function updateStatut($exerciceId)
+    public function updateStatut($exerciceId)
     {
         $statut = $this->repository->getExerciceStatutById($exerciceId);
         if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_VALIDE) {
