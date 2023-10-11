@@ -13,7 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
 
-class DbsSapeursActifStatus extends Command
+class DbsExercicesStatus extends Command
 {
     /**
      * The name and signature of the console command.
