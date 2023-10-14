@@ -95,6 +95,7 @@ class InterventionBusiness
         }
 
         $intervention['exercice_comptable_id'] = $exerciceComptable->id;
+        if (!array_key_exists('wgs84', $intervention) || is_null($intervention['wgs84'])) $intervention['wgs84'] = '';
         if (!array_key_exists('lieu', $intervention) || is_null($intervention['lieu'])) $intervention['lieu'] = '';
         if (!array_key_exists('description', $intervention) || is_null($intervention['description'])) $intervention['description'] = '';
         if (!array_key_exists('proprietaire', $intervention) || is_null($intervention['proprietaire'])) $intervention['proprietaire'] = '';
