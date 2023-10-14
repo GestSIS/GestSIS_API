@@ -3,12 +3,8 @@
 namespace App\Application\Console\Commands;
 
 use App\Domaine\Business\ExerciceBusiness;
-use App\Domaine\Business\SapeurBusiness;
-use App\Domaine\SPI\ExerciceRepository;
 use App\Infrastructure\Models\Exercice;
-use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Repositories\ExerciceRepositoryEloquent;
-use App\Infrastructure\Repositories\SapeurRepositoryEloquent;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
