@@ -165,7 +165,7 @@ class LocalitesTableSeeder extends Seeder
             array('id' => '148', 'commune_id' => NULL, 'npa' => '25150', 'designation' => 'Goux-Lès-Dambelin'),
             array('id' => '149', 'commune_id' => NULL, 'npa' => '2523', 'designation' => 'Lignières NE'),
             array('id' => '150', 'commune_id' => NULL, 'npa' => '2827', 'designation' => 'La Scheulte'),
-            array('id' => '151', 'commune_id' => NULL, 'npa' => '1683', 'designation' => 'Sarzens'),
+            array('id' => '151', 'commune_id' => NULL, 'npa' => '1642', 'designation' => 'Sorens FR'),
             array('id' => '152', 'commune_id' => NULL, 'npa' => '1473', 'designation' => 'Châtillon FR'),
         );
 

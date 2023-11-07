@@ -46,9 +46,8 @@ class DbsFix extends Command
         $dbs = config('database.dbs');
         foreach ($dbs as $db) {
             printf("Fix db=" . $db . "\n");
-            Localite::on($db)->insert([
-                array('id' => '151', 'commune_id' => NULL, 'npa' => '1683', 'designation' => 'Sarzens'),
-                array('id' => '152', 'commune_id' => NULL, 'npa' => '1473', 'designation' => 'Châtillon FR'),
+            Localite::on($db)->where('id', '=', 151)->update([
+                'npa' => '1642', 'designation' => 'Sorens FR'
             ]);
             printf("\n");
         }
