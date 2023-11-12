@@ -103,6 +103,7 @@ class AlarmeService
                 }
 
                 $alarme->firefighters = $tmp;
+                $alarme->unresolved = [];
 
                 if (count($missing) > 0) {
                     $alarme->unresolved = $missing;
