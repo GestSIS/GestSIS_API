@@ -28,7 +28,7 @@
       <thead>
         <tr>
           <th>Nom prénom</th>
-          <th class="text-center">Fonction</th>
+          <th>Fonction</th>
           <th class="text-center">Présent</th>
           <th class="text-center">Absent</th>
           <th class="text-center">Remplacé</th>
@@ -37,42 +37,39 @@
       </thead>
       <tbody>
         @foreach ($exercice->sapeurs as $presence)
-        <tr>
-          <td>{{ $presence->display }}</td>
-          <td>{{ $presence->fonction_id ? $fonctions[$presence->fonction_id] : '' }}</td>
-          <td>
-            <div class="form-check text-center">
-              <label class="form-check-label" for="present-{{$presence->sapeur_id}}"><input type="checkbox" class="form-check-input" id="present-{{$presence->sapeur_id}}" @if ($presence->present)
-                checked="checked"
-                @endif
-                >&#8203;</label>
-            </div>
-          </td>
-          <td>
-            <div class="form-check text-center">
-              <label class="form-check-label" for="absent-{{$presence->sapeur_id}}"><input type="checkbox" class="form-check-input" id="absent-{{$presence->sapeur_id}}" @if ($presence->absent)
-                checked="checked"
-                @endif
-                >&#8203;</label>
-            </div>
-          </td>
-          <td>
-            <div class="form-check text-center">
-              <label class="form-check-label" for="remplace-{{$presence->sapeur_id}}"><input type="checkbox" class="form-check-input" id="remplace-{{$presence->sapeur_id}}" @if ($presence->remplace)
-                checked="checked"
-                @endif
-                >&#8203;</label>
-            </div>
-          </td>
-          <td>
-            <div class="form-check text-center">
-              <label class="form-check-label" for="excuse-{{$presence->sapeur_id}}" class="custom-control-label"><input type="checkbox" class="form-check-input" id="excuse-{{$presence->sapeur_id}}" @if ($presence->excuse_type_id)
-                checked="checked"
-                @endif
-                ><span>{{ $presence->excuse_type_id ? $excuses[$presence->excuse_type_id] : '' }}</span></label>
-            </div>
-          </td>
-        </tr>
+          <tr>
+            <td>{{ $presence->display }}</td>
+            <td>{{ $presence->fonction_id ? $fonctions[$presence->fonction_id] : '' }}</td>
+            <td>
+              <div class="form-check text-center">
+                <label class="form-check-label" for="present-{{ $presence->sapeur_id }}"><input type="checkbox"
+                    class="form-check-input" id="present-{{ $presence->sapeur_id }}"
+                    @if ($presence->present) checked="checked" @endif>&#8203;</label>
+              </div>
+            </td>
+            <td>
+              <div class="form-check text-center">
+                <label class="form-check-label" for="absent-{{ $presence->sapeur_id }}"><input type="checkbox"
+                    class="form-check-input" id="absent-{{ $presence->sapeur_id }}"
+                    @if ($presence->absent) checked="checked" @endif>&#8203;</label>
+              </div>
+            </td>
+            <td>
+              <div class="form-check text-center">
+                <label class="form-check-label" for="remplace-{{ $presence->sapeur_id }}"><input type="checkbox"
+                    class="form-check-input" id="remplace-{{ $presence->sapeur_id }}"
+                    @if ($presence->remplace) checked="checked" @endif>&#8203;</label>
+              </div>
+            </td>
+            <td>
+              <div class="form-check text-center">
+                <label class="form-check-label" for="excuse-{{ $presence->sapeur_id }}"
+                  class="custom-control-label"><input type="checkbox" class="form-check-input"
+                    id="excuse-{{ $presence->sapeur_id }}"
+                    @if ($presence->excuse_type_id) checked="checked" @endif><span>{{ $presence->excuse_type_id ? $excuses[$presence->excuse_type_id] : '' }}</span></label>
+              </div>
+            </td>
+          </tr>
         @endforeach
       </tbody>
       <thead>
