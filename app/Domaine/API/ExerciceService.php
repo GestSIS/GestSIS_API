@@ -60,6 +60,7 @@ class ExerciceService
                 $q->where('exercice_sapeur.present', '=', 0)
                     ->where('exercice_sapeur.convoque', '=', 1)
                     ->where('exercice_sapeur.remplace', '=', 0)
+                    ->where('exercice_sapeur.absent', '=', 1)
                     ->orWhereNotNull('exercice_sapeur.excuse_type_id');
             })
             ->select('exercice_sapeur.*')
