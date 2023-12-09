@@ -266,9 +266,6 @@ class SapeurBusiness
 
     public function addFonction(int $sapeurId, $data)
     {
-        if (!$this->isSapeur($sapeurId)) {
-            throw new ArrayException([], "Impossible d'ajouter une fonction à un civil.");
-        }
         //Check duplicated fonction during period of time
         $fonctionId = $data['fonction_id'];
 
