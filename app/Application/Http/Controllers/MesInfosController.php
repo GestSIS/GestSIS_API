@@ -72,6 +72,17 @@ class MesInfosController extends Controller
         return response()->json(['data' => $data]);
     }
 
+    public function permis(Request $request)
+    {
+        $sapeurId = $request->attributes->get('sapeurId');
+        if ($sapeurId === null || intval($sapeurId) <= 0) {
+            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+        }
+
+        $data = $this->service->mesPermis($sapeurId);
+        return response()->json(['data' => $data]);
+    }
+
     public function groupes(Request $request)
     {
         $sapeurId = $request->attributes->get('sapeurId');

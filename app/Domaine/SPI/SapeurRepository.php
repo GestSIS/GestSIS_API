@@ -22,7 +22,7 @@ interface SapeurRepository
 
     public function getSapeurTelephonesById(int $sapeurId);
 
-    public function getSapeurGroupesbyId(int $sapeurId);
+    public function getSapeurGroupesById(int $sapeurId);
 
     public function createSapeur($data);
 

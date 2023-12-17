@@ -578,7 +578,7 @@ class SapeurBusiness
     public function removeGroupes($sapeurId, $groupesIds)
     {
         $this->repository->removeGroupes($sapeurId, $groupesIds);
-        return $this->repository->getSapeurGroupesbyId($sapeurId);
+        return $this->repository->getSapeurGroupesById($sapeurId);
     }
 
     /* ************************************************** *

@@ -75,7 +75,12 @@ class MesInfosService
 
     function mesGroupes($sapeurId)
     {
-        return $this->sapeurRepo->getSapeurGroupesbyId($sapeurId);
+        return $this->sapeurRepo->getSapeurGroupesById($sapeurId);
+    }
+
+    function mesPermis($sapeurId)
+    {
+        return $this->sapeurRepo->getSapeurPermisById($sapeurId);
     }
 
     function mesControlesMedicaux($sapeurId)

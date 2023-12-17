@@ -146,6 +146,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('mes-grades', [MesInfosController::class, 'grades'])->name('mes-grades');
         Route::get('mes-cours', [MesInfosController::class, 'cours'])->name('mes-cours');
         Route::get('mes-groupes', [MesInfosController::class, 'groupes'])->name('mes-groupes');
+        Route::get('mes-permis', [MesInfosController::class, 'permis'])->name('mes-permis');
         Route::get('mon-materiel', [MonMaterielController::class, 'index'])->name('mon-materiel');
 
         Route::get('mes-controles-medicaux', [MesControlesMedicauxController::class, 'index'])->name('mes-controles-medicaux');

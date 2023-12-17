@@ -108,7 +108,7 @@ class SapeurService
 
     public function getSapeurGroupesById(int $sapeurId)
     {
-        return $this->repository->getSapeurGroupesbyId($sapeurId);
+        return $this->repository->getSapeurGroupesById($sapeurId);
     }
 
     public function getSapeurTelephonesById(int $sapeurId)

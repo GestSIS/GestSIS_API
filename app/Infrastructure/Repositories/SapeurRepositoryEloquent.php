@@ -108,7 +108,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
             })->toArray();
     }
 
-    public function getSapeurGroupesbyId(int $sapeurId)
+    public function getSapeurGroupesById(int $sapeurId)
     {
         $temp = $this;
         return GroupeSapeur::where('sapeur_id', $sapeurId)
