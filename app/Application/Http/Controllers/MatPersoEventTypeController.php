@@ -30,7 +30,7 @@ class MatPersoEventTypeController extends Controller
     {
         $data = $request->validate([
             'nom' => 'string|min:1',
-            'description' => 'string|nullable',
+            'description' => 'string',
             'validable' => 'boolean',
             'materielTypeIds.*' => 'integer',
         ]);
@@ -43,7 +43,7 @@ class MatPersoEventTypeController extends Controller
     {
         $data = $request->validate([
             'nom' => 'string|min:1',
-            'description' => 'string|nullable',
+            'description' => 'string',
             'validable' => 'boolean',
             'materielTypeIds.*' => 'integer',
         ]);
