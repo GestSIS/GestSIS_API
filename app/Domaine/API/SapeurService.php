@@ -297,7 +297,7 @@ class SapeurService
                 AND (
                     m.sortie IS NULL OR m.sortie >= ?
                     )
-                AND s.type == 0
+                AND s.type = 0
                 GROUP BY c.id
             ", [$exerciceComptable->fin, $exerciceComptable->debut]);
 
@@ -321,7 +321,7 @@ class SapeurService
                 AND (
                     m.sortie IS NULL OR m.sortie >= ?
                     )
-                AND s.type == 0
+                AND s.type = 0
                 GROUP BY f.id
             ", [Carbon::parse($exerciceComptable->fin), Carbon::parse($exerciceComptable->debut), Carbon::parse($exerciceComptable->fin), Carbon::parse($exerciceComptable->debut)]);
 
@@ -347,7 +347,7 @@ class SapeurService
                 AND (
                     m.sortie IS NULL OR m.sortie >= ?
                     )
-                AND s.type == 0
+                AND s.type = 0
                 GROUP BY g.id
             ", [Carbon::parse($exerciceComptable->fin), Carbon::parse($exerciceComptable->fin), Carbon::parse($exerciceComptable->debut)]);
 
@@ -368,7 +368,7 @@ class SapeurService
                 AND (
                     m.sortie IS NULL OR m.sortie >= ?
                     )
-                AND s.type == 0
+                AND s.type = 0
                 GROUP BY pt.id
         ", [Carbon::parse($exerciceComptable->fin), Carbon::parse($exerciceComptable->fin), Carbon::parse($exerciceComptable->debut)]);
 
