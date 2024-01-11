@@ -54,7 +54,8 @@
         @foreach ($comptes as $index => $compte)
           <?php
           $count += $localCount = count($compte->ecritures);
-          $total += $localTotal = array_reduce($compte->ecritures->toArray(), fn($acc, $e) => $acc + $e['total'], 0);
+          $localTotal = array_reduce($compte->ecritures->toArray(), fn($acc, $e) => $acc + $e['total'], 0);
+          $total += ($compte->produit ? -1 : 1) * $localTotal;
           ?>
           <tr>
             <td>{{ $compte->numero }} {{ $compte->designation }}</td>
