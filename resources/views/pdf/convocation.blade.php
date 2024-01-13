@@ -27,7 +27,7 @@
       return substr($heure, 0, 5) . ' - ' . $end->format('H:i');
   }
   ?>
-  <div class="container">
+  <div class="container-fluid">
     @foreach ($sapeurs as $sapeur)
       <h1>{{ $params['titre'] }}</h1>
       <div style="margin-top: 90px; margin-left: 55%; font-size: 18px !important;">
