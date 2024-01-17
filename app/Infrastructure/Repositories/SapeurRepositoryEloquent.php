@@ -3,6 +3,7 @@
 
 namespace App\Infrastructure\Repositories;
 
+use App\Domaine\Business\SapeurBusiness;
 use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\ControleMedical;
 use App\Infrastructure\Models\CoursSapeur;
@@ -25,17 +26,23 @@ class SapeurRepositoryEloquent implements SapeurRepository
 {
     private const SAPEUR_LIGHT_COLUMNS = ['id', 'nom', 'prenom', 'actif', 'email', 'localite_id', 'fonction_id', 'grade_id', 'civilite_id', 'date_naissance', 'type', 'annee_incorporation'];
 
-    public function listeSapeurLight()
+    public function listeSapeurLight(bool $actif = false)
     {
         $temp = $this;
         $now = Carbon::now();
         $oneMonthFurther = Carbon::now()->addMonths(1);
-        return Sapeur::with(['permis', 'fonctions' => function ($query) use ($oneMonthFurther, $now) {
+        $query = Sapeur::with(['permis', 'fonctions' => function ($query) use ($oneMonthFurther, $now) {
             $query->where('debut', '<=', $oneMonthFurther)->where(function ($query) use ($now) {
                 $query->where('fin', '=', null)
                     ->orWhere('fin', '>=', $now);
             });
-        }])->get(self::SAPEUR_LIGHT_COLUMNS)
+        }]);
+
+        if ($actif) {
+            $query = $query->where('actif', '=', 1);
+        }
+
+        return $query->get(self::SAPEUR_LIGHT_COLUMNS)
             ->map(function ($sapeur) use ($temp) {
                 return $temp->convertSapeurLight($sapeur);
             })->toArray();

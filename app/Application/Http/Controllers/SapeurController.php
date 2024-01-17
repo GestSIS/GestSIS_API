@@ -20,12 +20,14 @@ class SapeurController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
+     * 
+     * @param Request $request
      * @return Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(["data" => $this->service->listeSapeurs()]);
+        $actif = $request->input('actif', false) === 'true';
+        return response()->json(["data" => $this->service->listeSapeurs($actif)]);
     }
 
     /**
