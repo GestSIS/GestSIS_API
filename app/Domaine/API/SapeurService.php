@@ -34,7 +34,10 @@ class SapeurService
 
     public function trombinoscope()
     {
-        $sapeurs = Sapeur::where([['actif', '=', 1], ['type', '=', SapeurBusiness::TYPE_SAPEUR]])->get(['id', 'nom', 'prenom']);
+        $sapeurs = Sapeur::where([['actif', '=', 1], ['type', '=', SapeurBusiness::TYPE_SAPEUR]])
+            ->orderBy('nom')
+            ->orderBy('prenom')
+            ->get(['id', 'nom', 'prenom']);
         return View('pdf/trombinoscope', [
             "sapeurs" => $sapeurs,
         ]);
