@@ -32,6 +32,14 @@ class SapeurService
         $this->business = $business;
     }
 
+    public function trombinoscope()
+    {
+        $sapeurs = Sapeur::where([['actif', '=', 1], ['type', '=', SapeurBusiness::TYPE_SAPEUR]])->get(['id', 'nom', 'prenom']);
+        return View('pdf/trombinoscope', [
+            "sapeurs" => $sapeurs,
+        ]);
+    }
+
     public function fiche($sapeurId)
     {
         $sapeur = Sapeur::with(['localite', 'civilite', 'fonction', 'grade'])->find($sapeurId);
@@ -133,8 +141,6 @@ class SapeurService
         foreach (self::$ALLOWED_PHOTO_EXTENSION as $extension) {
             $path = 'photos/' . $sisKey . '/' . $sapeurId . '.' . $extension;
             if (Storage::exists($path)) {
-                // return response()->json(storage_path($path));
-                // return response()->file(storage_path('app/' . $path));
                 return Storage::download($path, null, ['Response-Type' => 'arraybuffer']);
             }
         }

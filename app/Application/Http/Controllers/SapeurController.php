@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 
 class SapeurController extends Controller
 {
@@ -28,6 +29,23 @@ class SapeurController extends Controller
     {
         $actif = $request->input('actif', false) === 'true';
         return response()->json(["data" => $this->service->listeSapeurs($actif)]);
+    }
+
+    /**
+     * Display a listing of the resource.
+     * 
+     * @param Request $request
+     * @return Response
+     */
+    public function trombinoscope()
+    {
+        return $this->service->trombinoscope();
+    }
+
+    public function iconeSapeurDefault()
+    {
+        $storagePath = 'icon/user.svg';
+        return Storage::download($storagePath);
     }
 
     /**
