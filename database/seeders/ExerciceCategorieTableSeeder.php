@@ -25,8 +25,6 @@ class ExerciceCategorieTableSeeder extends Seeder
             array('id' => 8, 'designation' => 'Exercice spécifique', 'amendable' => 1, 'duree_base' => 180, 'statut' => 1, 'tri' => 8),
             array('id' => 9, 'designation' => 'Séance divers', 'amendable' => 0, 'duree_base' => 120, 'statut' => 1, 'tri' => 9),
             array('id' => 10, 'designation' => 'Préparation exercices', 'amendable' => 0, 'duree_base' => 120, 'statut' => 1, 'tri' => 10),
-            array('id' => 11, 'designation' => 'Frais annuels', 'amendable' => 0, 'duree_base' => 60, 'statut' => 1, 'tri' => 11),
-            array('id' => 1000000, 'designation' => 'Indemnité annuelle', 'amendable' => 0, 'duree_base' => 60, 'statut' => 1, 'tri' => 12),
         );
 
         foreach ($categories as $categorie) {

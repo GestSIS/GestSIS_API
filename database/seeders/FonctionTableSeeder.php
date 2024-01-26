@@ -29,16 +29,12 @@ class FonctionTableSeeder extends Seeder
             array('id' => 12, 'nom' => 'CI2', 'abreviation' => 'CI2', 'tri' => 52, 'cumulable' => false),
             array('id' => 13, 'nom' => 'CI1', 'abreviation' => 'CI1', 'tri' => 50, 'cumulable' => false),
             array('id' => 14, 'nom' => 'CG2', 'abreviation' => 'CG2', 'tri' => 34, 'cumulable' => false),
-            array('id' => 15, 'nom' => 'CGER', 'abreviation' => 'CGER', 'tri' => 32, 'cumulable' => true),
             array('id' => 16, 'nom' => 'CG1', 'abreviation' => 'CG1', 'tri' => 30, 'cumulable' => false),
             array('id' => 17, 'nom' => 'Chef Mat', 'abreviation' => 'PAM', 'tri' => 40, 'cumulable' => true),
             array('id' => 18, 'nom' => 'Machiniste', 'abreviation' => 'Mach', 'tri' => 18, 'cumulable' => true),
             array('id' => 19, 'nom' => 'Porteur', 'abreviation' => 'PAR', 'tri' => 16, 'cumulable' => false),
-            array('id' => 20, 'nom' => 'Electricien', 'abreviation' => 'ELEC', 'tri' => 14, 'cumulable' => true),
-            array('id' => 21, 'nom' => 'Garde et circulation', 'abreviation' => 'GC', 'tri' => 12, 'cumulable' => false),
             array('id' => 22, 'nom' => 'Sapeur', 'abreviation' => 'Sap', 'tri' => 10, 'cumulable' => false),
-            array('id' => 23, 'nom' => 'Fourrier auxiliaire', 'abreviation' => 'Four aux', 'tri' => 60, 'cumulable' => true),
-            array('id' => 24, 'nom' => 'Sanitaire', 'abreviation' => 'SAN', 'tri' => 11, 'cumulable' => true),
+            array('id' => 23, 'nom' => 'Fourrier auxiliaire', 'abreviation' => 'Four aux', 'tri' => 75, 'cumulable' => true),
         );
 
         foreach ($fonctions as $fonction) {
