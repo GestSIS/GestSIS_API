@@ -75,6 +75,12 @@ class CommunesTableSeeder extends Seeder
             array('id' => '65', 'designation' => 'Haute-Sorne'),
             array('id' => '68', 'designation' => 'Montfaucon'),
             array('id' => '69', 'designation' => 'Balsthal'),
+            array('id' => '70', 'designation' => 'Lajoux'),
+            array('id' => '71', 'designation' => 'Les Genevez'),
+            array('id' => '72', 'designation' => 'Fahy'),
+            array('id' => '73', 'designation' => 'Courtedoux'),
+            array('id' => '74', 'designation' => 'Les Enfers'),
+            array('id' => '75', 'designation' => 'St-Brais'),
         );
 
         foreach ($communes as $commune) {
@@ -82,4 +88,3 @@ class CommunesTableSeeder extends Seeder
         }
     }
 }
-
