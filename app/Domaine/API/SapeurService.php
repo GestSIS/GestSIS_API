@@ -32,14 +32,21 @@ class SapeurService
         $this->business = $business;
     }
 
-    public function trombinoscope()
+    public function trombinoscope($sisId)
     {
+        $defaultImagePath = 'icon/user.svg';
+        $imageDefault = "data:image/svg+xml;base64," . base64_encode(Storage::get($defaultImagePath));
+
         $sapeurs = Sapeur::where([['actif', '=', 1], ['type', '=', SapeurBusiness::TYPE_SAPEUR]])
             ->orderBy('nom')
             ->orderBy('prenom')
             ->get(['id', 'nom', 'prenom']);
+
         return View('pdf/trombinoscope', [
             "sapeurs" => $sapeurs,
+            "sisId" => $sisId,
+            "sapeurService" => $this,
+            "imageDefault" => $imageDefault,
         ]);
     }
 
@@ -139,7 +146,7 @@ class SapeurService
 
     private static $ALLOWED_PHOTO_EXTENSION = ['jpg', 'jpeg', 'png'];
 
-    public function getPhotoSapeur($sapeurId, $sisKey)
+    public function downloadPhotoSapeur($sapeurId, $sisKey)
     {
         foreach (self::$ALLOWED_PHOTO_EXTENSION as $extension) {
             $path = 'photos/' . $sisKey . '/' . $sapeurId . '.' . $extension;
@@ -148,6 +155,17 @@ class SapeurService
             }
         }
         return response()->json(Null);
+    }
+
+    public function getPhotoSapeurAsHtmlEncoding($sapeurId, $sisKey)
+    {
+        foreach (self::$ALLOWED_PHOTO_EXTENSION as $extension) {
+            $path = 'photos/' . $sisKey . '/' . $sapeurId . '.' . $extension;
+            if (Storage::exists($path)) {
+                return "data:image/{$extension};base64," . base64_encode(Storage::get($path));
+            }
+        }
+        return null;
     }
 
     public function deletePhotoSapeur($sapeurId, $sisKey)

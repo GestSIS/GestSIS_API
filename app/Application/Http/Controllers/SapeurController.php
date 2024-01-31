@@ -37,15 +37,10 @@ class SapeurController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function trombinoscope()
+    public function trombinoscope(Request $request)
     {
-        return $this->service->trombinoscope();
-    }
-
-    public function iconeSapeurDefault()
-    {
-        $storagePath = 'icon/user.svg';
-        return Storage::download($storagePath);
+        $sisKey = $request->header('Sis-Id', null);
+        return $this->service->trombinoscope($sisKey);
     }
 
     /**

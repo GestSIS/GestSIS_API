@@ -29,7 +29,7 @@ class ControleMedicalFactory extends Factory
             'en_cours' => 1,
             'sapeur_id' => $this->faker->numberBetween(1, 25),
             'medecin_id' => $this->faker->numberBetween(1, 10),
-            'controle_medical_type_id' => $this->faker->numberBetween(1, 6)
+            'controle_medical_type_id' => $this->faker->numberBetween(1, 2)
         ];
     }
 }

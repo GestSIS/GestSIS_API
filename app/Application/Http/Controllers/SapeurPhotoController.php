@@ -25,7 +25,7 @@ class SapeurPhotoController extends Controller
     public function index(Request $request, int $id)
     {
         $sisKey = $request->header('Sis-Id', Null);
-        return $this->service->getPhotoSapeur($id, $sisKey);
+        return $this->service->downloadPhotoSapeur($id, $sisKey);
     }
 
     /**

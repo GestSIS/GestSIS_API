@@ -43,7 +43,7 @@ class InterventionFactory extends Factory
             'statut' => 0,
             'exercice_comptable_id' => 4,
             'localite_id' => $this->faker->randomElement($array = array(3, 5, 23, 44, 93)),
-            'type_intervention_id' => $this->faker->numberBetween(1, 5),
+            'type_intervention_id' => $this->faker->numberBetween(1, 4),
             'sapeur_id' => $this->faker->numberBetween(1, 10),
             'stat_federal_id' => $this->faker->numberBetween(1, 5),
             'intervention_traitement_id' => 1,

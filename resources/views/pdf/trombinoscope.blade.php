@@ -29,8 +29,8 @@
     <div class="d-grid gap-2" style="grid-template-columns: repeat(6, minmax(0, 1fr));">
       @foreach ($sapeurs as $sapeur)
         <div class="d-flex flex-column align-items-center">
-          <img class="img-fluid" name="{{ $sapeur->id }}" src="/api/v2/sapeurs/{{ $sapeur->id }}/photo"
-            onerror="this.onerror=null;this.src='/api/v2/icone-sapeur-default';"
+          <img class="img-fluid" name="{{ $sapeur->id }}"
+            src="{{ $sapeurService->getPhotoSapeurAsHtmlEncoding($sapeur->id, $sisId) ?? $imageDefault }}"
             alt="{{ $sapeur->nom }} {{ $sapeur->prenom }}" />
           <label for="{{ $sapeur->id }}">{{ $sapeur->nom }} {{ $sapeur->prenom }}</label>
         </div>

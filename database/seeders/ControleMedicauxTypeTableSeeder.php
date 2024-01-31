@@ -16,7 +16,7 @@ class ControleMedicauxTypeTableSeeder extends Seeder
     {
         $types = array(
             array('id' => 1, 'designation' => 'Contrôle PAR ', 'duree_validite' => 2, 'expirable' => true, 'tri' => 1),
-            array('id' => 4, 'designation' => 'Examen d\'aptitude FSS', 'duree_validite' => 2, 'expirable' => true, 'tri' => 2),
+            array('id' => 2, 'designation' => 'Examen d\'aptitude FSS', 'duree_validite' => 2, 'expirable' => true, 'tri' => 2),
         );
 
         foreach ($types as $type) {

@@ -190,7 +190,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('liste-fssp', [SapeurController::class, 'listeFssp'])->name('api.v2.liste-fssp');
 
         Route::get('trombinoscope', [SapeurController::class, 'trombinoscope'])->name('api.v2.trombinoscope');
-        Route::get('icone-sapeur-default', [SapeurController::class, 'iconeSapeurDefault'])->name('api.v2.icone-sapeur-default');
     });
 
     // All

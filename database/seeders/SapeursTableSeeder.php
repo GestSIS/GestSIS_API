@@ -152,23 +152,23 @@ class SapeursTableSeeder extends Seeder
         ]);
 
         $groupes_sapeurs = array(
-            array('id' => '4','groupe_id' => '1','sapeur_id' => '1'),
-            array('id' => '14','groupe_id' => '5','sapeur_id' => '1'),
-            array('id' => '16','groupe_id' => '6','sapeur_id' => '1'),
-            array('id' => '22','groupe_id' => '2','sapeur_id' => '2'),
-            array('id' => '23','groupe_id' => '5','sapeur_id' => '2'),
-            array('id' => '28','groupe_id' => '4','sapeur_id' => '2'),
-            array('id' => '38','groupe_id' => '34','sapeur_id' => '2'),
-            array('id' => '40','groupe_id' => '34','sapeur_id' => '3'),
-            array('id' => '42','groupe_id' => '35','sapeur_id' => '3'),
-            array('id' => '45','groupe_id' => '36','sapeur_id' => '3'),
-            array('id' => '48','groupe_id' => '6','sapeur_id' => '3'),
-            array('id' => '50','groupe_id' => '5','sapeur_id' => '3'),
-            array('id' => '51','groupe_id' => '4','sapeur_id' => '3'),
-            array('id' => '56','groupe_id' => '37','sapeur_id' => '3'),
+            array('id' => '1', 'groupe_id' => '1', 'sapeur_id' => '1'),
+            array('id' => '2', 'groupe_id' => '5', 'sapeur_id' => '1'),
+            array('id' => '3', 'groupe_id' => '6', 'sapeur_id' => '1'),
+            array('id' => '4', 'groupe_id' => '2', 'sapeur_id' => '2'),
+            array('id' => '5', 'groupe_id' => '5', 'sapeur_id' => '2'),
+            array('id' => '6', 'groupe_id' => '4', 'sapeur_id' => '2'),
+            array('id' => '7', 'groupe_id' => '7', 'sapeur_id' => '2'),
+            array('id' => '8', 'groupe_id' => '8', 'sapeur_id' => '3'),
+            array('id' => '9', 'groupe_id' => '9', 'sapeur_id' => '3'),
+            array('id' => '10', 'groupe_id' => '10', 'sapeur_id' => '3'),
+            array('id' => '11', 'groupe_id' => '6', 'sapeur_id' => '3'),
+            array('id' => '12', 'groupe_id' => '5', 'sapeur_id' => '3'),
+            array('id' => '13', 'groupe_id' => '4', 'sapeur_id' => '3'),
+            array('id' => '14', 'groupe_id' => '11', 'sapeur_id' => '3'),
         );
 
-        foreach($groupes_sapeurs as $groupes_sapeur){
+        foreach ($groupes_sapeurs as $groupes_sapeur) {
             DB::table('groupe_sapeur')->insert($groupes_sapeur);
         }
     }
