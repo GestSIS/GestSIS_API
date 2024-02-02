@@ -10,10 +10,9 @@ use stdClass;
 
 class ControleMedicalRepositoryEloquent implements ControleMedicalRepository
 {
-    //TODO Implement this class
-
     public function listeAllControlesMedicaux()
     {
+        // TODO: Filter controles médicaux pour sapeur actifs
         $temp = $this;
         return ControleMedical::get()
             ->map(function ($controle) use ($temp) {

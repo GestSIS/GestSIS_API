@@ -488,6 +488,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('cours-sapeurs/{exerciceComptableId}', [CoursSapeurController::class, 'index']);
     });
 
+    Route::group(['middleware' => 'jwtTokenRole:comptabilite.tout,fiche_travail.config'], function () {
+        Route::resource('comptes', CompteController::class)->only(['index']);
+        Route::resource('ecriture-categories', EcritureCategorieController::class)->only(['index']);
+    });
+
     // Comptabilite
     Route::group(['middleware' => 'jwtTokenRole:comptabilite.tout'], function () {
         Route::post('imputation/annuel/{id}', [ImputationController::class, 'annuel']);
@@ -517,13 +522,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('exercices-comptable/{exercieComptableId}/justificatif', [CompteController::class, 'justificatifComplet']);
 
         // Params Comptabilite
-        Route::resource('comptes', CompteController::class)->only(['index']);
         Route::resource('indemnites-exercice-types', IndemniteExerciceTypeController::class)->only(['index']);
         Route::resource('indemnites-intervention-types', IndemniteInterventionTypeController::class)->only(['index']);
         Route::resource('indemnites-cours-types', IndemniteCoursTypeController::class)->only(['index']);
         Route::resource('frais-indemnites-types', FraisIndemniteTypeController::class)->only(['index']);
         Route::resource('frais-indemnites-annuel-types', FraisIndemniteAnnuelTypeController::class)->only(['index']);
-        Route::resource('ecriture-categories', EcritureCategorieController::class)->only(['index']);
 
         // Décomptes
         Route::get('decomptes/{id}/ecritures', [DecompteController::class, 'ecritures']);
