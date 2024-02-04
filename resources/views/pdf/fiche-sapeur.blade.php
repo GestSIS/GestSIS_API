@@ -99,6 +99,13 @@ if (!function_exists('formatDate')) {
         name="remarques"></textarea>
     </div>
 
+    <h2 class="h3">Informations bancaires</h2>
+    <div class="mb-3">
+      <label for="m-sap-iban">Numéro IBAN</label>
+      <input type="text" id="m-sap-iban" value="{{ $sapeur->iban }}" class="form-control form-control-sm"
+        rows="3" name="iban"></input>
+    </div>
+
     <h2 class="h3">Téléphone</h2>
     <table class="table table-sm table-bordered table-striped mb-2">
       <tr>
