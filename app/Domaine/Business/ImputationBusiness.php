@@ -600,7 +600,7 @@ class ImputationBusiness
             $dureeNonTarifMinSapeur = $dureeNonTarifMin[$sapeurId];
 
             $total = 0;
-            $dureeTotal = $dureeNonTarifMinSapeur + $dureeTarifMin;
+            $dureeTotal = $dureeNonTarifMinSapeur + $dureeTarifMinSapeur;
 
             // Calcul du nombre d'heures effectives en tarif min
             if ($dureeTarifMinSapeur > $tarifMinPour) {
