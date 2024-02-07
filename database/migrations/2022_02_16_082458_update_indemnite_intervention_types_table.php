@@ -18,10 +18,10 @@ return new class extends Migration
             $table->renameColumn('solde_min', 'tarif_min'); // Renommé
             $table->renameColumn('solde_min_pour', 'tarif_min_pour'); // Renommé
 
-            $table->unsignedInteger('type'); // Renommé
+            $table->unsignedInteger('type');
         });
         Schema::table('indemnite_intervention_fonctions', function (Blueprint $table) {
-            $table->renameColumn('solde', 'tarif'); // 
+            $table->renameColumn('solde', 'tarif'); // Renommé
 
             $table->unsignedBigInteger('fonction_id')->nullable()->change();
         });

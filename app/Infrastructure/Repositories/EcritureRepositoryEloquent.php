@@ -114,6 +114,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
     public function persisteNewEcriture($ecriture)
     {
         if (!array_key_exists('complement', $ecriture)) $ecriture['complement'] = "";
+        if (!array_key_exists('tarif_pro_rata', $ecriture)) $ecriture['tarif_pro_rata'] = null;
         if (!array_key_exists('tarif_min', $ecriture)) $ecriture['tarif_min'] = null;
         if (!array_key_exists('tarif_min_pour', $ecriture)) $ecriture['tarif_min_pour'] = null;
         if (!array_key_exists('tarif_min_pro_rata', $ecriture)) $ecriture['tarif_min_pro_rata'] = null;
@@ -159,6 +160,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->type_unite_id = $ecriture->type_unite_id;
         $object->quantite = $ecriture->quantite;
         $object->tarif = $ecriture->tarif;
+        $object->tarif_pro_rata = $ecriture->tarif_pro_rata;
         $object->tarif_min = $ecriture->tarif_min;
         $object->tarif_min_pour = $ecriture->tarif_min_pour;
         $object->tarif_min_pro_rata = $ecriture->tarif_min_pro_rata;
@@ -197,6 +199,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->type_unite_id = $ecriture->type_unite_id;
         $object->quantite = $ecriture->quantite;
         $object->tarif = $ecriture->tarif;
+        $object->tarif_pro_rata = $ecriture->tarif_pro_rata;
         $object->tarif_min = $ecriture->tarif_min;
         $object->tarif_min_pour = $ecriture->tarif_min_pour;
         $object->tarif_min_pro_rata = $ecriture->tarif_min_pro_rata;

@@ -345,7 +345,7 @@ class ImputationBusiness
     public function imputerAnnuel(int $exerciceComptableId)
     {
         // Choix disponible pour une seule imputation annuelle :
-        // FIXME: Actuelle regénère les frais pour tous les sapeurs ! et ne fait pas ce qui est écrit ci-dessous
+        // FIXME: Actuellement regénère les frais pour tous les sapeurs ! et ne fait pas ce qui est écrit ci-dessous
         // 1. ~~ Si déjà une imputation pour l'année alors ne rien faire~~
         // 2. OUI -> Ajouter des imputations uniquement pour les sapeurs qui n'ont pas de frais pour l'instant
         // 3. ~~ Tout supprimer pour l'année courante et tout regénérer~~
@@ -506,12 +506,6 @@ class ImputationBusiness
 
     /**
      * Générer les écritures liés aux présences des sapeurs durant cette intervention
-     * 
-     * Décompose le temps de chaque sapeurs entre
-     * - Week-end (nuit inclus)
-     * - Nuit
-     * - Normal
-     * Puis calcul le total avec les taux paramétrés.
      */
     public function imputerIntervention($interventionId, $data)
     {
@@ -522,11 +516,13 @@ class ImputationBusiness
             throw new ArrayException(array("message" => "Impossible d'imputer cette intervention"));
         }
 
+        $ecritures = [];
         if ($indemniteType->taux_weekend > 0 || $indemniteType->taux_nuit > 0) {
-            $this->imputerInterventionTaux($interventionId, $intervention, $indemniteType, $data);
+            $ecritures = $this->imputerInterventionTaux($intervention, $indemniteType);
         } else {
-            $this->imputerInterventionTarifMin($interventionId, $intervention, $indemniteType, $data);
+            $ecritures = $this->imputerInterventionTarifMin($intervention, $indemniteType);
         }
+        Ecriture::insert($ecritures);
 
         // Update statut
         return $this->interventionRepo->editInterventionInformationsById($interventionId, [
@@ -534,7 +530,12 @@ class ImputationBusiness
         ])->statut;
     }
 
-    private function imputerInterventionTarifMin($interventionId, $intervention, $indemniteType, $data)
+    /**
+     * Générer les écritures liés aux présences des sapeurs durant cette intervention
+     * 
+     * Décompose le temps de chaque sapeurs entre les différentes phases et applique le tarif minimum
+     */
+    private function imputerInterventionTarifMin($intervention, $indemniteType)
     {
         // Grouper les présences par sapeurs
         $sapeurs = [];
@@ -599,10 +600,15 @@ class ImputationBusiness
             $dureeNonTarifMinSapeur = $dureeNonTarifMin[$sapeurId];
 
             $total = 0;
+            $dureeTotal = $dureeNonTarifMinSapeur + $dureeTarifMin;
 
-            // Application du tarif min
+            // Calcul du nombre d'heures effectives en tarif min
             if ($dureeTarifMinSapeur > $tarifMinPour) {
-                $dureeNonTarifMinSapeur += $dureeTarifMinSapeur - $tarifMinPour;
+                if ($indemniteType->tarif_pro_rata) {
+                    $dureeNonTarifMinSapeur += $dureeTarifMinSapeur - $tarifMinPour;
+                } else {
+                    $dureeNonTarifMinSapeur += floor($dureeTarifMinSapeur - $tarifMinPour);
+                }
                 $dureeTarifMinSapeur = $tarifMinPour;
             }
 
@@ -618,7 +624,8 @@ class ImputationBusiness
 
             $ecritures[] = array(
                 'tarif' => $tarif,
-                'quantite' => $dureeTarifMinSapeur + $dureeNonTarifMinSapeur,
+                'tarif_pro_rata' => $indemniteType->tarif_pro_rata,
+                'quantite' => $dureeTotal,
                 'total' => $total,
                 'tarif_min' => $tarifMin,
                 'tarif_min_pour' => $tarifMinPour,
@@ -639,12 +646,20 @@ class ImputationBusiness
             );
         }
 
-        Ecriture::insert($ecritures);
+        return $ecritures;
     }
 
-    private function imputerInterventionTaux($interventionId, $intervention, $indemniteType, $data)
+    /**
+     * Générer les écritures liés aux présences des sapeurs durant cette intervention
+     * 
+     * Décompose le temps de chaque sapeurs entre
+     * - Week-end (nuit inclus)
+     * - Nuit
+     * - Normal
+     * Puis calcul le total avec les taux paramétrés.
+     */
+    private function imputerInterventionTaux($intervention, $indemniteType): array
     {
-        // $dateImputation = $data['date_imputation']; // TODO: Ajouter date d'imputation ?
         $designation = "{$intervention->localite->designation} ({$intervention->type->designation}) $intervention->lieu";
 
         // Grouper les présences par sapeurs
@@ -656,11 +671,6 @@ class ImputationBusiness
             array_push($sapeurs[$presence->sapeur_id], $presence);
         }
 
-        // $phases = $intervention->phases;
-
-        // //TODO: Retourne les phases durant cette période
-        // $getPhases = function ($presence) use ($phases) {
-        // };
         $ecritures = array();
 
         // Calcul la durée de présence dans chaque catégorie (week-end, nuit, standard)
@@ -828,7 +838,7 @@ class ImputationBusiness
                     'sapeur_id' => $sapeur_id,
                     'compte_id' => $indemniteType->compte_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
-                    'intervention_id' => $interventionId,
+                    'intervention_id' => $intervention->id,
                     'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
 
                     'module' => self::ECRITURE_MODULE_INTERVENTION,
@@ -852,7 +862,7 @@ class ImputationBusiness
                     'sapeur_id' => $sapeur_id,
                     'compte_id' => $indemniteType->compte_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
-                    'intervention_id' => $interventionId,
+                    'intervention_id' => $intervention->id,
                     'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
 
                     'module' => self::ECRITURE_MODULE_INTERVENTION,
@@ -876,7 +886,7 @@ class ImputationBusiness
                     'sapeur_id' => $sapeur_id,
                     'compte_id' => $indemniteType->compte_id,
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
-                    'intervention_id' => $interventionId,
+                    'intervention_id' => $intervention->id,
                     'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
 
                     'module' => self::ECRITURE_MODULE_INTERVENTION,
@@ -885,7 +895,7 @@ class ImputationBusiness
             }
         }
 
-        Ecriture::insert($ecritures);
+        return $ecritures;
     }
 
     public function imputerExercice($exerciceId, $data)
