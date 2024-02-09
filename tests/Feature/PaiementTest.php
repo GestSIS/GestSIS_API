@@ -25,9 +25,10 @@ class PaiementTest extends TestCase
                     'decompte_id',
                     'solde',
                     'indemnite',
-                    'frais',
-                    'amende',
-                    'avs',
+                    'frais_forfaitaire',
+                    'frais_effectif',
+                    'autre',
+                    'avs_ac',
                     'total',
                     'sapeur_id',
                 ]
@@ -61,9 +62,10 @@ class PaiementTest extends TestCase
                                 "sapeur_id",
                                 "solde",
                                 "indemnite",
-                                "frais",
-                                "amende",
-                                "avs",
+                                'frais_forfaitaire',
+                                'frais_effectif',
+                                'autre',
+                                "avs_ac",
                                 "total"
                             ]
                         ]
@@ -89,7 +91,6 @@ class PaiementTest extends TestCase
         ]);
 
         $response = $this->json('GET', "/api/v2/paiements/3/iso20022", $data);
-
         $response->assertStatus(200);
     }
 }

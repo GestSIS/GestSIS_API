@@ -17,90 +17,84 @@ class DecompteTest extends TestCase
     public function testDecompteSimple()
     {
         $ecritures = [
-            array(
+            [
                 "designation" => "test",
                 "total" => 1,
-                "tarif" => 0,
+                "tarif" => 1,
                 "type_unite_id" => 1,
-                "quantite" => 0,
-                "solde" => 1,
-                "indemnite" => 0,
-                "frais" => 0,
+                "quantite" => 1,
+                "module" => 0,
+                "type" => 1,
                 "sapeur_id" => 1,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 1,
                 "ecriture_categorie_id" => 1,
-            ),
-            array(
+            ],
+            [
                 "designation" => "test",
                 "total" => 1,
-                "tarif" => 0,
+                "tarif" => 2,
                 "type_unite_id" => 1,
-                "quantite" => 0,
-                "solde" => 0,
-                "indemnite" => 2,
-                "frais" => 0,
+                "quantite" => 1,
+                "module" => 0,
+                "type" => 2,
                 "sapeur_id" => 1,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 1,
                 "ecriture_categorie_id" => 1,
-            ),
-            array(
+            ],
+            [
                 "designation" => "test",
                 "total" => 1,
-                "tarif" => 0,
+                "tarif" => 4,
                 "type_unite_id" => 1,
-                "quantite" => 0,
-                "solde" => 0,
-                "indemnite" => 0,
-                "frais" => 4,
+                "quantite" => 1,
+                "module" => 0,
+                "type" => 3,
                 "sapeur_id" => 1,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 1,
                 "ecriture_categorie_id" => 1,
-            ),
-            array(
+            ],
+            [
                 "designation" => "test",
                 "total" => 1,
-                "tarif" => 0,
+                "tarif" => 1,
                 "type_unite_id" => 1,
-                "quantite" => 0,
-                "solde" => 1,
-                "indemnite" => 0,
-                "frais" => 0,
+                "quantite" => 1,
+                "module" => 0,
+                "type" => 1,
                 "sapeur_id" => 2,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 1,
                 "ecriture_categorie_id" => 1,
-            ),
-            array(
+            ],
+            [
                 "designation" => "test",
                 "total" => 1,
-                "tarif" => 0,
+                "tarif" => 2,
                 "type_unite_id" => 1,
-                "quantite" => 0,
-                "solde" => 0,
-                "indemnite" => 2,
-                "frais" => 0,
+                "quantite" => 1,
+                "module" => 0,
+                "type" => 2,
                 "sapeur_id" => 2,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 1,
                 "ecriture_categorie_id" => 1,
-            ),
-            array(
+            ],
+            [
                 "designation" => "test",
                 "total" => 1,
-                "tarif" => 0,
+                "tarif" => 4,
                 "type_unite_id" => 1,
-                "quantite" => 0,
-                "solde" => 0,
-                "indemnite" => 0,
-                "frais" => 4,
+                "quantite" => 1,
+                "module" => 0,
+                "type" => 3,
                 "sapeur_id" => 2,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 1,
                 "ecriture_categorie_id" => 1,
-            )
+            ]
         ];
         Ecriture::insert($ecritures);
         $ecritures = Ecriture::where('exercice_comptable_id', 1)->get();
@@ -158,9 +152,10 @@ class DecompteTest extends TestCase
                             'decompte_id',
                             'solde',
                             'indemnite',
-                            'frais',
-                            'amende',
-                            'avs',
+                            'frais_forfaitaire',
+                            'frais_effectif',
+                            'autre',
+                            'avs_ac',
                             'total',
                             'sapeur_id',
                         ]
@@ -172,21 +167,23 @@ class DecompteTest extends TestCase
                         'paiements' => [
                             [
                                 "sapeur_id" => 1,
-                                "solde" => 1.00,
-                                "indemnite" => 2.00,
-                                "frais" => 4.00,
-                                "amende" => 0.00,
-                                "avs" => 0.00,
-                                "total" => 7.00
+                                "solde" => "1.00",
+                                "indemnite" => "2.00",
+                                "frais_forfaitaire" => "4.00",
+                                "frais_effectif" => "0.00",
+                                "autre" => "0.00",
+                                "avs_ac" => "0.00",
+                                "total" => "7.00"
                             ],
                             [
                                 "sapeur_id" => 2,
-                                "solde" => 1.00,
-                                "indemnite" => 2.00,
-                                "frais" => 4.00,
-                                "amende" => 0.00,
-                                "avs" => 0.00,
-                                "total" => 7.00
+                                "solde" => "1.00",
+                                "indemnite" => "2.00",
+                                "frais_forfaitaire" => "4.00",
+                                "frais_effectif" => "4.00",
+                                "autre" => "0.00",
+                                "avs_ac" => "0.00",
+                                "total" => "7.00"
                             ]
                         ]
                     ]
@@ -230,9 +227,10 @@ class DecompteTest extends TestCase
                             'decompte_id',
                             'solde',
                             'indemnite',
-                            'frais',
-                            'amende',
-                            'avs',
+                            'frais_forfaitaire',
+                            'frais_effectif',
+                            'autre',
+                            'avs_ac',
                             'total',
                             'sapeur_id',
                         ]
@@ -248,7 +246,7 @@ class DecompteTest extends TestCase
     public function testDecompteDeduction()
     {
         $ecritures = [
-            array(
+            [
                 "designation" => "test",
                 "total" => 1,
                 "tarif" => 0,
@@ -256,13 +254,14 @@ class DecompteTest extends TestCase
                 "quantite" => 0,
                 "solde" => 7400,
                 "indemnite" => 0,
-                "frais" => 0,
+                "frais_forfaitaire" => 0,
+                "frais_effectif" => 0,
                 "sapeur_id" => 1,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 2,
                 "ecriture_categorie_id" => 1,
-            ),
-            array(
+            ],
+            [
                 "designation" => "test",
                 "total" => 1,
                 "tarif" => 0,
@@ -270,13 +269,14 @@ class DecompteTest extends TestCase
                 "quantite" => 0,
                 "solde" => 0,
                 "indemnite" => 2400,
-                "frais" => 0,
+                "frais_forfaitaire" => 0,
+                "frais_effectif" => 0,
                 "sapeur_id" => 2,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 2,
                 "ecriture_categorie_id" => 1,
-            ),
-            array(
+            ],
+            [
                 "designation" => "test",
                 "total" => 1,
                 "tarif" => 0,
@@ -284,12 +284,13 @@ class DecompteTest extends TestCase
                 "quantite" => 0,
                 "solde" => 6000,
                 "indemnite" => 1400,
-                "frais" => 0,
+                "frais_forfaitaire" => 0,
+                "frais_effectif" => 0,
                 "sapeur_id" => 3,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 2,
                 "ecriture_categorie_id" => 1,
-            )
+            ]
         ];
         Ecriture::insert($ecritures);
         $ecritures = Ecriture::where('exercice_comptable_id', 2)->get();
@@ -305,7 +306,7 @@ class DecompteTest extends TestCase
             'designation' => 'test',
             'deduction' => 1,
             'exercice_comptable_id' => 2,
-            'date' => Carbon::today()
+            'date' => Carbon::today(),
         ];
 
         $business = new PaiementBusiness();
@@ -345,9 +346,10 @@ class DecompteTest extends TestCase
                             'decompte_id',
                             'solde',
                             'indemnite',
-                            'frais',
-                            'amende',
-                            'avs',
+                            'frais_forfaitaire',
+                            'frais_effectif',
+                            'autre',
+                            'avs_ac',
                             'total',
                             'sapeur_id',
                         ]
@@ -361,27 +363,30 @@ class DecompteTest extends TestCase
                                 "sapeur_id" => 1,
                                 "solde" => "7400.00",
                                 "indemnite" => "0.00",
-                                "frais" => "0.00",
-                                "amende" => "0.00",
-                                "avs" => "414.60",
+                                "frais_forfaitaire" => "0.00",
+                                "frais_effectif" => "0.00",
+                                "autre" => "0.00",
+                                "avs_ac" => "414.60",
                                 "total" => "6985.40"
                             ],
                             [
                                 "sapeur_id" => 2,
                                 "solde" => "0.00",
                                 "indemnite" => "2400.00",
-                                "frais" => "0.00",
-                                "amende" => "0.00",
-                                "avs" => "414.60",
+                                "frais_forfaitaire" => "0.00",
+                                "frais_effectif" => "0.00",
+                                "autre" => "0.00",
+                                "avs_ac" => "414.60",
                                 "total" => "1985.40"
                             ],
                             [
                                 "sapeur_id" => 3,
                                 "solde" => "6000.00",
                                 "indemnite" => "1400.00",
-                                "frais" => "0.00",
-                                "amende" => "0.00",
-                                "avs" => "414.60",
+                                "frais_forfaitaire" => "0.00",
+                                "frais_effectif" => "0.00",
+                                "autre" => "0.00",
+                                "avs_ac" => "414.60",
                                 "total" => "6985.40"
                             ]
                         ]
@@ -394,48 +399,71 @@ class DecompteTest extends TestCase
     public function testDeuxDecompteDeduction()
     {
         $ecritures = [
-            array(
+            [
                 "designation" => "test",
-                "total" => 1,
-                "tarif" => 0,
+                "total" => 6000,
                 "type_unite_id" => 1,
                 "quantite" => 0,
-                "solde" => 6900,
-                "indemnite" => 0,
-                "frais" => 0,
+                "tarif" => 6000,
+                "module" => 0,
+                "type" => 1,
                 "sapeur_id" => 1,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 3,
                 "ecriture_categorie_id" => 1,
-            ),
-            array(
+            ],
+            [
                 "designation" => "test",
-                "total" => 1,
-                "tarif" => 0,
+                "total" => 900,
                 "type_unite_id" => 1,
                 "quantite" => 0,
-                "solde" => 0,
-                "indemnite" => 1900,
-                "frais" => 0,
+                "tarif" => 900,
+                "module" => 0,
+                "type" => 2,
+                "sapeur_id" => 1,
+                "compte_id" => 1,
+                "exercice_comptable_id" => 3,
+                "ecriture_categorie_id" => 1,
+            ],
+            [
+                "designation" => "test",
+                "type_unite_id" => 1,
+                "total" => 1900,
+                "quantite" => 1,
+                "tarif" => 1900,
+                "module" => 0,
+                "type" => 2,
                 "sapeur_id" => 2,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 3,
                 "ecriture_categorie_id" => 1,
-            ),
-            array(
+            ],
+            [
                 "designation" => "test",
-                "total" => 1,
-                "tarif" => 0,
+                "total" => 6000,
                 "type_unite_id" => 1,
                 "quantite" => 0,
-                "solde" => 6000,
-                "indemnite" => 900,
-                "frais" => 0,
+                "tarif" => 6000,
+                "module" => 0,
+                "type" => 1,
                 "sapeur_id" => 3,
                 "compte_id" => 1,
                 "exercice_comptable_id" => 3,
                 "ecriture_categorie_id" => 1,
-            )
+            ],
+            [
+                "designation" => "test",
+                "total" => 900,
+                "type_unite_id" => 1,
+                "quantite" => 0,
+                "tarif" => 900,
+                "module" => 0,
+                "type" => 2,
+                "sapeur_id" => 3,
+                "compte_id" => 1,
+                "exercice_comptable_id" => 3,
+                "ecriture_categorie_id" => 1,
+            ],
         ];
         Ecriture::insert($ecritures);
         $ecritures = Ecriture::where('exercice_comptable_id', 3)->get();
@@ -451,7 +479,7 @@ class DecompteTest extends TestCase
             'designation' => 'test',
             'deduction' => 1,
             'exercice_comptable_id' => 3,
-            'date' => Carbon::today()
+            'date' => Carbon::today(),
         ];
 
         $business = new PaiementBusiness();
@@ -491,9 +519,10 @@ class DecompteTest extends TestCase
                             'decompte_id',
                             'solde',
                             'indemnite',
-                            'frais',
-                            'amende',
-                            'avs',
+                            'frais_forfaitaire',
+                            'frais_effectif',
+                            'autre',
+                            'avs_ac',
                             'total',
                             'sapeur_id',
                         ]
@@ -505,31 +534,34 @@ class DecompteTest extends TestCase
                         'paiements' => [
                             [
                                 "sapeur_id" => 1,
-                                "solde" => "6900.00",
-                                "indemnite" => "0.00",
-                                "frais" => "0.00",
-                                "amende" => "0.00",
-                                "avs" => "0",
+                                "solde" => "6000.00",
+                                "indemnite" => "900.00",
+                                "frais_forfaitaire" => "0.00",
+                                "frais_effectif" => "0.00",
+                                "autre" => "0.00",
+                                "avs_ac" => "0",
                                 "total" => "6900"
                             ],
                             [
                                 "sapeur_id" => 2,
                                 "solde" => "0.00",
                                 "indemnite" => "1900.00",
-                                "frais" => "0.00",
-                                "amende" => "0.00",
-                                "avs" => "0",
+                                "frais_forfaitaire" => "0.00",
+                                "frais_effectif" => "0.00",
+                                "autre" => "0.00",
+                                "avs_ac" => "0",
                                 "total" => "1900"
                             ],
                             [
                                 "sapeur_id" => 3,
                                 "solde" => "6000.00",
                                 "indemnite" => "900.00",
-                                "frais" => "0.00",
-                                "amende" => "0.00",
-                                "avs" => "0",
+                                "frais_forfaitaire" => "0.00",
+                                "frais_effectif" => "0.00",
+                                "autre" => "0.00",
+                                "avs_ac" => "0",
                                 "total" => "6900"
-                            ]
+                            ],
                         ]
                     ]
                 ]

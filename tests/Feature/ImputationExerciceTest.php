@@ -70,7 +70,7 @@ class ImputationExerciceTest extends TestCase
                 'excuse_type_id' => null
             )
         ));
-        $exerciceService->validateExercice($this->exerciceId);
+        $exerciceService->validateExerciceById($this->exerciceId);
     }
 
     /**

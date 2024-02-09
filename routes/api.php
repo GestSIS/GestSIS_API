@@ -548,7 +548,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         // Paiements
         Route::get('paiements/exercice-comptable/{id}', [PaiementController::class, 'getByExerciceComptable']);
-        Route::get('paiements/{id}/iso20022', 'PaiementController@iso20022');
+        Route::get('paiements/{id}/iso20022', [PaiementController::class, 'iso20022']);
         Route::get('paiements/{id}', [PaiementController::class, 'get']);
 
         // Amendes
