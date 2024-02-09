@@ -136,7 +136,7 @@ class ExerciceSapeurTest extends TestCase
         $sapeurs[1]['present'] = 0;
         $sapeurs[1]['excuse_type_id'] = 1;
 
-        $response = $this->json('PUT', '/api/v2/exercices/' . $exercice->id . '/sapeurs/', array("sapeurs" => $sapeurs));
+        $response = $this->json('POST', '/api/v2/exercices/presence/' . $sapeurs[1]['id'], array("sapeurs" => $sapeurs[1]));
 
         $response
             ->assertStatus(200)

@@ -75,7 +75,7 @@ class SapeurMutationTest extends TestCase
 
         $mutation = $response->getData()->data->mutation;
         $actif = $response->getData()->data->actif;
-
+        dd($actif);
         $this->assertTrue(Carbon::parse($data['incorporation'])->diffInDays($mutation->incorporation) === 0);
         $this->assertTrue($data['sortie'] === $mutation->sortie);
         $this->assertTrue($data['motif'] === $mutation->motif);

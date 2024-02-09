@@ -6,7 +6,7 @@ use App\Domaine\Business\ImputationBusiness;
 use Exception;
 use Tests\TestCase;
 
-class ExampleTest extends TestCase
+class ImputationBusinessTest extends TestCase
 {
 
     protected $business;

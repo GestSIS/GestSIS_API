@@ -66,7 +66,7 @@ class InterventionMissionsController extends Controller
         $data = $request->validate([
             'missions.*.id' => 'integer|exists:missions,id',
             'missions.*.sapeur_id' => 'integer|exists:sapeurs,id|required_without:missions.*.sapeur',
-            'missions.*.sapeur' => 'string|required_without:missions.*.sapeur_id',
+            'missions.*.sapeur' => 'nullable|string|required_without:missions.*.sapeur_id',
             'missions.*.debut' => 'date_format:Y-m-d H:i',
             'missions.*.fin' => 'date_format:Y-m-d H:i|after:missions.*.debut',
             'missions.*.titre' => 'string',

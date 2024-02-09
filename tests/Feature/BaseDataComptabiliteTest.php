@@ -17,7 +17,7 @@ class BaseDataComptabiliteTest extends TestCase
     public function testFraisIndemnitesTypeIndexOk()
     {
         $response = $this->json('GET', "/api/v2/frais-indemnites-types/");
-
+        // dd($response);
         $response
             ->assertStatus(200)
             ->assertJsonStructure([
@@ -40,8 +40,6 @@ class BaseDataComptabiliteTest extends TestCase
                                     'tarif',
                                     'fonction_id',
                                     'indemnite_exe_id',
-                                    'tarif_min',
-                                    'tarif_min_pour',
                                     'compte_id',
                                     'type',
                                 ]
@@ -54,8 +52,10 @@ class BaseDataComptabiliteTest extends TestCase
                             'designation',
                             'compte_id',
                             'tarif',
+                            'tarif_pro_rata',
                             'tarif_min',
                             'tarif_min_pour',
+                            'tarif_min_pro_rata',
                             'taux_weekend',
                             'taux_nuit',
                             'debut',

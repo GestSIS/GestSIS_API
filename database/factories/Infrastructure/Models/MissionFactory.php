@@ -31,7 +31,7 @@ class MissionFactory extends Factory
             'fin' => $dateTwo->format('Y-m-d H:i'),
             'titre' => $this->faker->text(50),
             'resume' => $this->faker->text(200),
-            
+
             'sapeur_id' => $this->faker->numberBetween(1, 10),
         ];
     }
