@@ -43,7 +43,7 @@ class SapeurFactory extends Factory
             'porteur' => 0,
             'localite_id' => $this->faker->numberBetween(1, 146),
             'civilite_id' => $this->faker->numberBetween(1, 2),
-            'incorporation' => "29.01.2019",
+            // 'incorporation' => "29.01.2019",
 
             'type' => SapeurBusiness::TYPE_SAPEUR,
         ];

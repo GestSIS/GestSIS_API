@@ -26,7 +26,7 @@ class CoursSapeurController extends Controller
         $admin = $request->attributes->get('admin', false);
         $permissions = $request->attributes->get('permissions', []);
 
-        $avecEcritures = $admin || array_key_exists('comptabilite.tout', $permissions);
+        $avecEcritures = $admin || array_key_exists('comptabilite.lecture', $permissions);
 
         return response()->json(['data' => $this->service->coursSapeurs($exerciceComptableId, $avecEcritures)]);
     }

@@ -20,7 +20,7 @@ class TravailController extends Controller
         $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
         $hasLectureOuValidationPermission = $admin || in_array('fiche_travail.validation', $perms) || in_array('fiche_travail.lecture', $perms);
-        $withEcritures = $admin || in_array('comptabilite.tout', $perms);
+        $withEcritures = $admin || in_array('comptabilite.lecture', $perms);
 
         $sapeurId = $request->attributes->get('sapeurId');
         if (!$hasLectureOuValidationPermission && !$sapeurId) {

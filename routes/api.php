@@ -222,7 +222,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Sapeurs
-    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,exercice.lecture,intervention.lecture,organisation.modification,comptabilite.tout,cours.lecture,mat_perso.lecture,fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation,fiche_travail.lecture'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,exercice.lecture,intervention.lecture,organisation.modification,comptabilite.lecture,cours.lecture,mat_perso.lecture,fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation,fiche_travail.lecture'], function () {
         Route::resource('sapeurs', SapeurController::class)->only(['index', 'show']);
 
         Route::get('sapeurs/{id}/fiche', [SapeurController::class, 'fiche']);
@@ -291,7 +291,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Organisation
-    Route::group(['middleware' => 'jwtTokenRole:intervention.lecture,effectif.tout,sapeur.lecture,organisation.modification,comptabilite.tout'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:intervention.lecture,effectif.tout,sapeur.lecture,organisation.modification,comptabilite.lecture'], function () {
         Route::resource('groupes', GroupeController::class)->only(['index']);
     });
 
@@ -307,11 +307,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Exercices
-    Route::group(['middleware' => 'jwtTokenSapeurOrRole:exercice.lecture,exercice.presence,comptabilite.tout'], function () {
+    Route::group(['middleware' => 'jwtTokenSapeurOrRole:exercice.lecture,exercice.presence,comptabilite.lecture'], function () {
         // Paramètres publiques car nécessaire pour le frontend
         Route::resource('excuse-param', ExcuseParamController::class)->only(['index']);
     });
-    Route::group(['middleware' => 'jwtTokenRole:exercice.lecture,exercice.presence,comptabilite.tout'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:exercice.lecture,exercice.presence,comptabilite.lecture'], function () {
         Route::resource('exercices', ExerciceController::class)->only(['index', 'show']);
         Route::resource('exercices.sapeurs', ConvocationsController::class)->only(['index']);
 
@@ -394,7 +394,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Interventions
-    Route::group(['middleware' => 'jwtTokenRole:intervention.lecture,comptabilite.tout'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:intervention.lecture,comptabilite.lecture'], function () {
         Route::resource('interventions', InterventionController::class)->only(['index', 'show']);
         Route::resource('interventions.materiels', InterventionMaterielsController::class)->only(['index']);
         Route::resource('interventions.vehicules', InterventionVehiculesController::class)->only(['index']);
@@ -453,7 +453,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenRole:intervention.validation'], function () {
         Route::post('interventions/{id}/valider', [InterventionController::class, 'valider'])->name('api.v2.interventions.valider');
     });
-    Route::group(['middleware' => 'jwtTokenRole:intervention.lecture,intervention.modification,comptabilite.tout'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:intervention.lecture,intervention.modification,comptabilite.lecture'], function () {
         // TODO: see to add the correct right for the following routes : 'store', 'update']);
         Route::resource('phase-types', PhaseTypeController::class)->only(['index']);
         Route::resource('stat-federal', StatFederalController::class)->only(['index']);
@@ -484,17 +484,17 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('unites', [UniteController::class, 'index'])->name('api.v2.unites');
     });
 
-    Route::group(['middleware' => 'jwtTokenRole:cours.lecture,comptabilite.tout'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:cours.lecture,comptabilite.lecture'], function () {
         Route::get('cours-sapeurs/{exerciceComptableId}', [CoursSapeurController::class, 'index']);
     });
 
-    Route::group(['middleware' => 'jwtTokenRole:comptabilite.tout,fiche_travail.config'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:comptabilite.lecture,fiche_travail.config'], function () {
         Route::resource('comptes', CompteController::class)->only(['index']);
         Route::resource('ecriture-categories', EcritureCategorieController::class)->only(['index']);
     });
 
     // Comptabilite
-    Route::group(['middleware' => 'jwtTokenRole:comptabilite.tout'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:comptabilite.modification'], function () {
         Route::post('imputation/annuel/{id}', [ImputationController::class, 'annuel']);
         Route::delete('imputation/annuel/{id}', [ImputationController::class, 'cancelAnnuel']);
         Route::post('imputation/cours/{id}', [ImputationController::class, 'cours']);
@@ -506,6 +506,19 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('imputation/intervention/{id}', [ImputationController::class, 'intervention']);
         Route::delete('imputation/intervention/{id}', [ImputationController::class, 'cancelIntervention']);
 
+        Route::resource('ecritures', EcritureController::class)->only(['store', 'update', 'destroy']);
+
+        Route::post('decomptes/creer-annuel', [DecompteController::class, 'creerAnnuel']);
+        Route::post('decomptes/creer-sapeur', [DecompteController::class, 'creerSapeur']);
+        Route::post('decomptes/creer-exercice', [DecompteController::class, 'creerExercice']);
+        Route::resource('decomptes', DecompteController::class)->only(['destroy']);
+
+        // Amendes
+        Route::post('generer-amendes/{id}/sapeur/{sapeurId}', [AmendeController::class, 'sapeur']);
+        Route::post('generer-amendes/{id}', [AmendeSapeurController::class, 'annuel']);
+    });
+
+    Route::group(['middleware' => 'jwtTokenRole:comptabilite.lecture'], function () {
         Route::get('ecritures/exercices/{id}', [EcritureController::class, 'exercices']);
         Route::get('ecritures/exercice/{id}', [EcritureController::class, 'exercice']);
         Route::get('ecritures/annuel/{id}', [EcritureController::class, 'annuel']);
@@ -513,8 +526,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('ecritures/intervention/{id}', [EcritureController::class, 'intervention']);
         Route::get('ecritures/divers/{id}', [EcritureController::class, 'divers']);
         Route::get('ecritures/{id}', [EcritureController::class, 'all']);
-
-        Route::resource('ecritures', EcritureController::class)->only(['store', 'update', 'destroy']);
 
         Route::get('comptes/{id}/ecritures/{exerciceComptableId}', [CompteController::class, 'ecritures']);
 
@@ -530,9 +541,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         // Décomptes
         Route::get('decomptes/{id}/ecritures', [DecompteController::class, 'ecritures']);
-        Route::post('decomptes/creer-annuel', [DecompteController::class, 'creerAnnuel']);
-        Route::post('decomptes/creer-sapeur', [DecompteController::class, 'creerSapeur']);
-        Route::post('decomptes/creer-exercice', [DecompteController::class, 'creerExercice']);
         Route::get('decomptes/exercice-comptable/{id}', [DecompteController::class, 'getByExerciceComptable']);
         Route::get('decomptes/{id}/iso20022', [DecompteController::class, 'iso20022']);
         Route::get('decomptes/{id}/a-facturer', [DecompteController::class, 'aFacturer']);
@@ -541,7 +549,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('decomptes/{id}/print-par-sapeur', [DecompteController::class, 'printParSapeur']);
         Route::get('decomptes/{id}/print-par-sapeur/{sapeurId}', [DecompteController::class, 'printPourSapeur']);
         Route::get('decomptes/{id}/print-par-compte', [DecompteController::class, 'printParCompte']);
-        Route::resource('decomptes', DecompteController::class)->only(['show', 'destroy']);
+        Route::resource('decomptes', DecompteController::class)->only(['show']);
 
         // Params Amendes
         Route::resource('amendes', AmendeController::class)->only(['index']);
@@ -550,10 +558,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('paiements/exercice-comptable/{id}', [PaiementController::class, 'getByExerciceComptable']);
         Route::get('paiements/{id}/iso20022', [PaiementController::class, 'iso20022']);
         Route::get('paiements/{id}', [PaiementController::class, 'get']);
-
-        // Amendes
-        Route::post('generer-amendes/{id}/sapeur/{sapeurId}', [AmendeController::class, 'sapeur']);
-        Route::post('generer-amendes/{id}', [AmendeSapeurController::class, 'annuel']);
 
         // Certificats de salaire
         Route::get('exercices-comptable/{ExerciceComptableId}/certificat-salaire', [DecompteController::class, 'certificatSalaire']);

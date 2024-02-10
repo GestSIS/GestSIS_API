@@ -18,7 +18,7 @@ class TravailTypeController extends Controller
     {
         $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
-        $avecTarifs = $admin || in_array('fiche_travail.config', $perms) || in_array('comptabilite.tout', $perms);
+        $avecTarifs = $admin || in_array('fiche_travail.config', $perms) || in_array('comptabilite.lecture', $perms);
 
         $type = $this->service->travailTypes($avecTarifs);
 
