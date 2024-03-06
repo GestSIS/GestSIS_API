@@ -402,6 +402,10 @@ class PaiementBusiness
         if ($sisParam == null) {
             throw new ArrayException([], "Paramètres global du SIS non configuré");
         }
+        $avsParam = AvsParam::first();
+        if ($avsParam == null) {
+            throw new ArrayException([], "Paramètres de l'AVS non configuré");
+        }
 
         $totaux = [];
         foreach (Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get() as $d) {
@@ -430,7 +434,7 @@ class PaiementBusiness
         try {
             // Génération du pdf de chaque sapeur
             foreach (Sapeur::whereIn('id', array_keys($totaux))->with(['localite', 'civilite'])->orderBy('nom')->get() as $sapeur) {
-                $path = $this->creationPdf($sapeur, $exerciceComptable, $totaux[$sapeur->id], $affichageFrais, true, $sisParam);
+                $path = $this->creationPdf($sapeur, $exerciceComptable, $totaux[$sapeur->id], $affichageFrais, true, $sisParam, $avsParam);
                 $merged->addFile($path);
             }
 
@@ -455,8 +459,7 @@ class PaiementBusiness
                 "exception" => $e,
             ]);
         } finally {
-
-            // Supression du dossier même si erreur php
+            // Suppression du dossier même si erreur php
             Storage::deleteDirectory("tmp/" . $exerciceComptableId);
         }
     }
@@ -476,6 +479,10 @@ class PaiementBusiness
         $sisParam = SisParam::with(['sapeur', 'localite'])->first();
         if ($sisParam == null) {
             throw new ArrayException([], "Paramètres global du SIS non configuré");
+        }
+        $avsParam = AvsParam::first();
+        if ($avsParam == null) {
+            throw new ArrayException([], "Paramètres de l'AVS non configuré");
         }
 
         // Calcul des totaux
@@ -503,7 +510,7 @@ class PaiementBusiness
         }
 
         $sapeur = Sapeur::with(['localite', 'civilite'])->find($sapeurId);
-        return $this->creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, false, $sisParam);
+        return $this->creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, false, $sisParam, $avsParam);
     }
 
     /**
@@ -515,10 +522,12 @@ class PaiementBusiness
      * @param bool $affichageFrais true si les frais doivent apparaitre
      * @param bool $enregistrement true si le fichier doit 'etre enregistré, sortie navigateur sinon
      */
-    private function creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, $enregistrement, $sisParam)
+    private function creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, $enregistrement, $sisParam, $avsParam)
     {
         $localite = $sapeur->localite;
         $civilite = $sapeur->civilite;
+
+        $soldeImposable = max($total['solde'] - $avsParam->franchise_imposition_cantonale, 0);
 
         $fields = array(
             "A" => "Ja",
@@ -530,12 +539,12 @@ class PaiementBusiness
             "HName" => $sapeur->nom . " " . $sapeur->prenom,
             "HAdresse" => $sapeur->rue . " " . $sapeur->no_rue,
             "HPostfach" => $localite->npa . " " . $localite->designation,
-            "1" => round($total['solde'] + $total['indemnite']),
+            "1" => round($soldeImposable + $total['indemnite']),
             // remplissage point 6 - indemnités
             // "6" => $total['indemnite'],
-            "8" => round($total['solde'] + $total['indemnite']),
+            "8" => round($soldeImposable + $total['indemnite']),
             "9" => round($total['avs_ac']),
-            "11" => round($total['solde'] + $total['indemnite']) - round($total['avs_ac']),
+            "11" => round($soldeImposable + $total['indemnite']) - round($total['avs_ac']),
             "15-1" => "Répartition:\tSolde\t\t" . round($total['solde']),
             "15-2" => "\t\t\tIndemnité\t" . round($total['indemnite']),
             "OrtDatum" => $this->dateFr(),

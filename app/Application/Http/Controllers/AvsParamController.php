@@ -28,6 +28,7 @@ class AvsParamController extends Controller
             'taux_ac' => 'required|numeric|gt:0|lte:1',
             'franchise_avs' => 'required|numeric|gte:0',
             'franchise_imposition' => 'required|numeric|gte:0',
+            'franchise_imposition_cantonale' => 'required|numeric|gte:0',
             'compte_id' => 'required|integer',
             'ecriture_categorie_id' => 'required|integer'
         ]);

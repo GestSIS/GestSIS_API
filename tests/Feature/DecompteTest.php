@@ -103,7 +103,8 @@ class DecompteTest extends TestCase
             'taux_avs' => "1.0",
             'taux_ac' => "1.0",
             'franchise_avs' => 2300,
-            'franchise_imposition' => 5000
+            'franchise_imposition' => 5000,
+            'franchise_imposition_cantonale' => 8000,
         ]);
 
         $params = [
@@ -299,7 +300,8 @@ class DecompteTest extends TestCase
             'taux_avs' => "0.1055",
             'taux_ac' => "0.24",
             'franchise_avs' => 2300,
-            'franchise_imposition' => 5000
+            'franchise_imposition' => 5000,
+            'franchise_imposition_cantonale' => 8000,
         ]);
 
         $params = [
@@ -472,7 +474,8 @@ class DecompteTest extends TestCase
             'taux_avs' => "0.1055",
             'taux_ac' => "0.24",
             'franchise_avs' => 2300,
-            'franchise_imposition' => 5000
+            'franchise_imposition' => 5000,
+            'franchise_imposition_cantonale' => 8000,
         ]);
 
         $params = [
