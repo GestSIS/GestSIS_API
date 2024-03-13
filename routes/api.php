@@ -608,9 +608,12 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
 
     // Matériel personnel
+    Route::group(['middleware' => 'jwtTokenSapeurOrRole:mat_perso.lecture'], function () {
+        Route::resource('mat-perso-types', MatPersoTypeController::class)->only(['index']);
+    });
+
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.lecture'], function () {
         Route::resource('mat-perso-categories', MatPersoCategorieController::class)->only(['index']);
-        Route::resource('mat-perso-types', MatPersoTypeController::class)->only(['index']);
         Route::resource('mat-perso-event-types', MatPersoEventTypeController::class)->only(['index']);
         Route::resource('mat-perso-alerte-types', MatPersoAlerteTypeController::class)->only(['index']);
 
