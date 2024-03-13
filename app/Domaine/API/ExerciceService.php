@@ -117,14 +117,31 @@ class ExerciceService
         return $this->business->validateExerciceById($exerciceId);
     }
 
-    public function listeSapeurOfExerciceById($exerciceId)
+    public function listeSapeurOfExerciceById($exerciceId, $hasPresencePermission = false)
     {
+        $champs = [
+            'id',
+            'created_at',
+            'updated_at',
+            'sapeur_id',
+            'exercice_id',
+            'excuse_type_id',
+            'convoque',
+            'present',
+            'amende',
+            'remplace',
+            'absent',
+            'excuse_statut',
+            'date_demande',
+            'justificatif_path',
+            'date_validation',
+        ];
         $heures = HeureExercice
             ::where('exercice_id', $exerciceId)
             ->get()->toArray();
         $sapeurs = ExerciceSapeur
             ::where('exercice_id', $exerciceId)
-            ->get()->toArray();
+            ->get($hasPresencePermission ? '*' : $champs)->toArray();
 
         $dictionary = [];
         foreach ($sapeurs as $sapeur) {

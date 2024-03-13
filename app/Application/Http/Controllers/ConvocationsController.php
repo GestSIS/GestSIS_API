@@ -27,9 +27,12 @@ class ConvocationsController extends Controller
      *
      * @return Response
      */
-    public function index($exerciceId)
+    public function index(Request $request, $exerciceId)
     {
-        $sapeurs = $this->service->listeSapeurOfExerciceById($exerciceId);
+        $admin = $request->attributes->get('admin');
+        $perms = $request->attributes->get('permissions', []);
+        $hasPresencePermission = $admin || in_array('exercice.presence', $perms);
+        $sapeurs = $this->service->listeSapeurOfExerciceById($exerciceId, $hasPresencePermission);
 
         return response()->json(['data' => $sapeurs]);
     }
