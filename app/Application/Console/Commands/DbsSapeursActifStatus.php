@@ -1,29 +1,27 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Application\Console\Commands;
 
-use App\Domaine\Business\ExerciceBusiness;
-use App\Infrastructure\Models\Exercice;
-use App\Infrastructure\Repositories\ExerciceRepositoryEloquent;
-use Carbon\Carbon;
+use App\Domaine\Business\SapeurBusiness;
+use App\Infrastructure\Repositories\SapeurRepositoryEloquent;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
 
-class DbsExercicesStatus extends Command
+class DbsSapeursActifStatus extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'dbs:exercices-status';
+    protected $signature = 'dbs:sapeurs-actif-status';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Recalcule le status des exercices';
+    protected $description = 'Recalcule le status actif/inactif des sapeurs';
 
     /**
      * Create a new command instance.
@@ -43,14 +41,13 @@ class DbsExercicesStatus extends Command
     public function handle()
     {
         $dbs = config('database.dbs');
-        $exerciceBusiness = new ExerciceBusiness(new ExerciceRepositoryEloquent());
+        $sapeurBusiness = new SapeurBusiness(new SapeurRepositoryEloquent());
         foreach ($dbs as $db) {
             printf("Recompute for sis=" . $db . "\n");
             Config::set('database.default', $db);
-            $exercices = Exercice::where('date', '>', Carbon::create(2023, 1, 1));
-            foreach ($exercices as $exercice) {
-                $exerciceBusiness->updateStatut($exercice->id);
-            }
+            $sapeurBusiness->recomputeSapeurActifStatus();
+            $sapeurBusiness->recomputeSapeurFonctionPrincipale();
+            $sapeurBusiness->recomputeSapeurGradePrincipal();
 
             printf("\n");
         }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Application\Console\Commands;
 
 use App\Domaine\Business\ImputationBusiness;
 use App\Infrastructure\Models\AvsParam;
