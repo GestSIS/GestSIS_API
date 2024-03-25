@@ -100,18 +100,18 @@ class SapeurCoursTest extends TestCase
         $grade = array_pop($grades);
 
         //Validate cours
-        $this->assertTrue(Carbon::parse($data['date'])->diffInDays($cours->date) === 0.0);
+        $this->assertTrue(Carbon::parse($data['date'])->diffInDays($cours->date) === 0);
         $this->assertTrue($data['localite_id'] === $cours->localite_id);
         $this->assertTrue($data['cours_id'] === $cours->cours_id);
 
         //Validate new grade
-        $this->assertTrue(Carbon::parse($data['date_grade'])->diffInDays($grade->date) === 0.0);
+        $this->assertTrue(Carbon::parse($data['date_grade'])->diffInDays($grade->date) === 0);
 
         //Validate old fonction
-        $this->assertTrue(Carbon::parse($data['date_fonction'])->diffInDays($fonction_old->fin) === 0.0);
+        $this->assertTrue(Carbon::parse($data['date_fonction'])->diffInDays($fonction_old->fin) === 0);
 
         //Validate new fontion
-        $this->assertTrue(Carbon::parse($data['date_fonction'])->diffInDays($fonction_new->debut) === 0.0);
+        $this->assertTrue(Carbon::parse($data['date_fonction'])->diffInDays($fonction_new->debut) === 0);
         $this->assertTrue($fonction_new->fin === null);
     }
 
@@ -159,7 +159,7 @@ class SapeurCoursTest extends TestCase
 
         $cours = $response->getData()->data;
 
-        $this->assertTrue(Carbon::parse($data['date'])->diffInDays($cours->date) === 0.0);
+        $this->assertTrue(Carbon::parse($data['date'])->diffInDays($cours->date) === 0);
     }
 
     /**

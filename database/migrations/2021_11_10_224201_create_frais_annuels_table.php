@@ -17,8 +17,8 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->decimal('montant');
-            $table->decimal('quantite');
+            $table->unsignedDecimal('montant');
+            $table->unsignedDecimal('quantite');
 
             $table->unsignedBigInteger('fonction_id');
             $table->foreign('fonction_id')->references('id')->on('fonctions')->onDelete('cascade');
