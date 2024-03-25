@@ -42,7 +42,7 @@ class DbsInit extends Command
         foreach ($dbs as $db) {
             printf("DATABASE " . $db . "\n");
             printf("migrate:fresh with seed\n");
-            Artisan::call('migrate:fresh --seed --database=' . $db);
+            Artisan::call('migrate:fresh --seed --database=db_' . $db);
             printf("migration done for " . $db . "\n");
             printf("\n");
         }

@@ -40,7 +40,7 @@ class DbsSeed extends Command
     {
         $dbs = config('database.dbs');
         foreach ($dbs as $db) {
-            Artisan::call('db:seed --database=' . $db);
+            Artisan::call('db:seed --database=db_' . $db);
 
             // printf("DATABASE " . $db . "\n");
             // Cours::on($db)->where('abreviation', '=', 'CI 2')->update(['duree' => 5]);
