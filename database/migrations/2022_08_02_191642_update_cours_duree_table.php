@@ -14,10 +14,10 @@ return new class extends Migration
     public function up()
     {
         Schema::table('cours', function (Blueprint $table) {
-            $table->decimal('duree')->change();
+            $table->decimal('duree')->default(1.0)->change();
         });
         Schema::table('cours_sapeur', function (Blueprint $table) {
-            $table->decimal('duree')->change();
+            $table->decimal('duree')->default(1.0)->change();
         });
     }
 
@@ -29,10 +29,10 @@ return new class extends Migration
     public function down()
     {
         Schema::table('cours', function (Blueprint $table) {
-            $table->smallInteger('duree')->change();
+            $table->smallInteger('duree')->default(1)->change();
         });
         Schema::table('cours_sapeur', function (Blueprint $table) {
-            $table->smallInteger('duree')->change();
+            $table->smallInteger('duree')->default(1)->change();
         });
     }
 };
