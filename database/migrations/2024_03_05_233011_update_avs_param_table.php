@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('avs_params', function (Blueprint $table) {
-            $table->unsignedDecimal('franchise_imposition_cantonale')->default(8000);
+            $table->decimal('franchise_imposition_cantonale')->default(8000);
         });
     }
 

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->integer('ordre');
-            $table->unsignedDecimal('montant');
+            $table->decimal('montant');
 
             // Foreign keys
             $table->unsignedBigInteger('compte_id');
