@@ -43,7 +43,6 @@ class DbsInit extends Command
             printf("DATABASE " . $db . "\n");
             printf("migrate:fresh with seed\n");
             Artisan::call('migrate:fresh --seed --database=' . $db);
-            printf("migration done for " . $db . "\n");
             printf("\n");
         }
         printf("Migrating done\n");
