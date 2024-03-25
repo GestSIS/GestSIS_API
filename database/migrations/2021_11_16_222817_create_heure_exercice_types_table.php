@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->string('designation');
-            $table->decimal('montant');
+            $table->unsignedDecimal('montant');
             $table->unsignedInteger('type');
 
             $table->unsignedBigInteger('compte_id');

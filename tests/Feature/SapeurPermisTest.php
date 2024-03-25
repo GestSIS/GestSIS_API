@@ -132,7 +132,7 @@ class SapeurPermisTest extends TestCase
 
         $permis = $response->getData()->data;
 
-        $this->assertTrue(Carbon::parse($date)->diffInDays($permis->date) === 0.0);
+        $this->assertTrue(Carbon::parse($date)->diffInDays($permis->date) === 0);
     }
 
 

@@ -27,7 +27,7 @@ class ModuleCours extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->decimal('tarif');
+            $table->unsignedDecimal('tarif');
             $table->unsignedInteger('type');
 
             $table->unsignedBigInteger('type_unite_id');

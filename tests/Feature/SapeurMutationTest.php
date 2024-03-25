@@ -76,7 +76,7 @@ class SapeurMutationTest extends TestCase
         $mutation = $response->getData()->data->mutation;
         $actif = $response->getData()->data->actif;
         dd($actif);
-        $this->assertTrue(Carbon::parse($data['incorporation'])->diffInDays($mutation->incorporation) === 0.0);
+        $this->assertTrue(Carbon::parse($data['incorporation'])->diffInDays($mutation->incorporation) === 0);
         $this->assertTrue($data['sortie'] === $mutation->sortie);
         $this->assertTrue($data['motif'] === $mutation->motif);
         $this->assertTrue($data['localite_id'] === $mutation->localite_id);
@@ -124,8 +124,8 @@ class SapeurMutationTest extends TestCase
 
         $mutation = $response->getData()->data->mutation;
 
-        $this->assertTrue(Carbon::parse($data['incorporation'])->diffInDays($mutation->incorporation) === 0.0);
-        $this->assertTrue(Carbon::parse($data['sortie'])->diffInDays($mutation->sortie) === 0.0);
+        $this->assertTrue(Carbon::parse($data['incorporation'])->diffInDays($mutation->incorporation) === 0);
+        $this->assertTrue(Carbon::parse($data['sortie'])->diffInDays($mutation->sortie) === 0);
         $this->assertTrue($data['motif'] === $mutation->motif);
         $this->assertTrue($data['localite_id'] === $mutation->localite_id);
     }

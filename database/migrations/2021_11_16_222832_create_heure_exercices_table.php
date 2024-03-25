@@ -18,9 +18,9 @@ return new class extends Migration
             $table->timestamps();
 
             $table->string('designation');
-            $table->decimal('quantite');
+            $table->unsignedDecimal('quantite');
 
-            $table->decimal('montant');
+            $table->unsignedDecimal('montant');
             $table->unsignedInteger('type');
 
             $table->unsignedBigInteger('exercice_id');

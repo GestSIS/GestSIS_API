@@ -19,12 +19,12 @@ return new class extends Migration
 
             $table->string('designation');
 
-            $table->decimal('solde'); // Renommé
-            $table->decimal('solde_min')->nullable(); // Renommé
-            $table->decimal('solde_min_pour')->nullable(); // Renommé
+            $table->unsignedDecimal('solde'); // Renommé
+            $table->unsignedDecimal('solde_min')->nullable(); // Renommé
+            $table->unsignedDecimal('solde_min_pour')->nullable(); // Renommé
 
-            $table->decimal('taux_weekend')->nullable();
-            $table->decimal('taux_nuit')->nullable();
+            $table->unsignedDecimal('taux_weekend')->nullable();
+            $table->unsignedDecimal('taux_nuit')->nullable();
             $table->time('debut')->nullable();
             $table->time('fin')->nullable();
 
