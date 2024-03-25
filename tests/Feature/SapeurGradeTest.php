@@ -73,7 +73,7 @@ class SapeurGradeTest extends TestCase
         $grade = $response->getData()->data->grade;
 
         $this->assertTrue($grade !== null);
-        $this->assertTrue(Carbon::parse($data['date'])->diffInDays($grade->date) === 0);
+        $this->assertTrue(Carbon::parse($data['date'])->diffInDays($grade->date) === 0.0);
         $this->assertTrue($data['remarque'] === $grade->remarque);
         $this->assertTrue($data['grade_id'] === $grade->grade_id);
     }
@@ -137,7 +137,7 @@ class SapeurGradeTest extends TestCase
 
         $grade = $response->getData()->data->grade;
 
-        $this->assertTrue(Carbon::parse($data['date'])->diffInDays($grade->date) === 0);
+        $this->assertTrue(Carbon::parse($data['date'])->diffInDays($grade->date) === 0.0);
         $this->assertTrue($data['remarque'] === $grade->remarque);
     }
 

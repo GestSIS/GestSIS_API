@@ -31,7 +31,7 @@ class ModuleTravail extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->unsignedDecimal('tarif');
+            $table->decimal('tarif');
             $table->unsignedInteger('type');
 
             $table->unsignedBigInteger('fonction_id')->nullable()->default(null);

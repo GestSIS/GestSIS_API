@@ -75,8 +75,8 @@ class SapeurFonctionTest extends TestCase
         $fonction = $response->getData()->data->fonction;
 
         $this->assertTrue($fonction !== null);
-        $this->assertTrue(Carbon::parse($data['debut'])->diffInDays($fonction->debut) === 0);
-        $this->assertTrue(Carbon::parse($data['fin'])->diffInDays($fonction->fin) === 0);
+        $this->assertTrue(Carbon::parse($data['debut'])->diffInDays($fonction->debut) === 0.0);
+        $this->assertTrue(Carbon::parse($data['fin'])->diffInDays($fonction->fin) === 0.0);
         $this->assertTrue($data['remarque'] === $fonction->remarque);
         $this->assertTrue($data['fonction_id'] === $fonction->fonction_id);
     }
@@ -143,8 +143,8 @@ class SapeurFonctionTest extends TestCase
 
         $fonction = $response->getData()->data->fonction;
 
-        $this->assertTrue(Carbon::parse($data['debut'])->diffInDays($fonction->debut) === 0);
-        $this->assertTrue(Carbon::parse($data['fin'])->diffInDays($fonction->fin) === 0);
+        $this->assertTrue(Carbon::parse($data['debut'])->diffInDays($fonction->debut) === 0.0);
+        $this->assertTrue(Carbon::parse($data['fin'])->diffInDays($fonction->fin) === 0.0);
         $this->assertTrue($data['remarque'] === $fonction->remarque);
     }
 
