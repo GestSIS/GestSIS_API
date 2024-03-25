@@ -29,8 +29,8 @@ return new class extends Migration
         Schema::table('indemnite_exercice_fonctions', function (Blueprint $table) {
             $table->renameColumn('solde', 'tarif');
             $table->dropColumn('indemnite');
-            $table->unsignedDecimal('tarif_min')->nullable();
-            $table->unsignedDecimal('tarif_min_pour')->nullable();
+            $table->decimal('tarif_min')->nullable();
+            $table->decimal('tarif_min_pour')->nullable();
 
             $table->unsignedBigInteger('compte_id');
             $table->foreign('compte_id')->references('id')->on('comptes');
@@ -49,10 +49,10 @@ return new class extends Migration
     public function down()
     {
         Schema::table('indemnite_exercice_types', function (Blueprint $table) {
-            $table->unsignedDecimal('solde');
-            $table->unsignedDecimal('indemnite');
-            $table->unsignedDecimal('solde_min')->nullable();
-            $table->unsignedDecimal('solde_min_pour')->nullable();
+            $table->decimal('solde');
+            $table->decimal('indemnite');
+            $table->decimal('solde_min')->nullable();
+            $table->decimal('solde_min_pour')->nullable();
 
             $table->unsignedBigInteger('compte_id');
             $table->foreign('compte_id')->references('id')->on('comptes');

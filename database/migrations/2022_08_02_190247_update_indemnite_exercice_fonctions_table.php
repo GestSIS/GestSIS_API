@@ -28,8 +28,8 @@ return new class extends Migration
     public function down()
     {
         Schema::table('indemnite_exercice_fonctions', function (Blueprint $table) {
-            $table->unsignedDecimal('tarif_min')->nullable();
-            $table->unsignedDecimal('tarif_min_pour')->nullable();
+            $table->decimal('tarif_min')->nullable();
+            $table->decimal('tarif_min_pour')->nullable();
         });
     }
 };
