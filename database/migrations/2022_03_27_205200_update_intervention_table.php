@@ -17,10 +17,10 @@ return new class extends Migration
             $table->string('agent')->default("");
             $table->boolean('rapport_police')->default(false)->change();
 
-            $table->string('lieu')->change();
-            $table->text('description')->change();
-            $table->text('proprietaire')->change();
-            $table->text('responsable')->change();
+            $table->string('lieu')->default('')->change();
+            $table->text('description')->default('')->change();
+            $table->text('proprietaire')->default('')->change();
+            $table->text('responsable')->default('')->change();
         });
     }
 

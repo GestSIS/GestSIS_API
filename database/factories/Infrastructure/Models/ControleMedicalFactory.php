@@ -24,7 +24,7 @@ class ControleMedicalFactory extends Factory
         return [
             'designation' => 'Controle',
             'consultation' => now(),
-            'validite' => now()->addYears($this->faker->numberBetween(1, 5)),
+            'validite' => now(),
             'accepter' => 1,
             'en_cours' => 1,
             'sapeur_id' => $this->faker->numberBetween(1, 25),
