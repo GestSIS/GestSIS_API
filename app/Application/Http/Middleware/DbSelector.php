@@ -26,7 +26,7 @@ class DbSelector
             return response()->json(["error" => "Sis non sélectionné"], 401);
         }
 
-        Config::set('database.default', $sisKey);
+        Config::set('database.default', 'db_' . $sisKey);
         return $next($request);
     }
 }

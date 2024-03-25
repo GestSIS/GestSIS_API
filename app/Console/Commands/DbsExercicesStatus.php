@@ -46,7 +46,7 @@ class DbsExercicesStatus extends Command
         $exerciceBusiness = new ExerciceBusiness(new ExerciceRepositoryEloquent());
         foreach ($dbs as $db) {
             printf("Recompute for sis=" . $db . "\n");
-            Config::set('database.default', $db);
+            Config::set('database.default', 'db_' . $db);
             $exercices = Exercice::where('date', '>', Carbon::create(2023, 1, 1));
             foreach ($exercices as $exercice) {
                 $exerciceBusiness->updateStatut($exercice->id);

@@ -46,7 +46,7 @@ $connections['mysql'] = [
 ];
 
 foreach ($dbs as $db) {
-    $connections[$db] = [
+    $connections['db_' . $db] = [
         'driver' => 'mysql',
         'host' => env('DB_HOST', 'db'),
         'port' => env('DB_PORT', '3306'),
