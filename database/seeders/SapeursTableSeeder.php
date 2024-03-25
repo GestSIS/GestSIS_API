@@ -137,6 +137,7 @@ class SapeursTableSeeder extends Seeder
 
             'sapeur_id' => 1,
             'cours_id' => 1,
+            'duree' => 1,
             'date' => Carbon::parse('2010-01-28'),
             'localite_id' => 6,
         ]);
@@ -147,6 +148,7 @@ class SapeursTableSeeder extends Seeder
 
             'sapeur_id' => 1,
             'cours_id' => 1,
+            'duree' => 1,
             'date' => Carbon::parse('2010-01-28'),
             'localite_id' => 6,
         ]);
