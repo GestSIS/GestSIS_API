@@ -19,11 +19,11 @@ return new class extends Migration
 
             $table->string('designation');
 
-            $table->unsignedDecimal('solde'); // Supprimé
-            $table->unsignedDecimal('indemnite'); // Supprimé
+            $table->decimal('solde'); // Supprimé
+            $table->decimal('indemnite'); // Supprimé
 
-            $table->unsignedDecimal('solde_min')->nullable(); // Supprimé 
-            $table->unsignedDecimal('solde_min_pour')->nullable(); // Supprimé
+            $table->decimal('solde_min')->nullable(); // Supprimé 
+            $table->decimal('solde_min_pour')->nullable(); // Supprimé
 
             $table->unsignedBigInteger('compte_id'); // Supprimé
             $table->foreign('compte_id')->references('id')->on('comptes'); // Supprimé
