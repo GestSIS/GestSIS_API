@@ -19,7 +19,7 @@ class AdminService
         $dbs = config('database.dbs');
         $res = [];
         foreach ($dbs as $db) {
-            Config::set('database.default', $db);
+            Config::set('database.default', 'db_' . $db);
             $res[$db] = $this->service->contacts();
         }
         return $res;
