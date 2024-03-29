@@ -4,7 +4,6 @@ namespace App\Domaine\API;
 
 use App\Domaine\Business\ControleMedicalBusiness;
 use App\Domaine\SPI\ControleMedicalRepository;
-use App\Infrastructure\Models\Sapeur;
 use Illuminate\Support\Facades\DB;
 
 class EmailService
