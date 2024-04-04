@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Infrastructure\Models\Cours;
 use App\Infrastructure\Models\Grade;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
@@ -45,7 +46,11 @@ class DbsSeed extends Command
             // Artisan::call('db:seed --database=db_' . $db);
             $grade = Grade::on('db_' . $db)->where('abreviation', '=', 'Adj')->first() ?? Grade::on('db_' . $db)->where('abreviation', '=', 'adj')->first();
             if ($grade === null) {
-                Grade::on('db_' . $db)->insert(['id' => 12, 'designation' => 'Adjudant', 'abreviation' => 'Adj', 'groupe' => 2, 'tri' => 67]);
+                try {
+                    Grade::on('db_' . $db)->insert(['id' => 12, 'designation' => 'Adjudant', 'abreviation' => 'Adj', 'groupe' => 2, 'tri' => 67]);
+                } catch (Exception $e) {
+                    printf("Unable to create grade for db : " . $db);
+                }
             }
 
             Cours::on('db_' . $db)->where('designation', '=', 'Chef d\'intervention 1')->update(['grade_id' => $grade?->id ?? 12]);
