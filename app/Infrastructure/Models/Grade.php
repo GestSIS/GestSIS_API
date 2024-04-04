@@ -8,6 +8,6 @@ class Grade extends Model
 {
     protected $fillable = ['designation', 'abreviation', 'groupe', 'tri'];
     protected $casts = [
-        'tri' => 'integer'
+        'tri' => 'integer', 'groupe' => 'integer',
     ];
 }
