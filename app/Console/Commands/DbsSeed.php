@@ -42,8 +42,7 @@ class DbsSeed extends Command
     {
         $dbs = config('database.dbs');
         foreach ($dbs as $db) {
-            Artisan::call('db:seed --database=db_' . $db);
-
+            // Artisan::call('db:seed --database=db_' . $db);
             Grade::on('db_' . $db)->insert(['id' => 12, 'designation' => 'Adjudant', 'abreviation' => 'Adj', 'groupe' => 1, 'tri' => 87]);
 
             Cours::on('db_' . $db)->where('designation', '=', 'Chef d\'intervention 1')->update(['grade_id' => 12]);
