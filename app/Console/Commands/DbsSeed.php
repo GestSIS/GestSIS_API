@@ -43,7 +43,7 @@ class DbsSeed extends Command
         $dbs = config('database.dbs');
         foreach ($dbs as $db) {
             // Artisan::call('db:seed --database=db_' . $db);
-            $grade = Grade::on('db_' . $db)->where('abreviation', '=', 'adj')->first();
+            $grade = Grade::on('db_' . $db)->where('abreviation', '=', 'Adj')->first() ?? Grade::on('db_' . $db)->where('abreviation', '=', 'adj')->first();
             if ($grade === null) {
                 Grade::on('db_' . $db)->insert(['id' => 12, 'designation' => 'Adjudant', 'abreviation' => 'Adj', 'groupe' => 2, 'tri' => 67]);
             }
