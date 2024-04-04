@@ -25,10 +25,11 @@ class GradesTableSeeder extends Seeder
             array('id' => '8',  'designation' => 'Sergent-major',       'abreviation' => 'Sgtm',    'groupe' => '2',   'tri' => '82'),
             array('id' => '9',  'designation' => 'Major',               'abreviation' => 'Maj',     'groupe' => '1',   'tri' => '99'),
             array('id' => '10', 'designation' => 'Soldat',              'abreviation' => 'Sdt',     'groupe' => '3',   'tri' => '65'),
-            array('id' => '11', 'designation' => 'Candidats',           'abreviation' => 'Cand',    'groupe' => '3',   'tri' => '60')
+            array('id' => '11', 'designation' => 'Candidats',           'abreviation' => 'Cand',    'groupe' => '3',   'tri' => '60'),
+            array('id' => '12', 'designation' => 'Adjudant',            'abreviation' => 'Adj',     'groupe' => '1',   'tri' => '87'),
         );
 
-        foreach ($grades as $grade){
+        foreach ($grades as $grade) {
             DB::table('grades')->insert($grade);
         }
     }

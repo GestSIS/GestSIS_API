@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Infrastructure\Models\Cours;
+use App\Infrastructure\Models\Grade;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
@@ -42,24 +44,12 @@ class DbsSeed extends Command
         foreach ($dbs as $db) {
             Artisan::call('db:seed --database=db_' . $db);
 
-            // printf("DATABASE " . $db . "\n");
-            // Cours::on($db)->where('abreviation', '=', 'CI 2')->update(['duree' => 5]);
-            // Cours::on($db)->where('abreviation', '=', 'CI 1')->update(['duree' => 5]);
-            // Cours::on($db)->where('abreviation', '=', 'DCH')->update(['duree' => 5]);
-            // Cours::on($db)->where('designation', '=', 'Chef de groupe')->update(['validite_debut' => '2017-01-01', 'duree' => 5]);
-            // Cours::on($db)->where('designation', '=', 'CG échelles remorquables')->update(['validite_fin' => '2012-12-31']);
-            // Cours::on($db)->where('designation', '=', 'Electricien')->update(['validite_fin' => '2012-12-31']);
-            // Cours::on($db)->where('designation', '=', 'Porteur')->update(['validite_fin' => '2014-12-31']);
-            // Cours::on($db)->where('designation', '=', 'Garde et circulation')->update(['validite_fin' => '2010-12-31']);
-            // Cours::on($db)->where('designation', '=', 'Rattrapage')->update(['validite_fin' => '2020-12-31']);
-            // Cours::on($db)->where('designation', '=', 'Porteur')->update(['validite_fin' => '2014-12-31']);
-            // Cours::on($db)->where('abreviation', '=', 'BA 1')->update(['validite_debut' => '2015-01-01', 'duree' => 5]);
-            // Cours::on($db)->where('abreviation', '=', 'BA 2')->update(['validite_debut' => '2015-01-01', 'duree' => 3]);
-            // Cours::on($db)->where('designation', '=', 'BLS-AED')->update(['duree' => 0.5]);
-            // Cours::on($db)->where('designation', '=', 'Machiniste')->update(['duree' => 5]);
-            // Cours::on($db)->where('designation', '=', 'Chef de groupe 1')->update(['validite_fin' => '2016-12-31']);
-            // Cours::on($db)->where('designation', '=', 'Chef de groupe 2')->update(['validite_fin' => '2016-12-31']);
-            // Cours::on($db)->where('abreviation', '=', 'BA')->update(['validite_fin' => '2014-12-31']);
+            Grade::on('db_' . $db)->insert(['id' => 12, 'designation' => 'Adjudant', 'abreviation' => 'Adj', 'groupe' => 1, 'tri' => 87]);
+
+            Cours::on('db_' . $db)->where('designation', '=', 'Chef d\'intervention 1')->update(['grade_id' => 12]);
+            Cours::on('db_' . $db)->where('designation', '=', 'Chef d\'intervention 2')->update(['grade_id' => 3]);
+            Cours::on('db_' . $db)->where('designation', '=', 'Machiniste')->update(['grade_id' => 7]);
+            Cours::on('db_' . $db)->where('designation', '=', 'Chef de groupe')->update(['grade_id' => 6]);
             printf("\n");
         }
         printf("Migrating done\n");
