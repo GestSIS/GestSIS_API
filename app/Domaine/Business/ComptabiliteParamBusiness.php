@@ -181,6 +181,9 @@ class ComptabiliteParamBusiness
         if (array_key_exists('phase_id', $data) && $data['phase_id'] == 0) {
             $data['phase_id'] = NULL;
         }
+        if (array_key_exists('tarif_pro_rata', $data) && $data['tarif_pro_rata'] == 0) {
+            $data['tarif_pro_rata'] = false;
+        }
         $indemnite = IndemniteInterventionType::find($id);
         $indemnite->update($data);
         if (!$parFonction) {

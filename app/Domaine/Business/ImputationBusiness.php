@@ -757,8 +757,8 @@ class ImputationBusiness
                             $dureeTarifWeekend += $duree;
                         } elseif ($testNuit) {
                             $overlapping = 0;
-                            $overlapping += min($debut->max($nightPeriodOneStart)->diffInHours($fin->min($nightPeriodOneEnd)), 0);
-                            $overlapping += min($debut->max($nightPeriodTwoStart)->diffInHours($fin->min($nightPeriodTwoEnd)), 0);
+                            $overlapping += min($debut->max($nightPeriodOneStart)->diffInHours($fin->min($nightPeriodOneEnd), true), 0.0);
+                            $overlapping += min($debut->max($nightPeriodTwoStart)->diffInHours($fin->min($nightPeriodTwoEnd), true), 0.0);
 
                             $dureeTarifNuit += $overlapping;
                             $dureeTarifStandard += $duree - $overlapping;
