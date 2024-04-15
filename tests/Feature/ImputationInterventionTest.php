@@ -273,21 +273,4 @@ class ImputationInterventionTest extends TestCase
                 ]
             );
     }
-    //    /**
-    //     * Test add exercice
-    //     *
-    //     * @return void
-    //     * @throws Exception
-    //     */
-    //    public function testImputationLonguePériode()
-    //    {
-    //        $param = array(
-    //            "indemnite_exercice_type_id" => 10
-    //        );
-    //
-    //        $ecritures = $this->comptabiliteService->imputationExercice($this->interventionId, $param);
-    //        //$response = $this->json('POST', '/api/v2/imputation/exercice/' . $this->interventionId, $param);
-    //
-    //        $this->assertTrue(count($ecritures) === 2);
-    //    }
 }
