@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Telephone extends Model
 {
     protected $fillable = ['tri', 'nom', 'numero'];
-    protected $casts = [
-        'tri' => 'integer'
-    ];
+    protected function casts(): array
+    {
+        return  ['tri' => 'integer'];
+    }
 }

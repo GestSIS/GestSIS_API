@@ -35,11 +35,14 @@ class Intervention extends Model
         'sapeur_id',
         'type_intervention_id',
     ];
-    protected $casts = [
-        'rapport_police' => 'boolean', 'degre' => 'integer', 'sauve_personne' => 'integer', 'sauve_animaux' => 'integer',
-        'stat_nb' => 'integer', 'statut' => 'integer', 'localite_id' => 'integer', 'intervention_traitement_id' => 'integer',
-        'stat_federal_id' => 'integer', 'sapeur_id' => 'integer', 'type_intervention_id' => 'integer'
-    ];
+    protected function casts(): array
+    {
+        return  [
+            'rapport_police' => 'boolean', 'degre' => 'integer', 'sauve_personne' => 'integer', 'sauve_animaux' => 'integer',
+            'stat_nb' => 'integer', 'statut' => 'integer', 'localite_id' => 'integer', 'intervention_traitement_id' => 'integer',
+            'stat_federal_id' => 'integer', 'sapeur_id' => 'integer', 'type_intervention_id' => 'integer'
+        ];
+    }
 
     public function localite()
     {

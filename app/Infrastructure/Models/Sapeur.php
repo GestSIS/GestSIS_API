@@ -14,11 +14,14 @@ class Sapeur extends Model
         'lieu_de_travail', 'email', 'actif', 'iban', 'iban_statut', 'remarque', 'porteur', 'localite_id',
         'civilite_id', 'cotisation_avs', 'annee_incorporation'
     ];
-    protected $casts = [
-        'actif' => 'integer', 'iban_statut' => 'integer', 'actif' => 'integer', 'cotisation_avs' => 'integer',
-        'localite_id' => 'integer', 'civilite_id' => 'integer', 'porteur' => 'integer', 'fonction_id' => 'integer',
-        'grade_id' => 'integer', 'type' => 'integer'
-    ];
+    protected function casts(): array
+    {
+        return  [
+            'actif' => 'integer', 'iban_statut' => 'integer', 'actif' => 'integer', 'cotisation_avs' => 'integer',
+            'localite_id' => 'integer', 'civilite_id' => 'integer', 'porteur' => 'integer', 'fonction_id' => 'integer',
+            'grade_id' => 'integer', 'type' => 'integer'
+        ];
+    }
 
     protected $attributes = [
         'suffixe' => '',

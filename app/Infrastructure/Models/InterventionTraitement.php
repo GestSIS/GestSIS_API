@@ -7,7 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class InterventionTraitement extends Model
 {
     protected $fillable = ['tri', 'designation'];
-    protected $casts = [
-        'tri' => 'integer'
-    ];
+    protected function casts(): array
+    {
+        return  [
+            'tri' => 'integer'
+        ];
+    }
 }

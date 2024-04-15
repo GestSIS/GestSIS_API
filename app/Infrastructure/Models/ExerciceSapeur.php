@@ -9,10 +9,13 @@ class ExerciceSapeur extends Model
 {
     protected $table = 'exercice_sapeur';
     protected $fillable = ['convoque', 'present', 'absent', 'remplace', 'excuse_type_id', 'amende'];
-    protected $casts = [
-        'sapeur_id' => 'integer', 'exercice_id' => 'integer', 'present' => 'integer', 'absent' => 'integer', 'convoque' => 'integer',
-        'amende' => 'boolean', 'remplace' => 'integer', 'excuse_type_id' => 'integer', 'excuse_statut' => 'integer'
-    ];
+    protected function casts(): array
+    {
+        return  [
+            'sapeur_id' => 'integer', 'exercice_id' => 'integer', 'present' => 'integer', 'absent' => 'integer', 'convoque' => 'integer',
+            'amende' => 'boolean', 'remplace' => 'integer', 'excuse_type_id' => 'integer', 'excuse_statut' => 'integer'
+        ];
+    }
 
     use HasFactory;
 

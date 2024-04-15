@@ -10,9 +10,10 @@ class TravailType extends Model
     use HasFactory;
 
     protected $fillable = ['designation', 'actif', 'ecriture_categorie_id', 'type_unite_id'];
-    protected $casts = [
-        'actif' => 'boolean', 'ecriture_categorie_id' => 'integer', 'type_unite_id' => 'integer'
-    ];
+    protected function casts(): array
+    {
+        return  ['actif' => 'boolean', 'ecriture_categorie_id' => 'integer', 'type_unite_id' => 'integer'];
+    }
 
     public function fonctions()
     {

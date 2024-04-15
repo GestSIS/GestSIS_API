@@ -10,7 +10,10 @@ class MaterielEventType extends Model
     use HasFactory;
 
     protected $fillable = ['nom', 'description', 'validable'];
-    protected $casts = ['validable' => 'boolean'];
+    protected function casts(): array
+    {
+        return  ['validable' => 'boolean'];
+    }
 
     function materielTypes()
     {

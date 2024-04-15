@@ -10,9 +10,12 @@ class IndemniteCoursType extends Model
         'designation',
         'ecriture_categorie_id'
     ];
-    protected $casts = [
-        'ecriture_categorie_id' => 'integer'
-    ];
+    protected function casts(): array
+    {
+        return  [
+            'ecriture_categorie_id' => 'integer'
+        ];
+    }
 
     public function fonctions()
     {

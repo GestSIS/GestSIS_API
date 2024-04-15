@@ -7,7 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class ExerciceComptable extends Model
 {
     protected $fillable = ['annee', 'designation', 'debut', 'fin', 'boucle'];
-    protected $casts = [
-        'annee' => 'integer', 'boucle' => 'integer'
-    ];
+    protected function casts(): array
+    {
+        return  [
+            'annee' => 'integer', 'boucle' => 'integer'
+        ];
+    }
 }

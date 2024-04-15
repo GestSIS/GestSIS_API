@@ -24,11 +24,14 @@ class IndemniteInterventionType extends Model
         'tarif_pro_rata',
         'tarif_min_pro_rata',
     ];
-    protected $casts = [
-        'tarif' => 'decimal:2', 'tarif_min_pour' => 'decimal:2', 'taux_weekend' => 'decimal:2', 'taux_nuit' => 'decimal:2',
-        'compte_id' => 'integer', 'phase_id' => 'integer', 'type_unite_id' => 'integer', 'ecriture_categorie_id' => 'integer',
-        'par_fonction' => 'boolean', 'type' => 'integer', 'tarif_pro_rata' => 'boolean', 'tarif_min_pro_rata' => 'boolean'
-    ];
+    protected function casts(): array
+    {
+        return  [
+            'tarif' => 'decimal:2', 'tarif_min_pour' => 'decimal:2', 'taux_weekend' => 'decimal:2', 'taux_nuit' => 'decimal:2',
+            'compte_id' => 'integer', 'phase_id' => 'integer', 'type_unite_id' => 'integer', 'ecriture_categorie_id' => 'integer',
+            'par_fonction' => 'boolean', 'type' => 'integer', 'tarif_pro_rata' => 'boolean', 'tarif_min_pro_rata' => 'boolean'
+        ];
+    }
 
     public function fonctions()
     {

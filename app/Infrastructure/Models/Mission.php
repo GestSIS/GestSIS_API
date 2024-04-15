@@ -10,9 +10,10 @@ class Mission extends Model
     use HasFactory;
 
     protected $fillable = ['debut', 'fin', 'titre', 'resume', 'sapeur_id', 'sapeur'];
-    protected $casts = [
-        'sapeur_id' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return  ['sapeur_id' => 'integer'];
+    }
 
     public function sapeurObject()
     {

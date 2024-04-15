@@ -10,7 +10,10 @@ class MaterielPersonnel extends Model
     use HasFactory;
 
     protected $fillable = ['taille', 'remarque', 'attribution', 'retour', 'sapeur_id'];
-    protected $casts = ['sapeur_id' => 'integer', 'materiel_type_id' => 'integer', 'materiel_id' => 'integer'];
+    protected function casts(): array
+    {
+        return  ['sapeur_id' => 'integer', 'materiel_type_id' => 'integer', 'materiel_id' => 'integer'];
+    }
 
     public function sapeur()
     {

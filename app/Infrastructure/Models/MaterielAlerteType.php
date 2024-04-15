@@ -10,7 +10,10 @@ class MaterielAlerteType extends Model
     use HasFactory;
 
     protected $fillable = ['titre', 'description', 'seuil_min', 'dernier'];
-    protected $casts = ['seuil_min' => 'integer', 'dernier' => 'boolean'];
+    protected function casts(): array
+    {
+        return  ['seuil_min' => 'integer', 'dernier' => 'boolean'];
+    }
 
     function eventTypes()
     {

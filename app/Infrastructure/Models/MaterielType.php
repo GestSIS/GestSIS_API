@@ -10,5 +10,8 @@ class MaterielType extends Model
     use HasFactory;
 
     protected $fillable = ['designation', 'materiel_categorie_id'];
-    protected $casts = ['materiel_categorie_id' => 'integer'];
+    protected function casts(): array
+    {
+        return  ['materiel_categorie_id' => 'integer'];
+    }
 }

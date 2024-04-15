@@ -11,7 +11,10 @@ class InterventionMateriel extends Model
 
     protected $table = 'intervention_materiel';
     protected $fillable = ['quantite'];
-    protected $casts = [
-        'quantite' => 'decimal:2', 'materiel_id' => 'integer', 'intervention_id' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return  [
+            'quantite' => 'decimal:2', 'materiel_id' => 'integer', 'intervention_id' => 'integer',
+        ];
+    }
 }

@@ -7,9 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Permis extends Model
 {
     protected $fillable = ['date'];
-    protected $casts = [
-        'sapeur_id' => 'integer', 'permis_type_id' => 'integer'
-    ];
+    protected function casts(): array
+    {
+        return  [
+            'sapeur_id' => 'integer', 'permis_type_id' => 'integer'
+        ];
+    }
 
     /**
      * Get the post that owns the comment.

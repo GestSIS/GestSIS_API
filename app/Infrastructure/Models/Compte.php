@@ -7,9 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Compte extends Model
 {
     protected $fillable = ['numero', 'designation', 'produit'];
-    protected $casts = [
-        'produit' => 'integer'
-    ];
+    protected function casts(): array
+    {
+        return  [
+            'produit' => 'integer'
+        ];
+    }
 
     /**
      * The cours that belong to the sapeur.

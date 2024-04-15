@@ -12,7 +12,10 @@ class MaterielEvent extends Model
     protected $fillable = [
         'date', 'remarque', 'succes'
     ];
-    protected $casts = [
-        'date' => 'date', 'succes' => 'boolean', 'materiel_nominal_id' => 'integer', 'materiel_event_type_id' => 'integer'
-    ];
+    protected function casts(): array
+    {
+        return  [
+            'date' => 'date', 'succes' => 'boolean', 'materiel_nominal_id' => 'integer', 'materiel_event_type_id' => 'integer'
+        ];
+    }
 }

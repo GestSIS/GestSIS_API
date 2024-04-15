@@ -10,7 +10,10 @@ class MaterielGenerique extends Model
     use HasFactory;
 
     protected $fillable = ['quantite'];
-    protected $casts = ['quantite' => 'integer'];
+    protected function casts(): array
+    {
+        return  ['quantite' => 'integer'];
+    }
 
     public function materiel()
     {

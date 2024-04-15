@@ -7,9 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class FraisIndemniteAnnuelType extends Model
 {
     protected $fillable = ['compte_id', 'ecriture_categorie_id', 'designation', 'cumulable', 'type'];
-    protected $casts = [
-        'compte_id' => 'integer', 'ecriture_categorie_id' => 'integer', 'cumulable' => 'boolean', 'type' => 'integer'
-    ];
+    protected function casts(): array
+    {
+        return  [
+            'compte_id' => 'integer', 'ecriture_categorie_id' => 'integer', 'cumulable' => 'boolean', 'type' => 'integer'
+        ];
+    }
 
     public function fraisIndemniteAnnuels()
     {

@@ -8,9 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class Exercice extends Model
 {
     protected $fillable = ['date', 'heure', 'lieu', 'designation', 'communications', 'duree', 'statut', 'exercice_categorie_id', 'localite_id'];
-    protected $casts = [
-        'duree' => 'integer', 'statut' => 'integer', 'localite_id' => 'integer', 'exercice_categorie_id' => 'integer'
-    ];
+    protected function casts(): array
+    {
+        return  [
+            'duree' => 'integer', 'statut' => 'integer', 'localite_id' => 'integer', 'exercice_categorie_id' => 'integer'
+        ];
+    }
 
     use HasFactory;
 

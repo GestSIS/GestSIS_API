@@ -12,10 +12,13 @@ class TravailTypeFonction extends Model
         'compte_id',
         'fonction_id',
     ];
-    protected $casts = [
-        'type' => 'integer',
-        'tarif' => 'decimal:2',
-        'compte_id' => 'integer',
-        'fonction_id' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return  [
+            'type' => 'integer',
+            'tarif' => 'decimal:2',
+            'compte_id' => 'integer',
+            'fonction_id' => 'integer',
+        ];
+    }
 }

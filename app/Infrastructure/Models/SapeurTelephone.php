@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class SapeurTelephone extends Model
 {
     protected $fillable = ['telephone_type_id', 'numero', 'rta', 'priorite'];
-    protected $casts = [
-        'rta' => 'boolean', 'priorite' => 'integer', 'telephone_type_id' => 'integer', 'sapeur_id' => 'integer'
-    ];
+    protected function casts(): array
+    {
+        return  ['rta' => 'boolean', 'priorite' => 'integer', 'telephone_type_id' => 'integer', 'sapeur_id' => 'integer'];
+    }
 
     protected $table = 'sapeur_telephone';
 

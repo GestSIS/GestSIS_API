@@ -8,7 +8,10 @@ class GroupeIntervention extends Model
 {
     protected $table = 'groupe_intervention';
     protected $fillable = ['no', 'designation', 'intervention_id'];
-    protected $casts = [
-        'no' => 'integer', 'intervention_id' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return  [
+            'no' => 'integer', 'intervention_id' => 'integer',
+        ];
+    }
 }

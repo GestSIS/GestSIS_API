@@ -12,9 +12,12 @@ class IndemniteExerciceType extends Model
         'par_fonction',
         'ecriture_categorie_id'
     ];
-    protected $casts = [
-        'type_unite_id' => 'integer', 'par_fonction' => 'boolean', 'ecriture_categorie_id' => 'integer'
-    ];
+    protected function casts(): array
+    {
+        return  [
+            'type_unite_id' => 'integer', 'par_fonction' => 'boolean', 'ecriture_categorie_id' => 'integer'
+        ];
+    }
 
     public function fonctions()
     {
