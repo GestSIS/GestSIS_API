@@ -14,7 +14,9 @@ class Ecriture extends Model
         'type_unite_id',
         'quantite',
         'tarif_min',
+        'tarif_pro_rata',
         'tarif_min_pour',
+        'tarif_min_pro_rata',
         'taux',
         'taux_description',
 
@@ -55,11 +57,14 @@ class Ecriture extends Model
         // décompte d'heure
     ];
 
-    protected $casts = [
-        'total' => 'decimal:2', 'tarif' => 'decimal:2', 'type_unite_id' => 'integer', 'quantite' => 'decimal:2',
-        'solde_min' => 'decimal:2', 'solde_min_pour' => 'decimal:2', 'taux' => 'decimal:2', 'solde' => 'decimal:2',
-        'indemnite' => 'decimal:2', 'frais' => 'decimal:2', 'avs' => 'boolean', 'amende' => 'boolean', 'frais_annuel' => 'boolean',
-        'indemnite_annuel' => 'boolean', 'compte_id' => 'integer', 'exercice_comptable_id' => 'integer', 'ecriture_categorie_id' => 'integer',
-        'sapeur_id' => 'integer', 'intervention_id' => 'integer', 'exercice_id' => 'integer'
-    ];
+    protected function casts(): array
+    {
+        return [
+            'total' => 'decimal:2', 'tarif' => 'decimal:2', 'type_unite_id' => 'integer', 'quantite' => 'decimal:2',
+            'tarif_min' => 'decimal:2', 'tarif_min_pour' => 'decimal:2', 'taux' => 'decimal:2',
+            'tarif_pro_rata' => 'boolean', 'tarif_min_pro_rata' => 'boolean',
+            'module' => 'integer', 'type' => 'integer', 'compte_id' => 'integer', 'exercice_comptable_id' => 'integer', 'ecriture_categorie_id' => 'integer',
+            'sapeur_id' => 'integer', 'intervention_id' => 'integer', 'exercice_id' => 'integer'
+        ];
+    }
 }

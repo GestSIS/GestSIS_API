@@ -170,6 +170,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->exercice_comptable_id = $ecriture->exercice_comptable_id;
         $object->intervention_id = $ecriture->intervention_id;
         $object->exercice_id = $ecriture->exercice_id;
+        $object->cours_sapeur_id = $ecriture->exercice_id;
 
         $object->compte_id = $ecriture->compte_id;
         $object->ecriture_categorie_id = $ecriture->ecriture_categorie_id;
@@ -209,6 +210,7 @@ class EcritureRepositoryEloquent implements EcritureRepository
         $object->exercice_comptable_id = $ecriture->exercice_comptable_id;
         $object->intervention_id = $ecriture->intervention_id;
         $object->exercice_id = $ecriture->exercice_id;
+        $object->cours_sapeur_id = $ecriture->exercice_id;
         $object->compte_id = $ecriture->compte_id;
         $object->ecriture_categorie_id = $ecriture->ecriture_categorie_id;
         $object->date = $ecriture->date;

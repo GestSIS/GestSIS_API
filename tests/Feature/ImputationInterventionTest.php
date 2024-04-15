@@ -9,6 +9,8 @@ use Tests\TestCase;
 use App\Domaine\API\InterventionService;
 use App\Domaine\API\SapeurService;
 use App\Domaine\API\ImputationService;
+use App\Domaine\Business\ImputationBusiness;
+use App\Domaine\Business\InterventionBusiness;
 use Carbon\Carbon;
 
 class ImputationInterventionTest extends TestCase
@@ -42,7 +44,9 @@ class ImputationInterventionTest extends TestCase
 
         $intervention = Intervention::factory()->make();
         $intervention->date_debut = Carbon::createMidnightDate(2019, 1, 1);
+        $intervention->heure_debut = "00:00";
         $intervention->date_fin = Carbon::createMidnightDate(2019, 1, 3);
+        $intervention->heure_fin = "00:00";
 
         $this->interventionId = $interventionService->createIntervention($intervention->toArray())->id;
 
@@ -77,7 +81,7 @@ class ImputationInterventionTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testImputationImputationTarifSimple()
+    public function testImputationImputationTarifSimpleSansProRata()
     {
         $param = array(
             "indemnite_intervention_type_id" => 1
@@ -86,13 +90,78 @@ class ImputationInterventionTest extends TestCase
 
         $response
             ->assertStatus(200)
-            ->assertJson([
-                'data' => true
-            ]);
-
-        $ecritures = $this->comptabiliteService->getEcrituresForInterventionById($this->interventionId);
-
-        //$this->assertTrue(count($ecritures) === 3);
+            ->assertJson(
+                [
+                    "data" => [
+                        'statut' => InterventionBusiness::INTERVENTION_STATUT_IMPUTE,
+                        'ecritures' => [
+                            [
+                                'complement' => Null,
+                                'total' => '490.00',
+                                'tarif' => '30.00',
+                                'type_unite_id' => 2,
+                                'quantite' => '16.25',
+                                'tarif_min' => '40.00',
+                                'tarif_pro_rata' => false,
+                                'tarif_min_pour' => '1.00',
+                                'tarif_min_pro_rata' => false,
+                                'date' => '2019-01-01',
+                                'heure' => '00:00:00',
+                                'sapeur_id' => 1,
+                                'compte_id' => 4,
+                                'intervention_id' => $this->interventionId,
+                                'exercice_id' => null,
+                                'ecriture_categorie_id' => 4,
+                                'cours_sapeur_id' => null,
+                                'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
+                                'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
+                            ],
+                            [
+                                'complement' => Null,
+                                'total' => '40.00',
+                                'tarif' => '30.00',
+                                'type_unite_id' => 2,
+                                'quantite' => '0.50',
+                                'tarif_min' => '40.00',
+                                'tarif_pro_rata' => false,
+                                'tarif_min_pour' => '1.00',
+                                'tarif_min_pro_rata' => false,
+                                'date' => '2019-01-01',
+                                'heure' => '00:00:00',
+                                'sapeur_id' => 2,
+                                'compte_id' => 4,
+                                'intervention_id' => $this->interventionId,
+                                'exercice_id' => null,
+                                'ecriture_categorie_id' => 4,
+                                'cours_sapeur_id' => null,
+                                'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
+                                'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
+                            ],
+                            [
+                                'complement' => Null,
+                                'total' => '100.00',
+                                'tarif' => '30.00',
+                                'type_unite_id' => 2,
+                                'quantite' => '3.25',
+                                'tarif_min' => '40.00',
+                                'tarif_pro_rata' => false,
+                                'tarif_min_pour' => '1.00',
+                                'tarif_min_pro_rata' => false,
+                                'date' => '2019-01-01',
+                                'heure' => '00:00:00',
+                                'sapeur_id' => 3,
+                                'compte_id' => 4,
+                                'intervention_id' => $this->interventionId,
+                                'exercice_id' => null,
+                                'ecriture_categorie_id' => 4,
+                                'cours_sapeur_id' => null,
+                                'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
+                                'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
+                            ],
+                        ]
+                    ]
+                ]
+            );
     }
 
     /**
@@ -110,13 +179,99 @@ class ImputationInterventionTest extends TestCase
 
         $response
             ->assertStatus(200)
-            ->assertJson([
-                'data' => true
-            ]);
-
-        $ecritures = $this->comptabiliteService->getEcrituresForInterventionById($this->interventionId);
-        //dd($ecritures);
-        //$this->assertTrue(count($ecritures) === 3);
+            ->assertJson(
+                [
+                    "data" => [
+                        'statut' => InterventionBusiness::INTERVENTION_STATUT_IMPUTE,
+                        'ecritures' => [
+                            [
+                                'complement' => Null,
+                                'total' => '127.50',
+                                'tarif' => '30.00',
+                                'type_unite_id' => 2,
+                                'quantite' => '4.25',
+                                'tarif_min' => null,
+                                'tarif_min_pour' => null,
+                                'taux' => NULL,
+                                'taux_description' => NULL,
+                                'date' => '2019-01-01',
+                                'heure' => '00:00:00',
+                                'sapeur_id' => 1,
+                                'compte_id' => 4,
+                                'intervention_id' => $this->interventionId,
+                                'exercice_id' => null,
+                                'ecriture_categorie_id' => 4,
+                                'cours_sapeur_id' => null,
+                                'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
+                                'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
+                            ],
+                            [
+                                'complement' => Null,
+                                'total' => '450.00',
+                                'tarif' => '30.00',
+                                'type_unite_id' => 2,
+                                'quantite' => '12.00',
+                                'tarif_min' => null,
+                                'tarif_min_pour' => null,
+                                'taux' => '1.25',
+                                'taux_description' => 'Nuit',
+                                'date' => '2019-01-01',
+                                'heure' => '00:00:00',
+                                'sapeur_id' => 1,
+                                'compte_id' => 4,
+                                'intervention_id' => $this->interventionId,
+                                'exercice_id' => null,
+                                'ecriture_categorie_id' => 4,
+                                'cours_sapeur_id' => null,
+                                'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
+                                'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
+                            ],
+                            [
+                                'complement' => Null,
+                                'total' => '15.00',
+                                'tarif' => '30.00',
+                                'type_unite_id' => 2,
+                                'quantite' => '0.50',
+                                'tarif_min' => null,
+                                'tarif_min_pour' => null,
+                                'taux' => NULL,
+                                'taux_description' => NULL,
+                                'date' => '2019-01-01',
+                                'heure' => '00:00:00',
+                                'sapeur_id' => 2,
+                                'compte_id' => 4,
+                                'intervention_id' => $this->interventionId,
+                                'exercice_id' => null,
+                                'ecriture_categorie_id' => 4,
+                                'cours_sapeur_id' => null,
+                                'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
+                                'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
+                            ],
+                            [
+                                'complement' => Null,
+                                'total' => '97.50',
+                                'tarif' => '30.00',
+                                'type_unite_id' => 2,
+                                'quantite' => '3.25',
+                                'tarif_min' => null,
+                                'tarif_min_pour' => null,
+                                'taux' => NULL,
+                                'taux_description' => NULL,
+                                'date' => '2019-01-01',
+                                'heure' => '00:00:00',
+                                'sapeur_id' => 3,
+                                'compte_id' => 4,
+                                'intervention_id' => $this->interventionId,
+                                'exercice_id' => null,
+                                'ecriture_categorie_id' => 4,
+                                'cours_sapeur_id' => null,
+                                'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
+                                'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
+                            ],
+                        ]
+                    ]
+                ]
+            );
     }
     //    /**
     //     * Test add exercice
