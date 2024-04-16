@@ -8,6 +8,7 @@ use App\Domaine\SPI\InterventionRepository;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Groupe;
 use App\Infrastructure\Models\Intervention;
+use App\Infrastructure\Models\InterventionSapeur;
 use App\Infrastructure\Models\Materiel;
 use App\Infrastructure\Models\Quittance;
 use App\Infrastructure\Models\Sapeur;
@@ -92,7 +93,7 @@ class InterventionService
      * @param int
      * @param array
      * @return Intervention
-     * @throws ArrayException(
+     * @throws \App\Domaine\Exceptions\ArrayException
      */
     public function editInterventionInformationsById($interventionId, $data)
     {
@@ -119,7 +120,7 @@ class InterventionService
      *
      * @param $data
      * @return array
-     * @throws ArrayException(
+     * @throws \App\Domaine\Exceptions\ArrayException
      */
     public function addPresences($interventionId, $sapeurs)
     {
@@ -135,7 +136,7 @@ class InterventionService
      *
      * @param $data
      * @return Collection
-     * @throws ArrayException(
+     * @throws \App\Domaine\Exceptions\ArrayException
      */
     public function updatePresences($interventionId, $sapeurs)
     {
@@ -154,11 +155,27 @@ class InterventionService
     }
 
     /**
-     * Ajout de phases d'un intervention
+     * Return les statistiques de présence pour les interventions
+     *
+     * @param int $exerciceComptableId
+     * @return array
+     */
+    public function statPresences(int $exerciceComptableId): array
+    {
+        // return InterventionSapeur::where('exercice_comptable_id', '=', $exerciceComptableId)->get();
+        return DB::select("SELECT ins.*
+                FROM intervention_sapeur as ins
+                INNER JOIN interventions as i ON i.id = ins.intervention_id
+                WHERE i.exercice_comptable_id = ?
+            ", [$exerciceComptableId]);
+    }
+
+    /**
+     * Ajout de phases d'une intervention
      *
      * @param $data
      * @return Collection
-     * @throws ArrayException(
+     * @throws \App\Domaine\Exceptions\ArrayException
      */
     public function addPhases($interventionId, $phases)
     {
@@ -171,7 +188,7 @@ class InterventionService
      *
      * @param $data
      * @return Collection
-     * @throws ArrayException(
+     * @throws \App\Domaine\Exceptions\ArrayException
      */
     public function updatePhases($interventionId, $phases)
     {
@@ -194,7 +211,7 @@ class InterventionService
      *
      * @param $data
      * @return Collection
-     * @throws ArrayException(
+     * @throws \App\Domaine\Exceptions\ArrayException
      */
     public function addAppels($interventionId, $appels)
     {
@@ -207,7 +224,7 @@ class InterventionService
      *
      * @param $data
      * @return Collection
-     * @throws ArrayException(
+     * @throws \App\Domaine\Exceptions\ArrayException
      */
     public function updateAppels($interventionId, $appels)
     {
@@ -230,7 +247,7 @@ class InterventionService
      *
      * @param $data
      * @return Collection
-     * @throws ArrayException(
+     * @throws \App\Domaine\Exceptions\ArrayException
      */
     public function addMissions($interventionId, $missions)
     {
@@ -243,7 +260,7 @@ class InterventionService
      *
      * @param $data
      * @return Collection
-     * @throws ArrayException(
+     * @throws \App\Domaine\Exceptions\ArrayException
      */
     public function updateMissions($interventionId, $missions)
     {
@@ -266,7 +283,7 @@ class InterventionService
      *
      * @param $data
      * @return Collection
-     * @throws ArrayException(
+     * @throws \App\Domaine\Exceptions\ArrayException
      */
     public function addMateriels($interventionId, $materiels)
     {
@@ -279,7 +296,7 @@ class InterventionService
      *
      * @param $data
      * @return Collection
-     * @throws ArrayException(
+     * @throws \App\Domaine\Exceptions\ArrayException
      */
     public function updateMateriels($interventionId, $materiels)
     {
@@ -302,7 +319,7 @@ class InterventionService
      *
      * @param $data
      * @return Collection
-     * @throws ArrayException(
+     * @throws \App\Domaine\Exceptions\ArrayException
      */
     public function addQuittances($interventionId, $quittances)
     {
@@ -325,7 +342,7 @@ class InterventionService
      *
      * @param $data
      * @return Collection
-     * @throws ArrayException(
+     * @throws \App\Domaine\Exceptions\ArrayException
      */
     public function addVehicules($interventionId, $vehicules)
     {
@@ -348,7 +365,7 @@ class InterventionService
      *
      * @param $data
      * @return Collection
-     * @throws ArrayException(
+     * @throws \App\Domaine\Exceptions\ArrayException
      */
     public function addGroupes($interventionId, $groupes)
     {

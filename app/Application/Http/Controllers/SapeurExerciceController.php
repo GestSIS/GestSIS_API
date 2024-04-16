@@ -28,7 +28,7 @@ class SapeurExerciceController extends Controller
     }
 
     /**
-     * Return le nombre d'intervention par materiel pour l'année comptable
+     * Return les présences aux exercices pour l'année comptable
      *
      * @param Request $request
      * @param int $exercice_comptable_id

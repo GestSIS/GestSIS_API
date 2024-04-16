@@ -324,7 +324,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('convocation/{id}', [ConvocationController::class, 'convoquer']);
 
         // Statistiques
-        Route::get('statistiques/{id}/presence', [SapeurExerciceController::class, 'stat']);
+        Route::get('statistiques/{id}/presence-exercice', [SapeurExerciceController::class, 'stat']);
     });
     Route::group(['middleware' => 'jwtTokenRole:exercice.presence'], function () {
         Route::get('exercices-derniers', [ExerciceController::class, 'last'])->name('api.v2.exercices.derniers');
@@ -459,6 +459,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('stat-federal', StatFederalController::class)->only(['index']);
         Route::resource('stat-intervention', StatInterventionController::class)->only(['index']);
         Route::resource('intervention-traitement', InterventionTraitementController::class)->only(['index']);
+
+        // Statistiques
+        Route::get('statistiques/{id}/presence-intervention', [InterventionSapeursController::class, 'stat']);
     });
     Route::group(['middleware' => 'jwtTokenRole:intervention.lecture'], function () {
         Route::resource('vehicules', VehiculeController::class)->only(['index']);

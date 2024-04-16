@@ -88,4 +88,18 @@ class InterventionSapeursController extends Controller
         $statut = $this->service->removePresences($interventionId, $data['sapeurs']);
         return response()->json(['data' => $statut]);
     }
+
+    /**
+     * Return les présences aux interventions pour l'année comptable
+     *
+     * @param Request $request
+     * @param int $exerciceComptableId
+     * @return Response
+     */
+    public function stat(int $exerciceComptableId)
+    {
+        $data = $this->service->statPresences($exerciceComptableId);
+
+        return response()->json(['data' => $data]);
+    }
 }
