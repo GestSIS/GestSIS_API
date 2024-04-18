@@ -114,10 +114,10 @@ class EcritureRepositoryEloquent implements EcritureRepository
     public function persisteNewEcriture($ecriture)
     {
         if (!array_key_exists('complement', $ecriture)) $ecriture['complement'] = "";
-        if (!array_key_exists('tarif_pro_rata', $ecriture)) $ecriture['tarif_pro_rata'] = null;
+        if (!array_key_exists('tarif_pro_rata', $ecriture)) $ecriture['tarif_pro_rata'] = true;
         if (!array_key_exists('tarif_min', $ecriture)) $ecriture['tarif_min'] = null;
         if (!array_key_exists('tarif_min_pour', $ecriture)) $ecriture['tarif_min_pour'] = null;
-        if (!array_key_exists('tarif_min_pro_rata', $ecriture)) $ecriture['tarif_min_pro_rata'] = null;
+        if (!array_key_exists('tarif_min_pro_rata', $ecriture)) $ecriture['tarif_min_pro_rata'] = true;
         if (!array_key_exists('taux', $ecriture)) $ecriture['taux'] = null;
         if (!array_key_exists('taux_description', $ecriture)) $ecriture['taux_description'] = null;
 
