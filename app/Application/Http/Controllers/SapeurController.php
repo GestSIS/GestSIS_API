@@ -69,6 +69,15 @@ class SapeurController extends Controller
     }
 
     /**
+     * Return la liste foad
+     */
+    public function listeFoad(Request $request)
+    {
+        $date = $request->get('date', Carbon::now());
+        return $this->service->listeFoad($date);
+    }
+
+    /**
      * Return la liste des téléphones
      */
     public function sapeursTelephones()

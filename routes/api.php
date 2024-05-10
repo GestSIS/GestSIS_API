@@ -188,6 +188,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenRole:effectif.tout'], function () {
         Route::get('effectif', [SapeurController::class, 'effectif'])->name('api.v2.effectif');
         Route::get('liste-fssp', [SapeurController::class, 'listeFssp'])->name('api.v2.liste-fssp');
+        Route::get('liste-foad', [SapeurController::class, 'listeFoad'])->name('api.v2.liste-foad');
 
         Route::get('trombinoscope', [SapeurController::class, 'trombinoscope'])->name('api.v2.trombinoscope');
     });

@@ -78,6 +78,11 @@ class SapeurService
         return Excel::download(new ListeFsspExport($date), 'liste_fssp.xlsx');
     }
 
+    public function listeFoad($date)
+    {
+        return Excel::download(new ListeFoadExport($date), 'liste_foad.xlsx');
+    }
+
     public function effectif()
     {
         return Sapeur::with('telephones', 'permis', 'fonctions', 'groupes')
