@@ -5,6 +5,7 @@ namespace App\Domaine\API;
 use App\Domaine\Business\SapeurBusiness;
 use App\Domaine\SPI\ControleMedicalRepository;
 use App\Domaine\SPI\SapeurRepository;
+use App\Infrastructure\Collections\ListeFoadExport;
 use App\Infrastructure\Collections\ListeFsspExport;
 use App\Infrastructure\Models\CoursSapeur;
 use App\Infrastructure\Models\ExerciceComptable;

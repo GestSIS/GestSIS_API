@@ -27,12 +27,11 @@ class ListeFoadExport implements FromCollection, WithHeadings
       ->where('sapeurs.type', '=', SapeurBusiness::TYPE_SAPEUR)
       ->leftJoin('mutations', 'sapeurs.id', '=', 'mutations.sapeur_id')
       ->leftJoin('sapeur_telephone', 'sapeur_telephone.sapeur_id', '=', 'sapeurs.id')
-      # TODO: Grade principal
-      ->leftJoin('grade_sapeurs', 'sapeur_telephone.sapeur_id', '=', 'sapeurs.id')
-      ->leftJoin('grades', 'sapeur_telephone.sapeur_id', '=', 'sapeurs.id')
+      ->leftJoin('grades', 'sapeurs.grade_id', '=', 'grades.id')
       ->select([
         'sapeurs.nom', 'sapeurs.prenom',
         'sapeur_telephone.numero', 'sapeurs.email',
+        DB::raw('CASE WHEN `grades`.`groupe`=1 THEN "Officier" WHEN `grades`.`groupe`=2 THEN "Sous-Officier" ELSE "Sapeur" END')
       ])
       ->where('mutations.incorporation', '<=', $date)
       ->where(function ($query) use ($date) {
@@ -62,7 +61,7 @@ class ListeFoadExport implements FromCollection, WithHeadings
   {
     //Put Here Header Name That you want in your excel sheet 
     return [
-      'Nom', 'Prénom', 'Adresse', 'NPA Localité', 'Téléphone', 'Email'
+      'Nom', 'Prénom', 'Téléphone', 'Email', 'Grade'
     ];
   }
 }

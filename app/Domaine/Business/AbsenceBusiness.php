@@ -19,6 +19,7 @@ class AbsenceBusiness
             ['fin', '>=', $absence['debut']]
         ])->exists();
     }
+
     public function ajouterAbsence($data)
     {
         if (Carbon::parse($data['debut'])->gt(Carbon::parse($data['fin']))) {
