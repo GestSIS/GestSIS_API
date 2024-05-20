@@ -23,7 +23,7 @@ class ListeFoadExport implements FromCollection, WithHeadings
   public function collection()
   {
     $date = $this->date;
-    $data = Sapeur::query()
+    return Sapeur::query()
       ->where('sapeurs.type', '=', SapeurBusiness::TYPE_SAPEUR)
       ->leftJoin('mutations', 'sapeurs.id', '=', 'mutations.sapeur_id')
       ->leftJoin('sapeur_telephone', 'sapeur_telephone.sapeur_id', '=', 'sapeurs.id')
@@ -40,21 +40,7 @@ class ListeFoadExport implements FromCollection, WithHeadings
       })
       ->orderBy('sapeurs.nom', 'ASC')
       ->orderBy('sapeurs.prenom', 'ASC')
-      ->get()
-      ->all();
-
-    return collect(
-      array_values(
-        array_reduce($data, function ($acc, $e) {
-          $id = $e->id;
-          unset($e->id);
-          $present = $acc[$id] ?? false;
-          if (!$present)
-            $acc[$id] = $e;
-          return $acc;
-        }, [])
-      )
-    );
+      ->get();
   }
 
   public function headings(): array
