@@ -49,12 +49,10 @@ class Ecriture extends Model
         // 3. Frais/Indemnité Annuel
         // 4. AVS
         // 5. Amende
-        // 6. Décompte d'heures
+        // 6. Fiches travails
         // 7. Cours
         // 8. Remboursement à l'employeur ?
 
-        // TODO: Modules à implémenter
-        // décompte d'heure
     ];
 
     protected function casts(): array
@@ -64,7 +62,7 @@ class Ecriture extends Model
             'tarif_min' => 'decimal:2', 'tarif_min_pour' => 'decimal:2', 'taux' => 'decimal:2',
             'tarif_pro_rata' => 'boolean', 'tarif_min_pro_rata' => 'boolean',
             'module' => 'integer', 'type' => 'integer', 'compte_id' => 'integer', 'exercice_comptable_id' => 'integer', 'ecriture_categorie_id' => 'integer',
-            'sapeur_id' => 'integer', 'intervention_id' => 'integer', 'exercice_id' => 'integer'
+            'sapeur_id' => 'integer', 'intervention_id' => 'integer', 'exercice_id' => 'integer', 'cours_sapeur_id' => 'integer',
         ];
     }
 }
