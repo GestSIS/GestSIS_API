@@ -16,7 +16,7 @@
 </head>
 
 <body>
-  <div class="">
+  <div class="container-fluid">
     <?php
     if (!function_exists('isExercice')) {
       function isExercice($e)
@@ -156,7 +156,7 @@
       }
 
     ?>
-      @if ($debutSapeur)
+    @if ($debutSapeur)
       <h1 class="text-center">Décompte de frais</h1>
       <table class="table table-secondary table-responsive table-sm">
         <thead>
@@ -169,15 +169,15 @@
         </thead>
       </table>
       <div></div>
-      @endif
+    @endif
 
-      @if ($debutSection && !isAvsAc($ecriture))
+    @if ($debutSection && !isAvsAc($ecriture))
       <h2>{{ sectionTitle($ecriture) }}</h2>
       <table class="table table-sm table-striped table-bordered">
-        @endif
+    @endif
 
-        @if (isAnnuel($ecriture))
-        @if ($debutSection)
+    @if (isAnnuel($ecriture))
+      @if ($debutSection)
         <thead>
           <tr>
             <th colspan="3">Nature du service</th>
@@ -188,21 +188,21 @@
           </tr>
         </thead>
         <tbody>
-          @endif
-          <tr>
-            <td colspan="3">{{ $ecriture->designation }}</td>
-            <td>{{ formatTarif($ecriture) }}</td>
-            <td>{{ formatNumber($ecriture->quantite) }}</td>
-            <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
-            <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
-          </tr>
-          @if ($finSection)
+      @endif
+      <tr>
+        <td colspan="3">{{ $ecriture->designation }}</td>
+        <td>{{ formatTarif($ecriture) }}</td>
+        <td>{{ formatNumber($ecriture->quantite) }}</td>
+        <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
+        <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
+      </tr>
+      @if ($finSection)
         </tbody>
-        @endif
-        @endif
+      @endif
+    @endif
 
-        @if (isExercice($ecriture))
-        @if ($debutSection)
+    @if (isExercice($ecriture))
+      @if ($debutSection)
         <thead>
           <tr>
             <th>Date</th>
@@ -215,23 +215,23 @@
           </tr>
         </thead>
         <tbody>
-          @endif
-          <tr>
-            <td>{{ formatDate($ecriture->date) }}</td>
-            <td>{{ formatTime($ecriture->heure) }}</td>
-            <td>{{ $ecriture->designation }}</td>
-            <td>{{ formatTarif($ecriture) }}</td>
-            <td>{{ formatNumber($ecriture->quantite) }}</td>
-            <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
-            <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
-          </tr>
-          @if ($finSection)
+      @endif
+      <tr>
+        <td>{{ formatDate($ecriture->date) }}</td>
+        <td>{{ formatTime($ecriture->heure) }}</td>
+        <td>{{ $ecriture->designation }}</td>
+        <td>{{ formatTarif($ecriture) }}</td>
+        <td>{{ formatNumber($ecriture->quantite) }}</td>
+        <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
+        <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
+      </tr>
+      @if ($finSection)
         </tbody>
-        @endif
-        @endif
+      @endif
+    @endif
 
-        @if (isCours($ecriture))
-        @if ($debutSection)
+    @if (isCours($ecriture))
+      @if ($debutSection)
         <thead>
           <tr>
             <th>Date</th>
@@ -244,23 +244,23 @@
           </tr>
         </thead>
         <tbody>
-          @endif
-          <tr>
-            <td>{{ formatDate($ecriture->date) }}</td>
-            <td></td>
-            <td>{{ $ecriture->designation }}</td>
-            <td>{{ formatTarif($ecriture) }}</td>
-            <td>{{ formatNumber($ecriture->quantite) }}</td>
-            <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
-            <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
-          </tr>
-          @if ($finSection)
+      @endif
+      <tr>
+        <td>{{ formatDate($ecriture->date) }}</td>
+        <td></td>
+        <td>{{ $ecriture->designation }}</td>
+        <td>{{ formatTarif($ecriture) }}</td>
+        <td>{{ formatNumber($ecriture->quantite) }}</td>
+        <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
+        <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
+      </tr>
+      @if ($finSection)
         </tbody>
-        @endif
-        @endif
+      @endif
+    @endif
 
-        @if (isAmende($ecriture))
-        @if ($debutSection)
+    @if (isAmende($ecriture))
+      @if ($debutSection)
         <thead>
           <tr>
             <th>Date</th>
@@ -272,22 +272,22 @@
           </tr>
         </thead>
         <tbody>
-          @endif
-          <tr>
-            <td>{{ formatDate($ecriture->date) }}</td>
-            <td>{{ formatTime($ecriture->heure) }}</td>
-            <td>{{ $ecriture->designation }}</td>
-            <td>{{ $ecriture->complement }}</td>
-            <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
-            <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
-          </tr>
-          @if ($finSection)
+      @endif
+      <tr>
+        <td>{{ formatDate($ecriture->date) }}</td>
+        <td>{{ formatTime($ecriture->heure) }}</td>
+        <td>{{ $ecriture->designation }}</td>
+        <td>{{ $ecriture->complement }}</td>
+        <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
+        <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
+      </tr>
+      @if ($finSection)
         </tbody>
-        @endif
-        @endif
+      @endif
+    @endif
 
-        @if (isTravail($ecriture))
-        @if ($debutSection)
+    @if (isTravail($ecriture))
+      @if ($debutSection)
         <thead>
           <tr>
             <th>Date</th>
@@ -300,23 +300,23 @@
           </tr>
         </thead>
         <tbody>
-          @endif
-          <tr>
-            <td>{{ formatDate($ecriture->date) }}</td>
-            <td></td>
-            <td>{{ $ecriture->designation }}</td>
-            <td>{{ formatTarif($ecriture) }}</td>
-            <td>{{ formatNumber($ecriture->quantite) }}</td>
-            <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
-            <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
-          </tr>
-          @if ($finSection)
+      @endif
+      <tr>
+        <td>{{ formatDate($ecriture->date) }}</td>
+        <td></td>
+        <td>{{ $ecriture->designation }}</td>
+        <td>{{ formatTarif($ecriture) }}</td>
+        <td>{{ formatNumber($ecriture->quantite) }}</td>
+        <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
+        <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
+      </tr>
+      @if ($finSection)
         </tbody>
-        @endif
-        @endif
+      @endif
+    @endif
 
-        @if (isDivers($ecriture))
-        @if ($debutSection)
+    @if (isDivers($ecriture))
+      @if ($debutSection)
         <thead>
           <tr>
             <th>Date</th>
@@ -329,23 +329,23 @@
           </tr>
         </thead>
         <tbody>
-          @endif
-          <tr>
-            <td>{{ formatDate($ecriture->date) }}</td>
-            <td>{{ formatTime($ecriture->heure) }}</td>
-            <td>{{ $ecriture->designation }}</td>
-            <td>{{ formatTarif($ecriture) }}</td>
-            <td>{{ formatNumber($ecriture->quantite) }}</td>
-            <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
-            <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
-          </tr>
-          @if ($finSection)
+      @endif
+      <tr>
+        <td>{{ formatDate($ecriture->date) }}</td>
+        <td>{{ formatTime($ecriture->heure) }}</td>
+        <td>{{ $ecriture->designation }}</td>
+        <td>{{ formatTarif($ecriture) }}</td>
+        <td>{{ formatNumber($ecriture->quantite) }}</td>
+        <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
+        <td class="text-end">{{ formatNumber($ecriture->total) }}</td>
+      </tr>
+      @if ($finSection)
         </tbody>
-        @endif
-        @endif
+      @endif
+    @endif
 
-        @if (isIntervention($ecriture))
-        @if ($debutSection)
+    @if (isIntervention($ecriture))
+      @if ($debutSection)
         <thead>
           <tr>
             <th>Date</th>
@@ -358,38 +358,38 @@
           </tr>
         </thead>
         <tbody>
-          @endif
-
-          @if ($debutIntervention)
-          <tr>
-            <td>{{ formatDate($ecriture->date) }}</td>
-            <td>{{ formatTime($ecriture->heure) }}</td>
-            <td colspan="5">{{ $ecriture->designation }}</td>
-          </tr>
-          @endif
-          <tr>
-            <td colspan="2"></td>
-            <td>{{ $ecriture->taux_description }}</td>
-            <td>{{ formatTarif($ecriture) }}</td>
-            <td>{{ formatNumber($ecriture->quantite) }}</td>
-            <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
-            <td class="text-end">{{ $ecriture->total }}</td>
-          </tr>
-          @if ($finSection)
-        </tbody>
-        @endif
-        @endif
-
-        @if ($finSection && $nbEcritureSections > 0)
-        <tfoot>
-          <tr>
-            <th colspan="{{ isAmende($ecriture) ? 5 : 6 }}" class="text-end">Sous-total</th>
-            <th class="text-end">{{ formatNumber($categorieSousTotal) }}</th>
-          </tr>
-          </tbody>
-      </table>
       @endif
-      @if ($finSapeur)
+
+      @if ($debutIntervention)
+        <tr>
+          <td>{{ formatDate($ecriture->date) }}</td>
+          <td>{{ formatTime($ecriture->heure) }}</td>
+          <td colspan="5">{{ $ecriture->designation }}</td>
+        </tr>
+      @endif
+      <tr>
+        <td colspan="2"></td>
+        <td>{{ $ecriture->taux_description }}</td>
+        <td>{{ formatTarif($ecriture) }}</td>
+        <td>{{ formatNumber($ecriture->quantite) }}</td>
+        <td>{{ formatDate($decomptes[$ecriture->decompte_id]->date) }}</td>
+        <td class="text-end">{{ $ecriture->total }}</td>
+      </tr>
+      @if ($finSection)
+        </tbody>
+      @endif
+    @endif
+
+    @if ($finSection && $nbEcritureSections > 0)
+      <tfoot>
+        <tr>
+          <th colspan="{{ isAmende($ecriture) ? 5 : 6 }}" class="text-end">Sous-total</th>
+          <th class="text-end">{{ formatNumber($categorieSousTotal) }}</th>
+        </tr>
+        </tbody>
+        </table>
+    @endif
+    @if ($finSapeur)
       <div class="container-fluid">
         <div class="row">
           {{-- TODO: Gérer les écritures divers avec montants négatifs --}}
@@ -423,7 +423,7 @@
         </div>
       </div>
       <div class="page-break"></div>
-      @endif
+    @endif
     <?php
       if (!isAvsAc($ecriture)) {
         $previousEcriture = $ecriture;
@@ -432,24 +432,24 @@
     ?>
 
     @if ($nbEcritures === 0)
-    <h1>Aucune écriture</h1>
+      <h1>Aucune écriture</h1>
     @elseif($nbSapeur > 1)
-    <h1>Récapitulatif</h1>
-    <table class="table table-sm table-striped">
-      <thead>
-        <tr>
-          <th>Sapeur</th>
-          <th class="text-center">Solde</th>
-          <th class="text-center">Indemnité</th>
-          <th class="text-center">Charge AVS/AI/APG - AC</th>
-          <th class="text-center">Frais effectif</th>
-          <th class="text-center">Frais forfaitaire</th>
-          <th class="text-center">Autre</th>
-          <th class="text-center">Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php
+      <h1>Récapitulatif</h1>
+      <table class="table table-sm table-striped">
+        <thead>
+          <tr>
+            <th>Sapeur</th>
+            <th class="text-center">Solde</th>
+            <th class="text-center">Indemnité</th>
+            <th class="text-center">Charge AVS/AI/APG - AC</th>
+            <th class="text-center">Frais effectif</th>
+            <th class="text-center">Frais forfaitaire</th>
+            <th class="text-center">Autre</th>
+            <th class="text-center">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php
         $sapeurId = null;
         $total_solde = 0.0;
         $total_indemnite = 0.0;
@@ -472,34 +472,34 @@
             $total_autre += $paiement->autre;
             $total_total += $paiement->total;
         ?>
-            <tr>
-              <td>{{ $ecriture->sapeur }}</td>
-              <td class="text-end">{{ formatNumber($paiement->solde) }}</td>
-              <td class="text-end">{{ formatNumber($paiement->indemnite) }}</td>
-              <td class="text-end">{{ formatNumber($paiement->avs_ac) }}</td>
-              <td class="text-end">{{ formatNumber($paiement->frais_effectif) }}</td>
-              <td class="text-end">{{ formatNumber($paiement->frais_forfaitaire) }}</td>
-              <td class="text-end">{{ formatNumber($paiement->autre) }}</td>
-              <th class="text-end">{{ formatNumber($paiement->total) }}</th>
-            </tr>
-        <?php
+          <tr>
+            <td>{{ $ecriture->sapeur }}</td>
+            <td class="text-end">{{ formatNumber($paiement->solde) }}</td>
+            <td class="text-end">{{ formatNumber($paiement->indemnite) }}</td>
+            <td class="text-end">{{ formatNumber($paiement->avs_ac) }}</td>
+            <td class="text-end">{{ formatNumber($paiement->frais_effectif) }}</td>
+            <td class="text-end">{{ formatNumber($paiement->frais_forfaitaire) }}</td>
+            <td class="text-end">{{ formatNumber($paiement->autre) }}</td>
+            <th class="text-end">{{ formatNumber($paiement->total) }}</th>
+          </tr>
+          <?php
           }
         }
         ?>
-      </tbody>
-      <tfoot>
-        <tr>
-          <th>Total</th>
-          <th class="text-end">{{ formatNumber($total_solde) }}</th>
-          <th class="text-end">{{ formatNumber($total_indemnite) }}</th>
-          <th class="text-end">{{ formatNumber($total_avs_ac) }}</th>
-          <th class="text-end">{{ formatNumber($total_frais_effectif) }}</th>
-          <th class="text-end">{{ formatNumber($total_frais_forfaitaire) }}</th>
-          <th class="text-end">{{ formatNumber($total_autre) }}</th>
-          <th class="text-end">{{ formatNumber($total_total) }}</th>
-        </tr>
-      </tfoot>
-    </table>
+        </tbody>
+        <tfoot>
+          <tr>
+            <th>Total</th>
+            <th class="text-end">{{ formatNumber($total_solde) }}</th>
+            <th class="text-end">{{ formatNumber($total_indemnite) }}</th>
+            <th class="text-end">{{ formatNumber($total_avs_ac) }}</th>
+            <th class="text-end">{{ formatNumber($total_frais_effectif) }}</th>
+            <th class="text-end">{{ formatNumber($total_frais_forfaitaire) }}</th>
+            <th class="text-end">{{ formatNumber($total_autre) }}</th>
+            <th class="text-end">{{ formatNumber($total_total) }}</th>
+          </tr>
+        </tfoot>
+      </table>
     @endif
   </div>
 </body>

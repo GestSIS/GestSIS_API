@@ -21,7 +21,7 @@
 </head>
 
 <body>
-  <div class="">
+  <div class="container-fluid">
 
     <h1 class="text-center">{{ $decompte->designation }}</h1>
     <div>Date : {{ formatDate($decompte->date) }}</div>
