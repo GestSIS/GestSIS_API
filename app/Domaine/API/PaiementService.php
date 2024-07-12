@@ -3,7 +3,6 @@
 
 namespace App\Domaine\API;
 
-use App\Application\Mail\DecompteSapeur;
 use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Business\PaiementBusiness;
 use App\Domaine\Exceptions\ArrayException;
@@ -17,14 +16,8 @@ use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\SisParam;
-use Exception;
-use Illuminate\Http\Client\Pool;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
-use Throwable;
 
 class PaiementService
 {
@@ -41,11 +34,11 @@ class PaiementService
     }
 
     /**
-     * creer un décompte
+     * Creer un décompte
      * 
      * @param int $exerciceComptableId - id de l'exercice comptable pour lequel créer les paiements
      */
-    public function creerDecompteAnnuel($exerciceComptableId, $date, $designation, $selection)
+    public function creerDecompteAnnuel($exerciceComptableId, $date, $designation, $selection, $sapeurIds)
     {
         // Vérifi que les paramètres AVS ont été configurés
         $avsParam = AvsParam::first();
@@ -77,7 +70,15 @@ class PaiementService
             $modules[] = ImputationBusiness::ECRITURE_MODULE_FICHE_TRAVAIL;
         }
 
-        $ecritures = Ecriture::whereNull('decompte_id')->where('exercice_comptable_id', $exerciceComptableId)->whereIn('module', $modules)->get();
+        $ecrituresRequest = Ecriture::whereNull('decompte_id')
+            ->where('exercice_comptable_id', $exerciceComptableId)
+            ->whereIn('module', $modules);
+
+        if (count($sapeurIds) > 0) {
+            $ecrituresRequest = $ecrituresRequest->whereIn('sapeur_id', $sapeurIds);
+        }
+
+        $ecritures = $ecrituresRequest->get();
         if ($ecritures->count() === 0) {
             throw new ArrayException([], 'Aucune écriture disponible pour la création du décompte.');
         }

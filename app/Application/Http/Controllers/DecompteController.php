@@ -30,6 +30,8 @@ class DecompteController extends Controller
             'exercice_comptable_id' => 'required|integer|min:1',
             'date' => 'required|date',
             'designation' => 'required|string|min:1',
+            'sapeur_ids' => 'nullable|array',
+            'sapeur_ids.*' => 'integer|min:1',
         ]);
 
         $selection = $request->validate([
@@ -43,7 +45,13 @@ class DecompteController extends Controller
         ]);
 
         try {
-            $decompte = $this->service->creerDecompteAnnuel($data['exercice_comptable_id'], $data['date'], $data['designation'], $selection);
+            $decompte = $this->service->creerDecompteAnnuel(
+                $data['exercice_comptable_id'],
+                $data['date'],
+                $data['designation'],
+                $selection,
+                $data['sapeur_ids'] ?? []
+            );
         } catch (ArrayException $e) {
             return response()->json(['error' => $e->getErrors()]);
         }
