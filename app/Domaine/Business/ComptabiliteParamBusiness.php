@@ -164,6 +164,9 @@ class ComptabiliteParamBusiness
         if (array_key_exists('phase_id', $data) && $data['phase_id'] == 0) {
             $data['phase_id'] = NULL;
         }
+        if (array_key_exists('tarif_pro_rata', $data) && ($data['tarif_pro_rata'] == 0 || $data['tarif_pro_rata'] == null)) {
+            $data['tarif_pro_rata'] = false;
+        }
         if (!$parFonction) {
             $data['par_fonction'] = false;
         }
@@ -181,7 +184,7 @@ class ComptabiliteParamBusiness
         if (array_key_exists('phase_id', $data) && $data['phase_id'] == 0) {
             $data['phase_id'] = NULL;
         }
-        if (array_key_exists('tarif_pro_rata', $data) && $data['tarif_pro_rata'] == 0) {
+        if (array_key_exists('tarif_pro_rata', $data) && ($data['tarif_pro_rata'] == 0 || $data['tarif_pro_rata'] == null)) {
             $data['tarif_pro_rata'] = false;
         }
         $indemnite = IndemniteInterventionType::find($id);
