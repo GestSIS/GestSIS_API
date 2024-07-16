@@ -18,6 +18,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->string('message');
+            $table->dateTime('date_programme');
             $table->dateTime('date_envoie');
 
             $table->string('numeros');

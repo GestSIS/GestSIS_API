@@ -4,6 +4,7 @@ namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\AspsmsParam;
+use App\Infrastructure\Models\Sms;
 use Carbon\Carbon;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Client\ConnectionException;
@@ -29,7 +30,7 @@ class AspsmsBusiness
         $message = iconv('UTF-8', 'ASCII//TRANSLIT', $data['message']);
         $origin = "GestSIS"; // $data['origin']; // Pas pour le moment
         $differe = $data['differe'];
-        $date = isset($data['date']) ? $data['date'] : "";
+        $date = $data['date'] ?? "";
         if ($differe) {
             $date = Carbon::parse($date, "Europe/Zurich")->toIso8601String();
         }
@@ -44,7 +45,20 @@ class AspsmsBusiness
             $username = Crypt::decryptString($params->username);
             $password = Crypt::decryptString($params->password);
 
-            return self::sendTextSMS($username, $password, $message, $origin, $differe, $date, $numeros);
+            $response = self::sendTextSMS($username, $password, $message, $origin, $differe, $date, $numeros);
+
+            // TODO: Store sent sms in DB
+            $sms = new Sms();
+            $now = Carbon::now();
+            $sms->fill([
+                'message' => $message,
+                'date_envoie' => $differe ? Carbon::parse($date, "Europe/Zurich") : $now,
+                'date_programme' => $now,
+                'numeros' => implode(';', $data['numeros']),
+                'exercice_id' => $data['exerciceId'] ?? null,
+            ]);
+
+            return $response;
         } catch (DecryptException $e) {
             throw new ArrayException([], 'ASPSMS non configuré');
         }
@@ -109,7 +123,7 @@ class AspsmsBusiness
                         // Authorization failed
                         throw new ArrayException([], "Informations de connexion invalides");
                     case "5":
-                        // Credit insuffisant
+                        throw new ArrayException([], "Crédit insuffisant");
                     default:
                         throw new ArrayException([], "Erreur ASPSMS veuillez contacter votre administrateur system");
                 }
@@ -158,7 +172,6 @@ class AspsmsBusiness
                 return $response->body();
             }
         } catch (ConnectionException $e) {
-            throw $e;
             throw new ArrayException([], "Erreur lors de la connexion ASPSMS veuillez contacter votre administrateur system");
         }
         return 'OK';
