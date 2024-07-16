@@ -4,6 +4,7 @@ namespace App\Domaine\API;
 
 use App\Domaine\Business\AspsmsBusiness;
 use App\Infrastructure\Models\AspsmsParam;
+use App\Infrastructure\Models\Sms;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Crypt;
 
@@ -14,6 +15,11 @@ class AspsmsService
     public function __construct(AspsmsBusiness $business)
     {
         $this->business = $business;
+    }
+
+    public function index()
+    {
+        return Sms::all();
     }
 
     public function credit()

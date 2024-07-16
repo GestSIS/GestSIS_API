@@ -14,6 +14,12 @@ class AspsmsController extends Controller
         $this->service = $service;
     }
 
+    public function index()
+    {
+        $credit = $this->service->index();
+        return response()->json(['data' => $credit]);
+    }
+
     public function credit()
     {
         $credit = $this->service->credit();
@@ -28,6 +34,7 @@ class AspsmsController extends Controller
             'differe' => 'boolean',
             'date' => 'nullable|string',
             'numeros.*' => 'required|string',
+            'exerciceId' => 'nullable|integer',
         ]);
 
         $params = $this->service->send($data);
