@@ -43,9 +43,9 @@ class ExerciceService
         return ['path' => $presence->justificatif_path, 'filename' => $presence->justificatif_filename];
     }
 
-    public function listeExercice()
+    public function listeExercice(int $exerciceComptableId)
     {
-        return $this->repository->listExerciceLight();
+        return $this->repository->listExerciceLight($exerciceComptableId);
     }
 
     public function absences($exerciceComptableId)

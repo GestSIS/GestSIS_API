@@ -6,7 +6,7 @@ namespace App\Domaine\SPI;
 
 interface ExerciceRepository
 {
-    public function listExerciceLight();
+    public function listExerciceLight(int $exerciceComptableId);
 
     public function listeSapeurOfExerciceById(int $exerciceId);
 

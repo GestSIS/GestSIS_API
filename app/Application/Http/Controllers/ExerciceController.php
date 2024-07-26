@@ -19,10 +19,8 @@ class ExerciceController extends Controller
 
     public function index(Request $request)
     {
-        // TODO: Refactor to service
         $exerciceComptableId = $request->get('exercice_comptable_id');
-
-        $exercices = Exercice::where('exercice_comptable_id', $exerciceComptableId)->get();
+        $exercices = $this->service->listeExercice($exerciceComptableId);
         return response()->json(['data' => $exercices]);
     }
 

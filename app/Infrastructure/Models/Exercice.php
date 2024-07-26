@@ -29,6 +29,11 @@ class Exercice extends Model
         return $this->hasMany(Ecriture::class);
     }
 
+    public function sms()
+    {
+        return $this->hasMany(Sms::class);
+    }
+
     public function localite()
     {
         return $this->belongsTo(Localite::class);

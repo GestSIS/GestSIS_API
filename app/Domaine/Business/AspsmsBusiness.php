@@ -40,14 +40,13 @@ class AspsmsBusiness
         try {
             $params = AspsmsParam::first();
             if (!$params) {
-                return [];
+                throw new ArrayException([], 'ASPSMS non configuré');
             }
             $username = Crypt::decryptString($params->username);
             $password = Crypt::decryptString($params->password);
 
             $response = self::sendTextSMS($username, $password, $message, $origin, $differe, $date, $numeros);
 
-            // TODO: Store sent sms in DB
             $sms = new Sms();
             $now = Carbon::now();
             $sms->fill([
@@ -57,7 +56,7 @@ class AspsmsBusiness
                 'numeros' => implode(';', $data['numeros']),
                 'exercice_id' => $data['exerciceId'] ?? null,
             ]);
-
+            $sms->save();
             return $response;
         } catch (DecryptException $e) {
             throw new ArrayException([], 'ASPSMS non configuré');

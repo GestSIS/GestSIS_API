@@ -27,11 +27,13 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         'exercice_comptable_id',
     ];
 
-    public function listExerciceLight()
+    public function listExerciceLight(int $exerciceComptableId)
     {
         $temp = $this;
         return Exercice
-            ::all(self::EXERCICE_LIGHT_COLUMNS)
+            ::where('exercice_comptable_id', $exerciceComptableId)
+            ->withCount('sms')
+            ->get(self::EXERCICE_LIGHT_COLUMNS)
             ->map(function ($exercice) use ($temp) {
                 return $temp->convertExercice($exercice);
             })->toArray();
@@ -226,6 +228,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         $object->heure = $exercice->heure;
         $object->duree = $exercice->duree;
         $object->lieu = $exercice->lieu;
+        $object->nbSms = $exercice->sms_count;
         $object->communications = $exercice->communications;
         $object->designation = $exercice->designation;
         $object->statut = $exercice->statut;
