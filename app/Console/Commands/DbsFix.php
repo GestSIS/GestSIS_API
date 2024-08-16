@@ -9,6 +9,7 @@ use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Fonction;
 use App\Infrastructure\Models\Localite;
+use App\Infrastructure\Models\LocaliteSis;
 use Illuminate\Console\Command;
 
 class DbsFix extends Command
@@ -46,40 +47,29 @@ class DbsFix extends Command
     {
         $dbs = config('database.dbs');
         foreach ($dbs as $db) {
-            printf("Fix db=" . $db . "\n");
-            Commune::on($db)->insert([
-                array('id' => '70', 'designation' => 'Lajoux'),
-                array('id' => '71', 'designation' => 'Les Genevez'),
-                array('id' => '72', 'designation' => 'Fahy'),
-                array('id' => '73', 'designation' => 'Courtedoux'),
-                array('id' => '74', 'designation' => 'Les Enfers'),
-                array('id' => '75', 'designation' => 'St-Brais'),
+            printf("Fix db=db_" . $db . "\n");
+            Commune::on("db_" . $db)->insert([
+                array('id' => '76', 'designation' => 'Porrentruy'),
+                array('id' => '77', 'designation' => 'Grand-Fontaine'),
             ]);
 
-            Localite::on($db)->where('id', '=', 47)->update([
-                'commune_id' => '70', 'npa' => '2718', 'designation' => 'Lajoux'
-            ]);
-            Localite::on($db)->where('id', '=', 48)->update([
-                'commune_id' => '37', 'npa' => '2360', 'designation' => 'Le Bémont'
-            ]);
-            Localite::on($db)->where('id', '=', 58)->update([
-                'commune_id' => '71', 'npa' => '2714', 'designation' => 'Les Genevez'
-            ]);
-            Localite::on($db)->where('id', '=', 39)->update([
-                'commune_id' => '72', 'npa' => '2916', 'designation' => 'Fahy'
-            ]);
-            Localite::on($db)->where('id', '=', 27)->update([
-                'commune_id' => '73', 'npa' => '2905', 'designation' => 'Courtedoux'
-            ]);
-            Localite::on($db)->where('id', '=', 41)->update([
-                'commune_id' => '70', 'npa' => '2718', 'designation' => 'Fornet-Dessus'
-            ]);
-            Localite::on($db)->where('id', '=', 53)->update([
-                'commune_id' => '74', 'npa' => '2363', 'designation' => 'Les Enfers'
-            ]);
-            Localite::on($db)->where('id', '=', 91)->update([
-                'commune_id' => '75', 'npa' => '2364', 'designation' => 'St-Brais'
-            ]);
+            Localite::on("db_" . $db)->where('commune_id', '=', 12)->update(['commune_id' => 9]);
+            Localite::on("db_" . $db)->where('commune_id', '=', 13)->update(['commune_id' => 9]);
+            Localite::on("db_" . $db)->where('commune_id', '=', 27)->update(['commune_id' => 26]);
+
+            Commune::on("db_" . $db)->whereIn('id', [12, 13, 27])->delete();
+
+            // array('id' => '31', 'commune_id' => '26', 'npa' => '2933', 'designation' => 'Damphreux'),
+            // // array('id' => '32', 'commune_id' => NULL, 'npa' => '2933', 'designation' => 'Damphreux-Lugnez'),
+            // array('id' => '42', 'commune_id' => '66', 'npa' => '2953', 'designation' => 'Fregiécourt'),
+            // // array('id' => '43', 'commune_id' => '66', 'npa' => '2953', 'designation' => 'Fregiécourt-Pleujouse'),
+
+            LocaliteSis::on("db_" . $db)->whereIn('localite_id', [32, 43])->delete();
+            Localite::on("db_" . $db)->whereIn('id', [32, 43])->delete();
+
+            Localite::on("db_" . $db)->where('id', '=', 77)->update(['commune_id' => 76]);
+            Localite::on("db_" . $db)->where('id', '=', 46)->update(['commune_id' => 77]);
+
             printf("\n");
         }
         printf("Migrating done\n");

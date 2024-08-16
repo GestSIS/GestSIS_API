@@ -2,6 +2,7 @@
 
 namespace App\Domaine\API;
 
+use App\Infrastructure\Models\LocaliteSis;
 use Illuminate\Support\Facades\Config;
 
 class AdminService
@@ -21,6 +22,19 @@ class AdminService
         foreach ($dbs as $db) {
             Config::set('database.default', 'db_' . $db);
             $res[$db] = $this->service->contacts();
+        }
+        return $res;
+    }
+
+    public function sisLocalites()
+    {
+        // Iteration sur toutes les bases de données
+        $dbs = config('database.dbs');
+        $res = [];
+        foreach ($dbs as $db) {
+            Config::set('database.default', 'db_' . $db);
+            $localites = LocaliteSis::with('localite')->get();
+            $res[$db] = $localites;
         }
         return $res;
     }

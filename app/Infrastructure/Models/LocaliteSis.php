@@ -14,4 +14,9 @@ class LocaliteSis extends Model
             'localite_id' => 'integer'
         ];
     }
+
+    public function localite()
+    {
+        return $this->hasOne(Localite::class);
+    }
 }

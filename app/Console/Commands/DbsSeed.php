@@ -6,7 +6,6 @@ use App\Infrastructure\Models\Cours;
 use App\Infrastructure\Models\Grade;
 use Exception;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 
 class DbsSeed extends Command
 {

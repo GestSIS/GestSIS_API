@@ -21,8 +21,8 @@ class CommunesTableSeeder extends Seeder
             array('id' => '9', 'designation' => 'Courrendlin'),
             array('id' => '10', 'designation' => 'Châtillon'),
             array('id' => '11', 'designation' => 'Rossemaison'),
-            array('id' => '12', 'designation' => 'Rebeuvelier'),
-            array('id' => '13', 'designation' => 'Vellerat'),
+            // array('id' => '12', 'designation' => 'Rebeuvelier'),
+            // array('id' => '13', 'designation' => 'Vellerat'),
             array('id' => '14', 'designation' => 'Soyhières'),
             array('id' => '15', 'designation' => 'Pleigne'),
             array('id' => '16', 'designation' => 'Mettembert'),
@@ -34,8 +34,8 @@ class CommunesTableSeeder extends Seeder
             array('id' => '23', 'designation' => 'Beurnevésin'),
             array('id' => '24', 'designation' => 'Bonfol'),
             array('id' => '25', 'designation' => 'Coeuve'),
-            array('id' => '26', 'designation' => 'Damphreux'),
-            array('id' => '27', 'designation' => 'Lugnez'),
+            array('id' => '26', 'designation' => 'Damphreux-Lugnez'),
+            // array('id' => '27', 'designation' => 'Lugnez'),
             array('id' => '28', 'designation' => 'Vendlincourt'),
             array('id' => '29', 'designation' => 'Courroux'),
             array('id' => '30', 'designation' => 'Bure'),
@@ -81,6 +81,8 @@ class CommunesTableSeeder extends Seeder
             array('id' => '73', 'designation' => 'Courtedoux'),
             array('id' => '74', 'designation' => 'Les Enfers'),
             array('id' => '75', 'designation' => 'St-Brais'),
+            array('id' => '76', 'designation' => 'Porrentruy'),
+            array('id' => '77', 'designation' => 'Grand-Fontaine'),
         );
 
         foreach ($communes as $commune) {
