@@ -17,6 +17,6 @@ class LocaliteSis extends Model
 
     public function localite()
     {
-        return $this->hasOne(Localite::class);
+        return $this->belongsTo(Localite::class);
     }
 }
