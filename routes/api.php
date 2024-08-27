@@ -127,6 +127,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenVali
 
     Route::get('sis-contacts-tous', [AdminController::class, 'sisContacts']);
     Route::get('sis-localites-tous', [AdminController::class, 'sisLocalites']);
+    Route::get('sis-communes-tous', [AdminController::class, 'sisCommunes']);
 });
 
 // Route::get('exercices-comptable/{exercieComptableId}/justificatif', [CompteController::class, 'justificatifComplet']);

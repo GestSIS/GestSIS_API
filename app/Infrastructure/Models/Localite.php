@@ -12,4 +12,9 @@ class Localite extends Model
             'commune_id' => 'integer'
         ];
     }
+
+    public function commune()
+    {
+        return $this->hasOne(Commune::class);
+    }
 }
