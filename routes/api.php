@@ -44,6 +44,7 @@ use App\Application\Http\Controllers\ExcuseTypeController;
 use App\Application\Http\Controllers\ExerciceCategorieController;
 use App\Application\Http\Controllers\ExerciceComptableController;
 use App\Application\Http\Controllers\ExerciceController;
+use App\Application\Http\Controllers\ExerciceSmsController;
 use App\Application\Http\Controllers\FonctionController;
 use App\Application\Http\Controllers\FraisIndemniteAnnuelController;
 use App\Application\Http\Controllers\FraisIndemniteAnnuelTypeController;
@@ -111,6 +112,7 @@ use App\Application\Http\Controllers\SapeurTelephoneController;
 use App\Application\Http\Controllers\SisContactController;
 use App\Application\Http\Controllers\SisLogoController;
 use App\Application\Http\Controllers\SisParamController;
+use App\Application\Http\Controllers\SmsController;
 use App\Application\Http\Controllers\StatFederalController;
 use App\Application\Http\Controllers\StatInterventionController;
 use App\Application\Http\Controllers\TelephoneController;
@@ -394,6 +396,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
     Route::group(['middleware' => 'jwtTokenRole:sms.config'], function () {
         Route::resource('aspsms/param', AspsmsParamController::class)->only(['index', 'store']);
+    });
+
+    Route::group(['middleware' => 'jwtTokenRole:sms.envoie'], function () {
+        Route::resource('sms', SmsController::class)->only('index');
+        Route::resource('exercices.sms', ExerciceSmsController::class)->only('index');
     });
 
     // Interventions
