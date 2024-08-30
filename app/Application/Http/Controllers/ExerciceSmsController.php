@@ -15,7 +15,7 @@ class ExerciceSmsController extends Controller
 
     public function index(int $exerciceId)
     {
-        $sms = $this->service->smsParExerciceComptable($exerciceId);
+        $sms = $this->service->smsParExercice($exerciceId);
         return response()->json(['data' => $sms]);
     }
 }
