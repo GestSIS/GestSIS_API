@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Feature;
+namespace Tests\Feature;
 
 use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Business\PaiementBusiness;

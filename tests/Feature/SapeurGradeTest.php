@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Feature;
+namespace Tests\Feature;
 
 use App\Domaine\API\SapeurService;
 use App\Infrastructure\Models\Sapeur;

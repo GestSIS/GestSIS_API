@@ -20,6 +20,9 @@ class ExerciceController extends Controller
     public function index(Request $request)
     {
         $exerciceComptableId = $request->get('exercice_comptable_id');
+        if(!$exerciceComptableId){
+            return response()->json(["Missing `exercice_comptable_id` parameter", 400]);
+        }
         $exercices = $this->service->listeExercice($exerciceComptableId);
         return response()->json(['data' => $exercices]);
     }

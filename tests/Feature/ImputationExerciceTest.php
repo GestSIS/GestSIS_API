@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Feature;
+namespace Tests\Feature;
 
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Sapeur;

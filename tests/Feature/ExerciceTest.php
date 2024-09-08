@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Feature;
+namespace Tests\Feature;
 
 use App\Domaine\API\ExerciceService;
 use App\Infrastructure\Models\Exercice;
@@ -17,27 +17,6 @@ class ExerciceTest extends TestCase
         parent::setUp();
 
         $this->service = $this->app->make(ExerciceService::class);
-    }
-
-    /**
-     * Test index exercices
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function testExerciceIndexAllOk()
-    {
-        $response = $this->json('GET', "/api/v2/exercices/");
-
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'data' => [
-                    '*' => [
-                        'designation', 'localite_id', 'date', 'lieu', 'heure', 'duree'
-                    ]
-                ]
-            ]);
     }
 
     /**
