@@ -17,7 +17,7 @@ class SmsService
     public function smsParExerciceComptable(int $exerciceComptableId)
     {
         // TODO: Filter by date regarding exercice comptable
-        return Sms::all();
+        return Sms::with('smsNumeros')->get();
     }
 
     public function smsParExercice(int $exerciceId)
