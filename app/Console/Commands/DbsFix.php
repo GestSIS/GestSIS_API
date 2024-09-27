@@ -10,6 +10,8 @@ use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Fonction;
 use App\Infrastructure\Models\Localite;
 use App\Infrastructure\Models\LocaliteSis;
+use App\Infrastructure\Models\Sms;
+use App\Infrastructure\Models\SmsNumero;
 use Illuminate\Console\Command;
 
 class DbsFix extends Command

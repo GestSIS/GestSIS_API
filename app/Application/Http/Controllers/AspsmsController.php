@@ -27,7 +27,8 @@ class AspsmsController extends Controller
             // 'origin' => 'required|string', // Pas pour le moment
             'differe' => 'boolean',
             'date' => 'nullable|string',
-            'numeros.*' => 'required|string',
+            'contacts.*.numero' => 'required|string',
+            'contacts.*.sapeurId' => 'nullable|integer',
             'exerciceId' => 'nullable|integer',
         ]);
 

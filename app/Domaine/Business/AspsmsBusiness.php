@@ -5,6 +5,7 @@ namespace App\Domaine\Business;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\AspsmsParam;
 use App\Infrastructure\Models\Sms;
+use App\Infrastructure\Models\SmsNumero;
 use Carbon\Carbon;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Client\ConnectionException;
@@ -35,8 +36,8 @@ class AspsmsBusiness
             $date = Carbon::parse($date, "Europe/Zurich")->toIso8601String();
         }
 
-        $numeros = $data['numeros'];
-
+        $contacts = $data['contacts'];
+        $numeros = array_map(fn($num) => $num['numero'], $contacts);
         try {
             $params = AspsmsParam::first();
             if (!$params) {
@@ -53,10 +54,16 @@ class AspsmsBusiness
                 'message' => $message,
                 'date_envoie' => $differe ? Carbon::parse($date, "Europe/Zurich") : $now,
                 'date_programme' => $now,
-                'numeros' => implode(';', $data['numeros']),
                 'exercice_id' => $data['exerciceId'] ?? null,
             ]);
             $sms->save();
+
+            SmsNumero::insert(array_map(fn($contact) => ([
+                'sms_id' => $sms->id,
+                'numero' => $contact['numero'],
+                'sapeur_id' => $contact['sapeurId'] ?? null,
+            ]), $contacts));
+
             return $response;
         } catch (DecryptException $e) {
             throw new ArrayException([], 'ASPSMS non configuré');
