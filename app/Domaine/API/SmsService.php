@@ -22,6 +22,6 @@ class SmsService
 
     public function smsParExercice(int $exerciceId)
     {
-        return Sms::where('exercice_id', '=', $exerciceId)->get();
+        return Sms::with('smsNumeros')->where('exercice_id', '=', $exerciceId)->get();
     }
 }

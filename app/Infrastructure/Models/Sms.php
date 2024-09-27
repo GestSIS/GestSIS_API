@@ -22,4 +22,12 @@ class Sms extends Model
             'exercice_id' => 'integer'
         ];
     }
+
+    /**
+     * Les numéros contacté
+     */
+    public function smsNumeros()
+    {
+        return $this->hasMany(SmsNumero::class);
+    }
 }
