@@ -26,11 +26,11 @@ class OrganisationBusiness
         $groupes = Groupe::get();
         $groupesMap = [];
         foreach ($groupes as $groupe) {
-            $groupesMap[$groupe->id] = $groupe->pere_id;
+            $groupesMap[$groupe->id] = $groupe->parent_id;
         }
 
         // Controle qu'il n'y ait pas de loop dans la hierarchie des groupes
-        $pereId = array_key_exists('pere_id', $data) ? $data['pere_id'] : null;
+        $pereId = array_key_exists('parent_id', $data) ? $data['parent_id'] : null;
         $visited = [];
         while (!is_null($pereId)) {
             if (in_array($pereId, $visited) || $pereId == $groupeId) {

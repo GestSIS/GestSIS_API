@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class ModuleMateriel extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -19,8 +19,8 @@ class ModuleMateriel extends Migration
 
             $table->string('designation');
 
-            $table->unsignedBigInteger('pere_id')->nullable()->default(null);
-            $table->foreign('pere_id')->references('id')->on('materiel_categories');
+            $table->unsignedBigInteger('parent_id')->nullable()->default(null);
+            $table->foreign('parent_id')->references('id')->on('materiel_categories');
         });
 
         Schema::create('materiel_types', function (Blueprint $table) {

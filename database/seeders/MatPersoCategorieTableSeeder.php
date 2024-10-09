@@ -14,18 +14,19 @@ class MatPersoCategorieTableSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('materiel_categories')->insert([
-            ['id' => 1, 'designation' => 'Habits', 'pere_id' => null],
-            ['id' => 2, 'designation' => 'Casques', 'pere_id' => null],
-            ['id' => 3, 'designation' => 'Souliers', 'pere_id' => null],
-            ['id' => 4, 'designation' => 'Matériel divers', 'pere_id' => null],
-            ['id' => 5, 'designation' => 'Clés/Badges', 'pere_id' => null],
-            ['id' => 6, 'designation' => 'Gants', 'pere_id' => null],
-            ['id' => 7, 'designation' => 'Pantalon', 'pere_id' => 1],
-            ['id' => 8, 'designation' => 'Veste', 'pere_id' => 1],
-            ['id' => 9, 'designation' => 'Pull', 'pere_id' => 1],
-            ['id' => 10, 'designation' => 'Sous-vêtements', 'pere_id' => 1],
-        ]);
+        $categories = [
+            ['id' => 1, 'designation' => 'Habits', 'parent_id' => null],
+            ['id' => 2, 'designation' => 'Casques', 'parent_id' => null],
+            ['id' => 3, 'designation' => 'Souliers', 'parent_id' => null],
+            ['id' => 4, 'designation' => 'Matériel divers', 'parent_id' => null],
+            ['id' => 5, 'designation' => 'Clés/Badges', 'parent_id' => null],
+            ['id' => 6, 'designation' => 'Gants', 'parent_id' => null],
+            ['id' => 7, 'designation' => 'Pantalon', 'parent_id' => 1],
+            ['id' => 8, 'designation' => 'Veste', 'parent_id' => 1],
+            ['id' => 9, 'designation' => 'Pull', 'parent_id' => 1],
+            ['id' => 10, 'designation' => 'Sous-vêtements', 'parent_id' => 1],
+        ];
+        DB::table('materiel_categories')->insert($categories);
 
         DB::table('materiel_types')->insert([
             ['id' => 1, 'designation' => 'Pantalon attente F1 + ceinture', 'materiel_categorie_id' => 7],

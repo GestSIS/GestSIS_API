@@ -30,7 +30,7 @@ class MatPersoCategorieController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1|required',
-            'pere_id' => 'integer|nullable'
+            'parent_id' => 'integer|nullable'
         ]);
 
         $categorie = $this->service->ajouterCategorie($data);
@@ -41,7 +41,7 @@ class MatPersoCategorieController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
-            'pere_id' => 'integer|nullable'
+            'parent_id' => 'integer|nullable'
         ]);
 
         $categorie = $this->service->modifierCategorie($id, $data);

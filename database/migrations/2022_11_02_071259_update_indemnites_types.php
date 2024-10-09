@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class UpdateIndemnitesTypes extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -29,18 +29,5 @@ class UpdateIndemnitesTypes extends Migration
      *
      * @return void
      */
-    public function down()
-    {
-        Schema::dropIfExists('materiel_alerte_type_pour');
-        Schema::dropIfExists('materiel_alerte_types');
-        Schema::dropIfExists('materiel_event_type_pour');
-        Schema::dropIfExists('materiel_events');
-        Schema::dropIfExists('materiel_event_types');
-        Schema::dropIfExists('materiel_generiques');
-        Schema::dropIfExists('materiel_alertes');
-        Schema::dropIfExists('materiel_nominals');
-        Schema::dropIfExists('materiel_personnels');
-        Schema::dropIfExists('materiel_types');
-        Schema::dropIfExists('materiel_categories');
-    }
+    public function down() {}
 };

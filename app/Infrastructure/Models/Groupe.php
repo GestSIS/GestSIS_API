@@ -6,11 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Groupe extends Model
 {
-    protected $fillable = ['type', 'no', 'designation', 'tri', 'pere_id'];
+    protected $fillable = ['type', 'no', 'designation', 'tri', 'parent_id'];
     protected function casts(): array
     {
         return  [
-            'no' => 'integer', 'tri' => 'integer', 'pere_id' => 'integer', 'type' => 'integer'
+            'no' => 'integer',
+            'tri' => 'integer',
+            'parent_id' => 'integer',
+            'type' => 'integer'
         ];
     }
 

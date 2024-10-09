@@ -9,7 +9,16 @@ class MaterielCategorie extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['designation', 'pere_id'];
+    protected $fillable = [
+        'designation',
+        'parent_id',
+        'couleur_id',
+        'tri'
+    ];
 
-    protected $cast = ['pere_id' => 'integer'];
+    protected $cast = [
+        'parent_id' => 'integer',
+        'couleur_id' => 'integer',
+        'tri' => 'integer'
+    ];
 }
