@@ -24,7 +24,7 @@ class MatPersoParamBusiness
 
     public static function modifierCategorie($id, $data)
     {
-        if ($data['pere_id'] == $id) {
+        if ($data['parent_id'] == $id) {
             throw new ArrayException([], "Récursivité illégale détectée");
         }
         // TODO: Controller récursivity du parent multi-niveau
@@ -34,7 +34,7 @@ class MatPersoParamBusiness
 
     public static function supprimerCategorie($id)
     {
-        if (MaterielCategorie::where('pere_id', $id)->exists() || MaterielType::where('materiel_categorie_id', $id)->exists()) {
+        if (MaterielCategorie::where('parent_id', $id)->exists() || MaterielType::where('materiel_categorie_id', $id)->exists()) {
             throw new ArrayException([], "Veuillez d'abord supprimer les catégories ou matériels types enfant");
         }
         MaterielCategorie::where('id', $id)->delete();

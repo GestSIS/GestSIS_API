@@ -1,5 +1,11 @@
 <?php
 
+use App\Infrastructure\Models\Article;
+use App\Infrastructure\Models\Couleur;
+use App\Infrastructure\Models\Emplacement;
+use App\Infrastructure\Models\MaterielCategorie;
+use App\Infrastructure\Models\MaterielPersonnel;
+use App\Infrastructure\Models\Vehicule;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -28,23 +34,28 @@ return new class extends Migration
             $table->string('fond', length: 9)->comment('hex code pour l\'arrière plan');
         });
 
-        // TODO: Create a basic couleur
+        // Create a basic couleur
+        $couleur = couleur::create(['nom' => 'default', 'texte' => '#ffffff00', 'fond' => '#fc031780']);
 
         // Déjà existante
         Schema::table('materiel_categories', function (Blueprint $table) {
             $table->integer('tri')->default(1);
 
-            $table->unsignedBigInteger('couleur_id')->default(1);
+            $table->unsignedBigInteger('couleur_id')->default(0);
             $table->foreign('couleur_id')->references('id')->on('couleurs');
         });
 
-        // TODO: générer une valeur pour tri des categories
+        // générer une valeur pour tri des categories
+        $categories = MaterielCategorie::all();
+        foreach ($categories as $categorie) {
+            $categorie->tri = $categorie->id;
+            $categorie->save();
+        }
 
         Schema::table('materiel_categories', function (Blueprint $table) {
             $table->integer('tri')->unique()->change();
 
-            $table->unsignedBigInteger('couleur_id')->update();
-            $table->foreign('couleur_id')->references('id')->on('couleurs');
+            $table->unsignedBigInteger('couleur_id')->change();
         });
 
         Schema::create('inventaires', function (Blueprint $table) {
@@ -54,11 +65,9 @@ return new class extends Migration
             $table->date('date');
             $table->string('remarque');
 
-            $table->unsignedBigInteger('emplacement_id');
-            $table->foreign('emplacement_id')->references('id')->on('emplacements');
+            $table->foreignId('emplacement_id')->constrained();
 
-            $table->unsignedBigInteger('sapeur_id');
-            $table->foreign('sapeur_id')->references('id')->on('sapeurs');
+            $table->foreignId('sapeur_id')->constrained();
 
             // TODO: remplacer par sapeur_id
             $table->string('personne');
@@ -68,193 +77,243 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->string('nom');
+            $table->string('designation');
             $table->string('remarque');
-            $table->integer('tri');
-            $table->boolean('est_etiquete')->comment('Est-ce que les articles dans cet inventaire portent une étiquette');
+            $table->boolean('est_etiquete')->default(false)->comment('Est-ce que les articles dans cet inventaire portent une étiquette');
             $table->date('impression_inventaire')->nullable()->default(null);
 
-            $table->unsignedBigInteger('couleur_id');
-            $table->foreign('couleur_id')->references('id')->on('couleurs');
+            $table->foreignId('couleur_id')->constrained();
 
             $table->unsignedBigInteger('parent_id');
-            $table->foreign('parent_id')->references('id')->on('emplacements');
+            $table->foreignId('parent_id')->references('id')->on('emplacements');
 
             $table->boolean('statut')->default(true);
-
-            // TODO: Contrainte unicité sur article_id et inventaire_id
         });
 
-        Schema::table('vehicules', function (Blueprint $table) {
-            $table->unsignedBigInteger('id')->change();
 
-            // TODO: Supprimer designation ??? Non
+        // Créer un emplacement pour chaque véhicule
+        $vehicules = Vehicule::all();
+        foreach ($vehicules as $vehicule) {
+            $emplacement = new Emplacement();
+            $emplacement->designation = $vehicule->designation;
+            $emplacement->remarque = '';
+            $emplacement->tri = $vehicule->tri;
+            $emplacement->statut = $vehicule->statut;
+            $emplacement->couleur_id = $couleur->id;
+            $emplacement->save();
+        }
+
+        Schema::table('vehicules', function (Blueprint $table) {
+            $table->dropPrimary('id');
+            $table->foreignId('id')->references('id')->on('emplacements');
+
+            // Supprimer designation ??? Non
             // Ou bien mettre un flag dans emplacement ???
             // Que faire en cas de suppression du véhicule ?
             // Le conserver dans le système mais plus dans les emplacements ?
             // Ajouter un field statut dans emplacement pour pouvoir désactiver
             // ceux inactif mais quand même à garder
 
-            // TODO: Supprimer champs designation, statut et tri
-            // $table->string('designation');
-            // $table->boolean('statut');
-            // $table->integer('tri');
+            $table->dropColumn(['designation', 'statut', 'tri']);
+
             // $table->decimal('forfait', 5, 2);
             // $table->decimal('unite', 5, 2);
 
-            // TODO: Numéro chassi
-            // TODO: Autres
+            // Potentiels améliorations future:
+            // - Numéro chassi
+            // - Date achat
+            // - Fournisseur
+            // - Marque
+            // - ...
         });
 
-        Schema::table('hangars', function (Blueprint $table) {
-            $table->unsignedBigInteger('id')->change();
-
-            // TODO: Supprimer designation ???
-            // Ou bien mettre un flag dans emplacement ???
+        Schema::create('hangars', function (Blueprint $table) {
+            $table->unsignedBigInteger('id');
+            $table->foreignId('id')->references('id')->on('emplacements');
 
             $table->string('rue');
             $table->string('no_rue');
 
-            $table->bigInteger('localite_id')->unsigned();
-            $table->foreign('localite_id')->references('id')->on('localites');
+            $table->foreignId('localite_id')->constrained();
         });
 
         Schema::create('articles', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->string('numero');
-            $table->boolean('est_etiquete');
-            $table->boolean('est_unique');
-            $table->string('remarque');
-            $table->string('compartiment');
+            $table->string('numero')->default('');
+            $table->string('uuid')->unique();
+            $table->string('achat')->unique();
+            $table->string('taille')->default('');
+            $table->boolean('est_etiquete')->default(false)->comment('Est étiqueté');
+            $table->boolean('est_unique')->default(false);
+            $table->string('remarque')->default('');
+            $table->string('compartiment')->default('');
+
+            $table->date('attribution')->nullable()->default(null);
+            $table->date('retour')->nullable()->default(null);
 
             // TODO: Created and Deleted fields
 
-            $table->unsignedBigInteger('emplacement_id')->nullable();
-            $table->foreign('emplacement_id')->references('id')->on('emplacements');
-
-            $table->unsignedBigInteger('sapeur_id')->nullable();
-            $table->foreign('sapeur_id')->references('id')->on('sapeurs');
-
-            $table->unsignedBigInteger('materiel_type_id');
-            $table->foreign('materiel_type_id')->references('id')->on('materiel_types');
+            $table->foreignId('materiel_type_id')->constrained();
+            $table->foreignId('sapeur_id')->nullable()->constrained();
+            $table->foreignId('emplacement_id')->nullable()->constrained();
         });
+
+        $materiels = MaterielPersonnel::with('materiel')->get()->toArray();
+        $articles = [];
+        foreach ($materiels as $materiel) {
+            if ($materiel->materiel?->uuid) {
+                // anciennement matériel nominal
+                $articles[] = [
+                    'taille' => $materiel->taille,
+                    'remarque' => $materiel->remarque,
+                    'materiel_type_id' => $materiel->materiel_type_id,
+                    'sapeur_id' => $materiel->sapeur_id,
+                    'emplacement_id' => null,
+                    'est_etiquete' => false,
+                    'est_unique' => true,
+                    'attribution' => $materiel->attribution,
+                    'retour' => $materiel->retour,
+
+                    'numero' => $materiel->materiel->numero,
+                    'uuid' => $materiel->materiel->uuid,
+                    'achat' => $materiel->materiel->achat,
+                ];
+            } else {
+                // anciennement matériel
+                for ($i = 0; $i < $materiel->materiel->quantite; $i++) {
+                    $articles[] = [
+                        'taille' => $materiel->taille,
+                        'remarque' => $materiel->remarque,
+                        'materiel_type_id' => $materiel->materiel_type_id,
+                        'sapeur_id' => $materiel->sapeur_id,
+                        'emplacement_id' => null,
+                        'est_etiquete' => false,
+                        'est_unique' => true,
+                        'attribution' => $materiel->attribution,
+                        'retour' => $materiel->retour,
+
+                        'numero' => '',
+                        'uuid' => uniqid($materiel['materiel_type_id'] . "-"),
+                        'achat' => '',
+                    ];
+                }
+            }
+        }
+        Article::insert($articles);
+
+        Schema::dropIfExists('materiel_nominals');
+        Schema::dropIfExists('materiel_generiques');
+        Schema::dropIfExists('materiel_personnels');
 
         Schema::update('materiel_types', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
+            // Champs déjà existantsapp/Infrastructure/Models/Vehicule.php
             // $table->string('designation');
+            // $table->boolean('taille')->default(true);
+            // $table->foreignId('materiel_categorie_id')->constrained();
+
             $table->string('prix');
-            $table->string('fournisseur');
-            $table->string('reparateur');
-            $table->string('compartiment');
+            $table->string('fournisseur')->default('');
+            $table->string('reparateur')->default('');
             $table->boolean('a_controller')->comment('Besoin de contrôller des aspects de ce matériel');
-            $table->string('prefix')->comment();
+            $table->string('prefix')->default('')->comment();
             $table->string('remarque');
             $table->int('tri');
 
             $table->boolean('est_attribuable');
 
-            // TODO: Created and Deleted fields
-
-            $table->unsignedBigInteger('materiel_categorie_id');
-            $table->foreign('materiel_categorie_id')->references('id')->on('materiel_categories');
-
-            $table->unsignedBigInteger('fonction_id')->nullable()->comment('fonction responsable de l \'entretient');
-            $table->foreign('fonction_id')->references('id')->on('fonctions');
+            $table->foreignId('fonction_id')->nullable()->comment('fonction responsable de l \'entretient')->constrained();
         });
 
         Schema::create('tuyau_diametres', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('diametre');
-
-            $table->unsignedBigInteger('batterie_type_id');
-            $table->foreign('batterie_type_id')->references('id')->on('batterie_types');
+            $table->integer('diametre')->comment('diamètre du tuyau en mm')->unique();
         });
 
-        Schema::create('produit_batteries', function (Blueprint $table) {
-            $table->bigIncrements('id');
+        Schema::create('materiel_type_batteries', function (Blueprint $table) {
+            $table->unsignedBigInteger('id');
+            $table->foreign('id')->references('id')->on('materiel_types')->onDelete('cascade');
             $table->timestamps();
 
             $table->integer('nombre');
-
-            $table->unsignedBigInteger('batterie_type_id');
-            $table->foreign('batterie_type_id')->references('id')->on('batterie_types');
+            $table->foreignId('batterie_type_id')->constrained();
         });
 
-        Schema::create('produit_tuyaus', function (Blueprint $table) {
-            $table->bigIncrements('id');
+        Schema::create('materiel_type_tuyaux', function (Blueprint $table) {
+            $table->unsignedBigInteger('id');
+            $table->foreign('id')->references('id')->on('materiel_types')->onDelete('cascade');
             $table->timestamps();
 
             $table->integer('longeur')->comment('longeur du tuyau en metre');
             $table->boolean('separement')->comment('Est-ce que le tuyau est roule separement ?');
 
-            $table->unsignedBigInteger('tuyau_diametre_id');
-            $table->foreign('tuyau_diametre_id')->references('id')->on('tuyau_diametres');
+            $table->foreignId('tuyau_diametre_id')->constrained();
         });
 
-        // Schema::create('inventaire_articles', function (Blueprint $table) {
-        //     $table->bigIncrements('id');
-        //     $table->timestamps();
+        Schema::create('inventaire_articles', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->timestamps();
 
-        //     $table->boolean('present');
+            $table->boolean('present');
 
-        //     $table->unsignedBigInteger('article_id');
-        //     $table->foreign('article_id')->references('id')->on('articles');
+            $table->unsignedBigInteger('article_id');
+            $table->foreign('article_id')->references('id')->on('articles');
 
-        //     $table->unsignedBigInteger('inventaire_id');
-        //     $table->foreign('inventaire_id')->references('id')->on('inventaires');
+            $table->unsignedBigInteger('inventaire_id');
+            $table->foreign('inventaire_id')->references('id')->on('inventaires');
 
-        //     // TODO: Contrainte unicité sur article_id et inventaire_id
-        // });
+            // TODO: Contrainte unicité sur article_id et inventaire_id
+        });
 
-        // Schema::create('maintenances', function (Blueprint $table) {
-        //     $table->bigIncrements('id');
-        //     $table->timestamps();
+        Schema::create('maintenances', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->timestamps();
 
-        //     $table->string('nom');
-        //     $table->int('periodicite');
-        //     $table->boolean('externalise');
+            $table->string('nom');
+            $table->int('periodicite');
+            $table->boolean('externalise');
 
-        //     $table->unsignedBigInteger('materiel_type_id');
-        //     $table->foreign('materiel_type_id')->references('id')->on('materiel_types');
-        // });
+            $table->unsignedBigInteger('materiel_type_id');
+            $table->foreign('materiel_type_id')->references('id')->on('materiel_types');
+        });
 
-        // Schema::create('maintenance_execs', function (Blueprint $table) {
-        //     $table->bigIncrements('id');
-        //     $table->timestamps();
+        Schema::create('maintenance_execs', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->timestamps();
 
-        //     $table->string('nom');
-        //     $table->string('remarque');
-        //     $table->string('responsable');
-        //     $table->date('date');
-        //     $table->boolean('externalise');
+            $table->string('nom');
+            $table->string('remarque');
+            $table->string('responsable');
+            $table->date('date');
+            $table->boolean('externalise');
 
-        //     // TODO: user_id
+            // TODO: user_id
 
-        //     $table->unsignedBigInteger('maintenance_id');
-        //     $table->foreign('maintenance_id')->references('id')->on('maintenances');
-        // });
+            $table->unsignedBigInteger('maintenance_id');
+            $table->foreign('maintenance_id')->references('id')->on('maintenances');
+        });
 
-        // Schema::create('maintenance_exec_lignes', function (Blueprint $table) {
-        //     $table->bigIncrements('id');
-        //     $table->timestamps();
+        Schema::create('maintenance_exec_lignes', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->timestamps();
 
-        //     $table->string('nom');
-        //     $table->boolean('effectuee');
-        //     $table->boolean('reussie');
-        //     $table->string('remarque');
+            $table->string('nom');
+            $table->boolean('effectuee');
+            $table->boolean('reussie');
+            $table->string('remarque');
 
-        //     // TODO: user_id
+            // TODO: user_id
 
-        //     $table->unsignedBigInteger('maintenance_exec_id');
-        //     $table->foreign('maintenance_exec_id')->references('id')->on('maintenance_execs');
+            $table->unsignedBigInteger('maintenance_exec_id');
+            $table->foreign('maintenance_exec_id')->references('id')->on('maintenance_execs');
 
-        //     $table->unsignedBigInteger('article_id');
-        //     $table->foreign('article_id')->references('id')->on('articles');
-        // });
+            $table->unsignedBigInteger('article_id');
+            $table->foreign('article_id')->references('id')->on('articles');
+        });
     }
 
     /**

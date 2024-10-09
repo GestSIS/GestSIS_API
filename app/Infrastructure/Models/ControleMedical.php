@@ -13,7 +13,10 @@ class ControleMedical extends Model
     protected function casts(): array
     {
         return  [
-            'accepter' => 'boolean', 'en_cours' => 'boolean', 'medecin_id' => 'integer', 'controle_medical_type_id' => 'integer',
+            'accepter' => 'boolean',
+            'en_cours' => 'boolean',
+            'medecin_id' => 'integer',
+            'controle_medical_type_id' => 'integer',
         ];
     }
 

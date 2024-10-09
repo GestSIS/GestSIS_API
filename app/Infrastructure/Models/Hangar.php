@@ -4,19 +4,17 @@ namespace App\Infrastructure\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Vehicule extends Model
+class Hangar extends Model
 {
     protected $fillable = [
-        'forfait',
-        'unite',
-        'type_unite_id'
+        'rue',
+        'no_rue',
+        'localite_id'
     ];
     protected function casts(): array
     {
         return  [
-            'forfait' => 'decimal:2',
-            'unite' => 'decimal:2',
-            'type_unite_id' => 'integer'
+            'localite_id' => 'integer'
         ];
     }
 }
