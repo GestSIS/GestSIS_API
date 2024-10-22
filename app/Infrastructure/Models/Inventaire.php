@@ -5,23 +5,23 @@ namespace App\Infrastructure\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MaintenanceType extends Model
+class Inventaire extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'date',
         'designation',
-        'periodicite',
-        'externalise',
-        'nb_max',
+        'remarque',
+        'emplacement_id',
+        'responsable',
     ];
 
     protected function casts(): array
     {
         return  [
-            'periodicite' => 'integer',
-            'nb_max' => 'integer',
-            'externalise' => 'boolean',
+            'emplacement_id' => 'integer',
+            'sapeur_id' => 'integer',
         ];
     }
 }
