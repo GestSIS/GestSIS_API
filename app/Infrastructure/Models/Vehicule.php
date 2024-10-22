@@ -6,11 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Vehicule extends Model
 {
+    public $incrementing = false;
+
     protected $fillable = [
         'forfait',
         'unite',
         'type_unite_id'
     ];
+
     protected function casts(): array
     {
         return  [
