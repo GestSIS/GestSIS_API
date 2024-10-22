@@ -374,20 +374,30 @@ class ImputationBusiness
         $fin = $exerciceComptable->fin;
 
         // Fonction gardée si intersect avec exercice comptable actuel
+        // dd(['debut' => $debut, 'fin' => $fin]);
         $sapeurs = FonctionSapeur::where(function ($query) use ($debut, $fin) {
             $query
-                ->where([
-                    ['debut', '<=', $debut],
-                    ['fin', '>=', $debut],
-                ])
-                ->orWhere(function ($query) use ($debut) {
-                    $query->where('debut', '<=', $debut);
-                    $query->whereNull('fin');
+                ->where(function ($query) use ($debut) {
+                    $query
+                        ->where([
+                            ['debut', '<=', $debut],
+                            ['fin', '>=', $debut],
+                        ])
+                        ->whereNotNull('fin');
                 })
-                ->orWhere([
-                    ['debut', '>=', $debut],
-                    ['debut', '<=', $fin],
-                ]);
+                ->orWhere(function ($query) use ($debut) {
+                    $query
+                        ->where('debut', '<=', $debut)
+                        ->whereNull('fin');
+                })
+                ->orWhere(function ($query) use ($debut, $fin) {
+                    $query
+                        ->where([
+                            ['debut', '>=', $debut],
+                            ['debut', '<=', $fin],
+                        ])
+                        ->whereNotNull('fin');
+                });
         })
             ->join('fonctions', 'fonctions.id', '=', 'fonction_sapeur.fonction_id')
             ->orderBy('fonctions.tri', 'desc')
@@ -405,9 +415,9 @@ class ImputationBusiness
 
             // Génère le mapping -> ["fonction_id" => 'indemnite'];
             $mapping = array_reduce(array_map(
-                fn ($indemnite) => [$indemnite['fonction_id'] => $indemnite],
+                fn($indemnite) => [$indemnite['fonction_id'] => $indemnite],
                 $type['frais_indemnite_annuels']
-            ), fn ($a, $b) => $a + $b, []);
+            ), fn($a, $b) => $a + $b, []);
 
             foreach ($sapeursGrouped as $sapeurId => $fonctions) {
                 foreach ($fonctions as $fonctionId) {
