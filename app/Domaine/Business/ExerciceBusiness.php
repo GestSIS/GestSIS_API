@@ -23,11 +23,13 @@ class ExerciceBusiness
     // 3 -> Disponible pour imputation
     // 4 -> Imputée
     public const EXERCICE_STATUT_ANNULE = 0;
-    public const EXERCICE_STATUT_EMPTY = 1;
+    public const EXERCICE_STATUT_VIDE = 1;
     public const EXERCICE_STATUT_SAISI = 2;
     public const EXERCICE_STATUT_VALIDE = 3;
     public const EXERCICE_STATUT_IMPUTE = 4;
 
+    // TODO: Supprimer champ amende et utiliser excuse_statut à la place ?
+    // public const EXCUSE_STATUT_AMENDEE = -2;
     public const EXCUSE_STATUT_REFUSEE = -1;
     public const EXCUSE_STATUT_A_TRAITER = 0;
     public const EXCUSE_STATUT_ACCEPTEE = 1;
@@ -58,7 +60,7 @@ class ExerciceBusiness
 
         // Update statut si l'exercice est incomplet
         if (count($presenceIncompletes) > 0) {
-            $statut = self::EXERCICE_STATUT_EMPTY;
+            $statut = self::EXERCICE_STATUT_VIDE;
         } else {
             $statut = max($statut, self::EXERCICE_STATUT_SAISI);
         }
@@ -82,7 +84,7 @@ class ExerciceBusiness
         // 2 -> saisie
         // 3 -> validé
         // 4 -> imputé
-        $data['statut'] = self::EXERCICE_STATUT_EMPTY;
+        $data['statut'] = self::EXERCICE_STATUT_VIDE;
         return $this->repository->createExercice($data);
     }
 
@@ -104,7 +106,7 @@ class ExerciceBusiness
             return $statut;
         }
 
-        $this->repository->updateExerciceById($exerciceId, array("statut" => self::EXERCICE_STATUT_EMPTY));
+        $this->repository->updateExerciceById($exerciceId, array("statut" => self::EXERCICE_STATUT_VIDE));
         $statut = $this->updateStatut($exerciceId);
         return $statut;
     }
@@ -137,6 +139,8 @@ class ExerciceBusiness
             throw new ArrayException(["message" => "Certains sapeurs convoqué sont incomplet"]);
         }
 
+        // TODO: Valider les absences amendées ??
+
         return $this->repository->updateExerciceById($exerciceId, [
             "statut" => self::EXERCICE_STATUT_VALIDE
         ]);
@@ -152,7 +156,7 @@ class ExerciceBusiness
     public function updateSapeurPresences($presences, $hasValidationPermission)
     {
         // FIXME:update sapeurs presences 
-        $exerciceIds = array_map(fn ($e) => $e['exercice_id'], $presences);
+        $exerciceIds = array_map(fn($e) => $e['exercice_id'], $presences);
 
         // fetch exercices status
         $exercices = Exercice::whereIn('id', $exerciceIds)->get(['id', 'statut'])->toArray();
@@ -314,11 +318,11 @@ class ExerciceBusiness
         }, $exercice->sapeurs->toArray()));
 
         // Sapeurs non présent mais avec des heures pas pris en compte ?
-        $sapeursAjoutes = array_filter($presences, fn ($e) => !$sapeursIdsActuel->contains($e['sapeur_id']));
+        $sapeursAjoutes = array_filter($presences, fn($e) => !$sapeursIdsActuel->contains($e['sapeur_id']));
         $this->addSapeurs($exerciceId, $sapeursAjoutes);
 
         // Updated sapeurs
-        $sapeursModifies = array_filter($presences, fn ($e) => $sapeursIdsActuel->contains($e['sapeur_id']));
+        $sapeursModifies = array_filter($presences, fn($e) => $sapeursIdsActuel->contains($e['sapeur_id']));
         $this->updateSapeurs($exerciceId, $sapeursModifies, false);
 
         // On ignore les sapeurs déjà saisi mais non présent dans les présences envoyées
@@ -372,6 +376,10 @@ class ExerciceBusiness
 
         // Changement de la présence
         {
+            if ($presence['amende'] == true) {
+                $presence['excuse_statut'] = ExerciceBusiness::EXCUSE_STATUT_REFUSEE;
+            }
+
             // Permission: Saisie présence 
             ExerciceSapeur
                 ::where('exercice_id', $exerciceId)
@@ -416,21 +424,21 @@ class ExerciceBusiness
         if (array_key_exists('heures', $presenceEffective)) {
             $heuresEffectives = array_filter(
                 $presenceEffective['heures'],
-                fn ($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
+                fn($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
             );
-            $heuresEffectivesId = array_filter(array_map(fn ($h) => array_key_exists('id', $h) ? $h['id'] : null, $heuresEffectives), fn ($h) => !is_null($h));
+            $heuresEffectivesId = array_filter(array_map(fn($h) => array_key_exists('id', $h) ? $h['id'] : null, $heuresEffectives), fn($h) => !is_null($h));
 
             // Heures supprimées
             $heuresSupprimeesIds = array_map(
-                fn ($h) => $h['id'],
-                array_filter($heuresReferences, fn ($h) => !in_array($h['id'], $heuresEffectivesId))
+                fn($h) => $h['id'],
+                array_filter($heuresReferences, fn($h) => !in_array($h['id'], $heuresEffectivesId))
             );
             if (count($heuresSupprimeesIds) > 0) {
                 throw new ArrayException([], 'Permissions insuffisantes pour supprimer des heures.');
             }
 
             // Heures ajoutées
-            $heuresAjoutees = array_filter($heuresEffectives, fn ($heure) => !isset($heure['id']) || !$heure['id']);
+            $heuresAjoutees = array_filter($heuresEffectives, fn($heure) => !isset($heure['id']) || !$heure['id']);
             foreach ($heuresAjoutees as $heure) {
                 throw new ArrayException([], 'Permissions insuffisantes pour ajouter des heures.');
             }
@@ -438,12 +446,12 @@ class ExerciceBusiness
             // Heures modifiées
             $heuresModifiees = array_filter(
                 $heuresEffectives,
-                fn ($heure) => isset($heure['id']) && $heure['id'] && !in_array($heure['id'], $heuresSupprimeesIds)
+                fn($heure) => isset($heure['id']) && $heure['id'] && !in_array($heure['id'], $heuresSupprimeesIds)
             );
             foreach ($heuresModifiees as $heure) {
                 $heureReference = array_filter(
                     $heuresReferences,
-                    fn ($h) => $h['id'] == $heure['id']
+                    fn($h) => $h['id'] == $heure['id']
                 );
 
                 // Check qu'aucune heure n'a été modifiée
@@ -484,7 +492,7 @@ class ExerciceBusiness
             // Ajout heures sup if any
             $heures = array_filter(
                 array_key_exists('heures', $sapeur) ? $sapeur['heures'] : [],
-                fn ($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
+                fn($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
             );
             foreach ($heures as $heure) {
                 if (!HeureExerciceType::where('id', '=', $heure['heure_exercice_type_id'])->exists()) {
@@ -566,18 +574,18 @@ class ExerciceBusiness
 
                 $heures = array_filter(
                     array_key_exists('heures', $sapeur) ? $sapeur['heures'] : [],
-                    fn ($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
+                    fn($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
                 );
-                $heuresId = array_filter(array_map(fn ($h) => array_key_exists('id', $h) ? $h['id'] : null, $heures), fn ($h) => !is_null($h));
+                $heuresId = array_filter(array_map(fn($h) => array_key_exists('id', $h) ? $h['id'] : null, $heures), fn($h) => !is_null($h));
 
                 // Heures supprimées
-                $heuresSupprimeesId = array_map(fn ($h) => $h['id'], array_filter($cachedHeures, fn ($h) => $h['sapeur_id'] == $sapeur['sapeur_id'] && !in_array($h['id'], $heuresId)));
+                $heuresSupprimeesId = array_map(fn($h) => $h['id'], array_filter($cachedHeures, fn($h) => $h['sapeur_id'] == $sapeur['sapeur_id'] && !in_array($h['id'], $heuresId)));
                 if (count($heuresSupprimeesId) > 0) {
                     throw new ArrayException([], 'Permissions insuffisantes pour modifier les présences.');
                 }
 
                 // Heures ajoutées
-                $heuresAjoutees = array_filter($heures, fn ($heure) => !isset($heure['id']) || !$heure['id']);
+                $heuresAjoutees = array_filter($heures, fn($heure) => !isset($heure['id']) || !$heure['id']);
                 foreach ($heuresAjoutees as $heure) {
                     if (!array_key_exists('heure_exercice_type_id', $heure)) {
                         // On ignore l'heure invalide
@@ -587,7 +595,7 @@ class ExerciceBusiness
                 }
 
                 // Heures modifiées
-                $heuresModifiees = array_filter($heures, fn ($heure) => isset($heure['id']) && $heure['id'] && !in_array($heure['id'], $heuresSupprimeesId));
+                $heuresModifiees = array_filter($heures, fn($heure) => isset($heure['id']) && $heure['id'] && !in_array($heure['id'], $heuresSupprimeesId));
                 foreach ($heuresModifiees as $heure) {
                     $heureActuelle = $indexedHeures[$heure['id']];
 
@@ -614,19 +622,19 @@ class ExerciceBusiness
 
             $heures = array_filter(
                 array_key_exists('heures', $sapeur) ? $sapeur['heures'] : [],
-                fn ($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
+                fn($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
             );
-            $heuresId = array_filter(array_map(fn ($h) => array_key_exists('id', $h) ? $h['id'] : null, $heures), fn ($h) => !is_null($h));
+            $heuresId = array_filter(array_map(fn($h) => array_key_exists('id', $h) ? $h['id'] : null, $heures), fn($h) => !is_null($h));
 
             // Heures supprimées
-            $heuresSupprimeesId = array_map(fn ($h) => $h['id'], array_filter($cachedHeures, fn ($h) => $h['sapeur_id'] == $sapeur['sapeur_id'] && !in_array($h['id'], $heuresId)));
+            $heuresSupprimeesId = array_map(fn($h) => $h['id'], array_filter($cachedHeures, fn($h) => $h['sapeur_id'] == $sapeur['sapeur_id'] && !in_array($h['id'], $heuresId)));
             HeureExercice::where('exercice_id', $exerciceId)
                 ->where('sapeur_id', $sapeur['sapeur_id'])
                 ->whereIn('id', $heuresSupprimeesId)
                 ->delete();
 
             // Heures ajoutées
-            $heuresAjoutees = array_filter($heures, fn ($heure) => !isset($heure['id']) || !$heure['id']);
+            $heuresAjoutees = array_filter($heures, fn($heure) => !isset($heure['id']) || !$heure['id']);
             foreach ($heuresAjoutees as $heure) {
                 if (!array_key_exists('heure_exercice_type_id', $heure)) {
                     // On ignore l'heure invalide
@@ -637,7 +645,7 @@ class ExerciceBusiness
             }
 
             // Heures modifiées
-            $heuresModifiees = array_filter($heures, fn ($heure) => isset($heure['id']) && $heure['id'] && !in_array($heure['id'], $heuresSupprimeesId));
+            $heuresModifiees = array_filter($heures, fn($heure) => isset($heure['id']) && $heure['id'] && !in_array($heure['id'], $heuresSupprimeesId));
             foreach ($heuresModifiees as $heure) {
                 HeureExercice::where('exercice_id', $exerciceId)
                     ->where('sapeur_id', $sapeur['sapeur_id'])
