@@ -305,6 +305,12 @@ class GroupeInterventionTableSeeder extends Seeder
             ['id' => '7000348', 'designation' => 'Glovelier', 'no' => 40, 'intervention_id' => '7000085'],
             ['id' => '7000349', 'designation' => 'SIS-Cdt', 'no' => 90, 'intervention_id' => '7000086'],
             ['id' => '7000351', 'designation' => 'Boécourt', 'no' => 20, 'intervention_id' => '7000086'],
+<<<<<<< HEAD
         ]);
+=======
+        ];
+
+        DB::table('groupe_intervention')->insert($groupes);
+>>>>>>> 6be1bf0 (Update and improve seeders speed)
     }
 }

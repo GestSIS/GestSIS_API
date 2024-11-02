@@ -14,7 +14,7 @@ class MatPersoCategorieTableSeeder extends Seeder
      */
     public function run(): void
     {
-        $categories = [
+        DB::table('materiel_categories')->insert([
             ['id' => 1, 'designation' => 'Habits', 'parent_id' => null],
             ['id' => 2, 'designation' => 'Casques', 'parent_id' => null],
             ['id' => 3, 'designation' => 'Souliers', 'parent_id' => null],
@@ -25,8 +25,7 @@ class MatPersoCategorieTableSeeder extends Seeder
             ['id' => 8, 'designation' => 'Veste', 'parent_id' => 1],
             ['id' => 9, 'designation' => 'Pull', 'parent_id' => 1],
             ['id' => 10, 'designation' => 'Sous-vêtements', 'parent_id' => 1],
-        ];
-        DB::table('materiel_categories')->insert($categories);
+        ]);
 
         DB::table('materiel_types')->insert([
             ['id' => 1, 'designation' => 'Pantalon attente F1 + ceinture', 'materiel_categorie_id' => 7],

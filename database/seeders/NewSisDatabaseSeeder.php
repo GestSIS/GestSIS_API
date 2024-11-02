@@ -47,7 +47,6 @@ class NewSisDatabaseSeeder extends Seeder
 
         // Matériel personnel
         $this->call(MatPersoCategorieTableSeeder::class);
-        $this->call(MatPersoEventTypeTableSeeder::class);
-        $this->call(MatPersoAlerteTypeTableSeeder::class);
+        $this->call(MaintenanceTypeTableSeeder::class);
     }
 }

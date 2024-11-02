@@ -54,8 +54,16 @@ class IndemniteExerciceFonctionTableSeeder extends Seeder
             // ['type_unite_id' => 1, 'designation' => 'Autorité de surveillance', 'ecriture_categorie_id' => 6, 'compte_id' => 1, 'solde' => 0, 'indemnite' => 30, 'solde_min' => null, 'solde_min_pour' => null, 'par_fonction' => false],
             ['tarif' => 30, 'compte_id' => 1,  'fonction_id' => null, 'indemnite_exe_id' => 9, 'type' => 2],
 
+<<<<<<< HEAD
             // ['type_unite_id' => 2, 'designation' => 'Exercice journée', 'ecriture_categorie_id' => 3, 'compte_id' => 1, 'solde' => 0, 'indemnite' => 30, 'solde_min' => null, 'solde_min_pour' => null, 'par_fonction' => true],
             ['tarif' => 30, 'compte_id' => 1,  'fonction_id' => null, 'indemnite_exe_id' => 10, 'type' => 2],
         ]);
+=======
+            // array('type_unite_id' => 2, 'designation' => 'Exercice journée', 'ecriture_categorie_id' => 3, 'compte_id' => 1, 'solde' => 0, 'indemnite' => 30, 'solde_min' => null, 'solde_min_pour' => null, 'par_fonction' => true),
+            array('tarif' => 30, 'compte_id' => 1,  'fonction_id' => null, 'indemnite_exe_id' => 10, 'type' => 2),
+        );
+
+        DB::table('indemnite_exercice_fonctions')->insert($fonctions);
+>>>>>>> 6be1bf0 (Update and improve seeders speed)
     }
 }
