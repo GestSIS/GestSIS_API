@@ -85,10 +85,9 @@ class DatabaseSeeder extends Seeder
 
         // Matériel personnel
         $this->call(MatPersoCategorieTableSeeder::class);
-        $this->call(MatPersoEventTypeTableSeeder::class);
-        $this->call(MatPersoAlerteTypeTableSeeder::class);
+        $this->call(MaintenanceTypeTableSeeder::class);
 
-        $this->call(MatPersoTableSeeder::class);
+        $this->call(ArticleTableSeeder::class);
         /**/
     }
 }

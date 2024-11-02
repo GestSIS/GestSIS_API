@@ -64,7 +64,7 @@ return new class extends Migration
 
             $table->string('designation');
             $table->integer('tri');
-            $table->string('remarque');
+            $table->string('remarque')->default('');
             $table->boolean('est_etiquete')->default(false)->comment('Est-ce que les articles dans cet inventaire portent une étiquette');
             $table->date('impression_inventaire')->nullable()->default(null);
 
@@ -131,7 +131,7 @@ return new class extends Migration
 
             $table->string('numero')->default('');
             $table->string('uuid')->unique();
-            $table->string('achat');
+            $table->string('achat')->default('');
             $table->string('taille')->default('');
             $table->boolean('est_etiquete')->default(false)->comment('Est étiqueté');
             $table->boolean('est_unique')->default(false);
@@ -205,11 +205,13 @@ return new class extends Migration
             $table->string('fournisseur')->default('');
             $table->string('reparateur')->default('');
             $table->boolean('a_controller')->comment('Besoin de contrôller des aspects de ce matériel');
-            $table->string('prefix')->default('')->comment();
-            $table->string('remarque');
+            $table->string('remarque')->default('');
             $table->integer('tri');
 
-            $table->boolean('est_attribuable');
+            $table->string('prefix')->default('')->comment();
+            $table->boolean('est_numerote')->default(false);
+            $table->boolean('est_attribuable')->default(false);
+            $table->boolean('est_taillee')->default(false)->comment('Possède une taille');
 
             $table->foreignId('fonction_id')->nullable()->comment('fonction responsable de l \'entretient')->constrained();
         });
@@ -268,7 +270,7 @@ return new class extends Migration
 
             $table->string('designation');
             $table->date('date');
-            $table->string('remarque');
+            $table->string('remarque')->default('');
             $table->string('responsable');
 
             // user_id, laisser tomber pour le moment
@@ -282,7 +284,7 @@ return new class extends Migration
 
             $table->boolean('effectuee');
             $table->boolean('reussie');
-            $table->string('remarque');
+            $table->string('remarque')->default('');
 
             $table->foreignId('maintenance_id')->constrained();
             $table->foreignId('article_id')->constrained();
@@ -296,7 +298,7 @@ return new class extends Migration
 
             $table->date('date');
             $table->string('designation');
-            $table->string('remarque');
+            $table->string('remarque')->default('');
             $table->string('responsable');
 
             // user_id, laisser tomber pour le moment
