@@ -68,7 +68,7 @@ class ConvocationsController extends Controller
     }
 
     /**
-     * Update les présences sans tenir compte d'un exercice en particulier
+     * Update une présence d'un exercice
      *
      * @return Response
      */
@@ -82,7 +82,6 @@ class ConvocationsController extends Controller
             'remplace' => (int) $request->get('remplace'),
             'excuse_type_id' => (int) $request->get('excuse_type_id'),
             'excuse_statut' => (int) $request->get('excuse_statut'),
-            'amende' => $request->get('amende') == "true",
         ]);
 
         $data = $request->validate([
@@ -102,7 +101,6 @@ class ConvocationsController extends Controller
 
             'excuse_statut' => 'integer',
             'justification' => 'nullable|string',
-            'amende' => 'boolean',
         ]);
 
 
@@ -139,7 +137,6 @@ class ConvocationsController extends Controller
             'sapeurs.*.present' => 'required|boolean',
             'sapeurs.*.absent' => 'required|boolean',
             'sapeurs.*.remplace' => 'required|boolean',
-            'sapeurs.*.amende' => 'required|boolean',
             'sapeurs.*.excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
             'sapeurs.*.heures.*.id' => 'nullable|integer',
             'sapeurs.*.heures.*.quantite' => 'nullable|numeric',
