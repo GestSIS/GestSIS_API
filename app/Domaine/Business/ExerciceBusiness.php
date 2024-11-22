@@ -28,8 +28,7 @@ class ExerciceBusiness
     public const EXERCICE_STATUT_VALIDE = 3;
     public const EXERCICE_STATUT_IMPUTE = 4;
 
-    // TODO: Supprimer champ amende et utiliser excuse_statut à la place ?
-    // public const EXCUSE_STATUT_AMENDEE = -2;
+    public const EXCUSE_STATUT_AMENDEE = -2;
     public const EXCUSE_STATUT_REFUSEE = -1;
     public const EXCUSE_STATUT_A_TRAITER = 0;
     public const EXCUSE_STATUT_ACCEPTEE = 1;
@@ -42,7 +41,7 @@ class ExerciceBusiness
     }
 
     /**
-     * Modifie le statut à saisi si toutes les présences ont été saisies
+     * Modifie le statut de l'exercice saisi si toutes les présences ont été saisies
      */
     public function updateStatut($exerciceId)
     {
@@ -139,7 +138,7 @@ class ExerciceBusiness
             throw new ArrayException(["message" => "Certains sapeurs convoqué sont incomplet"]);
         }
 
-        // TODO: Valider les absences amendées ??
+        // TODO: Valider les absences amendées ?? Non
 
         return $this->repository->updateExerciceById($exerciceId, [
             "statut" => self::EXERCICE_STATUT_VALIDE
@@ -155,7 +154,6 @@ class ExerciceBusiness
      */
     public function updateSapeurPresences($presences, $hasValidationPermission)
     {
-        // FIXME:update sapeurs presences 
         $exerciceIds = array_map(fn($e) => $e['exercice_id'], $presences);
 
         // fetch exercices status
@@ -194,7 +192,6 @@ class ExerciceBusiness
                         'convoque' => $presence['convoque'],
                         'remplace' => $presence['remplace'],
                         'excuse_type_id' => $presence['excuse_type_id'],
-                        'amende' => $presence['amende'],
                     ]);
                 } else {
                     ExerciceSapeur::where([
@@ -219,7 +216,6 @@ class ExerciceBusiness
                     'absent' => $presence['absent'],
                     'remplace' => $presence['remplace'],
                     'excuse_type_id' => $presence['excuse_type_id'],
-                    'amende' => $presence['amende'],
                 ]);
             }
         }
@@ -296,8 +292,6 @@ class ExerciceBusiness
      */
     public function updatePresences($exerciceId, $presences)
     {
-        // FIXME:update presences
-
         // Fetch exercice
         $exercice = Exercice::with("sapeurs")->where('id', '=', $exerciceId)->first();
 
@@ -332,7 +326,7 @@ class ExerciceBusiness
     }
 
     /**
-     * Update presences à partir d'une liste complète saisie
+     * Modification d'une présence d'un exercice
      *
      * @param $data
      * @return Collection
@@ -376,8 +370,8 @@ class ExerciceBusiness
 
         // Changement de la présence
         {
-            if ($presence['amende'] == true) {
-                $presence['excuse_statut'] = ExerciceBusiness::EXCUSE_STATUT_REFUSEE;
+            if ($presence['present'] == true || $presence['remplace'] == true) {
+                $presence['excuse_statut'] = ExerciceBusiness::EXCUSE_STATUT_A_TRAITER;
             }
 
             // Permission: Saisie présence 
@@ -389,15 +383,14 @@ class ExerciceBusiness
                     'present' => $presence['present'],
                     'absent' => $presence['absent'],
                     'remplace' => $presence['remplace'],
-                    'amende' => $presence['amende'],
-                    'excuse_type_id' => $presence['excuse_type_id'] == 0 ? null : $presence['excuse_type_id'],
-
-                    'remarque' => $presence['remarque'] ?? '',
-                    'justificatif_path' => $presence['justificatif_path'],
-                    'justificatif_filename' => $presence['justificatif_filename'],
 
                     ...($hasValidationPermission ? [
+                        'excuse_type_id' => $presence['excuse_type_id'] == 0 ? null : $presence['excuse_type_id'],
                         'excuse_statut' => $presence['excuse_statut'],
+
+                        'remarque' => $presence['remarque'] ?? '',
+                        'justificatif_path' => $presence['justificatif_path'],
+                        'justificatif_filename' => $presence['justificatif_filename'],
                         'justification' => $presence['justification'] ?? '',
                     ] : [])
                 ]);
@@ -554,7 +547,6 @@ class ExerciceBusiness
                         'convoque' => False,
                         'present' => False,
                         'absent' => False,
-                        'amende' => False,
                         'remplace' => False,
                         'excuse_type_id' => null,
                         'heures' => [],
@@ -615,9 +607,9 @@ class ExerciceBusiness
                     'convoque' => $sapeur['convoque'],
                     'present' => $sapeur['present'],
                     'absent' => $sapeur['absent'],
-                    'amende' => $sapeur['amende'],
                     'remplace' => $sapeur['remplace'],
                     'excuse_type_id' => $sapeur['excuse_type_id'],
+                    'excuse_statut' => $sapeur['excuse_statut'],
                 ]);
 
             $heures = array_filter(
@@ -659,7 +651,7 @@ class ExerciceBusiness
     }
 
     /**
-     * Suppression de sapeurs d'un exercice
+     * Suppression d'une excuse
      *
      * @param $data
      */
@@ -690,7 +682,6 @@ class ExerciceBusiness
         // Then add the new one
         $exerciceSapeur->justificatif_path = '';
         $exerciceSapeur->justificatif_filename = '';
-        $exerciceSapeur->excuse_statut = 0;
         $exerciceSapeur->excuse_type_id = null;
         $exerciceSapeur->date_validation = null;
         $exerciceSapeur->remarque = '';

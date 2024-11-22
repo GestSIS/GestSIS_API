@@ -61,7 +61,6 @@ class ExerciceController extends Controller
                     'convoque' => False,
                     'present' => False,
                     'absent' => False,
-                    'amende' => False,
                     'remplace' => False,
                     'excuse_type_id' => null,
                     'heures' => [],

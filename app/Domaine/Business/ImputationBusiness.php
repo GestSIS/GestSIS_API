@@ -200,7 +200,7 @@ class ImputationBusiness
         // Chargement des exercices amendés du sapeur
         $exercices = ExerciceSapeur::where([
             ['sapeur_id', '=', $sapeurId],
-            ['amende', '=', 1]
+            ['excuse_statut', '=', ExerciceBusiness::EXCUSE_STATUT_AMENDEE]
         ])->join('exercices', 'exercices.id', '=', 'exercice_sapeur.exercice_id')
             ->where('exercices.exercice_comptable_id', $exerciceComptableId)
             ->orderBy('exercices.date', 'ASC')
@@ -270,7 +270,7 @@ class ImputationBusiness
 
         // Chargement des exercices amendés du sapeur
         $exercices = ExerciceSapeur::where([
-            ['amende', '=', 1]
+            ['excuse_statut', '=', ExerciceBusiness::EXCUSE_STATUT_AMENDEE]
         ])->join('exercices', 'exercices.id', '=', 'exercice_sapeur.exercice_id')
             ->where('exercices.exercice_comptable_id', $exerciceComptableId)
             ->orderBy('exercice_sapeur.sapeur_id', 'ASC')

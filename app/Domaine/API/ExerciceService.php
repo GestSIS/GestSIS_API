@@ -128,7 +128,6 @@ class ExerciceService
             'excuse_type_id',
             'convoque',
             'present',
-            'amende',
             'remplace',
             'absent',
             'excuse_statut',
@@ -154,7 +153,6 @@ class ExerciceService
                     'convoque' => False,
                     'present' => False,
                     'absent' => False,
-                    'amende' => False,
                     'remplace' => False,
                     'excuse_type_id' => null,
                     'heures' => [],
@@ -181,7 +179,6 @@ class ExerciceService
                 'convoque' => False,
                 'present' => False,
                 'absent' => False,
-                'amende' => False,
                 'remplace' => False,
                 'excuse_type_id' => null,
                 'heures' => [],
@@ -270,7 +267,7 @@ class ExerciceService
 
 
     /**
-     * Modification des présences d'un exercice
+     * Modification d'une présence d'un exercice
      *
      * @param $data
      * @return Collection

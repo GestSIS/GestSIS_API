@@ -47,27 +47,27 @@ class ImputationExerciceTest extends TestCase
                 'convoque' => 1,
                 'present' => 1,
                 'absent' => 0,
-                'amende' => 0,
                 'remplace' => 0,
-                'excuse_type_id' => null
+                'excuse_type_id' => null,
+                'excuse_statut' => 1,
             ),
             array(
                 'sapeur_id' => $this->sapeurTwoId,
                 'convoque' => 1,
                 'present' => 0,
                 'absent' => 0,
-                'amende' => 1,
                 'remplace' => 0,
-                'excuse_type_id' => 4
+                'excuse_type_id' => 4,
+                'excuse_statut' => -2,
             ),
             array(
                 'sapeur_id' => $this->sapeurThreeId,
                 'convoque' => 1,
                 'present' => 1,
                 'absent' => 0,
-                'amende' => 0,
                 'remplace' => 0,
-                'excuse_type_id' => null
+                'excuse_type_id' => null,,
+                'excuse_statut' => -1,
             )
         ));
         $exerciceService->validateExerciceById($this->exerciceId);

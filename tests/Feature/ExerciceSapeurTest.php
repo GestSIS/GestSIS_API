@@ -33,7 +33,8 @@ class ExerciceSapeurTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'sapeur_id', 'exercice_id'
+                        'sapeur_id',
+                        'exercice_id'
                     ]
                 ]
             ]);
@@ -56,27 +57,27 @@ class ExerciceSapeurTest extends TestCase
                     'convoque' => 1,
                     'present' => 1,
                     'absent' => 0,
-                    'amende' => 0,
                     'remplace' => 0,
-                    'excuse_type_id' => null
+                    'excuse_type_id' => null,
+                    'excuse_statut' => 0,
                 ),
                 array(
                     'sapeur_id' => 2,
                     'convoque' => 1,
                     'present' => 0,
                     'absent' => 0,
-                    'amende' => 1,
                     'remplace' => 0,
-                    'excuse_type_id' => 4
+                    'excuse_type_id' => 4,
+                    'excuse_statut' => -2,
                 ),
                 array(
                     'sapeur_id' => 3,
                     'convoque' => 1,
                     'present' => 0,
                     'absent' => 0,
-                    'amende' => 0,
                     'remplace' => 0,
-                    'excuse_type_id' => null
+                    'excuse_type_id' => null,,
+                    'excuse_statut' => -1,
                 ),
             )
         );
@@ -107,27 +108,27 @@ class ExerciceSapeurTest extends TestCase
                 'convoque' => 1,
                 'present' => 1,
                 'absent' => 0,
-                'amende' => 0,
                 'remplace' => 0,
-                'excuse_type_id' => null
+                'excuse_type_id' => null,
+                'excuse_statut' => 0,
             ),
             array(
                 'sapeur_id' => 2,
                 'convoque' => 1,
                 'present' => 0,
                 'absent' => 0,
-                'amende' => 1,
                 'remplace' => 0,
-                'excuse_type_id' => 4
+                'excuse_type_id' => 4,
+                'excuse_statut' => -2,
             ),
             array(
                 'sapeur_id' => 3,
                 'convoque' => 1,
                 'present' => 0,
                 'absent' => 0,
-                'amende' => 0,
                 'remplace' => 0,
-                'excuse_type_id' => null
+                'excuse_type_id' => null,
+                'excuse_statut' => 0,
             )
         ];
 
@@ -162,27 +163,27 @@ class ExerciceSapeurTest extends TestCase
                 'convoque' => 1,
                 'present' => 1,
                 'absent' => 0,
-                'amende' => 0,
                 'remplace' => 0,
-                'excuse_type_id' => null
+                'excuse_type_id' => null,
+                'excuse_statut' => 0,
             ),
             array(
                 'sapeur_id' => 2,
                 'convoque' => 1,
                 'present' => 0,
                 'absent' => 0,
-                'amende' => 1,
                 'remplace' => 0,
-                'excuse_type_id' => 4
+                'excuse_type_id' => 4,
+                'excuse_statut' => -2,
             ),
             array(
                 'sapeur_id' => 3,
                 'convoque' => 1,
                 'present' => 0,
                 'absent' => 0,
-                'amende' => 0,
                 'remplace' => 0,
-                'excuse_type_id' => null
+                'excuse_type_id' => null,
+                'excuse_statut' => 0,
             )
         ];
 

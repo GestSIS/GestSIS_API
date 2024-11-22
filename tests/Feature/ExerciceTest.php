@@ -34,7 +34,12 @@ class ExerciceTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'designation', 'localite_id', 'date', 'lieu', 'heure', 'duree'
+                        'designation',
+                        'localite_id',
+                        'date',
+                        'lieu',
+                        'heure',
+                        'duree'
                     ]
                 ]
             ]);
@@ -54,7 +59,12 @@ class ExerciceTest extends TestCase
             ->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    'designation', 'localite_id', 'date', 'lieu', 'heure', 'duree'
+                    'designation',
+                    'localite_id',
+                    'date',
+                    'lieu',
+                    'heure',
+                    'duree'
                 ]
             ]);
     }
@@ -137,9 +147,9 @@ class ExerciceTest extends TestCase
                 'convoque' => 1,
                 'present' => 1,
                 'absent' => 0,
-                'amende' => 0,
                 'remplace' => 0,
-                'excuse_type_id' => null
+                'excuse_type_id' => null,
+                'excuse_statut' => 1,
             ],
         ];
         $this->service->addSapeurs($exercice->id, $sapeurs);

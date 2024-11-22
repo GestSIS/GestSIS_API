@@ -15,7 +15,7 @@ class MedecinFactory extends Factory
      * @var string
      */
     protected $model = Medecin::class;
-    
+
     /**
      * Define the model's default state.
      *
@@ -27,7 +27,7 @@ class MedecinFactory extends Factory
             'designation' => $this->faker->firstName . ' ' . $this->faker->lastName,
             'adresse' => $this->faker->streetName,
             'actif' => 1,
-            'localite_id' => $this->faker->numberBetween(1,146),
+            'localite_id' => $this->faker->numberBetween(1, 5),
         ];
     }
 }

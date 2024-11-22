@@ -43,7 +43,6 @@ class ExcuseController extends Controller
     public function store(Request $request, int $convocationId)
     {
         $request->merge([
-            'amende' => (bool) $request->get('amende'),
             'excuse_type_id' => (int) $request->get('excuse_type_id'),
             'excuse_statut' => (int) $request->get('excuse_statut'),
         ]);
@@ -56,7 +55,6 @@ class ExcuseController extends Controller
 
             'excuse_statut' => 'integer',
             'justification' => 'nullable|string',
-            'amende' => 'boolean',
         ]);
 
 
