@@ -12,7 +12,7 @@ class GroupesTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $groupes = array(
             array('id' => 1, 'pere_id' => null, 'type' => 0, 'no' => NULL, 'designation' => 'Organisation d\'alarme', 'tri' => 1),

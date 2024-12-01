@@ -12,7 +12,7 @@ class CommunesTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $communes = array(
             array('id' => '2', 'designation' => 'Boécourt'),

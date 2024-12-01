@@ -12,7 +12,7 @@ class TypeInterventionTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $types = array(
             array('id' => 1, 'stat_intervention_id' => 1, 'designation' => 'Feu véhicule', 'tri' => 1),

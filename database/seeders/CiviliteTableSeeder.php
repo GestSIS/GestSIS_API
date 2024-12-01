@@ -12,13 +12,15 @@ class CiviliteTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         DB::table('civilites')->insert([
-            'designation' => 'Homme', 'forme_politesse' => 'Monsieur'
+            'designation' => 'Homme',
+            'forme_politesse' => 'Monsieur'
         ]);
         DB::table('civilites')->insert([
-            'designation' => 'Femme', 'forme_politesse' => 'Madame'
+            'designation' => 'Femme',
+            'forme_politesse' => 'Madame'
         ]);
     }
 }

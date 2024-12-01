@@ -12,7 +12,7 @@ class MatPersoAlerteTypeTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $events = array(
             array('id' => 1, 'titre' => 'Lavage max pour tenue feu', 'description' => 'Nb lavage max recommandé atteint (8)', 'seuil_min' => 8, 'dernier' => false),

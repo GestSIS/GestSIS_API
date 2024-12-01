@@ -12,7 +12,7 @@ class MaterielTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $materiels = array(
             array('id' => '1', 'designation' => 'Pompes à immersion', 'tri' => 1, 'statut' => 1, 'forfait' => 0, 'unite' => 1),

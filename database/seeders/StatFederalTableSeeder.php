@@ -12,7 +12,7 @@ class StatFederalTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $stats = array(
             array('id' => 1, 'designation' => 'Lutte contre le feu', 'tri' => 1, 'statut' => 1),

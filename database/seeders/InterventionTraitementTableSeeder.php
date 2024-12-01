@@ -12,7 +12,7 @@ class InterventionTraitementTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $traitements = array(
             array('id' => '1', 'designation' => '-', 'tri' => '1'),

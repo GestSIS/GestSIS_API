@@ -12,7 +12,7 @@ class GradesTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $grades = array(
             array('id' => '1',  'designation' => 'Capitaine',          'abreviation' => 'Cap',  'groupe' => '1', 'tri' => '98'),

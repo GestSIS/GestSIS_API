@@ -12,7 +12,7 @@ class ExerciceCategorieTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $categories = array(
             array('id' => 1, 'designation' => 'Exercice', 'amendable' => 1, 'duree_base' => 180, 'statut' => 1, 'tri' => 1),

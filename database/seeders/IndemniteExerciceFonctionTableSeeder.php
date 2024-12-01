@@ -12,7 +12,7 @@ class IndemniteExerciceFonctionTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $fonction = array(
             array('tarif' => 40, 'compte_id' => 2, 'fonction_id' => 1, 'indemnite_exe_id' => 10, 'type' => 1),

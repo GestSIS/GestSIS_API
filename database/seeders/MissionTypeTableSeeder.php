@@ -12,7 +12,7 @@ class MissionTypeTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $missions = array(
             array('titre' => 'Alimentation tonne'),

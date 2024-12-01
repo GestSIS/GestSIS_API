@@ -14,7 +14,7 @@ class MatPersoTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $materiels = array(
             array('id' => 1, 'taille' => 'XL', 'remarque' => '', 'sapeur_id' => 1, 'attribution' => '2014-01-01', 'retour' => '2022-01-12', 'materiel_type_id' => 2, 'materiel_type' => MaterielNominal::class, 'materiel_id' => 1),

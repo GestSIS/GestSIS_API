@@ -12,7 +12,7 @@ class ExerciceSapeurTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $presences = array(
             array('id' => 1, 'exercice_id' => 1, 'sapeur_id' => 1, 'excuse_type_id' => null, 'convoque' => 1, 'present' => 1, 'absent' => 0, 'remplace' => 0),

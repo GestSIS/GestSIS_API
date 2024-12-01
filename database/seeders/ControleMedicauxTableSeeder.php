@@ -12,7 +12,7 @@ class ControleMedicauxTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         ControleMedical::factory()->count(50)->create();
     }

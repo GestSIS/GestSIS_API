@@ -12,7 +12,7 @@ class MatPersoEventTypeTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $events = array(
             array('id' => 1, 'nom' => 'Lavage', 'description' => '', 'validable' => false),

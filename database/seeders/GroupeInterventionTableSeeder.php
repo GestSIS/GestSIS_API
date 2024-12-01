@@ -12,7 +12,7 @@ class GroupeInterventionTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $groupes = array(
             array('id' => '3000042', 'designation' => 'SIS-Cdt', 'no' => 90, 'intervention_id' => '3000012'),

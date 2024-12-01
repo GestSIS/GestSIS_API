@@ -12,7 +12,7 @@ class LocalitesTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $localites = array(
             array('id' => '1', 'commune_id' => '22', 'npa' => '2942', 'designation' => 'Alle'),

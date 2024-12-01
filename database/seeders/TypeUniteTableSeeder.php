@@ -12,7 +12,7 @@ class TypeUniteTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $unite = array(
             array('id' => '1', 'comptable' => True, 'unite' => 'pièce', 'abreviation' => 'pce'),

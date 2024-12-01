@@ -12,7 +12,7 @@ class PhaseTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $phases = array(
             array('intervention_id' => 393, 'phase_type_id' => 1, 'debut' => '2019-01-01 12:00'),

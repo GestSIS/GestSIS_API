@@ -12,7 +12,7 @@ class SisParamTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         DB::table('sis_params')->insert([
             'id' => 1,

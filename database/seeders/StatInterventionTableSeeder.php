@@ -12,7 +12,7 @@ class StatInterventionTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $stats = array(
             array('id' => 1, 'designation' => 'Feux', 'tri' => 1),

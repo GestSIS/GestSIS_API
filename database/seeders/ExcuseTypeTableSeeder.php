@@ -12,7 +12,7 @@ class ExcuseTypeTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         //
         $excusesTypes = array(

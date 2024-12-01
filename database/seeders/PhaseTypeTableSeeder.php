@@ -12,11 +12,11 @@ class PhaseTypeTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $phases = array(
-            array('id' => 1,'designation' => 'intervention'),
-            array('id' => 2,'designation' => 'rétablissement'),
+            array('id' => 1, 'designation' => 'intervention'),
+            array('id' => 2, 'designation' => 'rétablissement'),
         );
 
         foreach ($phases as $item) {

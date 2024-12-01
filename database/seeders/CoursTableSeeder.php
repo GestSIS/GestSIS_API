@@ -13,7 +13,7 @@ class CoursTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $cours = array(
             array('id' => '1', 'duree' => '1', 'precedent_id' => null, 'grade_id' => null, 'fonction_id' => '22', 'abreviation' => 'BA', 'designation' => 'Cours de base', 'Tri' => '10', 'validite_debut' => null, 'validite_fin' => Carbon::createFromDate(2014, 12, 31)),

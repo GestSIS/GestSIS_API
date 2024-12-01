@@ -12,7 +12,7 @@ class PaiementTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $categories = array(
             array('id' => 1, 'decompte_id' => 1, 'solde' => 300, 'indemnite' => 1000, 'frais_forfaitaire' => 93.4, 'frais_effectif' => 0.0, 'autre' => 0, 'avs_ac' => 0, 'total' => 1393.4, 'sapeur_id' => 1),

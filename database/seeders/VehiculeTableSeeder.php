@@ -12,7 +12,7 @@ class VehiculeTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $vehicules = array(
             array('id' => 1, 'designation' => 'Tonne-Pompe (Bassecourt)', 'forfait' => 0, 'unite' => 0, 'statut' => 1, 'tri' => 1),

@@ -12,7 +12,7 @@ class MissionTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $missions = array(
             array('id' => 1, 'intervention_id' => 393, 'sapeur_id' => 1, 'titre' => 'Sauvetage', 'debut' => '2019-01-01 12:25', 'fin' => '2019-01-01 12:48', 'resume' => '2ème étage"'),

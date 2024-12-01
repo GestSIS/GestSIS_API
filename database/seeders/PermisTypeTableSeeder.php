@@ -12,7 +12,7 @@ class PermisTypeTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $permis = array(
             array('type' => 'A',),

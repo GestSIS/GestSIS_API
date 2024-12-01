@@ -12,7 +12,7 @@ class TelephoneTypeTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         DB::table('telephone_types')->insert([
             'type' => 'Privé',

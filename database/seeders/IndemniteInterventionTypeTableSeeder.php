@@ -13,7 +13,7 @@ class IndemniteInterventionTypeTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $indemnites = array(
             array('designation' => 'Intervention', 'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE, 'ecriture_categorie_id' => 4, 'compte_id' => 4, 'tarif' => 30.0, 'type_unite_id' => 2, 'tarif_min' => 40.0, 'tarif_min_pour' => 1, 'tarif_min_pro_rata' => false, 'tarif_pro_rata' => false, 'phase_id' => 1, 'par_fonction' => false, 'taux_weekend' => null, 'taux_nuit' => null, 'debut' => null, 'fin' => null),

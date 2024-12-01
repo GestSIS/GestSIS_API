@@ -12,7 +12,7 @@ class FraisIndemniteAnnuelTypeTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $types = array(
             array('id' => 1, 'cumulable' => False, 'compte_id' => 2, 'type' => 2, 'ecriture_categorie_id' => 8, 'designation' => 'Indemnité'), //Cdt

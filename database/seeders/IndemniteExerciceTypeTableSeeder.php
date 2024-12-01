@@ -12,7 +12,7 @@ class IndemniteExerciceTypeTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $indemnites = array(
             array('type_unite_id' => 1, 'designation' => 'Exercice soirée', 'ecriture_categorie_id' => 1, 'par_fonction' => false),

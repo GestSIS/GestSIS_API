@@ -13,7 +13,7 @@ class InterventionTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         Intervention::factory()->count(25)->create();
 

@@ -12,7 +12,7 @@ class AspsmsParamTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         DB::table('aspsms_params')->insert([
             'id' => 1,

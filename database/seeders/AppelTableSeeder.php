@@ -12,7 +12,7 @@ class AppelTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $appels = array(
             array('id' => 1, 'intervention_id' => 393, 'numero' => '032 234 45 56', 'date' => '2019-12-01 12:25', 'nom' => 'Anonyme', 'commentaire' => ''),

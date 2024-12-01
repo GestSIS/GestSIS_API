@@ -12,7 +12,7 @@ class FonctionTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $fonctions = array(
             array('id' => 1, 'nom' => 'Commandant', 'abreviation' => 'Cdt', 'tri' => 100, 'cumulable' => false),

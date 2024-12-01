@@ -12,7 +12,7 @@ class CompteTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $comptes = array(
             array('id' => 1, 'numero' => '300', 'designation' => 'EM + Autorité de surveillance + Comissions', 'produit' => false),

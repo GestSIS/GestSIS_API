@@ -12,7 +12,7 @@ class VehiculeInterventionTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $vehicules = array(
             array('id' => 5000000, 'intervention_id' => 393, 'vehicule_id' => 2),

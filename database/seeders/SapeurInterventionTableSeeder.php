@@ -12,7 +12,7 @@ class SapeurInterventionTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $sapeurs = array(
             array('sapeur_id' => 1, 'intervention_id' => 393, 'debut' => '2019-01-01 12:00', 'fin' => '2019-01-01 12:15', 'piquet' => false),

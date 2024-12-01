@@ -12,7 +12,7 @@ class MedecinTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         Medecin::factory()->count(10)->create();
     }

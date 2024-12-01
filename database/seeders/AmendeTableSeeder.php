@@ -12,7 +12,7 @@ class AmendeTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $amendes = array(
             array('id' => 1, 'ordre' => 1, 'montant' => 20, 'compte_id' => 9, 'ecriture_categorie_id' => 9),

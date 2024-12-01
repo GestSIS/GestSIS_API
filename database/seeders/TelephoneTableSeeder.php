@@ -12,7 +12,7 @@ class TelephoneTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $telephones = array(
             array('id' => '4', 'numero' => '032 420 68 04', 'nom' => 'RTA', 'tri' => '1'),

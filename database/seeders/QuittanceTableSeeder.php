@@ -12,7 +12,7 @@ class QuittanceTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $quittances = array(
             array('id' => 1, 'sapeur_id' => 1, 'intervention_id' => 393),

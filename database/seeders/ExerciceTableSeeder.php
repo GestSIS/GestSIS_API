@@ -13,7 +13,7 @@ class ExerciceTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         // Exercice::factory()->count(25)->create();
 
