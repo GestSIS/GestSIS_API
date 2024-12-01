@@ -22,22 +22,21 @@ class SapeursTableSeeder extends Seeder
 
         $factory = Factory::create();
         Mutation::insert(array_map(fn($s) => [
-            'loalite_id' => $s->localite_id,
-            'incroporation' => $factory->dateTimeBetween('-10years', '+1year'),
-            'sapeur_id' => $s->id,
+            'localite_id' => $s['localite_id'],
+            'incorporation' => $factory->dateTimeBetween('-10years', '+1year'),
+            'sapeur_id' => $s['id'],
+            'motif' => '',
         ], $sapeurs->toArray()));
 
-        // permis
         DB::table('permis')->insert([
             ['permis_type_id' => 6, 'sapeur_id' => 2, 'date' => Carbon::parse('1958-01-01')],
             ['permis_type_id' => 2, 'sapeur_id' => 1, 'date' => Carbon::parse('1958-01-01')],
             ['permis_type_id' => 3, 'sapeur_id' => 1, 'date' => Carbon::parse('1958-01-01')]
         ]);
 
-        //Telephones
         DB::table('sapeur_telephone')->insert([
             ['sapeur_id' => 1, 'numero' => '032 453 34 67', 'priorite' => 1, 'telephone_type_id' => 1, 'rta' => false],
-            ['sapeur_id' => 1, 'priorite' => 2, 'numero' => '078 752 14 25', 'telephone_type_id' => 2, 'rta' => true]
+            ['sapeur_id' => 1, 'numero' => '078 752 14 25', 'priorite' => 2, 'telephone_type_id' => 2, 'rta' => true]
         ]);
 
         DB::table('fonction_sapeur')->insert([
@@ -46,6 +45,9 @@ class SapeursTableSeeder extends Seeder
 
         DB::table('grade_sapeur')->insert([
             ['sapeur_id' => 1, 'grade_id' => 1, 'date' => Carbon::parse('2010-01-28'), 'remarque' => ''],
+        ]);
+
+        DB::table('cours_sapeur')->insert([
             ['sapeur_id' => 1, 'cours_id' => 1, 'duree' => 1, 'date' => Carbon::parse('2010-01-28'), 'localite_id' => 6],
             ['sapeur_id' => 1, 'cours_id' => 1, 'duree' => 1, 'date' => Carbon::parse('2010-01-28'), 'localite_id' => 6]
         ]);

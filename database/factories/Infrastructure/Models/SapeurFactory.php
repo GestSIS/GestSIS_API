@@ -41,7 +41,7 @@ class SapeurFactory extends Factory
             'iban_statut' => 1,
             'remarque' => $this->faker->text,
             'porteur' => 0,
-            'localite_id' => $this->faker->numberBetween(1, 146),
+            'localite_id' => $this->faker->numberBetween(1, 10),
             'civilite_id' => $this->faker->numberBetween(1, 2),
             // 'incorporation' => "29.01.2019",
 
