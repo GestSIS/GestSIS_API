@@ -14,21 +14,17 @@ class EcritureCategorieTableSeeder extends Seeder
      */
     public function run(): void
     {
-        $categories = array(
-            array('id' => 1, 'designation' => 'Exercice Soirée', 'tri' => 1),
-            array('id' => 2, 'designation' => 'Exercice matinée', 'tri' => 2),
-            array('id' => 3, 'designation' => 'Exercice journée', 'tri' => 3),
-            array('id' => 4, 'designation' => 'Intervention', 'tri' => 4),
-            array('id' => 5, 'designation' => 'Formation', 'tri' => 5),
-            array('id' => 6, 'designation' => 'EM & Comissions', 'tri' => 6),
-            array('id' => 7, 'designation' => 'Séances', 'tri' => 7),
-            array('id' => 8, 'designation' => 'Frais & indemnités annuelles', 'tri' => 8),
-            array('id' => 9, 'designation' => 'Amende', 'tri' => 9),
-            array('id' => 10, 'designation' => 'No stat', 'tri' => 10),
-        );
-
-        foreach ($categories as $categorie) {
-            DB::table('ecriture_categories')->insert($categorie);
-        }
+        DB::table('ecriture_categories')->insert([
+            ['id' => 1, 'designation' => 'Exercice Soirée', 'tri' => 1],
+            ['id' => 2, 'designation' => 'Exercice matinée', 'tri' => 2],
+            ['id' => 3, 'designation' => 'Exercice journée', 'tri' => 3],
+            ['id' => 4, 'designation' => 'Intervention', 'tri' => 4],
+            ['id' => 5, 'designation' => 'Formation', 'tri' => 5],
+            ['id' => 6, 'designation' => 'EM & Comissions', 'tri' => 6],
+            ['id' => 7, 'designation' => 'Séances', 'tri' => 7],
+            ['id' => 8, 'designation' => 'Frais & indemnités annuelles', 'tri' => 8],
+            ['id' => 9, 'designation' => 'Amende', 'tri' => 9],
+            ['id' => 10, 'designation' => 'No stat', 'tri' => 10],
+        ]);
     }
 }

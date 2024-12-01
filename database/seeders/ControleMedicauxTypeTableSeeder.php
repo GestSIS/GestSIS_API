@@ -14,13 +14,9 @@ class ControleMedicauxTypeTableSeeder extends Seeder
      */
     public function run(): void
     {
-        $types = array(
-            array('id' => 1, 'designation' => 'Contrôle PAR ', 'duree_validite' => 2, 'expirable' => true, 'tri' => 1),
-            array('id' => 2, 'designation' => 'Examen d\'aptitude FSS', 'duree_validite' => 2, 'expirable' => true, 'tri' => 2),
-        );
-
-        foreach ($types as $type) {
-            DB::table('controle_medical_types')->insert($type);
-        }
+        DB::table('controle_medical_types')->insert([
+            ['id' => 1, 'designation' => 'Contrôle PAR ', 'duree_validite' => 2, 'expirable' => true, 'tri' => 1],
+            ['id' => 2, 'designation' => 'Examen d\'aptitude FSS', 'duree_validite' => 2, 'expirable' => true, 'tri' => 2],
+        ]);
     }
 }

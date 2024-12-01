@@ -14,13 +14,9 @@ class PhaseTypeTableSeeder extends Seeder
      */
     public function run(): void
     {
-        $phases = array(
-            array('id' => 1, 'designation' => 'intervention'),
-            array('id' => 2, 'designation' => 'rétablissement'),
-        );
-
-        foreach ($phases as $item) {
-            DB::table('phase_types')->insert($item);
-        }
+        DB::table('phase_types')->insert([
+            ['id' => 1, 'designation' => 'intervention'],
+            ['id' => 2, 'designation' => 'rétablissement'],
+        ]);
     }
 }

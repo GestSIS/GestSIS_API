@@ -14,13 +14,9 @@ class DecompteTableSeeder extends Seeder
      */
     public function run(): void
     {
-        $categories = array(
-            array('id' => 1, 'designation' => 'partiel', 'date' => '2020-01-31', 'exercice_comptable_id' => 4, 'deduction' => 0, 'avs_total' => 0, 'ac_total' => 0, 'total' => 0),
-            array('id' => 2, 'designation' => 'final', 'date' => '2020-01-31', 'exercice_comptable_id' => 4, 'deduction' => 1, 'avs_total' => 0, 'ac_total' => 0, 'total' => 0),
-        );
-
-        foreach ($categories as $categorie) {
-            DB::table('decomptes')->insert($categorie);
-        }
+        DB::table('decomptes')->insert([
+            ['id' => 1, 'designation' => 'partiel', 'date' => '2020-01-31', 'exercice_comptable_id' => 4, 'deduction' => 0, 'avs_total' => 0, 'ac_total' => 0, 'total' => 0],
+            ['id' => 2, 'designation' => 'final', 'date' => '2020-01-31', 'exercice_comptable_id' => 4, 'deduction' => 1, 'avs_total' => 0, 'ac_total' => 0, 'total' => 0],
+        ]);
     }
 }

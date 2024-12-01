@@ -14,18 +14,14 @@ class StatInterventionTableSeeder extends Seeder
      */
     public function run(): void
     {
-        $stats = array(
-            array('id' => 1, 'designation' => 'Feux', 'tri' => 1),
-            array('id' => 3, 'designation' => 'Pollutions', 'tri' => 2),
-            array('id' => 4, 'designation' => 'Sauvetages', 'tri' => 3),
-            array('id' => 5, 'designation' => 'Inondations / Elements naturels', 'tri' => 4),
-            array('id' => 6, 'designation' => 'Alarmes automatiques', 'tri' => 5),
-            array('id' => 7, 'designation' => 'Divers', 'tri' => 6),
-            array('id' => 8, 'designation' => 'Pas de statistiques', 'tri' => 7),
-        );
-
-        foreach ($stats as $item) {
-            DB::table('stat_interventions')->insert($item);
-        }
+        DB::table('stat_interventions')->insert([
+            ['id' => 1, 'designation' => 'Feux', 'tri' => 1],
+            ['id' => 3, 'designation' => 'Pollutions', 'tri' => 2],
+            ['id' => 4, 'designation' => 'Sauvetages', 'tri' => 3],
+            ['id' => 5, 'designation' => 'Inondations / Elements naturels', 'tri' => 4],
+            ['id' => 6, 'designation' => 'Alarmes automatiques', 'tri' => 5],
+            ['id' => 7, 'designation' => 'Divers', 'tri' => 6],
+            ['id' => 8, 'designation' => 'Pas de statistiques', 'tri' => 7],
+        ]);
     }
 }

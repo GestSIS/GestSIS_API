@@ -14,19 +14,15 @@ class MissionTypeTableSeeder extends Seeder
      */
     public function run(): void
     {
-        $missions = array(
-            array('titre' => 'Alimentation tonne'),
-            array('titre' => 'Aspiration'),
-            array('titre' => 'Circulation'),
-            array('titre' => 'Extinction'),
-            array('titre' => 'Mise en place échelle'),
-            array('titre' => 'Recherche de personnes'),
-            array('titre' => 'Sauvetage'),
-            array('titre' => 'Securisation')
-        );
-
-        foreach ($missions as $item) {
-            DB::table('mission_types')->insert($item);
-        }
+        DB::table('mission_types')->insert([
+            ['titre' => 'Alimentation tonne'],
+            ['titre' => 'Aspiration'],
+            ['titre' => 'Circulation'],
+            ['titre' => 'Extinction'],
+            ['titre' => 'Mise en place échelle'],
+            ['titre' => 'Recherche de personnes'],
+            ['titre' => 'Sauvetage'],
+            ['titre' => 'Securisation']
+        ]);
     }
 }

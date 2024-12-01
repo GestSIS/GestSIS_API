@@ -15,13 +15,9 @@ class TelephoneTypeTableSeeder extends Seeder
     public function run(): void
     {
         DB::table('telephone_types')->insert([
-            'type' => 'Privé',
-        ]);
-        DB::table('telephone_types')->insert([
-            'type' => 'Professionnel',
-        ]);
-        DB::table('telephone_types')->insert([
-            'type' => 'Portable',
+            ['type' => 'Privé'],
+            ['type' => 'Professionnel'],
+            ['type' => 'Portable']
         ]);
     }
 }

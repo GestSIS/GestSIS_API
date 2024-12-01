@@ -19,12 +19,13 @@ class SapeursTableSeeder extends Seeder
     public function run(): void
     {
         $sapeurs = Sapeur::factory()->count(25)->create();
+
         $factory = Factory::create();
         Mutation::insert(array_map(fn($s) => [
             'loalite_id' => $s->localite_id,
             'incroporation' => $factory->dateTimeBetween('-10years', '+1year'),
             'sapeur_id' => $s->id,
-        ], $sapeurs->toArray()));
+        ], $sapeurs->to[))];
 
         // permis
         DB::table('permis')->insert([
@@ -49,7 +50,7 @@ class SapeursTableSeeder extends Seeder
             ['sapeur_id' => 1, 'cours_id' => 1, 'duree' => 1, 'date' => Carbon::parse('2010-01-28'), 'localite_id' => 6]
         ]);
 
-        $groupes = [
+        DB::table('groupe_sapeur')->insert([
             ['id' => 1, 'groupe_id' => 1, 'sapeur_id' => 1],
             ['id' => 2, 'groupe_id' => 5, 'sapeur_id' => 1],
             ['id' => 3, 'groupe_id' => 6, 'sapeur_id' => 1],
@@ -64,8 +65,6 @@ class SapeursTableSeeder extends Seeder
             ['id' => 12, 'groupe_id' => 5, 'sapeur_id' => 3],
             ['id' => 13, 'groupe_id' => 4, 'sapeur_id' => 3],
             ['id' => 14, 'groupe_id' => 11, 'sapeur_id' => 3],
-        ];
-
-        DB::table('groupe_sapeur')->insert($groupes);
+        ]);
     }
 }
