@@ -25,7 +25,7 @@ class SapeursTableSeeder extends Seeder
             'loalite_id' => $s->localite_id,
             'incroporation' => $factory->dateTimeBetween('-10years', '+1year'),
             'sapeur_id' => $s->id,
-        ], $sapeurs->to[))];
+        ], $sapeurs->toArray()));
 
         // permis
         DB::table('permis')->insert([
