@@ -396,7 +396,6 @@ class ImputationBusiness
                             ['debut', '>=', $debut],
                             ['debut', '<=', $fin],
                         ])
-                        ->whereNotNull('fin');
                 });
         })
             ->join('fonctions', 'fonctions.id', '=', 'fonction_sapeur.fonction_id')
