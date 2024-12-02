@@ -395,7 +395,7 @@ class ImputationBusiness
                         ->where([
                             ['debut', '>=', $debut],
                             ['debut', '<=', $fin],
-                        ])
+                        ]);
                 });
         })
             ->join('fonctions', 'fonctions.id', '=', 'fonction_sapeur.fonction_id')
