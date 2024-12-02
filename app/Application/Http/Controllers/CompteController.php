@@ -10,6 +10,7 @@ use Illuminate\Http\Response;
 class CompteController extends Controller
 {
     protected $paramService;
+    protected $service;
 
     public function __construct(ImputationService $service, ComptabiliteParamService $paramService)
     {
