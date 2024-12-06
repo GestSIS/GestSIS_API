@@ -10,6 +10,7 @@ use App\Infrastructure\Models\MaterielGenerique;
 use App\Infrastructure\Models\MaterielNominal;
 use App\Infrastructure\Models\MaterielPersonnel;
 
+// TODO: A supprimer
 class MatPersoBusiness
 {
     public const ALERTE_STATUT_OK = 1;
