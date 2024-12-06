@@ -9,57 +9,9 @@ use App\Infrastructure\Models\MaterielEvent;
 use App\Infrastructure\Models\MaterielEventType;
 use App\Infrastructure\Models\MaterielType;
 
+// TODO: Supprimer
 class MatPersoParamBusiness
 {
-    // Categorie
-    public static function ajouterCategorie($data)
-    {
-        // TODO: Controller récursivity du parent
-        $categorie = new MaterielCategorie();
-        $categorie->fill($data);
-        $categorie->save();
-
-        return $categorie;
-    }
-
-    public static function modifierCategorie($id, $data)
-    {
-        if ($data['parent_id'] == $id) {
-            throw new ArrayException([], "Récursivité illégale détectée");
-        }
-        // TODO: Controller récursivity du parent multi-niveau
-        MaterielCategorie::where('id', $id)->limit(1)->update($data);
-        return MaterielCategorie::find($id);
-    }
-
-    public static function supprimerCategorie($id)
-    {
-        if (MaterielCategorie::where('parent_id', $id)->exists() || MaterielType::where('materiel_categorie_id', $id)->exists()) {
-            throw new ArrayException([], "Veuillez d'abord supprimer les catégories ou matériels types enfant");
-        }
-        MaterielCategorie::where('id', $id)->delete();
-    }
-
-    // Type
-    public static function ajouterType($data)
-    {
-        $type = new MaterielType();
-        $type->fill($data);
-        $type->save();
-        return $type;
-    }
-
-    public static function modifierType($id, $data)
-    {
-        MaterielType::where('id', $id)->limit(1)->update($data);
-        return MaterielType::find($id);
-    }
-
-    public static function supprimerType($id)
-    {
-        MaterielType::where('id', $id)->delete();
-    }
-
     // Alerte type
     public static function ajouterAlerteType($data)
     {

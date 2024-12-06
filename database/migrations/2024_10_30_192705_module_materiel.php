@@ -10,8 +10,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -35,7 +34,7 @@ return new class extends Migration
         });
 
         // Create a basic couleur
-        $couleur = couleur::create(['nom' => 'default', 'texte' => '#ffffff00', 'fond' => '#fc031780']);
+        $couleur = couleur::create(['nom' => 'default', 'texte' => '#ffffffff', 'fond' => '#fc031780']);
 
         // Déjà existante
         Schema::table('materiel_categories', function (Blueprint $table) {
