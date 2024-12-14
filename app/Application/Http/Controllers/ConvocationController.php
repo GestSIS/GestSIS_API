@@ -26,6 +26,7 @@ class ConvocationController extends Controller
             'telephone' => (bool) $request->get('telephone', false),
             'adresse' => (bool) $request->get('adresse', false),
             'details' => (bool) $request->get('details', false),
+            'afficherDuree' => (bool) $request->get('afficherDuree', true),
             'info' => (bool) $request->get('info', false),
             'sapeurIds' => is_string($request->get('sapeurIds', '')) ? explode(',', $request->get('sapeurIds', '')) : $request->get('sapeurIds', ''),
         ]);
@@ -38,6 +39,7 @@ class ConvocationController extends Controller
             'details' => 'boolean',
             'titre' => 'string|required',
             'info' => 'boolean',
+            'afficherDuree' => 'boolean',
             'pourInfo' => 'string|nullable',
             'texteDebut' => 'string|nullable',
             'texteFin' => 'string|nullable',
