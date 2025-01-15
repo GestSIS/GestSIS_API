@@ -326,9 +326,9 @@ class SapeurService
                 FROM civilites as c
                 INNER JOIN sapeurs as s ON s.civilite_id = c.id
                 INNER JOIN mutations as m ON m.sapeur_id = s.id
-                WHERE m.incorporation <= ?
+                WHERE m.incorporation < ?
                 AND (
-                    m.sortie IS NULL OR m.sortie >= ?
+                    m.sortie IS NULL OR m.sortie > ?
                     )
                 AND s.type = 0
                 GROUP BY c.id

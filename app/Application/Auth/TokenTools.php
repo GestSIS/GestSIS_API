@@ -7,7 +7,6 @@ use Carbon\Carbon;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Stdclass;
 use Illuminate\Support\Facades\Storage;
