@@ -14,7 +14,7 @@
         "picocolors": "^1.0.1",
         "resolve-url-loader": "^5.0.0",
         "sass": "^1.77.6",
-        "vite": "^5.3.6"
+        "vite": "^5.4.12"
     },
     "packageManager": "yarn@4.1.1"
 }
