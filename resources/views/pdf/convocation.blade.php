@@ -33,21 +33,21 @@
   function formatHeureDuree($heure, $duree)
   {
     $end = Carbon::parse($heure)->addMinutes($duree);
-    return substr($heure, 0, 5) . ' - ' . $end->format('H:i');
+    return substr($heure, 0, 5) . '&nbsp;-&nbsp;' . $end->format('H:i');
   }
   ?>
   <div class="container-fluid">
     @foreach ($sapeurs as $sapeur)
     <h1>{{ $params['titre'] }}</h1>
-    <div style="margin-top: 90px; margin-left: 55%; font-size: 18px !important;">
+    <div style="margin-top: 90px; margin-left: 55%;">
       {{-- {{dd($sapeur, $civilites)}} --}}
-      <p class="m-0">{{ $civilites[$sapeur['civilite_id']] }}</p>
-      <p class="m-0">{{ $sapeur['nom'] }} {{ $sapeur['prenom'] }}</p>
-      <p class="m-0">{{ $sapeur['rue'] }} {{ $sapeur['no_rue'] }}</p>
-      <p class="m-0">{{ $localites[$sapeur['localite_id']] }}</p>
+      <p class="h3 m-0">{{ $civilites[$sapeur['civilite_id']] }}</p>
+      <p class="h3 m-0">{{ $sapeur['nom'] }} {{ $sapeur['prenom'] }}</p>
+      <p class="h3 m-0">{{ $sapeur['rue'] }} {{ $sapeur['no_rue'] }}</p>
+      <p class="h3 m-0">{{ $localites[$sapeur['localite_id']] }}</p>
     </div>
     <div class="mt-5">
-      <p class="text-justify">
+      <p class="text-justify h5">
         @foreach (explode("\n", str_replace(["\r\n", "\n\r", "\r"], "\n", $params['texteDebut'])) as $line)
         {{ $line }}<br />
         @endforeach
@@ -73,7 +73,7 @@
         ?>
           <tr>
             <td style="width: 100px !important;">{{ formatDate($exercice['date']) }}</td>
-            <td>{{ $params['afficherDuree'] ? formatHeureDuree($exercice['heure'], $exercice['duree']) : formatHeure($exercice['heure']) }}</td>
+            <td>{!! $params['afficherDuree'] ? formatHeureDuree($exercice['heure'], $exercice['duree']) : formatHeure($exercice['heure']) !!}</td>
             <td>
               {{ $categories[$exercice['exercice_categorie_id']] }} : {{ $exercice['designation'] }}<br />
               {{ $exercice['communications'] }}
@@ -91,7 +91,7 @@
       </tbody>
     </table>
     <div class="mt-5">
-      <p class="text-justify">
+      <p class="text-justify h5">
         @foreach (explode("\n", str_replace(["\r\n", "\n\r", "\r"], "\n", $params['texteFin'])) as $line)
         {{ $line }}<br />
         @endforeach
