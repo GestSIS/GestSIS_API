@@ -50,7 +50,11 @@ class DbsFix extends Command
     {
         $dbs = config('database.dbs');
         foreach ($dbs as $db) {
-            ConvocationParam::on("db_" . $db)->insert([]);
+            ConvocationParam::on("db_" . $db)->insert([
+                'title' => 'convocation',
+                'afficher_duree' => true,
+                'afficher_pour_infor' => true,
+            ]);
 
             // printf("Fix db=db_" . $db . "\n");
             // Commune::on("db_" . $db)->insert([
