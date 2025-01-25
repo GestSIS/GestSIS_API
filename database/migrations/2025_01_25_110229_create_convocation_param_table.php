@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Infrastructure\Models\ConvocationParam;
 
 return new class extends Migration
 {
@@ -14,7 +13,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::drop('convocation_params');
         Schema::create('convocation_params', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
@@ -27,8 +25,6 @@ return new class extends Migration
             $table->boolean('affichage_pour_info')->default(true);
             $table->boolean('affichage_duree')->default(true);
         });
-
-        (new ConvocationParam())->save();
     }
 
     /**

@@ -12,6 +12,7 @@ use App\Infrastructure\Models\Localite;
 use App\Infrastructure\Models\LocaliteSis;
 use App\Infrastructure\Models\Sms;
 use App\Infrastructure\Models\SmsNumero;
+use App\Infrastructure\Models\ConvocationParam;
 use Illuminate\Console\Command;
 
 class DbsFix extends Command
@@ -49,28 +50,30 @@ class DbsFix extends Command
     {
         $dbs = config('database.dbs');
         foreach ($dbs as $db) {
-            printf("Fix db=db_" . $db . "\n");
-            Commune::on("db_" . $db)->insert([
-                array('id' => '76', 'designation' => 'Porrentruy'),
-                array('id' => '77', 'designation' => 'Grand-Fontaine'),
-            ]);
+            ConvocationParam::on("db_" . $db)->insert([]);
 
-            Localite::on("db_" . $db)->where('commune_id', '=', 12)->update(['commune_id' => 9]);
-            Localite::on("db_" . $db)->where('commune_id', '=', 13)->update(['commune_id' => 9]);
-            Localite::on("db_" . $db)->where('commune_id', '=', 27)->update(['commune_id' => 26]);
+            // printf("Fix db=db_" . $db . "\n");
+            // Commune::on("db_" . $db)->insert([
+            //     array('id' => '76', 'designation' => 'Porrentruy'),
+            //     array('id' => '77', 'designation' => 'Grand-Fontaine'),
+            // ]);
 
-            Commune::on("db_" . $db)->whereIn('id', [12, 13, 27])->delete();
+            // Localite::on("db_" . $db)->where('commune_id', '=', 12)->update(['commune_id' => 9]);
+            // Localite::on("db_" . $db)->where('commune_id', '=', 13)->update(['commune_id' => 9]);
+            // Localite::on("db_" . $db)->where('commune_id', '=', 27)->update(['commune_id' => 26]);
+
+            // Commune::on("db_" . $db)->whereIn('id', [12, 13, 27])->delete();
 
             // array('id' => '31', 'commune_id' => '26', 'npa' => '2933', 'designation' => 'Damphreux'),
             // // array('id' => '32', 'commune_id' => NULL, 'npa' => '2933', 'designation' => 'Damphreux-Lugnez'),
             // array('id' => '42', 'commune_id' => '66', 'npa' => '2953', 'designation' => 'Fregiécourt'),
             // // array('id' => '43', 'commune_id' => '66', 'npa' => '2953', 'designation' => 'Fregiécourt-Pleujouse'),
 
-            LocaliteSis::on("db_" . $db)->whereIn('localite_id', [32, 43])->delete();
-            Localite::on("db_" . $db)->whereIn('id', [32, 43])->delete();
+            // LocaliteSis::on("db_" . $db)->whereIn('localite_id', [32, 43])->delete();
+            // Localite::on("db_" . $db)->whereIn('id', [32, 43])->delete();
 
-            Localite::on("db_" . $db)->where('id', '=', 77)->update(['commune_id' => 76]);
-            Localite::on("db_" . $db)->where('id', '=', 46)->update(['commune_id' => 77]);
+            // Localite::on("db_" . $db)->where('id', '=', 77)->update(['commune_id' => 76]);
+            // Localite::on("db_" . $db)->where('id', '=', 46)->update(['commune_id' => 77]);
 
             printf("\n");
         }
