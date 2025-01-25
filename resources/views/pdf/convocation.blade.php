@@ -26,14 +26,18 @@
     }
   }
 
-  function formatHeure($heure)
-  {
-    return substr($heure, 0, 5);
+  if (!function_exists('formatHeure')) {
+    function formatHeure($heure)
+    {
+      return substr($heure, 0, 5);
+    }
   }
-  function formatHeureDuree($heure, $duree)
-  {
-    $end = Carbon::parse($heure)->addMinutes($duree);
-    return substr($heure, 0, 5) . '&nbsp;-&nbsp;' . $end->format('H:i');
+  if (!function_exists('formatHeureDuree')) {
+    function formatHeureDuree($heure, $duree)
+    {
+      $end = Carbon::parse($heure)->addMinutes($duree);
+      return substr($heure, 0, 5) . '&nbsp;-&nbsp;' . $end->format('H:i');
+    }
   }
   ?>
   <div class="container-fluid">
@@ -48,7 +52,7 @@
     </div>
     <div class="mt-5">
       <p class="text-justify h5">
-        @foreach (explode("\n", str_replace(["\r\n", "\n\r", "\r"], "\n", $params['texteDebut'])) as $line)
+        @foreach (explode("\n", str_replace(["\r\n", "\n\r", "\r"], "\n", $params['texte_debut'])) as $line)
         {{ $line }}<br />
         @endforeach
       </p>
@@ -68,12 +72,12 @@
           // dd($convocation['exercice_id'], $exercices);
           $exercice = $exercices[$convocation['exercice_id']];
           $convoque = !!$convocation['convoque'];
-          $pourInfo = $params['info'] && !$convoque;
+          $pourInfo = $params['afficher_pour_info'] && !$convoque;
           $colspan = $pourInfo ? 1 : 2;
         ?>
           <tr>
             <td style="width: 100px !important;">{{ formatDate($exercice['date']) }}</td>
-            <td>{!! $params['afficherDuree'] ? formatHeureDuree($exercice['heure'], $exercice['duree']) : formatHeure($exercice['heure']) !!}</td>
+            <td>{!! $params['afficher_duree'] ? formatHeureDuree($exercice['heure'], $exercice['duree']) : formatHeure($exercice['heure']) !!}</td>
             <td>
               {{ $categories[$exercice['exercice_categorie_id']] }} : {{ $exercice['designation'] }}<br />
               {{ $exercice['communications'] }}
@@ -82,7 +86,7 @@
               {{ $localites[$exercice['localite_id']] }} : {{ $exercice['lieu'] }}
             </td>
             @if ($pourInfo)
-            <td><em>{{ $params['pourInfo'] }}<em></td>
+            <td><em>{{ $params['texte_pour_info'] }}<em></td>
             @endif
           </tr>
         <?php
@@ -92,7 +96,7 @@
     </table>
     <div class="mt-5">
       <p class="text-justify h5">
-        @foreach (explode("\n", str_replace(["\r\n", "\n\r", "\r"], "\n", $params['texteFin'])) as $line)
+        @foreach (explode("\n", str_replace(["\r\n", "\n\r", "\r"], "\n", $params['texte_fin'])) as $line)
         {{ $line }}<br />
         @endforeach
       </p>

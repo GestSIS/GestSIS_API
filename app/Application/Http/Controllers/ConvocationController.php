@@ -21,28 +21,18 @@ class ConvocationController extends Controller
     public function convoquer(Request $request, $exerciceComptableId)
     {
         $request->merge([
-            'nip' => (bool) $request->get('nip', false),
-            'groupe' => (bool) $request->get('groupe', false),
-            'telephone' => (bool) $request->get('telephone', false),
-            'adresse' => (bool) $request->get('adresse', false),
-            'details' => (bool) $request->get('details', false),
-            'afficherDuree' => (bool) $request->get('afficherDuree', true),
-            'info' => (bool) $request->get('info', false),
+            'afficher_duree' => (bool) $request->get('afficher_duree', true),
+            'afficher_pour_info' => (bool) $request->get('afficher_pour_info', false),
             'sapeurIds' => is_string($request->get('sapeurIds', '')) ? explode(',', $request->get('sapeurIds', '')) : $request->get('sapeurIds', ''),
         ]);
 
         $data = $request->validate([
-            'nip' => 'boolean',
-            'groupe' => 'boolean',
-            'telephone' => 'boolean',
-            'adresse' => 'boolean',
-            'details' => 'boolean',
             'titre' => 'string|required',
-            'info' => 'boolean',
-            'afficherDuree' => 'boolean',
-            'pourInfo' => 'string|nullable',
-            'texteDebut' => 'string|nullable',
-            'texteFin' => 'string|nullable',
+            'afficher_pour_info' => 'boolean',
+            'afficher_duree' => 'boolean',
+            'texte_pour_info' => 'string|nullable',
+            'texte_debut' => 'string|nullable',
+            'texte_fin' => 'string|nullable',
             'sapeurIds' => 'array|nullable',
             'sapeurIds.*' => 'integer'
         ]);

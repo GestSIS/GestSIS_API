@@ -31,6 +31,7 @@ use App\Application\Http\Controllers\CompteController;
 use App\Application\Http\Controllers\ControleMedicalController;
 use App\Application\Http\Controllers\ControleMedicalTypeController;
 use App\Application\Http\Controllers\ConvocationController;
+use App\Application\Http\Controllers\ConvocationParamController;
 use App\Application\Http\Controllers\ConvocationsController;
 use App\Application\Http\Controllers\CoursController;
 use App\Application\Http\Controllers\CoursSapeurController;
@@ -327,6 +328,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         // Convocations
         Route::get('convocation/{id}', [ConvocationController::class, 'convoquer']);
+        Route::resource('convocation-param', ConvocationParamController::class)->only(['index', 'store']);
 
         // Statistiques
         Route::get('statistiques/{id}/presence-exercice', [SapeurExerciceController::class, 'stat']);
