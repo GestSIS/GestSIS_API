@@ -72,12 +72,12 @@
           // dd($convocation['exercice_id'], $exercices);
           $exercice = $exercices[$convocation['exercice_id']];
           $convoque = !!$convocation['convoque'];
-          $pourInfo = $params['afficher_pour_info'] && !$convoque;
+          $pourInfo = $params['affichage_pour_info'] && !$convoque;
           $colspan = $pourInfo ? 1 : 2;
         ?>
           <tr>
             <td style="width: 100px !important;">{{ formatDate($exercice['date']) }}</td>
-            <td>{!! $params['afficher_duree'] ? formatHeureDuree($exercice['heure'], $exercice['duree']) : formatHeure($exercice['heure']) !!}</td>
+            <td>{!! $params['affichage_duree'] ? formatHeureDuree($exercice['heure'], $exercice['duree']) : formatHeure($exercice['heure']) !!}</td>
             <td>
               {{ $categories[$exercice['exercice_categorie_id']] }} : {{ $exercice['designation'] }}<br />
               {{ $exercice['communications'] }}

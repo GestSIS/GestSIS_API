@@ -21,15 +21,15 @@ class ConvocationController extends Controller
     public function convoquer(Request $request, $exerciceComptableId)
     {
         $request->merge([
-            'afficher_duree' => (bool) $request->get('afficher_duree', true),
-            'afficher_pour_info' => (bool) $request->get('afficher_pour_info', false),
+            'affichage_duree' => (bool) $request->get('affichage_duree', true),
+            'affichage_pour_info' => (bool) $request->get('affichage_pour_info', false),
             'sapeurIds' => is_string($request->get('sapeurIds', '')) ? explode(',', $request->get('sapeurIds', '')) : $request->get('sapeurIds', ''),
         ]);
 
         $data = $request->validate([
             'titre' => 'string|required',
-            'afficher_pour_info' => 'boolean',
-            'afficher_duree' => 'boolean',
+            'affichage_pour_info' => 'boolean',
+            'affichage_duree' => 'boolean',
             'texte_pour_info' => 'string|nullable',
             'texte_debut' => 'string|nullable',
             'texte_fin' => 'string|nullable',
