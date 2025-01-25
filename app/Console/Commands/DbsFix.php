@@ -51,7 +51,7 @@ class DbsFix extends Command
         $dbs = config('database.dbs');
         foreach ($dbs as $db) {
             ConvocationParam::on("db_" . $db)->insert([
-                'title' => 'convocation',
+                'titre' => 'convocation',
                 'affichage_duree' => true,
                 'affichage_pour_infor' => true,
             ]);
