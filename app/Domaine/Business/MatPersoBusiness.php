@@ -17,8 +17,6 @@ class MatPersoBusiness
 
     public function createEvents($events)
     {
-        $alertes = MaterielAlerteType::with('eventTypes')->get();
-
         foreach ($events as $event) {
             $materiel = MaterielNominal::find($event['materiel_nominal_id']);
             if ($materiel == null) {
