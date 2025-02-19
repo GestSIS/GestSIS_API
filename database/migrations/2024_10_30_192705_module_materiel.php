@@ -34,7 +34,9 @@ return new class extends Migration {
         });
 
         // Create a basic couleur
-        $couleur = couleur::create(['nom' => 'default', 'texte' => '#ffffffff', 'fond' => '#fc031780']);
+        if (MaterielCategorie::count() > 0) {
+            Couleur::create(['nom' => 'default', 'texte' => '#ffffffff', 'fond' => '#fc031780']);
+        }
 
         // Déjà existante
         Schema::table('materiel_categories', function (Blueprint $table) {
@@ -69,7 +71,7 @@ return new class extends Migration {
 
             $table->foreignId('couleur_id')->constrained();
 
-            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->unsignedBigInteger('parent_id')->nullable()->default(null);
             $table->foreign('parent_id')->references('id')->on('emplacements');
 
             $table->boolean('statut')->default(true);
@@ -200,10 +202,10 @@ return new class extends Migration {
             // $table->boolean('taille')->default(true);
             // $table->foreignId('materiel_categorie_id')->constrained();
 
-            $table->string('prix');
+            $table->string('prix')->default('');
             $table->string('fournisseur')->default('');
             $table->string('reparateur')->default('');
-            $table->boolean('a_controller')->comment('Besoin de contrôller des aspects de ce matériel');
+            $table->boolean('a_controller')->default(false)->comment('Besoin de contrôller des aspects de ce matériel');
             $table->string('remarque')->default('');
             $table->integer('tri');
 
