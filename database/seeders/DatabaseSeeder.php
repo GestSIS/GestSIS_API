@@ -41,9 +41,20 @@ class DatabaseSeeder extends Seeder
         $this->call(ExerciceTableSeeder::class);
         $this->call(ExerciceSapeurTableSeeder::class);
 
+        // Matériel
+        $this->call(CouleurTableSeeder::class);
+        $this->call(BatterieTypeTableSeeder::class);
+        $this->call(TuyauDiametreTableSeeder::class);
+        $this->call(MaterielCategorieTableSeeder::class);
+        $this->call(MaterielTypeTableSeeder::class);
+        $this->call(MaintenanceTypeTableSeeder::class);
+
+        $this->call(ArticleTableSeeder::class);
+
         // Param interventions
         $this->call(MaterielTableSeeder::class);
         $this->call(VehiculeTableSeeder::class);
+        $this->call(HangarTableSeeder::class);
         // $this->call(PhaseTypeTableSeeder::class);
         $this->call(StatInterventionTableSeeder::class);
         $this->call(TypeInterventionTableSeeder::class);
@@ -82,12 +93,6 @@ class DatabaseSeeder extends Seeder
 
         $this->call(DecompteTableSeeder::class);
         $this->call(PaiementTableSeeder::class);
-
-        // Matériel personnel
-        $this->call(MatPersoCategorieTableSeeder::class);
-        $this->call(MaintenanceTypeTableSeeder::class);
-
-        $this->call(ArticleTableSeeder::class);
         /**/
     }
 }

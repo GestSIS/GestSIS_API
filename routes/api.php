@@ -15,6 +15,7 @@ use App\Application\Http\Controllers\AbsenceController;
 use App\Application\Http\Controllers\AbsenceParamController;
 use App\Application\Http\Controllers\AdminController;
 use App\Application\Http\Controllers\CouleurController;
+use App\Application\Http\Controllers\EmplacementController;
 use Illuminate\Support\Facades\Route;
 use Spatie\HttpLogger\Middlewares\HttpLogger;
 use App\Application\Http\Middleware\DbSelector;
@@ -621,14 +622,16 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('controles-medicaux-types', ControleMedicalTypeController::class)->only(['store', 'update', 'destroy']);
     });
 
-
-    // Matériel personnel
+    // Matériel
     Route::group(['middleware' => 'jwtTokenSapeurOrRole:mat_perso.lecture'], function () {
         Route::resource('materiel-types', MatPersoTypeController::class)->only(['index']);
         Route::resource('materiel-categories', MatPersoCategorieController::class)->only(['index']);
         Route::resource('couleurs', CouleurController::class)->only(['index']);
+        Route::resource('emplacements', EmplacementController::class)->only(['index']);
     });
 
+    // TODO: à migrer
+    // Matériel personnel
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.lecture'], function () {
         Route::resource('mat-perso-event-types', MatPersoEventTypeController::class)->only(['index']);
         Route::resource('mat-perso-alerte-types', MatPersoAlerteTypeController::class)->only(['index']);
