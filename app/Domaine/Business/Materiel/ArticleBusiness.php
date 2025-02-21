@@ -4,12 +4,16 @@ namespace App\Domaine\Business\Materiel;
 
 use App\Exceptions\InternalException;
 use App\Exceptions\BadRequestException;
+use App\Infrastructure\Models\Article;
+use App\Infrastructure\Models\Emplacement;
+use Illuminate\Database\Eloquent\Collection;
+use Nette\Utils\Arrays;
 
 /**
  * Model for manipulating 'item' database table
  * Available public methods
  */
-class ItemBusiness
+class ArticleBusiness
 {
   const EVENT_STATUS_NONE = "NONE";
   const EVENT_STATUS_SUCCESS = "SUCCESS";
@@ -20,6 +24,65 @@ class ItemBusiness
   const EVENT_TYPE_LIFECYCLE = "LIFECYCLE";
   const EVENT_TYPE_INVENTORY = "INVENTORY";
   const EVENT_TYPE_MAINTENANCE = "MAINTENANCE";
+
+  /**
+   * Retour de matériel qui était attribué à un sapeur
+   * @param mixed $date
+   * @param int[] $articleIds
+   * @param int $emplacementId
+   * @return void
+   */
+  public static function retourArticles(string $date, array $articleIds, int $emplacementId): Collection
+  {
+    Article::whereIn('id', $articleIds)->update(['sapeur_id' => null, 'emplacement_id' => $emplacementId, 'retour' => $date]);
+    return Article::whereIn('id', $articleIds)->get();
+  }
+
+
+  /**
+   * Attribution d'articles'
+   * @param int $sapeurId
+   * @param string $date
+   * @param int[] $articleIds
+   * @return void
+   */
+  public static function attribuerArticles(int $sapeurId, string $date, array $articleIds): Collection
+  {
+    // TODO: Controller que les articles soient bien attribuable
+
+    Article::whereIn('id', $articleIds)->update([
+      'sapeur_id' => $sapeurId,
+      'emplacement_id' => null,
+      'attribution' => $date
+    ]);
+  }
+
+  public static function creerArticles(array $articles)
+  {
+    // TODO: fetch types equivalents
+
+    // TODO: Controller numérotation correcte
+
+    // TODO: Controller qu'un article appartiennent soit à un sapeur soit à un emplacement
+
+    $articles = array_map(fn($article) => [
+      'materiel_type_id' => $article['materiel_type_id'],
+      'taille' => trim($article['taille'] ?? ''),
+      'remarque' => $article['remarque'] ?? '',
+      'emplacement_id' => $article['emplacement_id'],
+      'sapeur_id' => $article['sapeur_id'],
+      'attribution' => $article['attribution'],
+      'retour' => null,
+      'numero' => $article['numero'],
+      'uuid' => $article['uuid'],
+      'achat' => $article['achat'],
+      'compartiment' => $article['compartiment'],
+      'est_etiquete' => $article['est_etiquete'],
+      'est_unique' => $article['est_unique'],
+    ], $articles);
+
+    Article::insert($articles);
+  }
 
   /**
    * Get list of items per location for inventory
@@ -187,110 +250,142 @@ EOF;
   }
 
   /**
+   * Get list of items of a given sapeur
+   * @param integer $sapeurId ID of the sapeur for which to get items
+   * @return Collection of #item_existing_details
+   */
+  public static function getItemsBySapeur($sapeurId)
+  {
+    return Article::where('sapeur_id', '=', $sapeurId)->get();
+  }
+
+  /**
+   * Get list of items that can be attributed
+   * @return Collection of #item_existing_details
+   */
+  public static function getItemsAttribuable()
+  {
+    return Article::whereNull('sapeur_id')
+      ->leftJoin('materiel_types', 'articles.materiel_type_id', '=', 'materiel_types.id')
+      ->where('materiel_types.est_attribuable', '=', true)
+      ->get();
+  }
+
+  /**
+   * Get list of all items
+   * @return Collection of #item_existing_details
+   */
+  public static function getAllItems()
+  {
+    return Article::all();
+  }
+
+  /**
    * Get list of items of a given product
    * @param integer $productId ID of the product for which to get items
    * @return Collection of #item_existing_details
    */
-  public static function getItemsByProduct($productId)
+  public static function getItemsByProduct($materielTypeId)
   {
+    return Article::where('materiel_type_id', '=', $materielTypeId)->get();
 
-    // Get items and maintenances rows from database
-    $content = self::getItemsByWhere('product_id', $productId);
-    $items = $content['items'];
-    $maintenances = $content['maintenances'];
+    // // Get items and maintenances rows from database
+    // $content = self::getItemsByWhere('product_id', $productId);
+    // $items = $content['items'];
+    // $maintenances = $content['maintenances'];
 
-    // Prepare locations array
-    $locationsList = LocationModel::listLocationsLinear();
-    $locations = Arrays::replaceKeys(
-      $locationsList,
-      array_values(Arrays::each(
-        $locationsList,
-        function ($location) {
-          return $location['id'];
-        }
-      ))
-    );
+    // // Prepare locations array
+    // $locationsList = LocationModel::listLocationsLinear();
+    // $locations = Arrays::replaceKeys(
+    //   $locationsList,
+    //   array_values(Arrays::each(
+    //     $locationsList,
+    //     function ($location) {
+    //       return $location['id'];
+    //     }
+    //   ))
+    // );
 
-    // Build output
-    return array_values(Arrays::each(
-      $items,
-      function ($item) use (&$maintenances, &$locations) {
-        return [
-          'id' => $item->item_id,
-          'product' => [
-            'id' => $item->product_id,
-            'name' => $item->product_name
-          ],
-          'location' => $locations[$item->location_id],
-          'number' => $item->item_number,
-          'islabeled' => $item->item_islabeled === 1,
-          'isuniquelabeled' => $item->item_isuniquelabeled === 1,
-          'compartment' => $item->item_compartment,
-          'remark' => $item->item_remark,
-          'created' => [
-            'date' => $item->item_created_date,
-            'user' => [
-              'id' => $item->item_created_id,
-              'name' => $item->item_created_name
-            ]
-          ],
-          'deleted' => $item->item_deleted_id === null
-            ? null
-            : [
-              'date' => $item->item_deleted_date,
-              'user' => [
-                'id' => $item->item_deleted_id,
-                'name' => $item->item_deleted_name
-              ]
-            ],
-          'inventory' => [
-            'status' => $item->inventory_found === null
-              ? InventoryModel::STATUS_NONE
-              : (
-                $item->inventory_found === 1
-                ? InventoryModel::STATUS_PRESENT
-                : InventoryModel::STATUS_MISSING
-              ),
-            'date' => $item->inventory_date
-          ],
-          'maintenances' => array_values(Arrays::each(
-            Arrays::filter($maintenances, function ($maintenance) use (&$item) {
-              return $maintenance->item_id === $item->item_id;
-            }),
-            function ($maintenance) {
-              $maintenanceNext = $maintenance->maintenance_last === '2000-01-01'
-                ? null
-                : new \DateTime($maintenance->maintenance_last);
-              if ($maintenanceNext !== null) {
-                $maintenanceNext->add(new \DateInterval('P' . $maintenance->maintenance_periodicity . 'M'));
-                $maintenanceNext = $maintenanceNext->format('Y-m-d');
-              }
-              $itemNext = $maintenance->item_last === null
-                ? null
-                : new \DateTime($maintenance->item_last);
-              if ($itemNext !== null) {
-                $itemNext->add(new \DateInterval('P' . $maintenance->maintenance_periodicity . 'M'));
-                $itemNext = $itemNext->format('Y-m-d');
-              }
-              return [
-                'maintenance' => [
-                  'id' => $maintenance->maintenance_id,
-                  'product' => [
-                    'id' => $maintenance->product_id,
-                    'name' => $maintenance->product_name
-                  ],
-                  'name' => $maintenance->maintenance_name,
-                  'periodicity' => $maintenance->maintenance_periodicity,
-                  'outside' => $maintenance->maintenance_outside === 1,
-                  'next' => $maintenanceNext
-                ],
-                'next' => $itemNext
-              ];
-            }
-          ))
-        ];
-      }
-    ));
+    // // Build output
+    // return array_values(Arrays::each(
+    //   $items,
+    //   function ($item) use (&$maintenances, &$locations) {
+    //     return [
+    //       'id' => $item->item_id,
+    //       'product' => [
+    //         'id' => $item->product_id,
+    //         'name' => $item->product_name
+    //       ],
+    //       'location' => $locations[$item->location_id],
+    //       'number' => $item->item_number,
+    //       'islabeled' => $item->item_islabeled === 1,
+    //       'isuniquelabeled' => $item->item_isuniquelabeled === 1,
+    //       'compartment' => $item->item_compartment,
+    //       'remark' => $item->item_remark,
+    //       'created' => [
+    //         'date' => $item->item_created_date,
+    //         'user' => [
+    //           'id' => $item->item_created_id,
+    //           'name' => $item->item_created_name
+    //         ]
+    //       ],
+    //       'deleted' => $item->item_deleted_id === null
+    //         ? null
+    //         : [
+    //           'date' => $item->item_deleted_date,
+    //           'user' => [
+    //             'id' => $item->item_deleted_id,
+    //             'name' => $item->item_deleted_name
+    //           ]
+    //         ],
+    //       'inventory' => [
+    //         'status' => $item->inventory_found === null
+    //           ? InventoryModel::STATUS_NONE
+    //           : (
+    //             $item->inventory_found === 1
+    //             ? InventoryModel::STATUS_PRESENT
+    //             : InventoryModel::STATUS_MISSING
+    //           ),
+    //         'date' => $item->inventory_date
+    //       ],
+    //       'maintenances' => array_values(Arrays::each(
+    //         Arrays::filter($maintenances, function ($maintenance) use (&$item) {
+    //           return $maintenance->item_id === $item->item_id;
+    //         }),
+    //         function ($maintenance) {
+    //           $maintenanceNext = $maintenance->maintenance_last === '2000-01-01'
+    //             ? null
+    //             : new \DateTime($maintenance->maintenance_last);
+    //           if ($maintenanceNext !== null) {
+    //             $maintenanceNext->add(new \DateInterval('P' . $maintenance->maintenance_periodicity . 'M'));
+    //             $maintenanceNext = $maintenanceNext->format('Y-m-d');
+    //           }
+    //           $itemNext = $maintenance->item_last === null
+    //             ? null
+    //             : new \DateTime($maintenance->item_last);
+    //           if ($itemNext !== null) {
+    //             $itemNext->add(new \DateInterval('P' . $maintenance->maintenance_periodicity . 'M'));
+    //             $itemNext = $itemNext->format('Y-m-d');
+    //           }
+    //           return [
+    //             'maintenance' => [
+    //               'id' => $maintenance->maintenance_id,
+    //               'product' => [
+    //                 'id' => $maintenance->product_id,
+    //                 'name' => $maintenance->product_name
+    //               ],
+    //               'name' => $maintenance->maintenance_name,
+    //               'periodicity' => $maintenance->maintenance_periodicity,
+    //               'outside' => $maintenance->maintenance_outside === 1,
+    //               'next' => $maintenanceNext
+    //             ],
+    //             'next' => $itemNext
+    //           ];
+    //         }
+    //       ))
+    //     ];
+    //   }
+    // ));
   }
 
   /**
@@ -300,164 +395,172 @@ EOF;
    */
   public static function getItemsByLocation($locationId)
   {
+    // TODO: Améliorer pour afficher également tout les sous emplacements.
+    Emplacement::all();
+    // TODO: Index emplacements O(n)
 
-    // Get all sub-locations
-    $locationsList = LocationModel::listLocationsLinear($locationId);
-    $locationsIds = Arrays::each(
-      $locationsList,
-      function ($location) {
-        return $location['id'];
-      }
-    );
-    $locationsStr = Arrays::implode(
-      $locationsIds,
-      ', '
-    );
+    $emplacementIds = [$locationId];
+    // Iterate over emplacements O(n)
 
-    // Get items and maintenances rows from database
-    $content = self::getItemsByWhere('location_id', $locationsStr);
-    $items = $content['items'];
-    $maintenances = $content['maintenances'];
+    return Article::whereIn('emplacement_id', $emplacementIds)->get();
 
-    // Prepare locations array
-    $locations = Arrays::replaceKeys($locationsList, $locationsIds);
+    // // Get all sub-locations
+    // $locationsList = LocationModel::listLocationsLinear($locationId);
+    // $locationsIds = Arrays::each(
+    //   $locationsList,
+    //   function ($location) {
+    //     return $location['id'];
+    //   }
+    // );
+    // $locationsStr = Arrays::implode(
+    //   $locationsIds,
+    //   ', '
+    // );
 
-    // Build output
-    $categories = [];
-    foreach ($items as $item) {
+    // // Get items and maintenances rows from database
+    // $content = self::getItemsByWhere('location_id', $locationsStr);
+    // $items = $content['items'];
+    // $maintenances = $content['maintenances'];
 
-      // If item has been deleted, skip
-      if ($item->item_deleted_id) {
-        continue;
-      }
+    // // Prepare locations array
+    // $locations = Arrays::replaceKeys($locationsList, $locationsIds);
 
-      // Create category sub-array if not exist
-      if (!Arrays::has($categories, $item->category_id)) {
-        $categories[$item->category_id] = [
-          'category' => [
-            'id' => $item->category_id,
-            'name' => $item->category_name,
-            'color' => [
-              'id' => $item->color_id,
-              'name' => $item->color_name,
-              'foreground' => $item->color_foreground,
-              'background' => $item->color_background
-            ]
-          ],
-          'products' => []
-        ];
-      }
+    // // Build output
+    // $categories = [];
+    // foreach ($items as $item) {
 
-      // Create product/location sub-array if not exist
-      $keyLocationProduct = $item->location_id . '/' . $item->product_id;
-      if (!Arrays::has($categories[$item->category_id]['products'], $keyLocationProduct)) {
-        $categories[$item->category_id]['products'][$keyLocationProduct] = [
-          'product' => [
-            'id' => $item->product_id,
-            'name' => $item->product_name,
-            'prefix' => $item->product_prefix
-          ],
-          'location' => $locations[$item->location_id],
-          'items' => []
-        ];
-      }
+    //   // If item has been deleted, skip
+    //   if ($item->item_deleted_id) {
+    //     continue;
+    //   }
 
-      // Add item to array
-      $categories[$item->category_id]['products'][$keyLocationProduct]['items'][] = [
-        'id' => $item->item_id,
-        'product' => [
-          'id' => $item->product_id,
-          'name' => $item->product_name
-        ],
-        'location' => $locations[$item->location_id],
-        'number' => $item->item_number,
-        'islabeled' => $item->item_islabeled === 1,
-        'isuniquelabeled' => $item->item_isuniquelabeled === 1,
-        'compartment' => $item->item_compartment,
-        'remark' => $item->item_remark,
-        'created' => [
-          'date' => $item->item_created_date,
-          'user' => [
-            'id' => $item->item_created_id,
-            'name' => $item->item_created_name
-          ]
-        ],
-        'deleted' => $item->item_deleted_id
-          ? [
-            'date' => $item->item_deleted_date,
-            'user' => [
-              'id' => $item->item_deleted_id,
-              'name' => $item->item_deleted_name
-            ]
-          ]
-          : null,
-        'inventory' => [
-          'status' => $item->inventory_found === null
-            ? InventoryModel::STATUS_NONE
-            : (
-              $item->inventory_found === 1
-              ? InventoryModel::STATUS_PRESENT
-              : InventoryModel::STATUS_MISSING
-            ),
-          'date' => $item->inventory_date
-        ],
-        'maintenances' => array_values(Arrays::each(
-          Arrays::filter($maintenances, function ($maintenance) use (&$item) {
-            return $maintenance->item_id === $item->item_id;
-          }),
-          function ($maintenance) {
-            $maintenanceNext = $maintenance->maintenance_last === '2000-01-01'
-              ? null
-              : new \DateTime($maintenance->maintenance_last);
-            if ($maintenanceNext !== null) {
-              $maintenanceNext->add(new \DateInterval('P' . $maintenance->maintenance_periodicity . 'M'));
-              $maintenanceNext = $maintenanceNext->format('Y-m-d');
-            }
-            $itemNext = $maintenance->item_last === null
-              ? null
-              : new \DateTime($maintenance->item_last);
-            if ($itemNext !== null) {
-              $itemNext->add(new \DateInterval('P' . $maintenance->maintenance_periodicity . 'M'));
-              $itemNext = $itemNext->format('Y-m-d');
-            }
-            return [
-              'maintenance' => [
-                'id' => $maintenance->maintenance_id,
-                'product' => [
-                  'id' => $maintenance->product_id,
-                  'name' => $maintenance->product_name
-                ],
-                'name' => $maintenance->maintenance_name,
-                'periodicity' => $maintenance->maintenance_periodicity,
-                'outside' => $maintenance->maintenance_outside === 1,
-                'next' => $maintenanceNext
-              ],
-              'next' => $itemNext
-            ];
-          }
-        ))
-      ];
-    }
+    //   // Create category sub-array if not exist
+    //   if (!Arrays::has($categories, $item->category_id)) {
+    //     $categories[$item->category_id] = [
+    //       'category' => [
+    //         'id' => $item->category_id,
+    //         'name' => $item->category_name,
+    //         'color' => [
+    //           'id' => $item->color_id,
+    //           'name' => $item->color_name,
+    //           'foreground' => $item->color_foreground,
+    //           'background' => $item->color_background
+    //         ]
+    //       ],
+    //       'products' => []
+    //     ];
+    //   }
 
-    // Map output to correct JSON format
-    return array_values(Arrays::each(
-      $categories,
-      function ($category) {
-        return [
-          'category' => $category['category'],
-          'products' => array_values(Arrays::each(
-            $category['products'],
-            function ($product) {
-              return [
-                'product' => $product['product'],
-                'location' => $product['location'],
-                'items' => array_values($product['items'])
-              ];
-            }
-          ))
-        ];
-      }
-    ));
+    //   // Create product/location sub-array if not exist
+    //   $keyLocationProduct = $item->location_id . '/' . $item->product_id;
+    //   if (!Arrays::has($categories[$item->category_id]['products'], $keyLocationProduct)) {
+    //     $categories[$item->category_id]['products'][$keyLocationProduct] = [
+    //       'product' => [
+    //         'id' => $item->product_id,
+    //         'name' => $item->product_name,
+    //         'prefix' => $item->product_prefix
+    //       ],
+    //       'location' => $locations[$item->location_id],
+    //       'items' => []
+    //     ];
+    //   }
+
+    //   // Add item to array
+    //   $categories[$item->category_id]['products'][$keyLocationProduct]['items'][] = [
+    //     'id' => $item->item_id,
+    //     'product' => [
+    //       'id' => $item->product_id,
+    //       'name' => $item->product_name
+    //     ],
+    //     'location' => $locations[$item->location_id],
+    //     'number' => $item->item_number,
+    //     'islabeled' => $item->item_islabeled === 1,
+    //     'isuniquelabeled' => $item->item_isuniquelabeled === 1,
+    //     'compartment' => $item->item_compartment,
+    //     'remark' => $item->item_remark,
+    //     'created' => [
+    //       'date' => $item->item_created_date,
+    //       'user' => [
+    //         'id' => $item->item_created_id,
+    //         'name' => $item->item_created_name
+    //       ]
+    //     ],
+    //     'deleted' => $item->item_deleted_id
+    //       ? [
+    //         'date' => $item->item_deleted_date,
+    //         'user' => [
+    //           'id' => $item->item_deleted_id,
+    //           'name' => $item->item_deleted_name
+    //         ]
+    //       ]
+    //       : null,
+    //     'inventory' => [
+    //       'status' => $item->inventory_found === null
+    //         ? InventoryModel::STATUS_NONE
+    //         : (
+    //           $item->inventory_found === 1
+    //           ? InventoryModel::STATUS_PRESENT
+    //           : InventoryModel::STATUS_MISSING
+    //         ),
+    //       'date' => $item->inventory_date
+    //     ],
+    //     'maintenances' => array_values(Arrays::each(
+    //       Arrays::filter($maintenances, function ($maintenance) use (&$item) {
+    //         return $maintenance->item_id === $item->item_id;
+    //       }),
+    //       function ($maintenance) {
+    //         $maintenanceNext = $maintenance->maintenance_last === '2000-01-01'
+    //           ? null
+    //           : new \DateTime($maintenance->maintenance_last);
+    //         if ($maintenanceNext !== null) {
+    //           $maintenanceNext->add(new \DateInterval('P' . $maintenance->maintenance_periodicity . 'M'));
+    //           $maintenanceNext = $maintenanceNext->format('Y-m-d');
+    //         }
+    //         $itemNext = $maintenance->item_last === null
+    //           ? null
+    //           : new \DateTime($maintenance->item_last);
+    //         if ($itemNext !== null) {
+    //           $itemNext->add(new \DateInterval('P' . $maintenance->maintenance_periodicity . 'M'));
+    //           $itemNext = $itemNext->format('Y-m-d');
+    //         }
+    //         return [
+    //           'maintenance' => [
+    //             'id' => $maintenance->maintenance_id,
+    //             'product' => [
+    //               'id' => $maintenance->product_id,
+    //               'name' => $maintenance->product_name
+    //             ],
+    //             'name' => $maintenance->maintenance_name,
+    //             'periodicity' => $maintenance->maintenance_periodicity,
+    //             'outside' => $maintenance->maintenance_outside === 1,
+    //             'next' => $maintenanceNext
+    //           ],
+    //           'next' => $itemNext
+    //         ];
+    //       }
+    //     ))
+    //   ];
+    // }
+
+    // // Map output to correct JSON format
+    // return array_values(Arrays::each(
+    //   $categories,
+    //   function ($category) {
+    //     return [
+    //       'category' => $category['category'],
+    //       'products' => array_values(Arrays::each(
+    //         $category['products'],
+    //         function ($product) {
+    //           return [
+    //             'product' => $product['product'],
+    //             'location' => $product['location'],
+    //             'items' => array_values($product['items'])
+    //           ];
+    //         }
+    //       ))
+    //     ];
+    //   }
+    // ));
   }
 
   /**
@@ -738,87 +841,128 @@ EOF;
     );
   }
 
-  /**
-   * Create one or more new item(s)
-   * @param #item_new $item Properties of the item(s) to create
-   * @param integer $userId ID of the user who performs creation
-   * @return #item.post.output List of IDs of the created product(s)
-   */
-  public static function createItems($item, $userId)
-  {
+  // /**
+  //  * Create one or more new item(s)
+  //  * @param #item_new $item Properties of the item(s) to create
+  //  * @param integer $userId ID of the user who performs creation
+  //  * @return #item.post.output List of IDs of the created product(s)
+  //  */
+  // public static function createItems($artciles, $userId)
+  // {
 
-    // Determine if uniquely labeled
-    $isUniqueLabeled = self::isUniqueLabeled($item['product']['id'], null);
+  //   $base = [];
 
-    // If product does not use unique number, and number or isuniquelabeled is set, error
-    if (
-      !$isUniqueLabeled
-      &&
-      (
-        Arrays::has($item, 'number')
-        ||
-        Arrays::has($item, 'isuniquelabeled')
-      )
-    ) {
-      throw new BadRequestException(
-        BadRequestException::FORBIDDEN_OPERATION,
-        "Le matériel n'est pas étiquetté individuellement : les champs number et isuniquelabeled ne doivent pas être définis."
-      );
-    }
+  //   foreach ($articles as $materiel) {
+  //     if ($materiel['materiel']['quantite'] ?? null != null) {
+  //       $generique = new MaterielGenerique();
+  //       $generique->quantite = $materiel['materiel']['quantite'];
+  //       $generique->save();
 
-    // If product uses unique number and number or isuniquelabeled is not set, or quantity > 1, error
-    if (
-      $isUniqueLabeled
-      &&
-      (
-        !Arrays::has($item, 'number')
-        ||
-        !Arrays::has($item, 'isuniquelabeled')
-        ||
-        $item['quantity'] !== 1
-      )
-    ) {
-      throw new BadRequestException(
-        BadRequestException::FORBIDDEN_OPERATION,
-        "Le matériel est étiquetté individuellement : les champs number et isuniquelabeled doivent être définis et quantity doit être égal à 1."
-      );
-    }
+  //       array_push($base, [
+  //         'materiel_type_id' => $materiel['materiel_type_id'],
+  //         'materiel_type' => MaterielGenerique::class,
+  //         'materiel_id' => $generique->id,
+  //         'taille' => trim($materiel['taille'] ?? ''),
+  //         'remarque' => $materiel['remarque'] ?? '',
+  //         'sapeur_id' => null,
+  //         'attribution' => null,
+  //         'retour' => null,
+  //       ]);
+  //     } else {
+  //       $nominal = new MaterielNominal();
+  //       $nominal->numero = $materiel['materiel']['numero'];
+  //       $nominal->achat = $materiel['materiel']['achat'] ?? '';
+  //       $nominal->uuid = uniqid($materiel['materiel_type_id'] . "-");
+  //       $nominal->save();
 
-    // Build input
-    $input = Arrays::merge(
-      [
-        'product_id' => $item['product']['id'],
-        'location_id' => $item['location']['id'],
-        'islabeled' => $item['islabeled'] ? 1 : 0,
-        'compartment' => $item['compartment'],
-        'remark' => $item['remark'],
-        'created' => date('Y-m-d'),
-        'created_user_id' => $userId
-      ],
-      $item['quantity'] === 1 && $isUniqueLabeled
-      ? [
-        'number' => $item['number'],
-        'isuniquelabeled' => $item['isuniquelabeled'] ? 1 : 0
-      ]
-      : [
-        'number' => null,
-        'isuniquelabeled' => 0
-      ]
-    );
+  //       array_push($base, [
+  //         'materiel_type_id' => $materiel['materiel_type_id'],
+  //         'materiel_type' => MaterielNominal::class,
+  //         'materiel_id' => $nominal->id,
+  //         'taille' => trim($materiel['taille'] ?? ''),
+  //         'remarque' => $materiel['remarque'] ?? '',
+  //         'sapeur_id' => null,
+  //         'attribution' => null,
+  //         'retour' => null,
+  //       ]);
+  //     }
+  //   }
 
-    // Insert row(s)
-    $ids = [];
-    for ($i = 0; $i < $item['quantity']; $i++) {
-      $ids = Arrays::append($ids, self::create("item", $input));
-    }
+  //   MaterielPersonnel::insert($base);
 
-    // Format output
-    return [
-      'ids' => Arrays::each($ids, function ($id) {
-        return $id['id'];
-      })
-    ];
-  }
+
+  //   // Determine if uniquely labeled
+  //   $isUniqueLabeled = self::isUniqueLabeled($item['product']['id'], null);
+
+  //   // If product does not use unique number, and number or isuniquelabeled is set, error
+  //   if (
+  //     !$isUniqueLabeled
+  //     &&
+  //     (
+  //       Arrays::has($item, 'number')
+  //       ||
+  //       Arrays::has($item, 'isuniquelabeled')
+  //     )
+  //   ) {
+  //     throw new BadRequestException(
+  //       BadRequestException::FORBIDDEN_OPERATION,
+  //       "Le matériel n'est pas étiquetté individuellement : les champs number et isuniquelabeled ne doivent pas être définis."
+  //     );
+  //   }
+
+  //   // If product uses unique number and number or isuniquelabeled is not set, or quantity > 1, error
+  //   if (
+  //     $isUniqueLabeled
+  //     &&
+  //     (
+  //       !Arrays::has($item, 'number')
+  //       ||
+  //       !Arrays::has($item, 'isuniquelabeled')
+  //       ||
+  //       $item['quantity'] !== 1
+  //     )
+  //   ) {
+  //     throw new BadRequestException(
+  //       BadRequestException::FORBIDDEN_OPERATION,
+  //       "Le matériel est étiquetté individuellement : les champs number et isuniquelabeled doivent être définis et quantity doit être égal à 1."
+  //     );
+  //   }
+
+  //   // Build input
+  //   $input = Arrays::merge(
+  //     [
+  //       'product_id' => $item['product']['id'],
+  //       'location_id' => $item['location']['id'],
+  //       'islabeled' => $item['islabeled'] ? 1 : 0,
+  //       'compartment' => $item['compartment'],
+  //       'remark' => $item['remark'],
+  //       'created' => date('Y-m-d'),
+  //       'created_user_id' => $userId
+  //     ],
+  //     $item['quantity'] === 1 && $isUniqueLabeled
+  //     ? [
+  //       'number' => $item['number'],
+  //       'isuniquelabeled' => $item['isuniquelabeled'] ? 1 : 0
+  //     ]
+  //     : [
+  //       'number' => null,
+  //       'isuniquelabeled' => 0
+  //     ]
+  //   );
+
+  //   // Insert row(s)
+  //   $ids = [];
+  //   for ($i = 0; $i < $item['quantity']; $i++) {
+  //     $ids = Arrays::append($ids, self::create("item", $input));
+  //   }
+
+  //   // Format output
+  //   return [
+  //     'ids' => Arrays::each($ids, function ($id) {
+  //       return $id['id'];
+  //     })
+  //   ];
+  // }
 
   /**
    * Edit an existing item
@@ -887,6 +1031,7 @@ EOF;
    */
   public static function deleteVirtuallyItem($id, $userId)
   {
+    // TODO: à implémenter !
 
     // Make sure it is not already registered as deleted
     $items = self::db()->select("SELECT deleted FROM item WHERE id = ?", [$id]);

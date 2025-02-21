@@ -12,6 +12,12 @@ class MaterielType extends Model
     protected $fillable = ['designation', 'materiel_categorie_id'];
     protected function casts(): array
     {
-        return  ['materiel_categorie_id' => 'integer'];
+        return [
+            'materiel_categorie_id' => 'integer',
+            'fonction_id' => 'integer',
+            'est_numerote' => 'boolean',
+            'est_attribuable' => 'boolean',
+            'est_taillee' => 'boolean'
+        ];
     }
 }

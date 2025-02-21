@@ -3,10 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\Materiel\EmplacementBusiness;
-use App\Domaine\Business\MaterielBusiness;
-use App\Infrastructure\Models\Emplacement;
 use Illuminate\Http\Request;
-use Nette\NotImplementedException;
 
 class EmplacementController extends Controller
 {

@@ -2,7 +2,8 @@
 
 namespace App\Domaine\Business\Materiel;
 
-use App\Exceptions\InternalException;
+use App\Infrastructure\Models\MaterielType;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Model for manipulating 'product' database table
@@ -17,7 +18,7 @@ use App\Exceptions\InternalException;
  * @static deleteProduct($id)
  * @static reorderProduct($id, $reorder)
  */
-class ProductBusiness extends OrderModel
+class ProductBusiness // extends OrderModel
 {
 
   const TYPE_NONE = "NONE";
@@ -28,8 +29,9 @@ class ProductBusiness extends OrderModel
    * Get list of products with only basic informations, grouped by category
    * @return Collection of categoryId => [ #product_existing_basic ]
    */
-  public static function listProductsBasicByCategory()
+  public static function listProductsBasicByCategory(): Collection
   {
+    return MaterielType::orderBy('tri', 'asc')->get();
 
     // Build query
     $query = <<<EOF
@@ -520,7 +522,6 @@ EOF;
    */
   public static function getProductFull($id)
   {
-
     // Build query
     $query = <<<EOF
       SELECT

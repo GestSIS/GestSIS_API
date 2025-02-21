@@ -14,8 +14,12 @@
 use App\Application\Http\Controllers\AbsenceController;
 use App\Application\Http\Controllers\AbsenceParamController;
 use App\Application\Http\Controllers\AdminController;
+use App\Application\Http\Controllers\ArticleController;
+use App\Application\Http\Controllers\ArticleEmplacementController;
+use App\Application\Http\Controllers\ArticleSapeurController;
 use App\Application\Http\Controllers\CouleurController;
 use App\Application\Http\Controllers\EmplacementController;
+use App\Application\Http\Controllers\MaterielTypeArticleController;
 use Illuminate\Support\Facades\Route;
 use Spatie\HttpLogger\Middlewares\HttpLogger;
 use App\Application\Http\Middleware\DbSelector;
@@ -82,7 +86,7 @@ use App\Application\Http\Controllers\MatPersoCategorieController;
 use App\Application\Http\Controllers\MatPersoController;
 use App\Application\Http\Controllers\MatPersoEventController;
 use App\Application\Http\Controllers\MatPersoEventTypeController;
-use App\Application\Http\Controllers\MatPersoTypeController;
+use App\Application\Http\Controllers\MaterielTypeController;
 use App\Application\Http\Controllers\MedecinController;
 use App\Application\Http\Controllers\MesAbsencesController;
 use App\Application\Http\Controllers\MesControlesMedicauxController;
@@ -106,7 +110,6 @@ use App\Application\Http\Controllers\SapeurExerciceController;
 use App\Application\Http\Controllers\SapeurFonctionController;
 use App\Application\Http\Controllers\SapeurGradeController;
 use App\Application\Http\Controllers\SapeurGroupeController;
-use App\Application\Http\Controllers\SapeurMaterielController;
 use App\Application\Http\Controllers\SapeurMutationController;
 use App\Application\Http\Controllers\SapeurPermisController;
 use App\Application\Http\Controllers\SapeurPhotoController;
@@ -245,10 +248,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('sapeurs.fonctions', SapeurFonctionController::class)->only(['index']);
         Route::resource('sapeurs.grades', SapeurGradeController::class)->only(['index']);
         Route::resource('sapeurs.mutations', SapeurMutationController::class)->only(['index']);
-        Route::resource('sapeurs.materiels', SapeurMaterielController::class)->only(['index']);
         Route::resource('sapeurs.cours', SapeurCoursController::class)->only(['index']);
         Route::resource('sapeurs.photo', SapeurPhotoController::class)->only(['index']);
         Route::resource('sapeurs.groupes', SapeurGroupeController::class)->only(['index']);
+        Route::resource('sapeurs.articles', ArticleSapeurController::class)->only(['index']);
 
         // Publipostage
         Route::post('publipostage', [PublipostageController::class, 'index'])->name('publipostage');
@@ -624,31 +627,35 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Matériel
     Route::group(['middleware' => 'jwtTokenSapeurOrRole:mat_perso.lecture'], function () {
-        Route::resource('materiel-types', MatPersoTypeController::class)->only(['index']);
+        Route::resource('materiel-types', MaterielTypeController::class)->only(['index']);
+        Route::resource('materiel-types.articles', MaterielTypeArticleController::class)->only(['index']);
         Route::resource('materiel-categories', MatPersoCategorieController::class)->only(['index']);
         Route::resource('couleurs', CouleurController::class)->only(['index']);
         Route::resource('emplacements', EmplacementController::class)->only(['index']);
+        Route::resource('articles', ArticleController::class)->only(['index']);
+
+        Route::resource('emplacements.articles', ArticleEmplacementController::class)->only(['index']);
     });
 
-    // TODO: à migrer
-    // Matériel personnel
-    Route::group(['middleware' => 'jwtTokenRole:mat_perso.lecture'], function () {
-        Route::resource('mat-perso-event-types', MatPersoEventTypeController::class)->only(['index']);
-        Route::resource('mat-perso-alerte-types', MatPersoAlerteTypeController::class)->only(['index']);
+    // // TODO: à migrer
+    // // Matériel personnel
+    // Route::group(['middleware' => 'jwtTokenRole:mat_perso.lecture'], function () {
+    //     Route::resource('mat-perso-event-types', MatPersoEventTypeController::class)->only(['index']);
+    //     Route::resource('mat-perso-alerte-types', MatPersoAlerteTypeController::class)->only(['index']);
 
-        Route::resource('mat-perso', MatPersoController::class)->only(['index']);
-        Route::get('mat-perso/a-recuperer', [MatPersoController::class, 'aRecuperer'])->name('mat-perso.a-recuperer');
-        Route::resource('mat-perso-alertes', MatPersoAlerteController::class)->only(['index']);
-    });
+    //     Route::resource('mat-perso', MatPersoController::class)->only(['index']);
+    //     Route::get('mat-perso/a-recuperer', [MatPersoController::class, 'aRecuperer'])->name('mat-perso.a-recuperer');
+    //     Route::resource('mat-perso-alertes', MatPersoAlerteController::class)->only(['index']);
+    // });
 
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.modification'], function () {
-        Route::post('mat-perso/attribuer', [MatPersoAttributionController::class, 'attribuer'])->name('mat-perso.attribuer');
-        Route::post('mat-perso/retour', [MatPersoAttributionController::class, 'retour'])->name('mat-perso.retour');
+        Route::resource('sapeurs.articles', ArticleSapeurController::class)->only(['store']);
+        Route::delete('sapeurs/articles', [ArticleSapeurController::class, 'destroy'])->name('articles.sapeurs.destroy');
 
         // Modifier matériel
-        Route::post('mat-perso', [MatPersoController::class, 'create'])->name('mat-perso.create');
-        Route::put('mat-perso', [MatPersoController::class, 'update'])->name('mat-perso.update');
-        Route::delete('mat-perso', [MatPersoController::class, 'destroy'])->name('mat-perso.drestroy');
+        Route::post('articles', [ArticleController::class, 'create'])->name('articles.create');
+        Route::put('articles', [ArticleController::class, 'update'])->name('articles.update');
+        Route::delete('articles', [ArticleController::class, 'destroy'])->name('articles.destroy');
 
         // Events
         Route::post('mat-perso-event', [MatPersoEventController::class, 'create'])->name('mat-perso-event.create');
@@ -656,7 +663,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.config'], function () {
         Route::resource('mat-perso-categories', MatPersoCategorieController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('mat-perso-types', MatPersoTypeController::class)->only(['store', 'update', 'destroy']);
+        Route::resource('mat-perso-types', MaterielTypeController::class)->only(['store', 'update', 'destroy']);
         Route::resource('mat-perso-event-types', MatPersoEventTypeController::class)->only(['store', 'update', 'destroy']);
         Route::resource('mat-perso-alerte-types', MatPersoAlerteTypeController::class)->only(['store', 'update', 'destroy']);
     });
