@@ -14,7 +14,7 @@ class TuyauDiametreTableSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('tuyau_diametre')->insert([
+        DB::table('tuyau_diametres')->insert([
             ['id' => 1, 'diametre' => 40],
             ['id' => 2, 'diametre' => 55],
             ['id' => 3, 'diametre' => 75],

@@ -21,6 +21,7 @@ class SapeursTableSeeder extends Seeder
         $sapeurs = Sapeur::factory()->count(25)->create();
 
         $factory = Factory::create();
+
         Mutation::insert(array_map(fn($s) => [
             'localite_id' => $s['localite_id'],
             'incorporation' => $factory->dateTimeBetween('-10years', '+1year'),
@@ -67,6 +68,26 @@ class SapeursTableSeeder extends Seeder
             ['id' => 12, 'groupe_id' => 5, 'sapeur_id' => 3],
             ['id' => 13, 'groupe_id' => 4, 'sapeur_id' => 3],
             ['id' => 14, 'groupe_id' => 11, 'sapeur_id' => 3],
+        ]);
+
+        DB::table('articles')->insert([
+            ['materiel_type_id' => 1, 'sapeur_id' => 1, 'uuid' => '2387667wd661', 'numero' => '', 'taille' => 'XL', 'remarque' => '', 'emplacement_id' => null, 'est_etiquete' => false, 'attribution' => '2014-01-01', 'retour' => null, 'achat' => '2011', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 2, 'sapeur_id' => 1, 'uuid' => '2387667wd662', 'numero' => 'X12389734854', 'taille' => 'XL', 'remarque' => '', 'emplacement_id' => null, 'est_etiquete' => true, 'attribution' => '2014-01-01', 'retour' => null, 'achat' => '2011', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 3, 'sapeur_id' => 1, 'uuid' => '2387667wd663', 'numero' => '', 'taille' => 'XL', 'remarque' => '', 'emplacement_id' => null, 'est_etiquete' => false, 'attribution' => '2014-01-01', 'retour' => null, 'achat' => '2011', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 4, 'sapeur_id' => 1, 'uuid' => '2387667wd664', 'numero' => 'X12389734855', 'taille' => 'XL', 'remarque' => '', 'emplacement_id' => null, 'est_etiquete' => true, 'attribution' => '2014-01-01', 'retour' => null, 'achat' => '2011', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 5, 'sapeur_id' => 1, 'uuid' => '2387667wd665', 'numero' => '', 'taille' => 'XL', 'remarque' => '', 'emplacement_id' => null, 'est_etiquete' => false, 'attribution' => '2014-01-01', 'retour' => null, 'achat' => '2011', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 6, 'sapeur_id' => 1, 'uuid' => '2387667wd666', 'numero' => '', 'taille' => 'XL', 'remarque' => '', 'emplacement_id' => null, 'est_etiquete' => false, 'attribution' => '2014-01-01', 'retour' => null, 'achat' => '2011', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 7, 'sapeur_id' => 1, 'uuid' => '2387667wd667', 'numero' => '', 'taille' => 'XL', 'remarque' => '', 'emplacement_id' => null, 'est_etiquete' => false, 'attribution' => '2014-01-01', 'retour' => null, 'achat' => '2011', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 8, 'sapeur_id' => 1, 'uuid' => '2387667wd668', 'numero' => '', 'taille' => 'XL', 'remarque' => '', 'emplacement_id' => null, 'est_etiquete' => false, 'attribution' => '2014-01-01', 'retour' => null, 'achat' => '2011', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 9, 'sapeur_id' => 1, 'uuid' => '2387667wd669', 'numero' => '', 'taille' => 'XL', 'remarque' => '', 'emplacement_id' => null, 'est_etiquete' => false, 'attribution' => '2014-01-01', 'retour' => null, 'achat' => '2011', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 10, 'sapeur_id' => 1, 'uuid' => '2387667wd6610', 'numero' => '', 'taille' => '', 'remarque' => '', 'emplacement_id' => null, 'est_etiquete' => false, 'attribution' => '2014-01-01', 'retour' => null, 'achat' => '2011', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 11, 'sapeur_id' => 1, 'uuid' => '2387667wd6611', 'numero' => '', 'taille' => '49', 'remarque' => '', 'emplacement_id' => null, 'est_etiquete' => false, 'attribution' => '2014-01-01', 'retour' => null, 'achat' => '2011', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 12, 'sapeur_id' => 1, 'uuid' => '2387667wd6612', 'numero' => '', 'taille' => '', 'remarque' => '', 'emplacement_id' => null, 'est_etiquete' => false, 'attribution' => '2014-01-01', 'retour' => null, 'achat' => '2011', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 13, 'sapeur_id' => 1, 'uuid' => '2387667wd6613', 'numero' => '', 'taille' => '', 'remarque' => '', 'emplacement_id' => null, 'est_etiquete' => false, 'attribution' => '2014-01-01', 'retour' => null, 'achat' => '2011', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 14, 'sapeur_id' => 1, 'uuid' => '2387667wd6614', 'numero' => '', 'taille' => '', 'remarque' => '', 'emplacement_id' => null, 'est_etiquete' => false, 'attribution' => '2014-01-01', 'retour' => null, 'achat' => '2011', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 15, 'sapeur_id' => 1, 'uuid' => '2387667wd6615', 'numero' => '', 'taille' => '', 'remarque' => '', 'emplacement_id' => null, 'est_etiquete' => false, 'attribution' => '2014-01-01', 'retour' => null, 'achat' => '2011', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 16, 'sapeur_id' => 1, 'uuid' => '2387667wd6616', 'numero' => '', 'taille' => 'XL', 'remarque' => '', 'emplacement_id' => null, 'est_etiquete' => false, 'attribution' => '2014-01-01', 'retour' => null, 'achat' => '2011', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 17, 'sapeur_id' => 1, 'uuid' => '2387667wd6617', 'numero' => '', 'taille' => 'XL', 'remarque' => '', 'emplacement_id' => null, 'est_etiquete' => false, 'attribution' => '2014-01-01', 'retour' => null, 'achat' => '2011', 'created_at' => '2025-01-01'],
         ]);
     }
 }

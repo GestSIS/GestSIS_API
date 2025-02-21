@@ -2,9 +2,6 @@
 
 namespace App\Domaine\Business\Materiel;
 
-use App\Exceptions\BadRequestException;
-use App\Exceptions\InternalException;
-
 /**
  * Model for manipulating 'maintenance' database table
  * Available public methods
