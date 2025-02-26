@@ -145,7 +145,7 @@ class PaiementService
         $bic = $params->bic;
         $iban = $params->iban;
 
-        $nomFichier = Decompte::find($decompteId)->designation . ".xml";
+        $nomFichier = preg_replace("([^\w\s\d\-_~,;\[\]\(\).])", "-", Decompte::find($decompteId)->designation) . ".xml";
 
         $content = $this->business->iso20022PourDecompte($decompteId, $nom, $bic, $iban);
         return response()->streamDownload(
