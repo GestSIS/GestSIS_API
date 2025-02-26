@@ -2,7 +2,6 @@
 
 namespace App\Domaine\Business;
 
-use App\Domaine\API\TravauxService;
 use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
@@ -121,7 +120,7 @@ class ImputationBusiness
 
                 $ecriture->save();
                 return $ecriture;
-                // break;
+            // break;
 
             default:
                 throw new ArrayException([], 'Type d\'écriture non supporté pour le moment');
@@ -458,9 +457,10 @@ class ImputationBusiness
     public function annulerImputationExercice($exerciceId)
     {
         // Check si des ecritures sont déjà liées à un décompte
-        if (Ecriture::where('exercice_id', $exerciceId)
-            ->whereNotNull('decompte_id')
-            ->exists()
+        if (
+            Ecriture::where('exercice_id', $exerciceId)
+                ->whereNotNull('decompte_id')
+                ->exists()
         ) {
             throw new ArrayException([], 'Des écriture sont déjà facturées dans un décompte.');
         }
@@ -477,9 +477,10 @@ class ImputationBusiness
     public function annulerImputationIntervention($interventionId)
     {
         // Check si des ecritures sont déjà liées à un décompte
-        if (Ecriture::where('intervention_id', $interventionId)
-            ->whereNotNull('decompte_id')
-            ->exists()
+        if (
+            Ecriture::where('intervention_id', $interventionId)
+                ->whereNotNull('decompte_id')
+                ->exists()
         ) {
             throw new ArrayException([], 'Des écriture sont déjà facturées dans un décompte.');
         }
@@ -680,7 +681,7 @@ class ImputationBusiness
             array_push($sapeurs[$presence->sapeur_id], $presence);
         }
 
-        $ecritures = array();
+        $ecritures = [];
 
         // Calcul la durée de présence dans chaque catégorie (week-end, nuit, standard)
         foreach ($sapeurs as $sapeur_id => $presences) {
@@ -754,22 +755,27 @@ class ImputationBusiness
                     }
 
                     // Définition des deux périodes de nuit qui peuvent potentiellement overlap sur la présence
-                    $diff = (int) $debutNuit->diffInDays($debutCarbon, false);
-                    $nightPeriodOneStart = $debutNuit->copy()->addDays($diff);
-                    $nightPeriodOneEnd = $finNuit->copy()->addDays($diff);
-                    $nightPeriodTwoStart = $nightPeriodOneStart->copy()->subDay();
-                    $nightPeriodTwoEnd = $nightPeriodOneEnd->copy()->subDay();
+                    // dd($debutNuit);
 
-                    if ($debutCarbon->copy()->subDay() >= $finCarbon) {
+                    $debutNuit->setDate($debut->year, $debut->month, $debut->day);
+                    $finNuit->setDate($debut->year, $debut->month, $debut->day);
+                    $nightPeriodOneStart = $debutNuit->copy()->subDay();
+                    $nightPeriodOneEnd = $finNuit->copy();
+                    $nightPeriodTwoStart = $nightPeriodOneStart->copy()->addDay();
+                    $nightPeriodTwoEnd = $nightPeriodOneEnd->copy()->addDay();
+
+                    if ($debutCarbon->copy()->subDay() == $finCarbon) {
                         // Debut et fin la même journée
-                        if ($debutCarbon->isWeekend() && $testWeekend) {
+                        if ($debut->isWeekend() && $testWeekend) {
                             $dureeTarifWeekend += $duree;
                         } elseif ($testNuit) {
                             $overlapping = 0;
-                            $overlapping += min($debut->max($nightPeriodOneStart)->diffInHours($fin->min($nightPeriodOneEnd), true), 0.0);
-                            $overlapping += min($debut->max($nightPeriodTwoStart)->diffInHours($fin->min($nightPeriodTwoEnd), true), 0.0);
-
+                            $overlapping += max($debut->max($nightPeriodOneStart)->diffInHours($fin->min($nightPeriodOneEnd), false), 0.0);
+                            $overlapping += max($debut->max($nightPeriodTwoStart)->diffInHours($fin->min($nightPeriodTwoEnd), false), 0.0);
                             $dureeTarifNuit += $overlapping;
+
+                            // if ($presence->sapeur_id == '2')
+                            //     dd([$duree, $overlapping, $debut, $fin]);
                             $dureeTarifStandard += $duree - $overlapping;
                         } else {
                             $dureeTarifStandard += $duree;
@@ -782,7 +788,7 @@ class ImputationBusiness
                         $duree = $debut->diffInHours($finJour);
 
                         // Premier jour de la présence -> début
-                        if ($debutCarbon->isWeekend() && $testWeekend) {
+                        if ($debut->isWeekend() && $testWeekend) {
                             $dureeTarifWeekend += $duree;
                         } elseif ($testNuit) {
                             $overlapping = 0;
@@ -803,15 +809,23 @@ class ImputationBusiness
                         $debutJour = $fin->copy()->floorDay();
                         $duree = $debutJour->diffInHours($fin);
 
-                        if ($debutCarbon->isWeekend() && $testWeekend) {
+                        if ($fin->isWeekend() && $testWeekend) {
                             $dureeTarifWeekend += $duree;
                         } elseif ($testNuit) {
                             $overlapping = 0;
 
-                            $nightPeriodOneStart = $nightPeriodOneStart->copy()->addDays((int) $nightPeriodOneStart->diffInDays($debutJour, false));
-                            $nightPeriodOneEnd = $nightPeriodOneEnd->copy()->addDays((int) $nightPeriodOneStart->diffInDays($debutJour, false));
-                            $nightPeriodTwoStart = $nightPeriodOneStart->copy()->subDay(1);
-                            $nightPeriodTwoEnd = $nightPeriodOneEnd->copy()->subDay(1);
+                            $debutNuit->setDate($fin->year, $fin->month, $fin->day);
+                            $finNuit->setDate($fin->year, $fin->month, $fin->day);
+                            $nightPeriodOneStart = $debutNuit->copy()->subDay();
+                            $nightPeriodOneEnd = $finNuit->copy();
+                            $nightPeriodTwoStart = $nightPeriodOneStart->copy()->addDay();
+                            $nightPeriodTwoEnd = $nightPeriodOneEnd->copy()->addDay();
+                            // dd([
+                            //     $nightPeriodOneStart,
+                            //     $nightPeriodOneEnd,
+                            //     $nightPeriodTwoStart,
+                            //     $nightPeriodTwoEnd,
+                            // ]);
 
                             $overlapping += max($debutJour->max($nightPeriodOneStart)->diffInHours($fin->min($nightPeriodOneEnd), false), 0);
                             $overlapping += max($debutJour->max($nightPeriodTwoStart)->diffInHours($fin->min($nightPeriodTwoEnd), false), 0);
@@ -1157,9 +1171,10 @@ class ImputationBusiness
     public function annulerImputationCours($coursSapeurId)
     {
         // Check si des ecritures sont déjà liées à un décompte
-        if (Ecriture::where('cours_sapeur_id', $coursSapeurId)
-            ->whereNotNull('decompte_id')
-            ->exists()
+        if (
+            Ecriture::where('cours_sapeur_id', $coursSapeurId)
+                ->whereNotNull('decompte_id')
+                ->exists()
         ) {
             throw new ArrayException([], 'Des écriture sont déjà facturées dans un décompte.');
         }
@@ -1225,9 +1240,10 @@ class ImputationBusiness
     public function annulerImputationTravail($travailId)
     {
         // Check si des ecritures sont déjà liées à un décompte
-        if (Ecriture::where('travail_id', $travailId)
-            ->whereNotNull('decompte_id')
-            ->exists()
+        if (
+            Ecriture::where('travail_id', $travailId)
+                ->whereNotNull('decompte_id')
+                ->exists()
         ) {
             throw new ArrayException([], 'Des écriture sont déjà facturées dans un décompte.');
         }
@@ -1235,7 +1251,7 @@ class ImputationBusiness
         // Suppression des écritures
         Ecriture::where('travail_id', $travailId)
             ->delete();
-        Travail::where('id', '=',  $travailId)
+        Travail::where('id', '=', $travailId)
             ->update(['statut' => TravauxBusiness::TRAVAIL_STATUT_VALIDE]);
 
         return ['statut' => TravauxBusiness::TRAVAIL_STATUT_VALIDE];

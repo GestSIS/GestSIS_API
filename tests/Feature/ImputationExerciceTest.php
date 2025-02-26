@@ -66,7 +66,7 @@ class ImputationExerciceTest extends TestCase
                 'present' => 1,
                 'absent' => 0,
                 'remplace' => 0,
-                'excuse_type_id' => null,,
+                'excuse_type_id' => null,
                 'excuse_statut' => -1,
             )
         ));
