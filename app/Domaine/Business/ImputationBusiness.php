@@ -373,7 +373,6 @@ class ImputationBusiness
         $fin = $exerciceComptable->fin;
 
         // Fonction gardée si intersect avec exercice comptable actuel
-        // dd(['debut' => $debut, 'fin' => $fin]);
         $sapeurs = FonctionSapeur::where(function ($query) use ($debut, $fin) {
             $query
                 ->where(function ($query) use ($debut) {
@@ -755,8 +754,6 @@ class ImputationBusiness
                     }
 
                     // Définition des deux périodes de nuit qui peuvent potentiellement overlap sur la présence
-                    // dd($debutNuit);
-
                     $debutNuit->setDate($debut->year, $debut->month, $debut->day);
                     $finNuit->setDate($debut->year, $debut->month, $debut->day);
                     $nightPeriodOneStart = $debutNuit->copy()->subDay();
@@ -820,12 +817,6 @@ class ImputationBusiness
                             $nightPeriodOneEnd = $finNuit->copy();
                             $nightPeriodTwoStart = $nightPeriodOneStart->copy()->addDay();
                             $nightPeriodTwoEnd = $nightPeriodOneEnd->copy()->addDay();
-                            // dd([
-                            //     $nightPeriodOneStart,
-                            //     $nightPeriodOneEnd,
-                            //     $nightPeriodTwoStart,
-                            //     $nightPeriodTwoEnd,
-                            // ]);
 
                             $overlapping += max($debutJour->max($nightPeriodOneStart)->diffInHours($fin->min($nightPeriodOneEnd), false), 0);
                             $overlapping += max($debutJour->max($nightPeriodTwoStart)->diffInHours($fin->min($nightPeriodTwoEnd), false), 0);
