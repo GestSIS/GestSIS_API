@@ -78,204 +78,204 @@ class ImputationInterventionTest extends TestCase
         $this->interventionService->validerInterventionById($this->interventionId);
     }
 
-    // /**
-    //  * Test add exercice
-    //  *
-    //  * @return void
-    //  * @throws Exception
-    //  */
-    // public function testImputationImputationTarifSimpleSansProRata()
-    // {
-    //     $param = array(
-    //         "indemnite_intervention_type_id" => 1
-    //     );
-    //     $response = $this->json('POST', "/api/v2/imputation/intervention/$this->interventionId", $param);
+    /**
+     * Test add exercice
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testImputationImputationTarifSimpleSansProRata()
+    {
+        $param = array(
+            "indemnite_intervention_type_id" => 1
+        );
+        $response = $this->json('POST', "/api/v2/imputation/intervention/$this->interventionId", $param);
 
-    //     $response
-    //         ->assertStatus(200)
-    //         ->assertJson(
-    //             [
-    //                 "data" => [
-    //                     'statut' => InterventionBusiness::INTERVENTION_STATUT_IMPUTE,
-    //                     'ecritures' => [
-    //                         [
-    //                             'complement' => Null,
-    //                             'total' => '490.00',
-    //                             'tarif' => '30.00',
-    //                             'type_unite_id' => 2,
-    //                             'quantite' => '16.25',
-    //                             'tarif_min' => '40.00',
-    //                             'tarif_pro_rata' => false,
-    //                             'tarif_min_pour' => '1.00',
-    //                             'tarif_min_pro_rata' => false,
-    //                             'date' => '2019-01-01',
-    //                             'heure' => '00:00:00',
-    //                             'sapeur_id' => 1,
-    //                             'compte_id' => 4,
-    //                             'intervention_id' => $this->interventionId,
-    //                             'exercice_id' => null,
-    //                             'ecriture_categorie_id' => 4,
-    //                             'cours_sapeur_id' => null,
-    //                             'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
-    //                             'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
-    //                         ],
-    //                         [
-    //                             'complement' => Null,
-    //                             'total' => '40.00',
-    //                             'tarif' => '30.00',
-    //                             'type_unite_id' => 2,
-    //                             'quantite' => '0.50',
-    //                             'tarif_min' => '40.00',
-    //                             'tarif_pro_rata' => false,
-    //                             'tarif_min_pour' => '1.00',
-    //                             'tarif_min_pro_rata' => false,
-    //                             'date' => '2019-01-01',
-    //                             'heure' => '00:00:00',
-    //                             'sapeur_id' => 2,
-    //                             'compte_id' => 4,
-    //                             'intervention_id' => $this->interventionId,
-    //                             'exercice_id' => null,
-    //                             'ecriture_categorie_id' => 4,
-    //                             'cours_sapeur_id' => null,
-    //                             'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
-    //                             'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
-    //                         ],
-    //                         [
-    //                             'complement' => Null,
-    //                             'total' => '100.00',
-    //                             'tarif' => '30.00',
-    //                             'type_unite_id' => 2,
-    //                             'quantite' => '3.25',
-    //                             'tarif_min' => '40.00',
-    //                             'tarif_pro_rata' => false,
-    //                             'tarif_min_pour' => '1.00',
-    //                             'tarif_min_pro_rata' => false,
-    //                             'date' => '2019-01-01',
-    //                             'heure' => '00:00:00',
-    //                             'sapeur_id' => 3,
-    //                             'compte_id' => 4,
-    //                             'intervention_id' => $this->interventionId,
-    //                             'exercice_id' => null,
-    //                             'ecriture_categorie_id' => 4,
-    //                             'cours_sapeur_id' => null,
-    //                             'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
-    //                             'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
-    //                         ],
-    //                     ]
-    //                 ]
-    //             ]
-    //         );
-    // }
+        $response
+            ->assertStatus(200)
+            ->assertJson(
+                [
+                    "data" => [
+                        'statut' => InterventionBusiness::INTERVENTION_STATUT_IMPUTE,
+                        'ecritures' => [
+                            [
+                                'complement' => Null,
+                                'total' => '490.00',
+                                'tarif' => '30.00',
+                                'type_unite_id' => 2,
+                                'quantite' => '16.25',
+                                'tarif_min' => '40.00',
+                                'tarif_pro_rata' => false,
+                                'tarif_min_pour' => '1.00',
+                                'tarif_min_pro_rata' => false,
+                                'date' => '2019-01-01',
+                                'heure' => '00:00:00',
+                                'sapeur_id' => 1,
+                                'compte_id' => 4,
+                                'intervention_id' => $this->interventionId,
+                                'exercice_id' => null,
+                                'ecriture_categorie_id' => 4,
+                                'cours_sapeur_id' => null,
+                                'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
+                                'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
+                            ],
+                            [
+                                'complement' => Null,
+                                'total' => '40.00',
+                                'tarif' => '30.00',
+                                'type_unite_id' => 2,
+                                'quantite' => '0.50',
+                                'tarif_min' => '40.00',
+                                'tarif_pro_rata' => false,
+                                'tarif_min_pour' => '1.00',
+                                'tarif_min_pro_rata' => false,
+                                'date' => '2019-01-01',
+                                'heure' => '00:00:00',
+                                'sapeur_id' => 2,
+                                'compte_id' => 4,
+                                'intervention_id' => $this->interventionId,
+                                'exercice_id' => null,
+                                'ecriture_categorie_id' => 4,
+                                'cours_sapeur_id' => null,
+                                'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
+                                'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
+                            ],
+                            [
+                                'complement' => Null,
+                                'total' => '100.00',
+                                'tarif' => '30.00',
+                                'type_unite_id' => 2,
+                                'quantite' => '3.25',
+                                'tarif_min' => '40.00',
+                                'tarif_pro_rata' => false,
+                                'tarif_min_pour' => '1.00',
+                                'tarif_min_pro_rata' => false,
+                                'date' => '2019-01-01',
+                                'heure' => '00:00:00',
+                                'sapeur_id' => 3,
+                                'compte_id' => 4,
+                                'intervention_id' => $this->interventionId,
+                                'exercice_id' => null,
+                                'ecriture_categorie_id' => 4,
+                                'cours_sapeur_id' => null,
+                                'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
+                                'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
+                            ],
+                        ]
+                    ]
+                ]
+            );
+    }
 
-    // /**
-    //  * Test add exercice
-    //  *
-    //  * @return void
-    //  * @throws Exception
-    //  */
-    // public function testImputationImputationTarifComplex()
-    // {
-    //     $param = array(
-    //         "indemnite_intervention_type_id" => 2
-    //     );
-    //     $response = $this->json('POST', "/api/v2/imputation/intervention/$this->interventionId", $param);
+    /**
+     * Test add exercice
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testImputationImputationTarifComplex()
+    {
+        $param = array(
+            "indemnite_intervention_type_id" => 2
+        );
+        $response = $this->json('POST', "/api/v2/imputation/intervention/$this->interventionId", $param);
 
-    //     $response
-    //         ->assertStatus(200)
-    //         ->assertJson(
-    //             [
-    //                 "data" => [
-    //                     'statut' => InterventionBusiness::INTERVENTION_STATUT_IMPUTE,
-    //                     'ecritures' => [
-    //                         [
-    //                             'complement' => Null,
-    //                             'total' => '127.50',
-    //                             'tarif' => '30.00',
-    //                             'type_unite_id' => 2,
-    //                             'quantite' => '4.25',
-    //                             'tarif_min' => null,
-    //                             'tarif_min_pour' => null,
-    //                             'taux' => NULL,
-    //                             'taux_description' => NULL,
-    //                             'date' => '2019-01-01',
-    //                             'heure' => '00:00:00',
-    //                             'sapeur_id' => 1,
-    //                             'compte_id' => 4,
-    //                             'intervention_id' => $this->interventionId,
-    //                             'exercice_id' => null,
-    //                             'ecriture_categorie_id' => 4,
-    //                             'cours_sapeur_id' => null,
-    //                             'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
-    //                             'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
-    //                         ],
-    //                         [
-    //                             'complement' => Null,
-    //                             'total' => '450.00',
-    //                             'tarif' => '30.00',
-    //                             'type_unite_id' => 2,
-    //                             'quantite' => '12.00',
-    //                             'tarif_min' => null,
-    //                             'tarif_min_pour' => null,
-    //                             'taux' => '1.25',
-    //                             'taux_description' => 'Nuit',
-    //                             'date' => '2019-01-01',
-    //                             'heure' => '00:00:00',
-    //                             'sapeur_id' => 1,
-    //                             'compte_id' => 4,
-    //                             'intervention_id' => $this->interventionId,
-    //                             'exercice_id' => null,
-    //                             'ecriture_categorie_id' => 4,
-    //                             'cours_sapeur_id' => null,
-    //                             'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
-    //                             'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
-    //                         ],
-    //                         [
-    //                             'complement' => Null,
-    //                             'total' => '15.00',
-    //                             'tarif' => '30.00',
-    //                             'type_unite_id' => 2,
-    //                             'quantite' => '0.50',
-    //                             'tarif_min' => null,
-    //                             'tarif_min_pour' => null,
-    //                             'taux' => NULL,
-    //                             'taux_description' => NULL,
-    //                             'date' => '2019-01-01',
-    //                             'heure' => '00:00:00',
-    //                             'sapeur_id' => 2,
-    //                             'compte_id' => 4,
-    //                             'intervention_id' => $this->interventionId,
-    //                             'exercice_id' => null,
-    //                             'ecriture_categorie_id' => 4,
-    //                             'cours_sapeur_id' => null,
-    //                             'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
-    //                             'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
-    //                         ],
-    //                         [
-    //                             'complement' => Null,
-    //                             'total' => '97.50',
-    //                             'tarif' => '30.00',
-    //                             'type_unite_id' => 2,
-    //                             'quantite' => '3.25',
-    //                             'tarif_min' => null,
-    //                             'tarif_min_pour' => null,
-    //                             'taux' => NULL,
-    //                             'taux_description' => NULL,
-    //                             'date' => '2019-01-01',
-    //                             'heure' => '00:00:00',
-    //                             'sapeur_id' => 3,
-    //                             'compte_id' => 4,
-    //                             'intervention_id' => $this->interventionId,
-    //                             'exercice_id' => null,
-    //                             'ecriture_categorie_id' => 4,
-    //                             'cours_sapeur_id' => null,
-    //                             'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
-    //                             'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
-    //                         ],
-    //                     ]
-    //                 ]
-    //             ]
-    //         );
-    // }
+        $response
+            ->assertStatus(200)
+            ->assertJson(
+                [
+                    "data" => [
+                        'statut' => InterventionBusiness::INTERVENTION_STATUT_IMPUTE,
+                        'ecritures' => [
+                            [
+                                'complement' => Null,
+                                'total' => '127.50',
+                                'tarif' => '30.00',
+                                'type_unite_id' => 2,
+                                'quantite' => '4.25',
+                                'tarif_min' => null,
+                                'tarif_min_pour' => null,
+                                'taux' => NULL,
+                                'taux_description' => NULL,
+                                'date' => '2019-01-01',
+                                'heure' => '00:00:00',
+                                'sapeur_id' => 1,
+                                'compte_id' => 4,
+                                'intervention_id' => $this->interventionId,
+                                'exercice_id' => null,
+                                'ecriture_categorie_id' => 4,
+                                'cours_sapeur_id' => null,
+                                'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
+                                'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
+                            ],
+                            [
+                                'complement' => Null,
+                                'total' => '450.00',
+                                'tarif' => '30.00',
+                                'type_unite_id' => 2,
+                                'quantite' => '12.00',
+                                'tarif_min' => null,
+                                'tarif_min_pour' => null,
+                                'taux' => '1.25',
+                                'taux_description' => 'Nuit',
+                                'date' => '2019-01-01',
+                                'heure' => '00:00:00',
+                                'sapeur_id' => 1,
+                                'compte_id' => 4,
+                                'intervention_id' => $this->interventionId,
+                                'exercice_id' => null,
+                                'ecriture_categorie_id' => 4,
+                                'cours_sapeur_id' => null,
+                                'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
+                                'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
+                            ],
+                            [
+                                'complement' => Null,
+                                'total' => '15.00',
+                                'tarif' => '30.00',
+                                'type_unite_id' => 2,
+                                'quantite' => '0.50',
+                                'tarif_min' => null,
+                                'tarif_min_pour' => null,
+                                'taux' => NULL,
+                                'taux_description' => NULL,
+                                'date' => '2019-01-01',
+                                'heure' => '00:00:00',
+                                'sapeur_id' => 2,
+                                'compte_id' => 4,
+                                'intervention_id' => $this->interventionId,
+                                'exercice_id' => null,
+                                'ecriture_categorie_id' => 4,
+                                'cours_sapeur_id' => null,
+                                'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
+                                'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
+                            ],
+                            [
+                                'complement' => Null,
+                                'total' => '97.50',
+                                'tarif' => '30.00',
+                                'type_unite_id' => 2,
+                                'quantite' => '3.25',
+                                'tarif_min' => null,
+                                'tarif_min_pour' => null,
+                                'taux' => NULL,
+                                'taux_description' => NULL,
+                                'date' => '2019-01-01',
+                                'heure' => '00:00:00',
+                                'sapeur_id' => 3,
+                                'compte_id' => 4,
+                                'intervention_id' => $this->interventionId,
+                                'exercice_id' => null,
+                                'ecriture_categorie_id' => 4,
+                                'cours_sapeur_id' => null,
+                                'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
+                                'module' => ImputationBusiness::ECRITURE_MODULE_INTERVENTION,
+                            ],
+                        ]
+                    ]
+                ]
+            );
+    }
 
     public function testImputationImputationTarifTauxNuitEtWeekend()
     {
@@ -340,6 +340,13 @@ class ImputationInterventionTest extends TestCase
                 'sapeur_id' => 7,
                 'debut' => '2025-02-27 18:00',
                 'fin' => '2025-03-04 21:00',
+                'piquet' => 0
+            ],
+            [
+                // Tarif nuit + standard au quart d'heure
+                'sapeur_id' => 8,
+                'debut' => '2025-02-28 19:45',
+                'fin' => '2025-02-28 20:45',
                 'piquet' => 0
             ],
         ];
@@ -551,6 +558,34 @@ class ImputationInterventionTest extends TestCase
                                 "taux" => "1.25",
                                 "taux_description" => "Weekend",
                                 "sapeur_id" => 7,
+                                "type" => 1,
+                                "module" => 2,
+                            ],
+                            [
+                                "total" => "7.50",
+                                "quantite" => "0.25",
+                                "tarif" => "30.00",
+                                "tarif_pro_rata" => true,
+                                "tarif_min" => null,
+                                "tarif_min_pour" => null,
+                                "tarif_min_pro_rata" => false,
+                                "taux" => null,
+                                "taux_description" => null,
+                                "sapeur_id" => 8,
+                                "type" => 1,
+                                "module" => 2,
+                            ],
+                            [
+                                "total" => "28.15",
+                                "quantite" => "0.75",
+                                "tarif" => "30.00",
+                                "tarif_pro_rata" => true,
+                                "tarif_min" => null,
+                                "tarif_min_pour" => null,
+                                "tarif_min_pro_rata" => false,
+                                "taux" => "1.25",
+                                "taux_description" => "Nuit",
+                                "sapeur_id" => 8,
                                 "type" => 1,
                                 "module" => 2,
                             ],
