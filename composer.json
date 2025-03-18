@@ -18,6 +18,7 @@
         "maatwebsite/excel": "^3.1",
         "mikehaertl/php-pdftk": "^0.13",
         "php-ds/php-ds": "^1.4",
+        "sentry/sentry-laravel": "^4.13",
         "spatie/laravel-http-logger": "^1.4",
         "spatie/laravel-ignition": "^2.0"
     },
