@@ -189,18 +189,18 @@ class ExerciceBusiness
                         ['sapeur_id', '=', $presence['sapeur_id']],
                         ['exercice_id', '=', $presence['exercice_id']],
                     ])->update([
-                        'convoque' => $presence['convoque'],
-                        'remplace' => $presence['remplace'],
-                        'excuse_type_id' => $presence['excuse_type_id'],
-                    ]);
+                                'convoque' => $presence['convoque'],
+                                'remplace' => $presence['remplace'],
+                                'excuse_type_id' => $presence['excuse_type_id'],
+                            ]);
                 } else {
                     ExerciceSapeur::where([
                         ['id', '=', $presence['id']],
                         ['sapeur_id', '=', $presence['sapeur_id']],
                         ['exercice_id', '=', $presence['exercice_id']],
                     ])->update([
-                        'convoque' => $presence['convoque'],
-                    ]);
+                                'convoque' => $presence['convoque'],
+                            ]);
                 }
             } else if ($exerciceStatut === self::EXERCICE_STATUT_ANNULE) {
                 continue;
@@ -211,12 +211,12 @@ class ExerciceBusiness
                     ['sapeur_id', '=', $presence['sapeur_id']],
                     ['exercice_id', '=', $presence['exercice_id']],
                 ])->update([
-                    'convoque' => $presence['convoque'],
-                    'present' => $presence['present'],
-                    'absent' => $presence['absent'],
-                    'remplace' => $presence['remplace'],
-                    'excuse_type_id' => $presence['excuse_type_id'],
-                ]);
+                            'convoque' => $presence['convoque'],
+                            'present' => $presence['present'],
+                            'absent' => $presence['absent'],
+                            'remplace' => $presence['remplace'],
+                            'excuse_type_id' => $presence['excuse_type_id'],
+                        ]);
             }
         }
     }
@@ -609,7 +609,7 @@ class ExerciceBusiness
                     'absent' => $sapeur['absent'],
                     'remplace' => $sapeur['remplace'],
                     'excuse_type_id' => $sapeur['excuse_type_id'],
-                    'excuse_statut' => $sapeur['excuse_statut'],
+                    ...(array_key_exists('excuse_statut', $sapeur) ? ['excuse_statut' => $sapeur['excuse_statut']] : [])
                 ]);
 
             $heures = array_filter(
