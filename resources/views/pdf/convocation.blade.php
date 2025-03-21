@@ -42,7 +42,7 @@
   ?>
   <div class="container-fluid">
     @foreach ($sapeurs as $sapeur)
-    <h1>{{ $params['titre'] }}</h1>
+    <h1>{{ $params['titre'] ?? 'Convocation' }}</h1>
     <div style="margin-top: 90px; margin-left: 55%;">
       {{-- {{dd($sapeur, $civilites)}} --}}
       <p class="h3 m-0">{{ $civilites[$sapeur['civilite_id']] }}</p>
@@ -52,7 +52,7 @@
     </div>
     <div class="mt-5">
       <p class="text-justify h5">
-        @foreach (explode("\n", str_replace(["\r\n", "\n\r", "\r"], "\n", $params['texte_debut'])) as $line)
+        @foreach (explode("\n", str_replace(["\r\n", "\n\r", "\r"], "\n", $params['texte_debut'] ?? '')) as $line)
         {{ $line }}<br />
         @endforeach
       </p>
@@ -72,12 +72,12 @@
           // dd($convocation['exercice_id'], $exercices);
           $exercice = $exercices[$convocation['exercice_id']];
           $convoque = !!$convocation['convoque'];
-          $pourInfo = $params['affichage_pour_info'] && !$convoque;
+          $pourInfo = ($params['affichage_pour_info'] ?? false) && !$convoque;
           $colspan = $pourInfo ? 1 : 2;
         ?>
           <tr>
             <td style="width: 100px !important;">{{ formatDate($exercice['date']) }}</td>
-            <td>{!! $params['affichage_duree'] ? formatHeureDuree($exercice['heure'], $exercice['duree']) : formatHeure($exercice['heure']) !!}</td>
+            <td>{!! ($params['affichage_duree'] ?? false) ? formatHeureDuree($exercice['heure'], $exercice['duree']) : formatHeure($exercice['heure']) !!}</td>
             <td>
               {{ $categories[$exercice['exercice_categorie_id']] }} : {{ $exercice['designation'] }}<br />
               {{ $exercice['communications'] }}
@@ -86,7 +86,7 @@
               {{ $localites[$exercice['localite_id']] }} : {{ $exercice['lieu'] }}
             </td>
             @if ($pourInfo)
-            <td><em>{{ $params['texte_pour_info'] }}<em></td>
+            <td><em>{{ $params['texte_pour_info'] ?? '' }}<em></td>
             @endif
           </tr>
         <?php
@@ -96,7 +96,7 @@
     </table>
     <div class="mt-5">
       <p class="text-justify h5">
-        @foreach (explode("\n", str_replace(["\r\n", "\n\r", "\r"], "\n", $params['texte_fin'])) as $line)
+        @foreach (explode("\n", str_replace(["\r\n", "\n\r", "\r"], "\n", $params['texte_fin'] ?? '')) as $line)
         {{ $line }}<br />
         @endforeach
       </p>

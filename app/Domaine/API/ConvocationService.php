@@ -57,7 +57,7 @@ class ConvocationService
         }
 
         return View('pdf/convocation', [
-            "params" => $params,
+            "params" => $params ?? [],
             "sapeurs" => $sapeursMap,
             "exercices" => $exercicesMap,
             "civilites" => $civilitesMap,
