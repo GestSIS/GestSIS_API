@@ -94,7 +94,7 @@
     ..if intervention.vehicules.len() > 0 {
       intervention.vehicules
         .map(v=>[#vehicules.at(str(v.vehicule_id))])
-    } else [Aucun véhicule engagé]
+    } else {([Aucun véhicule engagé],)}
   )
 }
 
@@ -108,7 +108,7 @@
     ..if intervention.materiels.len() > 0 {
       intervention.materiels
         .map(m=>[#materiels.at(str(m.materiel_id))])
-    } else [Aucun matériel]
+    } else {([Aucun matériel],)}
   )
 }
 
@@ -135,7 +135,7 @@
               [#sapeur.nom #sapeur.prenom]
             } else [#mission.sapeur]}
         )).flatten()
-    } else [Aucune mission]
+    } else {([Aucune mission],)}
   )
 }
 
@@ -158,7 +158,7 @@
           [#appel.numero],
           [#appel.commentaire]
         )).flatten()
-    } else [Aucun appell]
+    } else {([Aucun appell],)}
   )
 }
 
@@ -172,7 +172,7 @@
     ..if intervention.groupes.len() > 0 {
       intervention.groupes
         .map(groupe=>[#groupe.no #groupe.designation])
-    } else [Aucun groupe d'alarme]
+    } else {([Aucun groupe d'alarme],)}
   )
 }
 
@@ -208,6 +208,6 @@
           }
         ))
         .flatten()
-    } else [Aucune présence],
+    } else {([Aucune présence],)},
   )
 }
