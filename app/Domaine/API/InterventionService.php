@@ -3,7 +3,10 @@
 
 namespace App\Domaine\API;
 
+use App\Application\Typst\TypstTemplate;
+use App\Application\Typst\TypstToPdfGenerator;
 use App\Domaine\Business\InterventionBusiness;
+use App\Domaine\Business\SisParamBusiness;
 use App\Domaine\SPI\InterventionRepository;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Groupe;
@@ -383,7 +386,7 @@ class InterventionService
         $this->business->removeGroupes($interventionId, $ids);
     }
 
-    public function rapport($interventionId, $params)
+    public function rapport($interventionId, $params, string $sisKey)
     {
         $withOptions = ['statFederal', 'typeIntervention', 'localite', 'chefIntervention', 'traitement'];
         $withMapping = [
@@ -432,14 +435,13 @@ class InterventionService
         // Chargement des groupes
         $ecritures = [];
         if (isset($params['montants']) && $params['montants']) {
-            // TODO: Total par sapeur
             $ecritures = Ecriture::where('intervention_id', '=', $interventionId)
                 ->groupBy('sapeur_id')
                 ->selectRaw('sum(total) as total, sapeur_id')
                 ->pluck('total', 'sapeur_id')
                 ->toArray();
 
-            $total = array_sum(array_map(fn ($e) => floatval($e), array_values($ecritures)));
+            $total = array_sum(array_map(fn($e) => floatval($e), array_values($ecritures)));
             $ecritures['total'] = $total;
         }
 
@@ -474,17 +476,28 @@ class InterventionService
             //TODO: Trier par nom, prénom
         }
 
-        return View('pdf/rapport-intervention', [
-            "intervention" => $intervention,
-            "params" => $params,
-            "vehicules" => $vehiculesMap,
-            "materiels" => $materielsMap,
-            "groupes" => $groupesMap,
-            "sapeurs" => $sapeursMap,
-            "quittances" => $quittancesMap,
-            "presences" => $presences,
-            "ecritures" => $ecritures,
-        ]);
+        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::RapportIntervention,
+            [
+                "intervention" => $intervention,
+                "params" => $params,
+                "vehicules" => $vehiculesMap,
+                "materiels" => $materielsMap,
+                "groupes" => $groupesMap,
+                "sapeurs" => $sapeursMap,
+                "quittances" => $quittancesMap,
+                "presences" => $presences,
+                "ecritures" => $ecritures,
+            ],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'rapport-intervention.pdf'
+        );
     }
 
     /**

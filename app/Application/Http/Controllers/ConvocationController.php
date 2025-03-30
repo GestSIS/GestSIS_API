@@ -31,6 +31,8 @@ class ConvocationController extends Controller
             'sapeurIds.*' => 'integer'
         ]);
         $sapeursIds = $sapeursIds['sapeurIds'] ?? [];
-        return $this->service->convoquer($exerciceComptableId, $sapeursIds);
+
+        $sisKey = $request->header('Sis-Id', Null);
+        return $this->service->convoquer($exerciceComptableId, $sapeursIds, $sisKey);
     }
 }

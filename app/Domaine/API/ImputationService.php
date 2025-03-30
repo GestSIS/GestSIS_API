@@ -214,18 +214,8 @@ class ImputationService
         return $this->business->genererAmendesAnnuels($exerciceComptableId);
     }
 
-    function decompteAnnuelParSapeur($exerciceComptableId)
-    {
-        $ecritures = $this->ecritureRepo->computeEcritureForPersonalDecompte($exerciceComptableId);
-
-        // FIXME: créer un nouveau décompte avec la date de paiement de chaque écriture
-        return View('pdf/decomptes-sapeurs', ["ecritures" => $ecritures]);
-    }
-
     public function justificatifIndividuel(int $exerciceComptableId, int $compteId)
     {
-        // Blade::component('single-compte', SingleCompte::class);
-
         $compte = Compte::with(['ecritures' => function ($query) use ($exerciceComptableId) {
             $query->where('exercice_comptable_id', $exerciceComptableId)->orderBy('date', 'asc');
         }])->find($compteId);

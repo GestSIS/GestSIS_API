@@ -2,7 +2,10 @@
 
 namespace App\Domaine\API;
 
+use App\Application\Typst\TypstTemplate;
+use App\Application\Typst\TypstToPdfGenerator;
 use App\Domaine\Business\ExerciceBusiness;
+use App\Domaine\Business\SisParamBusiness;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\SPI\SapeurRepository;
@@ -244,7 +247,7 @@ class ExerciceService
      * @return Collection
      * @throws ArrayException
      */
-    public function removeExcuse($sapeurId, $exerciceId,  $hasValidationPermission)
+    public function removeExcuse($sapeurId, $exerciceId, $hasValidationPermission)
     {
         return $this->business->removeExcuse($sapeurId, $exerciceId, $hasValidationPermission);
     }
@@ -341,7 +344,7 @@ class ExerciceService
         return $this->business->supprimerHeureExercice($exerciceId, $id);
     }
 
-    function listeAppel($exerciceId)
+    function listeAppel($exerciceId, string $sisKey)
     {
         $exercice = $this->repository->getExerciceByIdWith($exerciceId, ['sapeurs', 'localite']);
         $sapeurs = $this->sapeurRepository->listeSapeurLight();
@@ -374,17 +377,21 @@ class ExerciceService
             $fonctionsMap[$fonction->id] = $fonction->nom;
         }
 
-        return View('pdf/liste-appel', ["exercice" => $exercice, "fonctions" => $fonctionsMap, "excuses" => $excusesMap]);
+        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::ListeAppel,
+            ["exercice" => $exercice, "fonctions" => $fonctionsMap, "excuses" => $excusesMap],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'liste-appel.pdf'
+        );
     }
 
-    function listeAppelParLocalite($exerciceId)
-    {
-        $presences = $this->repository->listeSapeurOfExerciceById($exerciceId);
-
-        return View('pdf/liste-appel-localite', ["presences" => $presences]);
-    }
-
-    function listePresence($exerciceId)
+    function listePresence($exerciceId, string $sisKey)
     {
         $exercice = $this->repository->getExerciceByIdWith($exerciceId, ['sapeurs', 'localite']);
         $sapeurs = $this->sapeurRepository->listeSapeurLight();
@@ -409,7 +416,18 @@ class ExerciceService
             $excusesMap[$excuse->id] = $excuse->designation;
         }
 
-        return View('pdf/liste-presence', ["exercice" => $exercice, "excuses" => $excusesMap]);
+        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::ListePresence,
+            ["exercice" => $exercice, "excuses" => $excusesMap],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'liste-presence.pdf'
+        );
     }
 
     /**

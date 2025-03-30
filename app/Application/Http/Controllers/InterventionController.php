@@ -230,6 +230,20 @@ class InterventionController extends Controller
 
     public function rapport(Request $request, $id)
     {
+        $request->merge([
+            'infoGeneral' => $request->get('infoGeneral') == 'true',
+            'description' => $request->get('description') == 'true',
+            'groupes' => $request->get('groupes') == 'true',
+            'presences' => $request->get('presences') == 'true',
+            'montants' => $request->get('montants') == 'true',
+            'vehicules' => $request->get('vehicules') == 'true',
+            'materiel' => $request->get('materiel') == 'true',
+            'absents' => $request->get('absents') == 'true',
+            'statut' => $request->get('statut') == 'true',
+            'missions' => $request->get('missions') == 'true',
+            'appels' => $request->get('appels') == 'true',
+        ]);
+
         $params = $request->validate([
             'infoGeneral' => 'boolean',
             'description' => 'boolean',
@@ -243,7 +257,10 @@ class InterventionController extends Controller
             'missions' => 'boolean',
             'appels' => 'boolean',
         ]);
-        return $this->service->rapport($id, $params);
+
+        $sisKey = $request->header('Sis-Id', Null);
+
+        return $this->service->rapport($id, $params, $sisKey);
     }
 
     /**

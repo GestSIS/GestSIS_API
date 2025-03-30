@@ -3,8 +3,11 @@
 
 namespace App\Domaine\API;
 
+use App\Application\Typst\TypstTemplate;
+use App\Application\Typst\TypstToPdfGenerator;
 use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Business\PaiementBusiness;
+use App\Domaine\Business\SisParamBusiness;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Collections\AFacturerExport;
 use App\Infrastructure\Collections\EcrituresExport;
@@ -12,6 +15,7 @@ use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
+use App\Infrastructure\Models\TypeUnite;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Sapeur;
@@ -161,7 +165,7 @@ class PaiementService
         return Excel::download(new EcrituresExport($decompteId), 'ecritures.xlsx');
     }
 
-    public function impressionDecompte($decompteId)
+    public function impressionDecompte($decompteId, $sisKey)
     {
         $decompte = Decompte::find($decompteId);
         $ecritures = Ecriture::where('decompte_id', '=', $decompteId)->orderBy('date')->get();
@@ -171,7 +175,24 @@ class PaiementService
             $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
         }
 
-        return View('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
+        $unitesMap = [];
+        $unites = TypeUnite::all();
+        foreach ($unites as $unite) {
+            $unitesMap[$unite->id] = $unite->abreviation;
+        }
+
+        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::Decompte,
+            ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures, "unites" => $unitesMap],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'decompte.pdf'
+        );
     }
 
     public function decompteMontantsAFacturer($decompteId)
@@ -179,7 +200,7 @@ class PaiementService
         return Excel::download(new AFacturerExport($decompteId), 'a_facturer.xlsx');
     }
 
-    public static function impressionDecompteSapeur($decompteId, $sapeurId)
+    public static function impressionDecompteSapeur($decompteId, $sapeurId, string $sisKey)
     {
         // Pour le moment que les écritures du décompte !
         $ecritures = DB::table('ecritures')
@@ -205,10 +226,10 @@ class PaiementService
             ->orderBy('ecritures.heure')
             ->get();
 
-        return self::printDecompteSapeur($decompteId, $ecritures);
+        return self::printDecompteSapeur($decompteId, $ecritures, $sisKey);
     }
 
-    public function impressionDecompteParSapeur($decompteId)
+    public function impressionDecompteParSapeur($decompteId, string $sisKey)
     {
         // Pour le moment que les écritures du décompte !
         $ecritures = DB::table('ecritures')
@@ -233,10 +254,10 @@ class PaiementService
             ->orderBy('ecritures.heure')
             ->get();
 
-        return $this->printDecompteSapeur($decompteId, $ecritures);
+        return $this->printDecompteSapeur($decompteId, $ecritures, $sisKey);
     }
 
-    private static function printDecompteSapeur($decompteId, $ecritures)
+    private static function printDecompteSapeur($decompteId, $ecritures, string $sisKey)
     {
         $decompte = Decompte::with('paiements')->find($decompteId);
         $decomptes = Decompte::where('exercice_comptable_id', $decompte->exercice_comptable_id)->get();
@@ -256,11 +277,24 @@ class PaiementService
         foreach ($sapeurs as $sapeur) {
             $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
         }
-        return View('pdf/decomptes-sapeurs', ["decompte" => $decompte, "decomptes" => $decomptesMap, "sapeurs" => $sapeursMap, "ecritures" => $ecritures, "comptes" => $comptesMap]);
+
+        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::DecompteParSapeur,
+            ["decompte" => $decompte, "decomptes" => $decomptesMap, "sapeurs" => $sapeursMap, "ecritures" => $ecritures, "comptes" => $comptesMap],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'decompte-par-sapeur.pdf'
+        );
     }
 
     public function impressionDecompteParCompte($decompteId)
     {
+        // FIXME: actuellement pas affiché par compte
         $decompte = Decompte::find($decompteId);
         $ecritures = Ecriture::where('decompte_id', '=', $decompteId)->orderBy('date')->get();
         $sapeursMap = [];

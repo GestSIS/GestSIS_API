@@ -2,6 +2,9 @@
 
 namespace App\Domaine\API;
 
+use App\Application\Typst\TypstTemplate;
+use App\Application\Typst\TypstToPdfGenerator;
+use App\Domaine\Business\SisParamBusiness;
 use App\Infrastructure\Models\Civilite;
 use App\Infrastructure\Models\ConvocationParam;
 use App\Infrastructure\Models\Exercice;
@@ -11,7 +14,7 @@ use App\Infrastructure\Models\Sapeur;
 
 class ConvocationService
 {
-    public function convoquer($exerciceComptableId, array $sapeurIds)
+    public function convoquer($exerciceComptableId, array $sapeurIds, string $sisKey)
     {
         $civilites = Civilite::all();
         $localites = Localite::all();
@@ -20,7 +23,7 @@ class ConvocationService
 
         // Filtrage des personnes "pour info" 
         $exercices = Exercice::with('sapeurs')->where('exercice_comptable_id', $exerciceComptableId)->orderBy('date')->orderBy('heure')->get();
-        $sapeurIds = array_values(array_unique(array_merge(...array_map(fn ($e) => array_map(fn ($c) => $c['sapeur_id'], $e['sapeurs']), $exercices->toArray()))));
+        $sapeurIds = array_values(array_unique(array_merge(...array_map(fn($e) => array_map(fn($c) => $c['sapeur_id'], $e['sapeurs']), $exercices->toArray()))));
 
         // Filtre les sapeurs à partir de $params['sapeurIds'] si existant et non vide
         if (count($sapeurIds) > 0) {
@@ -56,13 +59,24 @@ class ConvocationService
             $exercicesMap[$e->id] = $e;
         }
 
-        return View('pdf/convocation', [
-            "params" => $params ?? [],
-            "sapeurs" => $sapeursMap,
-            "exercices" => $exercicesMap,
-            "civilites" => $civilitesMap,
-            "localites" => $localitesMap,
-            "categories" => $categoriesMap,
-        ]);
+        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::Convocations,
+            [
+                "params" => $params ?? [],
+                "sapeurs" => $sapeursMap,
+                "exercices" => $exercicesMap,
+                "civilites" => $civilitesMap,
+                "localites" => $localitesMap,
+                "categories" => $categoriesMap,
+            ],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'convocations.pdf'
+        );
     }
 }

@@ -392,9 +392,6 @@
     @if ($finSapeur)
       <div class="container-fluid">
         <div class="row">
-          {{-- TODO: Gérer les écritures divers avec montants négatifs --}}
-          {{-- TODO: Ne pas comptabiliser les écritures d'anciens décomptes -> OK à priori --}}
-          {{-- TODO: Ajout résumé des paiements en clôture du document --}}
           <div class="col-9"></div>
           <div class="col-2 p-1">Total</div>
           <div class="col-1 text-end p-1 bg-light border border-secondary border-bottom-0">
@@ -503,5 +500,4 @@
     @endif
   </div>
 </body>
-
 </html>

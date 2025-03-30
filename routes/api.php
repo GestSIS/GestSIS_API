@@ -352,9 +352,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         // Route::post('exercices/{convocationId}/excuses', [ExcuseController::class, 'store'])->name('api.v2.excuses.store');
         Route::delete('exercices/{exerciceId}/excuses/{sapeurId}', [ExcuseController::class, 'destroy'])->name('api.v2.excuses.delete');
         Route::get('exercices/{exerciceId}/excuses/{sapeurId}/justificatif', [ExcuseController::class, 'downloadJustificatif'])->name('api.v2.exercices.excuse.justificatif');
-
-        // TODO: à implémenter
-        // Route::get('exercices/{id}/liste-appel-localite', [ExerciceController::class, 'listeAppelLocalite']);
     });
     Route::group(['middleware' => 'jwtTokenRole:exercice.modification'], function () {
         Route::resource('exercices', ExerciceController::class)->only(['store', 'update']);

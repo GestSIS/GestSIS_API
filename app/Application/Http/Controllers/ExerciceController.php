@@ -69,11 +69,13 @@ class ExerciceController extends Controller
             $indexedExercice[$heure['exercice_id']]['indexedSapeurs'][$heure['sapeur_id']]['heures'][] = $heure;
         }
 
-        return response()->json(['data' => array_map(function ($e) {
-            $e['sapeurs'] = array_values($e['indexedSapeurs']);
-            unset($e['indexedSapeurs']);
-            return $e;
-        }, array_values($indexedExercice))]);
+        return response()->json([
+            'data' => array_map(function ($e) {
+                $e['sapeurs'] = array_values($e['indexedSapeurs']);
+                unset($e['indexedSapeurs']);
+                return $e;
+            }, array_values($indexedExercice))
+        ]);
     }
 
     public function store(Request $request)
@@ -149,18 +151,15 @@ class ExerciceController extends Controller
         return response()->json(['data' => $exercice]);
     }
 
-    function listeAppel($exerciceId)
+    function listeAppel(Request $request, $exerciceId)
     {
-        return $this->service->listeAppel($exerciceId);
+        $sisKey = $request->header('Sis-Id', Null);
+        return $this->service->listeAppel($exerciceId, $sisKey);
     }
 
-    function listeAppelParLocalite($exerciceId)
+    function listePresence(Request $request, $exerciceId)
     {
-        return $this->service->listeAppelParLocalite($exerciceId);
-    }
-
-    function listePresence($exerciceId)
-    {
-        return $this->service->listePresence($exerciceId);
+        $sisKey = $request->header('Sis-Id', Null);
+        return $this->service->listePresence($exerciceId, $sisKey);
     }
 }

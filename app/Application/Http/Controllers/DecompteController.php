@@ -96,7 +96,7 @@ class DecompteController extends Controller
         return response()->json(['data' => $decompte]);
     }
 
-    public function ecritures(Int $decompteId)
+    public function ecritures(int $decompteId)
     {
         $ecritures = $this->service->getEcrituresPourDecompte($decompteId);
         return response()->json(['data' => $ecritures]);
@@ -136,13 +136,14 @@ class DecompteController extends Controller
     }
 
     /**
-     * Créer un fichier iso20022 pour un décompte
+     * Créer un fichier pdf pour un décompte
      * 
      * @param int $id id du décompte pour lequelle le fichier doit être créé
      */
-    public function print($id)
+    public function print(Request $request, $id)
     {
-        return $this->service->impressionDecompte($id);
+        $sisKey = $request->header('Sis-Id', Null);
+        return $this->service->impressionDecompte($id, $sisKey);
     }
 
     /**
@@ -150,9 +151,10 @@ class DecompteController extends Controller
      * 
      * @param int $id id du décompte pour lequelle le fichier doit être créé
      */
-    public function printParSapeur($decompteId)
+    public function printParSapeur(Request $request, $decompteId)
     {
-        return $this->service->impressionDecompteParSapeur($decompteId);
+        $sisKey = $request->header('Sis-Id', Null);
+        return $this->service->impressionDecompteParSapeur($decompteId, $sisKey);
     }
 
     /**
@@ -160,9 +162,10 @@ class DecompteController extends Controller
      * 
      * @param int $id id du décompte pour lequelle le fichier doit être créé
      */
-    public function printPourSapeur($decompteId, $sapeurId)
+    public function printPourSapeur(Request $request, $decompteId, $sapeurId)
     {
-        return $this->service->impressionDecompteSapeur($decompteId, $sapeurId);
+        $sisKey = $request->header('Sis-Id', Null);
+        return $this->service->impressionDecompteSapeur($decompteId, $sapeurId, $sisKey);
     }
 
     /**
