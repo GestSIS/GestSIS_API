@@ -41,7 +41,7 @@ class TypstToPdfGenerator
 
         if ($result->failed()) {
             $directory->delete();
-            throw new ArrayException(['input' => json_encode($data)], "Une erreur est survenue lors de la generation du pdf");
+            throw new ArrayException(['output' => $result->error_log, 'input' => json_encode($data)], "Une erreur est survenue lors de la generation du pdf");
         }
 
         $pdfPath = $directory->path("$template->value.pdf");
