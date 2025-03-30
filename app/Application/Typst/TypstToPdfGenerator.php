@@ -14,8 +14,8 @@ enum TypstTemplate: string
     case DecompteParSapeur = 'decompte-par-sapeur';
     case Decompte = 'decompte';
     case FicheSapeur = 'fiche_sapeur';
-    case ListeAppel = 'liste_appel';
-    case ListePresence = 'liste_presence';
+    case ListeAppel = 'liste-appel';
+    case ListePresence = 'liste-presence';
     case RapportIntervention = 'rapport-intervention';
 }
 
