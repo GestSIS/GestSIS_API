@@ -37,11 +37,11 @@ class TypstToPdfGenerator
         File::put($jsonFile, json_encode($data));
         File::put($logoFile, Storage::get($logoPath));
 
-        $result = Process::run(config('typst.bin_path') . " compile $typstFile");
+        $result = Process::run(config('typst.bin_path') . " compile $typstFile --font-path=" . config('typst.font_path'));
 
         if ($result->failed()) {
             $directory->delete();
-            throw new ArrayException(['output' => $result->error_log, 'input' => json_encode($data)], "Une erreur est survenue lors de la generation du pdf");
+            throw new ArrayException(['output' => $result->errorOutput(), 'input' => json_encode($data)], "Une erreur est survenue lors de la generation du pdf");
         }
 
         $pdfPath = $directory->path("$template->value.pdf");

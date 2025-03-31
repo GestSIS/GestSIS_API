@@ -1,3 +1,6 @@
+#import "common.typ": formatDate, formatTime
+#set text(font: "DM Sans", weight: "extralight")
+
 #set page("a4", margin: (top: 3cm, rest: 2cm), header: {
     grid(
         columns: (1fr, 1fr, 1fr),
@@ -5,7 +8,6 @@
         image("logo", height: 1.5cm)
     )
 }, numbering: "1", flipped: true)
-//#set text(font: "DM Sans")
 
 #show heading.where(level: 1): it => {
   pagebreak(weak: true)
@@ -13,14 +15,6 @@
   it
 }
 
-#let formatDate(date) = if date != none {
-  datetime(year:int(date.slice(0,4)), day: int(date.slice(8,10)), month: int(date.slice(5,7)))
-    .display("[day].[month].[year repr:last_two]")
-}
-#let formatTime(date) = if date != none { 
-  datetime(hour:int(date.slice(0,2)), minute: int(date.slice(3,5)), second: 0)
-    .display("[hour]:[minute]")
-}
 #let (decompte, decomptes, sapeurs, ecritures) = json("decompte-par-sapeur.json")
 
 #let formatTarif(ecriture) = {

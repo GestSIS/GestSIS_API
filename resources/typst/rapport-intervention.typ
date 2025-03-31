@@ -1,4 +1,5 @@
 #import "common.typ": formatDate, formatTime, formatDateTime
+#set text(font: "DM Sans", weight: "extralight")
 
 #set page("a4", margin: (top: 3cm, left: 3cm, right: 2cm, rest: 2cm), header: {
     grid(
@@ -15,6 +16,7 @@
 #set table(
   fill: (_, y) => if calc.even(y) { rgb(0, 0, 0, 5%) },
 )
+
 
 = Rapport d'intervention
 
