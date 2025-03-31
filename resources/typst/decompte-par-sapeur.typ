@@ -1,7 +1,7 @@
 #import "common.typ": formatDate, formatTime
 #set text(font: "DM Sans", weight: "extralight")
 
-#set page("a4", margin: (top: 3cm, rest: 2cm), header: {
+#set page("a4", margin: (top: 3cm, left: 1.5cm, right: 0.5cm, rest: 2cm), header: {
     grid(
         columns: (1fr, 1fr, 1fr),
         align: (left + horizon, center + horizon, right + horizon),
