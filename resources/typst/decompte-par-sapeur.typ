@@ -1,7 +1,7 @@
 #import "common.typ": formatDate, formatTime
 #set text(font: "DM Sans", weight: "extralight")
 
-#set page("a4", margin: (top: 3cm, left: 1.5cm, right: 0.5cm, rest: 2cm), header: {
+#set page("a4", margin: (top: 3cm, left: 1.5cm, right: 1.5cm, rest: 2cm), header: {
     grid(
         columns: (1fr, 1fr, 1fr),
         align: (left + horizon, center + horizon, right + horizon),
@@ -75,12 +75,12 @@
   table.hline(),
       ..subEcritures.map((ecriture) => {
           (if ecriture.date != none { formatDate(ecriture.date) },
-          [#formatTime(ecriture.heure)],
-          [#ecriture.designation],
-          [#formatTarif(ecriture)],
-          [#ecriture.quantite],
-          [#formatDate(decomptes.at(str(ecriture.decompte_id)).date)],
-          [#ecriture.total])
+          formatTime(ecriture.heure),
+          ecriture.designation,
+          formatTarif(ecriture),
+          ecriture.quantite,
+          formatDate(decomptes.at(str(ecriture.decompte_id)).date),
+          ecriture.total)
       }).flatten(),
       table.footer(
         repeat: false,
@@ -117,27 +117,28 @@
     [Sapeur], [Solde], [Indemnite], [Cotisations\ AVS/AC], [Frais effectif], [Frais forfaitaire], [Autre], [Total]
   ),
   table.hline(),
-  ..decompte.paiements.map(paiement => {
-    (
-      [#sapeurs.at(str(paiement.sapeur_id))],
-      [#paiement.solde],
-      [#paiement.indemnite],
-      [#paiement.avs_ac],
-      [#paiement.frais_effectif],
-      [#paiement.frais_forfaitaire],
-      [#paiement.autre],
-      [*#paiement.total*])
-  }).flatten(),
+  ..decompte.paiements.map(paiement => {(
+      sapeurs.at(str(paiement.sapeur_id)),
+      paiement.solde,
+      paiement.indemnite,
+      paiement.avs_ac,
+      paiement.frais_effectif,
+      paiement.frais_forfaitaire,
+      paiement.autre,
+      [*#paiement.total*]
+  )}).flatten(),
   // TODO: Optimiser les multiples maps suivantes en ue seule réduction
   table.footer(
     repeat: false,
-    [*Nombre: #decompte.paiements.len()*],
-    [*#decompte.paiements.map(p => decimal(p.solde)).sum()*],
-    [*#decompte.paiements.map(p => decimal(p.indemnite)).sum()*],
-    [*#decompte.paiements.map(p => decimal(p.avs_ac)).sum()*],
-    [*#decompte.paiements.map(p => decimal(p.frais_effectif)).sum()*],
-    [*#decompte.paiements.map(p => decimal(p.frais_forfaitaire)).sum()*],
-    [*#decompte.paiements.map(p => decimal(p.autre)).sum()*],
-    [*#decompte.paiements.map(p => decimal(p.total)).sum()*],
+    ..(
+      [Nombre: #decompte.paiements.len()],
+      decompte.paiements.map(p => decimal(p.solde)).sum(),
+      decompte.paiements.map(p => decimal(p.indemnite)).sum(),
+      decompte.paiements.map(p => decimal(p.avs_ac)).sum(),
+      decompte.paiements.map(p => decimal(p.frais_effectif)).sum(),
+      decompte.paiements.map(p => decimal(p.frais_forfaitaire)).sum(),
+      decompte.paiements.map(p => decimal(p.autre)).sum(),
+      decompte.paiements.map(p => decimal(p.total)).sum()
+    ).map(el => [*#el*]),
   )
 )

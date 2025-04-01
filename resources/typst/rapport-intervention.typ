@@ -1,13 +1,13 @@
 #import "common.typ": formatDate, formatTime, formatDateTime
 #set text(font: "DM Sans", weight: "extralight")
 
-#set page("a4", margin: (top: 3cm, left: 1.5cm, right: 0.5cm, rest: 2cm), header: {
+#set page("a4", margin: (top: 3cm, left: 2cm, right: 1cm, rest: 2cm), header: {
     grid(
         columns: (1fr, 1fr, 1fr),
         align: (left + horizon, center + horizon, right + horizon),
         image("logo", height: 1.5cm)
     )
-})
+}, numbering: "1")
 
 #let (
   intervention, params, vehicules, materiels, groupes, sapeurs, quittances, presences, ecritures
@@ -121,10 +121,10 @@
   table(
     stroke: none,
     columns: (auto, auto, auto, 1fr, auto),
-    table.header(
-      [*Début*], [*Quittance*], [*Titre*], [*Résumé*], [*Responsable*]
-    ),
     ..if intervention.missions.len() > 0 {
+      (table.header(
+        [*Début*], [*Quittance*], [*Titre*], [*Résumé*], [*Responsable*]
+      ),
       intervention.missions
         .map(mission=> (
           [#mission.debut],
@@ -136,7 +136,7 @@
               let sapeur = sapeurs.at(str(mission.sapeur_id))
               [#sapeur.nom #sapeur.prenom]
             } else [#mission.sapeur]}
-        )).flatten()
+          ))).flatten()
     } else {([Aucune mission],)}
   )
 }
@@ -149,10 +149,10 @@
   table(
     stroke: none,
     columns: (auto, auto, auto, 1fr),
-    table.header(
-      [*Date*], [*Nom*], [*Numéro*], [*Commentaire*]
-    ),
-    ..if intervention.appels.len() > 0 {
+    ..if intervention.appels.len() > 0 {(
+      table.header(
+        [*Date*], [*Nom*], [*Numéro*], [*Commentaire*]
+      ),
       intervention.appels
         .map(appel=> (
           [#appel.date],
@@ -160,7 +160,7 @@
           [#appel.numero],
           [#appel.commentaire]
         )).flatten()
-    } else {([Aucun appell],)}
+    )} else {([Aucun appel],)}
   )
 }
 
