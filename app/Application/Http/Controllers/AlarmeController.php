@@ -36,7 +36,7 @@ class AlarmeController extends Controller
         } catch (Exception $e) {
             return response()->json(["error" => "Accès refusé"], 401);
         }
-        $sisKey = $request->header('Sis-Key', Null);
+        $sisKey = $request->header('Sis-Id', Null);
 
         $interventions = $this->service->listeAlarme($sisKey, $token, $force);
         return response()->json(['data' => $interventions]);

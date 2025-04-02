@@ -32,7 +32,7 @@ class SisLogoController extends Controller
         }
 
         $file = $request->file('logo');
-        $sisKey = $request->header('Sis-Key', Null);
+        $sisKey = $request->header('Sis-Id', Null);
         $justificatif = $this->service->updateLogo($sisKey, $file);
 
         return response()->json(['data' => $justificatif]);

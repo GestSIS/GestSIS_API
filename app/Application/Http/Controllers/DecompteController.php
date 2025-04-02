@@ -142,7 +142,7 @@ class DecompteController extends Controller
      */
     public function print(Request $request, $id)
     {
-        $sisKey = $request->header('Sis-Key', Null);
+        $sisKey = $request->header('Sis-Id', Null);
         return $this->service->impressionDecompte($id, $sisKey);
     }
 
@@ -153,7 +153,7 @@ class DecompteController extends Controller
      */
     public function printParSapeur(Request $request, $decompteId)
     {
-        $sisKey = $request->header('Sis-Key', Null);
+        $sisKey = $request->header('Sis-Id', Null);
         return $this->service->impressionDecompteParSapeur($decompteId, $sisKey);
     }
 
@@ -164,7 +164,7 @@ class DecompteController extends Controller
      */
     public function printPourSapeur(Request $request, $decompteId, $sapeurId)
     {
-        $sisKey = $request->header('Sis-Key', Null);
+        $sisKey = $request->header('Sis-Id', Null);
         return $this->service->impressionDecompteSapeur($decompteId, $sapeurId, $sisKey);
     }
 

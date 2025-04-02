@@ -47,7 +47,7 @@ class JustificatifController extends Controller
         }
 
         $file = $request->file('justificatif');
-        $sisKey = $request->header('Sis-Key', Null);
+        $sisKey = $request->header('Sis-Id', Null);
         $justificatif = $this->service->addJustificatif($id, $file, $sisKey);
 
         return response()->json(['data' => $justificatif]);
