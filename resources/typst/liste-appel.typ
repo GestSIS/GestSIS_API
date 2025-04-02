@@ -42,11 +42,10 @@
       [#if presence.present == 1 [☑] else [☐]],
       [#if presence.absent == 1 [☑] else [☐]],
       [#if presence.remplace == 1 [☑] else [☐]],
-      [#if presence.excuse_type_id == 0 [☑] else [☐]],
+      [#if presence.excuse_type_id > 0 [☑] else [☐]],
     )
   }).flatten(),
   table.footer(
     [*Total: #exercice.sapeurs.len()*]
   )
 )
-

@@ -9,7 +9,7 @@
     )
 }, numbering: "1")
 
-#let (exercice, excuses) = json("liste-appel.json")
+#let (exercice, excuses) = json("liste-presence.json")
 
 
 = Liste présence
