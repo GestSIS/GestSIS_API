@@ -294,16 +294,8 @@ class PaiementService
 
     public function impressionDecompteParCompte($decompteId)
     {
-        // FIXME: actuellement pas affiché par compte
-        $decompte = Decompte::find($decompteId);
-        $ecritures = Ecriture::where('decompte_id', '=', $decompteId)->orderBy('date')->get();
-        $sapeursMap = [];
-        $sapeurs = Sapeur::get(['id', 'nom', 'prenom']);
-        foreach ($sapeurs as $sapeur) {
-            $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
-        }
-
-        return View('pdf/decompte', ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures]);
+        // TODO: à implémenter
+        throw new ArrayException([], "Non implémenté pour le moment");
     }
 
     /**

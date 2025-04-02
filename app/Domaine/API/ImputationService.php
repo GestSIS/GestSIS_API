@@ -2,7 +2,10 @@
 
 namespace App\Domaine\API;
 
+use App\Application\Typst\TypstTemplate;
+use App\Application\Typst\TypstToPdfGenerator;
 use App\Domaine\Business\ImputationBusiness;
+use App\Domaine\Business\SisParamBusiness;
 use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
@@ -10,6 +13,7 @@ use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Sapeur;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ImputationService
@@ -189,9 +193,9 @@ class ImputationService
         return $this->business->imputerCours($coursSapeurId, $data);
     }
 
-    function annulerImputationCours($coursSapeurId,)
+    function annulerImputationCours($coursSapeurId, )
     {
-        return $this->business->annulerImputationCours($coursSapeurId,);
+        return $this->business->annulerImputationCours($coursSapeurId, );
     }
 
     function imputationTravail($ids)
@@ -199,9 +203,9 @@ class ImputationService
         return $this->business->imputerTravaux($ids);
     }
 
-    function annulerImputationTravail($coursSapeurId,)
+    function annulerImputationTravail($coursSapeurId, )
     {
-        return $this->business->annulerImputationTravail($coursSapeurId,);
+        return $this->business->annulerImputationTravail($coursSapeurId, );
     }
 
     function genererAmendesSapeur($exerciceComptableId, $sapeurId)
@@ -214,11 +218,13 @@ class ImputationService
         return $this->business->genererAmendesAnnuels($exerciceComptableId);
     }
 
-    public function justificatifIndividuel(int $exerciceComptableId, int $compteId)
+    public function justificatifIndividuel(int $exerciceComptableId, int $compteId, string $sisKey)
     {
-        $compte = Compte::with(['ecritures' => function ($query) use ($exerciceComptableId) {
-            $query->where('exercice_comptable_id', $exerciceComptableId)->orderBy('date', 'asc');
-        }])->find($compteId);
+        $compte = Compte::with([
+            'ecritures' => function ($query) use ($exerciceComptableId) {
+                $query->where('exercice_comptable_id', $exerciceComptableId)->orderBy('date', 'asc');
+            }
+        ])->find($compteId);
 
         $sapeursMap = [];
         $sapeurs = Sapeur::get(['id', 'nom', 'prenom']);
@@ -232,18 +238,33 @@ class ImputationService
             $decomptesMap[$decompte->id] = $decompte->date;
         }
 
-        return View('pdf/compte', [
-            "compte" => $compte,
-            "sapeurs" => $sapeursMap,
-            "decomptes" => $decomptesMap,
-        ]);
+
+        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::Comptes,
+            [
+                "date" => Carbon::now(),
+                "comptes" => [$compte],
+                "sapeurs" => $sapeursMap,
+                "decomptes" => $decomptesMap,
+            ],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'justificatif_complet.pdf'
+        );
     }
 
-    public function justificatifComplet(int $exerciceComptableId)
+    public function justificatifComplet(int $exerciceComptableId, string $sisKey)
     {
-        $comptes = Compte::with(['ecritures' => function ($query) use ($exerciceComptableId) {
-            $query->where('exercice_comptable_id', $exerciceComptableId)->orderBy('date', 'asc');
-        }])->orderBy('numero', 'asc')->get();
+        $comptes = Compte::with([
+            'ecritures' => function ($query) use ($exerciceComptableId) {
+                $query->where('exercice_comptable_id', $exerciceComptableId)->orderBy('date', 'asc');
+            }
+        ])->orderBy('numero', 'asc')->get();
 
         // Chargement des groupes
         $sapeursMap = [];
@@ -258,10 +279,22 @@ class ImputationService
             $decomptesMap[$decompte->id] = $decompte->date;
         }
 
-        return View('pdf/comptes', [
-            "comptes" => $comptes,
-            "sapeurs" => $sapeursMap,
-            "decomptes" => $decomptesMap,
-        ]);
+        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::Comptes,
+            [
+                "date" => Carbon::now(),
+                "comptes" => $comptes,
+                "sapeurs" => $sapeursMap,
+                "decomptes" => $decomptesMap,
+            ],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'justificatif_complet.pdf'
+        );
     }
 }

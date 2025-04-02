@@ -133,10 +133,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenVali
     Route::get('sis-communes-tous', [AdminController::class, 'sisCommunes']);
 });
 
-// Route::get('exercices-comptable/{exercieComptableId}/justificatif', [CompteController::class, 'justificatifComplet']);
-// Route::get('decomptes/{id}/print', [DecompteController::class, 'print']);
-// Route::get('decomptes/{id}/print-par-sapeur', [DecompteController::class, 'printParSapeur']);
-// Route::get('decomptes/{id}/print-par-compte', [DecompteController::class, 'printParCompte']);
 Route::group(['prefix' => 'v2'], function () {
     Route::resource('sis-logo', SisLogoController::class)->only(['show']);
 });

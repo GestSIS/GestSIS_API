@@ -10,9 +10,10 @@ use Storage;
 
 enum TypstTemplate: string
 {
+    case Comptes = 'comptes';
     case Convocations = 'convocations';
-    case DecompteParSapeur = 'decompte-par-sapeur';
     case Decompte = 'decompte';
+    case DecompteParSapeur = 'decompte-par-sapeur';
     case FicheSapeur = 'fiche_sapeur';
     case ListeAppel = 'liste-appel';
     case ListePresence = 'liste-presence';

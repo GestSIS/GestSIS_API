@@ -63,13 +63,15 @@ class CompteController extends Controller
         return response()->json(['data' => $this->service->getEcrituresByCompte($id, $exerciceComptableId)]);
     }
 
-    public function justificatifIndividuel(int $exerciceComptableId, int $compteId)
+    public function justificatifIndividuel(Request $request, int $exerciceComptableId, int $compteId)
     {
-        return $this->service->justificatifIndividuel($exerciceComptableId, $compteId);
+        $sisKey = $request->header('Sis-Id', Null);
+        return $this->service->justificatifIndividuel($exerciceComptableId, $compteId, $sisKey);
     }
 
-    public function justificatifComplet(int $exerciceComptableId)
+    public function justificatifComplet(Request $request, int $exerciceComptableId)
     {
-        return $this->service->justificatifComplet($exerciceComptableId);
+        $sisKey = $request->header('Sis-Id', Null);
+        return $this->service->justificatifComplet($exerciceComptableId, $sisKey);
     }
 }
