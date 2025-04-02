@@ -110,7 +110,7 @@ class ConvocationsController extends Controller
 
         $file = $request->file('justificatif_file');
 
-        $sisKey = $request->header('Sis-Id', Null);
+        $sisKey = $request->header('Sis-Key', Null);
         $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
         $hasValidationPermission = $admin || in_array('exercice.validation', $perms);

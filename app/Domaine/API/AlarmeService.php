@@ -29,7 +29,7 @@ class AlarmeService
     {
         try {
             $response = Http::withHeaders([
-                'Sis-Id' => $sisKey,
+                'Sis-Key' => $sisKey,
                 'Authorization' => 'Bearer ' . $token
             ])
                 ->acceptJson()
@@ -47,7 +47,8 @@ class AlarmeService
                     return "+41" . substr($tmp, 1);
                 }
                 return $tmp;
-            };
+            }
+            ;
 
             // Enhance response -> Se base uniquement sur les sapeurs actifs
             $sapeurs = Sapeur::with('telephones')->where('actif', '=', 1)->get(['nom', 'prenom', 'suffixe', 'id']);

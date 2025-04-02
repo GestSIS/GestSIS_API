@@ -153,13 +153,13 @@ class ExerciceController extends Controller
 
     function listeAppel(Request $request, $exerciceId)
     {
-        $sisKey = $request->header('Sis-Id', Null);
+        $sisKey = $request->header('Sis-Key', Null);
         return $this->service->listeAppel($exerciceId, $sisKey);
     }
 
     function listePresence(Request $request, $exerciceId)
     {
-        $sisKey = $request->header('Sis-Id', Null);
+        $sisKey = $request->header('Sis-Key', Null);
         return $this->service->listePresence($exerciceId, $sisKey);
     }
 }
