@@ -21,7 +21,7 @@ class DbSelector
             return $next($request);
         }
 
-        $sisKey = $request->header('Sis-Id', Null);
+        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
         if (is_null($sisKey)) {
             return response()->json(["error" => "Sis non sélectionné"], 401);
         }

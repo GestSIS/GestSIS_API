@@ -258,7 +258,7 @@ class InterventionController extends Controller
             'appels' => 'boolean',
         ]);
 
-        $sisKey = $request->header('Sis-Id', Null);
+        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
 
         return $this->service->rapport($id, $params, $sisKey);
     }

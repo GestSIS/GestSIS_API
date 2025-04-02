@@ -24,7 +24,7 @@ class SapeurPhotoController extends Controller
      */
     public function index(Request $request, int $id)
     {
-        $sisKey = $request->header('Sis-Id', Null);
+        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
         return $this->service->downloadPhotoSapeur($id, $sisKey);
     }
 
@@ -46,7 +46,7 @@ class SapeurPhotoController extends Controller
                     return response()->json(['data' => ['message' => 'Sapeur inexistant']], 500);
                 }
 
-                $sisKey = $request->header('Sis-Id', Null);
+                $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
                 $res = $this->service->uploadPhotoSapeur($validated['image'], $sapeurId, $sisKey);
                 return response()->json(['data' => $res]);
             }
@@ -63,7 +63,7 @@ class SapeurPhotoController extends Controller
      */
     public function destroy(Request $request, int $id)
     {
-        $sisKey = $request->header('Sis-Id', Null);
+        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
         $this->service->deletePhotoSapeur($id, $sisKey);
 
         return response()->json(['data' => "success"]);

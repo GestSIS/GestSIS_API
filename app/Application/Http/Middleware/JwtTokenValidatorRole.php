@@ -28,7 +28,7 @@ class JwtTokenValidatorRole
             return response()->json(["error" => "Accès refusé"], 401);
         }
 
-        $sisKey = $request->header('Sis-Id', Null);
+        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
         if (is_null($sisKey)) {
             return response()->json(["error" => "Sis non sélectionné"], 401);
         }

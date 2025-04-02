@@ -36,7 +36,7 @@ class MesDecomptesController extends Controller
      */
     public function print(Request $request, $decompteId)
     {
-        $sisKey = $request->header('Sis-Id', Null);
+        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
