@@ -2,7 +2,10 @@
 
 namespace App\Domaine\API;
 
+use App\Application\Typst\TypstTemplate;
+use App\Application\Typst\TypstToPdfGenerator;
 use App\Domaine\Business\SapeurBusiness;
+use App\Domaine\Business\SisParamBusiness;
 use App\Domaine\SPI\ControleMedicalRepository;
 use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Collections\ListeFoadExport;
@@ -13,6 +16,7 @@ use App\Infrastructure\Models\FonctionSapeur;
 use App\Infrastructure\Models\GradeSapeur;
 use App\Infrastructure\Models\MaterielPersonnel;
 use App\Infrastructure\Models\Mutation;
+use App\Infrastructure\Models\Permis;
 use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\SapeurTelephone;
 use Carbon\Carbon;
@@ -51,17 +55,30 @@ class SapeurService
         ]);
     }
 
-    public function fiche($sapeurId)
+    public function fiche($sapeurId, string $sisKey)
     {
         $sapeur = Sapeur::with(['localite', 'civilite', 'fonction', 'grade'])->find($sapeurId);
-        return View('pdf/fiche-sapeur', [
-            "sapeur" => $sapeur,
-            "fonctions" => FonctionSapeur::with('fonction')->where('sapeur_id', '=', $sapeurId)->orderBy('debut')->get(),
-            "grades" => GradeSapeur::with('grade')->where('sapeur_id', '=', $sapeurId)->orderBy('date')->get(),
-            "mutations" => Mutation::with('localite')->where('sapeur_id', '=', $sapeurId)->orderBy('incorporation')->get(),
-            "cours" => CoursSapeur::with(['localite', 'cours'])->where('sapeur_id', '=', $sapeurId)->orderBy('date')->get(),
-            "telephones" => SapeurTelephone::with(['telephoneType'])->where('sapeur_id', '=', $sapeurId)->orderBy('priorite')->get(),
-        ]);
+
+        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::FicheSapeur,
+            [
+                "sapeur" => $sapeur,
+                "fonctions" => FonctionSapeur::with('fonction')->where('sapeur_id', '=', $sapeurId)->orderBy('debut')->get(),
+                "grades" => GradeSapeur::with('grade')->where('sapeur_id', '=', $sapeurId)->orderBy('date')->get(),
+                "mutations" => Mutation::with('localite')->where('sapeur_id', '=', $sapeurId)->orderBy('incorporation')->get(),
+                "cours" => CoursSapeur::with(['localite', 'cours'])->where('sapeur_id', '=', $sapeurId)->orderBy('date')->get(),
+                "telephones" => SapeurTelephone::with(['telephoneType'])->where('sapeur_id', '=', $sapeurId)->orderBy('priorite')->get(),
+                "permis" => Permis::with(['permisType'])->where('sapeur_id', '=', $sapeurId)->orderBy('date')->get(),
+            ],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'liste-appel.pdf'
+        );
     }
 
     public function listeSapeurs(bool $actif)
@@ -190,7 +207,7 @@ class SapeurService
 
         // Ajout de l'image
         $extension = strtolower($image->extension());
-        return $image->storeAs('photos/' . $sisKey,  $sapeurId . "." . $extension);
+        return $image->storeAs('photos/' . $sisKey, $sapeurId . "." . $extension);
     }
 
     public function createSapeur($data)

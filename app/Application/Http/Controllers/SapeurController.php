@@ -46,9 +46,10 @@ class SapeurController extends Controller
     /**
      * Return la fiche sapeur
      */
-    public function fiche($sapeurId)
+    public function fiche(Request $request, $sapeurId)
     {
-        return $this->service->fiche($sapeurId);
+        $sisKey = $request->header('Sis-Id', null);
+        return $this->service->fiche($sapeurId, $sisKey);
     }
 
     /**
