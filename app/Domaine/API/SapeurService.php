@@ -37,22 +37,48 @@ class SapeurService
         $this->business = $business;
     }
 
-    public function trombinoscope($sisId)
+    public function trombinoscope(string $sisKey)
     {
-        $defaultImagePath = 'icon/user.svg';
-        $imageDefault = "data:image/svg+xml;base64," . base64_encode(Storage::get($defaultImagePath));
+        $imageDefault = 'icon/user.svg';
 
         $sapeurs = Sapeur::where([['actif', '=', 1], ['type', '=', SapeurBusiness::TYPE_SAPEUR]])
             ->orderBy('nom')
             ->orderBy('prenom')
             ->get(['id', 'nom', 'prenom']);
 
-        return View('pdf/trombinoscope', [
-            "sapeurs" => $sapeurs,
-            "sisId" => $sisId,
-            "sapeurService" => $this,
-            "imageDefault" => $imageDefault,
-        ]);
+        $sapeurs = array_map(
+            fn($sapeur) => [
+                ...$sapeur,
+                'photo' => $this->getPhotoSapeurPath($sapeur['id'], $sisKey)
+            ],
+            $sapeurs->toArray()
+        );
+        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::Trombinoscope,
+            [
+                "sapeurs" => $sapeurs,
+                "sisId" => $sisKey,
+                "imageDefault" => $imageDefault,
+            ],
+            $logoPath,
+            extraStorageFiles: [
+                $imageDefault,
+                ...array_filter(
+                    array_map(
+                        fn($s) => $s['photo'],
+                        $sapeurs
+                    ),
+                    fn($path) => $path !== null
+                )
+            ]
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'trombinoscope.pdf'
+        );
     }
 
     public function fiche($sapeurId, string $sisKey)
@@ -77,7 +103,7 @@ class SapeurService
             function () use ($content) {
                 echo $content;
             },
-            'liste-appel.pdf'
+            'fiche-sapeur.pdf'
         );
     }
 
@@ -180,11 +206,26 @@ class SapeurService
         return response()->json(Null);
     }
 
-    public function getPhotoSapeurAsHtmlEncoding($sapeurId, $sisKey)
+    public function getPhotoSapeurPath($sapeurId, $sisKey)
     {
         foreach (self::$ALLOWED_PHOTO_EXTENSION as $extension) {
             $path = 'photos/' . $sisKey . '/' . $sapeurId . '.' . $extension;
             if (Storage::exists($path)) {
+                return $path;
+                return Storage::path($path);
+                // return "data:image/{$extension};base64," . base64_encode(Storage::get($path));
+            }
+        }
+        return null;
+    }
+
+
+    public function getPhotoSapeurBase64($sapeurId, $sisKey)
+    {
+        foreach (self::$ALLOWED_PHOTO_EXTENSION as $extension) {
+            $path = 'photos/' . $sisKey . '/' . $sapeurId . '.' . $extension;
+            if (Storage::exists($path)) {
+                //return Storage::path($path);
                 return "data:image/{$extension};base64," . base64_encode(Storage::get($path));
             }
         }

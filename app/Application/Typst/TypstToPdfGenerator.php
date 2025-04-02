@@ -8,6 +8,9 @@ use Process;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 use Storage;
 
+/**
+ * Typst template disponibles
+ */
 enum TypstTemplate: string
 {
     case Comptes = 'comptes';
@@ -18,11 +21,12 @@ enum TypstTemplate: string
     case ListeAppel = 'liste-appel';
     case ListePresence = 'liste-presence';
     case RapportIntervention = 'rapport-intervention';
+    case Trombinoscope = 'trombinoscope';
 }
 
 class TypstToPdfGenerator
 {
-    public static function generateDocument(TypstTemplate $template, array $data, string $logoPath)
+    public static function generateDocument(TypstTemplate $template, array $data, string $logoPath, array $extraStorageFiles = [])
     {
         $directory = (new TemporaryDirectory())->create();
 
@@ -38,10 +42,14 @@ class TypstToPdfGenerator
         File::put($jsonFile, json_encode($data));
         File::put($logoFile, Storage::get($logoPath));
 
+        foreach ($extraStorageFiles as $file) {
+            File::put($directory->path($file), Storage::get($file));
+        }
+
         $result = Process::run(config('typst.bin_path') . " compile $typstFile --font-path=" . config('typst.font_path'));
 
         if ($result->failed()) {
-            $directory->delete();
+            // $directory->delete();
             throw new ArrayException(['output' => $result->errorOutput(), 'input' => json_encode($data)], "Une erreur est survenue lors de la generation du pdf");
         }
 
