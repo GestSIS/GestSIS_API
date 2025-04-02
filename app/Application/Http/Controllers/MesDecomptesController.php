@@ -36,12 +36,13 @@ class MesDecomptesController extends Controller
      */
     public function print(Request $request, $decompteId)
     {
+        $sisKey = $request->header('Sis-Id', Null);
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        return $this->mesInfosService->printDecompte($sapeurId, $decompteId);
+        return $this->mesInfosService->printDecompte($sapeurId, $decompteId, $sisKey);
     }
 
     /**

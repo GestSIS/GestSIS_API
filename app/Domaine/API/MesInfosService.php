@@ -204,8 +204,8 @@ class MesInfosService
         ];
     }
 
-    function printDecompte($sapeurId, $decompteId)
+    function printDecompte($sapeurId, $decompteId, string $sisKey)
     {
-        return PaiementService::impressionDecompteSapeur($decompteId, $sapeurId);
+        return PaiementService::impressionDecompteSapeur($decompteId, $sapeurId, $sisKey);
     }
 }
