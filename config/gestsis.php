@@ -11,5 +11,4 @@ return [
    |
    */
   'alarm_url' => env('APP_GESTSIS_ALARM_URL', ''),
-  'print_url' => env('APP_GESTSIS_PRINT_URL', ''),
 ];
