@@ -89,17 +89,23 @@ class InterventionBusiness
         }
 
         // Check pas déjà cloturé
-        if ($exerciceComptable == NULL || $exerciceComptable->boucle) {
-            // Impossible d'ajouter l'intervention
-            throw new ArrayException(["message" => "Exercice comptable inexistant ou déjà bouclé"]);
+        if ($exerciceComptable == NULL) {
+            throw new ArrayException(["message" => "Exercice comptable inexistant"]);
+        } else if ($exerciceComptable->boucle) {
+            throw new ArrayException(["message" => "Exercice comptable déjà bouclé"]);
         }
 
         $intervention['exercice_comptable_id'] = $exerciceComptable->id;
-        if (!array_key_exists('wgs84', $intervention) || is_null($intervention['wgs84'])) $intervention['wgs84'] = '';
-        if (!array_key_exists('lieu', $intervention) || is_null($intervention['lieu'])) $intervention['lieu'] = '';
-        if (!array_key_exists('description', $intervention) || is_null($intervention['description'])) $intervention['description'] = '';
-        if (!array_key_exists('proprietaire', $intervention) || is_null($intervention['proprietaire'])) $intervention['proprietaire'] = '';
-        if (!array_key_exists('responsable', $intervention) || is_null($intervention['responsable'])) $intervention['responsable'] = '';
+        if (!array_key_exists('wgs84', $intervention) || is_null($intervention['wgs84']))
+            $intervention['wgs84'] = '';
+        if (!array_key_exists('lieu', $intervention) || is_null($intervention['lieu']))
+            $intervention['lieu'] = '';
+        if (!array_key_exists('description', $intervention) || is_null($intervention['description']))
+            $intervention['description'] = '';
+        if (!array_key_exists('proprietaire', $intervention) || is_null($intervention['proprietaire']))
+            $intervention['proprietaire'] = '';
+        if (!array_key_exists('responsable', $intervention) || is_null($intervention['responsable']))
+            $intervention['responsable'] = '';
 
         $newIntervention = new Intervention();
         $newIntervention->fill($intervention);
@@ -135,9 +141,12 @@ class InterventionBusiness
 
         // Ajout des missions
         $missions = array_map(function ($e) use ($newIntervention) {
-            if (!isset($e['resume']) || is_null($e['resume'])) $e['resume'] = '';
-            if (!isset($e['sapeur_id'])) $e['sapeur_id'] = null;
-            if (!isset($e['sapeur'])) $e['sapeur'] = null;
+            if (!isset($e['resume']) || is_null($e['resume']))
+                $e['resume'] = '';
+            if (!isset($e['sapeur_id']))
+                $e['sapeur_id'] = null;
+            if (!isset($e['sapeur']))
+                $e['sapeur'] = null;
             $e['intervention_id'] = $newIntervention->id;
             return $e;
         }, $missions);
@@ -146,7 +155,8 @@ class InterventionBusiness
 
         // Ajout des appels
         $appels = array_map(function ($e) use ($newIntervention) {
-            if (!isset($e['commentaire']) || is_null($e['commentaire'])) $e['commentaire'] = '';
+            if (!isset($e['commentaire']) || is_null($e['commentaire']))
+                $e['commentaire'] = '';
             $e['intervention_id'] = $newIntervention->id;
             return $e;
         }, $appels);

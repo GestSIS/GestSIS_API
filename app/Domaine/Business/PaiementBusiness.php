@@ -3,6 +3,7 @@
 namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\Exceptions\InvalidActionException;
 use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\Decompte;
@@ -158,11 +159,11 @@ class PaiementBusiness
                 if ($total_imposable >= $avsParam->franchise_avs) {
                     $avs = ImputationBusiness::arrondi_5_centimes(
                         ImputationBusiness::arrondi_5_centimes($total_imposable * ($avsParam->taux_avs / 2.0))
-                            - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_avs / 2.0))
+                        - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_avs / 2.0))
                     );
                     $ac = ImputationBusiness::arrondi_5_centimes(
                         ImputationBusiness::arrondi_5_centimes($total_imposable * ($avsParam->taux_ac / 2.0))
-                            - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_ac / 2.0))
+                        - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_ac / 2.0))
                     );
                     $decompte->avs_total += $avs;
                     $decompte->ac_total += $ac;
@@ -309,7 +310,7 @@ class PaiementBusiness
                 new IBAN($iban)
             );
         } catch (Exception $e) {
-            throw new ArrayException([], 'Veuillez vérifier les informations de paiement de votre SIS');
+            throw new InvalidActionException([], 'Veuillez vérifier les informations de paiement de votre SIS');
         }
 
         $paiement->setExecutionDate(DateTime::createFromFormat('Y-m-d', $decompte->date));
@@ -325,7 +326,7 @@ class PaiementBusiness
                     $transaction = new BankCreditTransfer(
                         "instr-" . $i,
                         "e2e-" . $i,
-                        new Money\CHF((int)($p->total * 100)),
+                        new Money\CHF((int) ($p->total * 100)),
                         // TODO: Could be improved en remplacant les charactères accentués par leur version non accentué
                         Text::sanitize($sapeur->prenom . " " . $sapeur->nom, 70),
                         new StructuredPostalAddress($sapeur->rue == "" ? null : $sapeur->rue, $sapeur->no_rue == "" ? null : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
@@ -369,7 +370,7 @@ class PaiementBusiness
             $transaction = new BankCreditTransfer(
                 "instr-001",
                 "e2e-001",
-                new Money\CHF((int)($p->total * 100)),
+                new Money\CHF((int) ($p->total * 100)),
                 $sapeur->prenom . " " . $sapeur->nom,
                 new StructuredPostalAddress($sapeur->rue == "" ? null : $sapeur->rue, $sapeur->no_rue == "" ? null : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
                 new IBAN($sapeur->iban),
@@ -448,7 +449,7 @@ class PaiementBusiness
             }
 
             $headers = [
-                'Content-type'        => 'application/pdf',
+                'Content-type' => 'application/pdf',
                 'Content-Disposition' => 'attachment; filename="certificats_salaire.pdf"',
             ];
 

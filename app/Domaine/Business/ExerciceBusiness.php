@@ -2,6 +2,7 @@
 
 namespace App\Domaine\Business;
 
+use App\Domaine\Exceptions\InvalidActionException;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\ExcuseParam;
@@ -115,7 +116,7 @@ class ExerciceBusiness
         // Check pas déjà imputé
         $statut = $this->repository->getExerciceStatutById($exerciceId);
         if ($statut > self::EXERCICE_STATUT_VALIDE) {
-            throw new ArrayException([], "Impossible de supprimer un exercice déjà imputé");
+            throw new InvalidActionException([], "Impossible de supprimer un exercice déjà imputé");
         }
 
         $this->repository->deleteExerciceById($exerciceId);

@@ -2,13 +2,12 @@
 
 namespace App\Domaine\Business;
 
-use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\Exceptions\InvalidActionException;
 use App\Infrastructure\Models\Amende;
 use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\EcritureCategorie;
-use App\Infrastructure\Models\ExerciceCategorie;
 use App\Infrastructure\Models\FraisIndemniteAnnuel;
 use App\Infrastructure\Models\FraisIndemniteAnnuelType;
 use App\Infrastructure\Models\HeureExerciceType;
@@ -16,7 +15,6 @@ use App\Infrastructure\Models\IndemniteCoursFonction;
 use App\Infrastructure\Models\IndemniteCoursType;
 use App\Infrastructure\Models\IndemniteExerciceFonction;
 use App\Infrastructure\Models\IndemniteExerciceType;
-use App\Infrastructure\Models\IndemniteInterventionFonction;
 use App\Infrastructure\Models\IndemniteInterventionType;
 
 class ComptabiliteParamBusiness
@@ -55,25 +53,25 @@ class ComptabiliteParamBusiness
     public function supprimerCategorie($id)
     {
         if (Ecriture::where('ecriture_categorie_id', '=', $id)->count() > 0) {
-            throw new ArrayException([], "Impossible de supprimer une catégorie lié à des écritures");
+            throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié à des écritures");
         }
         if (IndemniteExerciceType::where('ecriture_categorie_id', '=', $id)->count() > 0) {
-            throw new ArrayException([], "Impossible de supprimer une catégorie lié à type d'indemnité d'exercice");
+            throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié à type d'indemnité d'exercice");
         }
         if (IndemniteInterventionType::where('ecriture_categorie_id', '=', $id)->count() > 0) {
-            throw new ArrayException([], "Impossible de supprimer une catégorie lié à type d'indemnité d'intervention");
+            throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié à type d'indemnité d'intervention");
         }
         if (FraisIndemniteAnnuelType::where('ecriture_categorie_id', '=', $id)->count() > 0) {
-            throw new ArrayException([], "Impossible de supprimer une catégorie lié à type d'indemnité annuel");
+            throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié à type d'indemnité annuel");
         }
         if (HeureExerciceType::where('ecriture_categorie_id', '=', $id)->count() > 0) {
-            throw new ArrayException([], "Impossible de supprimer une catégorie lié à type d'heure supplémentaires");
+            throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié à type d'heure supplémentaires");
         }
         if (AvsParam::where('ecriture_categorie_id', '=', $id)->count() > 0) {
-            throw new ArrayException([], "Impossible de supprimer une catégorie lié aux paramètres d'imputation AVS/AC");
+            throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié aux paramètres d'imputation AVS/AC");
         }
         if (Amende::where('ecriture_categorie_id', '=', $id)->count() > 0) {
-            throw new ArrayException([], "Impossible de supprimer une catégorie lié à une amende");
+            throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié à une amende");
         }
         EcritureCategorie::where('id', '=', $id)->limit(1)->delete();
         return true;
@@ -192,7 +190,7 @@ class ComptabiliteParamBusiness
         if (!$parFonction) {
             $indemnite->fonctions()->delete();
         } else {
-            $indemnite->fonctions()->whereNotIn('fonction_id', array_filter(array_map(fn ($f) => $f['fonction_id'], $data['fonctions']), fn ($f) => !is_null($f)))->delete();
+            $indemnite->fonctions()->whereNotIn('fonction_id', array_filter(array_map(fn($f) => $f['fonction_id'], $data['fonctions']), fn($f) => !is_null($f)))->delete();
             foreach ($data['fonctions'] as $f) {
                 $indemnite->fonctions()->updateOrCreate(['fonction_id' => $f['fonction_id']], $f);
             }
@@ -224,25 +222,25 @@ class ComptabiliteParamBusiness
     public static function supprimerCompte($id)
     {
         if (Ecriture::where('compte_id', '=', $id)->count() > 0) {
-            throw new ArrayException([], "Impossible de supprimer un compte lié à des écritures");
+            throw new InvalidActionException(message: "Impossible de supprimer un compte lié à des écritures");
         }
         if (IndemniteExerciceFonction::where('compte_id', '=', $id)->count() > 0) {
-            throw new ArrayException([], "Impossible de supprimer un compte lié à type d'indemnité d'exercice");
+            throw new InvalidActionException(message: "Impossible de supprimer un compte lié à type d'indemnité d'exercice");
         }
         if (IndemniteInterventionType::where('compte_id', '=', $id)->count() > 0) {
-            throw new ArrayException([], "Impossible de supprimer un compte lié à type d'indemnité d'intervention");
+            throw new InvalidActionException(message: "Impossible de supprimer un compte lié à type d'indemnité d'intervention");
         }
         if (FraisIndemniteAnnuelType::where('compte_id', '=', $id)->count() > 0) {
-            throw new ArrayException([], "Impossible de supprimer un compte lié à type d'indemnité annuel");
+            throw new InvalidActionException(message: "Impossible de supprimer un compte lié à type d'indemnité annuel");
         }
         if (HeureExerciceType::where('compte_id', '=', $id)->count() > 0) {
-            throw new ArrayException([], "Impossible de supprimer un compte lié à type d'heure supplémentaires");
+            throw new InvalidActionException(message: "Impossible de supprimer un compte lié à type d'heure supplémentaires");
         }
         if (AvsParam::where('compte_id', '=', $id)->count() > 0) {
-            throw new ArrayException([], "Impossible de supprimer un compte lié aux paramètres d'imputation AVS/AC");
+            throw new InvalidActionException(message: "Impossible de supprimer un compte lié aux paramètres d'imputation AVS/AC");
         }
         if (Amende::where('compte_id', '=', $id)->count() > 0) {
-            throw new ArrayException([], "Impossible de supprimer un compte lié à une amende");
+            throw new InvalidActionException(message: "Impossible de supprimer un compte lié à une amende");
         }
         Compte::where('id', '=', $id)->limit(1)->delete();
         return true;

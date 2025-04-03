@@ -3,6 +3,7 @@
 namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\Exceptions\InvalidActionException;
 use App\Infrastructure\Models\AspsmsParam;
 use App\Infrastructure\Models\Sms;
 use App\Infrastructure\Models\SmsNumero;
@@ -41,7 +42,7 @@ class AspsmsBusiness
         try {
             $params = AspsmsParam::first();
             if (!$params) {
-                throw new ArrayException([], 'ASPSMS non configuré');
+                throw new InvalidActionException([], 'ASPSMS non configuré');
             }
             $username = Crypt::decryptString($params->username);
             $password = Crypt::decryptString($params->password);
@@ -66,7 +67,7 @@ class AspsmsBusiness
 
             return $response;
         } catch (DecryptException $e) {
-            throw new ArrayException([], 'ASPSMS non configuré');
+            throw new InvalidActionException([], 'ASPSMS non configuré');
         }
     }
 
@@ -113,9 +114,9 @@ class AspsmsBusiness
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
             ])->post('https://json.aspsms.com/checkCredits', [
-                'UserName' => $username,
-                'Password' => $password,
-            ]);
+                        'UserName' => $username,
+                        'Password' => $password,
+                    ]);
 
             if ($response->successful()) {
                 switch ($response['StatusCode']) {
@@ -124,16 +125,15 @@ class AspsmsBusiness
                         $credit = $response['Credits'];
                         return $credit;
                     case "2":
-                        // Connect failed
+                    // Connect failed
                     case "3":
                         // Authorization failed
                         throw new ArrayException([], "Informations de connexion invalides");
                     case "5":
                         throw new ArrayException([], "Crédit insuffisant");
                     default:
-                        throw new ArrayException([], "Erreur ASPSMS veuillez contacter votre administrateur system");
+                        throw new ArrayException(['StatusCode' => $response['StatusCode']], "Erreur ASPSMS veuillez contacter votre administrateur system");
                 }
-                return $response->body();
             }
         } catch (ConnectionException $e) {
             // throw $e;
@@ -164,18 +164,16 @@ class AspsmsBusiness
                     case "1":
                         // Valid response
                         return $response;
-                        return 'OK';
                     case "2":
-                        // Connect failed
+                    // Connect failed
                     case "3":
                         // Authorization failed
                         throw new ArrayException([], "Informations de connexion invalides");
                     case "5":
-                        // Credit insuffisant
+                    // Credit insuffisant
                     default:
-                        throw new ArrayException([], "Erreur ASPSMS veuillez contacter votre administrateur system");
+                        throw new ArrayException(['StatusCode' => $response['StatusCode']], "Erreur ASPSMS veuillez contacter votre administrateur system");
                 }
-                return $response->body();
             }
         } catch (ConnectionException $e) {
             throw new ArrayException([], "Erreur lors de la connexion ASPSMS veuillez contacter votre administrateur system");

@@ -3,7 +3,6 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\MesInfosService;
-use App\Infrastructure\Models\ExcuseParam;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 

@@ -3,6 +3,7 @@
 use App\Application\Http\Middleware\DbSelector;
 use App\Application\Http\Middleware\JwtTokenValidatorAuth;
 use App\Application\Http\Middleware\JwtTokenValidatorSapeurOrRole;
+use App\Domaine\Exceptions\InvalidActionException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -34,6 +35,9 @@ return Application::configure(basePath: dirname(__DIR__))
         Integration::handles($exceptions);
         $exceptions
             ->render(function (ArrayException $e, Request $request) {
+                return response()->json(['error' => $e->getErrors()], 200);
+            })
+            ->render(function (InvalidActionException $e, Request $request) {
                 return response()->json(['error' => $e->getErrors()], 200);
             })
             ->render(function (ValidationException $e, Request $request) {

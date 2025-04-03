@@ -3,6 +3,7 @@
 namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\Exceptions\InvalidActionException;
 use App\Infrastructure\Models\Intervention;
 use App\Infrastructure\Models\InterventionMateriel;
 use App\Infrastructure\Models\InterventionTraitement;
@@ -169,7 +170,7 @@ class InterventionParamBusiness
     public static function supprimerMateriel($id)
     {
         if (InterventionMateriel::where('materiel_id', '=', $id)->exists()) {
-            throw new ArrayException([], 'Impossible de supprimer ce matériel, celui-ci est utilisé dans une intervention.');
+            throw new InvalidActionException([], 'Impossible de supprimer ce matériel, celui-ci est utilisé dans une intervention.');
         }
         Materiel::where('id', $id)->delete();
     }

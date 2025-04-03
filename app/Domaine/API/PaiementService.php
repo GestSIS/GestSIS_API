@@ -9,6 +9,7 @@ use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Business\PaiementBusiness;
 use App\Domaine\Business\SisParamBusiness;
 use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\Exceptions\InvalidActionException;
 use App\Infrastructure\Collections\AFacturerExport;
 use App\Infrastructure\Collections\EcrituresExport;
 use App\Infrastructure\Models\AvsParam;
@@ -47,7 +48,7 @@ class PaiementService
         // Vérifi que les paramètres AVS ont été configurés
         $avsParam = AvsParam::first();
         if ($avsParam == NULL) {
-            throw new ArrayException([], 'Erreur, paramètres AVS manquant, veuillez les compléter dans paramètres.');
+            throw new InvalidActionException([], 'Erreur, paramètres AVS manquant, veuillez les compléter dans paramètres.');
         }
 
         $deduction = true;

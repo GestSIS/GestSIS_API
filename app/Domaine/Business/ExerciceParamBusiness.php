@@ -4,6 +4,7 @@
 namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\Exceptions\InvalidActionException;
 use App\Infrastructure\Models\ExerciceCategorie;
 use App\Infrastructure\Models\ExcuseType;
 use App\Infrastructure\Models\Exercice;
@@ -29,7 +30,7 @@ class ExerciceParamBusiness
     public static function supprimerCategorie($id)
     {
         if (Exercice::where('exercice_categorie_id', '=', $id)->exists()) {
-            throw new ArrayException([], 'Impossible de supprimer cette catégorie, celle-ci est utilisée dans un exercice.');
+            throw new InvalidActionException(message: 'Impossible de supprimer cette catégorie, celle-ci est utilisée dans un exercice.');
         }
         ExerciceCategorie::where('id', $id)->delete();
     }
@@ -51,7 +52,7 @@ class ExerciceParamBusiness
     public static function supprimerExcuseType($id)
     {
         if (ExerciceSapeur::where('excuse_type_id', '=', $id)->exists()) {
-            throw new ArrayException([], 'Impossible de supprimer cette excuse, celle-ci est utilisée dans un exercice.');
+            throw new InvalidActionException(message: 'Impossible de supprimer cette excuse, celle-ci est utilisée dans un exercice.');
         }
         ExcuseType::where('id', $id)->delete();
     }
