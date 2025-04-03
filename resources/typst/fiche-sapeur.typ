@@ -17,6 +17,7 @@
   fill: (_, y) => if calc.even(y) { rgb(0, 0, 0, 5%) },
 )
 
+
 = Fiche sapeur
 
 #v(0.3cm)
@@ -116,7 +117,7 @@
   ),
   table.hline(),
   if sapeur.fonction != none [#sapeur.fonction.nom] else [-],
-  if sapeur.fonction != none [#sapeur.grade.designation] else [-]
+  if sapeur.grade != none [#sapeur.grade.designation] else [-]
 )
 
 == Cours
@@ -171,7 +172,7 @@
   ),
   table.hline(),
   ..if grades.len() == 0 {
-    (table.cell(colspan: 4)[Aucun numéro],)
+    (table.cell(colspan: 3)[Aucun numéro],)
   } else {
     grades.map(grade => (
       [#formatDate(grade.date)],
