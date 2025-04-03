@@ -196,7 +196,7 @@
       presences.values()
         .map(sapeur=>(
           [#sapeur.nom #sapeur.prenom],
-          {if quittances.len() > 0 and quittances.at(str(sapeur.id)) != none [☑] else [☐]},
+          {if quittances.len() > 0 and quittances.at(str(sapeur.id), default: none) != none [☑] else [☐]},
           [#formatDateTime(sapeur.presences.first().debut) - #formatDateTime(sapeur.presences.first().fin)],
           if params.montants and ecritures.len() > 0 and ecritures.at(str(sapeur.sapeur_id)) != none{
             ecriture = ecritures.at(str(sapeur.sapeur_id))
