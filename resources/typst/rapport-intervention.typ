@@ -209,9 +209,12 @@
             )).flatten()
           },
         )),
-        table.footer(table.cell(colspan: 3)[], [*#decimal(decimal("1.00")*decimal(ecritures.at("total")))*])  
+        if params.montants {
+          table.footer(table.cell(colspan: 3)[],    [*#decimal(decimal("1.00")*decimal(ecritures.at("total")))*])
+        }
       )
-        .flatten()
+      .filter(el => el != none)
+      .flatten()
     } else {([Aucune présence],)},
   )
 }
