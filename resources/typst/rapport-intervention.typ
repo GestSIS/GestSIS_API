@@ -1,7 +1,7 @@
 #import "common.typ": formatDate, formatTime, formatDateTime
 #set text(font: "DM Sans", weight: "extralight")
 
-#set page("a4", margin: (top: 3cm, left: 2cm, right: 1cm, rest: 2cm), header: {
+#set page("a4", margin: (top: 3cm, left: 1.5cm, right: 1cm, rest: 2cm), header: {
     grid(
         columns: (1fr, 1fr, 1fr),
         align: (left + horizon, center + horizon, right + horizon),
@@ -188,18 +188,18 @@
   table(
     stroke: none,
     columns: (auto, auto, 1fr, auto),
-    align: (auto, center, auto, auto),
+    align: (auto, center, auto, end),
     table.header(
       [Sapeur], [Quittance], [Presence], if params.montants [Montant]
     ),
     ..if intervention.presences.len() > 0 {
-      presences.values()
+      (..presences.values()
         .map(sapeur=>(
           [#sapeur.nom #sapeur.prenom],
           {if quittances.len() > 0 and quittances.at(str(sapeur.id), default: none) != none [☑] else [☐]},
           [#formatDateTime(sapeur.presences.first().debut) - #formatDateTime(sapeur.presences.first().fin)],
-          if params.montants and ecritures.len() > 0 and ecritures.at(str(sapeur.sapeur_id)) != none{
-            ecriture = ecritures.at(str(sapeur.sapeur_id))
+          if params.montants and ecritures.at(str(sapeur.id), default: none) != none{
+            let ecriture = ecritures.at(str(sapeur.id))
             [#ecriture]
           } else [],
           ..if sapeur.presences.len() > 1 {
@@ -207,8 +207,10 @@
               table.cell(colspan: 2, []),
               table.cell(colspan: 2, [#formatDateTime(presence.debut) - #formatDateTime(presence.fin)]),
             )).flatten()
-          }
-        ))
+          },
+        )),
+        table.footer(table.cell(colspan: 3)[], [*#decimal(decimal("1.00")*decimal(ecritures.at("total")))*])  
+      )
         .flatten()
     } else {([Aucune présence],)},
   )
