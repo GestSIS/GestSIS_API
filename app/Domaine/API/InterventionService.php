@@ -442,7 +442,7 @@ class InterventionService
                 ->toArray();
 
             $total = array_sum(array_map(fn($e) => floatval($e), array_values($ecritures)));
-            $ecritures['total'] = $total;
+            $ecritures['total'] = number_format($total, 2);
         }
 
         $intervention = Intervention::with($withOptions)->find($interventionId);

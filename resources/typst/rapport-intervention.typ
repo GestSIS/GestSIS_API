@@ -210,7 +210,7 @@
           },
         )),
         if params.montants {
-          table.footer(table.cell(colspan: 3)[],    [*#decimal(decimal("1.00")*decimal(ecritures.at("total")))*])
+          table.footer(table.cell(colspan: 3)[], [*#ecritures.at("total")*])
         }
       )
       .filter(el => el != none)
