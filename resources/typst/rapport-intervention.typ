@@ -133,7 +133,7 @@
           [#mission.resume],
           {
             if mission.sapeur_id != none {
-              let sapeur = sapeurs.at(str(mission.sapeur_id))
+              let sapeur = mission.sapeur_object
               [#sapeur.nom #sapeur.prenom]
             } else [#mission.sapeur]}
           ))).flatten()
