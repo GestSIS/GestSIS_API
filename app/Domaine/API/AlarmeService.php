@@ -29,7 +29,7 @@ class AlarmeService
     {
         try {
             $response = Http::withHeaders([
-                'Sis-Id' => $sisKey,
+                'Sis-Key' => $sisKey,
                 'Authorization' => 'Bearer ' . $token
             ])
                 ->acceptJson()
