@@ -19,6 +19,11 @@ class AdminController extends Controller
         return response()->json(['data' => $this->service->sisContacts()]);
     }
 
+    public function sisParams()
+    {
+        return response()->json(['data' => $this->service->sisParams()]);
+    }
+
     public function sisLocalites()
     {
         return response()->json(['data' => $this->service->sisLocalites()]);

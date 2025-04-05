@@ -124,13 +124,14 @@ use App\Application\Http\Controllers\TypeInterventionController;
 use App\Application\Http\Controllers\UniteController;
 use App\Application\Http\Controllers\VehiculeController;
 
-// Route spécial pour le serveur d'authentification
+// Routes spéciales pour le serveur d'authentification
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenValidatorAuth::class]], function () {
     Route::get('email-validate', [EmailController::class, 'validateEmail']);
 
     Route::get('sis-contacts-tous', [AdminController::class, 'sisContacts']);
     Route::get('sis-localites-tous', [AdminController::class, 'sisLocalites']);
     Route::get('sis-communes-tous', [AdminController::class, 'sisCommunes']);
+    Route::get('sis-params-tous', [AdminController::class, 'sisParams']);
 });
 
 Route::group(['prefix' => 'v2'], function () {
