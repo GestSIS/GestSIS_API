@@ -266,7 +266,8 @@ class PaiementService
             ->join('ecriture_categories', 'ecritures.ecriture_categorie_id', '=', 'ecriture_categories.id')
             ->join('type_unites', 'ecritures.type_unite_id', '=', 'type_unites.id')
             ->join('civilites', 'sapeurs.civilite_id', '=', 'civilites.id')
-            ->where('ecritures.exercice_comptable_id', '=', $exerciceComptableId)
+            ->join('decomptes', 'ecritures.decompte_id', '=', 'decomptes.id')
+            ->where('decomptes.exercice_comptable_id', '=', $exerciceComptableId)
             ->select(
                 'ecritures.*',
                 DB::raw('CONCAT(sapeurs.nom, " ", sapeurs.prenom) as sapeur'),
