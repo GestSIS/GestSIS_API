@@ -91,16 +91,18 @@
   }
   
   [=== Résumé]
-  let total = ecrituresParSapeur.map(e => decimal(e.total)).sum()
   let paiements = decomptes.values().map(d => d.paiements.find(p => str(p.sapeur_id) == sapeurId)).filter(p => p != none)
+  let verse = paiements.map(p => decimal(p.total)).sum(default: 0.00)
+  let avs_ac = paiements.map(p => decimal(p.avs_ac)).sum(default: 0.00)
+  let total = verse + avs_ac
 
   table(
     stroke: none,
     align: (start, end),
     columns: 2,
     [Total],[#total],
-    [Déduction AVS/AC],[#paiements.map(p => decimal(p.avs_ac)).sum(default: 0.00)],
+    [Déduction AVS/AC],[#avs_ac],
     table.hline(),
-    [*Total versé*],[*#paiements.map(p => decimal(p.total)).sum(default: 0.00)*],
+    [*Total versé*],[*#verse*],
   )
 }
