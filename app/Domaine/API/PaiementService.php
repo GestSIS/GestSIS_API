@@ -308,7 +308,6 @@ class PaiementService
         }
 
         $logoPath = (new SisParamBusiness())->getLogo($sisKey);
-        var_dump(json_encode(["decomptes" => $decomptesMap, "sapeurs" => $sapeursMap, "ecritures" => $ecritures, "comptes" => $comptesMap]));
         $content = TypstToPdfGenerator::generateDocument(
             TypstTemplate::ResumeParSapeur,
             ["decomptes" => $decomptesMap, "sapeurs" => $sapeursMap, "ecritures" => $ecritures, "comptes" => $comptesMap],
