@@ -258,6 +258,69 @@ class PaiementService
         return $this->printDecompteSapeur($decompteId, $ecritures, $sisKey);
     }
 
+    public function impressionResumeParSapeur($exerciceComptableId, string $sisKey)
+    {
+        // Pour le moment que les écritures du décompte !
+        $ecritures = DB::table('ecritures')
+            ->join('sapeurs', 'ecritures.sapeur_id', '=', 'sapeurs.id')
+            ->join('ecriture_categories', 'ecritures.ecriture_categorie_id', '=', 'ecriture_categories.id')
+            ->join('type_unites', 'ecritures.type_unite_id', '=', 'type_unites.id')
+            ->join('civilites', 'sapeurs.civilite_id', '=', 'civilites.id')
+            ->where('ecritures.exercice_comptable_id', '=', $exerciceComptableId)
+            ->select(
+                'ecritures.*',
+                DB::raw('CONCAT(sapeurs.nom, " ", sapeurs.prenom) as sapeur'),
+                'sapeurs.iban',
+                'ecriture_categories.tri',
+                'ecriture_categories.designation AS categorie',
+                'type_unites.abreviation as unite',
+                'civilites.forme_politesse as civilite'
+            )
+            ->orderBy('sapeur')
+            ->orderBy('ecriture_categories.tri', 'ASC')
+            ->orderBy('ecritures.module', 'ASC')
+            ->orderBy('ecritures.date')
+            ->orderBy('ecritures.heure')
+            ->get();
+
+        return $this->printResumeSapeur($exerciceComptableId, $ecritures, $sisKey);
+    }
+
+    private static function printResumeSapeur(int $exerciceComptableId, $ecritures, string $sisKey)
+    {
+        $decomptes = Decompte::with('paiements')->where('exercice_comptable_id', $exerciceComptableId)->get();
+        $decomptesMap = [];
+        foreach ($decomptes as $d) {
+            $decomptesMap[$d->id] = $d;
+        }
+
+        $comptes = Compte::all();
+        $comptesMap = [];
+        foreach ($comptes as $compte) {
+            $comptesMap[$compte->id] = $compte;
+        }
+
+        $sapeursMap = [];
+        $sapeurs = Sapeur::get(['id', 'nom', 'prenom']);
+        foreach ($sapeurs as $sapeur) {
+            $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
+        }
+
+        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        var_dump(json_encode(["decomptes" => $decomptesMap, "sapeurs" => $sapeursMap, "ecritures" => $ecritures, "comptes" => $comptesMap]));
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::ResumeParSapeur,
+            ["decomptes" => $decomptesMap, "sapeurs" => $sapeursMap, "ecritures" => $ecritures, "comptes" => $comptesMap],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'resume-par-sapeur.pdf'
+        );
+    }
+
     private static function printDecompteSapeur($decompteId, $ecritures, string $sisKey)
     {
         $decompte = Decompte::with('paiements')->find($decompteId);

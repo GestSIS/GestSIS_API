@@ -570,7 +570,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('paiements/{id}/iso20022', [PaiementController::class, 'iso20022']);
         Route::get('paiements/{id}', [PaiementController::class, 'get']);
 
-        // Certificats de salaire
+        // Certificats de salaire et résumé
+        Route::get('exercices-comptable/{ExerciceComptableId}/resume-par-sapeur', [DecompteController::class, 'resumeParSapeur']);
         Route::get('exercices-comptable/{ExerciceComptableId}/certificat-salaire', [DecompteController::class, 'certificatSalaire']);
         Route::get('exercices-comptable/{ExerciceComptableId}/certificat-salaire/{SapeurId}', [DecompteController::class, 'certificatSalaireSapeur']);
 
