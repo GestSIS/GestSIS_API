@@ -100,6 +100,8 @@ class InterventionBusiness
             $intervention['wgs84'] = '';
         if (!array_key_exists('lieu', $intervention) || is_null($intervention['lieu']))
             $intervention['lieu'] = '';
+        if (!array_key_exists('agent', $intervention) || is_null($intervention['agent']))
+            $intervention['agent'] = '';
         if (!array_key_exists('description', $intervention) || is_null($intervention['description']))
             $intervention['description'] = '';
         if (!array_key_exists('proprietaire', $intervention) || is_null($intervention['proprietaire']))
