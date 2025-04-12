@@ -157,16 +157,27 @@ class DecompteController extends Controller
         return $this->service->impressionDecompteParSapeur($decompteId, $sisKey);
     }
 
-
     /**
-     * Retourne un décompte pour tous les sapeurs
+     * Retourne un résumé comptable pour tous les sapeurs
      * 
-     * @param int $id id du décompte pour lequelle le fichier doit être créé
+     * @param int $exerciceComptableId id de l'exercice comptabée pour lequelle le fichier doit être créé
      */
-    public function resumeParSapeur(Request $request, $exerciceComptableId)
+    public function resumeParSapeur(Request $request, int $exerciceComptableId)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
         return $this->service->impressionResumeParSapeur($exerciceComptableId, $sisKey);
+    }
+
+    /**
+     * Retourne un résumé comptable pour 1 sapeur
+     * 
+     * @param int $exerciceComptableId id de l'exercice comptabée pour lequelle le fichier doit être créé
+     * @param int $sapeurId id du sapeur
+     */
+    public function resumePourSapeur(Request $request, int $exerciceComptableId, int $sapeurId)
+    {
+        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
+        return $this->service->impressionResumePourSapeur($exerciceComptableId, $sapeurId, $sisKey);
     }
 
     /**
