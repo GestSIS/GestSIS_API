@@ -48,47 +48,47 @@ class MesInfosService
         $this->sapeurRepo = $sapeurRepo;
     }
 
-    function mesInfos($sapeurId)
+    function mesInfos(int $sapeurId)
     {
         return $this->sapeurRepo->getSapeurDetailsById($sapeurId, ['telephones']);
     }
 
-    function mesFonctions($sapeurId)
+    function mesFonctions(int $sapeurId)
     {
         return $this->sapeurRepo->getSapeurFonctionsById($sapeurId);
     }
 
-    function mesMutations($sapeurId)
+    function mesMutations(int $sapeurId)
     {
         return $this->sapeurRepo->getSapeurMutationsById($sapeurId);
     }
 
-    function mesGrades($sapeurId)
+    function mesGrades(int $sapeurId)
     {
         return $this->sapeurRepo->getSapeurGradesById($sapeurId);
     }
 
-    function mesCours($sapeurId)
+    function mesCours(int $sapeurId)
     {
         return $this->sapeurRepo->getSapeurCoursById($sapeurId);
     }
 
-    function mesGroupes($sapeurId)
+    function mesGroupes(int $sapeurId)
     {
         return $this->sapeurRepo->getSapeurGroupesById($sapeurId);
     }
 
-    function mesPermis($sapeurId)
+    function mesPermis(int $sapeurId)
     {
         return $this->sapeurRepo->getSapeurPermisById($sapeurId);
     }
 
-    function mesControlesMedicaux($sapeurId)
+    function mesControlesMedicaux(int $sapeurId)
     {
         return $this->controleMedicalRepo->getSapeurControlesMedicauxById($sapeurId);
     }
 
-    function monJustificatifMedical($sapeurId, $controleMedicalId)
+    function monJustificatifMedical(int $sapeurId, int $controleMedicalId)
     {
         $controle = $this->controleMedicalRepo->getControleMedical($controleMedicalId);
         if ($sapeurId !== $controle->sapeur_id) {
@@ -97,22 +97,22 @@ class MesInfosService
         return $this->controleMedicalBusiness->getJustificatif($controleMedicalId);
     }
 
-    function mesExercices($sapeurId, $exerciceComptableId)
+    function mesExercices(int $sapeurId, int $exerciceComptableId)
     {
         return $this->exerciceRepo->listExerciceOfSapeurById($exerciceComptableId, $sapeurId);
     }
 
-    function creerExcuse($sapeurId, $exerciceId, $data, $file, $sisKey)
+    function creerExcuse(int $sapeurId, int $exerciceId, $data, $file, string $sisKey)
     {
         return $this->exerciceBusiness->creerExcuse($sapeurId, $exerciceId, $data, $file, $sisKey);
     }
 
-    function removeExcuse($sapeurId, $exerciceId, $hasValidationPermission)
+    function removeExcuse(int $sapeurId, int $exerciceId, bool $hasValidationPermission)
     {
         return $this->exerciceBusiness->removeExcuse($sapeurId, $exerciceId, $hasValidationPermission);
     }
 
-    function getJustificatif($exerciceId, $sapeurId)
+    function getJustificatif(int $exerciceId, int $sapeurId)
     {
         $presence = ExerciceSapeur::where([['exercice_id', '=', $exerciceId], ['sapeur_id', '=', $sapeurId]])->first();
         if ($presence == null || !$presence->justificatif_filename) {
@@ -122,7 +122,7 @@ class MesInfosService
         return ['path' => $presence->justificatif_path, 'filename' => $presence->justificatif_filename];
     }
 
-    function mesAbsences($sapeurId, $exerciceComptableId)
+    function mesAbsences(int $sapeurId, int $exerciceComptableId)
     {
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
 
@@ -132,13 +132,13 @@ class MesInfosService
         ])->get();
     }
 
-    function creerAbsence($sapeurId, $data)
+    function creerAbsence(int $sapeurId, $data)
     {
         $data['sapeur_id'] = $sapeurId;
         return $this->absenceBusiness->ajouterAbsence($data);
     }
 
-    function modifierAbsence($sapeurId, $absenceId, $data)
+    function modifierAbsence(int $sapeurId, int $absenceId, $data)
     {
         $absence = Absence::find($absenceId);
         if ($absence->sapeur_id !== $sapeurId) {
@@ -148,7 +148,7 @@ class MesInfosService
         return $this->absenceBusiness->modifierAbsence($absenceId, $data);
     }
 
-    function supprimerAbsence($sapeurId, $absenceId)
+    function supprimerAbsence(int $sapeurId, int $absenceId)
     {
         $absence = Absence::find($absenceId);
         if ($absence?->sapeur_id !== $sapeurId) {
@@ -157,12 +157,12 @@ class MesInfosService
         return $this->absenceBusiness->supprimerAbsence($absenceId);
     }
 
-    function monMateriel($sapeurId)
+    function monMateriel(int $sapeurId)
     {
         return MaterielPersonnel::with('materiel')->where('sapeur_id', '=', $sapeurId)->get()->toArray();
     }
 
-    function mesTravaux($sapeurId, $exerciceComptableId)
+    function mesTravaux(int $sapeurId, int $exerciceComptableId)
     {
         return Travail::where([
             ['sapeur_id', '=', $sapeurId],
@@ -170,7 +170,7 @@ class MesInfosService
         ])->get();
     }
 
-    function mesInterventions($sapeurId, $exerciceComptableId)
+    function mesInterventions(int $sapeurId, int $exerciceComptableId)
     {
         $presences = InterventionSapeur::where('intervention_sapeur.sapeur_id', '=', $sapeurId)
             ->join('interventions', 'interventions.id', '=', 'intervention_sapeur.intervention_id')
@@ -190,7 +190,7 @@ class MesInfosService
         return $presences;
     }
 
-    function mesDecomptes($sapeurId, $exerciceComptableId)
+    function mesDecomptes(int $sapeurId, int $exerciceComptableId)
     {
         $paiements = Paiement::where('sapeur_id', '=', $sapeurId)
             ->join('decomptes', 'paiements.decompte_id', '=', 'decomptes.id')
@@ -204,7 +204,12 @@ class MesInfosService
         ];
     }
 
-    function printDecompte($sapeurId, $decompteId, string $sisKey)
+    function printResumeAnnuel(int $sapeurId, int $exerciceComptableId, string $sisKey)
+    {
+        return PaiementService::impressionResumePourSapeur($exerciceComptableId, $sapeurId, $sisKey);
+    }
+
+    function printDecompte(int $sapeurId, int $decompteId, string $sisKey)
     {
         return PaiementService::impressionDecompteSapeur($decompteId, $sapeurId, $sisKey);
     }

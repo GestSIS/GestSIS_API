@@ -160,6 +160,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('mes-decomptes/{exerciceComptableId}', [MesDecomptesController::class, 'index'])->name('mes-decomptes');
         Route::get('mes-interventions/{exerciceComptableId}', [MesInterventionsController::class, 'index'])->name('mes-interventions');
 
+        Route::get('mes-exercices-comptable/{exerciceComptableId}/print', [MesDecomptesController::class, 'printResumeAnnuel'])->name('api.v2.mes-exercices-comptable.print');
         Route::get('mes-decomptes/{decompteId}/print', [MesDecomptesController::class, 'print'])->name('api.v2.mes-decomptes.print');
         Route::get('mon-certificat-salaire/{exerciceComptableId}', [MesDecomptesController::class, 'certificatSalaire'])->name('api.v2.mon-certificat-salaire');
 

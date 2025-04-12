@@ -31,6 +31,17 @@ class MesDecomptesController extends Controller
         return response()->json(['data' => $data]);
     }
 
+    public function printResumeAnnuel(Request $request, $exerciceComptableId)
+    {
+        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
+        $sapeurId = $request->attributes->get('sapeurId');
+        if ($sapeurId === null || intval($sapeurId) <= 0) {
+            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+        }
+
+        return $this->mesInfosService->printResumeAnnuel($sapeurId, $exerciceComptableId, $sisKey);
+    }
+
     /**
      * Récupération des décomptes du sapeur
      */

@@ -230,7 +230,7 @@ class PaiementService
         return self::printDecompteSapeur($decompteId, $ecritures, $sisKey);
     }
 
-    public function impressionDecompteParSapeur($decompteId, string $sisKey)
+    public static function impressionDecompteParSapeur($decompteId, string $sisKey)
     {
         // Pour le moment que les écritures du décompte !
         $ecritures = DB::table('ecritures')
@@ -255,10 +255,39 @@ class PaiementService
             ->orderBy('ecritures.heure')
             ->get();
 
-        return $this->printDecompteSapeur($decompteId, $ecritures, $sisKey);
+        return self::printDecompteSapeur($decompteId, $ecritures, $sisKey);
     }
 
-    public function impressionResumeParSapeur($exerciceComptableId, string $sisKey)
+    public static function impressionResumePourSapeur(int $exerciceComptableId, int $sapeurId, string $sisKey)
+    {
+        // Pour le moment que les écritures du décompte !
+        $ecritures = DB::table('ecritures')
+        ->join('sapeurs', 'ecritures.sapeur_id', '=', 'sapeurs.id')
+        ->join('ecriture_categories', 'ecritures.ecriture_categorie_id', '=', 'ecriture_categories.id')
+        ->join('type_unites', 'ecritures.type_unite_id', '=', 'type_unites.id')
+        ->join('civilites', 'sapeurs.civilite_id', '=', 'civilites.id')
+        ->join('decomptes', 'ecritures.decompte_id', '=', 'decomptes.id')
+        ->where('decomptes.exercice_comptable_id', '=', $exerciceComptableId)
+        ->where('sapeurs.id', '=', $sapeurId)
+        ->select(
+            'ecritures.*',
+            DB::raw('CONCAT(sapeurs.nom, " ", sapeurs.prenom) as sapeur'),
+            'sapeurs.iban',
+            'ecriture_categories.tri',
+            'ecriture_categories.designation AS categorie',
+            'type_unites.abreviation as unite',
+            'civilites.forme_politesse as civilite'
+        )
+        ->orderBy('ecriture_categories.tri', 'ASC')
+        ->orderBy('ecritures.module', 'ASC')
+        ->orderBy('ecritures.date')
+        ->orderBy('ecritures.heure')
+        ->get();
+
+        return self::printResumeSapeur($exerciceComptableId, $ecritures, $sisKey);
+    }
+
+    public static function impressionResumeParSapeur(int $exerciceComptableId, string $sisKey)
     {
         // Pour le moment que les écritures du décompte !
         $ecritures = DB::table('ecritures')
@@ -284,7 +313,7 @@ class PaiementService
             ->orderBy('ecritures.heure')
             ->get();
 
-        return $this->printResumeSapeur($exerciceComptableId, $ecritures, $sisKey);
+        return self::printResumeSapeur($exerciceComptableId, $ecritures, $sisKey);
     }
 
     private static function printResumeSapeur(int $exerciceComptableId, $ecritures, string $sisKey)
