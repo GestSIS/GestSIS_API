@@ -22,7 +22,7 @@
     [],
     [#civilites.at(str(sapeur.civilite_id)) \
       #sapeur.nom #sapeur.prenom \
-      #sapeur.rue #sapeur.nom #sapeur.no_rue \
+      #sapeur.rue #sapeur.no_rue \
       #localites.at(str(sapeur.localite_id)) \ ],
   )
   v(2cm)
