@@ -2,6 +2,7 @@
 
 namespace App\Domaine\Business;
 
+use App\Domaine\Exceptions\InvalidActionException;
 use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
@@ -90,9 +91,17 @@ class ImputationBusiness
         return $exerciceComptable;
     }
 
+    public function controlerStatusExerciceComptable(int $exerciceComptableId)
+    {
+        $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
+        if ($exerciceComptable->boucle == 1) {
+            throw new InvalidActionException(message: "Excercice comptable cloturé, impossible d'effectuer cette action");
+        }
+    }
+
     public function ajouterEcriture($data)
     {
-        //TODO: Controller exercice comptable non clôturé
+        $this->controlerStatusExerciceComptable($data['exercice_comptable_id']);
 
         // Switch between type
         switch ($data['module']) {
@@ -129,6 +138,8 @@ class ImputationBusiness
 
     public function modifierEcriture($ecritureId, $data)
     {
+        $this->controlerStatusExerciceComptable($data['exercice_comptable_id']);
+
         $ecriture = Ecriture::find($ecritureId);
         // Contrôle que l'écriture n'est pas liée à un décompte
         if ($ecriture->decompte_id) {
@@ -168,6 +179,9 @@ class ImputationBusiness
     public function supprimerEcriture($ecritureId)
     {
         $ecriture = Ecriture::find($ecritureId);
+        $this->controlerStatusExerciceComptable($ecriture->exercice_comptable_id);
+
+        $ecriture = Ecriture::find($ecritureId);
         // Contrôle que l'écriture n'est pas liée à un décompte
         if ($ecriture->decompte_id) {
             throw new ArrayException([], 'Ecriture déjà payée dans un décompte !');
@@ -182,6 +196,8 @@ class ImputationBusiness
      */
     public function genererAmendesSapeur($exerciceComptableId, $sapeurId)
     {
+        $this->controlerStatusExerciceComptable($exerciceComptableId);
+
         // Chargment de la config des amendes
         $amendes = Amende::orderBy('ordre', 'ASC')->get();
         $nbAmende = count($amendes);
@@ -259,6 +275,8 @@ class ImputationBusiness
      */
     public function genererAmendesAnnuels($exerciceComptableId)
     {
+        $this->controlerStatusExerciceComptable($exerciceComptableId);
+
         // Chargment de la config des amendes
         $amendes = Amende::orderBy('ordre', 'ASC')->get();
         $nbAmende = count($amendes);
@@ -343,6 +361,8 @@ class ImputationBusiness
      */
     public function imputerAnnuel(int $exerciceComptableId)
     {
+        $this->controlerStatusExerciceComptable($exerciceComptableId);
+
         // Choix disponible pour une seule imputation annuelle :
         // FIXME: Actuellement regénère les frais pour tous les sapeurs ! et ne fait pas ce qui est écrit ci-dessous
         // 1. ~~ Si déjà une imputation pour l'année alors ne rien faire~~
@@ -455,6 +475,9 @@ class ImputationBusiness
 
     public function annulerImputationExercice($exerciceId)
     {
+        $exercice = Exercice::find($exerciceId);
+        $this->controlerStatusExerciceComptable($exercice->exercice_comptable_id);
+
         // Check si des ecritures sont déjà liées à un décompte
         if (
             Ecriture::where('exercice_id', $exerciceId)
@@ -475,6 +498,9 @@ class ImputationBusiness
 
     public function annulerImputationIntervention($interventionId)
     {
+        $intervention = Intervention::find($interventionId);
+        $this->controlerStatusExerciceComptable($intervention->exercice_comptable_id);
+
         // Check si des ecritures sont déjà liées à un décompte
         if (
             Ecriture::where('intervention_id', $interventionId)
@@ -495,6 +521,8 @@ class ImputationBusiness
 
     public function annulerImputationAnnuel($exerciceComptableId)
     {
+        $this->controlerStatusExerciceComptable($exerciceComptableId);
+
         // Check si des ecritures sont déjà liées à un décompte
         // if (Ecriture::where('exercice_comptable_id', '=', $exerciceComptableId)
         //     ->where('module', '=', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)
@@ -518,6 +546,9 @@ class ImputationBusiness
      */
     public function imputerIntervention($interventionId, $data)
     {
+        $intervention = Intervention::find($interventionId);
+        $this->controlerStatusExerciceComptable($intervention->exercice_comptable_id);
+
         $indemniteType = $this->indemniteRepo->findIndemniteInterventionTypeById($data['indemnite_intervention_type_id']);
         $intervention = $this->interventionRepo->findWith($interventionId, ['presences', 'phases', 'localite', 'typeIntervention']);
 
@@ -914,6 +945,9 @@ class ImputationBusiness
 
     public function imputerExercice($exerciceId, $data)
     {
+        $exercice = Exercice::find($exerciceId);
+        $this->controlerStatusExerciceComptable($exercice->exercice_comptable_id);
+
         $exercice = $this->exerciceRepo->getExerciceByIdWith($exerciceId, ['sapeurs', 'localite']);
 
         if ($exercice->statut !== ExerciceBusiness::EXERCICE_STATUT_VALIDE) {
@@ -1086,6 +1120,8 @@ class ImputationBusiness
      */
     public function imputerCours(int $coursSapeurId, $data)
     {
+        $this->controlerStatusExerciceComptable($data['exercice_comptable_id']);
+
         // Chargement du cours
         $cours = CoursSapeur::with(['cours', 'ecritures'])->find($coursSapeurId);
 
@@ -1161,6 +1197,9 @@ class ImputationBusiness
 
     public function annulerImputationCours($coursSapeurId)
     {
+        $ecriture = Ecriture::find('cours_sapeur_id', $coursSapeurId);
+        $this->controlerStatusExerciceComptable($ecriture->exercice_comptable_id);
+
         // Check si des ecritures sont déjà liées à un décompte
         if (
             Ecriture::where('cours_sapeur_id', $coursSapeurId)
@@ -1178,11 +1217,14 @@ class ImputationBusiness
     }
 
     /**
-     * Génères des frais annuels pour les sapeurs n'ayant pas encore de frais annuels
+     * Imputation de travaux
      */
     public function imputerTravaux($ids)
     {
         $travaux = Travail::whereIn('id', $ids)->where('statut', '=', TravauxBusiness::TRAVAIL_STATUT_VALIDE)->get();
+
+        // TODO: Check si exercices comptable n'est pas cloturé
+        // $this->controlerStatusExerciceComptable($exerciceComptableId);
 
         // Chargement des travaux type
         $types = TravailType::with(['fonctions'])->get();
@@ -1230,6 +1272,7 @@ class ImputationBusiness
 
     public function annulerImputationTravail($travailId)
     {
+        // TODO: Check si pas cloturé !!!
         // Check si des ecritures sont déjà liées à un décompte
         if (
             Ecriture::where('travail_id', $travailId)

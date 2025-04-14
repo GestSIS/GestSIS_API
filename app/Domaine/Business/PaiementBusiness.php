@@ -35,6 +35,15 @@ use Z38\SwissPayment\Text;
  */
 class PaiementBusiness
 {
+
+    public function controlerStatusExerciceComptable(int $exerciceComptableId)
+    {
+        $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
+        if ($exerciceComptable->boucle == 1) {
+            throw new InvalidActionException(message: "Excercice comptable cloturé, impossible d'effectuer cette action");
+        }
+    }
+
     /**
      * creer un décompte
      * 
@@ -50,6 +59,8 @@ class PaiementBusiness
      */
     public function creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction)
     {
+        $this->controlerStatusExerciceComptable($exerciceComptableId);
+
         $avsParam = AvsParam::first();
         if (is_null($avsParam)) {
             throw new ArrayException(array("message" => "Paramètres AVS non configurés"));
@@ -278,11 +289,12 @@ class PaiementBusiness
      * Supprimer un décompte
      * 
      * @param int $decompteId id du décompte à supprimer
-     * 
-     * @return string booléen du résultat
      */
-    public function supprimerDecompte($decompteId)
+    public function supprimerDecompte(int $decompteId)
     {
+        $decompte = Decompte::find($decompteId);
+        $this->controlerStatusExerciceComptable($decompte->exercice_comptable_id);
+
         Ecriture::where('decompte_id', '=', $decompteId)->where('type', '=', ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_CHARGE_AVS_AC)->delete();
         Ecriture::where('decompte_id', '=', $decompteId)->update(['decompte_id' => null]);
         Decompte::where('id', '=', $decompteId)->delete(); // Cascade delete des paiements

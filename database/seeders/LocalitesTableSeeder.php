@@ -124,7 +124,7 @@ class LocalitesTableSeeder extends Seeder
             ['id' => '107', 'commune_id' => NULL, 'npa' => '2108', 'designation' => 'Couvet'],
             ['id' => '108', 'commune_id' => NULL, 'npa' => '2525', 'designation' => 'Le Landeron'],
             ['id' => '109', 'commune_id' => NULL, 'npa' => '2000', 'designation' => 'Neuchâtel'],
-            ['id' => '110', 'commune_id' => NULL, 'npa' => '2300', 'designation' => 'La Chaux-de-fonds'],
+            ['id' => '110', 'commune_id' => NULL, 'npa' => '2300', 'designation' => 'La Chaux-de-Fonds'],
             ['id' => '111', 'commune_id' => NULL, 'npa' => '2207', 'designation' => 'Coffrane'],
             ['id' => '113', 'commune_id' => NULL, 'npa' => '2057', 'designation' => 'Villiers'],
             ['id' => '114', 'commune_id' => NULL, 'npa' => '2043', 'designation' => 'Boudevilliers'],

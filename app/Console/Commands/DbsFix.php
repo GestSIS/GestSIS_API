@@ -50,14 +50,14 @@ class DbsFix extends Command
     {
         $dbs = config('database.dbs');
         foreach ($dbs as $db) {
-            ConvocationParam::on("db_" . $db)->insert([
-                'titre' => 'convocation',
-                'affichage_duree' => true,
-                'affichage_pour_infor' => true,
-            ]);
+            // ConvocationParam::on("db_" . $db)->insert([
+            //     'titre' => 'convocation',
+            //     'affichage_duree' => true,
+            //     'affichage_pour_infor' => true,
+            // ]);
 
-            // printf("Fix db=db_" . $db . "\n");
-            // Commune::on("db_" . $db)->insert([
+            printf("Fix db=db_" . $db . "\n");
+            // Localite::on("db_" . $db)->insert([
             //     array('id' => '76', 'designation' => 'Porrentruy'),
             //     array('id' => '77', 'designation' => 'Grand-Fontaine'),
             // ]);
@@ -76,7 +76,7 @@ class DbsFix extends Command
             // LocaliteSis::on("db_" . $db)->whereIn('localite_id', [32, 43])->delete();
             // Localite::on("db_" . $db)->whereIn('id', [32, 43])->delete();
 
-            // Localite::on("db_" . $db)->where('id', '=', 77)->update(['commune_id' => 76]);
+            Localite::on("db_" . $db)->where('id', '=', 110)->update(['designation' => 'La Chaux-de-Fonds']);
             // Localite::on("db_" . $db)->where('id', '=', 46)->update(['commune_id' => 77]);
 
             printf("\n");
