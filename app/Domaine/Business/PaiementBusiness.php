@@ -556,7 +556,7 @@ class PaiementBusiness
             "9" => round($total['avs_ac']),
             "11" => round($total['solde'] + $total['indemnite']) - round($total['avs_ac']),
             "15-1" => "Répartition:\tTâches essentielles\t" . round($total['solde']),
-            "15-2" => "\t\t\tIndemnités\t\t" . round($total['indemnite']),
+            "15-2" => "\t\t\tIndemnités\t\t\t" . round($total['indemnite']),
             "OrtDatum" => $this->dateFr(),
             "Unterschrift10" => $sisParam->nom,
             "Unterschrift11" => $sisParam->sapeur->nom . " " . $sisParam->sapeur->prenom,
