@@ -145,8 +145,8 @@ return new class extends Migration {
             // TODO: Created and Deleted fields
 
             $table->foreignId('materiel_type_id')->constrained();
-            $table->foreignId('sapeur_id')->nullable()->constrained();
-            $table->foreignId('emplacement_id')->nullable()->constrained();
+            $table->foreignId('sapeur_id')->nullable()->constrained()->default(null);
+            $table->foreignId('emplacement_id')->nullable()->constrained()->default(null);
         });
 
         $materiels = MaterielPersonnel::with('materiel')->get()->toArray();
