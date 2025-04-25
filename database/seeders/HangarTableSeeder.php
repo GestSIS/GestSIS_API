@@ -15,10 +15,10 @@ class HangarTableSeeder extends Seeder
     public function run(): void
     {
         DB::table('emplacements')->insert([
-            ['id' => 1, 'designation' => 'Bassecourt', 'est_etiquete' => true, 'tri' => 9, 'couleur_id' => 2, 'statut' => 1],
+            ['id' => 1, 'designation' => 'Bassecourt', 'est_etiquete' => true, 'tri' => 0, 'couleur_id' => 2, 'statut' => 1],
             ['id' => 2, 'designation' => 'Glovelier', 'est_etiquete' => true, 'tri' => 10, 'couleur_id' => 2, 'statut' => 1],
-            ['id' => 3, 'designation' => 'Courfaivre', 'est_etiquete' => true, 'tri' => 11, 'couleur_id' => 2, 'statut' => 1],
-            ['id' => 4, 'designation' => 'Boécourt', 'est_etiquete' => true, 'tri' => 12, 'couleur_id' => 2, 'statut' => 1],
+            ['id' => 3, 'designation' => 'Courfaivre', 'est_etiquete' => true, 'tri' => 7, 'couleur_id' => 2, 'statut' => 1],
+            ['id' => 4, 'designation' => 'Boécourt', 'est_etiquete' => true, 'tri' => 5, 'couleur_id' => 2, 'statut' => 1],
         ]);
         DB::table('hangars')->insert([
             ['id' => 1, 'localite_id' => 3, 'rue' => 'Colonel Hoffmeyer', 'no_rue' => '45'],
