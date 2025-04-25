@@ -539,8 +539,6 @@ class PaiementBusiness
         $localite = $sapeur->localite;
         $civilite = $sapeur->civilite;
 
-        $soldeImposable = max($total['solde'] - $avsParam->franchise_imposition_cantonale, 0);
-
         $fields = array(
             "A" => "Ja",
             "C2" => $sapeur->no_avs,
@@ -551,14 +549,14 @@ class PaiementBusiness
             "HName" => $sapeur->nom . " " . $sapeur->prenom,
             "HAdresse" => $sapeur->rue . " " . $sapeur->no_rue,
             "HPostfach" => $localite->npa . " " . $localite->designation,
-            "1" => round($soldeImposable + $total['indemnite']),
+            "1" => round($total['solde'] + $total['indemnite']),
             // remplissage point 6 - indemnités
             // "6" => $total['indemnite'],
-            "8" => round($soldeImposable + $total['indemnite']),
+            "8" => round($total['solde'] + $total['indemnite']),
             "9" => round($total['avs_ac']),
-            "11" => round($soldeImposable + $total['indemnite']) - round($total['avs_ac']),
-            "15-1" => "Répartition:\tSolde\t\t" . round($total['solde']),
-            "15-2" => "\t\t\tIndemnité\t" . round($total['indemnite']),
+            "11" => round($total['solde'] + $total['indemnite']) - round($total['avs_ac']),
+            "15-1" => "Répartition:\Tâches essentielles\t\t" . round($total['solde']),
+            "15-2" => "\t\t\tIndemnités\t" . round($total['indemnite']),
             "OrtDatum" => $this->dateFr(),
             "Unterschrift10" => $sisParam->nom,
             "Unterschrift11" => $sisParam->sapeur->nom . " " . $sisParam->sapeur->prenom,
