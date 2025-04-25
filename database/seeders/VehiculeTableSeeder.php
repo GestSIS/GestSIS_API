@@ -15,14 +15,14 @@ class VehiculeTableSeeder extends Seeder
     public function run(): void
     {
         DB::table('emplacements')->insert([
-            ['id' => 5, 'parent_id' => 1, 'est_etiquete' => true, 'designation' => 'Tonne-Pompe (Bassecourt)', 'tri' => 5, 'couleur_id' => 1, 'statut' => 1],
-            ['id' => 6, 'parent_id' => 1, 'est_etiquete' => true, 'designation' => 'VPM (Bassecourt)', 'tri' => 6, 'couleur_id' => 1, 'statut' => 1],
-            ['id' => 7, 'parent_id' => 1, 'est_etiquete' => true, 'designation' => 'Transport (Bassecourt)', 'tri' => 7, 'couleur_id' => 1, 'statut' => 1],
-            ['id' => 8, 'parent_id' => 4, 'est_etiquete' => true, 'designation' => 'Transport (Boécourt)', 'tri' => 8, 'couleur_id' => 1, 'statut' => 1],
-            ['id' => 9, 'parent_id' => 3, 'est_etiquete' => true, 'designation' => 'VPI (Courfaivre)', 'tri' => 9, 'couleur_id' => 1, 'statut' => 1],
-            ['id' => 10, 'parent_id' => 3, 'est_etiquete' => true, 'designation' => 'Jeep (Courfaivre)', 'tri' => 10, 'couleur_id' => 1, 'statut' => 0],
-            ['id' => 11, 'parent_id' => 2, 'est_etiquete' => true, 'designation' => 'VPI (Glovelier)', 'tri' => 11, 'couleur_id' => 1, 'statut' => 1],
-            ['id' => 12, 'parent_id' => 2, 'est_etiquete' => true, 'designation' => 'Transport (Glovelier)', 'tri' => 12, 'couleur_id' => 1, 'statut' => 1],
+            ['id' => 5, 'parent_id' => 1, 'est_etiquete' => true, 'designation' => 'Tonne-Pompe', 'tri' => 5, 'couleur_id' => 1, 'statut' => 1],
+            ['id' => 6, 'parent_id' => 1, 'est_etiquete' => true, 'designation' => 'VPM', 'tri' => 6, 'couleur_id' => 1, 'statut' => 1],
+            ['id' => 7, 'parent_id' => 1, 'est_etiquete' => true, 'designation' => 'Iveco', 'tri' => 7, 'couleur_id' => 1, 'statut' => 1],
+            ['id' => 8, 'parent_id' => 4, 'est_etiquete' => true, 'designation' => 'Mowag', 'tri' => 8, 'couleur_id' => 1, 'statut' => 1],
+            ['id' => 9, 'parent_id' => 3, 'est_etiquete' => true, 'designation' => 'VPI', 'tri' => 9, 'couleur_id' => 1, 'statut' => 1],
+            ['id' => 10, 'parent_id' => 3, 'est_etiquete' => true, 'designation' => 'Jeep', 'tri' => 10, 'couleur_id' => 1, 'statut' => 0],
+            ['id' => 11, 'parent_id' => 2, 'est_etiquete' => true, 'designation' => 'VPI', 'tri' => 11, 'couleur_id' => 1, 'statut' => 1],
+            ['id' => 12, 'parent_id' => 2, 'est_etiquete' => true, 'designation' => 'Transport', 'tri' => 12, 'couleur_id' => 1, 'statut' => 1],
         ]);
         DB::table('vehicules')->insert([
             ['id' => 5, 'forfait' => 0, 'unite' => 0],
