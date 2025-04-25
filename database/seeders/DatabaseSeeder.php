@@ -52,13 +52,14 @@ class DatabaseSeeder extends Seeder
         $this->call(ExerciceTableSeeder::class);
         $this->call(ExerciceSapeurTableSeeder::class);
 
-
+        // Materiel
+        $this->call(HangarTableSeeder::class);
+        $this->call(VehiculeTableSeeder::class);
+        $this->call(EmplacementTableSeeder::class);
         $this->call(ArticleTableSeeder::class);
 
         // Param interventions
         $this->call(MaterielTableSeeder::class);
-        $this->call(HangarTableSeeder::class);
-        $this->call(VehiculeTableSeeder::class);
         $this->call(StatInterventionTableSeeder::class);
         $this->call(TypeInterventionTableSeeder::class);
         $this->call(InterventionTraitementTableSeeder::class);
