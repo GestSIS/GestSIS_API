@@ -50,7 +50,7 @@ class TypstToPdfGenerator
         $result = Process::run(config('typst.bin_path') . " compile $typstFile --font-path=" . config('typst.font_path'));
 
         if ($result->failed()) {
-            // $directory->delete();
+            $directory->delete();
             throw new ArrayException(['output' => $result->errorOutput(), 'input' => json_encode($data)], "Une erreur est survenue lors de la generation du pdf");
         }
 
