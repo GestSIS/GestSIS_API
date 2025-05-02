@@ -34,7 +34,7 @@ class ArticleBusiness
    * @param int $emplacementId
    * @return void
    */
-  public static function retourArticles(string $date, array $articleIds, int $emplacementId): Collection
+  public static function retourArticles(int $emplacementId, string $date, array $articleIds): Collection
   {
     Article::whereIn('id', $articleIds)->update(['sapeur_id' => null, 'emplacement_id' => $emplacementId, 'retour' => $date]);
     return Article::whereIn('id', $articleIds)->get();
