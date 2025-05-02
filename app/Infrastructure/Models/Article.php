@@ -10,6 +10,7 @@ class Article extends Model
     use HasFactory;
 
     protected $fillable = [
+        'materiel_type_id',
         'numero',
         'uuid',
         'achat',
@@ -27,7 +28,7 @@ class Article extends Model
 
     protected function casts(): array
     {
-        return  [
+        return [
             'sapeur_id' => 'integer',
             'emplacement_id' => 'integer',
             'materiel_type_id' => 'integer',
