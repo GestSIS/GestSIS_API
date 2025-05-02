@@ -3,8 +3,8 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\Materiel\ArticleBusiness;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Request;
 
 class ArticleSapeurController extends Controller
 {
@@ -27,7 +27,7 @@ class ArticleSapeurController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request, int $sapeurId)
+    public function store(Request $request, int $sapeurId)
     {
         $data = $request->validate([
             'date' => 'required|date',
@@ -35,9 +35,9 @@ class ArticleSapeurController extends Controller
             'articleIds.*' => 'integer|min:1',
         ]);
 
-        $materiels = ArticleBusiness::attribuerArticles($sapeurId, $data['date'], $data['articleIds']);
+        $articles = ArticleBusiness::attribuerArticles($sapeurId, $data['date'], $data['articleIds']);
 
-        return response()->json(['data' => $materiels]);
+        return response()->json(['data' => $articles]);
     }
 
     /**

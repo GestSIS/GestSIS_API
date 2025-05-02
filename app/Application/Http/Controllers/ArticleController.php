@@ -39,14 +39,15 @@ class ArticleController extends Controller
             'articles.*.materiel_type_id' => 'integer|nullable',
             'articles.*.quantite' => 'integer|nullable',
             'articles.*.numero' => 'string|nullable',
+            'articles.*.est_etiquete' => 'boolean',
             'articles.*.achat' => 'string|nullable',
-            'articles.*.sapeur_id' => 'required_without:emplacement_id',
-            'articles.*.attribution' => 'required_if:sapeur_id',
-            'articles.*.emplacement_id' => 'required_without:sapeur_id',
-            'articles.*.compartiment' => 'required_without:sapeur_id',
+            'articles.*.sapeur_id' => 'required_if:emplacement_id,null',
+            'articles.*.attribution' => 'required_unless:sapeur_id,null',
+            'articles.*.emplacement_id' => 'required_if:sapeur_id,null',
+            'articles.*.compartiment' => 'string|nullable',
         ]);
 
-        $materiels = ArticleBusiness::createItems($data['materiels']);
+        $materiels = ArticleBusiness::creerArticles($data['articles']);
         return response()->json(['data' => $materiels]);
     }
 

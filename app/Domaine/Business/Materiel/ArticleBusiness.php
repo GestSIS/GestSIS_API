@@ -2,10 +2,12 @@
 
 namespace App\Domaine\Business\Materiel;
 
+use App\Domaine\Exceptions\ArrayException;
 use App\Exceptions\InternalException;
 use App\Exceptions\BadRequestException;
 use App\Infrastructure\Models\Article;
 use App\Infrastructure\Models\Emplacement;
+use App\Infrastructure\Models\MaterielType;
 use Illuminate\Database\Eloquent\Collection;
 use Nette\Utils\Arrays;
 
@@ -48,40 +50,66 @@ class ArticleBusiness
    */
   public static function attribuerArticles(int $sapeurId, string $date, array $articleIds): Collection
   {
-    // TODO: Controller que les articles soient bien attribuable
+    // Controle que les articles sont attribuable
+    $nonAttribuable = Article::whereIn('articles.id', $articleIds)
+      ->join('materiel_types', 'materiel_types.id', '=', 'articles.materiel_type_id')
+      ->where('materiel_types.est_attribuable', '=', false)
+      ->select(['articles.id', 'articles.materiel_type_id'])
+      ->get();
+
+    if (!$nonAttribuable->isEmpty()) {
+      throw new ArrayException([$nonAttribuable], message: 'Certains articles ne sont pas attribuable');
+    }
 
     Article::whereIn('id', $articleIds)->update([
       'sapeur_id' => $sapeurId,
       'emplacement_id' => null,
       'attribution' => $date
     ]);
+    return Article::whereIn('id', $articleIds)->get();
   }
 
   public static function creerArticles(array $articles)
   {
-    // TODO: fetch types equivalents
+    // fetch types equivalents
+    $indexedTypes = MaterielType::all()->keyBy('id');
 
-    // TODO: Controller numérotation correcte
+    // Controller qu'un article appartiennent soit à un sapeur soit à un emplacement
+    foreach ($articles as $article) {
+      if (
+        ($article['sapeur_id'] === null && $article['emplacement_id'] === null) ||
+        ($article['sapeur_id'] !== null && $article['emplacement_id'] !== null)
+      ) {
+        throw new ArrayException([], message: 'Certains articles sont à la fois assignés à un sapeur et à un emplacement');
+      }
 
-    // TODO: Controller qu'un article appartiennent soit à un sapeur soit à un emplacement
+      $type = $indexedTypes[$article['materiel_type_id']];
+      if (!$type->est_attribuable && $article['sapeur_id'] !== null) {
+        throw new ArrayException([], message: "Article de type '$type->designation' n'est pas attribuable");
+      }
+    }
 
-    $articles = array_map(fn($article) => [
-      'materiel_type_id' => $article['materiel_type_id'],
-      'taille' => trim($article['taille'] ?? ''),
-      'remarque' => $article['remarque'] ?? '',
-      'emplacement_id' => $article['emplacement_id'],
-      'sapeur_id' => $article['sapeur_id'],
-      'attribution' => $article['attribution'],
-      'retour' => null,
-      'numero' => $article['numero'],
-      'uuid' => $article['uuid'],
-      'achat' => $article['achat'],
-      'compartiment' => $article['compartiment'],
-      'est_etiquete' => $article['est_etiquete'],
-      'est_unique' => $article['est_unique'],
-    ], $articles);
+    // Controller numérotation correcte
+    $articles = array_map(function ($article) use ($indexedTypes) {
+      $type = $indexedTypes[$article['materiel_type_id']];
+      return [
+        'materiel_type_id' => $article['materiel_type_id'],
+        'taille' => $type->est_taillee ? trim($article['taille'] ?? '') : '',
+        'remarque' => $article['remarque'] ?? '',
+        'emplacement_id' => $article['emplacement_id'],
+        'sapeur_id' => $article['sapeur_id'],
+        'attribution' => $article['sapeur_id'] === null ? null : $article['attribution'],
+        'retour' => null,
+        'numero' => $type->est_numerote ? $article['numero'] : '',
+        'uuid' => uniqid(), // TODO: en avons-nous vraiment besoin ? Utiliser le numéro ou le UUID pour les codebar ?
+        'achat' => $article['achat'] ?? '',
+        'compartiment' => $article['compartiment'] ?? '',
+        'est_etiquete' => $article['est_etiquete'] ?? false,
+        'est_unique' => false, // TODO: Non utilisé pour le moment
+      ];
+    }, $articles);
 
-    Article::insert($articles);
+    return array_map(fn($article) => Article::create($article), $articles);
   }
 
   /**
@@ -268,7 +296,7 @@ EOF;
     return Article::whereNull('sapeur_id')
       ->leftJoin('materiel_types', 'articles.materiel_type_id', '=', 'materiel_types.id')
       ->where('materiel_types.est_attribuable', '=', true)
-      ->get();
+      ->get(['articles.*']);
   }
 
   /**
