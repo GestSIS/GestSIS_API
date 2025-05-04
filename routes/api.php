@@ -663,12 +663,13 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // TODO: à migrer
-    // Route::group(['middleware' => 'jwtTokenRole:mat_perso.config'], function () {
-    //     Route::resource('mat-perso-categories', MatPersoCategorieController::class)->only(['store', 'update', 'destroy']);
-    //     Route::resource('mat-perso-types', MaterielTypeController::class)->only(['store', 'update', 'destroy']);
-    //     Route::resource('mat-perso-event-types', MatPersoEventTypeController::class)->only(['store', 'update', 'destroy']);
-    //     Route::resource('mat-perso-alerte-types', MatPersoAlerteTypeController::class)->only(['store', 'update', 'destroy']);
-    // });
+    Route::group(['middleware' => 'jwtTokenRole:mat_perso.config'], function () {
+        Route::resource('couleurs', CouleurController::class)->only(['store', 'update', 'destroy']);
+        //     Route::resource('mat-perso-categories', MatPersoCategorieController::class)->only(['store', 'update', 'destroy']);
+        //     Route::resource('mat-perso-types', MaterielTypeController::class)->only(['store', 'update', 'destroy']);
+        //     Route::resource('mat-perso-event-types', MatPersoEventTypeController::class)->only(['store', 'update', 'destroy']);
+        //     Route::resource('mat-perso-alerte-types', MatPersoAlerteTypeController::class)->only(['store', 'update', 'destroy']);
+    });
 
     // TODO: Ajouter route type d'unité
     // (optionnel) Liste des dernières interventions (30 derniers jours)

@@ -2,22 +2,21 @@
 
 namespace App\Domaine\Business\Materiel;
 
-use App\Exceptions\InternalException;
 use App\Infrastructure\Models\Couleur;
 
 /**
  * Model for manipulating 'color' database table
  * Available public methods
  * @static listColors()
- * @static getColor($id)
- * @static createColor($color)
- * @static editColor($id, $data)
- * @static deleteColor($id)
+ * @static getCouleur($id)
+ * @static createCouleur($couleur)
+ * @static editCouleur($id, $data)
+ * @static deleteCouleur($id)
  */
 class ColorBusiness
 {  /**
    * Get list of colors
-   * @return Collection of #color_existing
+   * @return \Illuminate\Database\Eloquent\Collection of #color_existing
    */
   public static function listColors()
   {
@@ -29,37 +28,29 @@ class ColorBusiness
    * @param integer $id ID of the color to get
    * @return #color_existing
    */
-  public static function getColor($id)
+  public static function getCouleur($id)
   {
     return Couleur::find($id);
   }
 
   /**
    * Create a new color
-   * @param Array $color #color_new Properties of the new color
+   * @param array $couleur #color_new Properties of the new color
    * @return #idobj ID of the created color
    */
-  public static function createColor($color)
+  public static function createCouleur($couleur)
   {
-    return Couleur::create([
-      'nom' => $color['nom'],
-      'foreground' => $color['foreground'],
-      'background' => $color['background']
-    ]);
+    return Couleur::create($couleur);
   }
 
   /**
    * Edit an existing color
    * @param integer $id ID of the color to edit
-   * @param Array $data #color_new Properties of the color to modify
+   * @param array $data #color_new Properties of the color to modify
    */
-  public static function editColor($id, $data)
+  public static function editCouleur($id, $data)
   {
-    return Couleur::where('id', '=', $id)->update([
-      'name' => $data['name'],
-      'foreground' => $data['foreground'],
-      'background' => $data['background']
-    ]);
+    Couleur::where('id', '=', $id)->update($data);
     return Couleur::find($id);
   }
 
@@ -68,7 +59,7 @@ class ColorBusiness
    * @param integer $id ID of the color to delete
    * @return boolean true if deleted successfully
    */
-  public static function deleteColor($id)
+  public static function deleteCouleur($id)
   {
     return Couleur::where("id", '=', $id)->delete();
   }
