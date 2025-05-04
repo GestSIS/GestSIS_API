@@ -22,28 +22,30 @@ class CouleurController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1|required',
-            'parent_id' => 'integer|nullable'
+            'nom' => 'string|min:1|required',
+            'texte' => 'string|required',
+            'fond' => 'string|required',
         ]);
 
-        $couleur = ColorBusiness::createColor($data);
+        $couleur = ColorBusiness::createCouleur($data);
         return response()->json(['data' => $couleur]);
     }
 
     public function update(Request $request, $id)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'parent_id' => 'integer|nullable'
+            'nom' => 'string|min:1',
+            'texte' => 'string|required',
+            'fond' => 'string|required',
         ]);
 
-        $couleur = ColorBusiness::editColor($id, $data);
+        $couleur = ColorBusiness::editCouleur($id, $data);
         return response()->json(['data' => $couleur]);
     }
 
     public function destroy($id)
     {
-        $couleur = ColorBusiness::deleteColor($id);
+        $couleur = ColorBusiness::deleteCouleur($id);
         return response()->json(['data' => $couleur]);
     }
 }
