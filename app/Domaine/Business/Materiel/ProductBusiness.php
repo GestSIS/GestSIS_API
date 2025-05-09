@@ -2,7 +2,10 @@
 
 namespace App\Domaine\Business\Materiel;
 
+use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\Article;
 use App\Infrastructure\Models\MaterielType;
+use DB;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -21,9 +24,11 @@ use Illuminate\Database\Eloquent\Collection;
 class ProductBusiness // extends OrderModel
 {
 
-  const TYPE_NONE = "NONE";
-  const TYPE_PIPE = "PIPE";
-  const TYPE_BATTERY = "BATTERY";
+  const TYPE_NONE = 0;
+  const TYPE_PIPE = 1;
+  const TYPE_BATTERY = 2;
+  const TYPE_VEHICULE = 3;
+  const TYPE_HANGAR = 4;
 
   /**
    * Get list of products with only basic informations, grouped by category
@@ -32,44 +37,6 @@ class ProductBusiness // extends OrderModel
   public static function listProductsBasicByCategory(): Collection
   {
     return MaterielType::orderBy('tri', 'asc')->get();
-
-    // Build query
-    $query = <<<EOF
-      SELECT id, name, category_id
-      FROM product
-      ORDER BY `order`
-EOF;
-
-    // Execute query
-    $products = self::db()->select($query);
-
-    // Map output to correct JSON format
-    return Arrays::each(
-      Arrays::group(
-        Arrays::each(
-          $products,
-          function ($product) {
-            return [
-              'id' => $product->id,
-              'name' => $product->name,
-              'category_id' => $product->category_id
-            ];
-          }
-        ),
-        'category_id'
-      ),
-      function ($productLists) {
-        return Arrays::each(
-          $productLists,
-          function ($product) {
-            return [
-              'id' => $product['id'],
-              'name' => $product['name']
-            ];
-          }
-        );
-      }
-    );
   }
 
   /**
@@ -659,13 +626,16 @@ EOF;
    */
   public static function createProduct($product)
   {
+    $product['fournisseur'] ??= '';
+    $product['prix'] ??= '';
+    $product['reparateur'] ??= '';
+    $product['remarque'] ??= '';
+    $product['prefix'] ??= '';
 
-    // Insert into main table only
-    return self::create("product", [
-      'category_id' => $product['category']['id'],
-      'name' => $product['name'],
-      'owner_id' => $product['owner']['id'],
-      'order' => self::getNextOrder("product", "category_id", $product['category']['id'])
+    $order = DB::table('materiel_types')->max('id');
+    return MaterielType::create([
+      ...$product,
+      'tri' => ($order ?? 0) + 1,
     ]);
   }
 
@@ -676,6 +646,18 @@ EOF;
    */
   public static function editProduct($id, $data)
   {
+    $data['fournisseur'] ??= '';
+    $data['prix'] ??= '';
+    $data['reparateur'] ??= '';
+    $data['remarque'] ??= '';
+    $data['prefix'] ??= '';
+
+    // TODO: Handle type tuyau/batterie
+    MaterielType::where('id', $id)
+      ->limit(1)
+      ->update($data);
+
+    return MaterielType::find($id);
 
     // Simplified flags
     $isFullEdit = Arrays::has($data, 'remark');
@@ -755,7 +737,12 @@ EOF;
    */
   public static function deleteProduct($id)
   {
-    return self::delete("product", $id, "category_id");
+    if (
+      Article::where('materiel_categorie_id', $id)->exists()
+    ) {
+      throw new ArrayException([], "Veuillez d'abord supprimer les articles");
+    }
+    return MaterielType::where('id', $id)->delete();
   }
 
   /**
@@ -765,6 +752,7 @@ EOF;
    */
   public static function reorderProduct($id, $reorder)
   {
-    self::reorder("product", $id, $reorder, "category_id");
+    // TODO: a implémenter
+    // self::reorder("product", $id, $reorder, "category_id");
   }
 }

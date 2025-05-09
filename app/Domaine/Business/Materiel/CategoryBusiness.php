@@ -5,6 +5,7 @@ namespace App\Domaine\Business\Materiel;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\MaterielCategorie;
 use App\Infrastructure\Models\MaterielType;
+use DB;
 
 /**
  * Model for manipulating 'category' database table
@@ -35,12 +36,12 @@ class CategoryBusiness // extends OrderModel
    */
   public static function createCategory($category)
   {
+    $order = DB::table('materiel_categories')->max('id');
     return MaterielCategorie::create([
       'designation' => $category['designation'],
       'parent_id' => $category['parent_id'],
       'couleur_id' => $category['couleur_id'],
-      'tri' => $category['tri'], // TODO: à implémenter
-      // 'order' => self::getNextOrder("category")
+      'tri' => ($order ?? 0) + 1,
     ]);
   }
 

@@ -79,13 +79,7 @@ use App\Application\Http\Controllers\JustificatifController;
 use App\Application\Http\Controllers\LocaliteController;
 use App\Application\Http\Controllers\LocaliteSisController;
 use App\Application\Http\Controllers\MaterielController;
-use App\Application\Http\Controllers\MatPersoAlerteController;
-use App\Application\Http\Controllers\MatPersoAlerteTypeController;
-use App\Application\Http\Controllers\MatPersoAttributionController;
 use App\Application\Http\Controllers\MaterielCategorieController;
-use App\Application\Http\Controllers\MatPersoController;
-use App\Application\Http\Controllers\MatPersoEventController;
-use App\Application\Http\Controllers\MatPersoEventTypeController;
 use App\Application\Http\Controllers\MaterielTypeController;
 use App\Application\Http\Controllers\MedecinController;
 use App\Application\Http\Controllers\MesAbsencesController;
@@ -666,7 +660,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.config'], function () {
         Route::resource('couleurs', CouleurController::class)->only(['store', 'update', 'destroy']);
         Route::resource('materiel-categories', MaterielCategorieController::class)->only(['store', 'update', 'destroy']);
-        //     Route::resource('mat-perso-types', MaterielTypeController::class)->only(['store', 'update', 'destroy']);
+        Route::resource('materiel-types', MaterielTypeController::class)->only(['store', 'update', 'destroy']);
         //     Route::resource('mat-perso-event-types', MatPersoEventTypeController::class)->only(['store', 'update', 'destroy']);
         //     Route::resource('mat-perso-alerte-types', MatPersoAlerteTypeController::class)->only(['store', 'update', 'destroy']);
     });
