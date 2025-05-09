@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Infrastructure\Models\MaterielGenerique;
-use App\Infrastructure\Models\MaterielNominal;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 

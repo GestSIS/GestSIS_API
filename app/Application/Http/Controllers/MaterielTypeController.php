@@ -5,7 +5,6 @@ namespace App\Application\Http\Controllers;
 use App\Domaine\API\MatPersoParamService;
 use App\Domaine\Business\Materiel\ProductBusiness;
 use Illuminate\Http\Request;
-use Nette\NotImplementedException;
 
 class MaterielTypeController extends Controller
 {
@@ -29,32 +28,47 @@ class MaterielTypeController extends Controller
 
     public function store(Request $request)
     {
-        throw new NotImplementedException();
         $data = $request->validate([
             'designation' => 'string|min:1|required',
-            'materiel_categorie_id' => 'integer|required'
+            'materiel_categorie_id' => 'integer|required',
+            'est_numerote' => 'boolean|required',
+            'est_attribuable' => 'boolean|required',
+            'est_taillee' => 'boolean|required',
+            'prix' => 'string|nullable',
+            'fournisseur' => 'string|nullable',
+            'reparateur' => 'string|nullable',
+            // 'a_controller' => 'string',
+            'remarque' => 'string|nullable',
+            'prefix' => 'string|nullable',
         ]);
 
-        $type = $this->service->ajouterType($data);
+        $type = ProductBusiness::createProduct($data);
         return response()->json(['data' => $type]);
     }
 
     public function update(Request $request, $id)
     {
-        throw new NotImplementedException();
         $data = $request->validate([
             'designation' => 'string|min:1|required',
-            'materiel_categorie_id' => 'integer|required'
+            'materiel_categorie_id' => 'integer|required',
+            'est_numerote' => 'boolean|required',
+            'est_attribuable' => 'boolean|required',
+            'est_taillee' => 'boolean|required',
+            'prix' => 'string|nullable',
+            'fournisseur' => 'string|nullable',
+            'reparateur' => 'string|nullable',
+            // 'a_controller' => 'string',
+            'remarque' => 'string|nullable',
+            'prefix' => 'string|nullable',
         ]);
 
-        $type = $this->service->modifierType($id, $data);
+        $type = ProductBusiness::editProduct($id, $data);
         return response()->json(['data' => $type]);
     }
 
     public function destroy($id)
     {
-        throw new NotImplementedException();
-        $type = $this->service->supprimerType($id);
+        $type = ProductBusiness::deleteProduct($id);
         return response()->json(['data' => $type]);
     }
 }

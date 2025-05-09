@@ -77,29 +77,60 @@ return new class extends Migration {
             $table->boolean('statut')->default(true);
         });
 
+        Schema::dropIfExists('articles');
+        Schema::create('articles', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->timestamps();
+
+            $table->string('numero')->default('');
+            $table->string('uuid')->unique();
+            $table->string('achat')->default('');
+            $table->string('taille')->default('');
+            $table->boolean('est_etiquete')->default(false)->comment('Est étiqueté');
+            $table->boolean('est_unique')->default(false);
+            $table->string('remarque')->default('');
+
+            $table->date('attribution')->nullable()->default(null);
+            $table->date('retour')->nullable()->default(null);
+
+            // TODO: Created and Deleted fields
+
+            $table->foreignId('materiel_type_id')->constrained();
+            $table->foreignId('sapeur_id')->nullable()->constrained()->default(null);
+            $table->foreignId('emplacement_id')->nullable()->constrained()->default(null);
+            $table->string('compartiment')->default('');
+
+            $table->boolean('statut')->default(true);
+        });
+
+
         // Créer un emplacement pour chaque véhicule
         $vehicules = Vehicule::all();
         foreach ($vehicules as $vehicule) {
-            $emplacement = new Emplacement();
-            $emplacement->designation = $vehicule->designation;
-            $emplacement->remarque = '';
-            $emplacement->tri = $vehicule->tri;
-            $emplacement->statut = $vehicule->statut;
-            $emplacement->couleur_id = 1; //$couleur->id;
-            $emplacement->save();
+            Emplacement::create([
+                'designation' => $vehicule->designation,
+                'remarque' => '',
+                'tri' => $vehicule->tri,
+            ]);
+            $article = new Article();
+            $article->designation = $vehicule->designation;
+            $article->remarque = '';
+            $article->tri = $vehicule->tri;
+            $article->statut = $vehicule->statut;
+            $article->save();
         }
 
         Schema::table('vehicules', function (Blueprint $table) {
             // $table->dropPrimary('id');
             // $table->dropForeign('intervention_vehicule_vehicule_id_foreign');
             // $table->unsignedBigInteger('id')->unique()->change();
-            $table->foreign('id')->references('id')->on('emplacements');
+            $table->foreign('id')->references('id')->on('articles');
 
             // Supprimer designation ??? Non
-            // Ou bien mettre un flag dans emplacement ???
+            // Ou bien mettre un flag dans article ???
             // Que faire en cas de suppression du véhicule ?
-            // Le conserver dans le système mais plus dans les emplacements ?
-            // Ajouter un field statut dans emplacement pour pouvoir désactiver
+            // Le conserver dans le système mais plus dans les articles ?
+            // Ajouter un field statut dans article pour pouvoir désactiver
             // ceux inactif mais quand même à garder
 
             $table->dropColumn(['designation', 'statut', 'tri']);
@@ -116,39 +147,17 @@ return new class extends Migration {
         });
 
         Schema::create('hangars', function (Blueprint $table) {
-            $table->unsignedBigInteger('id')->unique();
-            $table->foreign('id')->references('id')->on('emplacements');
+            $table->bigIncrements('id');
 
-            $table->string('rue');
-            $table->string('no_rue');
+            $table->string('designation');
+            $table->string('rue')->default('');
+            $table->string('no_rue')->default('');
+            $table->boolean('statut')->default(true);
 
             $table->foreignId('localite_id')->constrained();
         });
 
-        Schema::dropIfExists('articles');
-        Schema::create('articles', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->timestamps();
-
-            $table->string('numero')->default('');
-            $table->string('uuid')->unique();
-            $table->string('achat')->default('');
-            $table->string('taille')->default('');
-            $table->boolean('est_etiquete')->default(false)->comment('Est étiqueté');
-            $table->boolean('est_unique')->default(false);
-            $table->string('remarque')->default('');
-            $table->string('compartiment')->default('');
-
-            $table->date('attribution')->nullable()->default(null);
-            $table->date('retour')->nullable()->default(null);
-
-            // TODO: Created and Deleted fields
-
-            $table->foreignId('materiel_type_id')->constrained();
-            $table->foreignId('sapeur_id')->nullable()->constrained()->default(null);
-            $table->foreignId('emplacement_id')->nullable()->constrained()->default(null);
-        });
-
+        // Migration matériel existant
         $materiels = MaterielPersonnel::with('materiel')->get()->toArray();
         $articles = [];
         foreach ($materiels as $materiel) {
@@ -199,8 +208,10 @@ return new class extends Migration {
             // $table->timestamps();
 
             // $table->string('designation');
-            // $table->boolean('taille')->default(true);
+            // $table->boolean('taille')->default(true); // TODO:: supprimer cet ancien champ
             // $table->foreignId('materiel_categorie_id')->constrained();
+
+            $table->integer('type')->default(0)->remarque("Permet de lier le type à un sous-type tel que hangar, vehicule, ...");
 
             $table->string('prix')->default('');
             $table->string('fournisseur')->default('');
@@ -209,9 +220,9 @@ return new class extends Migration {
             $table->string('remarque')->default('');
             $table->integer('tri');
 
-            $table->string('prefix')->default('')->comment();
+            $table->string('prefix')->default('');
             $table->boolean('est_numerote')->default(false);
-            $table->boolean('est_attribuable')->default(false);
+            $table->boolean('est_attribuable')->default(false)->comment('Peut être distribué à un sapeur');
             $table->boolean('est_taillee')->default(false)->comment('Possède une taille');
 
             $table->foreignId('fonction_id')->nullable()->comment('fonction responsable de l \'entretient')->constrained();
