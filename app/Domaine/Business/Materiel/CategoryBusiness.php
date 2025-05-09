@@ -3,8 +3,6 @@
 namespace App\Domaine\Business\Materiel;
 
 use App\Domaine\Exceptions\ArrayException;
-use App\Exceptions\BadRequestException;
-use App\Exceptions\InternalException;
 use App\Infrastructure\Models\MaterielCategorie;
 use App\Infrastructure\Models\MaterielType;
 
@@ -18,12 +16,12 @@ use App\Infrastructure\Models\MaterielType;
  * @static deleteCategory($id)
  * @static reorderCategory($id, $reorder)
  */
-class CategoryBusiness extends OrderModel
+class CategoryBusiness // extends OrderModel
 {
 
   /**
    * Get list of categories with contained products
-   * @return Collection of #category_existing_withproducts
+   * @return \Illuminate\Database\Eloquent\Collection of #category_existing_withproducts
    */
   public static function listCategories()
   {
@@ -31,26 +29,17 @@ class CategoryBusiness extends OrderModel
   }
 
   /**
-   * Get basic infos about a category, for editing purposes
-   * @param integer $id ID of the category to retrieve
-   * @return #category_existing_basic
-   */
-  public static function getCategoryBasic($id)
-  {
-    return MaterielCategorie::find($id);
-  }
-
-  /**
    * Create a new category
-   * @param Array $category #category_new Properties of the new category
+   * @param array $category #category_new Properties of the new category
    * @return #idobj ID of the created category
    */
   public static function createCategory($category)
   {
     return MaterielCategorie::create([
-      'name' => $category['name'],
-      'color_id' => $category['color_id'],
-      'order' => $category['color_id'], // TODO: à implémenter
+      'designation' => $category['designation'],
+      'parent_id' => $category['parent_id'],
+      'couleur_id' => $category['couleur_id'],
+      'tri' => $category['tri'], // TODO: à implémenter
       // 'order' => self::getNextOrder("category")
     ]);
   }
@@ -58,7 +47,7 @@ class CategoryBusiness extends OrderModel
   /**
    * Edit basic informations of an existing category
    * @param integer $id ID of the category to edit
-   * @param Array $data #category_new Properties of the category to modify
+   * @param array $data #category_new Properties of the category to modify
    */
   public static function editCategory($id, $data)
   {
@@ -68,8 +57,9 @@ class CategoryBusiness extends OrderModel
 
     // TODO: Controller récursivity du parent multi-niveau
     MaterielCategorie::where('id', $id)->limit(1)->update([
-      'name' => $data['name'],
-      'color_id' => $data['color']['id']
+      'designation' => $data['designation'],
+      'parent_id' => $data['parent_id'],
+      'couleur_id' => $data['couleur_id']
     ]);
 
     return MaterielCategorie::find($id);
@@ -94,7 +84,7 @@ class CategoryBusiness extends OrderModel
   /**
    * Reorder an existing category
    * @param integer $id ID of the category to reorder
-   * @param Array $reorder #reorder Infos about the reordering
+   * @param array $reorder #reorder Infos about the reordering
    */
   public static function reorderCategory($id, $reorder)
   {
