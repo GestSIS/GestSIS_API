@@ -82,7 +82,7 @@ use App\Application\Http\Controllers\MaterielController;
 use App\Application\Http\Controllers\MatPersoAlerteController;
 use App\Application\Http\Controllers\MatPersoAlerteTypeController;
 use App\Application\Http\Controllers\MatPersoAttributionController;
-use App\Application\Http\Controllers\MatPersoCategorieController;
+use App\Application\Http\Controllers\MaterielCategorieController;
 use App\Application\Http\Controllers\MatPersoController;
 use App\Application\Http\Controllers\MatPersoEventController;
 use App\Application\Http\Controllers\MatPersoEventTypeController;
@@ -629,7 +629,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenSapeurOrRole:mat_perso.lecture'], function () {
         Route::resource('materiel-types', MaterielTypeController::class)->only(['index']);
         Route::resource('materiel-types.articles', MaterielTypeArticleController::class)->only(['index']);
-        Route::resource('materiel-categories', MatPersoCategorieController::class)->only(['index']);
+        Route::resource('materiel-categories', MaterielCategorieController::class)->only(['index']);
         Route::resource('couleurs', CouleurController::class)->only(['index']);
         Route::resource('emplacements', EmplacementController::class)->only(['index']);
         Route::resource('articles', ArticleController::class)->only(['index']);
@@ -665,7 +665,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     // TODO: à migrer
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.config'], function () {
         Route::resource('couleurs', CouleurController::class)->only(['store', 'update', 'destroy']);
-        //     Route::resource('mat-perso-categories', MatPersoCategorieController::class)->only(['store', 'update', 'destroy']);
+        Route::resource('materiel-categories', MaterielCategorieController::class)->only(['store', 'update', 'destroy']);
         //     Route::resource('mat-perso-types', MaterielTypeController::class)->only(['store', 'update', 'destroy']);
         //     Route::resource('mat-perso-event-types', MatPersoEventTypeController::class)->only(['store', 'update', 'destroy']);
         //     Route::resource('mat-perso-alerte-types', MatPersoAlerteTypeController::class)->only(['store', 'update', 'destroy']);

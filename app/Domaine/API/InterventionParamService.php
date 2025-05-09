@@ -123,7 +123,7 @@ class InterventionParamService
 
     public function vehicules()
     {
-        return Vehicule::all();
+        return Vehicule::join('emplacements', 'emplacements.id', '=', 'vehicules.id')->get();
     }
 
     public function ajouterVehicule($data)
