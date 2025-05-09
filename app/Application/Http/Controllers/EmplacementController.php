@@ -22,16 +22,16 @@ class EmplacementController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1|required',
-            'remarque' => 'string',
-            'tri' => 'integer|required',
+            'remarque' => 'string|nullable',
+            // 'tri' => 'integer|required',
             'est_etiquete' => 'boolean|required',
-            'impression_inventaire' => 'boolean|required',
+            // 'impression_inventaire' => 'boolean|required',
             'couleur_id' => 'integer|min:1|required',
-            'parent_id' => 'integer|nullable|required',
-            'statut' => 'integer|required',
+            'parent_id' => 'integer|nullable',
+            // 'statut' => 'integer|required',
         ]);
 
-        $emplacement = LocationBusiness::createLocation($data);
+        $emplacement = EmplacementBusiness::createEmplacement($data);
         return response()->json(['data' => $emplacement]);
     }
 
@@ -39,22 +39,22 @@ class EmplacementController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1|required',
-            'remarque' => 'string',
-            'tri' => 'integer|required',
+            'remarque' => 'string|nullable',
+            // 'tri' => 'integer|required',
             'est_etiquete' => 'boolean|required',
-            'impression_inventaire' => 'boolean|required',
+            // 'impression_inventaire' => 'boolean|required',
             'couleur_id' => 'integer|min:1|required',
-            'parent_id' => 'integer|nullable|required',
-            'statut' => 'integer|required',
+            'parent_id' => 'integer|nullable',
+            // 'statut' => 'integer|required',
         ]);
 
-        $emplacement = LocationBusiness::editLocation($id, $data);
+        $emplacement = EmplacementBusiness::editEmplacement($id, $data);
         return response()->json(['data' => $emplacement]);
     }
 
     public function destroy($id)
     {
-        $emplacement = LocationBusiness::deleteLocation($id);
+        $emplacement = EmplacementBusiness::deleteEmplacement($id);
         return response()->json(['data' => $emplacement]);
     }
 }
