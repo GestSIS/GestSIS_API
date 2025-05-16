@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\MesInfosService;
+use App\Domaine\Business\Materiel\ArticleBusiness;
 use Illuminate\Http\Request;
 
 class MonMaterielController extends Controller
@@ -24,7 +25,7 @@ class MonMaterielController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        $data = $this->service->monMateriel($sapeurId);
+        $data = ArticleBusiness::getItemsBySapeur($sapeurId);
         return response()->json(['data' => $data]);
     }
 }
