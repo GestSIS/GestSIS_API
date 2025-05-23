@@ -93,6 +93,7 @@ class ArticleBusiness
     $articles = array_map(function ($article) use ($indexedTypes) {
       $type = $indexedTypes[$article['materiel_type_id']];
       return [
+        'quantite' => $type->est_numerote ? 1 : $article['quantite'],
         'materiel_type_id' => $article['materiel_type_id'],
         'taille' => $type->est_taillee ? trim($article['taille'] ?? '') : '',
         'remarque' => $article['remarque'] ?? '',
@@ -101,13 +102,16 @@ class ArticleBusiness
         'attribution' => $article['sapeur_id'] === null ? null : $article['attribution'],
         'retour' => null,
         'numero' => $type->est_numerote ? $article['numero'] : '',
-        'uuid' => uniqid(), // TODO: en avons-nous vraiment besoin ? Utiliser le numéro ou le UUID pour les codebar ?
+        // 'uuid' => uniqid(), // TODO: en avons-nous vraiment besoin ? Utiliser le numéro ou le UUID pour les codebar ?
         'achat' => $article['achat'] ?? '',
         'compartiment' => $article['compartiment'] ?? '',
         'est_etiquete' => $article['est_etiquete'] ?? false,
         'est_unique' => false, // TODO: Non utilisé pour le moment
       ];
     }, $articles);
+
+    $articles = array_merge([], ...array_map(fn($article) => array_fill(0, $article['quantite'], $article), $articles));
+    $articles = array_map(fn($article) => [...$article, 'uuid' => uniqid()], $articles);
 
     return array_map(fn($article) => Article::create($article), $articles);
   }
