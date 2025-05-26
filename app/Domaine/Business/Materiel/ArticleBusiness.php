@@ -116,30 +116,11 @@ class ArticleBusiness
     return array_map(fn($article) => Article::create($article), $articles);
   }
 
-  /**
-   * Get list of items per location for inventory
-   * @param integer $locationId ID of the main location for which to retrieve items
-   *                            Note: this will include sub-locations
-   * @return [
-   *           {
-   *             location: #location_existing_basic,
-   *             compartment: string,
-   *             categories: [
-   *                           {
-   *                             category: #category_existing_basic,
-   *                             items: [
-   *                                      {
-   *                                        product: #product_existing_basic,
-   *                                        item: #item_existing_many,
-   *                                        expected: integer
-   *                                        [found]: NOT SET HERE
-   *                                      }
-   *                                    ]
-   *                           }
-   *                         ]
-   *           }
-   *         ]
-   */
+  public static function deleteArticles(array $articleIds): bool
+  {
+    return Article::whereIn('id', $articleIds)->delete();
+  }
+
   public static function getItemsForInventory($locationId)
   {
 
