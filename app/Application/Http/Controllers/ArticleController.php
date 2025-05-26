@@ -82,7 +82,7 @@ class ArticleController extends Controller
             'articleIds.*' => 'required|integer',
         ]);
 
-        $articles = ArticleBusiness::deleteVirtuallyItem($data['articleIds']);
+        $articles = ArticleBusiness::deleteArticles($data['articleIds']);
         return response()->json(['data' => $articles]);
     }
 }
