@@ -67,17 +67,16 @@ return new class extends Migration {
             $table->integer('tri');
             $table->string('remarque')->default('');
             $table->boolean('est_etiquete')->default(false)->comment('Est-ce que les articles dans cet inventaire portent une étiquette');
-            $table->date('impression_inventaire')->nullable()->default(null);
+            $table->date('impression_inventaire')->nullable()->default(null);  // TODO: Quoi faire avec ?
 
             $table->foreignId('couleur_id')->constrained();
 
             $table->unsignedBigInteger('parent_id')->nullable()->default(null);
             $table->foreign('parent_id')->references('id')->on('emplacements');
 
-            $table->boolean('statut')->default(true);
+            $table->boolean('statut')->default(true); // TODO: Nécessaire ?
         });
 
-        Schema::dropIfExists('articles');
         Schema::create('articles', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
@@ -93,8 +92,6 @@ return new class extends Migration {
             $table->date('attribution')->nullable()->default(null);
             $table->date('retour')->nullable()->default(null);
 
-            // TODO: Created and Deleted fields
-
             $table->foreignId('materiel_type_id')->constrained();
             $table->foreignId('sapeur_id')->nullable()->constrained()->default(null);
             $table->foreignId('emplacement_id')->nullable()->constrained()->default(null);
@@ -103,8 +100,7 @@ return new class extends Migration {
             $table->boolean('statut')->default(true);
         });
 
-
-        // Créer un emplacement pour chaque véhicule
+        // Créer un emplacement pour chaque véhicule + Lier le véhicule à un article
         $vehicules = Vehicule::all();
         foreach ($vehicules as $vehicule) {
             Emplacement::create([
@@ -339,16 +335,17 @@ return new class extends Migration {
             $table->unique(['article_id', 'inventaire_id']);
         });
 
-        Schema::dropIfExists('materiel_alerte_type_pour');
-        Schema::dropIfExists('materiel_alerte_types');
-        Schema::dropIfExists('materiel_event_type_pour');
-        Schema::dropIfExists('materiel_events');
-        Schema::dropIfExists('materiel_event_types');
-        Schema::dropIfExists('materiel_alertes');
+        // TODO: à déplacer dans une prochaine migration
+        // Schema::dropIfExists('materiel_alerte_type_pour');
+        // Schema::dropIfExists('materiel_alerte_types');
+        // Schema::dropIfExists('materiel_event_type_pour');
+        // Schema::dropIfExists('materiel_events');
+        // Schema::dropIfExists('materiel_event_types');
+        // Schema::dropIfExists('materiel_alertes');
 
-        Schema::dropIfExists('materiel_nominals');
-        Schema::dropIfExists('materiel_generiques');
-        Schema::dropIfExists('materiel_personnels');
+        // Schema::dropIfExists('materiel_nominals');
+        // Schema::dropIfExists('materiel_generiques');
+        // Schema::dropIfExists('materiel_personnels');
     }
 
     /**
