@@ -25,7 +25,7 @@ class MonMaterielController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        $data = ArticleBusiness::getItemsBySapeur($sapeurId);
+        $data = ArticleBusiness::getArticlesPourSapeur($sapeurId);
         return response()->json(['data' => $data]);
     }
 }

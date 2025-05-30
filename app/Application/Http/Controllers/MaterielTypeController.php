@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\MatPersoParamService;
-use App\Domaine\Business\Materiel\ProductBusiness;
+use App\Domaine\Business\Materiel\MaterielTypeBusiness;
 use Illuminate\Http\Request;
 
 class MaterielTypeController extends Controller
@@ -22,7 +22,7 @@ class MaterielTypeController extends Controller
      */
     public function index()
     {
-        $types = ProductBusiness::listProductsBasicByCategory();
+        $types = MaterielTypeBusiness::listProductsBasicByCategory();
         return response()->json(['data' => $types]);
     }
 
@@ -34,6 +34,7 @@ class MaterielTypeController extends Controller
             'est_numerote' => 'boolean|required',
             'est_attribuable' => 'boolean|required',
             'est_taillee' => 'boolean|required',
+            'est_lavable' => 'boolean|required',
             'prix' => 'string|nullable',
             'fournisseur' => 'string|nullable',
             'reparateur' => 'string|nullable',
@@ -42,7 +43,7 @@ class MaterielTypeController extends Controller
             'prefix' => 'string|nullable',
         ]);
 
-        $type = ProductBusiness::createProduct($data);
+        $type = MaterielTypeBusiness::createProduct($data);
         return response()->json(['data' => $type]);
     }
 
@@ -54,6 +55,7 @@ class MaterielTypeController extends Controller
             'est_numerote' => 'boolean|required',
             'est_attribuable' => 'boolean|required',
             'est_taillee' => 'boolean|required',
+            'est_lavable' => 'boolean|required',
             'prix' => 'string|nullable',
             'fournisseur' => 'string|nullable',
             'reparateur' => 'string|nullable',
@@ -62,13 +64,13 @@ class MaterielTypeController extends Controller
             'prefix' => 'string|nullable',
         ]);
 
-        $type = ProductBusiness::editProduct($id, $data);
+        $type = MaterielTypeBusiness::editProduct($id, $data);
         return response()->json(['data' => $type]);
     }
 
     public function destroy($id)
     {
-        $type = ProductBusiness::deleteProduct($id);
+        $type = MaterielTypeBusiness::deleteProduct($id);
         return response()->json(['data' => $type]);
     }
 }

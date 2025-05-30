@@ -43,4 +43,9 @@ class Article extends Model
     {
         return $this->belongsTo(Sapeur::class);
     }
+
+    public function lavages()
+    {
+        return $this->hasMany(Lavage::class);
+    }
 }

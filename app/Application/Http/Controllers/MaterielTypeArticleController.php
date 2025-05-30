@@ -14,7 +14,7 @@ class MaterielTypeArticleController extends Controller
      */
     public function index(int $materielTypeId)
     {
-        $articles = ArticleBusiness::getItemsByProduct($materielTypeId);
+        $articles = ArticleBusiness::getArticlesParMaterielType($materielTypeId);
 
         return response()->json(['data' => $articles]);
     }

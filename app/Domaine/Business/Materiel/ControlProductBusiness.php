@@ -145,7 +145,7 @@ EOF;
       ),
       function ($location) use (&$results, $controlledProducts, $owners) {
         Arrays::each(
-          ItemModel::getItemsByLocation($location->location_id),
+          ItemModel::getArticlesParEmplacement($location->location_id),
           function ($category) use (&$results, $controlledProducts, $owners) {
             Arrays::each(
               $category['products'],

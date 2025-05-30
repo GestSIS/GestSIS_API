@@ -15,10 +15,13 @@ class ArticleController extends Controller
     public function index(Request $request)
     {
         $attribuable = $request->get('attribuable', false);
+        $lavable = $request->get('lavable', false);
         if ($attribuable) {
-            $articles = ArticleBusiness::getItemsAttribuable();
+            $articles = ArticleBusiness::getArticlesAttribuable();
+        } else if ($lavable) {
+            $articles = ArticleBusiness::getArticlesLavable();
         } else {
-            $articles = ArticleBusiness::getAllItems();
+            $articles = ArticleBusiness::getAllArticles();
         }
 
         return response()->json(['data' => $articles]);
