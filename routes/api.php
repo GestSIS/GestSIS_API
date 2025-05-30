@@ -633,17 +633,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('emplacements.articles', ArticleEmplacementController::class)->only(['index']);
     });
 
-    // // TODO: à migrer
-    // // Matériel personnel
-    // Route::group(['middleware' => 'jwtTokenRole:mat_perso.lecture'], function () {
-    //     Route::resource('mat-perso-event-types', MatPersoEventTypeController::class)->only(['index']);
-    //     Route::resource('mat-perso-alerte-types', MatPersoAlerteTypeController::class)->only(['index']);
-
-    //     Route::resource('mat-perso', MatPersoController::class)->only(['index']);
-    //     Route::get('mat-perso/a-recuperer', [MatPersoController::class, 'aRecuperer'])->name('mat-perso.a-recuperer');
-    //     Route::resource('mat-perso-alertes', MatPersoAlerteController::class)->only(['index']);
-    // });
-
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.modification'], function () {
         Route::resource('emplacements', EmplacementController::class)->only(['store', 'update', 'destroy']);
 
@@ -659,18 +648,12 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         // Batch Lavages
         Route::post('lavages', [LavageController::class, 'create'])->name('lavages.create');
         Route::delete('lavages', [LavageController::class, 'destroy'])->name('lavages.destroy');
-
-        // Events
-        // Route::post('mat-perso-event', [MatPersoEventController::class, 'create'])->name('mat-perso-event.create');
     });
 
-    // TODO: à migrer
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.config'], function () {
         Route::resource('couleurs', CouleurController::class)->only(['store', 'update', 'destroy']);
         Route::resource('materiel-categories', MaterielCategorieController::class)->only(['store', 'update', 'destroy']);
         Route::resource('materiel-types', MaterielTypeController::class)->only(['store', 'update', 'destroy']);
-        //     Route::resource('mat-perso-event-types', MatPersoEventTypeController::class)->only(['store', 'update', 'destroy']);
-        //     Route::resource('mat-perso-alerte-types', MatPersoAlerteTypeController::class)->only(['store', 'update', 'destroy']);
     });
 
     // TODO: Ajouter route type d'unité

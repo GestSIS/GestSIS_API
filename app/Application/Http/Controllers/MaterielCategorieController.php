@@ -2,19 +2,12 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\MatPersoParamService;
 use App\Domaine\Business\Materiel\CategoryBusiness;
 use App\Infrastructure\Models\MaterielCategorie;
 use Illuminate\Http\Request;
 
 class MaterielCategorieController extends Controller
 {
-    protected $service;
-
-    public function __construct(MatPersoParamService $service)
-    {
-        $this->service = $service;
-    }
 
     public function index()
     {

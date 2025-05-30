@@ -2,18 +2,11 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\MatPersoParamService;
 use App\Domaine\Business\Materiel\MaterielTypeBusiness;
 use Illuminate\Http\Request;
 
 class MaterielTypeController extends Controller
 {
-    protected $service;
-
-    public function __construct(MatPersoParamService $service)
-    {
-        $this->service = $service;
-    }
 
     /**
      * Display a listing of the resource.

@@ -45,8 +45,12 @@ class NewSisDatabaseSeeder extends Seeder
         // Controles médicaux
         $this->call(ControleMedicauxTypeTableSeeder::class);
 
-        // Matériel personnel
-        $this->call(MatPersoCategorieTableSeeder::class);
+        // Matériel
+        $this->call(CouleurTableSeeder::class);
+        $this->call(BatterieTypeTableSeeder::class);
+        $this->call(TuyauDiametreTableSeeder::class);
+        $this->call(MaterielCategorieTableSeeder::class);
+        $this->call(MaterielTypeTableSeeder::class);
         $this->call(MaintenanceTypeTableSeeder::class);
     }
 }
