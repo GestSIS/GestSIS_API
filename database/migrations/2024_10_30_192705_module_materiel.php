@@ -224,6 +224,7 @@ return new class extends Migration {
             $table->boolean('est_numerote')->default(false);
             $table->boolean('est_attribuable')->default(false)->comment('Peut être distribué à un sapeur');
             $table->boolean('est_taillee')->default(false)->comment('Possède une taille');
+            $table->boolean('est_lavable')->default(false)->comment('Pour activer le suivi des lavages');
 
             $table->foreignId('fonction_id')->nullable()->comment('fonction responsable de l \'entretient')->constrained();
         });
@@ -251,6 +252,14 @@ return new class extends Migration {
             $table->boolean('separement')->comment('Est-ce que le tuyau est roule separement ?');
 
             $table->foreignId('tuyau_diametre_id')->constrained();
+        });
+
+        Schema::create('lavages', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->timestamps();
+
+            $table->foreignId('article_id')->constrained();
+            $table->date('date');
         });
 
         Schema::create('maintenance_types', function (Blueprint $table) {

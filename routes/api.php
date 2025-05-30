@@ -19,6 +19,7 @@ use App\Application\Http\Controllers\ArticleEmplacementController;
 use App\Application\Http\Controllers\ArticleSapeurController;
 use App\Application\Http\Controllers\CouleurController;
 use App\Application\Http\Controllers\EmplacementController;
+use App\Application\Http\Controllers\LavageController;
 use App\Application\Http\Controllers\MaterielTypeArticleController;
 use Illuminate\Support\Facades\Route;
 use Spatie\HttpLogger\Middlewares\HttpLogger;
@@ -627,6 +628,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('couleurs', CouleurController::class)->only(['index']);
         Route::resource('emplacements', EmplacementController::class)->only(['index']);
         Route::resource('articles', ArticleController::class)->only(['index']);
+        Route::resource('lavages', LavageController::class)->only(['index']);
 
         Route::resource('emplacements.articles', ArticleEmplacementController::class)->only(['index']);
     });
@@ -643,16 +645,20 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     // });
 
     Route::group(['middleware' => 'jwtTokenRole:mat_perso.modification'], function () {
+        Route::resource('emplacements', EmplacementController::class)->only(['store', 'update', 'destroy']);
+
         // Attribution et retour de matériel
         Route::resource('sapeurs.articles', ArticleSapeurController::class)->only(['store']);
         Route::resource('emplacements.articles', ArticleEmplacementController::class)->only(['store']);
 
-        // Modifier des articles
+        // Batch Modifier des articles
         Route::post('articles', [ArticleController::class, 'create'])->name('articles.create');
         Route::put('articles', [ArticleController::class, 'update'])->name('articles.update');
         Route::delete('articles', [ArticleController::class, 'destroy'])->name('articles.destroy');
 
-        Route::resource('emplacements', EmplacementController::class)->only(['store', 'update', 'destroy']);
+        // Batch Lavages
+        Route::post('lavages', [LavageController::class, 'create'])->name('lavages.create');
+        Route::delete('lavages', [LavageController::class, 'destroy'])->name('lavages.destroy');
 
         // Events
         // Route::post('mat-perso-event', [MatPersoEventController::class, 'create'])->name('mat-perso-event.create');

@@ -17,7 +17,7 @@ class ArticleEmplacementController extends Controller
      */
     public function index(int $sapeurId)
     {
-        $articles = ArticleBusiness::getItemsByLocation($sapeurId);
+        $articles = ArticleBusiness::getArticlesParEmplacement($sapeurId);
 
         return response()->json(['data' => $articles]);
     }

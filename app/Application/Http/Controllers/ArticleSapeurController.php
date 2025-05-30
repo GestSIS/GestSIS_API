@@ -17,7 +17,7 @@ class ArticleSapeurController extends Controller
      */
     public function index(int $sapeurId)
     {
-        $articles = ArticleBusiness::getItemsBySapeur($sapeurId);
+        $articles = ArticleBusiness::getArticlesPourSapeur($sapeurId);
 
         return response()->json(['data' => $articles]);
     }

@@ -15,6 +15,7 @@ class MaterielType extends Model
         'est_numerote',
         'est_attribuable',
         'est_taillee',
+        'est_lavable',
         'prix',
         'fournisseur',
         'reparateur',
@@ -30,7 +31,8 @@ class MaterielType extends Model
             'fonction_id' => 'integer',
             'est_numerote' => 'boolean',
             'est_attribuable' => 'boolean',
-            'est_taillee' => 'boolean'
+            'est_taillee' => 'boolean',
+            'est_lavable' => 'boolean'
         ];
     }
 }

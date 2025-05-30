@@ -818,7 +818,7 @@ EOF;
 
     // Gather data
     $product = ProductModel::getProductForEditMinimal($productId);
-    $items = ItemModel::getItemsByProduct($productId);
+    $items = ItemModel::getArticlesParMaterielType($productId);
 
     // Aggregate items by location and compartment
     $locations = array();
