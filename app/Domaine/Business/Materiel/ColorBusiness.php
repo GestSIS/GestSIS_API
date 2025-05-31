@@ -20,7 +20,7 @@ class ColorBusiness
    */
   public static function listColors()
   {
-    return Couleur::all();
+    return Couleur::orderBy('nom')->get();
   }
 
   /**

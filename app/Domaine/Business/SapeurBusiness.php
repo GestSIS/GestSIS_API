@@ -28,7 +28,8 @@ class SapeurBusiness
     {
         $now = Carbon::now()->setTime(0, 0);
         foreach ($mutations as $mutation) {
-            if ((Carbon::parse($mutation->sortie)->gte($now) && Carbon::parse($mutation->incorporation)->subMonths(3)->lte($now)) ||
+            if (
+                (Carbon::parse($mutation->sortie)->gte($now) && Carbon::parse($mutation->incorporation)->subMonths(3)->lte($now)) ||
                 ($mutation->sortie === NULL && Carbon::parse($mutation->incorporation)->lte($now))
             ) {
                 return true;
@@ -39,7 +40,7 @@ class SapeurBusiness
 
     private function anneeIncorporation($mutations)
     {
-        return $mutations->map(fn ($m) => Carbon::parse($m->incorporation)->year)->min() ?? '';
+        return $mutations->map(fn($m) => Carbon::parse($m->incorporation)->year)->min() ?? '';
     }
 
     public function recomputeSapeurActifStatus()
@@ -56,14 +57,16 @@ class SapeurBusiness
     public function recomputeSapeurFonctionPrincipale()
     {
         $now = Carbon::now();
-        $sapeurs = Sapeur::where('type', '=', self::TYPE_SAPEUR)->with(['fonctions' => function ($query) use ($now) {
-            $query->where('debut', '<=', $now)->where(function ($query) use ($now) {
-                $query->where('fin', '=', null)
-                    ->orWhere('fin', '>=', $now);
-            })
-                ->join('fonctions', 'fonctions.id', '=', 'fonction_sapeur.fonction_id')
-                ->orderBy('fonctions.tri', 'DESC');
-        }])->get();
+        $sapeurs = Sapeur::where('type', '=', self::TYPE_SAPEUR)->with([
+            'fonctions' => function ($query) use ($now) {
+                $query->where('debut', '<=', $now)->where(function ($query) use ($now) {
+                    $query->where('fin', '=', null)
+                        ->orWhere('fin', '>=', $now);
+                })
+                    ->join('fonctions', 'fonctions.id', '=', 'fonction_sapeur.fonction_id')
+                    ->orderByDesc('fonctions.tri');
+            }
+        ])->get();
 
         foreach ($sapeurs as $sapeur) {
             $sapeur->fonction_id = $sapeur->fonctions[0]->fonction_id ?? null;
@@ -74,11 +77,13 @@ class SapeurBusiness
     public function recomputeSapeurGradePrincipal()
     {
         $now = Carbon::now();
-        $sapeurs = Sapeur::where('type', '=', self::TYPE_SAPEUR)->with(['grades' => function ($query) use ($now) {
-            $query->where('date', '<=', $now)
-                ->join('grades', 'grades.id', '=', 'grade_sapeur.grade_id')
-                ->orderBy('grades.tri', 'DESC');
-        }])->get();
+        $sapeurs = Sapeur::where('type', '=', self::TYPE_SAPEUR)->with([
+            'grades' => function ($query) use ($now) {
+                $query->where('date', '<=', $now)
+                    ->join('grades', 'grades.id', '=', 'grade_sapeur.grade_id')
+                    ->orderByDesc('grades.tri');
+            }
+        ])->get();
 
         foreach ($sapeurs as $sapeur) {
             $sapeur->grade_id = $sapeur->grades[0]->grade_id ?? null;
@@ -145,10 +150,12 @@ class SapeurBusiness
             throw new ArrayException([], "Impossible de supprimer un sapeur lié à une écriture comptable");
         }
 
-        if (MaterielPersonnel::where([
-            ['sapeur_id', '=', $sapeurId],
-            ['retour', '=', null]
-        ])->exists()) {
+        if (
+            MaterielPersonnel::where([
+                ['sapeur_id', '=', $sapeurId],
+                ['retour', '=', null]
+            ])->exists()
+        ) {
             throw new ArrayException([], "Impossible de supprimer un sapeur possédant du matériel personnel non rendu");
         }
 
@@ -498,10 +505,12 @@ class SapeurBusiness
     {
         $telephones = $this->repository->getSapeurTelephonesById($sapeurId);
         foreach ($telephones as $tel) {
-            if (strcmp(
-                trim(preg_replace('/\s+/', ' ', $tel->numero)),
-                trim(preg_replace('/\s+/', ' ', $data['numero']))
-            ) === 0) {
+            if (
+                strcmp(
+                    trim(preg_replace('/\s+/', ' ', $tel->numero)),
+                    trim(preg_replace('/\s+/', ' ', $data['numero']))
+                ) === 0
+            ) {
                 throw new ArrayException(['numero' => 'Duplicated numero']);
             }
         }
@@ -523,10 +532,12 @@ class SapeurBusiness
         );
 
         foreach ($telephones as $tel) {
-            if (strcmp(
-                trim(preg_replace('/\s+/', ' ', $tel->numero)),
-                trim(preg_replace('/\s+/', ' ', $data['numero']))
-            ) === 0) {
+            if (
+                strcmp(
+                    trim(preg_replace('/\s+/', ' ', $tel->numero)),
+                    trim(preg_replace('/\s+/', ' ', $data['numero']))
+                ) === 0
+            ) {
                 throw new ArrayException(['numéro' => 'Numéro à double'], 'Numéro déjà existant');
             }
         }

@@ -6,8 +6,10 @@ use App\Domaine\Exceptions\ArrayException;
 use App\Exceptions\InternalException;
 use App\Exceptions\BadRequestException;
 use App\Infrastructure\Models\Article;
+use App\Infrastructure\Models\BatterieType;
 use App\Infrastructure\Models\Emplacement;
 use App\Infrastructure\Models\MaterielType;
+use App\Infrastructure\Models\Vehicule;
 use Illuminate\Database\Eloquent\Collection;
 use Nette\Utils\Arrays;
 
@@ -17,15 +19,15 @@ use Nette\Utils\Arrays;
  */
 class ArticleBusiness
 {
-  const EVENT_STATUS_NONE = "NONE";
-  const EVENT_STATUS_SUCCESS = "SUCCESS";
-  const EVENT_STATUS_WARNING = "WARNING";
-  const EVENT_STATUS_FAILURE = "FAILURE";
-  const EVENT_STATUS_INFO = "INFO";
+  // const EVENT_STATUS_NONE = "NONE";
+  // const EVENT_STATUS_SUCCESS = "SUCCESS";
+  // const EVENT_STATUS_WARNING = "WARNING";
+  // const EVENT_STATUS_FAILURE = "FAILURE";
+  // const EVENT_STATUS_INFO = "INFO";
 
-  const EVENT_TYPE_LIFECYCLE = "LIFECYCLE";
-  const EVENT_TYPE_INVENTORY = "INVENTORY";
-  const EVENT_TYPE_MAINTENANCE = "MAINTENANCE";
+  // const EVENT_TYPE_LIFECYCLE = "LIFECYCLE";
+  // const EVENT_TYPE_INVENTORY = "INVENTORY";
+  // const EVENT_TYPE_MAINTENANCE = "MAINTENANCE";
 
   /**
    * Retour de matériel qui était attribué à un sapeur
@@ -71,6 +73,7 @@ class ArticleBusiness
 
   public static function creerArticles(array $articles)
   {
+    //TODO: Fail safe
     // fetch types equivalents
     $indexedTypes = MaterielType::all()->keyBy('id');
 
@@ -113,7 +116,56 @@ class ArticleBusiness
     $articles = array_merge([], ...array_map(fn($article) => array_fill(0, $article['quantite'], $article), $articles));
     $articles = array_map(fn($article) => [...$article, 'uuid' => uniqid()], $articles);
 
-    return array_map(fn($article) => Article::create($article), $articles);
+    return array_map(function ($data) {
+      $article = Article::create($data);
+      if (($data['vehicule'] ?? null) !== null) {
+        Vehicule::insert([$data['vehicule']]);
+      }
+      return $article;
+    }, $articles);
+  }
+
+  public static function editArticles(array $articles): array
+  {
+    //TODO: Fail safe
+    // fetch types equivalents
+    $indexedTypes = MaterielType::all()->keyBy('id');
+
+    // Controller qu'un article appartiennent soit à un sapeur soit à un emplacement
+    foreach ($articles as $article) {
+      if (
+        ($article['sapeur_id'] === null && $article['emplacement_id'] === null) ||
+        ($article['sapeur_id'] !== null && $article['emplacement_id'] !== null)
+      ) {
+        throw new ArrayException([], message: 'Certains articles sont à la fois assignés à un sapeur et à un emplacement');
+      }
+
+      $type = $indexedTypes[$article['materiel_type_id']];
+      if (!$type->est_attribuable && $article['sapeur_id'] !== null) {
+        throw new ArrayException([], message: "Article de type '$type->designation' n'est pas attribuable");
+      }
+    }
+
+    // Controller numérotation correcte
+    $articles = array_map(function ($article) use ($indexedTypes) {
+      $type = $indexedTypes[$article['materiel_type_id']];
+      return [
+        'id' => $article['id'],
+        'taille' => $type->est_taillee ? trim($article['taille'] ?? '') : '',
+        'remarque' => $article['remarque'] ?? '',
+        'emplacement_id' => $article['emplacement_id'],
+        'sapeur_id' => $article['sapeur_id'],
+        'attribution' => $article['sapeur_id'] === null ? null : $article['attribution'],
+        'retour' => null,
+        'numero' => $type->est_numerote ? $article['numero'] : '',
+        'achat' => $article['achat'] ?? '',
+        'compartiment' => $article['compartiment'] ?? '',
+        'est_etiquete' => $article['est_etiquete'] ?? false,
+        'est_unique' => false, // TODO: Non utilisé pour le moment
+      ];
+    }, $articles);
+
+    return array_map(fn($article) => Article::find($article['id'])->update($article), $articles);
   }
 
   public static function deleteArticles(array $articleIds): bool
@@ -176,7 +228,7 @@ class ArticleBusiness
   /**
    * Get list of items hierarchized by category, product and sublocation
    * @param integer $locationId ID of the main location to consider (incl. children)
-   * @return Object field "categories" of #location_existing_full
+   * @return Collection field "categories" of #location_existing_full
    */
   public static function getArticlesParEmplacement($locationId)
   {
@@ -190,97 +242,97 @@ class ArticleBusiness
     return Article::whereIn('emplacement_id', $emplacementIds)->get();
   }
 
-  /**
-   * Edit an existing item
-   * @param integer $id ID of the item to edit
-   * @param #item_edit $data Properties of the item to modify
-   */
-  public static function editItem($id, $data)
-  {
-    // TODO: a implémenter
+  // /**
+  //  * Edit an existing item
+  //  * @param integer $id ID of the item to edit
+  //  * @param #item_edit $data Properties of the item to modify
+  //  */
+  // public static function editItem($id, $data)
+  // {
+  //   // TODO: a implémenter
 
-    // Determine if is uniquely labeled
-    $isUniqueLabeled = self::isUniqueLabeled(null, $id);
+  //   // Determine if is uniquely labeled
+  //   $isUniqueLabeled = self::isUniqueLabeled(null, $id);
 
-    // If product does not use unique number, and number or isuniquelabeled is set, error
-    if (
-      !$isUniqueLabeled
-      &&
-      (
-        Arrays::has($data, 'number')
-        ||
-        Arrays::has($data, 'isuniquelabeled')
-      )
-    ) {
-      throw new BadRequestException(
-        BadRequestException::FORBIDDEN_OPERATION,
-        "Le matériel n'est pas étiquetté individuellement : les champs number et isuniquelabeled ne doivent pas être définis."
-      );
-    }
+  //   // If product does not use unique number, and number or isuniquelabeled is set, error
+  //   if (
+  //     !$isUniqueLabeled
+  //     &&
+  //     (
+  //       Arrays::has($data, 'number')
+  //       ||
+  //       Arrays::has($data, 'isuniquelabeled')
+  //     )
+  //   ) {
+  //     throw new BadRequestException(
+  //       BadRequestException::FORBIDDEN_OPERATION,
+  //       "Le matériel n'est pas étiquetté individuellement : les champs number et isuniquelabeled ne doivent pas être définis."
+  //     );
+  //   }
 
-    // If product uses unique number and number or isuniquelabeled is not set, or quantity > 1, error
-    if (
-      $isUniqueLabeled
-      &&
-      (
-        !Arrays::has($data, 'number')
-        ||
-        !Arrays::has($data, 'isuniquelabeled')
-      )
-    ) {
-      throw new BadRequestException(
-        BadRequestException::FORBIDDEN_OPERATION,
-        "Le matériel est étiquetté individuellement : les champs number et isuniquelabeled doivent être définis."
-      );
-    }
+  //   // If product uses unique number and number or isuniquelabeled is not set, or quantity > 1, error
+  //   if (
+  //     $isUniqueLabeled
+  //     &&
+  //     (
+  //       !Arrays::has($data, 'number')
+  //       ||
+  //       !Arrays::has($data, 'isuniquelabeled')
+  //     )
+  //   ) {
+  //     throw new BadRequestException(
+  //       BadRequestException::FORBIDDEN_OPERATION,
+  //       "Le matériel est étiquetté individuellement : les champs number et isuniquelabeled doivent être définis."
+  //     );
+  //   }
 
-    // Proceed with edition
-    self::edit("item", $id, Arrays::merge(
-      [
-        'location_id' => $data['location']['id'],
-        'islabeled' => $data['islabeled'] ? 1 : 0,
-        'compartment' => $data['compartment'],
-        'remark' => $data['remark']
-      ],
-      $isUniqueLabeled
-      ? [
-        'number' => $data['number'],
-        'isuniquelabeled' => $data['isuniquelabeled'] ? 1 : 0
-      ]
-      : []
-    ));
-  }
+  //   // Proceed with edition
+  //   self::edit("item", $id, Arrays::merge(
+  //     [
+  //       'location_id' => $data['location']['id'],
+  //       'islabeled' => $data['islabeled'] ? 1 : 0,
+  //       'compartment' => $data['compartment'],
+  //       'remark' => $data['remark']
+  //     ],
+  //     $isUniqueLabeled
+  //     ? [
+  //       'number' => $data['number'],
+  //       'isuniquelabeled' => $data['isuniquelabeled'] ? 1 : 0
+  //     ]
+  //     : []
+  //   ));
+  // }
 
-  /**
-   * Delete an existing item (virtually)
-   * @param integer $id ID of the item to delete
-   * @param integer $id ID of the user who performs deletion
-   */
-  public static function deleteVirtuallyItem($id, $userId)
-  {
-    // TODO: à implémenter !
+  // /**
+  //  * Delete an existing item (virtually)
+  //  * @param integer $id ID of the item to delete
+  //  * @param integer $id ID of the user who performs deletion
+  //  */
+  // public static function deleteVirtuallyItem($id, $userId)
+  // {
+  //   // TODO: à implémenter !
 
-    // Make sure it is not already registered as deleted
-    $items = self::db()->select("SELECT deleted FROM item WHERE id = ?", [$id]);
-    if (Arrays::size($items) === 0) {
-      throw new BadRequestException(
-        BadRequestException::RESOURCE_NOT_FOUND,
-        "La pièce avec l'ID $id n'existe pas."
-      );
-    }
-    if (Arrays::first($items)->deleted !== null) {
-      throw new BadRequestException(
-        BadRequestException::RESOURCE_NOT_FOUND,
-        "La pièce avec l'ID $id est déjà enregistrée comme supprimée."
-      );
-    }
+  //   // Make sure it is not already registered as deleted
+  //   $items = self::db()->select("SELECT deleted FROM item WHERE id = ?", [$id]);
+  //   if (Arrays::size($items) === 0) {
+  //     throw new BadRequestException(
+  //       BadRequestException::RESOURCE_NOT_FOUND,
+  //       "La pièce avec l'ID $id n'existe pas."
+  //     );
+  //   }
+  //   if (Arrays::first($items)->deleted !== null) {
+  //     throw new BadRequestException(
+  //       BadRequestException::RESOURCE_NOT_FOUND,
+  //       "La pièce avec l'ID $id est déjà enregistrée comme supprimée."
+  //     );
+  //   }
 
-    // Proceed with virtual deletion
-    self::edit("item", $id, [
-      'deleted' => date('Y-m-d'),
-      'deleted_user_id' => $userId
-    ]);
-  }
+  //   // Proceed with virtual deletion
+  //   self::edit("item", $id, [
+  //     'deleted' => date('Y-m-d'),
+  //     'deleted_user_id' => $userId
+  //   ]);
+  // }
 
   /**
    * @internal

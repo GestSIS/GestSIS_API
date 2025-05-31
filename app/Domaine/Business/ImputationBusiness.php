@@ -417,7 +417,7 @@ class ImputationBusiness
                 });
         })
             ->join('fonctions', 'fonctions.id', '=', 'fonction_sapeur.fonction_id')
-            ->orderBy('fonctions.tri', 'desc')
+            ->orderByDesc('fonctions.tri')
             ->distinct(['sapeur_id', 'fonction_id'])
             ->select(['sapeur_id', 'fonction_id', 'tri'])->get();
 

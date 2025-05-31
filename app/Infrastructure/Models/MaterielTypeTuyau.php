@@ -9,16 +9,16 @@ class MaterielTypeTuyau extends Model
     protected $table = 'materiel_type_tuyaux';
 
     protected $fillable = [
-        'longeure',
         'tuyau_diametre_id',
-        'separe',
+        'longeure',
+        'separement',
     ];
     protected function casts(): array
     {
-        return  [
-            'longeure' => 'integer',
+        return [
             'tuyau_diametre_id' => 'integer',
-            'separe' => 'boolean',
+            'longeure' => 'integer',
+            'separement' => 'boolean',
         ];
     }
 }
