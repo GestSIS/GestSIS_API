@@ -23,7 +23,7 @@ class BatteryBusiness
    */
   public static function listBatteries()
   {
-    return BatterieType::all();
+    return BatterieType::orderBy('nom')->get();
   }
 
   /**
@@ -38,27 +38,23 @@ class BatteryBusiness
 
   /**
    * Create a new battery
-   * @param Array $battery #batterytype_new Properties of the new battery
+   * @param array $battery #batterytype_new Properties of the new battery
    * @return #idobj ID of the created battery
    */
   public static function createBattery($battery)
   {
 
-    return BatterieType::create([
-      'nom' => $battery['nom']
-    ]);
+    return BatterieType::create($battery);
   }
 
   /**
    * Edit an existing battery
    * @param integer $id ID of the battery to edit
-   * @param Array $data #batterytype_new Properties of the battery to modify
+   * @param array $data #batterytype_new Properties of the battery to modify
    */
   public static function editBattery($id, $data)
   {
-    BatterieType::where('id', '=', $id)->update([
-      'name' => $data['name']
-    ]);
+    BatterieType::where('id', '=', $id)->update($data);
     return BatterieType::find($id);
   }
 
@@ -69,6 +65,6 @@ class BatteryBusiness
    */
   public static function deleteBattery($id)
   {
-    return BatterieType::delete($id);
+    return BatterieType::where('id', '=', $id)->delete();
   }
 }

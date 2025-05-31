@@ -24,6 +24,7 @@ class MaterielTypeController extends Controller
         $data = $request->validate([
             'designation' => 'string|min:1|required',
             'materiel_categorie_id' => 'integer|required',
+            'type' => 'integer|required',
             'est_numerote' => 'boolean|required',
             'est_attribuable' => 'boolean|required',
             'est_taillee' => 'boolean|required',
@@ -34,6 +35,14 @@ class MaterielTypeController extends Controller
             // 'a_controller' => 'string',
             'remarque' => 'string|nullable',
             'prefix' => 'string|nullable',
+            'batterie.nombre' => 'integer|nullable',
+            'batterie.batterie_type_id' => 'integer|nullable',
+            'vehicule.forfait' => 'integer|nullable',
+            'vehicule.unite' => 'integer|nullable',
+            'vehicule.type_unite_id' => 'integer|nullable',
+            'tuyau.tuyau_diametre_id' => 'integer|nullable',
+            'tuyau.longeur' => 'integer|nullable',
+            'tuyau.separement' => 'boolean|nullable',
         ]);
 
         $type = MaterielTypeBusiness::createProduct($data);
@@ -45,6 +54,7 @@ class MaterielTypeController extends Controller
         $data = $request->validate([
             'designation' => 'string|min:1|required',
             'materiel_categorie_id' => 'integer|required',
+            'type' => 'integer|required',
             'est_numerote' => 'boolean|required',
             'est_attribuable' => 'boolean|required',
             'est_taillee' => 'boolean|required',
@@ -55,6 +65,14 @@ class MaterielTypeController extends Controller
             // 'a_controller' => 'string',
             'remarque' => 'string|nullable',
             'prefix' => 'string|nullable',
+            'batterie.nombre' => 'integer|nullable',
+            'batterie.batterie_type_id' => 'integer|nullable',
+            'vehicule.forfait' => 'integer|nullable',
+            'vehicule.unite' => 'integer|nullable',
+            'vehicule.type_unite_id' => 'integer|nullable',
+            'tuyau.tuyau_diametre_id' => 'integer|nullable',
+            'tuyau.longeur' => 'integer|nullable',
+            'tuyau.separement' => 'boolean|nullable',
         ]);
 
         $type = MaterielTypeBusiness::editProduct($id, $data);

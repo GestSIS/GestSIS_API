@@ -5,6 +5,8 @@ namespace App\Domaine\Business\Materiel;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\Article;
 use App\Infrastructure\Models\MaterielType;
+use App\Infrastructure\Models\MaterielTypeBatterie;
+use App\Infrastructure\Models\MaterielTypeTuyau;
 use DB;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -36,7 +38,7 @@ class MaterielTypeBusiness // extends OrderModel
    */
   public static function listProductsBasicByCategory(): Collection
   {
-    return MaterielType::orderBy('tri', 'asc')->get();
+    return MaterielType::with(['tuyau', 'batterie'])->orderBy('tri', 'asc')->get();
   }
 
   /**
@@ -53,10 +55,25 @@ class MaterielTypeBusiness // extends OrderModel
     $product['prefix'] ??= '';
 
     $order = DB::table('materiel_types')->max('id');
-    return MaterielType::create([
+
+    $tuyau = $product['tuyau'] ?? null;
+    unset($product['tuyau']);
+    $batterie = $product['batterie'] ?? null;
+    unset($product['batterie']);
+
+    $type = MaterielType::create([
       ...$product,
       'tri' => ($order ?? 0) + 1,
     ]);
+
+    if ($product['type'] === self::TYPE_PIPE && $tuyau) {
+      MaterielTypeTuyau::insert(['id' => $type->id, ...$tuyau]);
+    }
+    if ($product['type'] === self::TYPE_BATTERY && $batterie) {
+      MaterielTypeBatterie::insert(['id' => $type->id, ...$batterie]);
+    }
+
+    return MaterielType::with(['tuyau', 'batterie'])->find($type->id);
   }
 
   /**
@@ -72,12 +89,26 @@ class MaterielTypeBusiness // extends OrderModel
     $data['remarque'] ??= '';
     $data['prefix'] ??= '';
 
-    // TODO: Handle type tuyau/batterie
+    $tuyau = $data['tuyau'] ?? null;
+    unset($data['tuyau']);
+    $batterie = $data['batterie'] ?? null;
+    unset($data['batterie']);
+
     MaterielType::where('id', $id)
       ->limit(1)
       ->update($data);
 
-    return MaterielType::find($id);
+    if ($data['type'] === self::TYPE_PIPE && $tuyau) {
+      MaterielTypeTuyau::insert(['id' => $id, ...$tuyau]);
+    } else {
+      MaterielTypeTuyau::where('id', '=', $id)->delete();
+    }
+    if ($data['type'] === self::TYPE_BATTERY && $batterie) {
+      MaterielTypeBatterie::insert(['id' => $id, ...$batterie]);
+    } else {
+      MaterielTypeBatterie::where('id', '=', $id)->delete();
+    }
+    return MaterielType::with(['tuyau', 'batterie'])->find($id);
   }
 
   /**

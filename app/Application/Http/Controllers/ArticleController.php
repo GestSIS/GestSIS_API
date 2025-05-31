@@ -63,15 +63,16 @@ class ArticleController extends Controller
             'articles.*.id' => 'required|integer',
             'articles.*.taille' => 'string|nullable',
             'articles.*.remarque' => 'string|nullable',
-            'articles.*.attribution' => 'date|nullable',
-            'articles.*.materiel' => 'required|array',
-            'articles.*.materiel.id' => 'required|integer',
-            'articles.*.materiel.quantite' => 'integer|nullable',
-            'articles.*.materiel.numero' => 'string|nullable',
-            'articles.*.materiel.achat' => 'string|nullable',
+            'articles.*.numero' => 'string|nullable',
+            'articles.*.est_etiquete' => 'boolean',
+            'articles.*.achat' => 'string|nullable',
+            'articles.*.sapeur_id' => 'required_if:emplacement_id,null',
+            'articles.*.attribution' => 'required_unless:sapeur_id,null',
+            'articles.*.emplacement_id' => 'required_if:sapeur_id,null',
+            'articles.*.compartiment' => 'string|nullable',
         ]);
 
-        $articles = $this->service->update($data['articles']);
+        $articles = ArticleBusiness::editArticles($data['articles']);
         return response()->json(['data' => $articles]);
     }
 

@@ -35,4 +35,14 @@ class MaterielType extends Model
             'est_lavable' => 'boolean'
         ];
     }
+
+    public function batterie()
+    {
+        return $this->belongsTo(MaterielTypeBatterie::class, 'id');
+    }
+
+    public function tuyau()
+    {
+        return $this->belongsTo(MaterielTypeTuyau::class, 'id');
+    }
 }

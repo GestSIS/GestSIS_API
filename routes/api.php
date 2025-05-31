@@ -17,10 +17,12 @@ use App\Application\Http\Controllers\AdminController;
 use App\Application\Http\Controllers\ArticleController;
 use App\Application\Http\Controllers\ArticleEmplacementController;
 use App\Application\Http\Controllers\ArticleSapeurController;
+use App\Application\Http\Controllers\BatterieTypeController;
 use App\Application\Http\Controllers\CouleurController;
 use App\Application\Http\Controllers\EmplacementController;
 use App\Application\Http\Controllers\LavageController;
 use App\Application\Http\Controllers\MaterielTypeArticleController;
+use App\Application\Http\Controllers\TuyauDiametreController;
 use Illuminate\Support\Facades\Route;
 use Spatie\HttpLogger\Middlewares\HttpLogger;
 use App\Application\Http\Middleware\DbSelector;
@@ -626,6 +628,9 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('materiel-types.articles', MaterielTypeArticleController::class)->only(['index']);
         Route::resource('materiel-categories', MaterielCategorieController::class)->only(['index']);
         Route::resource('couleurs', CouleurController::class)->only(['index']);
+        Route::resource('batterie-types', BatterieTypeController::class)->only(['index']);
+        Route::resource('tuyau-diametres', TuyauDiametreController::class)->only(['index']);
+
         Route::resource('emplacements', EmplacementController::class)->only(['index']);
         Route::resource('articles', ArticleController::class)->only(['index']);
         Route::resource('lavages', LavageController::class)->only(['index']);
@@ -654,6 +659,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('couleurs', CouleurController::class)->only(['store', 'update', 'destroy']);
         Route::resource('materiel-categories', MaterielCategorieController::class)->only(['store', 'update', 'destroy']);
         Route::resource('materiel-types', MaterielTypeController::class)->only(['store', 'update', 'destroy']);
+        Route::resource('batterie-types', BatterieTypeController::class)->only(['store', 'update', 'destroy']);
+        Route::resource('tuyau-diametres', TuyauDiametreController::class)->only(['store', 'update', 'destroy']);
     });
 
     // TODO: Ajouter route type d'unité

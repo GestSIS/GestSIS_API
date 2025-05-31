@@ -18,12 +18,6 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create('batterie_types', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->timestamps();
-            $table->string('nom')->unique();
-        });
-
         Schema::create('couleurs', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
@@ -135,9 +129,9 @@ return new class extends Migration {
             // $table->decimal('unite', 5, 2);
 
             // Potentiels améliorations future:
-            // - Numéro chassi
-            // - Date achat
-            // - Fournisseur
+            // - Numéro chassi -> Existant
+            // - Date achat -> déjà existant
+            // - Fournisseur -> sur materiel type
             // - Marque
             // - ...
         });
@@ -207,7 +201,7 @@ return new class extends Migration {
             // $table->boolean('taille')->default(true); // TODO:: supprimer cet ancien champ
             // $table->foreignId('materiel_categorie_id')->constrained();
 
-            $table->integer('type')->default(0)->remarque("Permet de lier le type à un sous-type tel que hangar, vehicule, ...");
+            $table->integer('type')->default(0)->remarque("Permet de lier le type à un sous-type tel que tuyau, vehicule, batterie, ...");
 
             $table->string('prix')->default('');
             $table->string('fournisseur')->default('');
@@ -225,9 +219,11 @@ return new class extends Migration {
             $table->foreignId('fonction_id')->nullable()->comment('fonction responsable de l \'entretient')->constrained();
         });
 
-        Schema::create('tuyau_diametres', function (Blueprint $table) {
+        Schema::create('batterie_types', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('diametre')->comment('diamètre du tuyau en mm')->unique();
+            $table->timestamps();
+
+            $table->string('nom')->unique();
         });
 
         Schema::create('materiel_type_batteries', function (Blueprint $table) {
@@ -239,13 +235,20 @@ return new class extends Migration {
             $table->foreignId('batterie_type_id')->constrained();
         });
 
+        Schema::create('tuyau_diametres', function (Blueprint $table) {
+            $table->timestamps();
+
+            $table->bigIncrements('id');
+            $table->integer('diametre')->comment('diamètre du tuyau en mm')->unique();
+        });
+
         Schema::create('materiel_type_tuyaux', function (Blueprint $table) {
             $table->unsignedBigInteger('id');
             $table->foreign('id')->references('id')->on('materiel_types')->onDelete('cascade');
             $table->timestamps();
 
             $table->integer('longeur')->comment('longeur du tuyau en metre');
-            $table->boolean('separement')->comment('Est-ce que le tuyau est roule separement ?');
+            $table->boolean('separement')->comment('Est-ce que le tuyau est roule separement ou en dévidoir ?');
 
             $table->foreignId('tuyau_diametre_id')->constrained();
         });

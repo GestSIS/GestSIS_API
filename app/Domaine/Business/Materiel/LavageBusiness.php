@@ -23,7 +23,7 @@ class LavageBusiness
   public static function getAllLavages()
   {
     return Lavage::with(['article', 'article.lavages'])
-      ->orderBy('date', 'desc')
+      ->orderByDesc('date')
       ->get();
   }
 
@@ -35,7 +35,7 @@ class LavageBusiness
   {
     return Lavage::where('date', '>', $depuis)
       ->with(['article', 'article.lavages'])
-      ->orderBy('date', 'desc')
+      ->orderByDesc('date')
       ->get();
   }
 

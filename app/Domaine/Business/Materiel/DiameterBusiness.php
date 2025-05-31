@@ -18,11 +18,11 @@ class DiameterBusiness
 {
   /**
    * Get list of diameters
-   * @return Collection of #diameter_existing
+   * @return \Illuminate\Database\Eloquent\Collection of #diameter_existing
    */
   public static function listDiameters()
   {
-    return TuyauDiametre::all();
+    return TuyauDiametre::orderBy('diametre')->get();
   }
 
   /**
@@ -37,26 +37,23 @@ class DiameterBusiness
 
   /**
    * Create a new diameter
-   * @param Array $diameter #diameter_new Properties of the new diameter
+   * @param array $diameter #diameter_new Properties of the new diameter
    * @return #idobj ID of the created diameter
    */
   public static function createDiameter($diameter)
   {
-    return TuyauDiametre::create([
-      'diameter' => $diameter['diameter']
-    ]);
+    return TuyauDiametre::create($diameter);
   }
 
   /**
    * Edit an existing diameter
    * @param integer $id ID of the diameter to edit
-   * @param Array $data #diameter_new Properties of the diameter to modify
+   * @param array $data #diameter_new Properties of the diameter to modify
    */
   public static function editDiameter($id, $data)
   {
-    return TuyauDiametre::where('id', '=', $id)->update([
-      'diameter' => $data['diameter']
-    ]);
+    TuyauDiametre::where('id', '=', $id)->update($data);
+    return TuyauDiametre::find($id);
   }
 
   /**
