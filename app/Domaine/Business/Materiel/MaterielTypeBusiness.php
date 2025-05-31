@@ -4,6 +4,7 @@ namespace App\Domaine\Business\Materiel;
 
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\Article;
+use App\Infrastructure\Models\InterventionVehicule;
 use App\Infrastructure\Models\MaterielType;
 use App\Infrastructure\Models\MaterielTypeBatterie;
 use App\Infrastructure\Models\MaterielTypeTuyau;
@@ -94,6 +95,16 @@ class MaterielTypeBusiness // extends OrderModel
     $batterie = $data['batterie'] ?? null;
     unset($data['batterie']);
 
+    $oldType = MaterielType::find($id)->get(['type']);
+    if (
+      $oldType === self::TYPE_VEHICULE && $data['type'] !== self::TYPE_VEHICULE &&
+      InterventionVehicule::join('articles', 'articles.id' . '=', 'intervention_vehicules.vehicule_id')
+        ->where('articles.materiel_type_id', '=', $id)
+        ->exists()
+    ) {
+      throw new ArrayException([], "Impossible d'enlever le type véhicule, des véhicules sont lié à ce type et utilisé pour des rapports d'intervention");
+    }
+
     MaterielType::where('id', $id)
       ->limit(1)
       ->update($data);
@@ -108,6 +119,16 @@ class MaterielTypeBusiness // extends OrderModel
     } else {
       MaterielTypeBatterie::where('id', '=', $id)->delete();
     }
+
+    // Gestion du changement de type en cas de véhicule
+
+    // TODO: Avant release
+    // if ($data['type'] === self::TYPE_VEHICULE) {
+    //   MaterielTypeBatterie::insert(['id' => $id, ...$batterie]);
+    // } else {
+    //   MaterielTypeBatterie::where('id', '=', $id)->delete();
+    // }
+
     return MaterielType::with(['tuyau', 'batterie'])->find($id);
   }
 

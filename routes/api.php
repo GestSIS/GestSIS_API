@@ -228,7 +228,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Sapeurs
-    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,exercice.lecture,intervention.lecture,organisation.modification,comptabilite.lecture,cours.lecture,mat_perso.lecture,fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation,fiche_travail.lecture'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,exercice.lecture,intervention.lecture,organisation.modification,comptabilite.lecture,cours.lecture,materiel.lecture,fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation,fiche_travail.lecture'], function () {
         Route::resource('sapeurs', SapeurController::class)->only(['index', 'show']);
 
         Route::get('sapeurs/{id}/fiche', [SapeurController::class, 'fiche']);
@@ -623,7 +623,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Matériel
-    Route::group(['middleware' => 'jwtTokenSapeurOrRole:mat_perso.lecture'], function () {
+    Route::group(['middleware' => 'jwtTokenSapeurOrRole:materiel.lecture'], function () {
         Route::resource('materiel-types', MaterielTypeController::class)->only(['index']);
         Route::resource('materiel-types.articles', MaterielTypeArticleController::class)->only(['index']);
         Route::resource('materiel-categories', MaterielCategorieController::class)->only(['index']);
@@ -638,7 +638,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::resource('emplacements.articles', ArticleEmplacementController::class)->only(['index']);
     });
 
-    Route::group(['middleware' => 'jwtTokenRole:mat_perso.modification'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:materiel.modification'], function () {
         Route::resource('emplacements', EmplacementController::class)->only(['store', 'update', 'destroy']);
 
         // Attribution et retour de matériel
@@ -655,7 +655,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::delete('lavages', [LavageController::class, 'destroy'])->name('lavages.destroy');
     });
 
-    Route::group(['middleware' => 'jwtTokenRole:mat_perso.config'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:materiel.config'], function () {
         Route::resource('couleurs', CouleurController::class)->only(['store', 'update', 'destroy']);
         Route::resource('materiel-categories', MaterielCategorieController::class)->only(['store', 'update', 'destroy']);
         Route::resource('materiel-types', MaterielTypeController::class)->only(['store', 'update', 'destroy']);
