@@ -79,6 +79,9 @@ class ArticleBusiness
 
     // Controller qu'un article appartiennent soit à un sapeur soit à un emplacement
     foreach ($articles as $article) {
+      $article['sapeur_id'] ??= null;
+      $article['emplacement_id'] ??= null;
+
       if (
         ($article['sapeur_id'] === null && $article['emplacement_id'] === null) ||
         ($article['sapeur_id'] !== null && $article['emplacement_id'] !== null)
@@ -101,8 +104,8 @@ class ArticleBusiness
         'taille' => $type->est_taillee ? trim($article['taille'] ?? '') : '',
         'remarque' => $article['remarque'] ?? '',
         'emplacement_id' => $article['emplacement_id'],
-        'sapeur_id' => $article['sapeur_id'],
-        'attribution' => $article['sapeur_id'] === null ? null : $article['attribution'],
+        'sapeur_id' => $article['sapeur_id'] ?? null,
+        'attribution' => ($article['sapeur_id'] ?? null) === null ? null : $article['attribution'],
         'retour' => null,
         'numero' => $type->est_numerote ? $article['numero'] : '',
         // 'uuid' => uniqid(), // TODO: en avons-nous vraiment besoin ? Utiliser le numéro ou le UUID pour les codebar ?
