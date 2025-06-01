@@ -127,12 +127,11 @@ class ArticleBusiness
 
   public static function editArticles(array $articles): array
   {
-    //TODO: Fail safe
     // fetch types equivalents
     $indexedTypes = MaterielType::all()->keyBy('id');
 
     // Controller qu'un article appartiennent soit à un sapeur soit à un emplacement
-    foreach ($articles as $article) {
+    $articles = array_map(function ($article) use ($indexedTypes) {
       if (
         ($article['sapeur_id'] === null && $article['emplacement_id'] === null) ||
         ($article['sapeur_id'] !== null && $article['emplacement_id'] !== null)
@@ -140,11 +139,14 @@ class ArticleBusiness
         throw new ArrayException([], message: 'Certains articles sont à la fois assignés à un sapeur et à un emplacement');
       }
 
-      $type = $indexedTypes[$article['materiel_type_id']];
+      $existant = Article::find($article['id']);
+      $article['materiel_type_id'] = $existant->materiel_type_id;
+      $type = $indexedTypes[$existant->materiel_type_id];
       if (!$type->est_attribuable && $article['sapeur_id'] !== null) {
         throw new ArrayException([], message: "Article de type '$type->designation' n'est pas attribuable");
       }
-    }
+      return $article;
+    }, $articles);
 
     // Controller numérotation correcte
     $articles = array_map(function ($article) use ($indexedTypes) {
