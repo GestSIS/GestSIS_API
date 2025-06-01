@@ -24,6 +24,9 @@ class Article extends Model
         'compartiment',
         'est_etiquete',
         'est_unique',
+        'designation',
+        'immatriculation',
+        'chassis',
     ];
 
     protected function casts(): array

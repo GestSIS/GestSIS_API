@@ -110,6 +110,9 @@ class ArticleBusiness
         'compartiment' => $article['compartiment'] ?? '',
         'est_etiquete' => $article['est_etiquete'] ?? false,
         'est_unique' => false, // TODO: Non utilisé pour le moment
+        'chassis' => $article['chassis'] ?? '',
+        'designation' => $article['designation'] ?? '',
+        'immatriculation' => $article['immatriculation'] ?? '',
       ];
     }, $articles);
 
@@ -164,6 +167,9 @@ class ArticleBusiness
         'compartiment' => $article['compartiment'] ?? '',
         'est_etiquete' => $article['est_etiquete'] ?? false,
         'est_unique' => false, // TODO: Non utilisé pour le moment
+        'chassis' => $article['chassis'] ?? '',
+        'designation' => $article['designation'] ?? '',
+        'immatriculation' => $article['immatriculation'] ?? '',
       ];
     }, $articles);
 

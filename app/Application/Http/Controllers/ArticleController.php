@@ -48,6 +48,9 @@ class ArticleController extends Controller
             'articles.*.attribution' => 'required_unless:sapeur_id,null',
             'articles.*.emplacement_id' => 'required_if:sapeur_id,null',
             'articles.*.compartiment' => 'string|nullable',
+            'articles.*.chassis' => 'string|nullable',
+            'articles.*.designation' => 'string|nullable',
+            'articles.*.immatriculation' => 'string|nullable',
         ]);
 
         $materiels = ArticleBusiness::creerArticles($data['articles']);
@@ -70,6 +73,9 @@ class ArticleController extends Controller
             'articles.*.attribution' => 'required_unless:sapeur_id,null',
             'articles.*.emplacement_id' => 'required_if:sapeur_id,null',
             'articles.*.compartiment' => 'string|nullable',
+            'articles.*.chassis' => 'string|nullable',
+            'articles.*.designation' => 'string|nullable',
+            'articles.*.immatriculation' => 'string|nullable',
         ]);
 
         $articles = ArticleBusiness::editArticles($data['articles']);

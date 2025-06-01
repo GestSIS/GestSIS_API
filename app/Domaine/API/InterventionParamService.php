@@ -3,6 +3,8 @@
 namespace App\Domaine\API;
 
 use App\Domaine\Business\InterventionParamBusiness;
+use App\Domaine\Business\Materiel\MaterielTypeBusiness;
+use App\Infrastructure\Models\Article;
 use App\Infrastructure\Models\InterventionTraitement;
 use App\Infrastructure\Models\Materiel;
 use App\Infrastructure\Models\MissionType;
@@ -123,24 +125,9 @@ class InterventionParamService
 
     public function vehicules()
     {
-        return Vehicule::join('articles', 'articles.id', '=', 'vehicules.id')
-            // ->join('materiel_types', 'materiel_types.id', '=', 'articles.materiel_type_id')
-            ->get();
-    }
-
-    public function ajouterVehicule($data)
-    {
-        return $this->business->ajouterVehicule($data);
-    }
-
-    public function modifierVehicule($id, $data)
-    {
-        return $this->business->modifierVehicule($id, $data);
-    }
-
-    public function supprimerVehicule($id)
-    {
-        return $this->business->supprimerVehicule($id);
+        return Article::join('materiel_types', 'articles.materiel_type_id', '=', 'materiel_types.id')
+            ->where('materiel_types.type', '=', MaterielTypeBusiness::TYPE_VEHICULE)
+            ->get(['articles.*']);
     }
 
     public function materiels()

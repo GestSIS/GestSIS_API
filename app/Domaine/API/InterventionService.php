@@ -11,7 +11,6 @@ use App\Domaine\SPI\InterventionRepository;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Groupe;
 use App\Infrastructure\Models\Intervention;
-use App\Infrastructure\Models\InterventionSapeur;
 use App\Infrastructure\Models\Materiel;
 use App\Infrastructure\Models\Quittance;
 use App\Infrastructure\Models\Sapeur;
