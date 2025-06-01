@@ -5,6 +5,7 @@ use App\Infrastructure\Models\Couleur;
 use App\Infrastructure\Models\Emplacement;
 use App\Infrastructure\Models\MaterielCategorie;
 use App\Infrastructure\Models\MaterielPersonnel;
+use App\Infrastructure\Models\MaterielType;
 use App\Infrastructure\Models\Vehicule;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -91,49 +92,12 @@ return new class extends Migration {
             $table->foreignId('emplacement_id')->nullable()->constrained()->default(null);
             $table->string('compartiment')->default('');
 
+            // Spécifique pour véhicule
+            $table->string('designation')->default('');
+            $table->string('immatriculation')->default('');
+            $table->string('chassis')->default('');
+
             $table->boolean('statut')->default(true);
-        });
-
-        // Créer un emplacement pour chaque véhicule + Lier le véhicule à un article
-        $vehicules = Vehicule::all();
-        foreach ($vehicules as $vehicule) {
-            Emplacement::create([
-                'designation' => $vehicule->designation,
-                'remarque' => '',
-                'tri' => $vehicule->tri,
-            ]);
-            $article = new Article();
-            $article->designation = $vehicule->designation;
-            $article->remarque = '';
-            $article->tri = $vehicule->tri;
-            $article->statut = $vehicule->statut;
-            $article->save();
-        }
-
-        Schema::table('vehicules', function (Blueprint $table) {
-            // $table->dropPrimary('id');
-            // $table->dropForeign('intervention_vehicule_vehicule_id_foreign');
-            // $table->unsignedBigInteger('id')->unique()->change();
-            $table->foreign('id')->references('id')->on('articles');
-
-            // Supprimer designation ??? Non
-            // Ou bien mettre un flag dans article ???
-            // Que faire en cas de suppression du véhicule ?
-            // Le conserver dans le système mais plus dans les articles ?
-            // Ajouter un field statut dans article pour pouvoir désactiver
-            // ceux inactif mais quand même à garder
-
-            $table->dropColumn(['designation', 'statut', 'tri']);
-
-            // $table->decimal('forfait', 5, 2);
-            // $table->decimal('unite', 5, 2);
-
-            // Potentiels améliorations future:
-            // - Numéro chassi -> Existant
-            // - Date achat -> déjà existant
-            // - Fournisseur -> sur materiel type
-            // - Marque
-            // - ...
         });
 
         Schema::create('hangars', function (Blueprint $table) {
@@ -183,7 +147,7 @@ return new class extends Migration {
                         'retour' => $materiel["retour"],
 
                         'numero' => '',
-                        'uuid' => uniqid($materiel['materiel_type_id'] . "-"),
+                        'uuid' => uniqid(),
                         'achat' => '',
                     ];
                 }
@@ -338,6 +302,34 @@ return new class extends Migration {
             $table->unique(['article_id', 'inventaire_id']);
         });
 
+        // Migration des véhicules
+        $vehicules = Vehicule::all();
+        if (count($vehicules) > 0) {
+            $typeVehicule = MaterielType::create(['designation' => 'vehicule', 'tri' => 1]);
+            $vehicules = Vehicule::all();
+            // Créer un emplacement pour chaque véhicule + Migrer le véhicule vers un article
+            foreach ($vehicules as $vehicule) {
+                Emplacement::create([
+                    'designation' => $vehicule->designation,
+                    'remarque' => '',
+                    'tri' => $vehicule->tri,
+                ]);
+                Article::insert([
+                    'id' => $vehicule->id,
+                    'designation' => $vehicule->designation,
+                    'tri' => $vehicule->tri,
+                    'statut' => $vehicule->statut,
+                    'uuid' => uniqid(),
+                    'materiel_type_id' => $typeVehicule->id,
+                ]);
+            }
+        }
+
+        Schema::table('intervention_vehicule', function (Blueprint $table) {
+            $table->dropForeign(['vehicule_id']);
+            $table->foreign('vehicule_id')->references('id')->on('articles');
+        });
+
         // TODO: à déplacer dans une prochaine migration
         // Schema::dropIfExists('materiel_alerte_type_pour');
         // Schema::dropIfExists('materiel_alerte_types');
@@ -349,6 +341,8 @@ return new class extends Migration {
         // Schema::dropIfExists('materiel_nominals');
         // Schema::dropIfExists('materiel_generiques');
         // Schema::dropIfExists('materiel_personnels');
+
+        // Schema::dropIfExists('vehicules');
     }
 
     /**

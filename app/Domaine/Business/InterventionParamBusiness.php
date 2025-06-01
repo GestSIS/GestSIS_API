@@ -119,34 +119,6 @@ class InterventionParamBusiness
         Telephone::where('id', $id)->delete();
     }
 
-    public function ajouterVehicule($data)
-    {
-        if (!array_key_exists('type_unite_id', $data) || $data['type_unite_id'] == "0") {
-            $data['type_unite_id'] = null;
-        }
-        $vehicule = new Vehicule();
-        $vehicule->fill($data);
-        $vehicule->save();
-        return $vehicule;
-    }
-
-    public function modifierVehicule($id, $data)
-    {
-        if (!array_key_exists('type_unite_id', $data) || $data['type_unite_id'] == "0") {
-            $data['type_unite_id'] = null;
-        }
-        Vehicule::where('id', $id)->limit(1)->update($data);
-        return Vehicule::find($id);
-    }
-
-    public static function supprimerVehicule($id)
-    {
-        if (InterventionVehicule::where('vehicule_id', '=', $id)->exists()) {
-            throw new ArrayException([], 'Impossible de supprimer ce véhicule, celui-ci est utilisé dans une intervention.');
-        }
-        Vehicule::where('id', $id)->delete();
-    }
-
     public function ajouterMateriel($data)
     {
         if (!array_key_exists('type_unite_id', $data) || $data['type_unite_id'] == "0") {
