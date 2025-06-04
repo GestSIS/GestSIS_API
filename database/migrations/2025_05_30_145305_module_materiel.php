@@ -3,7 +3,9 @@
 use App\Infrastructure\Models\Article;
 use App\Infrastructure\Models\Couleur;
 use App\Infrastructure\Models\Emplacement;
+use App\Infrastructure\Models\Lavage;
 use App\Infrastructure\Models\MaterielCategorie;
+use App\Infrastructure\Models\MaterielEvent;
 use App\Infrastructure\Models\MaterielPersonnel;
 use App\Infrastructure\Models\MaterielType;
 use App\Infrastructure\Models\Vehicule;
@@ -297,34 +299,42 @@ return new class extends Migration {
                 'couleur_id' => 1,
             ]);
         }
-        $articles = [];
+        $articlesCreation = [];
+        $articlesIndex = [];
         foreach ($materiels as $materiel) {
             if ($materiel["materiel"]["uuid"] ?? false) {
-                // anciennement matériel nominal
-                $articles[] = [
-                    'taille' => $materiel["taille"],
-                    'remarque' => $materiel["remarque"],
-                    'materiel_type_id' => $materiel["materiel_type_id"],
-                    'sapeur_id' => $materiel["retour"] === null ? $materiel["sapeur_id"] : null,
-                    'emplacement_id' => $materiel["retour"] === null && $materiel["sapeur_id"] !== null ? null: $stock->id,
-                    'est_etiquete' => false,
-                    'est_unique' => true,
-                    'attribution' => $materiel["attribution"],
-                    'retour' => $materiel["retour"],
-
-                    'numero' => $materiel["materiel"]["numero"],
-                    'uuid' => $materiel["materiel"]["uuid"],
-                    'achat' => $materiel["materiel"]["achat"],
-                ];
-            } else {
-                // anciennement matériel
-                for ($i = 0; $i < $materiel["materiel"]["quantite"]; $i++) {
-                    $articles[] = [
+                if ($materiel["materiel"]["numero"] ?? "" !== "") {
+                    // anciennement matériel nominal
+                    $article = [
                         'taille' => $materiel["taille"],
                         'remarque' => $materiel["remarque"],
                         'materiel_type_id' => $materiel["materiel_type_id"],
                         'sapeur_id' => $materiel["retour"] === null ? $materiel["sapeur_id"] : null,
-                        'emplacement_id' => $materiel["retour"] === null && $materiel["sapeur_id"] !== null ? null: $stock->id,
+                        'emplacement_id' => $materiel["retour"] === null && $materiel["sapeur_id"] !== null ? null : $stock->id,
+                        'est_etiquete' => false,
+                        'est_unique' => true,
+                        'attribution' => $materiel["attribution"],
+                        'retour' => $materiel["retour"],
+
+                        'numero' => $materiel["materiel"]["numero"],
+                        'uuid' => uniqid(),
+                        'achat' => $materiel["materiel"]["achat"],
+                    ];
+                    $article = Article::create($article);
+                    $articlesIndex[strval($materiel["materiel_id"])] = $article->id;
+                } else {
+                    // select * from materiel_personnels as n INNER JOIN materiel_nominals  as g ON g.id = n.materiel_id  WHERE n.materiel_type = "App\\Infrastructure\\Models\\MaterielNominal" AND g.numero ="";
+                    print ("\nDropped materiel id: " . strval($materiel['id'] . "\n"));
+                }
+            } else {
+                // anciennement matériel
+                for ($i = 0; $i < $materiel["materiel"]["quantite"]; $i++) {
+                    $articlesCreation[] = [
+                        'taille' => $materiel["taille"],
+                        'remarque' => $materiel["remarque"],
+                        'materiel_type_id' => $materiel["materiel_type_id"],
+                        'sapeur_id' => $materiel["retour"] === null ? $materiel["sapeur_id"] : null,
+                        'emplacement_id' => $materiel["retour"] === null && $materiel["sapeur_id"] !== null ? null : $stock->id,
                         'est_etiquete' => false,
                         'est_unique' => true,
                         'attribution' => $materiel["attribution"],
@@ -337,9 +347,23 @@ return new class extends Migration {
                 }
             }
         }
+        Article::insert($articlesCreation);
+
+        $events = MaterielEvent::all()->toArray();
+        $lavages = [];
+        foreach ($events as $event) {
+            if ($event['materiel_event_type_id'] == 1) {
+                $lavages[] = [
+                    'date' => substr($event['date'], 0, 10),
+                    'article_id' => $articlesIndex[strval($event['materiel_nominal_id'])],
+                ];
+            } else {
+                print ("\nType abandonné id: " . strval($event['id']) . "\n");
+            }
+        }
+        Lavage::insert($lavages);
         // TODO: Migrer lavages
 
-        Article::insert($articles);
 
         // TODO: à déplacer dans une prochaine migration
         // Schema::dropIfExists('materiel_alerte_type_pour');
@@ -363,19 +387,19 @@ return new class extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists('batterie_types');
-        Schema::dropIfExists('couleurs');
-        Schema::dropIfExists('emplacements');
-        Schema::dropIfExists('hangars');
-        Schema::dropIfExists('articles');
-        Schema::dropIfExists('tuyau_diametres');
-        Schema::dropIfExists('materiel_type_batteries');
-        Schema::dropIfExists('materiel_type_tuyaux');
-        Schema::dropIfExists('maintenance_types');
-        Schema::dropIfExists('maintenance_type_pour');
-        Schema::dropIfExists('maintenances');
-        Schema::dropIfExists('maintenance_articles');
-        Schema::dropIfExists('inventaires');
-        Schema::dropIfExists('inventaire_articles');
+        // Schema::dropIfExists('batterie_types');
+        // Schema::dropIfExists('couleurs');
+        // Schema::dropIfExists('emplacements');
+        // Schema::dropIfExists('hangars');
+        // Schema::dropIfExists('articles');
+        // Schema::dropIfExists('tuyau_diametres');
+        // Schema::dropIfExists('materiel_type_batteries');
+        // Schema::dropIfExists('materiel_type_tuyaux');
+        // Schema::dropIfExists('maintenance_types');
+        // Schema::dropIfExists('maintenance_type_pour');
+        // Schema::dropIfExists('maintenances');
+        // Schema::dropIfExists('maintenance_articles');
+        // Schema::dropIfExists('inventaires');
+        // Schema::dropIfExists('inventaire_articles');
     }
 };

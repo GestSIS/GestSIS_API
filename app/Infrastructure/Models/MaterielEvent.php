@@ -17,7 +17,7 @@ class MaterielEvent extends Model
 
     protected function casts(): array
     {
-        return  [
+        return [
             'date' => 'date',
             'succes' => 'boolean',
             'materiel_nominal_id' => 'integer',
