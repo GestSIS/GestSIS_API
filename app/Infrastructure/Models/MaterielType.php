@@ -29,10 +29,12 @@ class MaterielType extends Model
         return [
             'materiel_categorie_id' => 'integer',
             'fonction_id' => 'integer',
+            'type' => 'integer',
             'est_numerote' => 'boolean',
             'est_attribuable' => 'boolean',
             'est_taillee' => 'boolean',
-            'est_lavable' => 'boolean'
+            'est_lavable' => 'boolean',
+            'a_controller' => 'boolean',
         ];
     }
 
