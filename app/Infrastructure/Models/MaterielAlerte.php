@@ -14,9 +14,4 @@ class MaterielAlerte extends Model
     {
         return  ['materiel_nominal_id' => 'integer', 'statut' => 'integer'];
     }
-
-    public function materielNominal()
-    {
-        return $this->belongsTo(MaterielNominal::class);
-    }
 }

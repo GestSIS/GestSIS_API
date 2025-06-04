@@ -111,50 +111,6 @@ return new class extends Migration {
             $table->foreignId('localite_id')->constrained();
         });
 
-        // Migration matériel existant
-        $materiels = MaterielPersonnel::with('materiel')->get()->toArray();
-        $articles = [];
-        foreach ($materiels as $materiel) {
-            if ($materiel["materiel"]["uuid"] ?? false) {
-                // anciennement matériel nominal
-                $articles[] = [
-                    'taille' => $materiel["taille"],
-                    'remarque' => $materiel["remarque"],
-                    'materiel_type_id' => $materiel["materiel_type_id"],
-                    'sapeur_id' => $materiel["sapeur_id"],
-                    'emplacement_id' => null,
-                    'est_etiquete' => false,
-                    'est_unique' => true,
-                    'attribution' => $materiel["attribution"],
-                    'retour' => $materiel["retour"],
-
-                    'numero' => $materiel["materiel"]["numero"],
-                    'uuid' => $materiel["materiel"]["uuid"],
-                    'achat' => $materiel["materiel"]["achat"],
-                ];
-            } else {
-                // anciennement matériel
-                for ($i = 0; $i < $materiel["materiel"]["quantite"]; $i++) {
-                    $articles[] = [
-                        'taille' => $materiel["taille"],
-                        'remarque' => $materiel["remarque"],
-                        'materiel_type_id' => $materiel["materiel_type_id"],
-                        'sapeur_id' => $materiel["sapeur_id"],
-                        'emplacement_id' => null,
-                        'est_etiquete' => false,
-                        'est_unique' => true,
-                        'attribution' => $materiel["attribution"],
-                        'retour' => $materiel["retour"],
-
-                        'numero' => '',
-                        'uuid' => uniqid(),
-                        'achat' => '',
-                    ];
-                }
-            }
-        }
-        Article::insert($articles);
-
         Schema::table('materiel_types', function (Blueprint $table) {
 
             // Champs déjà existants app/Infrastructure/Models/Vehicule.php
@@ -313,11 +269,11 @@ return new class extends Migration {
                     'designation' => $vehicule->designation,
                     'remarque' => '',
                     'tri' => $vehicule->tri,
+                    'couleur_id' => 1,
                 ]);
                 Article::insert([
                     'id' => $vehicule->id,
                     'designation' => $vehicule->designation,
-                    'tri' => $vehicule->tri,
                     'statut' => $vehicule->statut,
                     'uuid' => uniqid(),
                     'materiel_type_id' => $typeVehicule->id,
@@ -329,6 +285,61 @@ return new class extends Migration {
             $table->dropForeign(['vehicule_id']);
             $table->foreign('vehicule_id')->references('id')->on('articles');
         });
+
+        // Migration matériel existant
+        $materiels = MaterielPersonnel::with('materiel')->get()->toArray();
+        $stock = null;
+        if (count($materiels) > 0) {
+            $stock = Emplacement::create([
+                'designation' => "Stock",
+                'remarque' => '',
+                'tri' => 0,
+                'couleur_id' => 1,
+            ]);
+        }
+        $articles = [];
+        foreach ($materiels as $materiel) {
+            if ($materiel["materiel"]["uuid"] ?? false) {
+                // anciennement matériel nominal
+                $articles[] = [
+                    'taille' => $materiel["taille"],
+                    'remarque' => $materiel["remarque"],
+                    'materiel_type_id' => $materiel["materiel_type_id"],
+                    'sapeur_id' => $materiel["retour"] === null ? $materiel["sapeur_id"] : null,
+                    'emplacement_id' => $materiel["retour"] === null && $materiel["sapeur_id"] !== null ? null: $stock->id,
+                    'est_etiquete' => false,
+                    'est_unique' => true,
+                    'attribution' => $materiel["attribution"],
+                    'retour' => $materiel["retour"],
+
+                    'numero' => $materiel["materiel"]["numero"],
+                    'uuid' => $materiel["materiel"]["uuid"],
+                    'achat' => $materiel["materiel"]["achat"],
+                ];
+            } else {
+                // anciennement matériel
+                for ($i = 0; $i < $materiel["materiel"]["quantite"]; $i++) {
+                    $articles[] = [
+                        'taille' => $materiel["taille"],
+                        'remarque' => $materiel["remarque"],
+                        'materiel_type_id' => $materiel["materiel_type_id"],
+                        'sapeur_id' => $materiel["retour"] === null ? $materiel["sapeur_id"] : null,
+                        'emplacement_id' => $materiel["retour"] === null && $materiel["sapeur_id"] !== null ? null: $stock->id,
+                        'est_etiquete' => false,
+                        'est_unique' => true,
+                        'attribution' => $materiel["attribution"],
+                        'retour' => $materiel["retour"],
+
+                        'numero' => '',
+                        'uuid' => uniqid(),
+                        'achat' => '',
+                    ];
+                }
+            }
+        }
+        // TODO: Migrer lavages
+
+        Article::insert($articles);
 
         // TODO: à déplacer dans une prochaine migration
         // Schema::dropIfExists('materiel_alerte_type_pour');
