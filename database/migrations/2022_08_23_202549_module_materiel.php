@@ -19,8 +19,8 @@ return new class extends Migration
 
             $table->string('designation');
 
-            $table->unsignedBigInteger('parent_id')->nullable()->default(null);
-            $table->foreign('parent_id')->references('id')->on('materiel_categories');
+            $table->unsignedBigInteger('pere_id')->nullable()->default(null);
+            $table->foreign('pere_id')->references('id')->on('materiel_categories');
         });
 
         Schema::create('materiel_types', function (Blueprint $table) {
