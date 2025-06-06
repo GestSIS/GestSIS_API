@@ -12,11 +12,11 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::table('groupes', function (Blueprint $table) {
-            $table->dropForeign('groupes_pere_id_foreign');
+        Schema::table('materiel_categories', function (Blueprint $table) {
+            $table->dropForeign('materiel_categories_pere_id_foreign');
             $table->renameColumn('pere_id', 'parent_id');
 
-            $table->foreign('parent_id')->references('id')->on('groupes')->onDelete('cascade');
+            $table->foreign('parent_id')->references('id')->on('materiel_categories')->onDelete('cascade');
         });
     }
 
@@ -27,12 +27,11 @@ return new class extends Migration {
      */
     public function down()
     {
-        // Déjà existante
-        Schema::table('groupes', function (Blueprint $table) {
-            $table->dropForeign('groupes_parent_id_foreign');
+        Schema::table('materiel_categories', function (Blueprint $table) {
+            $table->dropForeign('materiel_categories_parent_id_foreign');
             $table->renameColumn('parent_id', 'pere_id');
 
-            $table->foreign('pere_id')->references('id')->on('groupes')->onDelete('cascade');
+            $table->foreign('pere_id')->references('id')->on('materiel_categories')->onDelete('cascade');
         });
     }
 };
