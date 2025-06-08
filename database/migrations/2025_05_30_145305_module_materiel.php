@@ -9,6 +9,7 @@ use App\Infrastructure\Models\MaterielEvent;
 use App\Infrastructure\Models\MaterielPersonnel;
 use App\Infrastructure\Models\MaterielType;
 use App\Infrastructure\Models\Vehicule;
+use Carbon\Carbon;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -31,8 +32,9 @@ return new class extends Migration {
         });
 
         // Create a basic couleur
+        $couleur = null;
         if (MaterielCategorie::count() > 0) {
-            Couleur::create(['nom' => 'default', 'texte' => '#ffffffff', 'fond' => '#fc031780']);
+            $couleur = Couleur::create(['nom' => 'default', 'texte' => '#000000ff', 'fond' => '#ffffffff']);
         }
 
         // Déjà existante
@@ -47,6 +49,7 @@ return new class extends Migration {
         $categories = MaterielCategorie::all();
         foreach ($categories as $categorie) {
             $categorie->tri = $categorie->id;
+            $categorie->couleur_id = $couleur->id;
             $categorie->save();
         }
 
@@ -134,11 +137,15 @@ return new class extends Migration {
 
             $table->string('prefix')->default('');
             $table->boolean('est_numerote')->default(false);
-            $table->boolean('est_attribuable')->default(false)->comment('Peut être distribué à un sapeur');
+            $table->boolean('est_attribuable')->default(true)->comment('Peut être distribué à un sapeur');
             $table->boolean('est_taillee')->default(false)->comment('Possède une taille');
             $table->boolean('est_lavable')->default(false)->comment('Pour activer le suivi des lavages');
 
             $table->foreignId('fonction_id')->nullable()->comment('fonction responsable de l \'entretient')->constrained();
+        });
+
+        Schema::table('materiel_types', function (Blueprint $table) {
+            $table->boolean('est_attribuable')->default(false)->comment('Peut être distribué à un sapeur')->change();
         });
 
         Schema::create('batterie_types', function (Blueprint $table) {
@@ -203,9 +210,6 @@ return new class extends Migration {
             $table->unique(['maintenance_type_id', 'materiel_type_id'], 'maintenance_type_pour_unique');
         });
 
-        // TODO: Migrate event_type non validable dans maintenance_type
-        // TODO: Migrate event_type validable dans maintenance_type
-
         Schema::create('maintenances', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
@@ -263,20 +267,22 @@ return new class extends Migration {
         // Migration des véhicules
         $vehicules = Vehicule::all();
         if (count($vehicules) > 0) {
-            $typeVehicule = MaterielType::create(['designation' => 'vehicule', 'tri' => 1]);
+            $categorieVehicule = MaterielCategorie::create(['designation' => 'Vehicule', 'tri' => 100, 'couleur_id' => $couleur->id]);
+            $typeVehicule = MaterielType::create(['designation' => 'Vehicule', 'tri' => 1, 'materiel_categorie_id' => $categorieVehicule->id]);
             $vehicules = Vehicule::all();
             // Créer un emplacement pour chaque véhicule + Migrer le véhicule vers un article
             foreach ($vehicules as $vehicule) {
-                Emplacement::create([
+                $emplacement = Emplacement::create([
                     'designation' => $vehicule->designation,
                     'remarque' => '',
                     'tri' => $vehicule->tri,
-                    'couleur_id' => 1,
+                    'couleur_id' => $couleur->id,
                 ]);
                 Article::insert([
                     'id' => $vehicule->id,
                     'designation' => $vehicule->designation,
                     'statut' => $vehicule->statut,
+                    'emplacement_id' => $emplacement->id,
                     'uuid' => uniqid(),
                     'materiel_type_id' => $typeVehicule->id,
                 ]);
@@ -296,7 +302,7 @@ return new class extends Migration {
                 'designation' => "Stock",
                 'remarque' => '',
                 'tri' => 0,
-                'couleur_id' => 1,
+                'couleur_id' => $couleur->id,
             ]);
         }
         $articlesCreation = [];
@@ -306,6 +312,7 @@ return new class extends Migration {
                 if ($materiel["materiel"]["numero"] ?? "" !== "") {
                     // anciennement matériel nominal
                     $article = [
+                        'created_at' => $materiel["created_at"],
                         'taille' => $materiel["taille"],
                         'remarque' => $materiel["remarque"],
                         'materiel_type_id' => $materiel["materiel_type_id"],
@@ -318,9 +325,11 @@ return new class extends Migration {
 
                         'numero' => $materiel["materiel"]["numero"],
                         'uuid' => uniqid(),
-                        'achat' => $materiel["materiel"]["achat"],
+                        'achat' => substr($materiel["materiel"]["achat"] ?? "", 0, 10),
                     ];
                     $article = Article::create($article);
+                    $article->created_at = Carbon::parse($materiel['created_at']);
+                    $article->save(['timestamps' => false]);
                     $articlesIndex[strval($materiel["materiel_id"])] = $article->id;
                 } else {
                     // select * from materiel_personnels as n INNER JOIN materiel_nominals  as g ON g.id = n.materiel_id  WHERE n.materiel_type = "App\\Infrastructure\\Models\\MaterielNominal" AND g.numero ="";
@@ -330,6 +339,7 @@ return new class extends Migration {
                 // anciennement matériel
                 for ($i = 0; $i < $materiel["materiel"]["quantite"]; $i++) {
                     $articlesCreation[] = [
+                        'created_at' => Carbon::parse($materiel["created_at"]),
                         'taille' => $materiel["taille"],
                         'remarque' => $materiel["remarque"],
                         'materiel_type_id' => $materiel["materiel_type_id"],
@@ -362,10 +372,8 @@ return new class extends Migration {
             }
         }
         Lavage::insert($lavages);
-        // TODO: Migrer lavages
 
-
-        // TODO: à déplacer dans une prochaine migration
+        // TODO: à nettoyer dans une prochaine migration
         // Schema::dropIfExists('materiel_alerte_type_pour');
         // Schema::dropIfExists('materiel_alerte_types');
         // Schema::dropIfExists('materiel_event_type_pour');
