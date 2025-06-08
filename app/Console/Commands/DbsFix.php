@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Domaine\Business\ImputationBusiness;
+use App\Infrastructure\Models\Article;
 use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Commune;
 use App\Infrastructure\Models\Decompte;
@@ -13,6 +14,8 @@ use App\Infrastructure\Models\LocaliteSis;
 use App\Infrastructure\Models\Sms;
 use App\Infrastructure\Models\SmsNumero;
 use App\Infrastructure\Models\ConvocationParam;
+use App\Infrastructure\Models\MaterielEventType;
+use App\Infrastructure\Models\MaterielType;
 use Illuminate\Console\Command;
 
 class DbsFix extends Command
@@ -50,13 +53,38 @@ class DbsFix extends Command
     {
         $dbs = config('database.dbs');
         foreach ($dbs as $db) {
+            printf("Fix db=db_" . $db . "\n");
+
+            $typesIds = MaterielEventType::on("db_" . $db)->find(1)?->materielTypeIds() ?? [];//->materielTypeIds;
+            MaterielType::on("db_" . $db)->whereIn('id', $typesIds)->update(['est_lavable' => True, 'est_numerote' => True]);
+
+            // Attribut est_taillee
+            MaterielType::on("db_" . $db)
+                ->whereIn(
+                    'id',
+                    Article::on("db_" . $db)->where('taille', '!=', "")
+                        ->where("taille", "!=", "-")
+                        ->distinct('materiel_type_id')
+                        ->pluck('materiel_type_id')
+                )->update(['est_taillee' => True]);
+
+
+            // Attribut est_numerotee
+            MaterielType::on("db_" . $db)
+                ->whereIn(
+                    'id',
+                    Article::on("db_" . $db)->where('numero', '!=', "")
+                        ->where("numero", "!=", "-")
+                        ->distinct('materiel_type_id')
+                        ->pluck('materiel_type_id')
+                )->update(['est_numerote' => True]);
+
             // ConvocationParam::on("db_" . $db)->insert([
             //     'titre' => 'convocation',
             //     'affichage_duree' => true,
             //     'affichage_pour_infor' => true,
             // ]);
 
-            printf("Fix db=db_" . $db . "\n");
             // Localite::on("db_" . $db)->insert([
             //     array('id' => '76', 'designation' => 'Porrentruy'),
             //     array('id' => '77', 'designation' => 'Grand-Fontaine'),
@@ -76,7 +104,7 @@ class DbsFix extends Command
             // LocaliteSis::on("db_" . $db)->whereIn('localite_id', [32, 43])->delete();
             // Localite::on("db_" . $db)->whereIn('id', [32, 43])->delete();
 
-            Localite::on("db_" . $db)->where('id', '=', 110)->update(['designation' => 'La Chaux-de-Fonds']);
+            // Localite::on("db_" . $db)->where('id', '=', 110)->update(['designation' => 'La Chaux-de-Fonds']);
             // Localite::on("db_" . $db)->where('id', '=', 46)->update(['commune_id' => 77]);
 
             printf("\n");
