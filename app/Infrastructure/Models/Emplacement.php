@@ -18,8 +18,8 @@ class Emplacement extends Model
     ];
     protected function casts(): array
     {
-        return  [
-            'statut' => 'integer',
+        return [
+            'statut' => 'boolean',
             'tri' => 'integer',
             'impression_inventaire' => 'date',
             'est_etiquete' => 'boolean',

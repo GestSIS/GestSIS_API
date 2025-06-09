@@ -28,7 +28,7 @@ class EmplacementController extends Controller
             // 'impression_inventaire' => 'boolean|required',
             'couleur_id' => 'integer|min:1|required',
             'parent_id' => 'integer|nullable',
-            // 'statut' => 'integer|required',
+            'statut' => 'boolean|required',
         ]);
 
         $emplacement = EmplacementBusiness::createEmplacement($data);
@@ -45,7 +45,7 @@ class EmplacementController extends Controller
             // 'impression_inventaire' => 'boolean|required',
             'couleur_id' => 'integer|min:1|required',
             'parent_id' => 'integer|nullable',
-            // 'statut' => 'integer|required',
+            'statut' => 'boolean|required',
         ]);
 
         $emplacement = EmplacementBusiness::editEmplacement($id, $data);
