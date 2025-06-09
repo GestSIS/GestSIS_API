@@ -74,7 +74,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('parent_id')->nullable()->default(null);
             $table->foreign('parent_id')->references('id')->on('emplacements');
 
-            $table->boolean('statut')->default(true); // TODO: Nécessaire ?
+            $table->boolean('statut')->default(true);
         });
 
         Schema::create('articles', function (Blueprint $table) {
@@ -373,19 +373,6 @@ return new class extends Migration {
         }
         Lavage::insert($lavages);
 
-        // TODO: à nettoyer dans une prochaine migration
-        // Schema::dropIfExists('materiel_alerte_type_pour');
-        // Schema::dropIfExists('materiel_alerte_types');
-        // Schema::dropIfExists('materiel_event_type_pour');
-        // Schema::dropIfExists('materiel_events');
-        // Schema::dropIfExists('materiel_event_types');
-        // Schema::dropIfExists('materiel_alertes');
-
-        // Schema::dropIfExists('materiel_nominals');
-        // Schema::dropIfExists('materiel_generiques');
-        // Schema::dropIfExists('materiel_personnels');
-
-        // Schema::dropIfExists('vehicules');
     }
 
     /**
@@ -395,19 +382,19 @@ return new class extends Migration {
      */
     public function down()
     {
-        // Schema::dropIfExists('batterie_types');
-        // Schema::dropIfExists('couleurs');
-        // Schema::dropIfExists('emplacements');
-        // Schema::dropIfExists('hangars');
-        // Schema::dropIfExists('articles');
-        // Schema::dropIfExists('tuyau_diametres');
-        // Schema::dropIfExists('materiel_type_batteries');
-        // Schema::dropIfExists('materiel_type_tuyaux');
-        // Schema::dropIfExists('maintenance_types');
-        // Schema::dropIfExists('maintenance_type_pour');
-        // Schema::dropIfExists('maintenances');
-        // Schema::dropIfExists('maintenance_articles');
-        // Schema::dropIfExists('inventaires');
-        // Schema::dropIfExists('inventaire_articles');
+        Schema::dropIfExists('batterie_types');
+        Schema::dropIfExists('couleurs');
+        Schema::dropIfExists('emplacements');
+        Schema::dropIfExists('hangars');
+        Schema::dropIfExists('articles');
+        Schema::dropIfExists('tuyau_diametres');
+        Schema::dropIfExists('materiel_type_batteries');
+        Schema::dropIfExists('materiel_type_tuyaux');
+        Schema::dropIfExists('maintenance_types');
+        Schema::dropIfExists('maintenance_type_pour');
+        Schema::dropIfExists('maintenances');
+        Schema::dropIfExists('maintenance_articles');
+        Schema::dropIfExists('inventaires');
+        Schema::dropIfExists('inventaire_articles');
     }
 };
