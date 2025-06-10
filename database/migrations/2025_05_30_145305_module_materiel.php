@@ -31,32 +31,12 @@ return new class extends Migration {
             $table->string('fond', length: 9)->comment('hex code pour l\'arrière plan');
         });
 
-        // Create a basic couleur
-        $couleur = null;
-        if (MaterielCategorie::count() > 0) {
-            $couleur = Couleur::create(['nom' => 'default', 'texte' => '#000000ff', 'fond' => '#ffffffff']);
-        }
-
         // Déjà existante
         Schema::table('materiel_categories', function (Blueprint $table) {
-            $table->integer('tri')->default(1);
+            $table->integer('tri')->unique();
 
-            $table->unsignedBigInteger('couleur_id')->default(1);
+            $table->unsignedBigInteger('couleur_id');
             $table->foreign('couleur_id')->references('id')->on('couleurs');
-        });
-
-        // générer une valeur pour tri des categories
-        $categories = MaterielCategorie::all();
-        foreach ($categories as $categorie) {
-            $categorie->tri = $categorie->id;
-            $categorie->couleur_id = $couleur->id;
-            $categorie->save();
-        }
-
-        Schema::table('materiel_categories', function (Blueprint $table) {
-            $table->integer('tri')->unique()->change();
-
-            $table->unsignedBigInteger('couleur_id')->change();
         });
 
         Schema::create('emplacements', function (Blueprint $table) {
@@ -137,15 +117,11 @@ return new class extends Migration {
 
             $table->string('prefix')->default('');
             $table->boolean('est_numerote')->default(false);
-            $table->boolean('est_attribuable')->default(true)->comment('Peut être distribué à un sapeur');
+            $table->boolean('est_attribuable')->default(false)->comment('Peut être distribué à un sapeur');
             $table->boolean('est_taillee')->default(false)->comment('Possède une taille');
             $table->boolean('est_lavable')->default(false)->comment('Pour activer le suivi des lavages');
 
             $table->foreignId('fonction_id')->nullable()->comment('fonction responsable de l \'entretient')->constrained();
-        });
-
-        Schema::table('materiel_types', function (Blueprint $table) {
-            $table->boolean('est_attribuable')->default(false)->comment('Peut être distribué à un sapeur')->change();
         });
 
         Schema::create('batterie_types', function (Blueprint $table) {
@@ -264,115 +240,10 @@ return new class extends Migration {
             $table->unique(['article_id', 'inventaire_id']);
         });
 
-        // Migration des véhicules
-        $vehicules = Vehicule::all();
-        if (count($vehicules) > 0) {
-            $categorieVehicule = MaterielCategorie::create(['designation' => 'Vehicule', 'tri' => 100, 'couleur_id' => $couleur->id]);
-            $typeVehicule = MaterielType::create(['designation' => 'Vehicule', 'tri' => 1, 'materiel_categorie_id' => $categorieVehicule->id]);
-            $vehicules = Vehicule::all();
-            // Créer un emplacement pour chaque véhicule + Migrer le véhicule vers un article
-            foreach ($vehicules as $vehicule) {
-                $emplacement = Emplacement::create([
-                    'designation' => $vehicule->designation,
-                    'remarque' => '',
-                    'tri' => $vehicule->tri,
-                    'couleur_id' => $couleur->id,
-                ]);
-                Article::insert([
-                    'id' => $vehicule->id,
-                    'designation' => $vehicule->designation,
-                    'statut' => $vehicule->statut,
-                    'emplacement_id' => $emplacement->id,
-                    'uuid' => uniqid(),
-                    'materiel_type_id' => $typeVehicule->id,
-                ]);
-            }
-        }
-
         Schema::table('intervention_vehicule', function (Blueprint $table) {
             $table->dropForeign(['vehicule_id']);
             $table->foreign('vehicule_id')->references('id')->on('articles');
         });
-
-        // Migration matériel existant
-        $materiels = MaterielPersonnel::with('materiel')->get()->toArray();
-        $stock = null;
-        if (count($materiels) > 0) {
-            $stock = Emplacement::create([
-                'designation' => "Stock",
-                'remarque' => '',
-                'tri' => 0,
-                'couleur_id' => $couleur->id,
-            ]);
-        }
-        $articlesCreation = [];
-        $articlesIndex = [];
-        foreach ($materiels as $materiel) {
-            if ($materiel["materiel"]["uuid"] ?? false) {
-                if ($materiel["materiel"]["numero"] ?? "" !== "") {
-                    // anciennement matériel nominal
-                    $article = [
-                        'created_at' => $materiel["created_at"],
-                        'taille' => $materiel["taille"],
-                        'remarque' => $materiel["remarque"],
-                        'materiel_type_id' => $materiel["materiel_type_id"],
-                        'sapeur_id' => $materiel["retour"] === null ? $materiel["sapeur_id"] : null,
-                        'emplacement_id' => $materiel["retour"] === null && $materiel["sapeur_id"] !== null ? null : $stock->id,
-                        'est_etiquete' => false,
-                        'est_unique' => true,
-                        'attribution' => $materiel["attribution"],
-                        'retour' => $materiel["retour"],
-
-                        'numero' => $materiel["materiel"]["numero"],
-                        'uuid' => uniqid(),
-                        'achat' => substr($materiel["materiel"]["achat"] ?? "", 0, 10),
-                    ];
-                    $article = Article::create($article);
-                    $article->created_at = Carbon::parse($materiel['created_at']);
-                    $article->save(['timestamps' => false]);
-                    $articlesIndex[strval($materiel["materiel_id"])] = $article->id;
-                } else {
-                    // select * from materiel_personnels as n INNER JOIN materiel_nominals  as g ON g.id = n.materiel_id  WHERE n.materiel_type = "App\\Infrastructure\\Models\\MaterielNominal" AND g.numero ="";
-                    print ("\nDropped materiel id: " . strval($materiel['id'] . "\n"));
-                }
-            } else {
-                // anciennement matériel
-                for ($i = 0; $i < $materiel["materiel"]["quantite"]; $i++) {
-                    $articlesCreation[] = [
-                        'created_at' => Carbon::parse($materiel["created_at"]),
-                        'taille' => $materiel["taille"],
-                        'remarque' => $materiel["remarque"],
-                        'materiel_type_id' => $materiel["materiel_type_id"],
-                        'sapeur_id' => $materiel["retour"] === null ? $materiel["sapeur_id"] : null,
-                        'emplacement_id' => $materiel["retour"] === null && $materiel["sapeur_id"] !== null ? null : $stock->id,
-                        'est_etiquete' => false,
-                        'est_unique' => true,
-                        'attribution' => $materiel["attribution"],
-                        'retour' => $materiel["retour"],
-
-                        'numero' => '',
-                        'uuid' => uniqid(),
-                        'achat' => '',
-                    ];
-                }
-            }
-        }
-        Article::insert($articlesCreation);
-
-        $events = MaterielEvent::all()->toArray();
-        $lavages = [];
-        foreach ($events as $event) {
-            if ($event['materiel_event_type_id'] == 1) {
-                $lavages[] = [
-                    'date' => substr($event['date'], 0, 10),
-                    'article_id' => $articlesIndex[strval($event['materiel_nominal_id'])],
-                ];
-            } else {
-                print ("\nType abandonné id: " . strval($event['id']) . "\n");
-            }
-        }
-        Lavage::insert($lavages);
-
     }
 
     /**
