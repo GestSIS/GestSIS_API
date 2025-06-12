@@ -250,7 +250,7 @@ class ArticleBusiness
     $emplacementIds = [$locationId];
     // Iterate over emplacements O(n)
 
-    return Article::whereIn('emplacement_id', $emplacementIds)->get();
+    return Article::whereIn('emplacement_id', $emplacementIds)->with(['lavages'])->get();
   }
 
   // /**
