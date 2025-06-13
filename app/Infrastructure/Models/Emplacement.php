@@ -11,6 +11,7 @@ class Emplacement extends Model
         'remarque',
         'tri',
         'est_etiquete',
+        'est_compartimentable',
         'impression_inventaire',
         'couleur_id',
         'parent_id',
@@ -23,6 +24,7 @@ class Emplacement extends Model
             'tri' => 'integer',
             'impression_inventaire' => 'date',
             'est_etiquete' => 'boolean',
+            'est_compartimentable' => 'boolean',
             'couleur_id' => 'integer',
             'parent_id' => 'integer'
         ];
