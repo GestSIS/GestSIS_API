@@ -124,9 +124,6 @@ class ArticleBusiness
 
     return array_map(function ($data) {
       $article = Article::create($data);
-      if (($data['vehicule'] ?? null) !== null) {
-        Vehicule::insert([$data['vehicule']]);
-      }
       return $article;
     }, $articles);
   }

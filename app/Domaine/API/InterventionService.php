@@ -6,8 +6,10 @@ namespace App\Domaine\API;
 use App\Application\Typst\TypstTemplate;
 use App\Application\Typst\TypstToPdfGenerator;
 use App\Domaine\Business\InterventionBusiness;
+use App\Domaine\Business\Materiel\MaterielTypeBusiness;
 use App\Domaine\Business\SisParamBusiness;
 use App\Domaine\SPI\InterventionRepository;
+use App\Infrastructure\Models\Article;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Groupe;
 use App\Infrastructure\Models\Intervention;
@@ -407,7 +409,10 @@ class InterventionService
         // Chargement des vehicules
         $vehiculesMap = [];
         if (in_array('vehicules', $withOptions)) {
-            $vehicules = Vehicule::get();
+            $vehicules = Article::join('materiel_types', 'articles.materiel_type_id', '=', 'materiel_types.id')
+                ->where('materiel_types.type', '=', MaterielTypeBusiness::TYPE_VEHICULE)
+                ->get(['articles.*']);
+            ;
             foreach ($vehicules as $vehicule) {
                 $vehiculesMap[$vehicule->id] = $vehicule->designation;
             }
