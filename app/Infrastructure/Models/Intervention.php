@@ -37,10 +37,18 @@ class Intervention extends Model
     ];
     protected function casts(): array
     {
-        return  [
-            'rapport_police' => 'boolean', 'degre' => 'integer', 'sauve_personne' => 'integer', 'sauve_animaux' => 'integer',
-            'stat_nb' => 'integer', 'statut' => 'integer', 'localite_id' => 'integer', 'intervention_traitement_id' => 'integer',
-            'stat_federal_id' => 'integer', 'sapeur_id' => 'integer', 'type_intervention_id' => 'integer'
+        return [
+            'rapport_police' => 'boolean',
+            'degre' => 'integer',
+            'sauve_personne' => 'integer',
+            'sauve_animaux' => 'integer',
+            'stat_nb' => 'integer',
+            'statut' => 'integer',
+            'localite_id' => 'integer',
+            'intervention_traitement_id' => 'integer',
+            'stat_federal_id' => 'integer',
+            'sapeur_id' => 'integer',
+            'type_intervention_id' => 'integer'
         ];
     }
 

@@ -5,9 +5,7 @@ namespace Tests\Feature;
 use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Business\PaiementBusiness;
 use App\Infrastructure\Models\AvsParam;
-use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
-use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\SisParam;
 use Carbon\Carbon;
 use Tests\TestCase;
@@ -132,28 +130,7 @@ class DecompteTest extends TestCase
 
         $business = new PaiementBusiness();
         $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
-        // $response = $this->json('POST', "api/v2/decomptes/creer-annuel", $params);
 
-        // $response
-        //     ->assertStatus(200)
-        //     ->assertJsonStructure([
-        //         'data' => [
-        //             'id',
-        //             'designation',
-        //             'exercice_comptable_id',
-        //             'deduction'
-        //         ]
-        //     ])->assertJson(
-        //         [
-        //             "data" => [
-        //                 "designation" => "Decompte n°xxx",
-        //                 "exercice_comptable_id" => 1,
-        //                 "deduction" => 0,
-        //                 "avs_total" => 0,
-        //                 "ac_total" => 0
-        //             ]
-        //         ]
-        //     );
         $response = $this->json('GET', "api/v2/decomptes/" . $response['id']);
 
         $response
@@ -209,28 +186,6 @@ class DecompteTest extends TestCase
 
         //vérification qu'on ne paye pas deux fois
         $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
-        // $response = $this->json('POST', "api/v2/decomptes/create", $params);
-
-        // $response
-        //     ->assertStatus(200)
-        //     ->assertJsonStructure([
-        //         'data' => [
-        //             'id',
-        //             'designation',
-        //             'exercice_comptable_id',
-        //             'deduction'
-        //         ]
-        //     ])->assertJson(
-        //         [
-        //             "data" => [
-        //                 "designation" => "Decompte n°xxx",
-        //                 "exercice_comptable_id" => 1,
-        //                 "deduction" => 0,
-        //                 "avs_total" => 0,
-        //                 "ac_total" => 0
-        //             ]
-        //         ]
-        //     );
 
         $response = $this->json('GET', "api/v2/decomptes/" . $response['id']);
 
@@ -336,29 +291,6 @@ class DecompteTest extends TestCase
 
         $business = new PaiementBusiness();
         $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
-        // $response = $this->json('POST', "api/v2/decomptes/creer-annuel", $params);
-
-        // $response
-        //     ->assertStatus(200)
-        //     ->assertJsonStructure([
-        //         'data' => [
-        //             'id',
-        //             'designation',
-        //             'exercice_comptable_id',
-        //             'deduction'
-        //         ]
-        //     ])->assertJson(
-        //         [
-        //             "data" => [
-        //                 "designation" => "Decompte n°xxx",
-        //                 "exercice_comptable_id" => 2,
-        //                 "deduction" => 1,
-        //                 "avs_total" => 379.79999999999995,
-        //                 "ac_total" => 864
-        //             ]
-        //         ]
-        //     );
-
         $response = $this->json('GET', "api/v2/decomptes/" . $response['id']);
 
         $response
@@ -510,29 +442,6 @@ class DecompteTest extends TestCase
 
         $business = new PaiementBusiness();
         $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
-        // $response = $this->json('POST', "api/v2/decomptes/creer-annuel", $params);
-
-        // $response
-        //     ->assertStatus(200)
-        //     ->assertJsonStructure([
-        //         'data' => [
-        //             'id',
-        //             'designation',
-        //             'exercice_comptable_id',
-        //             'deduction'
-        //         ]
-        //     ])->assertJson(
-        //         [
-        //             "data" => [
-        //                 "designation" => "Decompte n°xxx",
-        //                 "exercice_comptable_id" => 3,
-        //                 "deduction" => 1,
-        //                 "avs_total" => 0,
-        //                 "ac_total" => 0
-        //             ]
-        //         ]
-        //     );
-
         $response = $this->json('GET', "api/v2/decomptes/" . $response['id']);
 
         $response
@@ -655,7 +564,6 @@ class DecompteTest extends TestCase
         ]);
 
         $response = $this->json('GET', "api/v2/decomptes/5/iso20022", $data);
-
         $response->assertStatus(200);
     }
 }
