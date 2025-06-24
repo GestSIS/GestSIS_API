@@ -32,7 +32,7 @@ class MesExcusesController extends Controller
 
         $data = $request->validate([
             'excuse_type_id' => 'required|integer|min:1',
-            'remarque' => 'string|required|min:1|max:255',
+            'remarque' => 'string|required|min:1|max:1000',
             // 'justificatif_filename' => 'required|boolean', // Nom du fichier
             // 'justificatif_path' => 'required|boolean', // Nom du fichier
         ]);

@@ -49,7 +49,7 @@ class ExcuseController extends Controller
 
         $data = $request->validate([
             'excuse_type_id' => 'nullable|integer',
-            'remarque' => 'nullable|string',
+            'remarque' => 'nullable|string|max:1000',
             // 'justificatif_filename' => 'required|boolean', // Nom du fichier
             // 'justificatif_path' => 'required|boolean', // Nom du fichier
 
