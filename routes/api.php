@@ -297,7 +297,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Organisation
-    Route::group(['middleware' => 'jwtTokenRole:intervention.lecture,effectif.tout,sapeur.lecture,organisation.modification,comptabilite.lecture'], function () {
+    Route::group(['middleware' => 'jwtTokenSapeurOrRole:intervention.lecture,effectif.tout,sapeur.lecture,organisation.modification,comptabilite.lecture'], function () {
         Route::resource('groupes', GroupeController::class)->only(['index']);
     });
 
