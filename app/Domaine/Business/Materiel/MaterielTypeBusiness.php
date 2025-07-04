@@ -140,7 +140,7 @@ class MaterielTypeBusiness // extends OrderModel
   public static function deleteProduct($id)
   {
     if (
-      Article::where('materiel_categorie_id', $id)->exists()
+      Article::where('materiel_type_id', $id)->exists()
     ) {
       throw new ArrayException([], "Veuillez d'abord supprimer les articles");
     }
