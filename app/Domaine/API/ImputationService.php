@@ -193,9 +193,9 @@ class ImputationService
         return $this->business->imputerCours($coursSapeurId, $data);
     }
 
-    function annulerImputationCours($coursSapeurId, )
+    function annulerImputationCours($coursSapeurId)
     {
-        return $this->business->annulerImputationCours($coursSapeurId, );
+        return $this->business->annulerImputationCours($coursSapeurId);
     }
 
     function imputationTravail($ids)
@@ -203,9 +203,9 @@ class ImputationService
         return $this->business->imputerTravaux($ids);
     }
 
-    function annulerImputationTravail($coursSapeurId, )
+    function annulerImputationTravail($coursSapeurId)
     {
-        return $this->business->annulerImputationTravail($coursSapeurId, );
+        return $this->business->annulerImputationTravail($coursSapeurId);
     }
 
     function genererAmendesSapeur($exerciceComptableId, $sapeurId)

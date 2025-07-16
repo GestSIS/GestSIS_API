@@ -58,11 +58,24 @@ class Ecriture extends Model
     protected function casts(): array
     {
         return [
-            'total' => 'decimal:2', 'tarif' => 'decimal:2', 'type_unite_id' => 'integer', 'quantite' => 'decimal:2',
-            'tarif_min' => 'decimal:2', 'tarif_min_pour' => 'decimal:2', 'taux' => 'decimal:2',
-            'tarif_pro_rata' => 'boolean', 'tarif_min_pro_rata' => 'boolean',
-            'module' => 'integer', 'type' => 'integer', 'compte_id' => 'integer', 'exercice_comptable_id' => 'integer', 'ecriture_categorie_id' => 'integer',
-            'sapeur_id' => 'integer', 'intervention_id' => 'integer', 'exercice_id' => 'integer', 'cours_sapeur_id' => 'integer',
+            'total' => 'decimal:2',
+            'tarif' => 'decimal:2',
+            'type_unite_id' => 'integer',
+            'quantite' => 'decimal:2',
+            'tarif_min' => 'decimal:2',
+            'tarif_min_pour' => 'decimal:2',
+            'taux' => 'decimal:2',
+            'tarif_pro_rata' => 'boolean',
+            'tarif_min_pro_rata' => 'boolean',
+            'module' => 'integer',
+            'type' => 'integer',
+            'compte_id' => 'integer',
+            'exercice_comptable_id' => 'integer',
+            'ecriture_categorie_id' => 'integer',
+            'sapeur_id' => 'integer',
+            'intervention_id' => 'integer',
+            'exercice_id' => 'integer',
+            'cours_sapeur_id' => 'integer',
         ];
     }
 }

@@ -1195,14 +1195,14 @@ class ImputationBusiness
         return $ecritures;
     }
 
-    public function annulerImputationCours($coursSapeurId)
+    public function annulerImputationCours(int $coursSapeurId)
     {
-        $ecriture = Ecriture::find('cours_sapeur_id', $coursSapeurId);
+        $ecriture = Ecriture::where('cours_sapeur_id', '=', $coursSapeurId)->first();
         $this->controlerStatusExerciceComptable($ecriture->exercice_comptable_id);
 
         // Check si des ecritures sont déjà liées à un décompte
         if (
-            Ecriture::where('cours_sapeur_id', $coursSapeurId)
+            Ecriture::where('cours_sapeur_id', '=', $coursSapeurId)
                 ->whereNotNull('decompte_id')
                 ->exists()
         ) {
@@ -1210,7 +1210,7 @@ class ImputationBusiness
         }
 
         // Suppression des écritures
-        Ecriture::where('cours_sapeur_id', $coursSapeurId)
+        Ecriture::where('cours_sapeur_id', '=', $coursSapeurId)
             ->delete();
 
         return true;
