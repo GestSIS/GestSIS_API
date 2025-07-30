@@ -20,32 +20,35 @@ use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\SapeurTelephone;
 use App\Infrastructure\Models\Travail;
 use Carbon\Carbon;
+use DB;
 use stdClass;
 
 class SapeurRepositoryEloquent implements SapeurRepository
 {
     private const SAPEUR_LIGHT_COLUMNS = ['id', 'nom', 'prenom', 'actif', 'email', 'localite_id', 'fonction_id', 'grade_id', 'civilite_id', 'date_naissance', 'type', 'annee_incorporation'];
 
-    public function listeSapeurLight(bool $actif = false)
+    public function listeSapeurLight(bool $actif = false, bool $actifOuAvecMateriel = false)
     {
-        $temp = $this;
         $now = Carbon::now();
         $oneMonthFurther = Carbon::now()->addMonths(1);
-        $query = Sapeur::with(['permis', 'fonctions' => function ($query) use ($oneMonthFurther, $now) {
-            $query->where('debut', '<=', $oneMonthFurther)->where(function ($query) use ($now) {
-                $query->where('fin', '=', null)
-                    ->orWhere('fin', '>=', $now);
-            });
-        }]);
+        $query = Sapeur::with([
+            'permis',
+            'fonctions' => function ($query) use ($oneMonthFurther, $now) {
+                $query->where('debut', '<=', $oneMonthFurther)->where(function ($query) use ($now) {
+                    $query->where('fin', '=', null)
+                        ->orWhere('fin', '>=', $now);
+                });
+            }
+        ]);
 
         if ($actif) {
             $query = $query->where('actif', '=', 1);
         }
+        if ($actifOuAvecMateriel) {
+            $query = $query->where('actif', '=', 1)->orWhereHas('articles');
+        }
 
-        return $query->get(self::SAPEUR_LIGHT_COLUMNS)
-            ->map(function ($sapeur) use ($temp) {
-                return $temp->convertSapeurLight($sapeur);
-            })->toArray();
+        return $query->orderBy('nom_prenom')->get([...self::SAPEUR_LIGHT_COLUMNS, DB::raw("CONCAT(nom, ' ', prenom) AS nom_prenom")])->toArray();
     }
 
     public function getSapeurDetailsById(int $sapeurId, $with = [])
@@ -358,39 +361,17 @@ class SapeurRepositoryEloquent implements SapeurRepository
         GroupeSapeur::where('sapeur_id', $sapeurId)->where('id', $sapeurGroupeId)->limit(1)->delete();
     }
 
-    protected function convertSapeurLight($sapeur)
-    {
-        if ($sapeur == null) return null;
-
-        $object = new StdClass();
-        $object->id = intval($sapeur->id);
-
-        $object->nom = $sapeur->nom;
-        $object->prenom = $sapeur->prenom;
-        $object->actif = intval($sapeur->actif);
-        $object->email = $sapeur->email;
-        $object->date_naissance = $sapeur->date_naissance;
-        $object->annee_incorporation = $sapeur->annee_incorporation;
-        $object->civilite_id = intval($sapeur->civilite_id);
-        $object->localite_id = intval($sapeur->localite_id);
-        $object->fonction_id = intval($sapeur->fonction_id);
-        $object->grade_id = intval($sapeur->grade_id);
-        $object->fonctions = $sapeur->fonctions->map(fn ($f) => intval($f->fonction_id));
-        $object->permis = $sapeur->permis->map(fn ($f) => intval($f->permis_type_id));
-        $object->type = intval($sapeur->type);
-
-        return $object;
-    }
-
     protected function convertSapeur($sapeur, $with = [])
     {
-        if ($sapeur == null) return null;
+        if ($sapeur == null)
+            return null;
 
         $object = new StdClass();
         $object->id = intval($sapeur->id);
 
         $object->nom = $sapeur->nom;
         $object->prenom = $sapeur->prenom;
+        $object->nom_prenom = $sapeur->nom . " " . $sapeur->prenom;
         $object->suffixe = $sapeur->suffixe;
         $object->rue = $sapeur->rue;
         $object->no_rue = $sapeur->no_rue;
@@ -474,7 +455,8 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
     protected function convertSapeurFonction($fonction, $withFonction = false)
     {
-        if ($fonction == null) return null;
+        if ($fonction == null)
+            return null;
 
         $object = new StdClass();
         $object->id = intval($fonction->id);
@@ -494,7 +476,8 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
     protected function convertFonction($fonction)
     {
-        if ($fonction == null) return null;
+        if ($fonction == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $fonction->id;
@@ -509,7 +492,8 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
     protected function convertSapeurGrade($grade, $withGrade = false)
     {
-        if ($grade == null) return null;
+        if ($grade == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $grade->id;
@@ -528,7 +512,8 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
     protected function convertGrade($grade)
     {
-        if ($grade == null) return null;
+        if ($grade == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $grade->id;
@@ -543,7 +528,8 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
     protected function convertSapeurCours($cours)
     {
-        if ($cours == null) return null;
+        if ($cours == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $cours->id;
@@ -559,7 +545,8 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
     protected function convertSapeurTelephone($telephone)
     {
-        if ($telephone == null) return null;
+        if ($telephone == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $telephone->id;
@@ -575,7 +562,8 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
     protected function convertSapeurMutation($mutation)
     {
-        if ($mutation == null) return null;
+        if ($mutation == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $mutation->id;
@@ -591,7 +579,8 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
     protected function convertSapeurPermis($permis)
     {
-        if ($permis == null) return null;
+        if ($permis == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $permis->id;
@@ -605,7 +594,8 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
     protected function convertSapeurGroupe($groupe)
     {
-        if ($groupe == null) return null;
+        if ($groupe == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $groupe->id;

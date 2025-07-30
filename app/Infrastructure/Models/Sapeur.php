@@ -10,16 +10,39 @@ class Sapeur extends Model
     use HasFactory;
 
     protected $fillable = [
-        'nom', 'prenom', 'suffixe', 'rue', 'no_rue', 'date_naissance', 'no_avs', 'profession', 'employeur',
-        'lieu_de_travail', 'email', 'actif', 'iban', 'iban_statut', 'remarque', 'porteur', 'localite_id',
-        'civilite_id', 'cotisation_avs', 'annee_incorporation'
+        'nom',
+        'prenom',
+        'suffixe',
+        'rue',
+        'no_rue',
+        'date_naissance',
+        'no_avs',
+        'profession',
+        'employeur',
+        'lieu_de_travail',
+        'email',
+        'actif',
+        'iban',
+        'iban_statut',
+        'remarque',
+        'porteur',
+        'localite_id',
+        'civilite_id',
+        'cotisation_avs',
+        'annee_incorporation'
     ];
     protected function casts(): array
     {
-        return  [
-            'actif' => 'integer', 'iban_statut' => 'integer', 'actif' => 'integer', 'cotisation_avs' => 'integer',
-            'localite_id' => 'integer', 'civilite_id' => 'integer', 'porteur' => 'integer', 'fonction_id' => 'integer',
-            'grade_id' => 'integer', 'type' => 'integer'
+        return [
+            'actif' => 'integer',
+            'iban_statut' => 'integer',
+            'cotisation_avs' => 'integer',
+            'localite_id' => 'integer',
+            'civilite_id' => 'integer',
+            'porteur' => 'integer',
+            'fonction_id' => 'integer',
+            'grade_id' => 'integer',
+            'type' => 'integer'
         ];
     }
 
@@ -126,5 +149,13 @@ class Sapeur extends Model
     public function civilite()
     {
         return $this->belongsTo(Civilite::class);
+    }
+
+    /**
+     * Les grades du sapeur
+     */
+    public function articles()
+    {
+        return $this->hasMany(Article::class);
     }
 }

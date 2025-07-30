@@ -8,7 +8,6 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
 
 class SapeurController extends Controller
 {
@@ -28,7 +27,8 @@ class SapeurController extends Controller
     public function index(Request $request)
     {
         $actif = $request->input('actif', false) === 'true';
-        return response()->json(["data" => $this->service->listeSapeurs($actif)]);
+        $actifOuAvecMateriel = $request->input('avec-materiel', false) === 'true';
+        return response()->json(["data" => $this->service->listeSapeurs($actif, $actifOuAvecMateriel)]);
     }
 
     /**

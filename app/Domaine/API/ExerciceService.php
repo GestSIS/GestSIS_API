@@ -351,10 +351,10 @@ class ExerciceService
         $exercice->sapeurs = array_map(function ($s) use ($sapeurs) {
             $id = $s->sapeur_id;
             $sap = array_values(array_filter($sapeurs, function ($sapeur) use ($id) {
-                return $sapeur->id == $id;
+                return $sapeur['id'] == $id;
             }))[0];
-            $s->display = $sap->nom . " " . $sap->prenom;
-            $s->fonction_id = $sap->fonction_id;
+            $s->display = $sap['nom_prenom'];
+            $s->fonction_id = $sap['fonction_id'] ?? 0;
             return $s;
         }, array_values($exercice->sapeurs));
 
@@ -398,9 +398,9 @@ class ExerciceService
         $exercice->sapeurs = array_map(function ($s) use ($sapeurs) {
             $id = $s->sapeur_id;
             $sap = array_values(array_filter($sapeurs, function ($sapeur) use ($id) {
-                return $sapeur->id == $id;
+                return $sapeur['id'] == $id;
             }))[0];
-            $s->display = $sap->nom . " " . $sap->prenom;
+            $s->display = $sap['nom_prenom'];
             return $s;
         }, array_values($exercice->sapeurs));
 

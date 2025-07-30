@@ -6,7 +6,7 @@ namespace App\Domaine\SPI;
 
 interface SapeurRepository
 {
-    public function listeSapeurLight(bool $actif = false);
+    public function listeSapeurLight(bool $actif = false, bool $actifOuAvecMateriel = false);
 
     public function getSapeurDetailsById(int $sapeurId, $with = []);
 

@@ -107,9 +107,9 @@ class SapeurService
         );
     }
 
-    public function listeSapeurs(bool $actif)
+    public function listeSapeurs(bool $actif, bool $actifOuAvecMateriel)
     {
-        return $this->repository->listeSapeurLight($actif);
+        return $this->repository->listeSapeurLight($actif, $actifOuAvecMateriel);
     }
 
     public function telephones()
