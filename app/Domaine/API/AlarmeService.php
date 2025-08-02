@@ -115,7 +115,7 @@ class AlarmeService
 
             return $alarmes;
         } catch (Exception $e) {
-            dd($e);
+            // dd($e);
             throw new ArrayException([], "Une erreur est survenue lors de la récupération des alarmes");
         }
     }
