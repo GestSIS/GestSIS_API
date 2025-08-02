@@ -26,13 +26,13 @@ class ConvocationController extends Controller
             'sapeurIds' => is_string($request->get('sapeurIds', '')) ? explode(',', $request->get('sapeurIds', '')) : $request->get('sapeurIds', ''),
         ]);
 
-        $sapeursIds = $request->validate([
+        $sapeurIds = $request->validate([
             'sapeurIds' => 'array|nullable',
             'sapeurIds.*' => 'integer'
         ]);
-        $sapeursIds = $sapeursIds['sapeurIds'] ?? [];
+        $sapeurIds = $sapeurIds['sapeurIds'] ?? [];
 
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        return $this->service->convoquer($exerciceComptableId, $sapeursIds, $sisKey);
+        return $this->service->convoquer($exerciceComptableId, $sapeurIds, $sisKey);
     }
 }

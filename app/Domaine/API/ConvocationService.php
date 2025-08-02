@@ -23,11 +23,15 @@ class ConvocationService
 
         // Filtrage des personnes "pour info" 
         $exercices = Exercice::with('sapeurs')->where('exercice_comptable_id', $exerciceComptableId)->orderBy('date')->orderBy('heure')->get();
-        $sapeurIds = array_values(array_unique(array_merge(...array_map(fn($e) => array_map(fn($c) => $c['sapeur_id'], $e['sapeurs']), $exercices->toArray()))));
-
+        $sapeurs = array_values(array_unique(
+            array_merge(...array_map(
+                fn($e) => array_map(fn($c) => $c['sapeur_id'], $e['sapeurs']),
+                $exercices->toArray()
+            ))
+        ));
         // Filtre les sapeurs à partir de $params['sapeurIds'] si existant et non vide
         if (count($sapeurIds) > 0) {
-            $sapeurIds = array_intersect($sapeurIds, $sapeurIds);
+            $sapeurIds = array_intersect($sapeurs, $sapeurIds);
         }
         $sapeurs = Sapeur::whereIn('id', $sapeurIds)->orderBy('nom')->orderBy('prenom')->get(['id', 'nom', 'prenom', 'civilite_id', 'no_rue', 'rue', 'localite_id']);
 
