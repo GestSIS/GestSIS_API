@@ -31,9 +31,9 @@ class ConvocationService
         ));
         // Filtre les sapeurs à partir de $params['sapeurIds'] si existant et non vide
         if (count($sapeurIds) > 0) {
-            $sapeurIds = array_intersect($sapeurs, $sapeurIds);
+            $sapeurs = array_intersect($sapeurs, $sapeurIds);
         }
-        $sapeurs = Sapeur::whereIn('id', $sapeurIds)->orderBy('nom')->orderBy('prenom')->get(['id', 'nom', 'prenom', 'civilite_id', 'no_rue', 'rue', 'localite_id']);
+        $sapeurs = Sapeur::whereIn('id', $sapeurs)->orderBy('nom')->orderBy('prenom')->get(['id', 'nom', 'prenom', 'civilite_id', 'no_rue', 'rue', 'localite_id']);
 
         $civilitesMap = [];
         $localitesMap = [];

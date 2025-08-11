@@ -30,6 +30,10 @@ class ConvocationController extends Controller
             'sapeurIds' => 'array|nullable',
             'sapeurIds.*' => 'integer'
         ]);
+
+        if (count($sapeurIds['sapeurIds']) === 1 && $sapeurIds['sapeurIds'][0] === "") {
+            $sapeurIds['sapeurIds'] = [];
+        }
         $sapeurIds = $sapeurIds['sapeurIds'] ?? [];
 
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
