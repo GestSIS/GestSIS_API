@@ -38,6 +38,7 @@ class InterventionSapeursController extends Controller
     public function store(Request $request, int $interventionId)
     {
         $data = $request->validate([
+            'sapeurs' => 'required|array',
             'sapeurs.*.debut' => 'required|date_format:Y-m-d H:i',
             'sapeurs.*.fin' => 'required|date_format:Y-m-d H:i|after:sapeurs.*.debut',
             'sapeurs.*.piquet' => 'required|boolean',
@@ -60,6 +61,7 @@ class InterventionSapeursController extends Controller
     public function update(Request $request, int $interventionId)
     {
         $data = $request->validate([
+            'sapeurs' => 'required|array',
             'sapeurs.*.id' => 'required|integer',
             'sapeurs.*.debut' => 'required|date_format:Y-m-d H:i',
             'sapeurs.*.fin' => 'required|date_format:Y-m-d H:i|after:sapeurs.*.debut',
@@ -82,6 +84,7 @@ class InterventionSapeursController extends Controller
     public function destroy(Request $request, int $interventionId)
     {
         $data = $request->validate([
+            'sapeurs' => 'required|array',
             'sapeurs.*' => 'required|integer'
         ]);
 
