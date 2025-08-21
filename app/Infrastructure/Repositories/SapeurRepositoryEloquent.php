@@ -3,7 +3,6 @@
 
 namespace App\Infrastructure\Repositories;
 
-use App\Domaine\Business\SapeurBusiness;
 use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\ControleMedical;
 use App\Infrastructure\Models\CoursSapeur;
@@ -13,7 +12,6 @@ use App\Infrastructure\Models\GradeSapeur;
 use App\Infrastructure\Models\GroupeSapeur;
 use App\Infrastructure\Models\HeureExercice;
 use App\Infrastructure\Models\InterventionSapeur;
-use App\Infrastructure\Models\MaterielPersonnel;
 use App\Infrastructure\Models\Mutation;
 use App\Infrastructure\Models\Permis;
 use App\Infrastructure\Models\Sapeur;
@@ -174,7 +172,6 @@ class SapeurRepositoryEloquent implements SapeurRepository
         HeureExercice::where('sapeur_id', '=', $sapeurId)->delete();
         InterventionSapeur::where('sapeur_id', '=', $sapeurId)->delete();
         GroupeSapeur::where('sapeur_id', '=', $sapeurId)->delete();
-        MaterielPersonnel::where('sapeur_id', '=', $sapeurId)->delete();
         ControleMedical::where('sapeur_id', '=', $sapeurId)->delete();
         Mutation::where('sapeur_id', '=', $sapeurId)->delete();
         Travail::where('sapeur_id', '=', $sapeurId)->delete();

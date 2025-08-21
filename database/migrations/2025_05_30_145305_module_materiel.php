@@ -1,15 +1,5 @@
 <?php
 
-use App\Infrastructure\Models\Article;
-use App\Infrastructure\Models\Couleur;
-use App\Infrastructure\Models\Emplacement;
-use App\Infrastructure\Models\Lavage;
-use App\Infrastructure\Models\MaterielCategorie;
-use App\Infrastructure\Models\MaterielEvent;
-use App\Infrastructure\Models\MaterielPersonnel;
-use App\Infrastructure\Models\MaterielType;
-use App\Infrastructure\Models\Vehicule;
-use Carbon\Carbon;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

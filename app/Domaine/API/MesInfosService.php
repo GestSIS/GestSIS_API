@@ -16,7 +16,6 @@ use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\InterventionSapeur;
-use App\Infrastructure\Models\MaterielPersonnel;
 use App\Infrastructure\Models\Paiement;
 use App\Infrastructure\Models\Travail;
 
@@ -155,11 +154,6 @@ class MesInfosService
             throw new ArrayException([], 'Absence invalide');
         }
         return $this->absenceBusiness->supprimerAbsence($absenceId);
-    }
-
-    function monMateriel(int $sapeurId)
-    {
-        return MaterielPersonnel::with('materiel')->where('sapeur_id', '=', $sapeurId)->get()->toArray();
     }
 
     function mesTravaux(int $sapeurId, int $exerciceComptableId)

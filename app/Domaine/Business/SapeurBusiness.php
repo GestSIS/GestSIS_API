@@ -5,10 +5,10 @@ namespace App\Domaine\Business;
 
 use App\Domaine\SPI\SapeurRepository;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\Article;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\GradeSapeur;
 use App\Infrastructure\Models\Intervention;
-use App\Infrastructure\Models\MaterielPersonnel;
 use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
 
@@ -151,7 +151,7 @@ class SapeurBusiness
         }
 
         if (
-            MaterielPersonnel::where([
+            Article::where([
                 ['sapeur_id', '=', $sapeurId],
                 ['retour', '=', null]
             ])->exists()

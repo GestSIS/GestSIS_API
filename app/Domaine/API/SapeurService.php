@@ -14,7 +14,6 @@ use App\Infrastructure\Models\CoursSapeur;
 use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\FonctionSapeur;
 use App\Infrastructure\Models\GradeSapeur;
-use App\Infrastructure\Models\MaterielPersonnel;
 use App\Infrastructure\Models\Mutation;
 use App\Infrastructure\Models\Permis;
 use App\Infrastructure\Models\Sapeur;
@@ -186,11 +185,6 @@ class SapeurService
     public function getSapeurControlesMedicauxById(int $sapeurId)
     {
         return $this->repositoryControles->getSapeurControlesMedicauxById($sapeurId);
-    }
-
-    public function getSapeurMaterielsById(int $sapeurId)
-    {
-        return MaterielPersonnel::with('materiel')->where('sapeur_id', '=', $sapeurId)->get()->toArray();
     }
 
     private static $ALLOWED_PHOTO_EXTENSION = ['jpg', 'jpeg', 'png'];
