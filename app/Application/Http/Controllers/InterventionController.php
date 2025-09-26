@@ -40,10 +40,10 @@ class InterventionController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'date_debut' => 'date',
-            'heure_debut' => 'date_format:H:i',
-            'date_fin' => 'date|after_or_equal:date_debut',
-            'heure_fin' => 'date_format:H:i',
+            'date_debut' => 'required|date',
+            'heure_debut' => 'required|date_format:H:i',
+            'date_fin' => 'required|date|after_or_equal:date_debut',
+            'heure_fin' => 'required|date_format:H:i',
             'lieu' => 'string|nullable',
             'objet' => 'string',
             'rapport_police' => 'boolean',
