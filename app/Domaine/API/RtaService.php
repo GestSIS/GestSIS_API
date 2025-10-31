@@ -105,7 +105,7 @@ class RtaService
             ...$modifies,
             ...$supprimes
         ];
-        usort($sapeurs, fn ($a, $b) => strcmp($a['nom'] . $a['prenom'], $b['nom'] . $b['prenom']));
+        usort($sapeurs, fn($a, $b) => strcmp($a['nom'] . $a['prenom'], $b['nom'] . $b['prenom']));
 
         if (count($sapeurs) <= 0) {
             throw new ArrayException(['sapeurs' => 'Aucun sapeur'], "Aucun sapeur présent dans la communication rta");
@@ -119,13 +119,13 @@ class RtaService
             'sapeurs' => $sapeurs,
         ])->render();
 
-        $url = "https://gestionrta-jura.ch/gestionRtaJura/interfaceXML/transfert.php";
+        $url = config("rta.api_url") . "/gestionRtaJura/interfaceXML/transfert.php";
 
         // Envoie de la requête
         $response = Http::attach(
             'fichier',
             $xml,
-            'GestSIS-2.0-RTA-' . $sis . '-' . $date->format('d-m-Y_H:i') . '.xml'
+            'GestSIS-2.0-RTA-' . $sis . '-' . $date->format('d-m-Y_H-i') . '.xml'
         )
             ->withBasicAuth($username, $password)
             ->post($url);

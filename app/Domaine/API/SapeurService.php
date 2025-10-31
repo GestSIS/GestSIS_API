@@ -206,8 +206,6 @@ class SapeurService
             $path = 'photos/' . $sisKey . '/' . $sapeurId . '.' . $extension;
             if (Storage::exists($path)) {
                 return $path;
-                return Storage::path($path);
-                // return "data:image/{$extension};base64," . base64_encode(Storage::get($path));
             }
         }
         return null;
@@ -219,7 +217,6 @@ class SapeurService
         foreach (self::$ALLOWED_PHOTO_EXTENSION as $extension) {
             $path = 'photos/' . $sisKey . '/' . $sapeurId . '.' . $extension;
             if (Storage::exists($path)) {
-                //return Storage::path($path);
                 return "data:image/{$extension};base64," . base64_encode(Storage::get($path));
             }
         }
