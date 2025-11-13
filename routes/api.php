@@ -237,6 +237,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('statistiques/{id}/fonction', [SapeurStatistiqueController::class, 'fonction']);
         Route::get('statistiques/{id}/grade', [SapeurStatistiqueController::class, 'grade']);
         Route::get('statistiques/{id}/permis', [SapeurStatistiqueController::class, 'permis']);
+        Route::get('statistiques/{id}/localite', [SapeurStatistiqueController::class, 'localite']);
     });
 
     Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture'], function () {

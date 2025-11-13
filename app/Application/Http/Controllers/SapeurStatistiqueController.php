@@ -49,4 +49,11 @@ class SapeurStatistiqueController extends Controller
 
         return response()->json(['data' => $materiels]);
     }
+
+    public function localite($exerciceComptableId)
+    {
+        $data = $this->service->statLocalite($exerciceComptableId);
+
+        return response()->json(['data' => $data]);
+    }
 }

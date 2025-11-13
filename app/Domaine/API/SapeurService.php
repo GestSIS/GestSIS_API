@@ -456,4 +456,22 @@ class SapeurService
 
         return $data;
     }
+
+    public function statLocalite($exerciceComptableId)
+    {
+        $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
+
+        $data = DB::select("SELECT s.localite_id AS localite_id, count(DISTINCT s.id) as nb
+                FROM sapeurs as s
+                INNER JOIN mutations as m ON m.sapeur_id = s.id
+                WHERE m.incorporation < ?
+                AND (
+                    m.sortie IS NULL OR m.sortie > ?
+                    )
+                AND s.type = 0
+                GROUP BY s.localite_id
+            ", [$exerciceComptable->fin, $exerciceComptable->debut]);
+
+        return $data;
+    }
 }
