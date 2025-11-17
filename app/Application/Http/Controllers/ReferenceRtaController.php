@@ -52,56 +52,27 @@ class ReferenceRtaController extends Controller
     public function setReference(Request $request)
     {
         $data = $request->validate([
-            'username' => 'string|required',
-            'password' => 'string|required',
             'sis' => 'string|required',
-            'communication' => 'string|required',
-            'ajoutes' => 'array',
-            'ajoutes.*.sapeur_id' => 'required|integer',
-            'ajoutes.*.nom' => 'required|string',
-            'ajoutes.*.prenom' => 'required|string',
-            'ajoutes.*.suffixe' => 'nullable|string',
-            'ajoutes.*.localite' => 'required|string',
-            'ajoutes.*.adresse' => 'required|string',
-            'ajoutes.*.fonction' => 'nullable|string',
-            'ajoutes.*.date_naissance' => 'required|date',
-            'ajoutes.*.groupes' => 'required|array|min:1',
-            'ajoutes.*.groupes.*.no' => 'required|integer',
-            'ajoutes.*.groupes.*.designation' => 'required|string',
-            'ajoutes.*.numeros' => 'required|array|min:1',
-            'ajoutes.*.numeros.*' => 'required|string',
-            'modifies' => 'array',
-            'modifies.*.sapeur_id' => 'integer|exists:reference_rtas,sapeur_id',
-            'modifies.*.nom' => 'string',
-            'modifies.*.prenom' => 'string',
-            'modifies.*.suffixe' => 'nullable|string',
-            'modifies.*.localite' => 'required|string',
-            'modifies.*.adresse' => 'required|string',
-            'modifies.*.fonction' => 'nullable|string',
-            'modifies.*.date_naissance' => 'date',
-            'modifies.*.groupes' => 'required|array|min:1',
-            'modifies.*.groupes.*.no' => 'required|integer',
-            'modifies.*.groupes.*.designation' => 'required|string',
-            'modifies.*.numeros' => 'required|array|min:1',
-            'modifies.*.numeros.*' => 'string',
-            'supprimes' => 'array',
-            'supprimes.*.sapeur_id' => 'integer',
-            'supprimes.*.nom' => 'string',
-            'supprimes.*.prenom' => 'string',
-            'supprimes.*.suffixe' => 'string|nullable',
-            'supprimes.*.localite' => 'string|required',
-            'supprimes.*.adresse' => 'string|nullable',
-            'supprimes.*.fonction' => 'string|nullable',
-            'supprimes.*.date_naissance' => 'date',
+            'sapeurs' => 'array',
+            'sapeurs.*.sapeur_id' => 'required|integer',
+            'sapeurs.*.nom' => 'required|string',
+            'sapeurs.*.prenom' => 'required|string',
+            'sapeurs.*.suffixe' => 'nullable|string',
+            'sapeurs.*.localite' => 'required|string',
+            'sapeurs.*.adresse' => 'required|string',
+            'sapeurs.*.fonction' => 'nullable|string',
+            'sapeurs.*.date_naissance' => 'required|date',
+            'sapeurs.*.groupes' => 'required|array|min:1',
+            'sapeurs.*.groupes.*.no' => 'required|integer',
+            'sapeurs.*.groupes.*.designation' => 'required|string',
+            'sapeurs.*.numeros' => 'required|array|min:1',
+            'sapeurs.*.numeros.*' => 'required|string',
         ]);
 
-        $username = $data['username'];
-        $password = $data['password'];
-        $communication = $data['communication'];
         $sis = $data['sis'];
 
         return response()->json([
-            "data" => $this->service->setReference($data, $username, $password, $communication, $sis)
+            "data" => $this->service->setReference($data, $sis)
         ]);
     }
 }

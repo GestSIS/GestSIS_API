@@ -62,126 +62,27 @@ class RtaService
         return [];
     }
 
-    public function setReference($data, $username, $password, $communication, $sis)
+    public function setReference($data, $sis)
     {
-        $date = Carbon::now();
-        if (is_null($communication) || $communication == '') {
-            $communication = '-';
-        }
-
-        $ajoutes = array_key_exists('ajoutes', $data) ? $data['ajoutes'] : [];
-        $modifies = array_key_exists('modifies', $data) ? $data['modifies'] : [];
-        $supprimes = array_key_exists('supprimes', $data) ? $data['supprimes'] : [];
-
-        // Controle que les sapeurs ne soient pas déjà présent
-        $ajoutesId = array_map(function ($sapeur) {
-            return $sapeur['sapeur_id'];
-        }, $ajoutes);
-        if (ReferenceRta::whereIn('sapeur_id', $ajoutesId)->count() > 0) {
-            throw new ArrayException(['ajoutes' => 'Sapeur déjà présent'], 'Ajout d\'un sapeur déjà présent dans la référence RTA');
-        }
-
-        // Preparation des données pour fichier xml
-        $ajoutes = array_map(function ($sapeur) {
-            $sapeur['type'] = 1;
-            $sapeur['fonction'] = array_key_exists('fonction', $sapeur) ? $sapeur['fonction'] : '';
-            return $sapeur;
-        }, $ajoutes);
-        $modifies = array_map(function ($sapeur) {
-            $sapeur['type'] = 2;
-            $sapeur['fonction'] = array_key_exists('fonction', $sapeur) ? $sapeur['fonction'] : '';
-            return $sapeur;
-        }, $modifies);
-        $supprimes = array_map(function ($sapeur) {
-            $sapeur['type'] = 3;
-            $sapeur['groupes'] = [];
-            $sapeur['numeros'] = [];
-            $sapeur['fonction'] = array_key_exists('fonction', $sapeur) ? $sapeur['fonction'] : '';
-            return $sapeur;
-        }, $supprimes);
-
-        $sapeurs = [
-            ...$ajoutes,
-            ...$modifies,
-            ...$supprimes
-        ];
-        usort($sapeurs, fn($a, $b) => strcmp($a['nom'] . $a['prenom'], $b['nom'] . $b['prenom']));
+        $sapeurs = array_key_exists('sapeurs', $data) ? $data['sapeurs'] : [];
 
         if (count($sapeurs) <= 0) {
             throw new ArrayException(['sapeurs' => 'Aucun sapeur'], "Aucun sapeur présent dans la communication rta");
         }
 
-        // Génération du fichier xml pour RTA
-        $xml = view('xml.rta', [
-            'sis' => $sis,
-            'date' => $date,
-            'communication' => $communication,
-            'sapeurs' => $sapeurs,
-        ])->render();
-
-        $url = config("rta.api_url") . "/gestionRtaJura/interfaceXML/transfert.php";
+        $url = config("rta.api_url") . "/api/v2/demandes";
 
         // Envoie de la requête
-        $response = Http::attach(
-            'fichier',
-            $xml,
-            'GestSIS-2.0-RTA-' . $sis . '-' . $date->format('d-m-Y_H-i') . '.xml'
-        )
-            ->withBasicAuth($username, $password)
-            ->post($url);
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . config('rta.api_token'),
+        ])
+            ->post($url, $data);
 
+        // TODO: Just check return code
         if (!str_contains($response->body(), '[TRS]OK')) {
             throw new ArrayException(["username" => "A vérifier", "password" => "A vérifier", "api_res" => $response->body()], "Identifiants incorrects");
         }
 
-        // Suppression, modification et ajout des sapeurs
-        $supprimesId = array_map(function ($sapeur) {
-            return $sapeur['sapeur_id'];
-        }, $supprimes);
-        ReferenceRta::whereIn('sapeur_id', $supprimesId)->delete();
-
-        $ajoutes = array_map(function ($sapeur) {
-            $data = json_encode([
-                'nom' => $sapeur['nom'],
-                'prenom' => $sapeur['prenom'],
-                'suffixe' => $sapeur['suffixe'],
-                'localite' => $sapeur['localite'],
-                'adresse' => $sapeur['adresse'],
-                'fonction' => $sapeur['fonction'],
-                'date_naissance' => $sapeur['date_naissance'],
-                'groupes' => $sapeur['groupes'],
-                'numeros' => $sapeur['numeros'],
-            ]);
-            return [
-                'sapeur_id' => $sapeur['sapeur_id'],
-                'data' => $data,
-            ];
-        }, $ajoutes);
-        ReferenceRta::insert($ajoutes);
-
-        $modifies = array_map(function ($sapeur) {
-            $data = json_encode([
-                'nom' => $sapeur['nom'],
-                'prenom' => $sapeur['prenom'],
-                'suffixe' => $sapeur['suffixe'],
-                'localite' => $sapeur['localite'],
-                'adresse' => $sapeur['adresse'],
-                'fonction' => $sapeur['fonction'],
-                'date_naissance' => $sapeur['date_naissance'],
-                'groupes' => $sapeur['groupes'],
-                'numeros' => $sapeur['numeros'],
-            ]);
-            return [
-                'sapeur_id' => $sapeur['sapeur_id'],
-                'data' => $data,
-            ];
-        }, $modifies);
-
-        foreach ($modifies as $sapeur) {
-            ReferenceRta::where('sapeur_id', $sapeur['sapeur_id'])->update($sapeur);
-        }
-
-        // Retourne la nouvelle référence
         return $this->getReferenceRta();
     }
 }
