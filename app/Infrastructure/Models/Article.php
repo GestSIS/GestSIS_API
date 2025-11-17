@@ -27,6 +27,7 @@ class Article extends Model
         'designation',
         'immatriculation',
         'chassis',
+        'statut'
     ];
 
     protected function casts(): array
@@ -39,6 +40,7 @@ class Article extends Model
             'retour' => 'date',
             'est_etiquete' => 'boolean',
             'est_unique' => 'boolean',
+            'statut' => 'boolean',
         ];
     }
 

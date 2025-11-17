@@ -170,6 +170,7 @@ class ArticleBusiness
         'chassis' => $article['chassis'] ?? '',
         'designation' => $article['designation'] ?? '',
         'immatriculation' => $article['immatriculation'] ?? '',
+        'statut' => $article['statut'] ?? true,
       ];
     }, $articles);
 

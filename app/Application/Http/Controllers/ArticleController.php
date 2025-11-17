@@ -76,6 +76,7 @@ class ArticleController extends Controller
             'articles.*.chassis' => 'string|nullable',
             'articles.*.designation' => 'string|nullable',
             'articles.*.immatriculation' => 'string|nullable',
+            'articles.*.statut' => 'boolean|nullable',
         ]);
 
         $articles = ArticleBusiness::editArticles($data['articles']);
