@@ -404,15 +404,13 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenRole:rta.lecture'], function () {
         Route::get('rta-gestsis', [ReferenceRtaController::class, 'getReferenceGestSis'])->name('api.v2.rta.get-gestsis');
         Route::get('rta', [ReferenceRtaController::class, 'getReferenceRta'])->name('api.v2.rta.get-rta');
-
-        Route::get('sapeurs-telephones', [SapeurController::class, 'sapeursTelephones'])->name('sapeurs-telephones');
     });
     Route::group(['middleware' => 'jwtTokenRole:rta.modification'], function () {
         Route::post('rta', [ReferenceRtaController::class, 'setReference'])->name('api.v2.rta.set');
         Route::delete('rta', [ReferenceRtaController::class, 'resetReferenceRta'])->name('api.v2.rta.reset-rta');
     });
     Route::group(['middleware' => 'jwtTokenRole:rta.config'], function () {
-        Route::resource('rta/param', RtaParamController::class)->only(['index', 'store']);
+        Route::resource('rta-param', RtaParamController::class)->only(['index', 'store']);
     });
 
     // Interventions
