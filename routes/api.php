@@ -22,6 +22,7 @@ use App\Application\Http\Controllers\CouleurController;
 use App\Application\Http\Controllers\EmplacementController;
 use App\Application\Http\Controllers\LavageController;
 use App\Application\Http\Controllers\MaterielTypeArticleController;
+use App\Application\Http\Controllers\RtaParamController;
 use App\Application\Http\Controllers\TuyauDiametreController;
 use Illuminate\Support\Facades\Route;
 use Spatie\HttpLogger\Middlewares\HttpLogger;
@@ -306,11 +307,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenRole:organisation.modification'], function () {
         Route::resource('groupes', GroupeController::class)->only(['store', 'update', 'destroy']);
         Route::resource('groupes.sapeurs', GroupeSapeursController::class)->only(['store']);
-
-        Route::get('rta-gestsis', [ReferenceRtaController::class, 'getReferenceGestSis'])->name('api.v2.rta.get-gestsis');
-        Route::get('rta', [ReferenceRtaController::class, 'getReferenceRta'])->name('api.v2.rta.get-rta');
-        Route::post('rta', [ReferenceRtaController::class, 'setReference'])->name('api.v2.rta.set');
-        Route::delete('rta', [ReferenceRtaController::class, 'resetReferenceRta'])->name('api.v2.rta.reset-rta');
     });
 
     // Exercices
@@ -399,10 +395,24 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenRole:sms.config'], function () {
         Route::resource('aspsms/param', AspsmsParamController::class)->only(['index', 'store']);
     });
-
     Route::group(['middleware' => 'jwtTokenRole:sms.envoie'], function () {
         Route::resource('sms', SmsController::class)->only('index');
         Route::resource('exercices.sms', ExerciceSmsController::class)->only('index');
+    });
+
+    // RTA
+    Route::group(['middleware' => 'jwtTokenRole:rta.lecture'], function () {
+        Route::get('rta-gestsis', [ReferenceRtaController::class, 'getReferenceGestSis'])->name('api.v2.rta.get-gestsis');
+        Route::get('rta', [ReferenceRtaController::class, 'getReferenceRta'])->name('api.v2.rta.get-rta');
+
+        Route::get('sapeurs-telephones', [SapeurController::class, 'sapeursTelephones'])->name('sapeurs-telephones');
+    });
+    Route::group(['middleware' => 'jwtTokenRole:rta.modification'], function () {
+        Route::post('rta', [ReferenceRtaController::class, 'setReference'])->name('api.v2.rta.set');
+        Route::delete('rta', [ReferenceRtaController::class, 'resetReferenceRta'])->name('api.v2.rta.reset-rta');
+    });
+    Route::group(['middleware' => 'jwtTokenRole:rta.config'], function () {
+        Route::resource('rta/param', RtaParamController::class)->only(['index', 'store']);
     });
 
     // Interventions
