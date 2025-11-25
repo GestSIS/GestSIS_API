@@ -64,7 +64,6 @@ class ReferenceRtaController extends Controller
             'sapeurs.*.date_naissance' => 'required|date',
             'sapeurs.*.groupes' => 'required|array|min:1',
             'sapeurs.*.groupes.*.no' => 'required|integer',
-            'sapeurs.*.groupes.*.designation' => 'required|string',
             'sapeurs.*.numeros' => 'required|array|min:1',
             'sapeurs.*.numeros.*' => 'required|string',
         ]);
@@ -72,7 +71,7 @@ class ReferenceRtaController extends Controller
         $sis = $data['sis'];
 
         return response()->json([
-            "data" => $this->service->setReference($data, $sis)
+            "data" => $this->service->setReference($data['sapeurs'], $sis)
         ]);
     }
 }
