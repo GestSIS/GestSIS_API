@@ -49,6 +49,15 @@ class RtaService
 
     public function getReferenceRta()
     {
+        $data = ReferenceRta::all()->toArray();
+        return array_map(function ($s) {
+            $data = json_decode($s['data'], true);
+            unset($s['data']);
+            $s = $s + $data;
+            return $s;
+        }, $data);
+
+        // TODO: Temp migration for RTA
         $params = RtaParam::first();
         if (!$params) {
             throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
