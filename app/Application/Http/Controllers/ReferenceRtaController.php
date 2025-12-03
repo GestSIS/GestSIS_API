@@ -65,8 +65,8 @@ class ReferenceRtaController extends Controller
             'sapeurs.*.groupes' => 'required|array|min:1',
             'sapeurs.*.groupes.*.no' => 'required|integer',
             'sapeurs.*.numeros' => 'required|array|min:1',
-            'sapeurs.*.numeros.*.numero' => 'required|string',
-            'sapeurs.*.numeros.*.type' => 'required|integer',
+            'sapeurs.*.numeros.*.numero' => 'required|string|max:20',
+            'sapeurs.*.numeros.*.type' => 'required|in:Privé,Prof,Mobile',
             'sapeurs.*.numeros.*.tri' => 'required|integer',
         ]);
 
