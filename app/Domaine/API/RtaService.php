@@ -133,14 +133,9 @@ class RtaService
                 'localite' => $sapeur['localite'],
                 'fonction' => $sapeur['fonction'] ?? "",
                 'groupes' => array_map(fn($groupe) => ['numero' => strval($groupe['no'])], $sapeur['groupes']),
-                'moyens_contact' => array_map(fn($t) => [
-                    'numero' => $t['numero'],
-                    'type' => $t['telephone_type_id'] === 1 ? 'Privé' : ($t['telephone_type_id'] === 2 ? 'Prof' : 'Mobile'),
-                    'tri' => $t['priorite'],
-                ], $sapeur['numeros']),
+                'moyens_contact' => $sapeur['numeros'],
             ];
         }, $sapeurs);
-        // dd($data);
 
         try {
             $response = Http::withHeaders([
@@ -153,12 +148,10 @@ class RtaService
                     'message' => 'Mise à jour de la référence RTA depuis GestSIS',
                 ]);
         } catch (\Exception $e) {
-            dd($e);
             throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
         }
 
         if ($response->failed()) {
-            return $response->body();
             throw new ArrayException(["api_res" => $response->body()], "Erreur lors de l'envoi RTA");
         }
 
