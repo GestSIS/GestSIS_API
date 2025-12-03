@@ -49,15 +49,15 @@ class RtaService
 
     public function getReferenceRta()
     {
-        $data = ReferenceRta::all()->toArray();
-        return array_map(function ($s) {
-            $data = json_decode($s['data'], true);
-            unset($s['data']);
-            $s = $s + $data;
-            return $s;
-        }, $data);
+        // FIXME: Temp migration for RTA
+        // $data = ReferenceRta::all()->toArray();
+        // return array_map(function ($s) {
+        //     $data = json_decode($s['data'], true);
+        //     unset($s['data']);
+        //     $s = $s + $data;
+        //     return $s;
+        // }, $data);
 
-        // TODO: Temp migration for RTA
         $params = RtaParam::first();
         if (!$params) {
             throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
@@ -100,7 +100,7 @@ class RtaService
             ...$s,
             "sapeur_id" => intval($s['uuid']),
             "groupes" => array_map(fn($g) => ["no" => $g['numero']], $s['groupes']),
-            "numeros" => array_map(fn($t) => $t['numero'], $s['moyens_contact']),
+            "numeros" => $s['moyens_contact'],
         ], $response->json('data.sapeurs'));
     }
 
@@ -132,14 +132,15 @@ class RtaService
                 'suffixe' => $sapeur['suffixe'] ?? "",
                 'localite' => $sapeur['localite'],
                 'fonction' => $sapeur['fonction'] ?? "",
-                'groupes' => array_map(fn($groupe) => ['numero' => $groupe['no']], $sapeur['groupes']),
-                'moyens_contact' => array_map(
-                    fn($tel, $index) => ['numero' => $tel, 'type' => 'Mobile', 'tri' => $index + 1],
-                    $sapeur['numeros'],
-                    array_keys($sapeur['numeros'])
-                ),
+                'groupes' => array_map(fn($groupe) => ['numero' => strval($groupe['no'])], $sapeur['groupes']),
+                'moyens_contact' => array_map(fn($t) => [
+                    'numero' => $t['numero'],
+                    'type' => $t['telephone_type_id'] === 1 ? 'Privé' : ($t['telephone_type_id'] === 2 ? 'Prof' : 'Mobile'),
+                    'tri' => $t['priorite'],
+                ], $sapeur['numeros']),
             ];
         }, $sapeurs);
+        // dd($data);
 
         try {
             $response = Http::withHeaders([
@@ -152,10 +153,12 @@ class RtaService
                     'message' => 'Mise à jour de la référence RTA depuis GestSIS',
                 ]);
         } catch (\Exception $e) {
+            dd($e);
             throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
         }
 
         if ($response->failed()) {
+            return $response->body();
             throw new ArrayException(["api_res" => $response->body()], "Erreur lors de l'envoi RTA");
         }
 

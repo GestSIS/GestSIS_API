@@ -65,7 +65,9 @@ class ReferenceRtaController extends Controller
             'sapeurs.*.groupes' => 'required|array|min:1',
             'sapeurs.*.groupes.*.no' => 'required|integer',
             'sapeurs.*.numeros' => 'required|array|min:1',
-            'sapeurs.*.numeros.*' => 'required|string',
+            'sapeurs.*.numeros.*.numero' => 'required|string',
+            'sapeurs.*.numeros.*.telephone_type_id' => 'required|integer',
+            'sapeurs.*.numeros.*.priorite' => 'required|integer',
         ]);
 
         $sis = $data['sis'];

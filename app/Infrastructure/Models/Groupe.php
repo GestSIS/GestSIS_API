@@ -9,14 +9,13 @@ class Groupe extends Model
     protected $fillable = ['type', 'no', 'designation', 'tri', 'parent_id'];
     protected function casts(): array
     {
-        return  [
+        return [
             'no' => 'integer',
             'tri' => 'integer',
             'parent_id' => 'integer',
             'type' => 'integer'
         ];
     }
-
 
     /**
      * The sapeur that belong to the sapeur.
