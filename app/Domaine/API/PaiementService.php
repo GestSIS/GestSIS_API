@@ -227,7 +227,7 @@ class PaiementService
             ->orderBy('ecritures.heure')
             ->get();
 
-        return self::printDecompteSapeur($decompteId, $ecritures, $sisKey);
+        return self::printDecompteSapeur($decompteId, $ecritures, $sisKey, false);
     }
 
     public static function impressionDecompteParSapeur($decompteId, string $sisKey)
@@ -255,34 +255,34 @@ class PaiementService
             ->orderBy('ecritures.heure')
             ->get();
 
-        return self::printDecompteSapeur($decompteId, $ecritures, $sisKey);
+        return self::printDecompteSapeur($decompteId, $ecritures, $sisKey, true);
     }
 
     public static function impressionResumePourSapeur(int $exerciceComptableId, int $sapeurId, string $sisKey)
     {
         // Pour le moment que les écritures du décompte !
         $ecritures = DB::table('ecritures')
-        ->join('sapeurs', 'ecritures.sapeur_id', '=', 'sapeurs.id')
-        ->join('ecriture_categories', 'ecritures.ecriture_categorie_id', '=', 'ecriture_categories.id')
-        ->join('type_unites', 'ecritures.type_unite_id', '=', 'type_unites.id')
-        ->join('civilites', 'sapeurs.civilite_id', '=', 'civilites.id')
-        ->join('decomptes', 'ecritures.decompte_id', '=', 'decomptes.id')
-        ->where('decomptes.exercice_comptable_id', '=', $exerciceComptableId)
-        ->where('sapeurs.id', '=', $sapeurId)
-        ->select(
-            'ecritures.*',
-            DB::raw('CONCAT(sapeurs.nom, " ", sapeurs.prenom) as sapeur'),
-            'sapeurs.iban',
-            'ecriture_categories.tri',
-            'ecriture_categories.designation AS categorie',
-            'type_unites.abreviation as unite',
-            'civilites.forme_politesse as civilite'
-        )
-        ->orderBy('ecriture_categories.tri', 'ASC')
-        ->orderBy('ecritures.module', 'ASC')
-        ->orderBy('ecritures.date')
-        ->orderBy('ecritures.heure')
-        ->get();
+            ->join('sapeurs', 'ecritures.sapeur_id', '=', 'sapeurs.id')
+            ->join('ecriture_categories', 'ecritures.ecriture_categorie_id', '=', 'ecriture_categories.id')
+            ->join('type_unites', 'ecritures.type_unite_id', '=', 'type_unites.id')
+            ->join('civilites', 'sapeurs.civilite_id', '=', 'civilites.id')
+            ->join('decomptes', 'ecritures.decompte_id', '=', 'decomptes.id')
+            ->where('decomptes.exercice_comptable_id', '=', $exerciceComptableId)
+            ->where('sapeurs.id', '=', $sapeurId)
+            ->select(
+                'ecritures.*',
+                DB::raw('CONCAT(sapeurs.nom, " ", sapeurs.prenom) as sapeur'),
+                'sapeurs.iban',
+                'ecriture_categories.tri',
+                'ecriture_categories.designation AS categorie',
+                'type_unites.abreviation as unite',
+                'civilites.forme_politesse as civilite'
+            )
+            ->orderBy('ecriture_categories.tri', 'ASC')
+            ->orderBy('ecritures.module', 'ASC')
+            ->orderBy('ecritures.date')
+            ->orderBy('ecritures.heure')
+            ->get();
 
         return self::printResumeSapeur($exerciceComptableId, $ecritures, $sisKey);
     }
@@ -350,7 +350,7 @@ class PaiementService
         );
     }
 
-    private static function printDecompteSapeur($decompteId, $ecritures, string $sisKey)
+    private static function printDecompteSapeur($decompteId, $ecritures, string $sisKey, bool $resume = false)
     {
         $decompte = Decompte::with('paiements')->find($decompteId);
         $decomptes = Decompte::where('exercice_comptable_id', $decompte->exercice_comptable_id)->get();
@@ -374,7 +374,7 @@ class PaiementService
         $logoPath = (new SisParamBusiness())->getLogo($sisKey);
         $content = TypstToPdfGenerator::generateDocument(
             TypstTemplate::DecompteParSapeur,
-            ["decompte" => $decompte, "decomptes" => $decomptesMap, "sapeurs" => $sapeursMap, "ecritures" => $ecritures, "comptes" => $comptesMap],
+            ["decompte" => $decompte, "decomptes" => $decomptesMap, "sapeurs" => $sapeursMap, "ecritures" => $ecritures, "comptes" => $comptesMap, 'resume' => $resume],
             $logoPath
         );
         return response()->streamDownload(
