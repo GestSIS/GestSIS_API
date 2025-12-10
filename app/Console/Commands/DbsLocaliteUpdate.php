@@ -1,20 +1,44 @@
 <?php
 
-namespace Database\Seeders;
+namespace App\Console\Commands;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Infrastructure\Models\Localite;
+use Illuminate\Console\Command;
 
-class LocalitesTableSeeder extends Seeder
+class DbsLocaliteUpdate extends Command
 {
     /**
-     * Run the database seeds.
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'dbs:sync:localites';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Command description';
+
+    /**
+     * Create a new command instance.
      *
      * @return void
      */
-    public function run(): void
+    public function __construct()
     {
-        DB::table('localites')->insert([
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return int
+     */
+    public function handle()
+    {
+        $localites = [
             ['id' => '1', 'commune_id' => '22', 'npa' => '2942', 'designation' => 'Alle'],
             ['id' => '2', 'commune_id' => '66', 'npa' => '2954', 'designation' => 'Asuel'],
             ['id' => '3', 'commune_id' => '65', 'npa' => '2854', 'designation' => 'Bassecourt'],
@@ -167,6 +191,25 @@ class LocalitesTableSeeder extends Seeder
             ['id' => '150', 'commune_id' => NULL, 'npa' => '2827', 'designation' => 'La Scheulte'],
             ['id' => '151', 'commune_id' => NULL, 'npa' => '1642', 'designation' => 'Sorens FR'],
             ['id' => '152', 'commune_id' => NULL, 'npa' => '1473', 'designation' => 'Châtillon FR'],
-        ]);
+        ];
+        $dbs = config('database.dbs');
+        foreach ($dbs as $db) {
+            printf("Fix db=db_" . $db . "\n");
+
+            foreach ($localites as $localite) {
+                Localite::on("db_" . $db)->updateOrCreate(
+                    ['id' => $localite['id']],
+                    [
+                        'commune_id' => $localite['commune_id'],
+                        'npa' => $localite['npa'],
+                        'designation' => $localite['designation'],
+                    ]
+                );
+            }
+
+            printf("\n");
+        }
+        printf("Migrating done\n");
+        return 0;
     }
 }

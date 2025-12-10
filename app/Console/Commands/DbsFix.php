@@ -55,29 +55,29 @@ class DbsFix extends Command
         foreach ($dbs as $db) {
             printf("Fix db=db_" . $db . "\n");
 
-            $typesIds = MaterielEventType::on("db_" . $db)->find(1)?->materielTypeIds() ?? [];//->materielTypeIds;
-            MaterielType::on("db_" . $db)->whereIn('id', $typesIds)->update(['est_lavable' => True, 'est_numerote' => True]);
+            // $typesIds = MaterielEventType::on("db_" . $db)->find(1)?->materielTypeIds() ?? [];//->materielTypeIds;
+            // MaterielType::on("db_" . $db)->whereIn('id', $typesIds)->update(['est_lavable' => True, 'est_numerote' => True]);
 
-            // Attribut est_taillee
-            MaterielType::on("db_" . $db)
-                ->whereIn(
-                    'id',
-                    Article::on("db_" . $db)->where('taille', '!=', "")
-                        ->where("taille", "!=", "-")
-                        ->distinct('materiel_type_id')
-                        ->pluck('materiel_type_id')
-                )->update(['est_taillee' => True]);
+            // // Attribut est_taillee
+            // MaterielType::on("db_" . $db)
+            //     ->whereIn(
+            //         'id',
+            //         Article::on("db_" . $db)->where('taille', '!=', "")
+            //             ->where("taille", "!=", "-")
+            //             ->distinct('materiel_type_id')
+            //             ->pluck('materiel_type_id')
+            //     )->update(['est_taillee' => True]);
 
 
-            // Attribut est_numerotee
-            MaterielType::on("db_" . $db)
-                ->whereIn(
-                    'id',
-                    Article::on("db_" . $db)->where('numero', '!=', "")
-                        ->where("numero", "!=", "-")
-                        ->distinct('materiel_type_id')
-                        ->pluck('materiel_type_id')
-                )->update(['est_numerote' => True]);
+            // // Attribut est_numerotee
+            // MaterielType::on("db_" . $db)
+            //     ->whereIn(
+            //         'id',
+            //         Article::on("db_" . $db)->where('numero', '!=', "")
+            //             ->where("numero", "!=", "-")
+            //             ->distinct('materiel_type_id')
+            //             ->pluck('materiel_type_id')
+            //     )->update(['est_numerote' => True]);
 
             // ConvocationParam::on("db_" . $db)->insert([
             //     'titre' => 'convocation',

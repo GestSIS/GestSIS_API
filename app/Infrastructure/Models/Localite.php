@@ -6,9 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Localite extends Model
 {
+    protected $fillable = [
+        'commune_id',
+        'npa',
+        'designation',
+    ];
+
     protected function casts(): array
     {
-        return  [
+        return [
             'commune_id' => 'integer'
         ];
     }
