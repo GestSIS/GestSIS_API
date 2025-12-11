@@ -96,7 +96,7 @@ class DbsLocaliteUpdate extends Command
             ['id' => '55', 'commune_id' => '41', 'npa' => '2345', 'designation' => 'Les Breuleux'],
             ['id' => '56', 'commune_id' => '42', 'npa' => '2338', 'designation' => 'Les Emibois'],
             ['id' => '57', 'commune_id' => '74', 'npa' => '2363', 'designation' => 'Les Enfers'],
-            ['id' => '58', 'commune_id' => '71', 'npa' => '2714', 'designation' => 'Les Genevez JU'],
+            ['id' => '58', 'commune_id' => '71', 'npa' => '2714', 'designation' => 'Les Genevez'],
             ['id' => '59', 'commune_id' => '40', 'npa' => '2353', 'designation' => 'Les Pommerats'],
             ['id' => '60', 'commune_id' => '15', 'npa' => '2807', 'designation' => 'Lucelle'],
             ['id' => '61', 'commune_id' => '26', 'npa' => '2933', 'designation' => 'Lugnez'],

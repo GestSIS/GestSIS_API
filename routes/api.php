@@ -435,8 +435,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('statistiques/{id}/intervention-traitement', [InterventionStatistiqueController::class, 'traitement']);
     });
     Route::group(['middleware' => 'jwtTokenRole:intervention.modification'], function () {
-        Route::resource('alarmes', AlarmeController::class)->only(['index']);
-
         Route::resource('interventions', InterventionController::class)->only(['store', 'update', 'destroy']);
         Route::post('interventions-complet', [InterventionController::class, 'complet'])->name('complet');
 
@@ -483,6 +481,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('statistiques/{id}/presence-intervention', [InterventionSapeursController::class, 'stat']);
     });
     Route::group(['middleware' => 'jwtTokenRole:intervention.lecture'], function () {
+        Route::resource('alarmes', AlarmeController::class)->only(['index']);
+
         Route::resource('vehicules', VehiculeController::class)->only(['index']);
         Route::resource('materiels', MaterielController::class)->only(['index']);
         Route::resource('mission-types', MissionTypeController::class)->only(['index']);
