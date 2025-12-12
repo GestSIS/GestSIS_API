@@ -63,7 +63,7 @@ class ReferenceRtaController extends Controller
             'sapeurs.*.fonction' => 'nullable|string',
             'sapeurs.*.date_naissance' => 'required|date',
             'sapeurs.*.groupes' => 'required|array|min:1',
-            'sapeurs.*.groupes.*.no' => 'required|integer',
+            'sapeurs.*.groupes.*.no' => 'required|string',
             'sapeurs.*.numeros' => 'required|array|min:1',
             'sapeurs.*.numeros.*.numero' => 'required|string|max:20',
             'sapeurs.*.numeros.*.type' => 'required|in:Privé,Prof,Mobile',
