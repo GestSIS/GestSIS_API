@@ -10,7 +10,6 @@ class Groupe extends Model
     protected function casts(): array
     {
         return [
-            'no' => 'integer',
             'tri' => 'integer',
             'parent_id' => 'integer',
             'type' => 'integer'

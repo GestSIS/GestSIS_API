@@ -30,7 +30,7 @@ class GroupeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
-            'no' => 'integer|nullable',
+            'no' => 'string|nullable',
             'parent_id' => 'integer|nullable',
             'tri' => 'integer',
             'type' => 'integer',
@@ -44,7 +44,7 @@ class GroupeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
-            'no' => 'integer|nullable',
+            'no' => 'string|nullable',
             'parent_id' => 'integer|nullable',
             'tri' => 'integer',
             'type' => 'integer',
@@ -56,7 +56,7 @@ class GroupeController extends Controller
 
     public function destroy($id)
     {
-        $groupe = $this->service->supprimerGroupe($id);
-        return response()->json(['data' => $groupe]);
+        $this->service->supprimerGroupe($id);
+        return response()->json(['data' => 'ok']);
     }
 }
