@@ -21,7 +21,7 @@
   it
 }
 
-#let (decompte, comptes, decomptes, sapeurs, ecritures) = json("decompte-par-sapeur.json")
+#let (decompte, comptes, decomptes, sapeurs, ecritures, resume) = json("decompte-par-sapeur.json")
 
 #let formatTarif(ecriture) = {
   let tarifMin = if ecriture.tarif_min == none [] else [#ecriture.tarif_min CHF/#ecriture.tarif_min_pour h puis ]
@@ -116,7 +116,7 @@
   }
 
   [=== Résumé]
-  let total = ecrituresParSapeur.map(e => decimal(e.total)).sum()
+  let total = calculateSubTotal(ecrituresParSapeur)
   let paiement = decompte.paiements.find(p => str(p.sapeur_id) == sapeurId)
   let dejaSolde = total - decimal(paiement.total)
   table(
