@@ -21,7 +21,7 @@
   it
 }
 
-#let (decompte, decomptes, sapeurs, ecritures, resume) = json("decompte-par-sapeur.json")
+#let (decompte, comptes, decomptes, sapeurs, ecritures) = json("decompte-par-sapeur.json")
 
 #let formatTarif(ecriture) = {
   let tarifMin = if ecriture.tarif_min == none [] else [#ecriture.tarif_min CHF/#ecriture.tarif_min_pour h puis ]
@@ -29,6 +29,19 @@
     ecriture.taux == none
   ) [] else [\* #str(decimal(ecriture.taux) * 100)% \(taux #ecriture.taux_description\)]
   return [#tarifMin #ecriture.tarif CHF/#ecriture.unite #tauxSpecial]
+}
+
+#let formatTotal(ecriture) = {
+  let compte = comptes.at(str(ecriture.compte_id))
+  return if compte.produit == 1 [-#ecriture.total] else [#ecriture.total]
+}
+
+#let calculateSubTotal(ecritures) = {
+  return ecritures
+    .map(
+      e => if comptes.at(str(e.compte_id)).produit == 1 { -decimal(e.total) } else { decimal(e.total) },
+    )
+    .sum()
 }
 
 #show table.cell.where(y: 0): strong
@@ -90,14 +103,14 @@
             formatTarif(ecriture),
             ecriture.quantite,
             formatDate(decomptes.at(str(ecriture.decompte_id)).date),
-            ecriture.total,
+            formatTotal(ecriture),
           )
         })
         .flatten(),
       table.footer(
         repeat: false,
         table.cell(colspan: 6, align: end, fill: none, [*Sous-total*]),
-        table.cell(fill: none, [*#subEcritures.map(e => decimal(e.total)).sum()*]),
+        table.cell(fill: none, [*#calculateSubTotal(subEcritures)*]),
       ),
     )
   }
