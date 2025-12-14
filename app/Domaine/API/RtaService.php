@@ -152,7 +152,7 @@ class RtaService
         }
 
         if ($response->failed()) {
-            throw new ArrayException(["api_res" => $response->body()], "Erreur lors de l'envoi RTA");
+            throw new ArrayException([], $response->json()?->erreur ?? "Erreur lors de l'envoi RTA");
         }
 
         return $this->getReferenceRta();
