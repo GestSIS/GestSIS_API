@@ -62,7 +62,7 @@ class LocalitesTableSeeder extends Seeder
             ['id' => '45', 'commune_id' => '40', 'npa' => '2354', 'designation' => 'Goumois'],
             ['id' => '46', 'commune_id' => '77', 'npa' => '2908', 'designation' => 'Grandfontaine'],
             ['id' => '47', 'commune_id' => '70', 'npa' => '2718', 'designation' => 'Lajoux'],
-            ['id' => '48', 'commune_id' => '37', 'npa' => '2360', 'designation' => 'Le Bémont JU'],
+            ['id' => '48', 'commune_id' => '37', 'npa' => '2360', 'designation' => 'Le Bémont'],
             ['id' => '49', 'commune_id' => '39', 'npa' => '2336', 'designation' => 'Le Boéchet'],
             ['id' => '50', 'commune_id' => '42', 'npa' => '2345', 'designation' => 'Le Cerneux-Veusil'],
             ['id' => '51', 'commune_id' => '38', 'npa' => '2340', 'designation' => 'Le Noirmont'],

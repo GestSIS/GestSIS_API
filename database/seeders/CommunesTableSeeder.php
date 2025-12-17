@@ -45,7 +45,7 @@ class CommunesTableSeeder extends Seeder
             ['id' => '34', 'designation' => 'Fontaines NE'],
             ['id' => '35', 'designation' => 'Chézard-St-Martin'],
             ['id' => '36', 'designation' => 'La Chaux-des-Breuleux'],
-            ['id' => '37', 'designation' => 'Le Bémont JU'],
+            ['id' => '37', 'designation' => 'Le Bémont'],
             ['id' => '38', 'designation' => 'Le Noirmont'],
             ['id' => '39', 'designation' => 'Les Bois'],
             ['id' => '40', 'designation' => 'Saignelégier'],
