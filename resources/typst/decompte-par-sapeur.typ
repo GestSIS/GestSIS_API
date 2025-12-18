@@ -116,9 +116,9 @@
   }
 
   [=== Résumé]
-  let total = calculateSubTotal(ecrituresParSapeur)
   let paiement = decompte.paiements.find(p => str(p.sapeur_id) == sapeurId)
-  let dejaSolde = total - decimal(paiement.total)
+  let total = calculateSubTotal(ecrituresParSapeur) + decimal(paiement.avs_ac)
+  let dejaSolde = total - decimal(paiement.total) - decimal(paiement.avs_ac)
   table(
     stroke: none,
     align: (start, end),
