@@ -7,6 +7,7 @@ use App\Domaine\SPI\ExerciceRepository;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\HeureExercice;
+use App\Infrastructure\Models\Sms;
 use Illuminate\Support\Facades\DB;
 use StdClass;
 
@@ -57,8 +58,8 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
 
         $exercices = Exercice::where('exercice_comptable_id', '=', $exerciceComptableId)
             ->whereIn('id', array_merge(
-                array_map(fn ($h) => $h['exercice_id'], $heures),
-                array_map(fn ($h) => $h['exercice_id'], $sapeurs),
+                array_map(fn($h) => $h['exercice_id'], $heures),
+                array_map(fn($h) => $h['exercice_id'], $sapeurs),
             ))->get()->toArray();
 
         $dictionary = [];
@@ -88,9 +89,10 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
 
     public function deleteExerciceById($exerciceId)
     {
-        ExerciceSapeur::where('exercice_id', $exerciceId)->delete();
-        HeureExercice::where('exercice_id', $exerciceId)->delete();
-        Exercice::where('id', $exerciceId)->delete();
+        ExerciceSapeur::where('exercice_id', '=', $exerciceId)->delete();
+        HeureExercice::where('exercice_id', '=', $exerciceId)->delete();
+        Sms::where('exercice_id', '=', $exerciceId)->delete();
+        Exercice::where('id', '=', $exerciceId)->delete();
     }
 
     /**
@@ -218,7 +220,8 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
      */
     protected function convertExercice($exercice, $with = [])
     {
-        if ($exercice == null) return null;
+        if ($exercice == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $exercice->id;
@@ -252,7 +255,8 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
     //TODO Externalise this code else-where
     protected function convertLocalite($localite)
     {
-        if ($localite == null) return null;
+        if ($localite == null)
+            return null;
 
         $object = new StdClass();
         $object->id = intval($localite->id);
@@ -269,7 +273,8 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
      */
     protected function convertSapeur($sapeur)
     {
-        if ($sapeur == null) return null;
+        if ($sapeur == null)
+            return null;
 
         $object = new StdClass();
         $object->id = intval($sapeur->id);
@@ -291,7 +296,8 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
      */
     protected function convertSapeurWithExercicesInfos($sapeur)
     {
-        if ($sapeur == null) return null;
+        if ($sapeur == null)
+            return null;
 
         $object = new StdClass();
         $object->id = intval($sapeur->id);
