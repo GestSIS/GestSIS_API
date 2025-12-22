@@ -10,7 +10,7 @@
     "require": {
         "php": "^8.3",
         "ch2877/swiss-payment": "^2.0.0",
-        "firebase/php-jwt": "^6.0",
+        "firebase/php-jwt": "^7.0",
         "guzzlehttp/guzzle": "^7.0.1",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.9",
