@@ -36,7 +36,7 @@
 
   table(
     stroke: none,
-    columns: (auto, auto, 2fr, auto, auto),
+    columns: (auto, auto, 1fr, 1fr, auto),
     table.header(
       [Date], [Heure], [Evenement], [Lieu], []
     ),
