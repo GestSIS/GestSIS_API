@@ -19,6 +19,7 @@ use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\Vehicule;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
 
 class InterventionService
 {
@@ -393,6 +394,7 @@ class InterventionService
         $withMapping = [
             'groupes' => 'groupes',
             'presences' => 'presences',
+            'presencesResume' => 'presences',
             // 'montants' => 'boolean',
             'vehicules' => 'vehicules',
             'materiel' => 'materiels',
@@ -455,7 +457,7 @@ class InterventionService
         $sapeursMap = [];
         $quittancesMap = [];
         $presences = [];
-        if (in_array('presences', $withOptions)) {
+        if (in_array('presences', $withOptions) || in_array('presencesResume', $withOptions)) {
             $sapeurs = Sapeur::get(['nom', 'prenom', 'id']);
             foreach ($sapeurs as $sapeur) {
                 $sapeursMap[$sapeur->id] = $sapeur->toArray();
