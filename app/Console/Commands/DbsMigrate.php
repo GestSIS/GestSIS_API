@@ -43,7 +43,7 @@ class DbsMigrate extends Command
             printf("DATABASE " . $db . "\n");
             printf("migrate\n");
             // Artisan::call('migrate:rollback --step=1 --database=db_' . $db);
-            Artisan::call('migrate --database=db_' . $db);
+            Artisan::call('migrate --force --no-interaction --database=db_' . $db);
             printf("\n");
         }
         printf("Migrating done\n");
