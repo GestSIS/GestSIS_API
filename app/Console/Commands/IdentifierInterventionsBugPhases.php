@@ -174,6 +174,11 @@ class IdentifierInterventionsBugPhases extends Command
                     number_format($i['ecart_total_chf'], 2)
                 ], $interventionsImpactees)
             );
+
+            // Liste compacte des IDs pour copier-coller
+            $ids = array_column($interventionsImpactees, 'intervention_id');
+            $this->newLine();
+            $this->line("  <fg=cyan>IDs des interventions impactées: " . implode(', ', $ids) . "</>");
         }
 
         return [
