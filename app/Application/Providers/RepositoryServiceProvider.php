@@ -25,10 +25,6 @@ class RepositoryServiceProvider extends ServiceProvider
             'App\Domaine\SPI\InterventionRepository',
             'App\Infrastructure\Repositories\InterventionRepositoryEloquent'
         );
-        $this->app->bind(
-            'App\Domaine\SPI\IndemniteTypeRepository',
-            'App\Infrastructure\Repositories\IndemniteTypeRepositoryEloquent'
-        );
     }
 
     /**

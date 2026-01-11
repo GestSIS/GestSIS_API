@@ -7,7 +7,6 @@ use App\Application\Typst\TypstToPdfGenerator;
 use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Business\SisParamBusiness;
 use App\Domaine\SPI\ExerciceRepository;
-use App\Domaine\SPI\IndemniteTypeRepository;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\Ecriture;
@@ -19,17 +18,14 @@ use Illuminate\Support\Facades\DB;
 class ImputationService
 {
     protected $exerciceRepo;
-    protected $indemniteRepo;
     protected $compteRepo;
     protected $business;
 
     public function __construct(
         ExerciceRepository $exercice,
-        IndemniteTypeRepository $indemnite,
         ImputationBusiness $business
     ) {
         $this->exerciceRepo = $exercice;
-        $this->indemniteRepo = $indemnite;
         $this->business = $business;
     }
 

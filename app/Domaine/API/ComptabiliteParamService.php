@@ -4,24 +4,24 @@ namespace App\Domaine\API;
 
 use App\Domaine\Business\ComptabiliteParamBusiness;
 use App\Domaine\SPI\ExerciceRepository;
-use App\Domaine\SPI\IndemniteTypeRepository;
 use App\Infrastructure\Models\Amende;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\EcritureCategorie;
+use App\Infrastructure\Models\FraisIndemniteAnnuelType;
+use App\Infrastructure\Models\IndemniteCoursType;
+use App\Infrastructure\Models\IndemniteExerciceType;
+use App\Infrastructure\Models\IndemniteInterventionType;
 
 class ComptabiliteParamService
 {
     protected $exerciceRepo;
-    protected $indemniteRepo;
     protected $business;
 
     public function __construct(
         ExerciceRepository $exercice,
-        IndemniteTypeRepository $indemnite,
         ComptabiliteParamBusiness $business
     ) {
         $this->exerciceRepo = $exercice;
-        $this->indemniteRepo = $indemnite;
         $this->business = $business;
     }
 
@@ -38,10 +38,10 @@ class ComptabiliteParamService
     function fraisIndemnitesTypes()
     {
         return array(
-            "annuels" => $this->indemniteRepo->listeFraisIndemniteAnnuelType(),
-            "cours" => $this->indemniteRepo->listeIndemniteCoursType(),
-            "exercices" => $this->indemniteRepo->listeIndemniteExerciceType(),
-            "interventions" => $this->indemniteRepo->listeIndemniteInterventionType(),
+            "annuels" => FraisIndemniteAnnuelType::with('fraisIndemniteAnnuels')->get(),
+            "cours" => IndemniteCoursType::with('fonctions')->get(),
+            "exercices" => IndemniteExerciceType::with('fonctions')->get(),
+            "interventions" => IndemniteInterventionType::with('fonctions')->get(),
         );
     }
 
@@ -67,7 +67,7 @@ class ComptabiliteParamService
 
     function fraisIndemnitesAnnuel()
     {
-        return $this->indemniteRepo->listeFraisIndemniteAnnuelType();
+        return FraisIndemniteAnnuelType::with('fraisIndemniteAnnuels')->get();
     }
 
     public function ajouterFraisIndemniteAnnuel($data)
@@ -102,7 +102,7 @@ class ComptabiliteParamService
 
     function indemnitesExercice()
     {
-        return $this->indemniteRepo->listeIndemniteExerciceType();
+        return IndemniteExerciceType::with('fonctions')->get();
     }
 
     public function ajouterIndemniteExercice($data)
@@ -122,7 +122,7 @@ class ComptabiliteParamService
 
     function indemnitesIntervention()
     {
-        return $this->indemniteRepo->listeIndemniteInterventionType();
+        return IndemniteInterventionType::with('fonctions')->get();
     }
 
     public function ajouterIndemniteIntervention($data)
@@ -162,7 +162,7 @@ class ComptabiliteParamService
 
     function indemnitesCoursTypes()
     {
-        return $this->indemniteRepo->listeIndemniteCoursType();
+        return IndemniteCoursType::with('fonctions')->get();
     }
 
     public function ajouterIndemniteCoursType($data)

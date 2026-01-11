@@ -4,7 +4,6 @@ namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\InvalidActionException;
 use App\Domaine\SPI\ExerciceRepository;
-use App\Domaine\SPI\IndemniteTypeRepository;
 use App\Domaine\SPI\InterventionRepository;
 use App\Domaine\SPI\SapeurRepository;
 use App\Domaine\Exceptions\ArrayException;
@@ -18,16 +17,18 @@ use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\Fonction;
 use App\Infrastructure\Models\FonctionSapeur;
+use App\Infrastructure\Models\FraisIndemniteAnnuelType;
 use App\Infrastructure\Models\HeureExercice;
 use App\Infrastructure\Models\HeureExerciceType;
 use App\Infrastructure\Models\IndemniteCoursType;
+use App\Infrastructure\Models\IndemniteExerciceType;
+use App\Infrastructure\Models\IndemniteInterventionType;
 use App\Infrastructure\Models\Intervention;
 use App\Infrastructure\Models\Travail;
 use App\Infrastructure\Models\TravailType;
 
 class ImputationBusiness
 {
-    protected $indemniteRepo;
     protected $exerciceRepo;
     protected $sapeurRepo;
     protected $interventionRepo;
@@ -35,13 +36,11 @@ class ImputationBusiness
     public function __construct(
         SapeurRepository $sapeur,
         ExerciceRepository $exercice,
-        InterventionRepository $intervention,
-        IndemniteTypeRepository $indemnite
+        InterventionRepository $intervention
     ) {
         $this->exerciceRepo = $exercice;
         $this->sapeurRepo = $sapeur;
         $this->interventionRepo = $intervention;
-        $this->indemniteRepo = $indemnite;
     }
 
     // Unités de GestSIS
@@ -412,7 +411,7 @@ class ImputationBusiness
         // - Ne prend actuellement en compte que la fonction actuelle et non pas la date de l'entrée en vigeure de cette fonction
         // - Prend uniquement les sapeurs actifs
 
-        $fraisIndemnitesTypes = $this->indemniteRepo->listeFraisIndemniteAnnuelType();
+        $fraisIndemnitesTypes = FraisIndemniteAnnuelType::with('fraisIndemniteAnnuels')->get();
 
         $fonctions = Fonction::all();
         $indexedFonctions = [];
@@ -608,7 +607,7 @@ class ImputationBusiness
 
         $this->controlerStatusExerciceComptable($intervention->exercice_comptable_id);
 
-        $indemniteType = $this->indemniteRepo->findIndemniteInterventionTypeById($data['indemnite_intervention_type_id']);
+        $indemniteType = IndemniteInterventionType::with('fonctions')->find($data['indemnite_intervention_type_id']);
 
         if ($intervention->statut !== InterventionBusiness::INTERVENTION_STATUT_VALIDE) {
             throw new ArrayException(array("message" => "Impossible d'imputer cette intervention"));
@@ -1034,7 +1033,7 @@ class ImputationBusiness
             throw new ArrayException([], "Impossible d'imputer cet exercice");
         }
 
-        $indemniteType = $this->indemniteRepo->findIndemniteExerciceTypeById($data['indemnite_exercice_type_id']);
+        $indemniteType = IndemniteExerciceType::with('fonctions')->find($data['indemnite_exercice_type_id']);
         if (!$indemniteType) {
             throw new ArrayException([], "Type d'indemnité introuvable");
         }

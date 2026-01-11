@@ -8,7 +8,6 @@ use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\HeureExercice;
 use App\Infrastructure\Models\Sms;
-use Illuminate\Support\Facades\DB;
 use StdClass;
 
 class ExerciceRepositoryEloquent implements ExerciceRepository
