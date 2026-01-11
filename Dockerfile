@@ -1,4 +1,4 @@
-FROM php:8.3-fpm
+FROM php:8.4-fpm
 
 RUN apt update && apt install -y zlib1g-dev libpng-dev libzip-dev && rm -rf /var/lib/apt/lists/*
 

@@ -1,7 +1,7 @@
 # GestSIS API - Copilot Instructions
 
 ## Project Overview
-GestSIS API is a Laravel 12 (PHP 8.3) firefighter management system API server using **Hexagonal Architecture** (ports and adapters). It's part of a microservices ecosystem including GestSIS_Auth for authentication and uses multi-tenant database architecture.
+GestSIS API is a Laravel 12 (PHP 8.4) firefighter management system API server using **Hexagonal Architecture** (ports and adapters). It's part of a microservices ecosystem including GestSIS_Auth for authentication and uses multi-tenant database architecture.
 
 ## Hexagonal Architecture (Critical)
 
