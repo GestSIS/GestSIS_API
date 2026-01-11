@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class IndemniteCoursFonction extends Model
 {
     protected $fillable = [
+        'indemnite_cours_id',
         'type',
         'tarif',
         'compte_id',

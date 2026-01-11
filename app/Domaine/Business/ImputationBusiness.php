@@ -91,11 +91,14 @@ class ImputationBusiness
         return $exerciceComptable;
     }
 
-    public function controlerStatusExerciceComptable(int $exerciceComptableId)
+    public function controlerStatusExerciceComptable(int $exerciceComptableId): void
     {
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
-        if ($exerciceComptable->boucle == 1) {
-            throw new InvalidActionException(message: "Excercice comptable cloturé, impossible d'effectuer cette action");
+        if ($exerciceComptable === null) {
+            throw new ArrayException([], 'Exercice comptable introuvable');
+        }
+        if ($exerciceComptable->boucle === 1) {
+            throw new InvalidActionException(message: "Exercice comptable clôturé, impossible d'effectuer cette action");
         }
     }
 
@@ -186,14 +189,18 @@ class ImputationBusiness
         return $ecriture;
     }
 
-    public function supprimerEcriture($ecritureId)
+    public function supprimerEcriture($ecritureId): string
     {
         $ecriture = Ecriture::find($ecritureId);
+        if ($ecriture === null) {
+            throw new ArrayException([], 'Écriture introuvable');
+        }
+
         $this->controlerStatusExerciceComptable($ecriture->exercice_comptable_id);
 
         // Contrôle que l'écriture n'est pas liée à un décompte
-        if ($ecriture->decompte_id) {
-            throw new ArrayException([], 'Ecriture déjà payée dans un décompte !');
+        if ($ecriture->decompte_id !== null) {
+            throw new ArrayException([], 'Écriture déjà payée dans un décompte !');
         }
 
         $ecriture->delete();
@@ -257,7 +264,7 @@ class ImputationBusiness
             $amende = $amendes[$i];
 
             // Creation d'une écriture pour chaque exercice amendé
-            $ecriture = array(
+            $ecriture = [
                 'tarif' => $amende->montant,
                 'quantite' => 1,
                 'total' => $amende->montant,
@@ -279,7 +286,7 @@ class ImputationBusiness
 
                 'module' => self::ECRITURE_MODULE_AMENDE,
                 'type' => self::ECRITURE_CATEGORIE_IMPOSITION_AUTRE,
-            );
+            ];
 
             $ecritures[] = $ecriture;
 
@@ -342,12 +349,12 @@ class ImputationBusiness
         ])->delete();
 
         // Pour l'instant juste générer de nouvelles amendes
-        $newEcritures = array();
+        $newEcritures = [];
         $i = 0;
         $sapeurId = -1;
 
         foreach ($exercices as $exercice) {
-            if ($sapeurId != $exercice->sapeur_id) {
+            if ($sapeurId !== $exercice->sapeur_id) {
                 $i = 0;
                 $sapeurId = $exercice->sapeur_id;
             }
@@ -355,7 +362,7 @@ class ImputationBusiness
             $amende = $amendes[$i];
 
             // Creation d'une écriture pour chaque exercice amendé
-            $ecriture = array(
+            $ecriture = [
                 'tarif' => $amende->montant,
                 'quantite' => 1,
                 'total' => $amende->montant,
@@ -377,9 +384,9 @@ class ImputationBusiness
 
                 'module' => self::ECRITURE_MODULE_AMENDE,
                 'type' => self::ECRITURE_CATEGORIE_IMPOSITION_AUTRE,
-            );
+            ];
 
-            array_push($newEcritures, $ecriture);
+            $newEcritures[] = $ecriture;
 
             if ($i + 1 < $nbAmende) {
                 $i++;
@@ -502,7 +509,7 @@ class ImputationBusiness
 
     private function imputerFraisIndemniteSapeur($fraisIndemniteType, $indemnite, $sapeurId, $exerciceComptableId, $indexedFonctions)
     {
-        $ecriture = array(
+        $ecriture = [
             'tarif' => $indemnite['montant'],
             'quantite' => $indemnite['quantite'],
             'total' => self::arrondi_5_centimes($indemnite['montant'] * $indemnite['quantite']),
@@ -516,7 +523,7 @@ class ImputationBusiness
 
             'module' => self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL,
             'type' => $fraisIndemniteType['type'],
-        );
+        ];
 
         $this->ecritureRepo->persisteNewEcriture($ecriture);
     }
@@ -524,7 +531,7 @@ class ImputationBusiness
     public function annulerImputationExercice($exerciceId)
     {
         $exercice = Exercice::find($exerciceId);
-        if (!$exercice) {
+        if ($exercice === null) {
             throw new ArrayException([], "Exercice introuvable.");
         }
         $this->controlerStatusExerciceComptable($exercice->exercice_comptable_id);
@@ -535,7 +542,7 @@ class ImputationBusiness
                 ->whereNotNull('decompte_id')
                 ->exists()
         ) {
-            throw new ArrayException([], 'Des écriture sont déjà facturées dans un décompte.');
+            throw new ArrayException([], 'Des écritures sont déjà facturées dans un décompte.');
         }
 
         // Suppression des écritures
@@ -550,7 +557,7 @@ class ImputationBusiness
     public function annulerImputationIntervention($interventionId)
     {
         $intervention = Intervention::find($interventionId);
-        if (!$intervention) {
+        if ($intervention === null) {
             throw new ArrayException([], "Intervention introuvable.");
         }
         $this->controlerStatusExerciceComptable($intervention->exercice_comptable_id);
@@ -561,7 +568,7 @@ class ImputationBusiness
                 ->whereNotNull('decompte_id')
                 ->exists()
         ) {
-            throw new ArrayException([], 'Des écriture sont déjà facturées dans un décompte.');
+            throw new ArrayException([], 'Des écritures sont déjà facturées dans un décompte.');
         }
 
         // Suppression des écritures
@@ -584,7 +591,7 @@ class ImputationBusiness
                 ->whereNotNull('decompte_id')
                 ->exists()
         ) {
-            throw new ArrayException([], 'Des écriture sont déjà facturées dans un décompte.');
+            throw new ArrayException([], 'Des écritures sont déjà facturées dans un décompte.');
         }
 
         // Suppression des écritures
@@ -601,11 +608,14 @@ class ImputationBusiness
      */
     public function imputerIntervention($interventionId, $data)
     {
-        $intervention = Intervention::find($interventionId);
+        $intervention = $this->interventionRepo->findWith($interventionId, ['presences', 'phases', 'localite', 'typeIntervention']);
+        if ($intervention === null) {
+            throw new ArrayException([], "Intervention introuvable.");
+        }
+
         $this->controlerStatusExerciceComptable($intervention->exercice_comptable_id);
 
         $indemniteType = $this->indemniteRepo->findIndemniteInterventionTypeById($data['indemnite_intervention_type_id']);
-        $intervention = $this->interventionRepo->findWith($interventionId, ['presences', 'phases', 'localite', 'typeIntervention']);
 
         if ($intervention->statut !== InterventionBusiness::INTERVENTION_STATUT_VALIDE) {
             throw new ArrayException(array("message" => "Impossible d'imputer cette intervention"));
@@ -638,13 +648,13 @@ class ImputationBusiness
             if (!array_key_exists($presence->sapeur_id, $sapeurs)) {
                 $sapeurs[$presence->sapeur_id] = [];
             }
-            array_push($sapeurs[$presence->sapeur_id], $presence);
+            $sapeurs[$presence->sapeur_id][] = $presence;
         }
 
         $phases = collect($intervention->phases)->sortByDesc('debut');
 
-        $dureeTarifMin = array();
-        $dureeNonTarifMin = array();
+        $dureeTarifMin = [];
+        $dureeNonTarifMin = [];
 
         $indemnite_phase_id = $indemniteType->phase_id;
 
@@ -663,15 +673,15 @@ class ImputationBusiness
                         break;
                     }
 
-                    $phaseDebut = $phase->debut != NULL ? Carbon::parse($phase->debut) : null;
+                    $phaseDebut = $phase->debut !== null ? Carbon::parse($phase->debut) : null;
 
                     // Si la phase commence après la fin de cette période, passer à la phase suivante
-                    if ($phaseDebut != NULL && $phaseDebut->gte($fin)) {
+                    if ($phaseDebut !== null && $phaseDebut->gte($fin)) {
                         continue;
                     }
 
                     // Déterminer le début effectif de ce segment
-                    $segmentDebut = $phaseDebut != NULL ? $phaseDebut->max($debut) : $debut;
+                    $segmentDebut = $phaseDebut !== null ? $phaseDebut->max($debut) : $debut;
 
                     // Calculer la durée de ce segment
                     $duree = $segmentDebut->diffInMinutes($fin) / 60;
@@ -680,7 +690,7 @@ class ImputationBusiness
                     $fin = $segmentDebut;
 
                     // Totalité des périodes restantes pour cette phase
-                    if ($indemnite_phase_id == NULL || $indemnite_phase_id == 0 || $phase->phase_type_id == $indemnite_phase_id) {
+                    if ($indemnite_phase_id === null || $indemnite_phase_id === 0 || $phase->phase_type_id === $indemnite_phase_id) {
                         $dureeTarifMinSapeur += $duree;
                     } else {
                         $dureeNonTarifMinSapeur += $duree;
@@ -697,7 +707,7 @@ class ImputationBusiness
         $tarifMinPour = floatval($indemniteType->tarif_min_pour) ?? 1.0;
         $designation = "{$intervention->localite->designation} ({$intervention->type->designation}) $intervention->lieu";
 
-        $ecritures = array();
+        $ecritures = [];
         foreach ($dureeTarifMin as $sapeurId => $dureeTarifMinSapeur) {
             // Duree sans tarif min
             $dureeNonTarifMinSapeur = $dureeNonTarifMin[$sapeurId];
@@ -727,7 +737,7 @@ class ImputationBusiness
 
             $total = self::arrondi_5_centimes($total);
 
-            $ecritures[] = array(
+            $ecritures[] = [
                 'tarif' => $tarif,
                 'tarif_pro_rata' => $indemniteType->tarif_pro_rata,
                 'quantite' => $dureeTotal,
@@ -748,7 +758,7 @@ class ImputationBusiness
 
                 'module' => self::ECRITURE_MODULE_INTERVENTION,
                 'type' => $indemniteType->type,
-            );
+            ];
         }
 
         return $ecritures;
@@ -933,7 +943,7 @@ class ImputationBusiness
 
             // Génération des écritures
             if ($totalTarifStandard > 0) {
-                $ecritures[] = array(
+                $ecritures[] = [
                     'tarif' => $tarif,
                     'quantite' => $dureeTarifStandard,
                     'taux' => null,
@@ -955,7 +965,7 @@ class ImputationBusiness
 
                     'module' => self::ECRITURE_MODULE_INTERVENTION,
                     'type' => $indemniteType->type,
-                );
+                ];
             }
 
             if ($totalTarifNuit > 0) {
@@ -1329,7 +1339,7 @@ class ImputationBusiness
 
         // Vérifier si une écriture est déjà liée à un décompte
         if ($ecritures->contains(fn($e) => $e->decompte_id !== null)) {
-            throw new ArrayException([], 'Des écriture sont déjà facturées dans un décompte.');
+            throw new ArrayException([], 'Des écritures sont déjà facturées dans un décompte.');
         }
 
         // Suppression des écritures
@@ -1420,7 +1430,7 @@ class ImputationBusiness
                 ->whereNotNull('decompte_id')
                 ->exists()
         ) {
-            throw new ArrayException([], 'Des écriture sont déjà facturées dans un décompte.');
+            throw new ArrayException([], 'Des écritures sont déjà facturées dans un décompte.');
         }
 
         // Suppression des écritures
