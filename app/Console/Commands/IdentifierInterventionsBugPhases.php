@@ -203,6 +203,16 @@ class IdentifierInterventionsBugPhases extends Command
             'details' => []
         ];
 
+        // Vérifier que l'intervention a bien été imputée avec tarif_min
+        $ecrituresAvecTarifMin = $intervention->ecritures->filter(function ($ecriture) {
+            return $ecriture->tarif_min !== null;
+        });
+
+        if ($ecrituresAvecTarifMin->isEmpty()) {
+            // Cette intervention n'utilise pas le tarif_min, elle n'est pas concernée par ce bug
+            return $result;
+        }
+
         // Grouper les présences par sapeur
         $sapeurs = [];
         foreach ($intervention->presences as $presence) {
