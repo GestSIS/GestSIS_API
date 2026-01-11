@@ -3,7 +3,6 @@
 namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\ArrayException;
-use App\Domaine\SPI\ControleMedicalRepository;
 use App\Infrastructure\Models\ControleMedical;
 use App\Infrastructure\Models\ControleMedicalType;
 use App\Infrastructure\Models\Medecin;
@@ -11,12 +10,6 @@ use Illuminate\Support\Facades\Storage;
 
 class ControleMedicalBusiness
 {
-    protected $repository;
-
-    public function __construct(ControleMedicalRepository $repository)
-    {
-        $this->repository = $repository;
-    }
 
     public function ajouterMedecin($data)
     {
@@ -71,21 +64,31 @@ class ControleMedicalBusiness
     {
         //TODO Change this
         $controleMedical['en_cours'] = true;
-        return $this->repository->createControleMedical($controleMedical);
+        $controleMedical['designation'] = $controleMedical['designation'] ?? '';
+
+        $controle = new ControleMedical();
+        $controle->fill($controleMedical);
+        $controle->sapeur_id = $controleMedical['sapeur_id'];
+        $controle->save();
+
+        return $controle;
     }
 
     public function updateControleMedical($controleId, $controleMedical)
     {
         //TODO Change this
         $controleMedical['en_cours'] = true;
-        return $this->repository->updateControleMedical($controleId, $controleMedical);
+        $controleMedical['designation'] = $controleMedical['designation'] ?? '';
+
+        ControleMedical::where('id', $controleId)->limit(1)->update($controleMedical);
+        return ControleMedical::find($controleId);
     }
 
     public function removeControleMedical($controleId)
     {
         //First remove justificatif
         $this->removeJustificatif($controleId);
-        return $this->repository->deleteControleMedical($controleId);
+        ControleMedical::destroy($controleId);
     }
 
     public function addJustificatif($controleMedicalId, $file, $sisKey)
@@ -95,20 +98,30 @@ class ControleMedicalBusiness
 
         // Then add the new one
         $path = $file->store('documents/' . $sisKey . '/controles_medicaux');
-        return $this->repository->addJustificatif($controleMedicalId, $file->getClientOriginalName(), $path);
+
+        $controle = ControleMedical::find($controleMedicalId);
+        $controle->filename = $file->getClientOriginalName();
+        $controle->path = $path;
+        $controle->save();
+
+        return $controle;
     }
 
     public function getJustificatif($controleMedicalId)
     {
         //Return the file
-        $justificatif = $this->repository->getJustificatif($controleMedicalId);
-        return ['path' => $justificatif->path, 'filename' => $justificatif->filename];
+        $controle = ControleMedical::find($controleMedicalId);
+        return ['path' => $controle->path, 'filename' => $controle->filename];
     }
 
     public function removeJustificatif($controleMedicalId)
     {
-        $path = $this->repository->removeJustificatif($controleMedicalId);
-        if ($path != null) {
+        $controle = ControleMedical::find($controleMedicalId);
+        if ($controle && $controle->path) {
+            $path = $controle->path;
+            $controle->filename = null;
+            $controle->path = null;
+            $controle->save();
             Storage::delete($path);
         }
     }

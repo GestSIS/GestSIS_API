@@ -3,21 +3,16 @@
 namespace App\Domaine\API;
 
 use App\Domaine\Business\ControleMedicalBusiness;
-use App\Domaine\SPI\ControleMedicalRepository;
-use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\ControleMedical;
 use App\Infrastructure\Models\ControleMedicalType;
-use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Medecin;
-use Illuminate\Database\Eloquent\Collection;
 
 class ControleMedicalService
 {
-    protected $repository;
     protected $business;
 
-    public function __construct(ControleMedicalRepository $repository, ControleMedicalBusiness $business)
+    public function __construct(ControleMedicalBusiness $business)
     {
-        $this->repository = $repository;
         $this->business = $business;
     }
 
@@ -63,12 +58,12 @@ class ControleMedicalService
 
     public function listeAllControlesMedicaux()
     {
-        return $this->repository->listeAllControlesMedicaux();
+        return ControleMedical::all();
     }
 
     public function getControleMedical($id)
     {
-        return $this->repository->getControleMedical($id);
+        return ControleMedical::find($id);
     }
 
     public function createControleMedical($controle)

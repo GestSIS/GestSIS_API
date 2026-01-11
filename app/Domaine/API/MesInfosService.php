@@ -8,10 +8,10 @@ use App\Domaine\Business\ControleMedicalBusiness;
 use App\Domaine\Business\ExerciceBusiness;
 use App\Domaine\Business\PaiementBusiness;
 use App\Domaine\Exceptions\ArrayException;
-use App\Domaine\SPI\ControleMedicalRepository;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\Absence;
+use App\Infrastructure\Models\ControleMedical;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\ExerciceSapeur;
@@ -25,7 +25,6 @@ class MesInfosService
     protected $exerciceBusiness;
     protected $absenceBusiness;
     protected $controleMedicalBusiness;
-    protected $controleMedicalRepo;
     protected $exerciceRepo;
     protected $sapeurRepo;
 
@@ -34,11 +33,9 @@ class MesInfosService
         ExerciceBusiness $exerciceBusiness,
         AbsenceBusiness $absenceBusiness,
         ControleMedicalBusiness $controleMedicalBusiness,
-        ControleMedicalRepository $controleMedicalRepo,
         ExerciceRepository $exerciceRepo,
         SapeurRepository $sapeurRepo
     ) {
-        $this->controleMedicalRepo = $controleMedicalRepo;
         $this->paiementBusiness = $paiementBusiness;
         $this->exerciceBusiness = $exerciceBusiness;
         $this->absenceBusiness = $absenceBusiness;
@@ -84,13 +81,13 @@ class MesInfosService
 
     function mesControlesMedicaux(int $sapeurId)
     {
-        return $this->controleMedicalRepo->getSapeurControlesMedicauxById($sapeurId);
+        return ControleMedical::where('sapeur_id', $sapeurId)->get();
     }
 
     function monJustificatifMedical(int $sapeurId, int $controleMedicalId)
     {
-        $controle = $this->controleMedicalRepo->getControleMedical($controleMedicalId);
-        if ($sapeurId !== $controle->sapeur_id) {
+        $controle = ControleMedical::find($controleMedicalId);
+        if (!$controle || $sapeurId !== $controle->sapeur_id) {
             throw new ArrayException([], 'Accès refusé');
         }
         return $this->controleMedicalBusiness->getJustificatif($controleMedicalId);

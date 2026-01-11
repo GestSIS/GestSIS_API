@@ -21,7 +21,7 @@ class SapeurMutationTest extends TestCase
         $this->service = $this->app->make(SapeurService::class);
 
         $data = Sapeur::factory()->make()->toArray();
-        $data['incorporation'] = "29.01.2019";
+        $data['incorporation'] = "2019-01-29"; // Format ISO
 
         $this->sapeurId = $this->service->createSapeur($data)->id;
     }
@@ -41,7 +41,11 @@ class SapeurMutationTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'incorporation', 'sapeur_id', 'sortie', 'motif'
+                        'id',
+                        'incorporation',
+                        'sapeur_id',
+                        'sortie',
+                        'motif'
                     ]
                 ]
             ]);

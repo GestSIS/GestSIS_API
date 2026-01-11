@@ -6,10 +6,10 @@ use App\Application\Typst\TypstTemplate;
 use App\Application\Typst\TypstToPdfGenerator;
 use App\Domaine\Business\SapeurBusiness;
 use App\Domaine\Business\SisParamBusiness;
-use App\Domaine\SPI\ControleMedicalRepository;
 use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Collections\ListeFoadExport;
 use App\Infrastructure\Collections\ListeFsspExport;
+use App\Infrastructure\Models\ControleMedical;
 use App\Infrastructure\Models\CoursSapeur;
 use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\FonctionSapeur;
@@ -26,13 +26,11 @@ use Maatwebsite\Excel\Facades\Excel;
 class SapeurService
 {
     protected $repository;
-    protected $repositoryControles;
     protected $business;
 
-    public function __construct(SapeurRepository $repository, ControleMedicalRepository $repositoryControles, SapeurBusiness $business)
+    public function __construct(SapeurRepository $repository, SapeurBusiness $business)
     {
         $this->repository = $repository;
-        $this->repositoryControles = $repositoryControles;
         $this->business = $business;
     }
 
@@ -184,7 +182,7 @@ class SapeurService
 
     public function getSapeurControlesMedicauxById(int $sapeurId)
     {
-        return $this->repositoryControles->getSapeurControlesMedicauxById($sapeurId);
+        return ControleMedical::where('sapeur_id', $sapeurId)->get();
     }
 
     private static $ALLOWED_PHOTO_EXTENSION = ['jpg', 'jpeg', 'png'];

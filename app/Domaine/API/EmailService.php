@@ -3,17 +3,14 @@
 namespace App\Domaine\API;
 
 use App\Domaine\Business\ControleMedicalBusiness;
-use App\Domaine\SPI\ControleMedicalRepository;
 use Illuminate\Support\Facades\DB;
 
 class EmailService
 {
-    protected $repository;
     protected $business;
 
-    public function __construct(ControleMedicalRepository $repository, ControleMedicalBusiness $business)
+    public function __construct(ControleMedicalBusiness $business)
     {
-        $this->repository = $repository;
         $this->business = $business;
     }
 

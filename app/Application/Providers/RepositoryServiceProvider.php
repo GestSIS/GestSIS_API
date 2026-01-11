@@ -18,10 +18,6 @@ class RepositoryServiceProvider extends ServiceProvider
             'App\Infrastructure\Repositories\SapeurRepositoryEloquent'
         );
         $this->app->bind(
-            'App\Domaine\SPI\EcritureRepository',
-            'App\Infrastructure\Repositories\EcritureRepositoryEloquent'
-        );
-        $this->app->bind(
             'App\Domaine\SPI\ExerciceRepository',
             'App\Infrastructure\Repositories\ExerciceRepositoryEloquent'
         );
@@ -32,10 +28,6 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             'App\Domaine\SPI\IndemniteTypeRepository',
             'App\Infrastructure\Repositories\IndemniteTypeRepositoryEloquent'
-        );
-        $this->app->bind(
-            'App\Domaine\SPI\ControleMedicalRepository',
-            'App\Infrastructure\Repositories\ControleMedicalRepositoryEloquent'
         );
     }
 

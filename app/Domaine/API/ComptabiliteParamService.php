@@ -3,28 +3,23 @@
 namespace App\Domaine\API;
 
 use App\Domaine\Business\ComptabiliteParamBusiness;
-use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
 use App\Infrastructure\Models\Amende;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\EcritureCategorie;
-use App\Infrastructure\Models\IndemniteCoursType;
 
 class ComptabiliteParamService
 {
-    protected $ecritureRepo;
     protected $exerciceRepo;
     protected $indemniteRepo;
     protected $business;
 
     public function __construct(
-        EcritureRepository $ecriture,
         ExerciceRepository $exercice,
         IndemniteTypeRepository $indemnite,
         ComptabiliteParamBusiness $business
     ) {
-        $this->ecritureRepo = $ecriture;
         $this->exerciceRepo = $exercice;
         $this->indemniteRepo = $indemnite;
         $this->business = $business;
