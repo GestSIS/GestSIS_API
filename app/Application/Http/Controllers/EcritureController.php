@@ -67,7 +67,7 @@ class EcritureController extends Controller
                     'type_unite_id' => 'integer|required',
                     'quantite' => 'numeric|required',
 
-                    'date' => 'date|nullable',
+                    'date' => 'date|required',
 
                     'sapeur_id' => 'integer|required|exists:sapeurs,id',
                     'exercice_comptable_id' => 'integer|required|exists:exercice_comptables,id',

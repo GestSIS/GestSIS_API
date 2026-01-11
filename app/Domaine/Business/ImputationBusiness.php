@@ -101,79 +101,89 @@ class ImputationBusiness
 
     public function ajouterEcriture($data)
     {
+        // Validation et recalcul du total
+        $totalCalcule = $data['tarif'] * $data['quantite'];
+        $totalAttendu = self::arrondi_5_centimes($totalCalcule);
+        if (abs($totalAttendu - $data['total']) > 0.01) {
+            throw new ArrayException([], "Le total fourni ({$data['total']}) ne correspond pas au calcul (tarif * quantité = {$totalAttendu})");
+        }
+
         $this->controlerStatusExerciceComptable($data['exercice_comptable_id']);
 
-        // Switch between type
-        switch ($data['module']) {
-            case self::ECRITURE_MODULE_DIVERS:
-
-                $ecriture = new Ecriture([
-                    'tarif' => $data['tarif'],
-                    'quantite' => $data['quantite'],
-                    'total' => self::arrondi_5_centimes($data['total']),
-
-                    'designation' => $data['designation'],
-
-                    'sapeur_id' => $data['sapeur_id'],
-                    'compte_id' => $data['compte_id'],
-                    'type_unite_id' => $data['type_unite_id'],
-                    'exercice_comptable_id' => $data['exercice_comptable_id'],
-                    'ecriture_categorie_id' => $data['ecriture_categorie_id'],
-
-                    'decompte_id' => null,
-                    'date' => $data['date'], // FIXME: check if null
-
-                    'module' => self::ECRITURE_MODULE_DIVERS,
-                    'type' => $data['type'],
-                ]);
-
-                $ecriture->save();
-                return $ecriture;
-            // break;
-
-            default:
-                throw new ArrayException([], 'Type d\'écriture non supporté pour le moment');
+        // Seul le module DIVERS est supporté actuellement
+        if ($data['module'] !== self::ECRITURE_MODULE_DIVERS) {
+            throw new ArrayException([], 'Type d\'écriture non supporté pour le moment');
         }
+
+        $ecriture = new Ecriture([
+            'tarif' => $data['tarif'],
+            'quantite' => $data['quantite'],
+            'total' => $totalAttendu,
+            'designation' => $data['designation'],
+            'sapeur_id' => $data['sapeur_id'],
+            'compte_id' => $data['compte_id'],
+            'type_unite_id' => $data['type_unite_id'],
+            'exercice_comptable_id' => $data['exercice_comptable_id'],
+            'ecriture_categorie_id' => $data['ecriture_categorie_id'],
+            'decompte_id' => null,
+            'date' => $data['date'],
+            'module' => self::ECRITURE_MODULE_DIVERS,
+            'type' => $data['type'],
+        ]);
+
+        $ecriture->save();
+        return $ecriture;
     }
 
     public function modifierEcriture($ecritureId, $data)
     {
-        $this->controlerStatusExerciceComptable($data['exercice_comptable_id']);
+        // Validation et recalcul du total
+        $totalCalcule = $data['tarif'] * $data['quantite'];
+        $totalAttendu = self::arrondi_5_centimes($totalCalcule);
+        if (abs($totalAttendu - $data['total']) > 0.01) {
+            throw new ArrayException([], "Le total fourni ({$data['total']}) ne correspond pas au calcul (tarif * quantité = {$totalAttendu})");
+        }
 
+        // Validation des montants positifs
+        if ($data['tarif'] < 0 || $data['quantite'] < 0) {
+            throw new ArrayException([], 'Le tarif et la quantité doivent être positifs');
+        }
+
+        // Charger l'écriture d'abord
         $ecriture = Ecriture::find($ecritureId);
+        if ($ecriture === null) {
+            throw new ArrayException([], 'Écriture introuvable');
+        }
+
+        // Vérifier le statut de l'exercice comptable avec l'ID de l'écriture existante
+        $this->controlerStatusExerciceComptable($ecriture->exercice_comptable_id);
+
         // Contrôle que l'écriture n'est pas liée à un décompte
-        if ($ecriture->decompte_id) {
-            throw new ArrayException([], 'Ecriture déjà payée dans un décompte !');
+        if ($ecriture->decompte_id !== null) {
+            throw new ArrayException([], 'Écriture déjà payée dans un décompte !');
         }
 
-        // Switch between type
-        switch ($data['module']) {
-            case self::ECRITURE_MODULE_DIVERS:
-
-                $ecriture->update([
-                    'tarif' => $data['tarif'],
-                    'quantite' => $data['quantite'],
-                    'total' => self::arrondi_5_centimes($data['total']),
-
-                    'designation' => $data['designation'],
-
-                    'sapeur_id' => $data['sapeur_id'],
-                    'compte_id' => $data['compte_id'],
-                    'type_unite_id' => $data['type_unite_id'],
-                    'exercice_comptable_id' => $data['exercice_comptable_id'],
-                    'ecriture_categorie_id' => $data['ecriture_categorie_id'],
-
-                    'decompte_id' => null,
-                    'date' => $data['date'], // FIXME: check if null
-                    'type' => $data['type'],
-                ]);
-
-                $ecriture->save();
-                return $ecriture;
-
-            default:
-                throw new ArrayException([], 'Type d\'écriture non supporté pour le moment');
+        // Seul le module DIVERS est supporté actuellement
+        if ($data['module'] !== self::ECRITURE_MODULE_DIVERS) {
+            throw new ArrayException([], 'Type d\'écriture non supporté pour le moment');
         }
+
+        $ecriture->update([
+            'tarif' => $data['tarif'],
+            'quantite' => $data['quantite'],
+            'total' => $totalAttendu,
+            'designation' => $data['designation'],
+            'sapeur_id' => $data['sapeur_id'],
+            'compte_id' => $data['compte_id'],
+            'type_unite_id' => $data['type_unite_id'],
+            'exercice_comptable_id' => $data['exercice_comptable_id'],
+            'ecriture_categorie_id' => $data['ecriture_categorie_id'],
+            'decompte_id' => null,
+            'date' => $data['date'],
+            'type' => $data['type'],
+        ]);
+
+        return $ecriture;
     }
 
     public function supprimerEcriture($ecritureId)
@@ -221,6 +231,17 @@ class ImputationBusiness
             ->orderBy('exercices.heure')
             ->get();
 
+        // Vérifier qu'aucune amende n'est déjà payée
+        if (
+            Ecriture::where([
+                ['exercice_comptable_id', '=', $exerciceComptableId],
+                ['sapeur_id', '=', $sapeurId],
+                ['module', '=', self::ECRITURE_MODULE_AMENDE]
+            ])->whereNotNull('decompte_id')->exists()
+        ) {
+            throw new ArrayException([], 'Des amendes sont déjà facturées dans un décompte.');
+        }
+
         // Suppression de amendes existantes
         Ecriture::where([
             ['exercice_comptable_id', '=', $exerciceComptableId],
@@ -240,12 +261,14 @@ class ImputationBusiness
                 'tarif' => $amende->montant,
                 'quantite' => 1,
                 'total' => $amende->montant,
+                'type_unite_id' => self::UNITE_PIECE,
 
                 'designation' => $exercice->designation,
                 'complement' => $exercice->excuse_type_id ? $indexedExcuses[$exercice->excuse_type_id]->designation : "",
 
                 'sapeur_id' => $exercice->sapeur_id,
                 'exercice_id' => $exercice->exercice_id,
+                'intervention_id' => null,
                 'compte_id' => $amende->compte_id,
                 'exercice_comptable_id' => $exerciceComptableId,
                 'ecriture_categorie_id' => $amende->ecriture_categorie_id,
@@ -265,7 +288,9 @@ class ImputationBusiness
             }
         }
 
-        Ecriture::insert($ecritures);
+        if (!empty($ecritures)) {
+            Ecriture::insert($ecritures);
+        }
         return $ecritures;
     }
 
@@ -298,6 +323,16 @@ class ImputationBusiness
         $indexedExcuses = [];
         foreach ($excusesTypes as $excuse) {
             $indexedExcuses[$excuse->id] = $excuse;
+        }
+
+        // Vérifier qu'aucune amende n'est déjà payée
+        if (
+            Ecriture::where([
+                ['exercice_comptable_id', '=', $exerciceComptableId],
+                ['module', '=', self::ECRITURE_MODULE_AMENDE]
+            ])->whereNotNull('decompte_id')->exists()
+        ) {
+            throw new ArrayException([], 'Des amendes sont déjà facturées dans un décompte.');
         }
 
         // Suppression de amendes existantes
@@ -351,7 +386,9 @@ class ImputationBusiness
             }
         }
 
-        Ecriture::insert($newEcritures);
+        if (!empty($newEcritures)) {
+            Ecriture::insert($newEcritures);
+        }
         return $newEcritures;
     }
 
@@ -381,10 +418,22 @@ class ImputationBusiness
         }
 
         // FIXME: regénérer que pour les sapeurs ne possédants pas d'indemnités ???
-        $ecritures = $this->ecritureRepo->listeEcrituresAnnuelsForExerciceComptableById($exerciceComptableId);
-        Ecriture::where('module', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)->whereNull('decompte_id')->delete();
-        // TODO: Que faire avec les indemnités déjà payées ?
-        // Ne pas générer les indemnités pour ces sapeurs ?
+
+        // Vérifier qu'aucune indemnité n'est déjà payée
+        if (
+            Ecriture::where([
+                ['exercice_comptable_id', '=', $exerciceComptableId],
+                ['module', '=', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL]
+            ])->whereNotNull('decompte_id')->exists()
+        ) {
+            throw new ArrayException([], 'Des indemnités annuelles sont déjà facturées dans un décompte.');
+        }
+
+        // Suppression des indemnités annuelles existantes pour cet exercice comptable uniquement
+        Ecriture::where([
+            ['exercice_comptable_id', '=', $exerciceComptableId],
+            ['module', '=', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL]
+        ])->delete();
 
         // Exercice comptable
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
@@ -475,9 +524,12 @@ class ImputationBusiness
     public function annulerImputationExercice($exerciceId)
     {
         $exercice = Exercice::find($exerciceId);
+        if (!$exercice) {
+            throw new ArrayException([], "Exercice introuvable.");
+        }
         $this->controlerStatusExerciceComptable($exercice->exercice_comptable_id);
 
-        // Check si des ecritures sont déjà liées à un décompte
+        // Vérifier si des écritures sont déjà liées à un décompte
         if (
             Ecriture::where('exercice_id', $exerciceId)
                 ->whereNotNull('decompte_id')
@@ -498,9 +550,12 @@ class ImputationBusiness
     public function annulerImputationIntervention($interventionId)
     {
         $intervention = Intervention::find($interventionId);
+        if (!$intervention) {
+            throw new ArrayException([], "Intervention introuvable.");
+        }
         $this->controlerStatusExerciceComptable($intervention->exercice_comptable_id);
 
-        // Check si des ecritures sont déjà liées à un décompte
+        // Vérifier si des écritures sont déjà liées à un décompte
         if (
             Ecriture::where('intervention_id', $interventionId)
                 ->whereNotNull('decompte_id')
@@ -522,14 +577,15 @@ class ImputationBusiness
     {
         $this->controlerStatusExerciceComptable($exerciceComptableId);
 
-        // Check si des ecritures sont déjà liées à un décompte
-        // if (Ecriture::where('exercice_comptable_id', '=', $exerciceComptableId)
-        //     ->where('module', '=', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)
-        //     ->whereNotNull('decompte_id')
-        //     ->exists()
-        // ) {
-        //     throw new ArrayException([], 'Des écriture sont déjà facturées dans un décompte.');
-        // }
+        // Vérifier si des écritures sont déjà liées à un décompte
+        if (
+            Ecriture::where('exercice_comptable_id', '=', $exerciceComptableId)
+                ->where('module', '=', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)
+                ->whereNotNull('decompte_id')
+                ->exists()
+        ) {
+            throw new ArrayException([], 'Des écriture sont déjà facturées dans un décompte.');
+        }
 
         // Suppression des écritures
         Ecriture::where('exercice_comptable_id', '=', $exerciceComptableId)
@@ -830,7 +886,7 @@ class ImputationBusiness
                         } elseif ($testNuit) {
                             $overlapping = 0;
 
-                            // Create period 1 start and end date
+                            // Créer les dates de début et fin de la période 1
                             $overlapping += max($debut->max($nightPeriodOneStart)->diffInHours($finJour->min($nightPeriodOneEnd), false), 0);
                             $overlapping += max($debut->max($nightPeriodTwoStart)->diffInHours($finJour->min($nightPeriodTwoEnd), false), 0);
 
@@ -895,6 +951,8 @@ class ImputationBusiness
                     'intervention_id' => $intervention->id,
                     'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
 
+                    'decompte_id' => null,
+
                     'module' => self::ECRITURE_MODULE_INTERVENTION,
                     'type' => $indemniteType->type,
                 );
@@ -918,6 +976,8 @@ class ImputationBusiness
                     'exercice_comptable_id' => $intervention->exercice_comptable_id,
                     'intervention_id' => $intervention->id,
                     'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+
+                    'decompte_id' => null,
 
                     'module' => self::ECRITURE_MODULE_INTERVENTION,
                     'type' => $indemniteType->type,
@@ -943,6 +1003,8 @@ class ImputationBusiness
                     'intervention_id' => $intervention->id,
                     'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
 
+                    'decompte_id' => null,
+
                     'module' => self::ECRITURE_MODULE_INTERVENTION,
                     'type' => $indemniteType->type,
                 ];
@@ -954,29 +1016,34 @@ class ImputationBusiness
 
     public function imputerExercice($exerciceId, $data)
     {
-        $exercice = Exercice::find($exerciceId);
+        $exercice = $this->exerciceRepo->getExerciceByIdWith($exerciceId, ['sapeurs', 'localite']);
+        if (!$exercice) {
+            throw new ArrayException([], "Exercice introuvable.");
+        }
+
         $this->controlerStatusExerciceComptable($exercice->exercice_comptable_id);
 
-        $exercice = $this->exerciceRepo->getExerciceByIdWith($exerciceId, ['sapeurs', 'localite']);
-
         if ($exercice->statut !== ExerciceBusiness::EXERCICE_STATUT_VALIDE) {
-            throw new ArrayException(array("message" => "Impossible d'imputer cet exercice"));
+            throw new ArrayException([], "Impossible d'imputer cet exercice");
         }
 
         $indemniteType = $this->indemniteRepo->findIndemniteExerciceTypeById($data['indemnite_exercice_type_id']);
+        if (!$indemniteType) {
+            throw new ArrayException([], "Type d'indemnité introuvable");
+        }
 
         $unite = $indemniteType->type_unite_id;
         $designation = "{$exercice->localite->designation} ({$exercice->lieu}) $exercice->designation";
-        $sapeurs = array_filter($exercice->sapeurs, function ($sap) {
+        $sapeurs = collect($exercice->sapeurs)->filter(function ($sap) {
             return $sap->present;
-        });
+        })->values()->all();
 
         if ($unite === self::UNITE_PIECE || $unite === self::UNITE_FORFAIT) {
             $this->imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation);
         } else if ($unite === self::UNITE_HEURE) {
             $this->imputerExerciceParHeure($exercice, $sapeurs, $indemniteType, $designation);
         } else {
-            throw new ArrayException(["message" => "Unité non supportée"]);
+            throw new ArrayException([], "Unité non supportée");
         }
 
         // Imputation heure supp
@@ -989,21 +1056,29 @@ class ImputationBusiness
 
     private function imputerExerciceHeureSup($exercice, $heures, $designation)
     {
-        $heureTypes = HeureExerciceType::all();
-        $indexedTypes = [];
-        foreach ($heureTypes as $type) {
-            $indexedTypes[$type->id] = $type;
+        if ($heures->isEmpty()) {
+            return;
         }
 
-        // Générer écritures
-        foreach ($heures as $heure) {
-            $designationSapeur = $designation . " - " . $heure->designation;
-            $tarifType = $indexedTypes[$heure->heure_exercice_type_id] ?? $heure;
+        // Charger uniquement les types nécessaires
+        $typeIds = $heures->pluck('heure_exercice_type_id')->unique();
+        $heureTypes = HeureExerciceType::whereIn('id', $typeIds)->get();
+        $indexedTypes = $heureTypes->keyBy('id');
 
+        // Construire le tableau pour l'insertion par lot
+        $ecritures = [];
+        foreach ($heures as $heure) {
+            $tarifType = $indexedTypes->get($heure->heure_exercice_type_id);
+
+            if (!$tarifType) {
+                throw new ArrayException([], "Type d'heure exercice introuvable");
+            }
+
+            $designationSapeur = $designation . " - " . $heure->designation;
             $total = $heure->quantite * $tarifType->montant;
 
             // Par heure -> calcul de la durée
-            $ecriture = array(
+            $ecritures[] = [
                 'tarif' => $tarifType->montant,
                 'quantite' => $heure->quantite,
                 'tarif_min' => null,
@@ -1022,29 +1097,46 @@ class ImputationBusiness
 
                 'module' => self::ECRITURE_MODULE_EXERCICE,
                 'type' => $tarifType->type,
-            );
+            ];
+        }
 
-            $this->ecritureRepo->persisteNewEcriture($ecriture);
+        if (!empty($ecritures)) {
+            Ecriture::insert($ecritures);
         }
     }
 
     private function imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation)
     {
-        // Générer écritures
+        if (empty($sapeurs)) {
+            return;
+        }
+
+        // Charger tous les détails des sapeurs en amont pour éviter les requêtes N+1
+        $sapeurIds = array_map(fn($s) => $s->sapeur_id, $sapeurs);
+        $sapeursDetails = [];
+        foreach ($sapeurIds as $sapeurId) {
+            $sapeursDetails[$sapeurId] = $this->sapeurRepo->getSapeurDetailsById($sapeurId);
+        }
+
+        // Prétraiter le mapping des tarifs par fonction pour éviter les filtrages répétés
+        $tarifsByFonction = [];
+        $defaultTarifs = [];
+        foreach ($indemniteType->fonctions as $fonction) {
+            if ($fonction->fonction_id === null) {
+                $defaultTarifs[] = $fonction;
+            } else {
+                $tarifsByFonction[$fonction->fonction_id][] = $fonction;
+            }
+        }
+
         $ecritures = [];
         foreach ($sapeurs as $sapeur) {
-            // Utilise uniquement la fonction principale
-            $id = $this->sapeurRepo->getSapeurDetailsById($sapeur->sapeur_id)->fonction_id;
-
-            $fonction_tarifs = array_filter($indemniteType->fonctions, function ($f) use ($id) {
-                return $f->fonction_id === $id;
-            });
-
-            if (count($fonction_tarifs) == 0) {
-                $fonction_tarifs = array_filter($indemniteType->fonctions, function ($f) {
-                    return $f->fonction_id === null;
-                });
+            $sapeurDetails = $sapeursDetails[$sapeur->sapeur_id] ?? null;
+            if (!$sapeurDetails) {
+                continue;
             }
+
+            $fonction_tarifs = $tarifsByFonction[$sapeurDetails->fonction_id] ?? $defaultTarifs;
 
             foreach ($fonction_tarifs as $indemnite) {
                 // Par pièce et pas par fonction -> pas de calcul
@@ -1071,33 +1163,52 @@ class ImputationBusiness
                 ];
             }
         }
-        Ecriture::insert($ecritures);
+
+        if (!empty($ecritures)) {
+            Ecriture::insert($ecritures);
+        }
     }
 
     private function imputerExerciceParHeure($exercice, $sapeurs, $indemniteType, $designation)
     {
+        if (empty($sapeurs)) {
+            return;
+        }
+
         $duree = $exercice->duree / 60;
 
-        // Générer écritures
+        // Charger tous les détails des sapeurs en amont pour éviter les requêtes N+1
+        $sapeurIds = array_map(fn($s) => $s->sapeur_id, $sapeurs);
+        $sapeursDetails = [];
+        foreach ($sapeurIds as $sapeurId) {
+            $sapeursDetails[$sapeurId] = $this->sapeurRepo->getSapeurDetailsById($sapeurId);
+        }
+
+        // Prétraiter le mapping des tarifs par fonction pour éviter les filtrages répétés
+        $tarifsByFonction = [];
+        $defaultTarifs = [];
+        foreach ($indemniteType->fonctions as $fonction) {
+            if ($fonction->fonction_id === null) {
+                $defaultTarifs[] = $fonction;
+            } else {
+                $tarifsByFonction[$fonction->fonction_id][] = $fonction;
+            }
+        }
+
+        $ecritures = [];
         foreach ($sapeurs as $sapeur) {
-            $id = $this->sapeurRepo->getSapeurDetailsById($sapeur->sapeur_id)->fonction_id;
-
-            $fonction_tarifs = array_filter($indemniteType->fonctions, function ($f) use ($id) {
-                return $f->fonction_id === $id;
-            });
-
-            if (count($fonction_tarifs) == 0) {
-                $fonction_tarifs = array_filter($indemniteType->fonctions, function ($f) {
-                    return $f->fonction_id === null;
-                });
+            $sapeurDetails = $sapeursDetails[$sapeur->sapeur_id] ?? null;
+            if (!$sapeurDetails) {
+                continue;
             }
 
+            $fonction_tarifs = $tarifsByFonction[$sapeurDetails->fonction_id] ?? $defaultTarifs;
+
             foreach ($fonction_tarifs as $indemnite) {
-                $total = 0;
                 $total = $indemnite->tarif * $duree;
 
-                //Par heure -> calcul de la durée
-                $ecriture = array(
+                // Par heure -> calcul de la durée
+                $ecritures[] = [
                     'tarif' => $indemnite->tarif,
                     'quantite' => $duree,
                     'tarif_min' => null,
@@ -1117,10 +1228,12 @@ class ImputationBusiness
 
                     'module' => self::ECRITURE_MODULE_EXERCICE,
                     'type' => $indemnite->type,
-                );
-
-                $this->ecritureRepo->persisteNewEcriture($ecriture);
+                ];
             }
+        }
+
+        if (!empty($ecritures)) {
+            Ecriture::insert($ecritures);
         }
     }
 
@@ -1129,98 +1242,98 @@ class ImputationBusiness
      */
     public function imputerCours(int $coursSapeurId, $data)
     {
+        // Validate required data keys
+        if (!isset($data['exercice_comptable_id']) || !isset($data['indemnite_cours_type_id'])) {
+            throw new ArrayException([], "Données requises manquantes");
+        }
+
         $this->controlerStatusExerciceComptable($data['exercice_comptable_id']);
 
         // Chargement du cours
         $cours = CoursSapeur::with(['cours', 'ecritures'])->find($coursSapeurId);
+        if ($cours === null) {
+            throw new ArrayException([], "Cours introuvable");
+        }
 
-        // Check que le cours n'est pas déjà imputé
-        if (count($cours->ecritures) > 0) {
+        // Vérifier que le cours n'est pas déjà imputé
+        if (!$cours->ecritures->isEmpty()) {
             throw new ArrayException([], "Cours déjà imputé");
         }
 
         // Chargement de l'indemnité type
         $indemniteType = IndemniteCoursType::with('fonctions')->find($data['indemnite_cours_type_id']);
-        if ($indemniteType == null) {
+        if ($indemniteType === null) {
             throw new ArrayException([], "Indemnité type invalide");
         }
 
+        if ($indemniteType->fonctions->isEmpty()) {
+            throw new ArrayException([], "Aucune fonction configurée pour ce type d'indemnité");
+        }
+
         $ecritures = [];
+        $designation = "Cours " . $cours->cours->designation;
 
         foreach ($indemniteType->fonctions as $fonction) {
+            $ecriture = [
+                'compte_id' => $fonction->compte_id,
+                'designation' => $designation,
+                'type_unite_id' => $fonction->type_unite_id,
+                'sapeur_id' => $cours->sapeur_id,
+                'cours_sapeur_id' => $coursSapeurId,
+                'exercice_comptable_id' => $data['exercice_comptable_id'],
+                'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
+                'date' => $cours->date,
+                'heure' => '',
+                'module' => self::ECRITURE_MODULE_COURS,
+                'type' => $fonction->type,
+            ];
+
             switch ($fonction->type_unite_id) {
                 case self::UNITE_JOUR:
-                    // Génération de l'écriture
-                    $ecritures[] = [
-                        'tarif' => $fonction->tarif,
-                        'quantite' => $cours->duree,
-                        'total' => $cours->duree * $fonction->tarif,
-
-                        'compte_id' => $fonction->compte_id,
-
-                        'designation' => "Cours " . $cours->cours->designation,
-                        'type_unite_id' => $fonction->type_unite_id,
-                        'sapeur_id' => $cours->sapeur_id,
-                        'cours_sapeur_id' => $coursSapeurId,
-                        'exercice_comptable_id' => $data['exercice_comptable_id'],
-                        'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
-                        'date' => $cours->date,
-                        'heure' => '',
-
-                        'module' => self::ECRITURE_MODULE_COURS,
-                        'type' => $fonction->type,
-                    ];
-
+                    $ecriture['tarif'] = $fonction->tarif;
+                    $ecriture['quantite'] = $cours->duree;
+                    $ecriture['total'] = $cours->duree * $fonction->tarif;
                     break;
+
                 case self::UNITE_FORFAIT:
                 case self::UNITE_PIECE:
-                    // Génération de l'écriture
-                    $ecritures[] = [
-                        'tarif' => $fonction->tarif,
-                        'quantite' => 1.0,
-                        'total' => $fonction->tarif,
-
-                        'compte_id' => $fonction->compte_id,
-
-                        'designation' => "Cours " . $cours->cours->designation,
-                        'type_unite_id' => $fonction->type_unite_id,
-                        'sapeur_id' => $cours->sapeur_id,
-                        'cours_sapeur_id' => $coursSapeurId,
-                        'exercice_comptable_id' => $data['exercice_comptable_id'],
-                        'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
-                        'date' => $cours->date,
-                        'heure' => '',
-
-                        'module' => self::ECRITURE_MODULE_COURS,
-                        'type' => $fonction->type,
-                    ];
+                    $ecriture['tarif'] = $fonction->tarif;
+                    $ecriture['quantite'] = 1.0;
+                    $ecriture['total'] = $fonction->tarif;
                     break;
+
                 default:
                     throw new ArrayException([], "Unité de l'indemnité type invalide");
             }
+
+            $ecritures[] = $ecriture;
         }
 
-        Ecriture::insert($ecritures);
+        if (!empty($ecritures)) {
+            Ecriture::insert($ecritures);
+        }
         return $ecritures;
     }
 
     public function annulerImputationCours(int $coursSapeurId)
     {
-        $ecriture = Ecriture::where('cours_sapeur_id', '=', $coursSapeurId)->first();
-        $this->controlerStatusExerciceComptable($ecriture->exercice_comptable_id);
+        // Charger toutes les écritures pour ce cours en une seule requête
+        $ecritures = Ecriture::where('cours_sapeur_id', $coursSapeurId)->get();
 
-        // Check si des ecritures sont déjà liées à un décompte
-        if (
-            Ecriture::where('cours_sapeur_id', '=', $coursSapeurId)
-                ->whereNotNull('decompte_id')
-                ->exists()
-        ) {
+        if ($ecritures->isEmpty()) {
+            throw new ArrayException([], 'Aucune écriture trouvée pour ce cours');
+        }
+
+        // Utiliser la première écriture pour vérifier le statut de l'exercice comptable
+        $this->controlerStatusExerciceComptable($ecritures->first()->exercice_comptable_id);
+
+        // Vérifier si une écriture est déjà liée à un décompte
+        if ($ecritures->contains(fn($e) => $e->decompte_id !== null)) {
             throw new ArrayException([], 'Des écriture sont déjà facturées dans un décompte.');
         }
 
         // Suppression des écritures
-        Ecriture::where('cours_sapeur_id', '=', $coursSapeurId)
-            ->delete();
+        Ecriture::where('cours_sapeur_id', $coursSapeurId)->delete();
 
         return true;
     }
@@ -1230,7 +1343,13 @@ class ImputationBusiness
      */
     public function imputerTravaux($ids)
     {
-        $travaux = Travail::whereIn('id', $ids)->where('statut', '=', TravauxBusiness::TRAVAIL_STATUT_VALIDE)->get();
+        $travaux = Travail::whereIn('id', $ids)
+            ->where('statut', TravauxBusiness::TRAVAIL_STATUT_VALIDE)
+            ->get();
+
+        if ($travaux->isEmpty()) {
+            return [];
+        }
 
         // Vérifier que tous les exercices comptables ne sont pas cloturés
         $exercicesComptablesIds = $travaux->pluck('exercice_comptable_id')->unique();
@@ -1238,26 +1357,28 @@ class ImputationBusiness
             $this->controlerStatusExerciceComptable($exerciceComptableId);
         }
 
-        // Chargement des travaux type
-        $types = TravailType::with(['fonctions'])->get();
-        $indexedTypes = [];
-        foreach ($types as $type) {
-            $indexedTypes[$type->id] = $type;
-        }
+        // Chargement des types de travaux - charger uniquement les types nécessaires
+        $travailTypeIds = $travaux->pluck('travail_type_id')->unique();
+        $types = TravailType::with(['fonctions'])
+            ->whereIn('id', $travailTypeIds)
+            ->get();
+        $indexedTypes = $types->keyBy('id');
 
         $ecritures = [];
 
         foreach ($travaux as $travail) {
-            $type = $indexedTypes[$travail->travail_type_id];
+            $type = $indexedTypes->get($travail->travail_type_id);
+
+            if (!$type) {
+                throw new ArrayException([], "Type de travail introuvable pour le travail ID {$travail->id}");
+            }
+
             foreach ($type->fonctions as $fonction) {
-                // Génération de l'écriture
                 $ecritures[] = [
                     'tarif' => $fonction->tarif,
                     'quantite' => $travail->quantite,
                     'total' => $travail->quantite * $fonction->tarif,
-
                     'compte_id' => $fonction->compte_id,
-
                     'designation' => $type->designation . " - " . $travail->designation,
                     'type_unite_id' => $type->type_unite_id,
                     'sapeur_id' => $travail->sapeur_id,
@@ -1266,26 +1387,34 @@ class ImputationBusiness
                     'ecriture_categorie_id' => $type->ecriture_categorie_id,
                     'date' => $travail->date,
                     'heure' => '',
-
                     'module' => self::ECRITURE_MODULE_FICHE_TRAVAIL,
                     'type' => $fonction->type,
                 ];
-
-                break;
             }
         }
 
-        Ecriture::insert($ecritures);
+        if (!empty($ecritures)) {
+            Ecriture::insert($ecritures);
+        }
+
         Travail::whereIn('id', $ids)
-            ->where('statut', '=', TravauxBusiness::TRAVAIL_STATUT_VALIDE)
+            ->where('statut', TravauxBusiness::TRAVAIL_STATUT_VALIDE)
             ->update(['statut' => TravauxBusiness::TRAVAIL_STATUT_IMPUTE]);
+
         return $ecritures;
     }
 
     public function annulerImputationTravail($travailId)
     {
-        // TODO: Check si pas cloturé !!!
-        // Check si des ecritures sont déjà liées à un décompte
+        $travail = Travail::find($travailId);
+
+        if (!$travail) {
+            throw new ArrayException([], 'Travail introuvable');
+        }
+
+        $this->controlerStatusExerciceComptable($travail->exercice_comptable_id);
+
+        // Vérifier si des écritures sont déjà liées à un décompte
         if (
             Ecriture::where('travail_id', $travailId)
                 ->whereNotNull('decompte_id')
@@ -1295,9 +1424,9 @@ class ImputationBusiness
         }
 
         // Suppression des écritures
-        Ecriture::where('travail_id', $travailId)
-            ->delete();
-        Travail::where('id', '=', $travailId)
+        Ecriture::where('travail_id', $travailId)->delete();
+
+        Travail::where('id', $travailId)
             ->update(['statut' => TravauxBusiness::TRAVAIL_STATUT_VALIDE]);
 
         return ['statut' => TravauxBusiness::TRAVAIL_STATUT_VALIDE];
