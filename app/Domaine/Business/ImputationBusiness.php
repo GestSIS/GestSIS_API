@@ -3,7 +3,6 @@
 namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\InvalidActionException;
-use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
 use App\Domaine\SPI\InterventionRepository;
@@ -28,20 +27,17 @@ use App\Infrastructure\Models\TravailType;
 
 class ImputationBusiness
 {
-    protected $ecritureRepo;
     protected $indemniteRepo;
     protected $exerciceRepo;
     protected $sapeurRepo;
     protected $interventionRepo;
 
     public function __construct(
-        EcritureRepository $ecriture,
         SapeurRepository $sapeur,
         ExerciceRepository $exercice,
         InterventionRepository $intervention,
         IndemniteTypeRepository $indemnite
     ) {
-        $this->ecritureRepo = $ecriture;
         $this->exerciceRepo = $exercice;
         $this->sapeurRepo = $sapeur;
         $this->interventionRepo = $intervention;
@@ -483,6 +479,7 @@ class ImputationBusiness
         }
 
         // Foreach indemnité annuelle
+        $ecritures = [];
         foreach ($fraisIndemnitesTypes as $type) {
 
             // Génère le mapping -> ["fonction_id" => 'indemnite'];
@@ -495,7 +492,20 @@ class ImputationBusiness
                 foreach ($fonctions as $fonctionId) {
                     if (array_key_exists($fonctionId, $mapping)) {
                         $indemnite = $mapping[$fonctionId];
-                        $this->imputerFraisIndemniteSapeur($type, $indemnite, $sapeurId, $exerciceComptableId, $indexedFonctions);
+
+                        $ecritures[] = [
+                            'tarif' => $indemnite['montant'],
+                            'quantite' => $indemnite['quantite'],
+                            'total' => self::arrondi_5_centimes($indemnite['montant'] * $indemnite['quantite']),
+                            'type_unite_id' => $indemnite['type_unite_id'],
+                            'designation' => $type['designation'] . ' (' . ($indexedFonctions[$indemnite['fonction_id']] ?? '') . ")",
+                            'sapeur_id' => $sapeurId,
+                            'compte_id' => $type['compte_id'],
+                            'exercice_comptable_id' => $exerciceComptableId,
+                            'ecriture_categorie_id' => $type['ecriture_categorie_id'],
+                            'module' => self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL,
+                            'type' => $type['type'],
+                        ];
 
                         if (!$type['cumulable']) {
                             // Non-cumulable, on passe au sapeur suivant
@@ -505,27 +515,10 @@ class ImputationBusiness
                 }
             }
         }
-    }
 
-    private function imputerFraisIndemniteSapeur($fraisIndemniteType, $indemnite, $sapeurId, $exerciceComptableId, $indexedFonctions)
-    {
-        $ecriture = [
-            'tarif' => $indemnite['montant'],
-            'quantite' => $indemnite['quantite'],
-            'total' => self::arrondi_5_centimes($indemnite['montant'] * $indemnite['quantite']),
-
-            'type_unite_id' => $indemnite['type_unite_id'],
-            'designation' => $fraisIndemniteType['designation'] . ' (' . ($indexedFonctions[$indemnite['fonction_id']] ?? '') . ")",
-            'sapeur_id' => $sapeurId,
-            'compte_id' => $fraisIndemniteType['compte_id'],
-            'exercice_comptable_id' => $exerciceComptableId,
-            'ecriture_categorie_id' => $fraisIndemniteType['ecriture_categorie_id'],
-
-            'module' => self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL,
-            'type' => $fraisIndemniteType['type'],
-        ];
-
-        $this->ecritureRepo->persisteNewEcriture($ecriture);
+        if (!empty($ecritures)) {
+            Ecriture::insert($ecritures);
+        }
     }
 
     public function annulerImputationExercice($exerciceId)
@@ -619,6 +612,10 @@ class ImputationBusiness
 
         if ($intervention->statut !== InterventionBusiness::INTERVENTION_STATUT_VALIDE) {
             throw new ArrayException(array("message" => "Impossible d'imputer cette intervention"));
+        }
+
+        if ($indemniteType === null) {
+            throw new ArrayException([], "Type d'indemnité introuvable");
         }
 
         $ecritures = [];

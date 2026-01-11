@@ -4,7 +4,7 @@ RUN apt update && apt install -y zlib1g-dev libpng-dev libzip-dev && rm -rf /var
 
 RUN mkdir -p /usr/share/man/man1 \
     && apt-get update \
-    && apt-get install -y --no-install-recommends curl wget \
+    && apt-get install -y --no-install-recommends curl wget vim zip git \
     && docker-php-ext-install gd \
     # gmp
     && apt-get install -y --no-install-recommends libgmp-dev \
@@ -41,6 +41,8 @@ RUN set -e ; \
     echo "*" > typst/.gitignore ; \
     rm -rf typst-x86_64-unknown-linux-musl* \
     ;
+
+# TODO: Installs fonts locally for typst to use
 
 RUN composer global require laravel/installer
 

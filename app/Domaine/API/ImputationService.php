@@ -6,11 +6,11 @@ use App\Application\Typst\TypstTemplate;
 use App\Application\Typst\TypstToPdfGenerator;
 use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Business\SisParamBusiness;
-use App\Domaine\SPI\EcritureRepository;
 use App\Domaine\SPI\ExerciceRepository;
 use App\Domaine\SPI\IndemniteTypeRepository;
 use App\Infrastructure\Models\Compte;
 use App\Infrastructure\Models\Decompte;
+use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
@@ -18,19 +18,16 @@ use Illuminate\Support\Facades\DB;
 
 class ImputationService
 {
-    protected $ecritureRepo;
     protected $exerciceRepo;
     protected $indemniteRepo;
     protected $compteRepo;
     protected $business;
 
     public function __construct(
-        EcritureRepository $ecriture,
         ExerciceRepository $exercice,
         IndemniteTypeRepository $indemnite,
         ImputationBusiness $business
     ) {
-        $this->ecritureRepo = $ecriture;
         $this->exerciceRepo = $exercice;
         $this->indemniteRepo = $indemnite;
         $this->business = $business;
@@ -99,27 +96,33 @@ class ImputationService
 
     function getAllEcrituresForExerciceComptableById($exerciceComptableId)
     {
-        return $this->ecritureRepo->listeAllEcritureForExerciceComptableById($exerciceComptableId);
+        return Ecriture::where('exercice_comptable_id', $exerciceComptableId)->get();
     }
 
     function getEcrituresDiversForExerciceComptableById($exerciceComptableId)
     {
-        return $this->ecritureRepo->listeEcritureDiversForExerciceComptableById($exerciceComptableId);
+        return Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+            ->where('module', ImputationBusiness::ECRITURE_MODULE_DIVERS)
+            ->get();
     }
 
     function getEcrituresAmendesForExerciceComptableById($exerciceComptableId)
     {
-        return $this->ecritureRepo->listeAmendeForExerciceComptableById($exerciceComptableId);
+        return Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+            ->where('module', ImputationBusiness::ECRITURE_MODULE_AMENDE)
+            ->get();
     }
 
     function getEcrituresByCompte($compteId, $exerciceComptableId)
     {
-        return $this->ecritureRepo->listeEcritureForCompteAndExerciceComptableById($compteId, $exerciceComptableId);
+        return Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+            ->where('compte_id', $compteId)
+            ->get();
     }
 
     function getEcrituresForExerciceById($exerciceId)
     {
-        return $this->ecritureRepo->listeEcritureForExercice($exerciceId);
+        return Ecriture::where('exercice_id', $exerciceId)->get();
     }
 
     function getEcrituresForExercicesByExerciceComptable($exerciceComptableId)
@@ -132,12 +135,14 @@ class ImputationService
 
     function getEcrituresForInterventionById($interventionId)
     {
-        return $this->ecritureRepo->listeEcritureForIntervention($interventionId);
+        return Ecriture::where('intervention_id', $interventionId)->get();
     }
 
     function getEcrituresAnnuelsForExerciceComptableById($exerciceComptableId)
     {
-        return $this->ecritureRepo->listeEcrituresAnnuelsForExerciceComptableById($exerciceComptableId);
+        return Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+            ->where('module', ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)
+            ->get();
     }
 
     function imputationExercice($exerciceId, $data)
@@ -146,7 +151,7 @@ class ImputationService
 
         return [
             "statut" => $statut,
-            "ecritures" => $this->ecritureRepo->listeEcritureForExercice($exerciceId)
+            "ecritures" => Ecriture::where('exercice_id', $exerciceId)->get()
         ];
     }
 
@@ -164,7 +169,7 @@ class ImputationService
 
         return [
             "statut" => $statut,
-            "ecritures" => $this->ecritureRepo->listeEcritureForIntervention($interventionId)
+            "ecritures" => Ecriture::where('intervention_id', $interventionId)->get()
         ];
     }
 
@@ -180,7 +185,9 @@ class ImputationService
     {
         $this->business->imputerAnnuel($exerciceComptableId);
 
-        return $this->ecritureRepo->listeEcrituresAnnuelsForExerciceComptableById($exerciceComptableId);
+        return Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+            ->where('module', ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)
+            ->get();
     }
 
     function annulerImputationAnnuel($exerciceComptableId)
