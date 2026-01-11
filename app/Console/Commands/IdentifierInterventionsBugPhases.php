@@ -165,13 +165,14 @@ class IdentifierInterventionsBugPhases extends Command
         if (!empty($interventionsImpactees)) {
             $this->newLine();
             $this->table(
-                ['ID', 'Date', 'Phases', 'Sapeurs impactés', 'Écart (CHF)'],
+                ['ID', 'Date', 'Phases', 'Sapeurs', 'Écart (CHF)', 'Config changée'],
                 array_map(fn($i) => [
                     $i['intervention_id'],
                     $i['date'],
                     $i['nb_phases'],
                     $i['nb_sapeurs_impactes'],
-                    number_format($i['ecart_total_chf'], 2)
+                    number_format($i['ecart_total_chf'], 2),
+                    $i['config_changee'] ? '⚠ OUI' : 'Non'
                 ], $interventionsImpactees)
             );
 
@@ -200,6 +201,7 @@ class IdentifierInterventionsBugPhases extends Command
             'impacte' => false,
             'nb_sapeurs_impactes' => 0,
             'ecart_total_chf' => 0,
+            'config_changee' => false,
             'details' => []
         ];
 
@@ -211,6 +213,34 @@ class IdentifierInterventionsBugPhases extends Command
         if ($ecrituresAvecTarifMin->isEmpty()) {
             // Cette intervention n'utilise pas le tarif_min, elle n'est pas concernée par ce bug
             return $result;
+        }
+
+        // Récupérer la config utilisée lors de l'imputation (depuis la première écriture)
+        $ecritureRef = $ecrituresAvecTarifMin->first();
+        $configImputee = [
+            'tarif' => floatval($ecritureRef->tarif),
+            'tarif_min' => floatval($ecritureRef->tarif_min),
+            'tarif_min_pour' => floatval($ecritureRef->tarif_min_pour),
+            'tarif_min_pro_rata' => boolval($ecritureRef->tarif_min_pro_rata),
+            'tarif_pro_rata' => boolval($ecritureRef->tarif_pro_rata),
+        ];
+
+        // Récupérer la config actuelle
+        $configActuelle = IndemniteInterventionType::whereNotNull('tarif_min')
+            ->whereNotNull('phase_id')
+            ->first();
+
+        if ($configActuelle) {
+            $configActuelleData = [
+                'tarif' => floatval($configActuelle->tarif),
+                'tarif_min' => floatval($configActuelle->tarif_min),
+                'tarif_min_pour' => floatval($configActuelle->tarif_min_pour),
+                'tarif_min_pro_rata' => boolval($configActuelle->tarif_min_pro_rata),
+                'tarif_pro_rata' => boolval($configActuelle->tarif_pro_rata),
+            ];
+
+            // Comparer les configs
+            $result['config_changee'] = ($configImputee !== $configActuelleData);
         }
 
         // Grouper les présences par sapeur
