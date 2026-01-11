@@ -181,7 +181,6 @@ class ImputationBusiness
         $ecriture = Ecriture::find($ecritureId);
         $this->controlerStatusExerciceComptable($ecriture->exercice_comptable_id);
 
-        $ecriture = Ecriture::find($ecritureId);
         // Contrôle que l'écriture n'est pas liée à un décompte
         if ($ecriture->decompte_id) {
             throw new ArrayException([], 'Ecriture déjà payée dans un décompte !');
@@ -600,20 +599,29 @@ class ImputationBusiness
             foreach ($presences as $periode) {
                 $debut = Carbon::parse($periode->debut);
                 $fin = Carbon::parse($periode->fin);
-                foreach ($phases as $phase) {
-                    $phaseDebut = Carbon::parse($phase->debut);
 
-                    if ($phase->debut != NULL && $phaseDebut->gte($fin)) {
+                // Parcourir toutes les phases pour découper la période complète
+                foreach ($phases as $phase) {
+                    if ($debut->gte($fin)) {
+                        // Plus de temps restant dans cette période
+                        break;
+                    }
+
+                    $phaseDebut = $phase->debut != NULL ? Carbon::parse($phase->debut) : null;
+
+                    // Si la phase commence après la fin de cette période, passer à la phase suivante
+                    if ($phaseDebut != NULL && $phaseDebut->gte($fin)) {
                         continue;
                     }
 
-                    if ($phase->debut == NULL) {
-                        $phaseDebut = $debut;
-                    }
+                    // Déterminer le début effectif de ce segment
+                    $segmentDebut = $phaseDebut != NULL ? $phaseDebut->max($debut) : $debut;
 
-                    $temp = $phaseDebut->max($debut);
-                    $duree = $temp->diffInMinutes($fin) / 60;
-                    $fin = $temp;
+                    // Calculer la durée de ce segment
+                    $duree = $segmentDebut->diffInMinutes($fin) / 60;
+
+                    // Avancer le pointeur de début pour le prochain segment
+                    $fin = $segmentDebut;
 
                     // Totalité des périodes restantes pour cette phase
                     if ($indemnite_phase_id == NULL || $indemnite_phase_id == 0 || $phase->phase_type_id == $indemnite_phase_id) {
@@ -621,11 +629,10 @@ class ImputationBusiness
                     } else {
                         $dureeNonTarifMinSapeur += $duree;
                     }
-                    break;
                 }
             }
-            $dureeTarifMin[$sapeurId] = ($dureeTarifMin[$sapeurId] ?? 0) + $dureeTarifMinSapeur;
-            $dureeNonTarifMin[$sapeurId] = ($dureeNonTarifMin[$sapeurId] ?? 0) + $dureeNonTarifMinSapeur;
+            $dureeTarifMin[$sapeurId] = $dureeTarifMinSapeur;
+            $dureeNonTarifMin[$sapeurId] = $dureeNonTarifMinSapeur;
         }
 
         // Récupération du type de frais
@@ -647,7 +654,9 @@ class ImputationBusiness
                 if ($indemniteType->tarif_pro_rata) {
                     $dureeNonTarifMinSapeur += $dureeTarifMinSapeur - $tarifMinPour;
                 } else {
-                    $dureeNonTarifMinSapeur += floor($dureeTarifMinSapeur - $tarifMinPour);
+                    // Arrondir à l'heure inférieure les heures excédentaires
+                    $heuresExcedentaires = $dureeTarifMinSapeur - $tarifMinPour;
+                    $dureeNonTarifMinSapeur += floor($heuresExcedentaires);
                 }
                 $dureeTarifMinSapeur = $tarifMinPour;
             }
@@ -1223,8 +1232,11 @@ class ImputationBusiness
     {
         $travaux = Travail::whereIn('id', $ids)->where('statut', '=', TravauxBusiness::TRAVAIL_STATUT_VALIDE)->get();
 
-        // TODO: Check si exercices comptable n'est pas cloturé
-        // $this->controlerStatusExerciceComptable($exerciceComptableId);
+        // Vérifier que tous les exercices comptables ne sont pas cloturés
+        $exercicesComptablesIds = $travaux->pluck('exercice_comptable_id')->unique();
+        foreach ($exercicesComptablesIds as $exerciceComptableId) {
+            $this->controlerStatusExerciceComptable($exerciceComptableId);
+        }
 
         // Chargement des travaux type
         $types = TravailType::with(['fonctions'])->get();
