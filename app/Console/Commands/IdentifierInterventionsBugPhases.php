@@ -19,7 +19,9 @@ class IdentifierInterventionsBugPhases extends Command
      * @var string
      */
     protected $signature = 'interventions:bug-phases 
-                            {--annee= : Année de l\'exercice comptable à analyser (ex: 2024)}';
+                            {--annee= : Année de l\'exercice comptable à analyser (ex: 2024)}
+                            {--sis= : Code du SIS à analyser (ex: hs). Si non spécifié, analyse toutes les bases}
+                            {--fix : Créer des écritures de correction pour les montants manquants}';
 
     /**
      * The console command description.
@@ -34,6 +36,17 @@ class IdentifierInterventionsBugPhases extends Command
     public function handle()
     {
         $dbs = config('database.dbs');
+        $sisFilter = $this->option('sis');
+
+        // Filtrer par SIS si spécifié
+        if ($sisFilter) {
+            if (!in_array($sisFilter, $dbs)) {
+                $this->error("Le SIS '{$sisFilter}' n'existe pas dans la configuration.");
+                $this->line("SIS disponibles: " . implode(', ', $dbs));
+                return 1;
+            }
+            $dbs = [$sisFilter];
+        }
 
         $this->info("Analyse sur " . count($dbs) . " base(s) de données");
         $this->newLine();
@@ -96,6 +109,7 @@ class IdentifierInterventionsBugPhases extends Command
     private function analyserDatabase($dbName)
     {
         $annee = $this->option('annee');
+        $fix = $this->option('fix');
 
         // Vérifier si le SIS a une config de tarification compatible avec le bug
         // Le bug affecte uniquement les interventions avec tarif_min et phases
@@ -180,6 +194,15 @@ class IdentifierInterventionsBugPhases extends Command
             $ids = array_column($interventionsImpactees, 'intervention_id');
             $this->newLine();
             $this->line("  <fg=cyan>IDs des interventions impactées: " . implode(', ', $ids) . "</>");
+
+            // Option de correction
+            if ($fix) {
+                $this->newLine();
+                if ($this->confirm("Créer les écritures de correction pour {$dbName}?")) {
+                    $nbEcritures = $this->fixInterventions($interventionsImpactees);
+                    $this->info("  ✓ {$nbEcritures} écriture(s) de correction créée(s)");
+                }
+            }
         }
 
         return [
@@ -334,5 +357,63 @@ class IdentifierInterventionsBugPhases extends Command
         }
 
         return $result;
+    }
+
+    /**
+     * Créer des écritures de correction pour les interventions impactées
+     */
+    private function fixInterventions($interventionsImpactees)
+    {
+        $nbEcritures = 0;
+
+        foreach ($interventionsImpactees as $interventionData) {
+            $intervention = Intervention::find($interventionData['intervention_id']);
+
+            foreach ($interventionData['details'] as $detail) {
+                // Récupérer une écriture existante pour copier la config
+                $ecritureRef = $intervention->ecritures->firstWhere('sapeur_id', $detail['sapeur_id']);
+
+                if (!$ecritureRef) {
+                    continue;
+                }
+
+                // Créer l'écriture de correction
+                $ecriture = new Ecriture([
+                    'designation' => "Correction bug phases - " . $ecritureRef->designation,
+                    'complement' => "Correction automatique du bug de calcul des phases multiples",
+                    'tarif' => $ecritureRef->tarif,
+                    'quantite' => $detail['ecart_heures'],
+                    'total' => $detail['ecart_chf'],
+                    'type_unite_id' => $ecritureRef->type_unite_id,
+
+                    'tarif_min' => null,
+                    'tarif_min_pour' => null,
+                    'tarif_min_pro_rata' => null,
+                    'tarif_pro_rata' => $ecritureRef->tarif_pro_rata,
+                    'taux' => null,
+                    'taux_description' => null,
+
+                    'sapeur_id' => $detail['sapeur_id'],
+                    'compte_id' => $ecritureRef->compte_id,
+                    'exercice_comptable_id' => $intervention->exercice_comptable_id,
+                    'intervention_id' => $intervention->id,
+                    'exercice_id' => null,
+                    'cours_sapeur_id' => null,
+                    'ecriture_categorie_id' => $ecritureRef->ecriture_categorie_id,
+                    'decompte_id' => null,
+
+                    'date' => $intervention->date_debut,
+                    'heure' => $intervention->heure_debut,
+
+                    'module' => 2, // ECRITURE_MODULE_INTERVENTION
+                    'type' => $ecritureRef->type,
+                ]);
+
+                $ecriture->save();
+                $nbEcritures++;
+            }
+        }
+
+        return $nbEcritures;
     }
 }
