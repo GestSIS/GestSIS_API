@@ -68,10 +68,10 @@ class IdentifierInterventionsBugPhases extends Command
         $this->info("╔═══════════════════════════════════════════════════════════╗");
         $this->info("║              RAPPORT GLOBAL MULTI-DB                      ║");
         $this->info("╠═══════════════════════════════════════════════════════════╣");
-        $this->info("║ Bases de données analysées: " . str_pad(count($dbs), 27) . "║");
-        $this->info("║ Interventions analysées:    " . str_pad($totalGlobalInterventionsAnalysees, 27) . "║");
-        $this->info("║ Interventions impactées:    " . str_pad($totalGlobalInterventionsImpactees, 27) . "║");
-        $this->info("║ Écart total:                " . str_pad(number_format($totalGlobalEcartCHF, 2) . " CHF", 27) . "║");
+        $this->info("║ Bases de données analysées: " . str_pad(count($dbs), 30) . "║");
+        $this->info("║ Interventions analysées:    " . str_pad($totalGlobalInterventionsAnalysees, 30) . "║");
+        $this->info("║ Interventions impactées:    " . str_pad($totalGlobalInterventionsImpactees, 30) . "║");
+        $this->info("║ Écart total:                " . str_pad(number_format($totalGlobalEcartCHF, 2) . " CHF", 30) . "║");
         $this->info("╚═══════════════════════════════════════════════════════════╝");
         $this->newLine();
 
