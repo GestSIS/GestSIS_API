@@ -6,10 +6,12 @@ use App\Domaine\API\ImputationService;
 use App\Domaine\API\SapeurService;
 use App\Infrastructure\Models\Sapeur;
 use Exception;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ImputationAnnuelTest extends TestCase
 {
+    use RefreshDatabase;
 
     protected $comptabiliteService;
     protected $sapeurOneId;
@@ -25,7 +27,7 @@ class ImputationAnnuelTest extends TestCase
         $this->comptabiliteService = $this->app->make(ImputationService::class);
 
         $data = Sapeur::factory()->make()->toArray();
-        $data['incorporation'] = "29.01.2019";
+        $data['incorporation'] = "2019-01-29";
         $this->sapeurOneId = $sapeurService->createSapeur($data)->id;
         $sapeurService->addFonction($this->sapeurOneId, [
             'fonction_id' => 1,
@@ -35,7 +37,7 @@ class ImputationAnnuelTest extends TestCase
         ]);
 
         $data = Sapeur::factory()->make()->toArray();
-        $data['incorporation'] = "29.01.2019";
+        $data['incorporation'] = "2019-01-29";
         $this->sapeurTwoId = $sapeurService->createSapeur($data)->id;
         $sapeurService->addFonction($this->sapeurTwoId, [
             'fonction_id' => 4,
@@ -45,7 +47,7 @@ class ImputationAnnuelTest extends TestCase
         ]);
 
         $data = Sapeur::factory()->make()->toArray();
-        $data['incorporation'] = "29.01.2019";
+        $data['incorporation'] = "2019-01-29";
         $this->sapeurThreeId = $sapeurService->createSapeur($data)->id;
         $sapeurService->addFonction($this->sapeurThreeId, [
             'fonction_id' => 5,
