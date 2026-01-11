@@ -78,4 +78,9 @@ class Ecriture extends Model
             'cours_sapeur_id' => 'integer',
         ];
     }
+
+    public function sapeur()
+    {
+        return $this->belongsTo(Sapeur::class);
+    }
 }

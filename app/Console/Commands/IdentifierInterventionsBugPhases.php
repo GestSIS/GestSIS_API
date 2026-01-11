@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Domaine\Business\InterventionBusiness;
+use App\Infrastructure\Models\Ecriture;
+use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\IndemniteInterventionType;
 use App\Infrastructure\Models\Intervention;
 use Carbon\Carbon;
@@ -17,7 +19,7 @@ class IdentifierInterventionsBugPhases extends Command
      * @var string
      */
     protected $signature = 'interventions:bug-phases 
-                            {--exercice-comptable-id= : ID de l\'exercice comptable à analyser}';
+                            {--annee= : Année de l\'exercice comptable à analyser (ex: 2024)}';
 
     /**
      * The console command description.
@@ -93,12 +95,11 @@ class IdentifierInterventionsBugPhases extends Command
      */
     private function analyserDatabase($dbName)
     {
-        $exerciceComptableId = $this->option('exercice-comptable-id');
+        $annee = $this->option('annee');
 
         // Vérifier si le SIS a une config de tarification compatible avec le bug
         // Le bug affecte uniquement les interventions avec tarif_min et phases
         $hasCompatibleConfig = IndemniteInterventionType::whereNotNull('tarif_min')
-            ->whereNotNull('phase_id')
             ->exists();
 
         if (!$hasCompatibleConfig) {
@@ -115,8 +116,20 @@ class IdentifierInterventionsBugPhases extends Command
             ->with(['presences', 'phases', 'ecritures.sapeur'])
             ->has('phases', '>=', 2);
 
-        if ($exerciceComptableId) {
-            $query->where('exercice_comptable_id', $exerciceComptableId);
+        if ($annee) {
+            // Filtrer par année de l'exercice comptable
+            $exerciceComptableIds = ExerciceComptable::where('annee', $annee)->pluck('id');
+
+            if ($exerciceComptableIds->isEmpty()) {
+                $this->line("  <fg=gray>Aucun exercice comptable trouvé pour l'année {$annee}. Skip.</>");
+                return [
+                    'nb_analysees' => 0,
+                    'nb_impactees' => 0,
+                    'ecart_total' => 0
+                ];
+            }
+
+            $query->whereIn('exercice_comptable_id', $exerciceComptableIds);
         }
 
         $interventions = $query->get();
