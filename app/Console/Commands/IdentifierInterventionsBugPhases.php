@@ -351,12 +351,18 @@ class IdentifierInterventionsBugPhases extends Command
                 $ecartHeures = $dureeSansBug - $dureeAvecBug;
                 $ecartCHF = $ecartHeures * $tarifHoraire;
 
+                // Construire le nom complet
+                $nomComplet = "ID $sapeurId";
+                if ($ecriture && $ecriture->sapeur) {
+                    $nomComplet = $ecriture->sapeur->nom . ' ' . $ecriture->sapeur->prenom;
+                }
+
                 $result['impacte'] = true;
                 $result['nb_sapeurs_impactes']++;
                 $result['ecart_total_chf'] += $ecartCHF;
                 $result['details'][] = [
                     'sapeur_id' => $sapeurId,
-                    'sapeur_nom' => $ecriture ? $ecriture->sapeur->nom_prenom : "ID $sapeurId",
+                    'sapeur_nom' => $nomComplet,
                     'duree_avec_bug' => round($dureeAvecBug, 2),
                     'duree_sans_bug' => round($dureeSansBug, 2),
                     'ecart_heures' => round($ecartHeures, 2),
