@@ -190,6 +190,15 @@ class IdentifierInterventionsBugPhases extends Command
                 ], $interventionsImpactees)
             );
 
+            // Détails des sapeurs par intervention
+            $this->newLine();
+            foreach ($interventionsImpactees as $inter) {
+                $this->line("  <fg=yellow>Intervention #{$inter['intervention_id']}</> - Sapeurs impactés:");
+                foreach ($inter['details'] as $detail) {
+                    $this->line("    • {$detail['sapeur_nom']} (écart: {$detail['ecart_heures']}h = {$detail['ecart_chf']} CHF)");
+                }
+            }
+
             // Liste compacte des IDs pour copier-coller
             $ids = array_column($interventionsImpactees, 'intervention_id');
             $this->newLine();
