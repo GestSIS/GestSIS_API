@@ -111,20 +111,6 @@ class IdentifierInterventionsBugPhases extends Command
         $annee = $this->option('annee');
         $fix = $this->option('fix');
 
-        // Vérifier si le SIS a une config de tarification compatible avec le bug
-        // Le bug affecte uniquement les interventions avec tarif_min et phases
-        $hasCompatibleConfig = IndemniteInterventionType::whereNotNull('tarif_min')
-            ->exists();
-
-        if (!$hasCompatibleConfig) {
-            $this->line("  <fg=gray>Aucune configuration tarif_min + phase_id détectée. Skip.</>");
-            return [
-                'nb_analysees' => 0,
-                'nb_impactees' => 0,
-                'ecart_total' => 0
-            ];
-        }
-
         // Récupérer les interventions imputées avec plusieurs phases
         $query = Intervention::where('statut', InterventionBusiness::INTERVENTION_STATUT_IMPUTE)
             ->with(['presences', 'phases', 'ecritures.sapeur'])
