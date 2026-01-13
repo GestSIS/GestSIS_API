@@ -118,14 +118,14 @@ class IdentifierInterventionsBugPhases extends Command
         // Récupérer les IDs des sapeurs actifs en 2025 si le filtre est activé
         $sapeursActifs2025 = null;
         if ($sapeurActif) {
-            $sapeursActifs2025 = Mutation::where(function($query) {
+            $sapeursActifs2025 = Mutation::where(function ($query) {
                 $query->where('incorporation', '<=', '2025-12-31')
-                      ->where(function($q) {
-                          $q->whereNull('sortie')
+                    ->where(function ($q) {
+                        $q->whereNull('sortie')
                             ->orWhere('sortie', '>=', '2025-01-01');
-                      });
+                    });
             })->pluck('sapeur_id')->unique()->toArray();
-            
+
             $this->line("  <fg=cyan>Filtre sapeurs actifs 2025: " . count($sapeursActifs2025) . " sapeur(s)</>");
         }
 
