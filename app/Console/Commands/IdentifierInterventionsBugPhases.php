@@ -3,10 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Domaine\Business\InterventionBusiness;
+use App\Domaine\Business\PaiementBusiness;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\IndemniteInterventionType;
 use App\Infrastructure\Models\Intervention;
+use App\Infrastructure\Models\Mutation;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
@@ -21,6 +23,7 @@ class IdentifierInterventionsBugPhases extends Command
     protected $signature = 'interventions:bug-phases 
                             {--annee= : Année de l\'exercice comptable à analyser (ex: 2024)}
                             {--sis= : Code du SIS à analyser (ex: hs). Si non spécifié, analyse toutes les bases}
+                            {--sapeur-actif : Filtrer uniquement les sapeurs actifs en 2025}
                             {--fix : Créer des écritures de correction pour les montants manquants}';
 
     /**
@@ -110,6 +113,21 @@ class IdentifierInterventionsBugPhases extends Command
     {
         $annee = $this->option('annee');
         $fix = $this->option('fix');
+        $sapeurActif = $this->option('sapeur-actif');
+
+        // Récupérer les IDs des sapeurs actifs en 2025 si le filtre est activé
+        $sapeursActifs2025 = null;
+        if ($sapeurActif) {
+            $sapeursActifs2025 = Mutation::where(function($query) {
+                $query->where('incorporation', '<=', '2025-12-31')
+                      ->where(function($q) {
+                          $q->whereNull('sortie')
+                            ->orWhere('sortie', '>=', '2025-01-01');
+                      });
+            })->pluck('sapeur_id')->unique()->toArray();
+            
+            $this->line("  <fg=cyan>Filtre sapeurs actifs 2025: " . count($sapeursActifs2025) . " sapeur(s)</>");
+        }
 
         // Récupérer les interventions imputées avec plusieurs phases
         $query = Intervention::where('statut', InterventionBusiness::INTERVENTION_STATUT_IMPUTE)
@@ -149,7 +167,7 @@ class IdentifierInterventionsBugPhases extends Command
         $totalEcartCHF = 0;
 
         foreach ($interventions as $intervention) {
-            $ecart = $this->analyserIntervention($intervention);
+            $ecart = $this->analyserIntervention($intervention, $sapeursActifs2025);
 
             if ($ecart['impacte']) {
                 $interventionsImpactees[] = $ecart;
@@ -181,7 +199,10 @@ class IdentifierInterventionsBugPhases extends Command
             foreach ($interventionsImpactees as $inter) {
                 $this->line("  <fg=yellow>Intervention #{$inter['intervention_id']}</> - Sapeurs impactés:");
                 foreach ($inter['details'] as $detail) {
-                    $this->line("    • {$detail['sapeur_nom']} (écart: {$detail['ecart_heures']}h = {$detail['ecart_chf']} CHF)");
+                    $ignored = $detail['ignored'] ?? false;
+                    $style = $ignored ? 'fg=gray' : '';
+                    $suffix = $ignored ? ' <fg=gray>[IGNORÉ - non actif en 2025]</>' : '';
+                    $this->line("    • <{$style}>{$detail['sapeur_nom']} (écart: {$detail['ecart_heures']}h = {$detail['ecart_chf']} CHF){$suffix}</{$style}>");
                 }
             }
 
@@ -194,8 +215,19 @@ class IdentifierInterventionsBugPhases extends Command
             if ($fix) {
                 $this->newLine();
                 if ($this->confirm("Créer les écritures de correction pour {$dbName}?")) {
-                    $nbEcritures = $this->fixInterventions($interventionsImpactees);
-                    $this->info("  ✓ {$nbEcritures} écriture(s) de correction créée(s)");
+                    $ecritures = $this->fixInterventions($interventionsImpactees);
+                    $this->info("  ✓ {$ecritures->count()} écriture(s) de correction créée(s)");
+
+                    // Générer le décompte avec les écritures de correction
+                    $this->newLine();
+                    if ($this->confirm("Générer un décompte avec ces écritures de correction?")) {
+                        $decompte = $this->genererDecompte($ecritures, $dbName);
+                        if ($decompte) {
+                            $this->info("  ✓ Décompte #{$decompte->id} créé: {$decompte->designation}");
+                            $this->line("    • Total à payer: " . number_format($decompte->a_payer_total, 2) . " CHF");
+                            $this->line("    • Paiements: {$decompte->paiements->count()}");
+                        }
+                    }
                 }
             }
         }
@@ -210,7 +242,7 @@ class IdentifierInterventionsBugPhases extends Command
     /**
      * Analyse une intervention pour détecter l'impact du bug
      */
-    private function analyserIntervention($intervention)
+    private function analyserIntervention($intervention, $sapeursActifs2025 = null)
     {
         $result = [
             'intervention_id' => $intervention->id,
@@ -343,6 +375,12 @@ class IdentifierInterventionsBugPhases extends Command
                     $nomComplet = $ecriture->sapeur->nom . ' ' . $ecriture->sapeur->prenom;
                 }
 
+                // Vérifier si le sapeur est actif en 2025 (si filtre activé)
+                $isIgnored = false;
+                if ($sapeursActifs2025 !== null && !in_array($sapeurId, $sapeursActifs2025)) {
+                    $isIgnored = true;
+                }
+
                 $result['impacte'] = true;
                 $result['nb_sapeurs_impactes']++;
                 $result['ecart_total_chf'] += $ecartCHF;
@@ -352,7 +390,8 @@ class IdentifierInterventionsBugPhases extends Command
                     'duree_avec_bug' => round($dureeAvecBug, 2),
                     'duree_sans_bug' => round($dureeSansBug, 2),
                     'ecart_heures' => round($ecartHeures, 2),
-                    'ecart_chf' => round($ecartCHF, 2)
+                    'ecart_chf' => round($ecartCHF, 2),
+                    'ignored' => $isIgnored
                 ];
             }
         }
@@ -365,12 +404,25 @@ class IdentifierInterventionsBugPhases extends Command
      */
     private function fixInterventions($interventionsImpactees)
     {
-        $nbEcritures = 0;
+        $ecritures = collect();
+
+        // Récupérer l'exercice comptable 2025
+        $exerciceComptable2025 = ExerciceComptable::where('annee', 2025)->first();
+
+        if (!$exerciceComptable2025) {
+            $this->error("  ✗ Aucun exercice comptable trouvé pour l'année 2025");
+            return $ecritures;
+        }
 
         foreach ($interventionsImpactees as $interventionData) {
             $intervention = Intervention::find($interventionData['intervention_id']);
 
             foreach ($interventionData['details'] as $detail) {
+                // Ignorer les sapeurs marqués comme ignorés
+                if ($detail['ignored'] ?? false) {
+                    continue;
+                }
+
                 // Récupérer une écriture existante pour copier la config
                 $ecritureRef = $intervention->ecritures->firstWhere('sapeur_id', $detail['sapeur_id']);
 
@@ -378,7 +430,7 @@ class IdentifierInterventionsBugPhases extends Command
                     continue;
                 }
 
-                // Créer l'écriture de correction
+                // Créer l'écriture de correction dans l'année 2025 sans déductions AVS/AI/AC
                 $ecriture = new Ecriture([
                     'designation' => "Correction bug phases - " . $ecritureRef->designation,
                     'complement' => "Correction automatique du bug de calcul des phases multiples",
@@ -396,7 +448,7 @@ class IdentifierInterventionsBugPhases extends Command
 
                     'sapeur_id' => $detail['sapeur_id'],
                     'compte_id' => $ecritureRef->compte_id,
-                    'exercice_comptable_id' => $intervention->exercice_comptable_id,
+                    'exercice_comptable_id' => $exerciceComptable2025->id, // Année 2025
                     'intervention_id' => $intervention->id,
                     'exercice_id' => null,
                     'cours_sapeur_id' => null,
@@ -411,10 +463,52 @@ class IdentifierInterventionsBugPhases extends Command
                 ]);
 
                 $ecriture->save();
-                $nbEcritures++;
+                $ecritures->push($ecriture);
             }
         }
 
-        return $nbEcritures;
+        return $ecritures;
+    }
+
+    /**
+     * Générer un décompte avec les écritures de correction
+     */
+    private function genererDecompte($ecritures, $dbName)
+    {
+        if ($ecritures->isEmpty()) {
+            return null;
+        }
+
+        // Récupérer l'exercice comptable 2025
+        $exerciceComptable2025 = ExerciceComptable::where('annee', 2025)->first();
+
+        if (!$exerciceComptable2025) {
+            $this->error("  ✗ Aucun exercice comptable trouvé pour l'année 2025");
+            return null;
+        }
+
+        $designation = "Correction bug phases - " . Carbon::now()->format('d.m.Y');
+        $date = Carbon::now()->format('Y-m-d');
+
+        // Instancier PaiementBusiness
+        $paiementBusiness = new PaiementBusiness();
+
+        try {
+            $decompte = $paiementBusiness->creerDecompte(
+                $ecritures,
+                $designation,
+                $exerciceComptable2025->id,
+                $date,
+                false // Pas de déduction
+            );
+
+            // Recharger le décompte avec les relations
+            $decompte->load('paiements');
+
+            return $decompte;
+        } catch (\Exception $e) {
+            $this->error("  ✗ Erreur lors de la création du décompte: " . $e->getMessage());
+            return null;
+        }
     }
 }
