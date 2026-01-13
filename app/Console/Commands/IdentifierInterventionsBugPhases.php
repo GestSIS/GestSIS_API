@@ -439,8 +439,8 @@ class IdentifierInterventionsBugPhases extends Command
                     'total' => $detail['ecart_chf'],
                     'type_unite_id' => $ecritureRef->type_unite_id,
 
-                    'tarif_min' => $ecritureRef->tarif_min,
-                    'tarif_min_pour' => $ecritureRef->tarif_min_pour,
+                    'tarif_min' => 0.0,
+                    'tarif_min_pour' => 0.0,
                     'tarif_min_pro_rata' => $ecritureRef->tarif_min_pro_rata,
                     'tarif_pro_rata' => $ecritureRef->tarif_pro_rata,
                     'taux' => $ecritureRef->taux,
