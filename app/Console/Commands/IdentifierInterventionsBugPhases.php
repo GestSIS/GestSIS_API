@@ -432,7 +432,7 @@ class IdentifierInterventionsBugPhases extends Command
 
                 // Créer l'écriture de correction dans l'année 2025 sans déductions AVS/AI/AC
                 $ecriture = new Ecriture([
-                    'designation' => "Correction bug phases - " . $ecritureRef->designation,
+                    'designation' => "Correction - " . $ecritureRef->designation,
                     'complement' => "Correction automatique du bug de calcul des phases multiples",
                     'tarif' => $ecritureRef->tarif,
                     'quantite' => $detail['ecart_heures'],
@@ -487,7 +487,7 @@ class IdentifierInterventionsBugPhases extends Command
             return null;
         }
 
-        $designation = "Correction bug phases - " . Carbon::now()->format('d.m.Y');
+        $designation = "Décompte de Correction bug phases - " . Carbon::now()->format('d.m.Y');
         $date = Carbon::now()->format('Y-m-d');
 
         // Instancier PaiementBusiness
