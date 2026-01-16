@@ -2,80 +2,603 @@
 
 # GestSIS_API
 
-Nouvelle version de l'api GestSIS
+API de gestion des services d'incendie et de secours (SIS) construite avec **Laravel 12** et **PHP 8.4**. Ce système permet la gestion complète des sapeurs-pompiers, interventions, équipements et documents réglementaires dans un environnement multi-tenant.
 
-## Installation
+## 📋 Table des matières
 
-Installation des dépendances :
+- [Fonctionnalités principales](#-fonctionnalités-principales)
+- [Architecture](#-architecture)
+- [Technologies](#-technologies)
+- [Installation](#-installation)
+- [Configuration](#-configuration)
+- [Développement](#-développement)
+- [Tests](#-tests)
+- [Multi-tenant](#-architecture-multi-tenant)
+- [Génération de documents](#-génération-de-documents)
 
-```sh
-composer install
-cp .env.example .env
+## ✨ Fonctionnalités principales
+
+- **Gestion des sapeurs-pompiers** : Fichiers personnels, grades, formations, disponibilités
+- **Gestion des interventions** : Rapports d'intervention, matériel utilisé, personnel engagé
+- **Documents réglementaires** : Génération automatique de fiches sapeur, certificats de salaire, rapports
+- **Multi-tenant** : Support de plusieurs SIS avec bases de données séparées
+- **Authentification JWT** : Intégration avec microservice GestSIS_Auth
+- **Export Excel** : Exports personnalisés pour analyses et archivage
+- **Intégrations externes** : API RTA, système d'alarme, envoi de SMS (ASPSMS)
+
+## 🏗 Architecture
+
+> ⚠️ **IMPORTANT - Évolution architecturale en cours**  
+> L'architecture hexagonale actuellement en place **sera abandonnée** prochainement. Elle sera remplacée par une architecture simplifiée à **2 couches** :
+> - **Controllers** : Gestion des requêtes HTTP et réponses
+> - **Business** : Logique métier directement avec Eloquent
+> 
+> **Raison** : La couche Repository (SPI + implémentation) n'apporte pas de valeur ajoutée avec Eloquent, qui fournit déjà une abstraction efficace de la base de données. Cette simplification réduira la complexité sans compromettre la maintenabilité.
+
+### Architecture actuelle (hexagonale - deprecated)
+
+Ce projet utilise actuellement une **architecture hexagonale** (ports et adapters) qui sera simplifiée.
+
+#### Flux de données (actuel)
+
+```
+Controller → API Service → Business → SPI Interface → Repository Implementation → Model
 ```
 
-Modifier le fichier `.env` afin de configurer la base de données. Attention, la création de la base de données n'est pas réalisée par ce script. La base de données pour ce serveur (GestSIS_API) ne doit pas
-être la même que celle du serveur d'authentification (GestSIS_Auth).
+### Couches
 
-Puis :
-```sh
+#### 1. Couche Application (`app/Application/`)
+
+Point d'entrée HTTP, gère les aspects techniques de l'application :
+- **Controllers** (`Http/Controllers/`) : Reçoivent les requêtes HTTP et délèguent aux API Services
+- **Middleware** : Authentification JWT, sélection de base de données multi-tenant
+- **Auth** : Validation des tokens JWT
+- **Mail** : Templates d'emails
+- **Typst** : Génération de documents PDF
+
+**Exemple** : `SapeurController::show()` → `SapeurService::getSapeur()`
+
+#### 2. Couche Domaine (`app/Domaine/`)
+
+Cœur métier de l'application, divisé en trois sous-couches :
+
+##### 2.1 API Services (`Domaine/API/`)
+
+Services exposant les points d'entrée vers la logique métier :
+- Gèrent directement les opérations de **lecture/listing**
+- Délèguent les opérations de **modification** à la couche Business
+- Injectent les dépendances nécessaires (SPI repositories)
+
+**Exemple** :
+```php
+class SapeurService {
+    public function __construct(
+        private SapeurRepository $sapeurRepository,
+        private SapeurBusiness $sapeurBusiness
+    ) {}
+    
+    // Listing direct
+    public function listSapeurs() {
+        return $this->sapeurRepository->findAll();
+    }
+    
+    // Modification via Business
+    public function updateSapeur($id, $data) {
+        return $this->sapeurBusiness->update($id, $data);
+    }
+}
+```
+
+##### 2.2 Business (`Domaine/Business/`)
+
+Logique métier et règles de gestion :
+- Validation des règles métier
+- Calculs complexes (ex: statut actif d'un sapeur)
+- Orchestration de transactions
+- Définition des constantes métier
+
+**Exemple** :
+```php
+class SapeurBusiness {
+    const TYPE_SAPEUR = 0;
+    const TYPE_CIVIL = 1;
+    
+    public function isActif(Sapeur $sapeur): bool {
+        // Logique métier pour déterminer si un sapeur est actif
+    }
+}
+```
+
+##### 2.3 SPI - Service Provider Interface (`Domaine/SPI/`)
+
+Interfaces définissant les contrats d'accès aux données :
+- Découplage entre le domaine et l'infrastructure
+- Permet de changer d'implémentation (Eloquent, Doctrine, API externe, etc.)
+
+**Exemple** :
+```php
+interface SapeurRepository {
+    public function findById(int $id): ?Sapeur;
+    public function findAll(): array;
+    public function save(Sapeur $sapeur): Sapeur;
+}
+```
+
+#### 3. Couche Infrastructure (`app/Infrastructure/`)
+
+Implémentation technique, dépendances externes :
+- **Repositories** (`Repositories/`) : Implémentations Eloquent des interfaces SPI (suffixe `*RepositoryEloquent`)
+- **Models** (`Models/`) : Modèles Eloquent pour l'ORM
+- **Collections** (`Collections/`) : Collections pour exports Excel (Maatwebspace)
+
+**Exemple** :
+```php
+class SapeurRepositoryEloquent implements SapeurRepository {
+    public function findById(int $id): ?Sapeur {
+        return Sapeur::find($id);
+    }
+}
+```
+
+### Architecture cible (simplifiée)
+
+La future architecture à 2 couches sera organisée ainsi :
+
+```
+Controller → Business (avec Eloquent) → Model
+```
+
+#### Controllers (`app/Application/Http/Controllers/`)
+
+Responsabilités :
+- Réception et validation des requêtes HTTP
+- Appel direct des classes Business
+- Formatage des réponses (JSON, PDF, Excel)
+- Gestion des codes HTTP et erreurs
+
+**Exemple** :
+```php
+class SapeurController extends Controller {
+    public function __construct(
+        private SapeurBusiness $sapeurBusiness
+    ) {}
+    
+    public function index() {
+        $sapeurs = $this->sapeurBusiness->listActifs();
+        return response()->json($sapeurs);
+    }
+    
+    public function store(Request $request) {
+        $sapeur = $this->sapeurBusiness->create($request->validated());
+        return response()->json($sapeur, 201);
+    }
+}
+```
+
+#### Business (`app/Domaine/Business/`)
+
+Responsabilités :
+- Logique métier et règles de gestion
+- Utilisation directe d'Eloquent (Models)
+- Transactions et orchestration
+- Calculs et validations métier
+
+**Exemple** :
+```php
+class SapeurBusiness {
+    const TYPE_SAPEUR = 0;
+    const TYPE_CIVIL = 1;
+    
+    public function listActifs() {
+        return Sapeur::where('statut', 'actif')
+            ->with(['grade', 'fonction'])
+            ->get();
+    }
+    
+    public function create(array $data): Sapeur {
+        DB::transaction(function() use ($data) {
+            $sapeur = Sapeur::create($data);
+            // Autres opérations métier...
+            return $sapeur;
+        });
+    }
+    
+    public function isActif(Sapeur $sapeur): bool {
+        // Logique métier pour déterminer si un sapeur est actif
+    }
+}
+```
+
+### Principes architecturaux (architecture cible)
+
+✅ **À faire** :
+- Controllers appellent uniquement les classes Business
+- Business contient toute la logique métier
+- Utiliser Eloquent directement dans Business (queries, relations, transactions)
+- Models restent simples (propriétés, casts, relations)
+
+❌ **À éviter** :
+- Logique métier dans les Controllers
+- Requêtes Eloquent complexes dans les Controllers
+- Logique applicative dans les Models
+- Duplication de code métier
+
+### Principes architecturaux actuels (hexagonale - deprecated) (architecture cible)
+
+✅ **À faire** :
+- Controllers appellent uniquement les API Services
+- API Services délèguent les mutations à Business
+- Business utilise les interfaces SPI
+- Repositories implémentent les interfaces SPI
+
+❌ **À éviter** :
+- Logique métier dans les Controllers
+- Injection directe de Models dans Business
+- Repositories sans interface SPI
+- Contournement de la couche API Service
+
+## 🛠 Technologies
+
+- **Backend** : Laravel 12, PHP 8.4
+- **Base de données** : MySQL/MariaDB (multi-tenant)
+- **Authentification** : JWT (microservice GestSIS_Auth)
+- **Documents PDF** : Typst, PDFTK
+- **Export** : Maatwebsite Excel
+- **Monitoring** : Sentry
+- **Tests** : PHPUnit
+- **Assets** : Vite
+
+## 🚀 Installation
+
+### Prérequis
+
+- PHP 8.4+
+- Composer
+- MySQL/MariaDB
+- Node.js & Yarn (pour les assets)
+- Typst (pour génération PDF) : [Installation](https://github.com/typst/typst)
+- PDFTK (optionnel, pour certificats de salaire)
+
+### Installation des dépendances
+
+```bash
+# Dépendances PHP
+composer install
+
+# Configuration
+cp .env.example .env
+
+# Clé d'application
 php artisan key:generate
+```
+
+### Configuration de la base de données
+
+⚠️ **Important** : Créer manuellement les bases de données avant de lancer les migrations. GestSIS_API et GestSIS_Auth doivent avoir des bases de données **séparées**.
+
+Modifier `.env` :
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=gestsis_api
+DB_USERNAME=root
+DB_PASSWORD=secret
+
+# Liste des bases multi-tenant (clés SIS séparées par des virgules)
+DB_LISTE=sdis1,sdis2,sdis3
+```
+
+### Migration et seeders
+
+```bash
+# Migration avec étapes
 php artisan migrate --step
+
+# Seeding des données de test
 php artisan db:seed
 ```
 
-### Configuration de l'authentification
+Pour les environnements multi-tenant :
+```bash
+# Migrer toutes les bases tenant
+php artisan dbs:migrate
 
-```sh
-mkdir storage/keys
+# Réinitialiser toutes les bases (fresh + seed)
+php artisan dbs:init
 ```
 
-Ajouter le fichier `auth-public.key` dans le dossier `storage/keys` contenant la clé publique.
+## ⚙️ Configuration
 
-Ce fichier doit au préalable avoir été généré dans le projet GestSIS_Auth.
+### Authentification JWT
 
-### Etats de sortie
+1. Créer le dossier des clés :
+```bash
+mkdir -p storage/keys
+```
 
-Tous les états de sorties pour impression sont générés à l'aide de Typst au format `.typ`.
+2. Ajouter la clé publique `auth-public.key` dans `storage/keys/`
 
-En ce qui concerne les certificats de salaire, `pdftk` est utilisé afin de remplir le fomulaire du template officiel. Référence pour pdftk :
-- https://github.com/lob/lambda-pdftk-example
+   ⚠️ Ce fichier doit être généré depuis le projet **GestSIS_Auth** (serveur d'authentification)
+
+Configuration dans `.env` :
+```env
+JWT_PUBLIC_KEY_PATH=storage/keys/auth-public.key
+JWT_ISSUER=GestSIS_Auth
+JWT_AUDIENCE=GestSIS_API
+```
+
+### Génération de documents
+
+#### Typst (documents principaux)
+
+```env
+TYPST_BIN_PATH=/path/to/typst
+TYPST_FONT_PATH=/path/to/fonts
+```
+
+Templates disponibles dans `resources/typst/` :
+- `fiche-sapeur.typ` : Fiche individuelle sapeur
+- `rapport-intervention.typ` : Rapport d'intervention
+- `common.typ` : Fonctions et styles communs
+
+#### PDFTK (certificats de salaire)
+
+```env
+PDFTK_BIN_PATH=/usr/bin/pdftk
+PDFTK_LIB_FOLDER=/usr/lib
+```
+
+Référence : [lambda-pdftk-example](https://github.com/lob/lambda-pdftk-example)
+
+### Intégrations externes
+
+```env
+# API RTA
+APP_RTA_API_URL=https://rta.example.com
+
+# Système d'alarme
+APP_GESTSIS_ALARM_URL=https://alarm.example.com
+
+# SMS ASPSMS
+ASPSMS_USER=your_user
+ASPSMS_PASSWORD=your_password
+```
+
+### Monitoring
+
+```env
+SENTRY_LARAVEL_DSN=https://your-sentry-dsn
+SENTRY_TRACES_SAMPLE_RATE=0.1
+```
+
+## 💻 Développement
 
 ### Serveur de développement
 
-Pour lancer le serveur de dev :
-
-```sh
+```bash
+# Serveur local
 php artisan serve
+
+# Accès depuis l'hôte (VM/Container)
+php artisan serve --host=0.0.0.0 --port=8000
 ```
 
-### Développement dans une machine virtuelle
-Si le serveur de développement est lancé dans une machine virtuelle, mais que l'accès se fait depuis l'hôte, il est nécessaire d'ajouter `--host=XXX` à la commande ci-dessus.
+### Assets frontend
 
-## Architecture Hexagonale
+```bash
+# Installation
+yarn install
 
-Ce projet utilise une architecture hexagonale afin d'améliorer la maintenance du projet.
+# Compilation dev (watch mode)
+yarn dev
 
-### Couche application
+# Build production
+yarn build
+```
 
-Tout ce qui permet d'interagir avec le domaine, `app\application`
+### Commandes utiles
 
-### Le domaine
+```bash
+# Lister les routes
+php artisan route:list
 
-Se compose de 3 couches les API's, le business et les SPI's.
+# Vider le cache
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
 
-### API's
+# Générer des classes
+php artisan make:controller NomController
+php artisan make:model Infrastructure/Models/NomModel
+```
 
-Cette couche se compose de services qui définissent les entrés du code métier, toute action à destination du métier passe par là. `App\Domaine\API`
-Toute action de modification doit être passée à la couche Business. Seul les actions de listing peuvent directemenet être résolues.
+### Tâches planifiées
 
-### Business
+Les tâches cron sont définies dans `cron.sh` :
+```bash
+# Mise à jour du statut actif des sapeurs (toutes les bases)
+php artisan dbs:sapeurs-actif-status
+```
 
-Le code métier dans le dossier`app\domaine\Business`
+## 🧪 Tests
 
-### SPI's
+### Exécuter les tests
 
-Défini les besoins qui seront implémentés dans la couche infrastructure. `app\domaine\SPI`
+```bash
+# Tous les tests
+php artisan test
 
-### Couche Infrastructure
+# Tests unitaires uniquement
+php artisan test tests/Unit
 
-Ce qui est piloté par le domaine, `app\infrastructure`
+# Tests fonctionnels uniquement
+php artisan test tests/Feature
+
+# Test spécifique
+php artisan test tests/Feature/SapeurControllerTest.php
+
+# Avec coverage
+php artisan test --coverage-html coverage
+```
+
+### Environnement de test
+
+Les tests utilisent une connexion `testing` dédiée (configurée dans `config/database.php`). Le middleware de sélection de base de données est automatiquement contourné quand `APP_ENV=testing`.
+
+Configuration `.env.testing` :
+```env
+APP_ENV=testing
+DB_CONNECTION=testing
+DB_DATABASE=gestsis_test
+```
+
+### Factories
+
+Utiliser les factories pour générer des données de test :
+```php
+use App\Infrastructure\Models\Sapeur;
+
+$sapeur = Sapeur::factory()->make(); // Instance non persistée
+$sapeur = Sapeur::factory()->create(); // Instance persistée
+$sapeurs = Sapeur::factory()->count(10)->create();
+```
+
+## 🏢 Architecture Multi-tenant
+
+GestSIS_API gère plusieurs organisations de pompiers (SIS), chacune avec sa propre base de données.
+
+### Fonctionnement
+
+1. **Sélection de la base** : Le middleware `DbSelector` lit le header HTTP :
+   - `Sis-Id` : Identifiant numérique du SIS
+   - `Sis-Key` : Clé textuelle du SIS (ex: "sdis1")
+
+2. **Switching runtime** : 
+```php
+Config::set('database.default', 'db_' . $sisKey);
+```
+
+3. **Connexions multiples** : Définies dans `config/database.php` à partir de `DB_LISTE`
+
+### Commandes multi-tenant
+
+| Commande | Description |
+|----------|-------------|
+| `php artisan dbs:migrate` | Migrer toutes les bases tenant |
+| `php artisan dbs:init` | Fresh migration + seed pour toutes les bases |
+| `php artisan dbs:sapeurs-actif-status` | Job batch de calcul statut actif |
+
+### Exemple d'appel API
+
+```bash
+curl -X GET https://api.gestsis.ch/api/sapeurs \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Sis-Key: sdis1" \
+  -H "Accept: application/json"
+```
+
+## 📄 Génération de documents
+
+### Workflow Typst
+
+1. Créer un répertoire temporaire
+2. Copier le template `.typ` + `common.typ` + logo
+3. Écrire les données en JSON
+4. Compiler : `typst compile template.typ --font-path=$TYPST_FONT_PATH`
+5. Retourner le PDF généré
+
+**Classe principale** : `App\Application\Typst\TypstToPdfGenerator`
+
+### Exemple de génération
+
+```php
+use App\Application\Typst\TypstToPdfGenerator;
+
+$generator = new TypstToPdfGenerator();
+$pdfPath = $generator->generateDocument(
+    'fiche-sapeur',
+    ['sapeur' => $sapeurData]
+);
+```
+
+## 📝 Conventions de code
+
+### Nommage
+
+- **Interfaces SPI** : `SapeurRepository` (dans `Domaine/SPI/`)
+- **Implémentations** : `SapeurRepositoryEloquent` (dans `Infrastructure/Repositories/`)
+- **API Services** : `SapeurService` (dans `Domaine/API/`)
+- **Business** : `SapeurBusiness` (dans `Domaine/Business/`)
+- **Models** : `Sapeur` (dans `Infrastructure/Models/`)
+
+### Dates
+
+- **Format suisse** : `DD.MM.YYYY` (ex: `29.01.2019`)
+- Utiliser **Carbon** pour les manipulations
+- Dates seules : `setTime(0, 0)` pour les comparaisons
+
+### Constantes métier
+
+Définir dans les classes Business :
+```php
+class SapeurBusiness {
+    const TYPE_SAPEUR = 0;
+    const TYPE_CIVIL = 1;
+    const STATUT_ACTIF = 'actif';
+    const STATUT_INACTIF = 'inactif';
+}
+```
+
+### Injection de dépendances
+
+```php
+class SapeurService {
+    public function __construct(
+        private SapeurRepository $repository,
+        private SapeurBusiness $business
+    ) {}
+}
+```
+
+## 🔧 Débogage
+
+### Logs
+
+```bash
+# Logs Laravel
+tail -f storage/logs/laravel.log
+
+# Logs HTTP (si activé)
+tail -f storage/logs/http-logger.log
+```
+
+### Debug bar
+
+En développement, Laravel Debugbar est disponible :
+```env
+DEBUGBAR_ENABLED=true
+```
+
+## 🤝 Contribution
+
+### Workflow
+
+1. Créer une branche
+2. Implémenter les changements (suivre l'architecture hexagonale)
+3. Écrire/mettre à jour les tests
+4. Créer une Pull Request vers `develop`
+
+### Checklist avant PR
+
+- [ ] Tests passent (`php artisan test`)
+- [ ] Code suit les conventions PSR-12
+- [ ] Architecture hexagonale respectée
+- [ ] Documentation mise à jour si nécessaire
+- [ ] Pas de secrets dans le code
+
+## 📚 Ressources
+
+- [Documentation Laravel 12](https://laravel.com/docs/12.x)
+- [Typst Documentation](https://typst.app/docs)
+- [PDFTK Documentation](https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/)
