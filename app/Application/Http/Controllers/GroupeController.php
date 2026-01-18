@@ -2,17 +2,17 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\GroupeService;
+use App\Domaine\Business\OrganisationBusiness;
 use App\Infrastructure\Models\Groupe;
 use Illuminate\Http\Request;
 
 class GroupeController extends Controller
 {
-    protected $service;
+    protected $business;
 
-    public function __construct(GroupeService $service)
+    public function __construct(OrganisationBusiness $business)
     {
-        $this->service = $service;
+        $this->business = $business;
     }
 
 
@@ -23,7 +23,7 @@ class GroupeController extends Controller
      */
     public function index()
     {
-        $groupes = $this->service->listeGroupe();
+        $groupes = Groupe::with('sapeurIds')->get();
         return response()->json(['data' => $groupes]);
     }
 
@@ -37,7 +37,7 @@ class GroupeController extends Controller
             'type' => 'integer',
         ]);
 
-        $groupe = $this->service->ajouterGroupe($data);
+        $groupe = $this->business->ajouterGroupe($data);
         return response()->json(['data' => $groupe]);
     }
 
@@ -55,7 +55,7 @@ class GroupeController extends Controller
             'type' => 'integer',
         ]);
 
-        $groupe = $this->service->modifierGroupe($id, $data);
+        $groupe = $this->business->modifierGroupe($id, $data);
         return response()->json(['data' => $groupe]);
     }
 
@@ -65,7 +65,7 @@ class GroupeController extends Controller
             return response()->json(['error' => 'Groupe not found'], 404);
         }
 
-        $this->service->supprimerGroupe($id);
+        $this->business->supprimerGroupe($id);
         return response()->json(['data' => 'ok']);
     }
 }

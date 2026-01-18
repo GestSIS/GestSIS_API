@@ -52,12 +52,18 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     public function createNewIntervention($data)
     {
-        if (!array_key_exists('lieu', $data) || $data['lieu'] === null) $data['lieu'] = '';
-        if (!array_key_exists('agent', $data) || $data['agent'] === null) $data['agent'] = '';
-        if (!array_key_exists('description', $data) || $data['description'] === null) $data['description'] = '';
-        if (!array_key_exists('proprietaire', $data) || $data['proprietaire'] === null) $data['proprietaire'] = '';
-        if (!array_key_exists('responsable', $data) || $data['responsable'] === null) $data['responsable'] = '';
-        if (array_key_exists('wgs84', $data) && $data['wgs84'] === null) $data['wgs84'] = '';
+        if (!array_key_exists('lieu', $data) || $data['lieu'] === null)
+            $data['lieu'] = '';
+        if (!array_key_exists('agent', $data) || $data['agent'] === null)
+            $data['agent'] = '';
+        if (!array_key_exists('description', $data) || $data['description'] === null)
+            $data['description'] = '';
+        if (!array_key_exists('proprietaire', $data) || $data['proprietaire'] === null)
+            $data['proprietaire'] = '';
+        if (!array_key_exists('responsable', $data) || $data['responsable'] === null)
+            $data['responsable'] = '';
+        if (array_key_exists('wgs84', $data) && $data['wgs84'] === null)
+            $data['wgs84'] = '';
 
         $intervention = new Intervention();
         $intervention->fill($data);
@@ -70,12 +76,18 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     public function editInterventionInformationsById($interventionId, $data)
     {
-        if (array_key_exists('lieu', $data) && $data['lieu'] === null) $data['lieu'] = '';
-        if (!array_key_exists('agent', $data) || $data['agent'] === null) $data['agent'] = '';
-        if (array_key_exists('description', $data) && $data['description'] === null) $data['description'] = '';
-        if (array_key_exists('proprietaire', $data) && $data['proprietaire'] === null) $data['proprietaire'] = '';
-        if (array_key_exists('responsable', $data) && $data['responsable'] === null) $data['responsable'] = '';
-        if (array_key_exists('wgs84', $data) && $data['wgs84'] === null) $data['wgs84'] = '';
+        if (array_key_exists('lieu', $data) && $data['lieu'] === null)
+            $data['lieu'] = '';
+        if (!array_key_exists('agent', $data) || $data['agent'] === null)
+            $data['agent'] = '';
+        if (array_key_exists('description', $data) && $data['description'] === null)
+            $data['description'] = '';
+        if (array_key_exists('proprietaire', $data) && $data['proprietaire'] === null)
+            $data['proprietaire'] = '';
+        if (array_key_exists('responsable', $data) && $data['responsable'] === null)
+            $data['responsable'] = '';
+        if (array_key_exists('wgs84', $data) && $data['wgs84'] === null)
+            $data['wgs84'] = '';
 
         $intervention = Intervention::find($interventionId);
         $intervention->update($data);
@@ -190,7 +202,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     public function addAppel($interventionId, $appel)
     {
-        if (array_key_exists('commentaire', $appel) && $appel['commentaire'] === null) $appel['commentaire'] = '';
+        if (array_key_exists('commentaire', $appel) && $appel['commentaire'] === null)
+            $appel['commentaire'] = '';
 
         $app = new Appel();
         $app->fill($appel);
@@ -200,7 +213,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     public function editAppelInfoById($interventionId, $appelId, $infos)
     {
-        if (array_key_exists('commentaire', $infos) && $infos['commentaire'] === null) $infos['commentaire'] = '';
+        if (array_key_exists('commentaire', $infos) && $infos['commentaire'] === null)
+            $infos['commentaire'] = '';
 
         Appel::where('intervention_id', $interventionId)->where('id', $appelId)->update($infos);
         return $this->convertAppel(Appel::find($appelId));
@@ -213,7 +227,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     public function addMission($interventionId, $mission)
     {
-        if (array_key_exists('resume', $mission) && $mission['resume'] === null) $mission['resume'] = '';
+        if (array_key_exists('resume', $mission) && $mission['resume'] === null)
+            $mission['resume'] = '';
 
         $mis = new Mission();
         $mis->fill($mission);
@@ -223,7 +238,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     public function editMissionInfoById($interventionId, $missionId, $infos)
     {
-        if (array_key_exists('resume', $infos) && $infos['resume'] === null) $infos['resume'] = '';
+        if (array_key_exists('resume', $infos) && $infos['resume'] === null)
+            $infos['resume'] = '';
 
         Mission::where('intervention_id', $interventionId)->where('id', $missionId)->update($infos);
         return $this->convertMission(Mission::find($missionId));
@@ -326,7 +342,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
      */
     protected function convertIntervention($intervention, $with = array())
     {
-        if ($intervention == null) return null;
+        if ($intervention == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $intervention->id;
@@ -384,7 +401,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     protected function convertTypeIntervention($type)
     {
-        if ($type == null) return null;
+        if ($type == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $type->id;
@@ -396,7 +414,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     protected function convertLocalite($localite)
     {
-        if ($localite == null) return null;
+        if ($localite == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $localite->id;
@@ -409,7 +428,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     protected function convertPhase($phase)
     {
-        if ($phase == null) return null;
+        if ($phase == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $phase->id;
@@ -423,7 +443,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     protected function convertPresence($presence)
     {
-        if ($presence == null) return null;
+        if ($presence == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $presence->id;
@@ -439,7 +460,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     protected function convertMission($mission)
     {
-        if ($mission == null) return null;
+        if ($mission == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $mission->id;
@@ -457,7 +479,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     protected function convertAppel($appel)
     {
-        if ($appel == null) return null;
+        if ($appel == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $appel->id;
@@ -473,7 +496,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     protected function convertVehicule($vehicule)
     {
-        if ($vehicule == null) return null;
+        if ($vehicule == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $vehicule->id;
@@ -486,7 +510,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     protected function convertMateriel($materiel)
     {
-        if ($materiel == null) return null;
+        if ($materiel == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $materiel->id;
@@ -500,7 +525,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     protected function convertQuittance($quittance)
     {
-        if ($quittance == null) return null;
+        if ($quittance == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $quittance->id;
@@ -513,7 +539,8 @@ class InterventionRepositoryEloquent implements InterventionRepository
 
     protected function convertGroupe($groupe)
     {
-        if ($groupe == null) return null;
+        if ($groupe == null)
+            return null;
 
         $object = new StdClass();
         $object->id = $groupe->id;

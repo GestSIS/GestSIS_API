@@ -132,7 +132,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
             $data['communications'] = '';
         }
 
-        $exercice = Exercice::find($exerciceId);
+        $exercice = Exercice::findOrFail($exerciceId);
         $exercice->update($data);
 
         return $this->convertExercice($exercice);
@@ -140,9 +140,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
 
     public function getExerciceByIdWith(int $exerciceId, $with = [])
     {
-        //TODO: validate $with
-        $autorized = ['sapeurs', 'localite'];
-        return $this->convertExercice(Exercice::with($with)->find($exerciceId), $with);
+        return $this->convertExercice(Exercice::with($with)->findOrFail($exerciceId), $with);
     }
 
     public function addSapeurToExercice(int $exerciceId, $data)
@@ -191,7 +189,7 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
     public function getSapeurs(int $exercice_id)
     {
         $temp = $this;
-        return Exercice::find($exercice_id)->sapeurs->map(function ($sapeur) use ($temp) {
+        return Exercice::findOrFail($exercice_id)->sapeurs->map(function ($sapeur) use ($temp) {
             return $temp->convertSapeur($sapeur);
         })->toArray();
     }

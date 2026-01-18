@@ -2,17 +2,16 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\Groupe;
-use App\Domaine\API\GroupeService;
+use App\Domaine\Business\OrganisationBusiness;
 use Illuminate\Http\Request;
 
 class GroupeSapeursController extends Controller
 {
-    protected $service;
+    protected $business;
 
-    public function __construct(GroupeService $service)
+    public function __construct(OrganisationBusiness $business)
     {
-        $this->service = $service;
+        $this->business = $business;
     }
 
     public function store(Request $request, $groupeId)
@@ -21,7 +20,7 @@ class GroupeSapeursController extends Controller
             '*' => 'integer|min:1',
         ]);
 
-        $groupe = $this->service->modifierGroupeSapeurs($groupeId, $data);
+        $groupe = $this->business->modifierGroupeSapeurs($groupeId, $data);
         return response()->json(['data' => $groupe]);
     }
 }
