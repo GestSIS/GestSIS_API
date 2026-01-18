@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd" bootstrap="vendor/autoload.php" colors="true" cacheDirectory=".phpunit.cache">
-  <coverage>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.5/phpunit.xsd"
+  bootstrap="vendor/autoload.php"
+  colors="true"
+  cacheDirectory=".phpunit.cache">
+  <!-- <coverage>
     <report>
       <html outputDirectory="storage/framework/testing" lowUpperBound="50" highLowerBound="80"/>
     </report>
-  </coverage>
+  </coverage> -->
   <testsuites>
     <testsuite name="Unit">
       <directory suffix="Test.php">./tests/Unit</directory>
@@ -14,6 +17,7 @@
     </testsuite>
   </testsuites>
   <php>
+    <ini name="memory_limit" value="512M"/>
     <env name="APP_ENV" value="testing"/>
     <env name="APP_MAINTENANCE_DRIVER" value="file"/>
     <env name="BCRYPT_ROUNDS" value="4"/>
