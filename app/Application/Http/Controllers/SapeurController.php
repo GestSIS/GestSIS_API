@@ -4,6 +4,8 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\SapeurService;
 use App\Domaine\Business\SapeurBusiness;
+use App\Domaine\SPI\SapeurRepository;
+use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -11,10 +13,14 @@ use Illuminate\Http\Response;
 
 class SapeurController extends Controller
 {
+    protected $repository;
+    protected $business;
     protected $service;
 
-    public function __construct(SapeurService $service)
+    public function __construct(SapeurService $service, SapeurRepository $repository, SapeurBusiness $business)
     {
+        $this->repository = $repository;
+        $this->business = $business;
         $this->service = $service;
     }
 
@@ -28,7 +34,8 @@ class SapeurController extends Controller
     {
         $actif = $request->input('actif', false) === 'true';
         $actifOuAvecMateriel = $request->input('avec-materiel', false) === 'true';
-        return response()->json(["data" => $this->service->listeSapeurs($actif, $actifOuAvecMateriel)]);
+
+        return response()->json(["data" => $this->repository->listeSapeurLight($actif, $actifOuAvecMateriel)]);
     }
 
     /**
@@ -57,7 +64,12 @@ class SapeurController extends Controller
      */
     public function effectif()
     {
-        return response()->json(['data' => $this->service->effectif()]);
+        $sapeurs = Sapeur::with('telephones', 'permis', 'fonctions', 'groupes')
+            ->where('actif', '=', '1')
+            ->where('type', '=', SapeurBusiness::TYPE_SAPEUR)
+            ->get(['id', 'nom', 'prenom', 'email', 'annee_incorporation', 'rue', 'no_rue', 'date_naissance', 'fonction_id', 'grade_id', 'civilite_id', 'localite_id'])
+            ->toArray();
+        return response()->json(['data' => $sapeurs]);
     }
 
     /**
@@ -128,8 +140,7 @@ class SapeurController extends Controller
                     'localite_id' => 'integer|min:1',
                     'civilite_id' => 'integer|min:1'
                 ]);
-                $sapeur = $this->service->createSapeur($data);
-                return response()->json(['data' => $sapeur]);
+                return response()->json(['data' => $this->business->createSapeur($data)]);
 
             case SapeurBusiness::TYPE_CIVIL:
                 $data = $request->validate([
@@ -146,8 +157,7 @@ class SapeurController extends Controller
                     'localite_id' => 'required|integer|min:1',
                     'civilite_id' => 'required|integer|min:1'
                 ]);
-                $sapeur = $this->service->createCivil($data);
-                return response()->json(['data' => $sapeur]);
+                return response()->json(['data' => $this->business->createCivil($data)]);
 
             default:
         }
@@ -167,9 +177,7 @@ class SapeurController extends Controller
             'actif' => 'required|integer|min:0|max:1',
         ]);
 
-        $sapeur = $this->service->updateNonSapeurStatut($sapeurId, $data);
-
-        return response()->json(['data' => $sapeur]);
+        return response()->json(['data' => $this->business->updateNonSapeurStatut($sapeurId, $data)]);
     }
 
     /**
@@ -180,7 +188,10 @@ class SapeurController extends Controller
      */
     public function show(int $id)
     {
-        $sapeur = $this->service->getSapeurDetailsById($id);
+        if (!$sapeur = $this->repository->getSapeurDetailsById($id)) {
+            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+        }
+
         return response()->json(['data' => $sapeur]);
     }
 
@@ -215,7 +226,9 @@ class SapeurController extends Controller
             'civilite_id' => 'integer|min:1'
         ]);
 
-        $sapeur = $this->service->editSapeurDetailsById($id, $data);
+        if (!$sapeur = $this->business->updateSapeurById($id, $data)) {
+            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+        }
 
         return response()->json(['data' => $sapeur]);
     }
@@ -228,7 +241,11 @@ class SapeurController extends Controller
      */
     public function destroy(int $id)
     {
-        $this->service->deleteSapeurById($id);
+        if (!Sapeur::where('id', $id)->exists()) {
+            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+        }
+
+        $this->business->deleteSapeurById($id);
 
         return response()->json(['data' => "success"]);
     }

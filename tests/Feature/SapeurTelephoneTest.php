@@ -2,67 +2,62 @@
 
 namespace Tests\Feature;
 
-use App\Domaine\API\SapeurService;
 use App\Infrastructure\Models\Sapeur;
-use Carbon\Carbon;
-use Exception;
+use App\Infrastructure\Models\SapeurTelephone;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
-
 
 class SapeurTelephoneTest extends TestCase
 {
-    protected $service;
-    protected $sapeurId;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->service = $this->app->make(SapeurService::class);
-
-        $data = Sapeur::factory()->make()->toArray();
-        $data['incorporation'] = "29.01.2019";
-
-        $this->sapeurId = $this->service->createSapeur($data)->id;
-    }
+    use DatabaseTransactions;
 
     /**
-     * Test add telephone
-     *
-     * @return void
-     * @throws Exception
+     * Test index returns list of telephones
      */
-    public function testTelephoneIndexOk()
+    public function testIndexTelephonesReturnsListOfTelephones()
     {
-        $response = $this->json('GET', "/api/v2/sapeurs/1/telephones");
+        $sapeur = Sapeur::factory()->create();
+        
+        // Create 3 telephones using factory
+        $tel1 = SapeurTelephone::factory()->forSapeur($sapeur->id)->ofType(1)->create();
+        $tel2 = SapeurTelephone::factory()->forSapeur($sapeur->id)->ofType(2)->create();
+        $tel3 = SapeurTelephone::factory()->forSapeur($sapeur->id)->ofType(3)->create();
+
+        $response = $this->json('GET', "/api/v2/sapeurs/{$sapeur->id}/telephones");
 
         $response
             ->assertStatus(200)
-            ->assertJsonStructure([
-                'data' => [
-                    '*' => [
-                        'id', 'telephone_type_id', 'sapeur_id', 'numero'
-                    ]
-                ]
-            ]);
+            ->assertJsonCount(3, 'data')
+            ->assertJsonFragment(['id' => $tel1->id])
+            ->assertJsonFragment(['id' => $tel2->id])
+            ->assertJsonFragment(['id' => $tel3->id]);
     }
 
     /**
-     * Test add telephone
-     *
-     * @return void
-     * @throws Exception
+     * Test index returns error when sapeur not found
      */
-    public function testAddTelephone()
+    public function testIndexTelephonesReturnsErrorWhenSapeurNotFound()
     {
-        $data = array(
+        $response = $this->json('GET', "/api/v2/sapeurs/99999/telephones");
+
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Sapeur non trouvé']);
+    }
+
+    /**
+     * Test add telephone successfully
+     */
+    public function testAddTelephoneSuccessfully()
+    {
+        $sapeur = Sapeur::factory()->create();
+        $data = [
             'numero' => '032 546 54 12',
             'telephone_type_id' => 1,
             'rta' => false,
             'priorite' => 1
-        );
+        ];
 
-        $response = $this->json('POST', "/api/v2/sapeurs/$this->sapeurId/telephones", $data);
+        $response = $this->json('POST', "/api/v2/sapeurs/{$sapeur->id}/telephones", $data);
 
         $response
             ->assertStatus(200)
@@ -73,40 +68,57 @@ class SapeurTelephoneTest extends TestCase
             ]);
 
         $telephone = $response->getData()->data;
-
-        foreach ($data as $key => $value) {
-            $this->assertTrue($data[$key] === get_object_vars($telephone)[$key]);
-        }
+        $this->assertEquals($data['numero'], $telephone->numero);
+        $this->assertEquals($data['telephone_type_id'], $telephone->telephone_type_id);
+        $this->assertEquals($sapeur->id, $telephone->sapeur_id);
     }
 
     /**
-     * Test edit telephone
-     *
-     * @return void
-     * @throws Exception
+     * Test add telephone returns error when sapeur not found
      */
-    public function testEditTelephone()
+    public function testAddTelephoneReturnsErrorWhenSapeurNotFound()
     {
-        $data = array(
-            'numero' => '032 546 54 15',
+        $data = [
+            'numero' => '032 546 54 12',
             'telephone_type_id' => 1,
             'rta' => false,
             'priorite' => 1
-        );
+        ];
 
-        $telephoneId = $this->service->addTelephone($this->sapeurId, $data)->id;
+        $response = $this->json('POST', "/api/v2/sapeurs/99999/telephones", $data);
 
-        $data = array(
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Sapeur non trouvé']);
+    }
+
+    /**
+     * Test edit telephone successfully
+     */
+    public function testEditTelephoneSuccessfully()
+    {
+        $sapeur = Sapeur::factory()->create();
+        
+        // Create telephone
+        $telephone = SapeurTelephone::factory()
+            ->forSapeur($sapeur->id)
+            ->withNumero('032 546 54 15')
+            ->ofType(1)
+            ->withRta(false)
+            ->withPriorite(1)
+            ->create();
+
+        $newData = [
+            'id' => $telephone->id,
             'numero' => '032 546 12 18',
             'telephone_type_id' => 2,
             'rta' => true,
             'priorite' => 3
-        );
+        ];
 
         $response = $this->json(
             'PUT',
-            "/api/v2/sapeurs/$this->sapeurId/telephones/$telephoneId",
-            array_merge($data, ['id' => $telephoneId])
+            "/api/v2/sapeurs/{$sapeur->id}/telephones/{$telephone->id}",
+            $newData
         );
 
         $response
@@ -117,80 +129,108 @@ class SapeurTelephoneTest extends TestCase
                 ]
             ]);
 
-        $telephone = $response->getData()->data;
-
-        foreach ($data as $key => $value) {
-            $this->assertTrue($data[$key] === get_object_vars($telephone)[$key]);
-        }
+        $updatedTelephone = $response->getData()->data;
+        $this->assertEquals($newData['numero'], $updatedTelephone->numero);
+        $this->assertEquals($newData['telephone_type_id'], $updatedTelephone->telephone_type_id);
+        $this->assertEquals($newData['rta'], $updatedTelephone->rta);
+        $this->assertEquals($newData['priorite'], $updatedTelephone->priorite);
     }
 
     /**
-     * Test edit telephone
-     *
-     * @return void
-     * @throws Exception
+     * Test edit telephone returns error when not found
      */
-    public function testEditTelephoneInvalid()
+    public function testEditTelephoneReturnsErrorWhenNotFound()
     {
-        $data = array(
-            'numero' => '032 546 54 15',
-            'telephone_type_id' => 1,
-            'rta' => 0,
-            'priorite' => 1
-        );
+        $sapeur = Sapeur::factory()->create();
 
-        $telephoneId = $this->service->addTelephone($this->sapeurId, $data)->id;
-
-        $data = array(
+        $data = [
+            'id' => 99999,
             'numero' => '032 546 12 18',
             'telephone_type_id' => 2,
-            'rta' => 0,
+            'rta' => true,
             'priorite' => 3
-        );
+        ];
 
         $response = $this->json(
             'PUT',
-            "/api/v2/sapeurs/$this->sapeurId/telephones/0",
-            array_merge($data, ['id' => $telephoneId])
+            "/api/v2/sapeurs/{$sapeur->id}/telephones/99999",
+            $data
         );
 
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'error'
-            ]);
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Téléphone non trouvé']);
     }
 
     /**
-     * Test remove telephone
-     *
-     * @return void
-     * @throws Exception
+     * Test edit telephone returns error when sapeur not found
      */
-    public function testRemoveTelephone()
+    public function testEditTelephoneReturnsErrorWhenSapeurNotFound()
     {
-        $data = array(
-            'numero' => '032 546 54 79',
-            'telephone_type_id' => 1,
-            'rta' => 0,
-            'priorite' => 1
+        $data = [
+            'id' => 1,
+            'numero' => '032 546 12 18',
+            'telephone_type_id' => 2,
+            'rta' => true,
+            'priorite' => 3
+        ];
+
+        $response = $this->json(
+            'PUT',
+            "/api/v2/sapeurs/99999/telephones/1",
+            $data
         );
 
-        $telephoneId = $this->service->addTelephone($this->sapeurId, $data)->id;
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Sapeur non trouvé']);
+    }
 
-        $response = $this->json('DELETE', "/api/v2/sapeurs/$this->sapeurId/telephones/$telephoneId");
+    /**
+     * Test remove telephone successfully
+     */
+    public function testRemoveTelephoneSuccessfully()
+    {
+        $sapeur = Sapeur::factory()->create();
+        
+        // Create telephone
+        $telephone = SapeurTelephone::factory()
+            ->forSapeur($sapeur->id)
+            ->withNumero('032 546 54 79')
+            ->create();
+
+        $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/telephones/{$telephone->id}");
 
         $response
             ->assertStatus(200)
-            ->assertJsonStructure([
-                'data'
-            ]);
+            ->assertJson(['data' => 'success']);
 
-        $telephones = $this->service->getSapeurTelephonesById($this->sapeurId);
-        array_filter($telephones, function ($p) use ($telephoneId) {
-            return $p->id == $telephoneId;
-        });
+        // Verify it's deleted
+        $this->assertDatabaseMissing('sapeur_telephone', [
+            'id' => $telephone->id,
+            'sapeur_id' => $sapeur->id
+        ]);
+    }
 
-        $this->assertTrue(count($telephones) === 0);
+    /**
+     * Test remove telephone returns error when not found
+     */
+    public function testRemoveTelephoneReturnsErrorWhenNotFound()
+    {
+        $sapeur = Sapeur::factory()->create();
+
+        $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/telephones/99999");
+
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Téléphone non trouvé']);
+    }
+
+    /**
+     * Test remove telephone returns error when sapeur not found
+     */
+    public function testRemoveTelephoneReturnsErrorWhenSapeurNotFound()
+    {
+        $response = $this->json('DELETE', "/api/v2/sapeurs/99999/telephones/1");
+
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Sapeur non trouvé']);
     }
 }

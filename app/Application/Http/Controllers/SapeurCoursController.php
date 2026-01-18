@@ -4,6 +4,8 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\SapeurService;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\CoursSapeur;
+use App\Infrastructure\Models\Sapeur;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -23,6 +25,10 @@ class SapeurCoursController extends Controller
      */
     public function index($sapeurId)
     {
+        if (!Sapeur::where('id', $sapeurId)->exists()) {
+            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+        }
+
         $cours = $this->service->getSapeurCoursById($sapeurId);
 
         return response()->json(['data' => $cours]);
@@ -37,6 +43,10 @@ class SapeurCoursController extends Controller
      */
     public function store(Request $request, int $sapeurId)
     {
+        if (!Sapeur::where('id', $sapeurId)->exists()) {
+            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+        }
+
         $data = $request->validate([
             'date' => 'required|date',
             'duree' => 'required|numeric|min:0',
@@ -64,6 +74,14 @@ class SapeurCoursController extends Controller
      */
     public function update(Request $request, int $sapeurId, int $coursId)
     {
+        if (!Sapeur::where('id', $sapeurId)->exists()) {
+            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+        }
+
+        if (!CoursSapeur::where(['id' => $coursId, 'sapeur_id' => $sapeurId])->exists()) {
+            return response()->json(['error' => 'Cours non trouvé'], 404);
+        }
+
         if ($coursId !== $request->get('id')) {
             return response()->json(['error' => 'invalid cours id']);
         }
@@ -88,6 +106,14 @@ class SapeurCoursController extends Controller
      */
     public function destroy(int $sapeurId, int $coursId)
     {
+        if (!Sapeur::where('id', $sapeurId)->exists()) {
+            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+        }
+
+        if (!CoursSapeur::where(['id' => $coursId, 'sapeur_id' => $sapeurId])->exists()) {
+            return response()->json(['error' => 'Cours non trouvé'], 404);
+        }
+
         $this->service->removeCours($sapeurId, $coursId);
 
         return response()->json(['data' => 'success']);

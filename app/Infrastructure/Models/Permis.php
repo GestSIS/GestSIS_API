@@ -2,15 +2,20 @@
 
 namespace App\Infrastructure\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Permis extends Model
 {
-    protected $fillable = ['date'];
+    use HasFactory;
+
+    protected $fillable = ['sapeur_id', 'permis_type_id', 'date'];
+
     protected function casts(): array
     {
-        return  [
-            'sapeur_id' => 'integer', 'permis_type_id' => 'integer'
+        return [
+            'sapeur_id' => 'integer',
+            'permis_type_id' => 'integer'
         ];
     }
 

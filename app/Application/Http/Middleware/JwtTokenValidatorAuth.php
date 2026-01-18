@@ -6,7 +6,7 @@ use Closure;
 use App\Application\Auth\TokenTools;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\App;
 
 class JwtTokenValidatorAuth
 {
@@ -18,7 +18,7 @@ class JwtTokenValidatorAuth
      */
     public function handle(Request $request, Closure $next)
     {
-        if (config('APP_ENV') === 'testing') {
+        if (App::environment('testing')) {
             return $next($request);
         }
 

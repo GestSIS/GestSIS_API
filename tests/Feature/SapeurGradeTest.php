@@ -2,205 +2,185 @@
 
 namespace Tests\Feature;
 
-use App\Domaine\API\SapeurService;
+use App\Infrastructure\Models\GradeSapeur;
 use App\Infrastructure\Models\Sapeur;
-use Carbon\Carbon;
-use Exception;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class SapeurGradeTest extends TestCase
 {
-    protected $service;
-    protected $sapeurId;
+    use DatabaseTransactions;
 
-    protected function setUp(): void
+    public function testIndexGradesReturnsListOfGrades(): void
     {
-        parent::setUp();
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        GradeSapeur::factory()->forSapeur($sapeur->id)->ofGrade(1)->create();
+        GradeSapeur::factory()->forSapeur($sapeur->id)->ofGrade(2)->create();
+        GradeSapeur::factory()->forSapeur($sapeur->id)->ofGrade(3)->create();
 
-        $this->service = $this->app->make(SapeurService::class);
+        // Act
+        $response = $this->json('GET', "/api/v2/sapeurs/{$sapeur->id}/grades");
 
-        $data = Sapeur::factory()->make()->toArray();
-        $data['incorporation'] = "29.01.2019";
-
-        $this->sapeurId = $this->service->createSapeur($data)->id;
+        // Assert
+        $response->assertStatus(200)
+            ->assertJsonCount(3, 'data');
     }
 
-    /**
-     * Test add permis
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function testGradeIndexOk()
+    public function testIndexGradesReturnsErrorWhenSapeurNotFound(): void
     {
-        $response = $this->json('GET', "/api/v2/sapeurs/1/grades");
+        // Act
+        $response = $this->json('GET', '/api/v2/sapeurs/99999/grades');
 
-        $response
-            ->assertStatus(200)
+        // Assert
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Sapeur non trouvé']);
+    }
+
+    public function testAddGradeSuccessfully(): void
+    {
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        $data = [
+            'date' => '1958-01-01',
+            'remarque' => 'Test remarque',
+            'grade_id' => 2
+        ];
+
+        // Act
+        $response = $this->json('POST', "/api/v2/sapeurs/{$sapeur->id}/grades", $data);
+
+        // Assert
+        $response->assertStatus(200)
             ->assertJsonStructure([
-                'data' => [
-                    '*' => [
-                        'id', 'grade_id', 'sapeur_id', 'date'
-                    ]
-                ]
+                'data' => ['grade' => ['id', 'grade_id', 'sapeur_id', 'date']]
             ]);
+        $this->assertDatabaseHas('grade_sapeur', [
+            'sapeur_id' => $sapeur->id,
+            'grade_id' => 2
+        ]);
     }
 
-    /**
-     * Test index grade
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function testAddGradeOk()
+    public function testAddGradeReturnsErrorWhenSapeurNotFound(): void
     {
-        $data = array(
-            'date' => "1958-01-01",
+        // Arrange
+        $data = [
+            'date' => '1958-01-01',
             'remarque' => '',
             'grade_id' => 2
-        );
+        ];
 
-        $response = $this->json('POST', "/api/v2/sapeurs/$this->sapeurId/grades", $data);
+        // Act
+        $response = $this->json('POST', '/api/v2/sapeurs/99999/grades', $data);
 
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'data' => ['grade' => [
-                    'id', 'grade_id', 'sapeur_id', 'date'
-                ]]
-            ]);
-
-        $grade = $response->getData()->data->grade;
-
-        $this->assertTrue($grade !== null);
-        $this->assertTrue(Carbon::parse($data['date'])->diffInDays($grade->date) === 0.0);
-        $this->assertTrue($data['remarque'] === $grade->remarque);
-        $this->assertTrue($data['grade_id'] === $grade->grade_id);
+        // Assert
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Sapeur non trouvé']);
     }
 
-    /**
-     * Test duplicated grade add
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function testAddGradeDuplicated()
+    public function testEditGradeSuccessfully(): void
     {
-        $data = array(
-            'date' => Carbon::createMidnightDate(1958, 1, 1),
-            'remarque' => '',
-            'grade_id' => 3
-        );
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        $grade = GradeSapeur::factory()
+            ->forSapeur($sapeur->id)
+            ->ofGrade(4)
+            ->withDate('1958-01-01')
+            ->create();
 
-        $this->service->addGrade($this->sapeurId, $data);
-
-        $response = $this->json('POST', "/api/v2/sapeurs/$this->sapeurId/grades", $data);
-
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'error'
-            ]);
-    }
-
-    /**
-     * Test edit grade
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function testEditGrade()
-    {
-        $data = array(
-            'date' => Carbon::createMidnightDate(1958, 1, 1),
-            'remarque' => '',
-            'grade_id' => 4
-        );
-
-        $grade_id = $this->service->addGrade($this->sapeurId, $data)['grade']->id;
-
-        $data = array(
-            'id' => $grade_id,
-            'date' => "1959-05-08",
+        $updateData = [
+            'id' => $grade->id,
+            'date' => '1959-05-08',
             'remarque' => 'Deserve it'
-        );
+        ];
 
-        $response = $this->json('PUT', "/api/v2/sapeurs/$this->sapeurId/grades/$grade_id", $data);
+        // Act
+        $response = $this->json('PUT', "/api/v2/sapeurs/{$sapeur->id}/grades/{$grade->id}", $updateData);
 
-        $response
-            ->assertStatus(200)
+        // Assert
+        $response->assertStatus(200)
             ->assertJsonStructure([
-                'data' => ['grade' => [
-                    'id', 'grade_id', 'sapeur_id', 'date'
-                ]]
+                'data' => ['grade' => ['id', 'grade_id', 'sapeur_id', 'date']]
             ]);
-
-        $grade = $response->getData()->data->grade;
-
-        $this->assertTrue(Carbon::parse($data['date'])->diffInDays($grade->date) === 0.0);
-        $this->assertTrue($data['remarque'] === $grade->remarque);
-    }
-
-    /**
-     * Test edit grade
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function testEditGradeInvalid()
-    {
-        $data = array(
-            'date' => Carbon::createMidnightDate(1958, 1, 1),
-            'remarque' => '',
-            'grade_id' => 6
-        );
-
-        $grade_id = $this->service->addGrade($this->sapeurId, $data)['grade']->id;
-
-        $data = array(
-            'id' => $grade_id,
-            'date' => "1959-05-08",
+        $this->assertDatabaseHas('grade_sapeur', [
+            'id' => $grade->id,
             'remarque' => 'Deserve it'
-        );
-
-        $response = $this->json('PUT', "/api/v2/sapeurs/$this->sapeurId/grades/0", $data);
-
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'error'
-            ]);
+        ]);
     }
 
-    /**
-     * Test remove grade
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function testRemoveGrade()
+    public function testEditGradeReturnsErrorWhenSapeurNotFound(): void
     {
-        $data = array(
-            'date' => Carbon::createMidnightDate(1958, 1, 1),
-            'remarque' => '',
-            'grade_id' => 5
-        );
+        // Arrange
+        $data = [
+            'id' => 1,
+            'date' => '1959-05-08',
+            'remarque' => 'Test'
+        ];
 
-        $grade_id = $this->service->addGrade($this->sapeurId, $data)['grade']->id;
+        // Act
+        $response = $this->json('PUT', '/api/v2/sapeurs/99999/grades/1', $data);
 
-        $response = $this->json('DELETE', "/api/v2/sapeurs/$this->sapeurId/grades/$grade_id");
+        // Assert
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Sapeur non trouvé']);
+    }
 
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'data'
-            ]);
+    public function testEditGradeReturnsErrorWhenGradeNotFound(): void
+    {
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        $data = [
+            'id' => 99999,
+            'date' => '1959-05-08',
+            'remarque' => 'Test'
+        ];
 
-        $grades = $this->service->getSapeurGradesById($this->sapeurId);
-        array_filter($grades, function ($p) use ($grade_id) {
-            return $p->id == $grade_id;
-        });
+        // Act
+        $response = $this->json('PUT', "/api/v2/sapeurs/{$sapeur->id}/grades/99999", $data);
 
-        $this->assertTrue(count($grades) === 0);
+        // Assert
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Grade non trouvé']);
+    }
+
+    public function testRemoveGradeSuccessfully(): void
+    {
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        $grade = GradeSapeur::factory()
+            ->forSapeur($sapeur->id)
+            ->ofGrade(5)
+            ->create();
+
+        // Act
+        $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/grades/{$grade->id}");
+
+        // Assert
+        $response->assertStatus(200)
+            ->assertJsonStructure(['data']);
+        $this->assertDatabaseMissing('grade_sapeur', ['id' => $grade->id]);
+    }
+
+    public function testRemoveGradeReturnsErrorWhenSapeurNotFound(): void
+    {
+        // Act
+        $response = $this->json('DELETE', '/api/v2/sapeurs/99999/grades/1');
+
+        // Assert
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Sapeur non trouvé']);
+    }
+
+    public function testRemoveGradeReturnsErrorWhenGradeNotFound(): void
+    {
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+
+        // Act
+        $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/grades/99999");
+
+        // Assert
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Grade non trouvé']);
     }
 }

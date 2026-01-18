@@ -2,64 +2,59 @@
 
 namespace Tests\Feature;
 
-use App\Domaine\API\SapeurService;
+use App\Infrastructure\Models\Permis;
 use App\Infrastructure\Models\Sapeur;
-use Carbon\Carbon;
-use Exception;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class SapeurPermisTest extends TestCase
 {
-
-    protected $service;
-    protected $sapeurId;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->service = $this->app->make(SapeurService::class);
-
-        $data = Sapeur::factory()->make()->toArray();
-        $data['incorporation'] = "29.01.2019";
-
-        $this->sapeurId = $this->service->createSapeur($data)->id;
-    }
+    use DatabaseTransactions;
 
     /**
-     * Test add permis
-     *
-     * @return void
-     * @throws Exception
+     * Test index returns list of permis
      */
-    public function testPermisIndexOk()
+    public function testIndexPermisReturnsListOfPermis()
     {
-        $response = $this->json('GET', "/api/v2/sapeurs/1/permis");
+        $sapeur = Sapeur::factory()->create();
+
+        // Create 3 permis using factory
+        $permis1 = Permis::factory()->forSapeur($sapeur->id)->ofType(1)->create();
+        $permis2 = Permis::factory()->forSapeur($sapeur->id)->ofType(2)->create();
+        $permis3 = Permis::factory()->forSapeur($sapeur->id)->ofType(3)->create();
+
+        $response = $this->json('GET', "/api/v2/sapeurs/{$sapeur->id}/permis");
 
         $response
             ->assertStatus(200)
-            ->assertJsonStructure([
-                'data' => [
-                    '*' => [
-                        'id', 'permis_type_id', 'sapeur_id', 'date'
-                    ]
-                ]
-            ]);
+            ->assertJsonCount(3, 'data')
+            ->assertJsonFragment(['id' => $permis1->id])
+            ->assertJsonFragment(['id' => $permis2->id])
+            ->assertJsonFragment(['id' => $permis3->id]);
     }
 
     /**
-     * Test add permis
-     *
-     * @return void
-     * @throws Exception
+     * Test index returns error when sapeur not found
      */
-    public function testAddPermisOk()
+    public function testIndexPermisReturnsErrorWhenSapeurNotFound()
     {
+        $response = $this->json('GET', "/api/v2/sapeurs/99999/permis");
+
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Sapeur non trouvé']);
+    }
+
+    /**
+     * Test add permis successfully
+     */
+    public function testAddPermisSuccessfully()
+    {
+        $sapeur = Sapeur::factory()->create();
         $permis_type = 9;
 
         $response = $this->json(
             'POST',
-            "/api/v2/sapeurs/$this->sapeurId/permis",
+            "/api/v2/sapeurs/{$sapeur->id}/permis",
             ['permis_type_id' => $permis_type, 'date' => '1958-01-01']
         );
 
@@ -67,128 +62,184 @@ class SapeurPermisTest extends TestCase
             ->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    'id', 'permis_type_id', 'sapeur_id', 'date'
+                    'id',
+                    'permis_type_id',
+                    'sapeur_id',
+                    'date'
                 ]
             ]);
 
         $permis = $response->getData()->data;
-
-        $this->assertTrue($permis->permis_type_id === $permis_type);
+        $this->assertEquals($permis_type, $permis->permis_type_id);
+        $this->assertEquals($sapeur->id, $permis->sapeur_id);
     }
 
     /**
-     * Test duplicated permis add
-     *
-     * @return void
-     * @throws Exception
+     * Test add permis returns error when sapeur not found
      */
-    public function testAddPermisDuplicated()
+    public function testAddPermisReturnsErrorWhenSapeurNotFound()
     {
-        $permis_type = 4;
-        $date = Carbon::createFromDate(1958, 1, 1);
-
-        $this->service->addPermis($this->sapeurId, ['permis_type_id' => $permis_type, 'date' => $date]);
-
         $response = $this->json(
             'POST',
-            "/api/v2/sapeurs/$this->sapeurId/permis",
-            ['permis_type_id' => $permis_type, 'date' => '1958-01-01']
+            "/api/v2/sapeurs/99999/permis",
+            ['permis_type_id' => 1, 'date' => '1958-01-01']
+        );
+
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Sapeur non trouvé']);
+    }
+
+    /**
+     * Test add permis returns error when duplicated
+     */
+    public function testAddPermisReturnsErrorWhenDuplicated()
+    {
+        $sapeur = Sapeur::factory()->create();
+        $permis_type = 4;
+        $date = '1958-01-01';
+
+        // Create first permis
+        $this->json(
+            'POST',
+            "/api/v2/sapeurs/{$sapeur->id}/permis",
+            ['permis_type_id' => $permis_type, 'date' => $date]
+        );
+
+        // Try to create duplicate
+        $response = $this->json(
+            'POST',
+            "/api/v2/sapeurs/{$sapeur->id}/permis",
+            ['permis_type_id' => $permis_type, 'date' => $date]
         );
 
         $response
             ->assertStatus(200)
-            ->assertJsonStructure([
-                'error'
-            ]);
+            ->assertJsonStructure(['error']);
     }
 
     /**
-     * Test edit permis
-     *
-     * @return void
-     * @throws Exception
+     * Test edit permis successfully
      */
-    public function testEditPermis()
+    public function testEditPermisSuccessfully()
     {
+        $sapeur = Sapeur::factory()->create();
         $permis_type = 2;
-        $date = Carbon::createMidnightDate(1958, 1, 1);
 
-        $permis = $this->service->addPermis($this->sapeurId, ['permis_type_id' => $permis_type, 'date' => $date]);
-        $date = "1999-11-21";
+        // Create permis
+        $createResponse = $this->json(
+            'POST',
+            "/api/v2/sapeurs/{$sapeur->id}/permis",
+            ['permis_type_id' => $permis_type, 'date' => '1958-01-01']
+        );
+        $permis = $createResponse->getData()->data;
 
+        $newDate = '1999-11-21';
+
+        // Update permis
         $response = $this->json(
             'PUT',
-            "/api/v2/sapeurs/$this->sapeurId/permis/$permis->id",
-            ['id' => $permis->id, 'date' => $date]
+            "/api/v2/sapeurs/{$sapeur->id}/permis/{$permis->id}",
+            ['id' => $permis->id, 'date' => $newDate]
         );
 
         $response
             ->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    'id', 'permis_type_id', 'sapeur_id', 'date'
+                    'id',
+                    'permis_type_id',
+                    'sapeur_id',
+                    'date'
                 ]
             ]);
 
-        $permis = $response->getData()->data;
-
-        $this->assertTrue(Carbon::parse($date)->diffInDays($permis->date) === 0.0);
+        $updatedPermis = $response->getData()->data;
+        $this->assertEquals($newDate, date('Y-m-d', strtotime($updatedPermis->date)));
     }
 
-
     /**
-     * Test edit permis
-     *
-     * @return void
-     * @throws Exception
+     * Test edit permis returns error when not found
      */
-    public function testEditPermisInvalid()
+    public function testEditPermisReturnsErrorWhenNotFound()
     {
-        $permis_type = 3;
-        $date = Carbon::createMidnightDate(1958, 1, 1);
-
-        $permis = $this->service->addPermis($this->sapeurId, ['permis_type_id' => $permis_type, 'date' => $date]);
-        $date = "1999-11-21";
+        $sapeur = Sapeur::factory()->create();
 
         $response = $this->json(
             'PUT',
-            "/api/v2/sapeurs/$this->sapeurId/permis/0",
-            ['id' => $permis->id, 'date' => $date]
+            "/api/v2/sapeurs/{$sapeur->id}/permis/99999",
+            ['id' => 99999, 'date' => '1999-11-21']
         );
 
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'error'
-            ]);
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Permis non trouvé']);
     }
 
     /**
-     * Test remove permis
-     *
-     * @return void
-     * @throws Exception
+     * Test edit permis returns error when sapeur not found
      */
-    public function testRemovePermis()
+    public function testEditPermisReturnsErrorWhenSapeurNotFound()
     {
+        $response = $this->json(
+            'PUT',
+            "/api/v2/sapeurs/99999/permis/1",
+            ['id' => 1, 'date' => '1999-11-21']
+        );
+
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Sapeur non trouvé']);
+    }
+
+    /**
+     * Test remove permis successfully
+     */
+    public function testRemovePermisSuccessfully()
+    {
+        $sapeur = Sapeur::factory()->create();
         $permis_type = 7;
-        $date = Carbon::createMidnightDate(1958, 1, 1);
 
-        $permisId = $this->service->addPermis($this->sapeurId, ['permis_type_id' => $permis_type, 'date' => $date])->id;
+        // Create permis
+        $createResponse = $this->json(
+            'POST',
+            "/api/v2/sapeurs/{$sapeur->id}/permis",
+            ['permis_type_id' => $permis_type, 'date' => '1958-01-01']
+        );
+        $permis = $createResponse->getData()->data;
 
-        $response = $this->json('DELETE', "/api/v2/sapeurs/$this->sapeurId/permis/$permisId");
+        // Delete permis
+        $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/permis/{$permis->id}");
 
         $response
             ->assertStatus(200)
-            ->assertJsonStructure([
-                'data'
-            ]);
+            ->assertJson(['data' => 'success']);
 
-        $permis = $this->service->getSapeurPermisById($this->sapeurId);
-        array_filter($permis, function ($p) use ($permisId) {
-            return $p->id == $permisId;
-        });
+        // Verify it's deleted
+        $indexResponse = $this->json('GET', "/api/v2/sapeurs/{$sapeur->id}/permis");
+        $permisList = $indexResponse->getData()->data;
+        $found = array_filter($permisList, fn($p) => $p->id == $permis->id);
+        $this->assertEmpty($found);
+    }
 
-        $this->assertTrue(count($permis) === 0);
+    /**
+     * Test remove permis returns error when not found
+     */
+    public function testRemovePermisReturnsErrorWhenNotFound()
+    {
+        $sapeur = Sapeur::factory()->create();
+
+        $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/permis/99999");
+
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Permis non trouvé']);
+    }
+
+    /**
+     * Test remove permis returns error when sapeur not found
+     */
+    public function testRemovePermisReturnsErrorWhenSapeurNotFound()
+    {
+        $response = $this->json('DELETE', "/api/v2/sapeurs/99999/permis/1");
+
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Sapeur non trouvé']);
     }
 }

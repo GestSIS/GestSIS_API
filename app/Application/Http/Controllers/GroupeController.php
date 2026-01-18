@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\GroupeService;
+use App\Infrastructure\Models\Groupe;
 use Illuminate\Http\Request;
 
 class GroupeController extends Controller
@@ -42,6 +43,10 @@ class GroupeController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (!Groupe::where('id', $id)->exists()) {
+            return response()->json(['error' => 'Groupe not found'], 404);
+        }
+
         $data = $request->validate([
             'designation' => 'string|min:1',
             'no' => 'string|nullable',
@@ -56,6 +61,10 @@ class GroupeController extends Controller
 
     public function destroy($id)
     {
+        if (!Groupe::where('id', $id)->exists()) {
+            return response()->json(['error' => 'Groupe not found'], 404);
+        }
+
         $this->service->supprimerGroupe($id);
         return response()->json(['data' => 'ok']);
     }

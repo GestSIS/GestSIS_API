@@ -4,6 +4,8 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\SapeurService;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\GradeSapeur;
+use App\Infrastructure\Models\Sapeur;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -23,6 +25,10 @@ class SapeurGradeController extends Controller
      */
     public function index(int $sapeurId)
     {
+        if (!Sapeur::where('id', $sapeurId)->exists()) {
+            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+        }
+
         $grades = $this->service->getSapeurGradesById($sapeurId);
 
         return response()->json(['data' => $grades]);
@@ -37,6 +43,10 @@ class SapeurGradeController extends Controller
      */
     public function store(Request $request, int $sapeurId)
     {
+        if (!Sapeur::where('id', $sapeurId)->exists()) {
+            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+        }
+
         // Ajout d'un nouveau grade
         $data = $request->validate([
             'grade_id' => 'required|integer|exists:grades,id',
@@ -60,6 +70,14 @@ class SapeurGradeController extends Controller
      */
     public function update(Request $request, int $sapeurId, int $gradeId)
     {
+        if (!Sapeur::where('id', $sapeurId)->exists()) {
+            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+        }
+
+        if (!GradeSapeur::where(['id' => $gradeId, 'sapeur_id' => $sapeurId])->exists()) {
+            return response()->json(['error' => 'Grade non trouvé'], 404);
+        }
+
         if ($gradeId !== $request->get('id')) {
             return response()->json(['error' => 'invalid grade id']);
         }
@@ -84,6 +102,14 @@ class SapeurGradeController extends Controller
      */
     public function destroy(int $sapeurId, int $gradeId)
     {
+        if (!Sapeur::where('id', $sapeurId)->exists()) {
+            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+        }
+
+        if (!GradeSapeur::where(['id' => $gradeId, 'sapeur_id' => $sapeurId])->exists()) {
+            return response()->json(['error' => 'Grade non trouvé'], 404);
+        }
+
         $res = $this->service->removeGrade($sapeurId, $gradeId);
 
         return response()->json(['data' => $res]);

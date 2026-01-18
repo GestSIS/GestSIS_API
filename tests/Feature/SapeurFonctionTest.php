@@ -2,253 +2,246 @@
 
 namespace Tests\Feature;
 
-use App\Domaine\API\SapeurService;
+use App\Infrastructure\Models\FonctionSapeur;
 use App\Infrastructure\Models\Sapeur;
-use Carbon\Carbon;
-use Exception;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class SapeurFonctionTest extends TestCase
 {
+    use DatabaseTransactions;
 
-    protected $service;
-    protected $sapeurId;
-
-    protected function setUp(): void
+    public function testIndexFonctionsReturnsListOfFonctions(): void
     {
-        parent::setUp();
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        FonctionSapeur::factory()->forSapeur($sapeur->id)->ofFonction(1)->create();
+        FonctionSapeur::factory()->forSapeur($sapeur->id)->ofFonction(2)->create();
+        FonctionSapeur::factory()->forSapeur($sapeur->id)->ofFonction(3)->create();
 
-        $this->service = $this->app->make(SapeurService::class);
+        // Act
+        $response = $this->json('GET', "/api/v2/sapeurs/{$sapeur->id}/fonctions");
 
-        $data = Sapeur::factory()->make()->toArray();
-        $data['incorporation'] = "29.01.2019";
-
-        $this->sapeurId = $this->service->createSapeur($data)->id;
+        // Assert
+        $response->assertStatus(200)
+            ->assertJsonCount(3, 'data');
     }
 
-    /**
-     * Test index fonction
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function testFonctionIndexOk()
+    public function testIndexFonctionsReturnsErrorWhenSapeurNotFound(): void
     {
-        $response = $this->json('GET', "/api/v2/sapeurs/1/fonctions");
+        // Act
+        $response = $this->json('GET', '/api/v2/sapeurs/99999/fonctions');
 
-        $response
-            ->assertStatus(200)
+        // Assert
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Sapeur non trouvé']);
+    }
+
+    public function testAddFonctionSuccessfully(): void
+    {
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        $data = [
+            'debut' => '1958-01-01',
+            'fin' => '1958-09-17',
+            'remarque' => 'Test remarque',
+            'fonction_id' => 2
+        ];
+
+        // Act
+        $response = $this->json('POST', "/api/v2/sapeurs/{$sapeur->id}/fonctions", $data);
+
+        // Assert
+        $response->assertStatus(200)
             ->assertJsonStructure([
-                'data' => [
-                    '*' => [
-                        'id', 'fonction_id', 'sapeur_id', 'debut', 'fin'
-                    ]
-                ]
+                'data' => ['fonction' => ['id', 'fonction_id', 'sapeur_id', 'debut', 'fin']]
             ]);
+        $this->assertDatabaseHas('fonction_sapeur', [
+            'sapeur_id' => $sapeur->id,
+            'fonction_id' => 2
+        ]);
     }
 
-    /**
-     * Test add fonction
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function testAddFonctionOk()
+    public function testAddFonctionReturnsErrorWhenSapeurNotFound(): void
     {
-        $data = array(
-            'debut' => "1958-01-01",
-            'fin' => "1958-09-17",
+        // Arrange
+        $data = [
+            'debut' => '1958-01-01',
+            'fin' => '1958-09-17',
             'remarque' => '',
             'fonction_id' => 2
-        );
+        ];
 
-        $response = $this->json('POST', "/api/v2/sapeurs/$this->sapeurId/fonctions", $data);
-        // dd($response);
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'data' => ['fonction' => [
-                    'id', 'fonction_id', 'sapeur_id', 'debut', 'fin'
-                ]]
-            ]);
+        // Act
+        $response = $this->json('POST', '/api/v2/sapeurs/99999/fonctions', $data);
 
-        $fonction = $response->getData()->data->fonction;
-
-        $this->assertTrue($fonction !== null);
-        $this->assertTrue(Carbon::parse($data['debut'])->diffInDays($fonction->debut) === 0.0);
-        $this->assertTrue(Carbon::parse($data['fin'])->diffInDays($fonction->fin) === 0.0);
-        $this->assertTrue($data['remarque'] === $fonction->remarque);
-        $this->assertTrue($data['fonction_id'] === $fonction->fonction_id);
+        // Assert
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Sapeur non trouvé']);
     }
 
-    /**
-     * Test duplicated fonction add
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function testAddFonctionDuplicated()
+    public function testEditFonctionSuccessfully(): void
     {
-        $data = array(
-            'debut' => "1958-01-01",
-            'fin' => "1958-09-17",
-            'remarque' => '',
-            'fonction_id' => 2
-        );
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        $fonction = FonctionSapeur::factory()
+            ->forSapeur($sapeur->id)
+            ->ofFonction(2)
+            ->withDebut('1958-01-01')
+            ->withFin('1958-09-17')
+            ->create();
 
-        $this->service->addFonction($this->sapeurId, $data);
+        $updateData = [
+            'id' => $fonction->id,
+            'debut' => '1959-05-08',
+            'fin' => '1960-09-17',
+            'remarque' => 'Updated'
+        ];
 
-        $response = $this->json('POST', "/api/v2/sapeurs/$this->sapeurId/fonctions", $data);
+        // Act
+        $response = $this->json('PUT', "/api/v2/sapeurs/{$sapeur->id}/fonctions/{$fonction->id}", $updateData);
 
-        $response
-            ->assertStatus(200)
+        // Assert
+        $response->assertStatus(200)
             ->assertJsonStructure([
-                'error'
+                'data' => ['fonction' => ['id', 'fonction_id', 'sapeur_id', 'debut', 'fin']]
             ]);
+        $this->assertDatabaseHas('fonction_sapeur', [
+            'id' => $fonction->id,
+            'remarque' => 'Updated'
+        ]);
     }
 
-    /**
-     * Test edit fonction
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function testEditFonction()
+    public function testEditFonctionReturnsErrorWhenSapeurNotFound(): void
     {
-        $data = array(
-            'debut' => Carbon::createMidnightDate(1958, 1, 1),
-            'fin' => Carbon::createMidnightDate(1958, 9, 17),
-            'remarque' => '',
-            'fonction_id' => 2
-        );
+        // Arrange
+        $data = [
+            'id' => 1,
+            'debut' => '1959-05-08',
+            'fin' => '1960-09-17',
+            'remarque' => 'Test'
+        ];
 
-        $fonction_id = $this->service->addFonction($this->sapeurId, $data)['fonction']->id;
+        // Act
+        $response = $this->json('PUT', '/api/v2/sapeurs/99999/fonctions/1', $data);
 
-        $data = array(
-            'id' => $fonction_id,
-            'debut' => "1959-05-08",
-            'fin' => "1960-09-17",
-            'remarque' => 'Deserve it'
-        );
-
-        $response = $this->json('PUT', "/api/v2/sapeurs/$this->sapeurId/fonctions/$fonction_id", $data);
-
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'data' => ['fonction' => [
-                    'id', 'fonction_id', 'sapeur_id', 'debut', 'fin'
-                ]]
-            ]);
-
-        $fonction = $response->getData()->data->fonction;
-
-        $this->assertTrue(Carbon::parse($data['debut'])->diffInDays($fonction->debut) === 0.0);
-        $this->assertTrue(Carbon::parse($data['fin'])->diffInDays($fonction->fin) === 0.0);
-        $this->assertTrue($data['remarque'] === $fonction->remarque);
+        // Assert
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Sapeur non trouvé']);
     }
 
-    /**
-     * Test edit fonction
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function testEditFonctionInvalid()
+    public function testEditFonctionReturnsErrorWhenFonctionNotFound(): void
     {
-        $data = array(
-            'debut' => Carbon::createMidnightDate(1958, 1, 1),
-            'fin' => Carbon::createMidnightDate(1958, 9, 17),
-            'remarque' => '',
-            'fonction_id' => 2
-        );
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        $data = [
+            'id' => 99999,
+            'debut' => '1959-05-08',
+            'fin' => '1960-09-17',
+            'remarque' => 'Test'
+        ];
 
-        $fonction_id = $this->service->addFonction($this->sapeurId, $data)['fonction']->id;
+        // Act
+        $response = $this->json('PUT', "/api/v2/sapeurs/{$sapeur->id}/fonctions/99999", $data);
 
-        $data = array(
-            'id' => $fonction_id,
-            'debut' => "1959-05-08",
-            'fin' => "1960-09-17",
-            'remarque' => 'Deserve it'
-        );
-
-        $response = $this->json('PUT', "/api/v2/sapeurs/$this->sapeurId/fonctions/0", $data);
-
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'error'
-            ]);
+        // Assert
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Fonction non trouvée']);
     }
 
-    /**
-     * Test remove fonction
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function testRemoveFonction()
+    public function testRemoveFonctionSuccessfully(): void
     {
-        $data = array(
-            'debut' => Carbon::createMidnightDate(1958, 1, 1),
-            'fin' => Carbon::createMidnightDate(1958, 9, 17),
-            'remarque' => '',
-            'fonction_id' => 2
-        );
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        $fonction = FonctionSapeur::factory()
+            ->forSapeur($sapeur->id)
+            ->ofFonction(2)
+            ->create();
 
-        $fonction_id = $this->service->addFonction($this->sapeurId, $data)['fonction']->id;
+        // Act
+        $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/fonctions/{$fonction->id}");
 
-        $response = $this->json('DELETE', "/api/v2/sapeurs/$this->sapeurId/fonctions/$fonction_id");
-
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'data'
-            ]);
-
-        $fonctions = $this->service->getSapeurFonctionsById($this->sapeurId);
-        array_filter($fonctions, function ($p) use ($fonction_id) {
-            return $p->id == $fonction_id;
-        });
-
-        $this->assertTrue(count($fonctions) === 0);
+        // Assert
+        $response->assertStatus(200)
+            ->assertJsonStructure(['data']);
+        $this->assertDatabaseMissing('fonction_sapeur', ['id' => $fonction->id]);
     }
 
-
-    /**
-     * Test remove fonction
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function testFinFonctions()
+    public function testRemoveFonctionReturnsErrorWhenSapeurNotFound(): void
     {
-        $data = array(
-            'debut' => Carbon::createMidnightDate(1958, 1, 1),
-            'remarque' => '',
-            'fonction_id' => 2
-        );
+        // Act
+        $response = $this->json('DELETE', '/api/v2/sapeurs/99999/fonctions/1');
 
-        $fonction_id = $this->service->addFonction($this->sapeurId, $data)['fonction']->id;
+        // Assert
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Sapeur non trouvé']);
+    }
 
-        $data = array(
-            "date" => "1960-09-17",
-            "ids" => array($fonction_id)
-        );
+    public function testRemoveFonctionReturnsErrorWhenFonctionNotFound(): void
+    {
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
 
-        $response = $this->json('POST', "/api/v2/sapeurs/$this->sapeurId/fin-fonctions/", $data);
+        // Act
+        $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/fonctions/99999");
 
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'data'
-            ]);
+        // Assert
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Fonction non trouvée']);
+    }
 
-        $fonctions = $this->service->getSapeurFonctionsById($this->sapeurId);
-        array_filter($fonctions, function ($p) use ($fonction_id) {
-            return $p->id == $fonction_id;
-        });
+    public function testFinFonctionsSuccessfully(): void
+    {
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        $fonction1 = FonctionSapeur::factory()
+            ->forSapeur($sapeur->id)
+            ->ofFonction(2)
+            ->withDebut('1958-01-01')
+            ->withFin(null)
+            ->create();
+        $fonction2 = FonctionSapeur::factory()
+            ->forSapeur($sapeur->id)
+            ->ofFonction(3)
+            ->withDebut('1959-01-01')
+            ->withFin(null)
+            ->create();
 
-        $this->assertTrue(!array_key_exists('fin', $fonctions));
+        $data = [
+            'date' => '1960-09-17',
+            'ids' => [$fonction1->id]
+        ];
+
+        // Act
+        $response = $this->json('POST', "/api/v2/sapeurs/{$sapeur->id}/fin-fonctions", $data);
+
+        // Assert
+        $response->assertStatus(200)
+            ->assertJsonStructure(['data']);
+        $this->assertDatabaseHas('fonction_sapeur', [
+            'id' => $fonction1->id,
+            'fin' => '1960-09-17'
+        ]);
+        // fonction2 should still have null fin
+        $this->assertDatabaseHas('fonction_sapeur', [
+            'id' => $fonction2->id,
+            'fin' => null
+        ]);
+    }
+
+    public function testFinFonctionsReturnsErrorWhenSapeurNotFound(): void
+    {
+        // Arrange
+        $data = [
+            'date' => '1960-09-17',
+            'ids' => [1]
+        ];
+
+        // Act
+        $response = $this->json('POST', '/api/v2/sapeurs/99999/fin-fonctions', $data);
+
+        // Assert
+        $response->assertStatus(404)
+            ->assertJson(['error' => 'Sapeur non trouvé']);
     }
 }

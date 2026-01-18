@@ -4,6 +4,8 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\SapeurService;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\FonctionSapeur;
+use App\Infrastructure\Models\Sapeur;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -23,6 +25,10 @@ class SapeurFonctionController extends Controller
      */
     public function index(int $sapeurId)
     {
+        if (!Sapeur::where('id', $sapeurId)->exists()) {
+            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+        }
+
         $fonctions = $this->service->getSapeurFonctionsById($sapeurId);
 
         return response()->json(['data' => $fonctions]);
@@ -38,6 +44,10 @@ class SapeurFonctionController extends Controller
      */
     public function store(Request $request, int $sapeurId)
     {
+        if (!Sapeur::where('id', $sapeurId)->exists()) {
+            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+        }
+
         $data = $request->validate([
             'fonction_id' => 'required|integer|exists:fonctions,id',
             'debut' => 'required|date',
@@ -61,6 +71,14 @@ class SapeurFonctionController extends Controller
      */
     public function update(Request $request, int $sapeurId, int $fonctionId)
     {
+        if (!Sapeur::where('id', $sapeurId)->exists()) {
+            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+        }
+
+        if (!FonctionSapeur::where(['id' => $fonctionId, 'sapeur_id' => $sapeurId])->exists()) {
+            return response()->json(['error' => 'Fonction non trouvée'], 404);
+        }
+
         if ($fonctionId !== $request->get('id')) {
             return response()->json(['error' => 'invalid fonction id']);
         }
@@ -86,6 +104,14 @@ class SapeurFonctionController extends Controller
      */
     public function destroy(int $sapeurId, int $fonctionId)
     {
+        if (!Sapeur::where('id', $sapeurId)->exists()) {
+            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+        }
+
+        if (!FonctionSapeur::where(['id' => $fonctionId, 'sapeur_id' => $sapeurId])->exists()) {
+            return response()->json(['error' => 'Fonction non trouvée'], 404);
+        }
+
         $res = $this->service->removeFonction($sapeurId, $fonctionId);
 
         return response()->json(['data' => $res]);
@@ -93,6 +119,10 @@ class SapeurFonctionController extends Controller
 
     public function fin(Request $request, int $sapeurId)
     {
+        if (!Sapeur::where('id', $sapeurId)->exists()) {
+            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+        }
+
         $data = $request->validate([
             'ids.*' => 'required|integer',
             'date' => 'required|date'

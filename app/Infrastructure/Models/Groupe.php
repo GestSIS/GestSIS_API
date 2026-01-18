@@ -2,10 +2,12 @@
 
 namespace App\Infrastructure\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Groupe extends Model
 {
+    use HasFactory;
     protected $fillable = ['type', 'no', 'designation', 'tri', 'parent_id'];
     protected function casts(): array
     {

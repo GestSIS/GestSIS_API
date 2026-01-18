@@ -4,6 +4,7 @@ namespace App\Application\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 
 class DbSelector
@@ -17,7 +18,7 @@ class DbSelector
      */
     public function handle(Request $request, Closure $next)
     {
-        if (env('APP_ENV') === 'testing') {
+        if (App::environment('testing')) {
             return $next($request);
         }
 

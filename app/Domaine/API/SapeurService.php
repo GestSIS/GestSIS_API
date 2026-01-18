@@ -104,11 +104,6 @@ class SapeurService
         );
     }
 
-    public function listeSapeurs(bool $actif, bool $actifOuAvecMateriel)
-    {
-        return $this->repository->listeSapeurLight($actif, $actifOuAvecMateriel);
-    }
-
     public function telephones()
     {
         return Sapeur::with('telephones')->get(['id'])->toArray();
@@ -124,25 +119,12 @@ class SapeurService
         return Excel::download(new ListeFoadExport($date), 'liste_foad.xlsx');
     }
 
-    public function effectif()
-    {
-        return Sapeur::with('telephones', 'permis', 'fonctions', 'groupes')
-            ->where('actif', '=', '1')
-            ->where('type', '=', SapeurBusiness::TYPE_SAPEUR)
-            ->get(['id', 'nom', 'prenom', 'email', 'annee_incorporation', 'rue', 'no_rue', 'date_naissance', 'fonction_id', 'grade_id', 'civilite_id', 'localite_id'])
-            ->toArray();
-    }
 
     public function convocationSms()
     {
         return Sapeur::with('telephones')
             ->where('actif', '=', '1')
             ->get(['id', 'nom', 'prenom'])->toArray();
-    }
-
-    public function getSapeurDetailsById($sapeurid)
-    {
-        return $this->repository->getSapeurDetailsById($sapeurid);
     }
 
     public function getSapeurGradesById(int $sapeurId)
@@ -209,18 +191,6 @@ class SapeurService
         return null;
     }
 
-
-    public function getPhotoSapeurBase64($sapeurId, $sisKey)
-    {
-        foreach (self::$ALLOWED_PHOTO_EXTENSION as $extension) {
-            $path = 'photos/' . $sisKey . '/' . $sapeurId . '.' . $extension;
-            if (Storage::exists($path)) {
-                return "data:image/{$extension};base64," . base64_encode(Storage::get($path));
-            }
-        }
-        return null;
-    }
-
     public function deletePhotoSapeur($sapeurId, $sisKey)
     {
         $path = 'photos/' . $sisKey . '/' . $sapeurId . '.';
@@ -243,26 +213,6 @@ class SapeurService
     public function createSapeur($data)
     {
         return $this->business->createSapeur($data);
-    }
-
-    public function createCivil($data)
-    {
-        return $this->business->createCivil($data);
-    }
-
-    public function editSapeurDetailsById($sapeurId, $data)
-    {
-        return $this->business->updateSapeurById($sapeurId, $data);
-    }
-
-    public function updateNonSapeurStatut($sapeurId, $data)
-    {
-        return $this->business->updateNonSapeurStatut($sapeurId, $data);
-    }
-
-    public function deleteSapeurById($sapeurId)
-    {
-        $this->business->deleteSapeurById($sapeurId);
     }
 
     public function addCours($sapeurId, $cours)

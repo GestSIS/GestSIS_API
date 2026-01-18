@@ -3,6 +3,7 @@
 namespace Database\Factories\Infrastructure\Models;
 
 use App\Domaine\Business\SapeurBusiness;
+use App\Infrastructure\Models\Localite;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Infrastructure\Models\Sapeur;
 
@@ -28,7 +29,7 @@ class SapeurFactory extends Factory
             'suffixe' => '',
             'rue' => $this->faker->streetName,
             'no_rue' => $this->faker->streetSuffix,
-            'date_naissance' => $this->faker->dateTimeBetween('-60years', '-10years'),
+            'date_naissance' => $this->faker->dateTimeBetween('-60years', '-18years')->format('Y-m-d'),
             'no_avs' => $this->faker->avs13,
             'profession' => $this->faker->jobTitle,
             'employeur' => 'Canton du Jura',
@@ -41,11 +42,29 @@ class SapeurFactory extends Factory
             'iban_statut' => 1,
             'remarque' => $this->faker->text,
             'porteur' => 0,
-            'localite_id' => $this->faker->numberBetween(1, 10),
+            'localite_id' => fn() => Localite::inRandomOrder()->first()?->id ?? 1,
             'civilite_id' => $this->faker->numberBetween(1, 2),
-            // 'incorporation' => "29.01.2019",
 
             'type' => SapeurBusiness::TYPE_SAPEUR,
         ];
+    }
+
+    /**
+     * Configure the factory to create an entry mutation after creating a sapeur.
+     */
+    public function configure()
+    {
+        return $this->afterCreating(function (Sapeur $sapeur) {
+            // Create an entry mutation with incorporation date
+            // Use a default date if not set (mimics the API behavior)
+            $incorporationDate = $this->faker->dateTimeBetween('-10years', '-1year')->format('Y-m-d');
+
+            $sapeur->mutations()->create([
+                'localite_id' => $sapeur->localite_id,
+                'incorporation' => $incorporationDate,
+                'sortie' => null,
+                'motif' => 'Incorporation',
+            ]);
+        });
     }
 }

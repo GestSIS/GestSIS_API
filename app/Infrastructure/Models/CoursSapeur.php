@@ -2,10 +2,13 @@
 
 namespace App\Infrastructure\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class CoursSapeur extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['cours_id', 'sapeur_id', 'date', 'localite_id', 'duree'];
     protected $table = 'cours_sapeur';
     protected function casts(): array

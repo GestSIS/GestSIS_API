@@ -145,6 +145,11 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
     public function updateSapeurById(int $sapeurId, $data)
     {
+        $sapeur = Sapeur::find($sapeurId);
+        if (!$sapeur) {
+            return null;
+        }
+
         $nullableFields = ['suffixe', 'remarque', 'profession', 'employeur', 'lieu_de_travail', 'iban', 'email', 'no_avs'];
         foreach ($nullableFields as $field) {
             if (array_key_exists($field, $data) && $data[$field] === null) {

@@ -2,12 +2,15 @@
 
 namespace App\Infrastructure\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class FonctionSapeur extends Model
 {
+    use HasFactory;
+
     protected $table = 'fonction_sapeur';
-    protected $fillable = ['debut', 'fin', 'remarque'];
+    protected $fillable = ['sapeur_id', 'fonction_id', 'debut', 'fin', 'remarque'];
 
     /**
      * Le sapeur
