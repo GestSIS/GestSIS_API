@@ -75,8 +75,8 @@ class SapeurMutationTest extends TestCase
     {
         // Use dates BEFORE the initial mutation (2019-01-29) to avoid overlap
         $data = [
-            'incorporation' => "2015-01-01",
-            'sortie' => "2018-12-31",
+            'incorporation' => "2005-01-01",
+            'sortie' => "2008-12-31",
             'motif' => 'Test mutation',
             'localite_id' => $this->localiteId
         ];

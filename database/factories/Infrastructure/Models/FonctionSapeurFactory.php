@@ -19,39 +19,4 @@ class FonctionSapeurFactory extends Factory
             'remarque' => '',
         ];
     }
-
-    public function forSapeur(int $sapeurId): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'sapeur_id' => $sapeurId,
-        ]);
-    }
-
-    public function ofFonction(int $fonctionId): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'fonction_id' => $fonctionId,
-        ]);
-    }
-
-    public function withDebut(string $debut): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'debut' => $debut,
-        ]);
-    }
-
-    public function withFin(?string $fin): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'fin' => $fin,
-        ]);
-    }
-
-    public function withRemarque(?string $remarque): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'remarque' => $remarque,
-        ]);
-    }
 }

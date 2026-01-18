@@ -16,9 +16,9 @@ class SapeurCoursTest extends TestCase
     {
         // Arrange
         $sapeur = Sapeur::factory()->create();
-        CoursSapeur::factory()->forSapeur($sapeur->id)->ofCours(1)->create();
-        CoursSapeur::factory()->forSapeur($sapeur->id)->ofCours(2)->create();
-        CoursSapeur::factory()->forSapeur($sapeur->id)->ofCours(3)->create();
+        CoursSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'cours_id' => 1]);
+        CoursSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'cours_id' => 2]);
+        CoursSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'cours_id' => 3]);
 
         // Act
         $response = $this->json('GET', "/api/v2/sapeurs/{$sapeur->id}/cours");
@@ -70,12 +70,12 @@ class SapeurCoursTest extends TestCase
     {
         // Arrange
         $sapeur = Sapeur::factory()->create();
-        $fonctionExistante = FonctionSapeur::factory()
-            ->forSapeur($sapeur->id)
-            ->ofFonction(2)
-            ->withDebut('1958-01-01')
-            ->withFin(null)
-            ->create();
+        $fonctionExistante = FonctionSapeur::factory()->create([
+            'sapeur_id' => $sapeur->id,
+            'fonction_id' => 2,
+            'debut' => '1958-01-01',
+            'fin' => null
+        ]);
 
         $data = [
             'date' => '1958-02-07',
@@ -147,13 +147,13 @@ class SapeurCoursTest extends TestCase
     {
         // Arrange
         $sapeur = Sapeur::factory()->create();
-        $cours = CoursSapeur::factory()
-            ->forSapeur($sapeur->id)
-            ->ofCours(2)
-            ->withDate('1958-01-01')
-            ->withLocalite(1)
-            ->withDuree(1)
-            ->create();
+        $cours = CoursSapeur::factory()->create([
+            'sapeur_id' => $sapeur->id,
+            'cours_id' => 2,
+            'date' => '1958-01-01',
+            'localite_id' => 1,
+            'duree' => 1
+        ]);
 
         $updateData = [
             'id' => $cours->id,
@@ -214,10 +214,10 @@ class SapeurCoursTest extends TestCase
     {
         // Arrange
         $sapeur = Sapeur::factory()->create();
-        $cours = CoursSapeur::factory()
-            ->forSapeur($sapeur->id)
-            ->ofCours(2)
-            ->create();
+        $cours = CoursSapeur::factory()->create([
+            'sapeur_id' => $sapeur->id,
+            'cours_id' => 2
+        ]);
 
         // Act
         $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/cours/{$cours->id}");

@@ -15,9 +15,9 @@ class SapeurGradeTest extends TestCase
     {
         // Arrange
         $sapeur = Sapeur::factory()->create();
-        GradeSapeur::factory()->forSapeur($sapeur->id)->ofGrade(1)->create();
-        GradeSapeur::factory()->forSapeur($sapeur->id)->ofGrade(2)->create();
-        GradeSapeur::factory()->forSapeur($sapeur->id)->ofGrade(3)->create();
+        GradeSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'grade_id' => 1]);
+        GradeSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'grade_id' => 2]);
+        GradeSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'grade_id' => 3]);
 
         // Act
         $response = $this->json('GET', "/api/v2/sapeurs/{$sapeur->id}/grades");
@@ -82,11 +82,11 @@ class SapeurGradeTest extends TestCase
     {
         // Arrange
         $sapeur = Sapeur::factory()->create();
-        $grade = GradeSapeur::factory()
-            ->forSapeur($sapeur->id)
-            ->ofGrade(4)
-            ->withDate('1958-01-01')
-            ->create();
+        $grade = GradeSapeur::factory()->create([
+            'sapeur_id' => $sapeur->id,
+            'grade_id' => 4,
+            'date' => '1958-01-01'
+        ]);
 
         $updateData = [
             'id' => $grade->id,
@@ -147,10 +147,10 @@ class SapeurGradeTest extends TestCase
     {
         // Arrange
         $sapeur = Sapeur::factory()->create();
-        $grade = GradeSapeur::factory()
-            ->forSapeur($sapeur->id)
-            ->ofGrade(5)
-            ->create();
+        $grade = GradeSapeur::factory()->create([
+            'sapeur_id' => $sapeur->id,
+            'grade_id' => 5
+        ]);
 
         // Act
         $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/grades/{$grade->id}");

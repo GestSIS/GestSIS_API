@@ -19,9 +19,9 @@ class SapeurPermisTest extends TestCase
         $sapeur = Sapeur::factory()->create();
 
         // Create 3 permis using factory
-        $permis1 = Permis::factory()->forSapeur($sapeur->id)->ofType(1)->create();
-        $permis2 = Permis::factory()->forSapeur($sapeur->id)->ofType(2)->create();
-        $permis3 = Permis::factory()->forSapeur($sapeur->id)->ofType(3)->create();
+        $permis1 = Permis::factory()->create(['sapeur_id' => $sapeur->id, 'permis_type_id' => 1]);
+        $permis2 = Permis::factory()->create(['sapeur_id' => $sapeur->id, 'permis_type_id' => 2]);
+        $permis3 = Permis::factory()->create(['sapeur_id' => $sapeur->id, 'permis_type_id' => 3]);
 
         $response = $this->json('GET', "/api/v2/sapeurs/{$sapeur->id}/permis");
 

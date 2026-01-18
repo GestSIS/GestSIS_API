@@ -26,24 +26,4 @@ class GroupeSapeurFactory extends Factory
             'groupe_id' => $this->faker->numberBetween(1, 10),
         ];
     }
-
-    /**
-     * Indicate that the groupe is for a specific sapeur.
-     */
-    public function forSapeur(int $sapeurId): static
-    {
-        return $this->state(fn(array $attributes) => [
-            'sapeur_id' => $sapeurId,
-        ]);
-    }
-
-    /**
-     * Indicate that the groupe has a specific ID.
-     */
-    public function forGroupe(int $groupeId): static
-    {
-        return $this->state(fn(array $attributes) => [
-            'groupe_id' => $groupeId,
-        ]);
-    }
 }

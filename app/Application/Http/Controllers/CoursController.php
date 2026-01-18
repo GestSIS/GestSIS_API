@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\SapeurParamService;
+use App\Infrastructure\Models\Cours;
 use Illuminate\Http\Request;
 
 class CoursController extends Controller
@@ -41,6 +42,10 @@ class CoursController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (!Cours::where('id', $id)->exists()) {
+            return response()->json(['error' => 'Cours not found'], 404);
+        }
+
         $data = $request->validate([
             'abreviation' => 'string|min:1',
             'designation' => 'string|min:1',
@@ -59,6 +64,10 @@ class CoursController extends Controller
 
     public function destroy($id)
     {
+        if (!Cours::where('id', $id)->exists()) {
+            return response()->json(['error' => 'Cours not found'], 404);
+        }
+
         $cours = $this->service->supprimerCours($id);
         return response()->json(['data' => $cours]);
     }

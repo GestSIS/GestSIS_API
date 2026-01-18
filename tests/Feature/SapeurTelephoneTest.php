@@ -17,11 +17,11 @@ class SapeurTelephoneTest extends TestCase
     public function testIndexTelephonesReturnsListOfTelephones()
     {
         $sapeur = Sapeur::factory()->create();
-        
+
         // Create 3 telephones using factory
-        $tel1 = SapeurTelephone::factory()->forSapeur($sapeur->id)->ofType(1)->create();
-        $tel2 = SapeurTelephone::factory()->forSapeur($sapeur->id)->ofType(2)->create();
-        $tel3 = SapeurTelephone::factory()->forSapeur($sapeur->id)->ofType(3)->create();
+        $tel1 = SapeurTelephone::factory()->create(['sapeur_id' => $sapeur->id, 'telephone_type_id' => 1]);
+        $tel2 = SapeurTelephone::factory()->create(['sapeur_id' => $sapeur->id, 'telephone_type_id' => 2]);
+        $tel3 = SapeurTelephone::factory()->create(['sapeur_id' => $sapeur->id, 'telephone_type_id' => 3]);
 
         $response = $this->json('GET', "/api/v2/sapeurs/{$sapeur->id}/telephones");
 
@@ -63,7 +63,12 @@ class SapeurTelephoneTest extends TestCase
             ->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    'id', 'telephone_type_id', 'sapeur_id', 'rta', 'priorite', 'numero'
+                    'id',
+                    'telephone_type_id',
+                    'sapeur_id',
+                    'rta',
+                    'priorite',
+                    'numero'
                 ]
             ]);
 
@@ -97,15 +102,15 @@ class SapeurTelephoneTest extends TestCase
     public function testEditTelephoneSuccessfully()
     {
         $sapeur = Sapeur::factory()->create();
-        
+
         // Create telephone
-        $telephone = SapeurTelephone::factory()
-            ->forSapeur($sapeur->id)
-            ->withNumero('032 546 54 15')
-            ->ofType(1)
-            ->withRta(false)
-            ->withPriorite(1)
-            ->create();
+        $telephone = SapeurTelephone::factory()->create([
+            'sapeur_id' => $sapeur->id,
+            'numero' => '032 546 54 15',
+            'telephone_type_id' => 1,
+            'rta' => false,
+            'priorite' => 1
+        ]);
 
         $newData = [
             'id' => $telephone->id,
@@ -125,7 +130,12 @@ class SapeurTelephoneTest extends TestCase
             ->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    'id', 'telephone_type_id', 'sapeur_id', 'rta', 'priorite', 'numero'
+                    'id',
+                    'telephone_type_id',
+                    'sapeur_id',
+                    'rta',
+                    'priorite',
+                    'numero'
                 ]
             ]);
 
@@ -190,12 +200,12 @@ class SapeurTelephoneTest extends TestCase
     public function testRemoveTelephoneSuccessfully()
     {
         $sapeur = Sapeur::factory()->create();
-        
+
         // Create telephone
-        $telephone = SapeurTelephone::factory()
-            ->forSapeur($sapeur->id)
-            ->withNumero('032 546 54 79')
-            ->create();
+        $telephone = SapeurTelephone::factory()->create([
+            'sapeur_id' => $sapeur->id,
+            'numero' => '032 546 54 79'
+        ]);
 
         $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/telephones/{$telephone->id}");
 

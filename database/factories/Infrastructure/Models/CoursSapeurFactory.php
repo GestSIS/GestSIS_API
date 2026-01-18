@@ -19,39 +19,4 @@ class CoursSapeurFactory extends Factory
             'duree' => $this->faker->randomFloat(2, 0.5, 10),
         ];
     }
-
-    public function forSapeur(int $sapeurId): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'sapeur_id' => $sapeurId,
-        ]);
-    }
-
-    public function ofCours(int $coursId): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'cours_id' => $coursId,
-        ]);
-    }
-
-    public function withDate(string $date): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'date' => $date,
-        ]);
-    }
-
-    public function withLocalite(int $localiteId): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'localite_id' => $localiteId,
-        ]);
-    }
-
-    public function withDuree(float $duree): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'duree' => $duree,
-        ]);
-    }
 }

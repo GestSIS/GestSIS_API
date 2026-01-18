@@ -31,39 +31,4 @@ class GroupeFactory extends Factory
             'parent_id' => null,
         ];
     }
-
-    public function withDesignation(string $designation): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'designation' => $designation,
-        ]);
-    }
-
-    public function withNo(string $no): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'no' => $no,
-        ]);
-    }
-
-    public function withTri(int $tri): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'tri' => $tri,
-        ]);
-    }
-
-    public function withType(int $type): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'type' => $type,
-        ]);
-    }
-
-    public function withParent(?int $parentId): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'parent_id' => $parentId,
-        ]);
-    }
 }

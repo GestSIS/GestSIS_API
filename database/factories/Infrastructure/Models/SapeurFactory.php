@@ -42,7 +42,7 @@ class SapeurFactory extends Factory
             'iban_statut' => 1,
             'remarque' => $this->faker->text,
             'porteur' => 0,
-            'localite_id' => fn() => Localite::inRandomOrder()->first()?->id ?? 1,
+            'localite_id' => $this->faker->numberBetween(1, 10),
             'civilite_id' => $this->faker->numberBetween(1, 2),
 
             'type' => SapeurBusiness::TYPE_SAPEUR,

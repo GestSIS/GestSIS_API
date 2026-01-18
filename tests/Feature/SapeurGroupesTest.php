@@ -15,9 +15,9 @@ class SapeurGroupesTest extends TestCase
     {
         // Arrange
         $sapeur = Sapeur::factory()->create();
-        GroupeSapeur::factory()->forSapeur($sapeur->id)->forGroupe(1)->create();
-        GroupeSapeur::factory()->forSapeur($sapeur->id)->forGroupe(2)->create();
-        GroupeSapeur::factory()->forSapeur($sapeur->id)->forGroupe(3)->create();
+        GroupeSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'groupe_id' => 1]);
+        GroupeSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'groupe_id' => 2]);
+        GroupeSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'groupe_id' => 3]);
 
         // Act
         $response = $this->json('GET', "/api/v2/sapeurs/{$sapeur->id}/groupes");
@@ -41,9 +41,9 @@ class SapeurGroupesTest extends TestCase
     {
         // Arrange
         $sapeur = Sapeur::factory()->create();
-        $groupe1 = GroupeSapeur::factory()->forSapeur($sapeur->id)->forGroupe(1)->create();
-        $groupe2 = GroupeSapeur::factory()->forSapeur($sapeur->id)->forGroupe(2)->create();
-        $groupe3 = GroupeSapeur::factory()->forSapeur($sapeur->id)->forGroupe(3)->create();
+        $groupe1 = GroupeSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'groupe_id' => 1]);
+        $groupe2 = GroupeSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'groupe_id' => 2]);
+        $groupe3 = GroupeSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'groupe_id' => 3]);
 
         // Act
         $response = $this->json('POST', "/api/v2/sapeurs/{$sapeur->id}/quitter-groupes", [

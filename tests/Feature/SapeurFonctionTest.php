@@ -15,9 +15,9 @@ class SapeurFonctionTest extends TestCase
     {
         // Arrange
         $sapeur = Sapeur::factory()->create();
-        FonctionSapeur::factory()->forSapeur($sapeur->id)->ofFonction(1)->create();
-        FonctionSapeur::factory()->forSapeur($sapeur->id)->ofFonction(2)->create();
-        FonctionSapeur::factory()->forSapeur($sapeur->id)->ofFonction(3)->create();
+        FonctionSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'fonction_id' => 1]);
+        FonctionSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'fonction_id' => 2]);
+        FonctionSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'fonction_id' => 3]);
 
         // Act
         $response = $this->json('GET', "/api/v2/sapeurs/{$sapeur->id}/fonctions");
@@ -84,12 +84,12 @@ class SapeurFonctionTest extends TestCase
     {
         // Arrange
         $sapeur = Sapeur::factory()->create();
-        $fonction = FonctionSapeur::factory()
-            ->forSapeur($sapeur->id)
-            ->ofFonction(2)
-            ->withDebut('1958-01-01')
-            ->withFin('1958-09-17')
-            ->create();
+        $fonction = FonctionSapeur::factory()->create([
+            'sapeur_id' => $sapeur->id,
+            'fonction_id' => 2,
+            'debut' => '1958-01-01',
+            'fin' => '1958-09-17'
+        ]);
 
         $updateData = [
             'id' => $fonction->id,
@@ -153,10 +153,10 @@ class SapeurFonctionTest extends TestCase
     {
         // Arrange
         $sapeur = Sapeur::factory()->create();
-        $fonction = FonctionSapeur::factory()
-            ->forSapeur($sapeur->id)
-            ->ofFonction(2)
-            ->create();
+        $fonction = FonctionSapeur::factory()->create([
+            'sapeur_id' => $sapeur->id,
+            'fonction_id' => 2
+        ]);
 
         // Act
         $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/fonctions/{$fonction->id}");
@@ -194,18 +194,18 @@ class SapeurFonctionTest extends TestCase
     {
         // Arrange
         $sapeur = Sapeur::factory()->create();
-        $fonction1 = FonctionSapeur::factory()
-            ->forSapeur($sapeur->id)
-            ->ofFonction(2)
-            ->withDebut('1958-01-01')
-            ->withFin(null)
-            ->create();
-        $fonction2 = FonctionSapeur::factory()
-            ->forSapeur($sapeur->id)
-            ->ofFonction(3)
-            ->withDebut('1959-01-01')
-            ->withFin(null)
-            ->create();
+        $fonction1 = FonctionSapeur::factory()->create([
+            'sapeur_id' => $sapeur->id,
+            'fonction_id' => 2,
+            'debut' => '1958-01-01',
+            'fin' => null
+        ]);
+        $fonction2 = FonctionSapeur::factory()->create([
+            'sapeur_id' => $sapeur->id,
+            'fonction_id' => 3,
+            'debut' => '1959-01-01',
+            'fin' => null
+        ]);
 
         $data = [
             'date' => '1960-09-17',

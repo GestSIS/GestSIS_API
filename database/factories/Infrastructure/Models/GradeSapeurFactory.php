@@ -18,32 +18,4 @@ class GradeSapeurFactory extends Factory
             'remarque' => '',
         ];
     }
-
-    public function forSapeur(int $sapeurId): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'sapeur_id' => $sapeurId,
-        ]);
-    }
-
-    public function ofGrade(int $gradeId): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'grade_id' => $gradeId,
-        ]);
-    }
-
-    public function withDate(string $date): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'date' => $date,
-        ]);
-    }
-
-    public function withRemarque(?string $remarque): self
-    {
-        return $this->state(fn(array $attributes) => [
-            'remarque' => $remarque,
-        ]);
-    }
 }

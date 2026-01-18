@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\SapeurParamService;
+use App\Infrastructure\Models\Grade;
 use Illuminate\Http\Request;
 
 class GradeController extends Controller
@@ -41,6 +42,10 @@ class GradeController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (!Grade::where('id', $id)->exists()) {
+            return response()->json(['error' => 'Grade not found'], 404);
+        }
+
         $data = $request->validate([
             'designation' => 'string|min:1',
             'abreviation' => 'string|min:1',
@@ -54,6 +59,10 @@ class GradeController extends Controller
 
     public function destroy($id)
     {
+        if (!Grade::where('id', $id)->exists()) {
+            return response()->json(['error' => 'Grade not found'], 404);
+        }
+
         $grade = $this->service->supprimerGrade($id);
         return response()->json(['data' => $grade]);
     }
