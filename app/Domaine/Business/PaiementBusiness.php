@@ -348,8 +348,8 @@ class PaiementBusiness
 
                     $paiement->addTransaction($transaction);
                     $i++;
-                } catch (InvalidArgumentException) {
-                    throw new ArrayException([], "Informations de paiement pour '$sapeur->nom $sapeur->prenom' invalides : $sapeur->iban");
+                } catch (InvalidArgumentException $e) {
+                    throw new ArrayException(['error' => $e->getMessage()], "Informations de paiement pour '$sapeur->nom $sapeur->prenom' invalides : $sapeur->iban");
                 }
             }
         }
