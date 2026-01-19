@@ -341,7 +341,12 @@ class PaiementBusiness
                         new Money\CHF((int) ($p->total * 100)),
                         // TODO: Could be improved en remplacant les charactères accentués par leur version non accentué
                         Text::sanitize($sapeur->prenom . " " . $sapeur->nom, 70),
-                        new StructuredPostalAddress($sapeur->rue == "" ? null : $sapeur->rue, $sapeur->no_rue == "" ? null : $sapeur->no_rue, $sapeur->localite()->get()[0]->npa, $sapeur->localite()->get()[0]->designation),
+                        new StructuredPostalAddress(
+                            $sapeur->rue == "" ? null : Text::sanitize($sapeur->rue, 70),
+                            $sapeur->no_rue == "" ? null : Text::sanitize($sapeur->no_rue, 16),
+                            Text::sanitize($sapeur->localite()->get()[0]->npa, 16),
+                            Text::sanitize($sapeur->localite()->get()[0]->designation, 35)
+                        ),
                         new IBAN($sapeur->iban),
                         IID::fromIBAN(new IBAN($sapeur->iban))
                     );
@@ -349,7 +354,7 @@ class PaiementBusiness
                     $paiement->addTransaction($transaction);
                     $i++;
                 } catch (InvalidArgumentException $e) {
-                    throw new ArrayException(['error' => $e->getMessage()], "Informations de paiement pour '$sapeur->nom $sapeur->prenom' invalides : $sapeur->iban");
+                    throw new ArrayException(['error' => $e->getMessage(), 'type' => typeOf($e)], "Informations de paiement pour '$sapeur->nom $sapeur->prenom' invalides : $sapeur->iban");
                 }
             }
         }
