@@ -484,7 +484,7 @@ class ImputationBusiness
             // Génère le mapping -> ["fonction_id" => 'indemnite'];
             $mapping = array_reduce(array_map(
                 fn($indemnite) => [$indemnite['fonction_id'] => $indemnite],
-                $type['frais_indemnite_annuels']
+                $type['fraisIndemniteAnnuels']->toArray()
             ), fn($a, $b) => $a + $b, []);
 
             foreach ($sapeursGrouped as $sapeurId => $fonctions) {
