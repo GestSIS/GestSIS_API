@@ -6,10 +6,12 @@ use App\Infrastructure\Models\Intervention;
 use App\Infrastructure\Models\InterventionMateriel;
 use App\Domaine\API\InterventionService;
 use Exception;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class InterventionMaterielTest extends TestCase
 {
+    use DatabaseTransactions;
 
     protected $interventionService;
     protected $interventionId;
@@ -40,7 +42,8 @@ class InterventionMaterielTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'intervention_id', 'materiel_id'
+                        'intervention_id',
+                        'materiel_id'
                     ]
                 ]
             ]);
@@ -104,9 +107,9 @@ class InterventionMaterielTest extends TestCase
 
         $materiels = InterventionMateriel::factory()->count(1)->make(['intervention_id' => $this->interventionId])->toArray();
 
-        $ids = array_map(function ($s) {
-            return $s->id;
-        }, $this->interventionService->addMateriels($this->interventionId, $materiels));
+        $ids = $this->interventionService->addMateriels($this->interventionId, $materiels)
+            ->map(fn($s) => $s->id)
+            ->toArray();
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/materiels', ['materiels' => $ids]);
 
         $response

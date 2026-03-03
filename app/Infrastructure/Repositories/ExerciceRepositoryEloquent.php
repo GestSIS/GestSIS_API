@@ -96,29 +96,6 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
 
     /**
      * @param array $data
-     * @return mixed
-     */
-    public function createExercice(array $data)
-    {
-        if (array_key_exists('lieu', $data) && $data['lieu'] === null) {
-            $data['lieu'] = '';
-        }
-
-        if (array_key_exists('communications', $data) && $data['communications'] === null) {
-            $data['communications'] = '';
-        }
-
-        $exercice = new Exercice();
-        $exercice->fill($data);
-        $exercice->exercice_categorie_id = $data['exercice_categorie_id'];
-        $exercice->exercice_comptable_id = $data['exercice_comptable_id'];
-        $exercice->save();
-
-        return $this->convertExercice($exercice);
-    }
-
-    /**
-     * @param array $data
      * @param $id
      * @return mixed
      */

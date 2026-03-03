@@ -50,30 +50,6 @@ class InterventionRepositoryEloquent implements InterventionRepository
         return $this->convertIntervention(Intervention::find($interventionId));
     }
 
-    public function createNewIntervention($data)
-    {
-        if (!array_key_exists('lieu', $data) || $data['lieu'] === null)
-            $data['lieu'] = '';
-        if (!array_key_exists('agent', $data) || $data['agent'] === null)
-            $data['agent'] = '';
-        if (!array_key_exists('description', $data) || $data['description'] === null)
-            $data['description'] = '';
-        if (!array_key_exists('proprietaire', $data) || $data['proprietaire'] === null)
-            $data['proprietaire'] = '';
-        if (!array_key_exists('responsable', $data) || $data['responsable'] === null)
-            $data['responsable'] = '';
-        if (array_key_exists('wgs84', $data) && $data['wgs84'] === null)
-            $data['wgs84'] = '';
-
-        $intervention = new Intervention();
-        $intervention->fill($data);
-        $intervention->date_imputation = null;
-        $intervention->exercice_comptable_id = $data['exercice_comptable_id'];
-        $intervention->save();
-
-        return $this->convertIntervention($intervention);
-    }
-
     public function editInterventionInformationsById($interventionId, $data)
     {
         if (array_key_exists('lieu', $data) && $data['lieu'] === null)
@@ -106,78 +82,6 @@ class InterventionRepositoryEloquent implements InterventionRepository
         Appel::where('intervention_id', '=', $interventionId)->delete();
         Phase::where('intervention_id', '=', $interventionId)->delete();
         Intervention::where('id', '=', $interventionId)->delete();
-    }
-
-    public function getInterventionAppels($interventionId)
-    {
-        $temp = $this;
-        return Appel::where('intervention_id', $interventionId)
-            ->get()->map(function ($intervention) use ($temp) {
-                return $temp->convertAppel($intervention);
-            })->toArray();
-    }
-
-    public function getInterventionMissions($interventionId)
-    {
-        $temp = $this;
-        return Mission::where('intervention_id', $interventionId)
-            ->get()->map(function ($intervention) use ($temp) {
-                return $temp->convertMission($intervention);
-            })->toArray();
-    }
-
-    public function getInterventionVehicules($interventionId)
-    {
-        $temp = $this;
-        return InterventionVehicule::where('intervention_id', $interventionId)
-            ->get()->map(function ($intervention) use ($temp) {
-                return $temp->convertVehicule($intervention);
-            })->toArray();
-    }
-
-    public function getInterventionMateriels($interventionId)
-    {
-        $temp = $this;
-        return InterventionMateriel::where('intervention_id', $interventionId)
-            ->get()->map(function ($intervention) use ($temp) {
-                return $temp->convertMateriel($intervention);
-            })->toArray();
-    }
-
-    public function getInterventionPhases($interventionId)
-    {
-        $temp = $this;
-        return Phase::where('intervention_id', $interventionId)
-            ->get()->map(function ($intervention) use ($temp) {
-                return $temp->convertPhase($intervention);
-            })->toArray();
-    }
-
-    public function getInterventionQuittances($interventionId)
-    {
-        $temp = $this;
-        return Quittance::where('intervention_id', $interventionId)
-            ->get()->map(function ($intervention) use ($temp) {
-                return $temp->convertQuittance($intervention);
-            })->toArray();
-    }
-
-    public function getInterventionPresences($interventionId)
-    {
-        $temp = $this;
-        return InterventionSapeur::where('intervention_id', $interventionId)
-            ->get()->map(function ($intervention) use ($temp) {
-                return $temp->convertPresence($intervention);
-            })->toArray();
-    }
-
-    public function getInterventionGroupes($interventionId)
-    {
-        $temp = $this;
-        return GroupeIntervention::where('intervention_id', $interventionId)
-            ->get()->map(function ($intervention) use ($temp) {
-                return $temp->convertGroupe($intervention);
-            })->toArray();
     }
 
     public function addPresence($interventionId, $presence)

@@ -4,10 +4,12 @@ namespace Tests\Feature;
 
 use App\Infrastructure\Models\Intervention;
 use Exception;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class InterventionTest extends TestCase
 {
+    use DatabaseTransactions;
 
     protected $service;
     protected $interventionId;
@@ -34,7 +36,8 @@ class InterventionTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'designation'
+                        'id',
+                        'designation'
                     ]
                 ]
             ]);
@@ -54,7 +57,9 @@ class InterventionTest extends TestCase
             ->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    'id', 'localite_id', 'date_debut'
+                    'id',
+                    'localite_id',
+                    'date_debut'
                 ]
             ]);
     }

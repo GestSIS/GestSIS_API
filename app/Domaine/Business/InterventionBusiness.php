@@ -7,7 +7,9 @@ use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\Intervention;
 use App\Infrastructure\Models\InterventionSapeur;
+use App\Infrastructure\Models\InterventionVehicule;
 use App\Infrastructure\Models\Mission;
+use App\Infrastructure\Models\Phase;
 use App\Infrastructure\Models\Quittance;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -39,16 +41,34 @@ class InterventionBusiness
      * Create a intervention
      *
      * @param $data
-     * @return InterventionBusiness
+     * @return Intervention
      * @throws ArrayException
      */
-    public function createIntervention($data)
+    public function createIntervention($data): Intervention
     {
         //TODO Vérifier intervention comptable
         $phaseTypeIntervention = 1;
         $data['statut'] = self::INTERVENTION_STATUT_EMPTY;
 
-        $intervention = $this->repository->createNewIntervention($data);
+        if (!array_key_exists('lieu', $data) || $data['lieu'] === null)
+            $data['lieu'] = '';
+        if (!array_key_exists('agent', $data) || $data['agent'] === null)
+            $data['agent'] = '';
+        if (!array_key_exists('description', $data) || $data['description'] === null)
+            $data['description'] = '';
+        if (!array_key_exists('proprietaire', $data) || $data['proprietaire'] === null)
+            $data['proprietaire'] = '';
+        if (!array_key_exists('responsable', $data) || $data['responsable'] === null)
+            $data['responsable'] = '';
+        if (array_key_exists('wgs84', $data) && $data['wgs84'] === null)
+            $data['wgs84'] = '';
+
+        $intervention = new Intervention();
+        $intervention->fill($data);
+        $intervention->date_imputation = null;
+        $intervention->exercice_comptable_id = $data['exercice_comptable_id'];
+        $intervention->save();
+
         $this->repository->addPhase($intervention->id, array(
             "debut" => null,
             "phase_type_id" => $phaseTypeIntervention,
@@ -275,7 +295,8 @@ class InterventionBusiness
         $this->repository->removePresencesById($interventionId, $ids);
         $statut = $this->repository->getInterventionStatutById($interventionId);
 
-        if (count($this->repository->getInterventionPresences($interventionId)) === 0) {
+        $presences = InterventionSapeur::where('intervention_id', $interventionId)->get();
+        if ($presences->isEmpty()) {
             $statut = $this->repository->editInterventionInformationsById($interventionId, ["statut" => self::INTERVENTION_STATUT_EMPTY]);
         }
         return $statut;
@@ -381,7 +402,7 @@ class InterventionBusiness
         $this->checkIsNotImpute($interventionId);
 
         $intervention = $this->repository->findInterventionById($interventionId);
-        $existingPhases = $this->repository->getInterventionPhases($interventionId);
+        $existingPhases = Phase::where('intervention_id', $interventionId)->get();
 
         $debut = Carbon::parse($intervention->date_debut . " " . $intervention->heure_debut);
         foreach ($phases as $phase) {
@@ -510,12 +531,10 @@ class InterventionBusiness
         $this->checkIsNotImpute($interventionId);
 
         //Check duplicated vehicules
-        $vehiculesRef = $this->repository->getInterventionVehicules($interventionId);
-        $vehiculesId = array_map(function ($vehicule) {
-            return $vehicule->vehicule_id;
-        }, $vehiculesRef);
-        $vehicules = array_filter($vehicules, function ($vehicule) use ($vehiculesId) {
-            return !in_array($vehicule, $vehiculesId);
+        $vehiculeIds = InterventionVehicule::where('intervention_id', $interventionId)->get()
+            ->map(fn($s) => $s->vehicule_id)->toArray();
+        $vehicules = array_filter($vehicules, function ($vehicule) use ($vehiculeIds) {
+            return !in_array($vehicule, $vehiculeIds);
         });
 
         foreach ($vehicules as $vehicule) {

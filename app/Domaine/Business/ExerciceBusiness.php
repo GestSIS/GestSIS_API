@@ -73,19 +73,27 @@ class ExerciceBusiness
      * Create a exercice
      *
      * @param $data
-     * @return ExerciceBusiness
      * @throws ArrayException
      */
-    public function createExercice($data)
+    public function createExercice($data): Exercice
     {
-        // Statut:
-        // 0 -> annulé
-        // 1 -> vide
-        // 2 -> saisie
-        // 3 -> validé
-        // 4 -> imputé
         $data['statut'] = self::EXERCICE_STATUT_VIDE;
-        return $this->repository->createExercice($data);
+
+        if (array_key_exists('lieu', $data) && $data['lieu'] === null) {
+            $data['lieu'] = '';
+        }
+
+        if (array_key_exists('communications', $data) && $data['communications'] === null) {
+            $data['communications'] = '';
+        }
+
+        $exercice = new Exercice();
+        $exercice->fill($data);
+        $exercice->exercice_categorie_id = $data['exercice_categorie_id'];
+        $exercice->exercice_comptable_id = $data['exercice_comptable_id'];
+        $exercice->save();
+
+        return $exercice;
     }
 
     public function cancelExerciceById($exerciceId)

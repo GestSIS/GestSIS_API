@@ -5,10 +5,12 @@ namespace Tests\Feature;
 use App\Domaine\API\ExerciceService;
 use App\Infrastructure\Models\Exercice;
 use Exception;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class BaseDataExerciceTest extends TestCase
 {
+    use DatabaseTransactions;
 
     /**
      * Test index exercices-categorie
@@ -25,7 +27,8 @@ class BaseDataExerciceTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'designation'
+                        'id',
+                        'designation'
                     ]
                 ]
             ]);
@@ -46,7 +49,8 @@ class BaseDataExerciceTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'designation'
+                        'id',
+                        'designation'
                     ]
                 ]
             ]);

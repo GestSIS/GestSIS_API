@@ -9,6 +9,7 @@ use App\Infrastructure\Models\IndemniteCoursFonction;
 use App\Infrastructure\Models\Localite;
 use App\Infrastructure\Models\Sapeur;
 use Exception;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 use App\Domaine\API\SapeurService;
 use App\Domaine\API\ImputationService;
@@ -16,6 +17,7 @@ use App\Domaine\API\CoursService;
 
 class ImputationCoursTest extends TestCase
 {
+    use DatabaseTransactions;
 
     protected $imputationService;
     protected $sapeurOneId;

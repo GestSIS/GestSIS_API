@@ -6,12 +6,15 @@ use App\Domaine\API\ControleMedicalService;
 use App\Infrastructure\Models\ControleMedical;
 use App\Infrastructure\Models\Medecin;
 use App\Infrastructure\Models\Sapeur;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ControleMedicalTest extends TestCase
 {
+    use DatabaseTransactions;
+
     protected $controleMedicalService;
 
     protected function setUp(): void

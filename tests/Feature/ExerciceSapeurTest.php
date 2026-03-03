@@ -4,10 +4,12 @@ namespace Tests\Feature;
 
 use App\Infrastructure\Models\Exercice;
 use Exception;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class ExerciceSapeurTest extends TestCase
 {
+    use DatabaseTransactions;
 
     protected $exerciceService;
 

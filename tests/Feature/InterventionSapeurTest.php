@@ -4,10 +4,12 @@ namespace Tests\Feature;
 
 use App\Infrastructure\Models\Intervention;
 use Exception;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class InterventionSapeurTest extends TestCase
 {
+    use DatabaseTransactions;
 
     protected $interventionService;
     protected $interventionId;
@@ -38,7 +40,9 @@ class InterventionSapeurTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'intervention_id', 'sapeur_id', 'id'
+                        'intervention_id',
+                        'sapeur_id',
+                        'id'
                     ]
                 ]
             ]);
@@ -111,12 +115,13 @@ class InterventionSapeurTest extends TestCase
             ),
         );
 
-        $res = $this->interventionService->addPresences($this->interventionId, $sapeurs)['sapeurs'];
-        $res = array_map(function ($s) {
-            $s->debut = substr($s->debut, 0, 16);
-            $s->fin = substr($s->fin, 0, 16);
-            return $s;
-        }, $res);
+        $res = $this->interventionService->addPresences($this->interventionId, $sapeurs)['sapeurs']
+            ->map(function ($s) {
+                $s->debut = substr($s->debut, 0, 16);
+                $s->fin = substr($s->fin, 0, 16);
+                return $s;
+            })
+            ->toArray();
 
         $response = $this->json('PUT', '/api/v2/interventions/' . $this->interventionId . '/sapeurs', ['sapeurs' => $res]);
 
@@ -156,9 +161,9 @@ class InterventionSapeurTest extends TestCase
             ),
         );
 
-        $ids = array_map(function ($s) {
-            return $s->id;
-        }, $this->interventionService->addPresences($this->interventionId, $sapeurs)['sapeurs']);
+        $ids = $this->interventionService->addPresences($this->interventionId, $sapeurs)['sapeurs']
+            ->map(fn($s) => $s->id)
+            ->toArray();
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/sapeurs', ['sapeurs' => $ids]);
 
         $response

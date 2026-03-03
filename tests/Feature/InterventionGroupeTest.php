@@ -5,10 +5,13 @@ namespace Tests\Feature;
 use App\Infrastructure\Models\GroupeIntervention;
 use App\Infrastructure\Models\Intervention;
 use Exception;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class InterventionGroupeTest extends TestCase
 {
+    use DatabaseTransactions;
+
     protected $interventionService;
     protected $interventionId;
 
@@ -38,7 +41,9 @@ class InterventionGroupeTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'intervention_id', 'designation', 'no'
+                        'intervention_id',
+                        'designation',
+                        'no'
                     ]
                 ]
             ]);
@@ -52,7 +57,7 @@ class InterventionGroupeTest extends TestCase
      */
     public function testAddInterventionGroupe()
     {
-        $groupes = [['designation' => 'g1', 'no' => 1], ['designation' => 'g2', 'no' => 2], ['designation' => 'g3', 'no' => 3], ['designation' => 'g5', 'no' => 5]];
+        $groupes = [['designation' => 'g1', 'no' => "1"], ['designation' => 'g2', 'no' => "2"], ['designation' => 'g3', 'no' => "3"], ['designation' => 'g5', 'no' => "5"]];
 
         $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/groupes', array('groupes' => $groupes));
 
@@ -71,7 +76,7 @@ class InterventionGroupeTest extends TestCase
      */
     public function testRemoveInterventionGroupe()
     {
-        $groupes = [['designation' => 'g1', 'no' => 1]];
+        $groupes = [['designation' => 'g1', 'no' => "1"]];
         $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/groupes', array('groupes' => $groupes));
         $groupes = GroupeIntervention::where('intervention_id', '=', $this->interventionId)->pluck('id')->toArray();
 

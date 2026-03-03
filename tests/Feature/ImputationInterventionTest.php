@@ -6,6 +6,7 @@ use App\Infrastructure\Models\IndemniteInterventionType;
 use App\Infrastructure\Models\Intervention;
 use App\Infrastructure\Models\Sapeur;
 use Exception;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 use App\Domaine\API\InterventionService;
 use App\Domaine\API\SapeurService;
@@ -16,6 +17,7 @@ use Carbon\Carbon;
 
 class ImputationInterventionTest extends TestCase
 {
+    use DatabaseTransactions;
 
     protected $comptabiliteService;
     protected $sapeurOneId;
@@ -25,6 +27,10 @@ class ImputationInterventionTest extends TestCase
 
     protected $interventionService;
 
+    protected int $indemniteTypeSimpleId;
+    protected int $indemniteTypeComplexId;
+    protected int $indemniteTypeProRataId;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -32,6 +38,64 @@ class ImputationInterventionTest extends TestCase
         $this->interventionService = $this->app->make(InterventionService::class);
         $sapeurService = $this->app->make(SapeurService::class);
         $this->comptabiliteService = $this->app->make(ImputationService::class);
+
+        // Création des types d'indemnités propres au test
+        $this->indemniteTypeSimpleId = IndemniteInterventionType::create([
+            'designation' => 'Type Simple',
+            'tarif' => 30,
+            'tarif_min' => 40,
+            'tarif_min_pour' => 1,
+            'taux_weekend' => null,
+            'taux_nuit' => null,
+            'debut' => null,
+            'fin' => null,
+            'compte_id' => 4,
+            'phase_id' => 1,
+            'type_unite_id' => 2,
+            'ecriture_categorie_id' => 4,
+            'par_fonction' => false,
+            'type' => 1,
+            'tarif_pro_rata' => false,
+            'tarif_min_pro_rata' => false,
+        ])->id;
+
+        $this->indemniteTypeComplexId = IndemniteInterventionType::create([
+            'designation' => 'Type Complexe (taux nuit/weekend)',
+            'tarif' => 30,
+            'tarif_min' => null,
+            'tarif_min_pour' => null,
+            'taux_weekend' => 1.25,
+            'taux_nuit' => 1.25,
+            'debut' => '20:00',
+            'fin' => '08:00',
+            'compte_id' => 4,
+            'phase_id' => null,
+            'type_unite_id' => 2,
+            'ecriture_categorie_id' => 4,
+            'par_fonction' => false,
+            'type' => 1,
+            'tarif_pro_rata' => true,
+            'tarif_min_pro_rata' => false,
+        ])->id;
+
+        $this->indemniteTypeProRataId = IndemniteInterventionType::create([
+            'designation' => 'Type Pro-Rata',
+            'tarif' => 30,
+            'tarif_min' => 40,
+            'tarif_min_pour' => 1,
+            'taux_weekend' => null,
+            'taux_nuit' => null,
+            'debut' => null,
+            'fin' => null,
+            'compte_id' => 4,
+            'phase_id' => 1,
+            'type_unite_id' => 2,
+            'ecriture_categorie_id' => 4,
+            'par_fonction' => false,
+            'type' => 1,
+            'tarif_pro_rata' => true,
+            'tarif_min_pro_rata' => true,
+        ])->id;
 
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "29.01.2019";
@@ -90,7 +154,7 @@ class ImputationInterventionTest extends TestCase
     public function testImputationImputationTarifSimpleSansProRata()
     {
         $param = array(
-            "indemnite_intervention_type_id" => 1
+            "indemnite_intervention_type_id" => $this->indemniteTypeSimpleId
         );
         $response = $this->json('POST', "/api/v2/imputation/intervention/$this->interventionId", $param);
 
@@ -183,7 +247,7 @@ class ImputationInterventionTest extends TestCase
     public function testImputationImputationTarifComplex()
     {
         $param = array(
-            "indemnite_intervention_type_id" => 2
+            "indemnite_intervention_type_id" => $this->indemniteTypeComplexId
         );
         $response = $this->json('POST', "/api/v2/imputation/intervention/$this->interventionId", $param);
 
@@ -301,7 +365,7 @@ class ImputationInterventionTest extends TestCase
      */
     public function testImputationImputationTarifTauxNuitEtWeekend()
     {
-        $param = ["indemnite_intervention_type_id" => 2];
+        $param = ["indemnite_intervention_type_id" => $this->indemniteTypeComplexId];
 
         $intervention = Intervention::factory()->make();
         // Intervention du jeudi au mercredi incluant un weekend complet
@@ -703,9 +767,9 @@ class ImputationInterventionTest extends TestCase
         $this->interventionService->addPresences($interventionId, $sapeurs);
         $this->interventionService->validerInterventionById($interventionId);
 
-        // Imputation avec tarif min (indemnite_intervention_type_id = 1)
+        // Imputation avec tarif min
         $param = [
-            "indemnite_intervention_type_id" => 1
+            "indemnite_intervention_type_id" => $this->indemniteTypeSimpleId
         ];
         $response = $this->json('POST', "/api/v2/imputation/intervention/$interventionId", $param);
 
@@ -774,7 +838,7 @@ class ImputationInterventionTest extends TestCase
     public function testImputationTarifMinAvecProRata()
     {
         $param = [
-            "indemnite_intervention_type_id" => 5
+            "indemnite_intervention_type_id" => $this->indemniteTypeProRataId
         ];
         $response = $this->json('POST', "/api/v2/imputation/intervention/$this->interventionId", $param);
 
@@ -888,9 +952,9 @@ class ImputationInterventionTest extends TestCase
         $this->interventionService->addPresences($interventionId, $sapeurs);
         $this->interventionService->validerInterventionById($interventionId);
 
-        // Imputation avec tarif_pro_rata = false (ID 1: tarif=30, tarif_min=40, tarif_min_pour=1)
+        // Imputation avec tarif_pro_rata = false (tarif=30, tarif_min=40, tarif_min_pour=1)
         $param = [
-            "indemnite_intervention_type_id" => 1
+            "indemnite_intervention_type_id" => $this->indemniteTypeSimpleId
         ];
         $response = $this->json('POST', "/api/v2/imputation/intervention/$interventionId", $param);
 

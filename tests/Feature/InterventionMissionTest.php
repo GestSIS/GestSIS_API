@@ -6,10 +6,12 @@ use App\Infrastructure\Models\Mission;
 use App\Infrastructure\Models\Intervention;
 use App\Domaine\API\InterventionService;
 use Exception;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class InterventionMissionTest extends TestCase
 {
+    use DatabaseTransactions;
 
     protected $interventionService;
     protected $interventionId;
@@ -40,7 +42,8 @@ class InterventionMissionTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'intervention_id', 'id'
+                        'intervention_id',
+                        'id'
                     ]
                 ]
             ]);
@@ -75,12 +78,13 @@ class InterventionMissionTest extends TestCase
     {
         $missions = Mission::factory()->count(3)->make(['intervention_id' => $this->interventionId])->toArray();
 
-        $res = $this->interventionService->addMissions($this->interventionId, $missions);
-        $res = array_map(function ($s) {
-            $s->debut = substr($s->debut, 0, 16);
-            $s->fin = substr($s->fin, 0, 16);
-            return $s;
-        }, $res);
+        $res = $this->interventionService->addMissions($this->interventionId, $missions)
+            ->map(function ($s) {
+                $s->debut = substr($s->debut, 0, 16);
+                $s->fin = substr($s->fin, 0, 16);
+                return $s;
+            })
+            ->toArray();
 
         $response = $this->json('PUT', '/api/v2/interventions/' . $this->interventionId . '/missions', ['missions' => $res]);
 
@@ -101,9 +105,9 @@ class InterventionMissionTest extends TestCase
     {
         $missions = Mission::factory()->count(3)->make(['intervention_id' => $this->interventionId])->toArray();
 
-        $ids = array_map(function ($s) {
-            return $s->id;
-        }, $this->interventionService->addMissions($this->interventionId, $missions));
+        $ids = $this->interventionService->addMissions($this->interventionId, $missions)
+            ->map(fn($s) => $s->id)
+            ->toArray();
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/missions', ['missions' => $ids]);
 
         $response

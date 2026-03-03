@@ -3,10 +3,12 @@
 namespace Tests\Feature;
 
 use Exception;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class BaseDataComptabiliteTest extends TestCase
 {
+    use DatabaseTransactions;
 
     /**
      * Test index exercices-categorie
@@ -24,17 +26,31 @@ class BaseDataComptabiliteTest extends TestCase
                 'data' => [
                     'annuels' => [
                         '*' => [
-                            'id', 'designation', 'cumulable', 'compte_id', 'ecriture_categorie_id', 'type',
+                            'id',
+                            'designation',
+                            'cumulable',
+                            'compte_id',
+                            'ecriture_categorie_id',
+                            'type',
                             'frais_indemnite_annuels' => [
                                 '*' => [
-                                    'id', 'fonction_id', 'quantite', 'montant', 'frais_indemnite_annuel_type_id', 'type_unite_id'
+                                    'id',
+                                    'fonction_id',
+                                    'quantite',
+                                    'montant',
+                                    'frais_indemnite_annuel_type_id',
+                                    'type_unite_id'
                                 ]
                             ],
                         ]
                     ],
                     'exercices' => [
                         '*' => [
-                            'id', 'designation', 'type_unite_id', 'ecriture_categorie_id', 'par_fonction',
+                            'id',
+                            'designation',
+                            'type_unite_id',
+                            'ecriture_categorie_id',
+                            'par_fonction',
                             'fonctions' => [
                                 '*' => [
                                     'tarif',
@@ -90,7 +106,11 @@ class BaseDataComptabiliteTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'designation', 'total', 'quantite', 'sapeur_id'
+                        'id',
+                        'designation',
+                        'total',
+                        'quantite',
+                        'sapeur_id'
                     ]
                 ]
             ]);
@@ -112,7 +132,11 @@ class BaseDataComptabiliteTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'designation', 'total', 'quantite', 'sapeur_id'
+                        'id',
+                        'designation',
+                        'total',
+                        'quantite',
+                        'sapeur_id'
                     ]
                 ]
             ]);
@@ -134,7 +158,11 @@ class BaseDataComptabiliteTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'designation', 'total', 'quantite', 'sapeur_id'
+                        'id',
+                        'designation',
+                        'total',
+                        'quantite',
+                        'sapeur_id'
                     ]
                 ]
             ]);

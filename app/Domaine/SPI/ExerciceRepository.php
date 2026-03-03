@@ -14,8 +14,6 @@ interface ExerciceRepository
 
     public function getExerciceByIdWith(int $exerciceId, $with = []);
 
-    public function createExercice(array $data);
-
     public function updateExerciceById(int $exerciceId, $data);
 
     public function addSapeurToExercice(int $exerciceId, array $sapeurs);

@@ -21,34 +21,34 @@ class FraisIndemniteAnnuelTypeTableSeeder extends Seeder
         ]);
 
         DB::table('frais_indemnite_annuels')->insert([
-            ['frais_indemnite_annuel_type_id' => 1, 'type_unite_id' => 3,  'montant' => 2000, 'quantite' => 1, 'fonction_id' => 1], //Cdt
-            ['frais_indemnite_annuel_type_id' => 1, 'type_unite_id' => 3,  'montant' => 2000, 'quantite' => 1, 'fonction_id' => 3], //Resp inst
-            ['frais_indemnite_annuel_type_id' => 1, 'type_unite_id' => 3,  'montant' => 1000, 'quantite' => 1, 'fonction_id' => 2], //V-cdt
-            ['frais_indemnite_annuel_type_id' => 1, 'type_unite_id' => 3,  'montant' => 600, 'quantite' => 1, 'fonction_id' => 23], //Fourrier adjoint
-            ['frais_indemnite_annuel_type_id' => 1, 'type_unite_id' => 3,  'montant' => 1100, 'quantite' => 1, 'fonction_id' => 5], //Fourrier
-            ['frais_indemnite_annuel_type_id' => 1, 'type_unite_id' => 3,  'montant' => 2500, 'quantite' => 1, 'fonction_id' => 4], //Caissier
-            ['frais_indemnite_annuel_type_id' => 1, 'type_unite_id' => 3,  'montant' => 200, 'quantite' => 1, 'fonction_id' => 11], //Resp section
-            ['frais_indemnite_annuel_type_id' => 1, 'type_unite_id' => 3,  'montant' => 2000, 'quantite' => 1, 'fonction_id' => 17], //Chef mat
+            ['frais_indemnite_annuel_type_id' => 1, 'type_unite_id' => 3, 'montant' => 2000, 'quantite' => 1, 'fonction_id' => 1], //Cdt
+            ['frais_indemnite_annuel_type_id' => 1, 'type_unite_id' => 3, 'montant' => 2000, 'quantite' => 1, 'fonction_id' => 3], //Resp inst
+            ['frais_indemnite_annuel_type_id' => 1, 'type_unite_id' => 3, 'montant' => 1000, 'quantite' => 1, 'fonction_id' => 2], //V-cdt
+            ['frais_indemnite_annuel_type_id' => 1, 'type_unite_id' => 3, 'montant' => 600, 'quantite' => 1, 'fonction_id' => 23], //Fourrier adjoint
+            ['frais_indemnite_annuel_type_id' => 1, 'type_unite_id' => 3, 'montant' => 1100, 'quantite' => 1, 'fonction_id' => 5], //Fourrier
+            ['frais_indemnite_annuel_type_id' => 1, 'type_unite_id' => 3, 'montant' => 2500, 'quantite' => 1, 'fonction_id' => 4], //Caissier
+            ['frais_indemnite_annuel_type_id' => 1, 'type_unite_id' => 3, 'montant' => 200, 'quantite' => 1, 'fonction_id' => 11], //Resp section
+            ['frais_indemnite_annuel_type_id' => 1, 'type_unite_id' => 3, 'montant' => 2000, 'quantite' => 1, 'fonction_id' => 17], //Chef mat
 
-            ['frais_indemnite_annuel_type_id' => 2, 'type_unite_id' => 1,  'montant' => 150, 'quantite' => 12, 'fonction_id' => 1], //Cdt
-            ['frais_indemnite_annuel_type_id' => 2, 'type_unite_id' => 1,  'montant' => 50, 'quantite' => 12, 'fonction_id' => 3], //Resp inst
-            ['frais_indemnite_annuel_type_id' => 2, 'type_unite_id' => 1,  'montant' => 50, 'quantite' => 12, 'fonction_id' => 2], //V-cdt
-            ['frais_indemnite_annuel_type_id' => 2, 'type_unite_id' => 1,  'montant' => 50, 'quantite' => 12, 'fonction_id' => 23], //Fourrier adjoint
-            ['frais_indemnite_annuel_type_id' => 2, 'type_unite_id' => 1,  'montant' => 50, 'quantite' => 12, 'fonction_id' => 5], //Fourrier
-            ['frais_indemnite_annuel_type_id' => 2, 'type_unite_id' => 1,  'montant' => 100, 'quantite' => 12, 'fonction_id' => 4], //Caissier
-            ['frais_indemnite_annuel_type_id' => 2, 'type_unite_id' => 1,  'montant' => 50, 'quantite' => 12, 'fonction_id' => 17], //Chef mat
+            ['frais_indemnite_annuel_type_id' => 2, 'type_unite_id' => 7, 'montant' => 150, 'quantite' => 12, 'fonction_id' => 1], //Cdt - MOIS
+            ['frais_indemnite_annuel_type_id' => 2, 'type_unite_id' => 7, 'montant' => 50, 'quantite' => 12, 'fonction_id' => 3], //Resp inst - MOIS
+            ['frais_indemnite_annuel_type_id' => 2, 'type_unite_id' => 7, 'montant' => 50, 'quantite' => 12, 'fonction_id' => 2], //V-cdt - MOIS
+            ['frais_indemnite_annuel_type_id' => 2, 'type_unite_id' => 7, 'montant' => 50, 'quantite' => 12, 'fonction_id' => 23], //Fourrier adjoint - MOIS
+            ['frais_indemnite_annuel_type_id' => 2, 'type_unite_id' => 7, 'montant' => 50, 'quantite' => 12, 'fonction_id' => 5], //Fourrier - MOIS
+            ['frais_indemnite_annuel_type_id' => 2, 'type_unite_id' => 7, 'montant' => 100, 'quantite' => 12, 'fonction_id' => 4], //Caissier - MOIS
+            ['frais_indemnite_annuel_type_id' => 2, 'type_unite_id' => 7, 'montant' => 50, 'quantite' => 12, 'fonction_id' => 17], //Chef mat - MOIS
 
-            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 1,  'montant' => 35, 'quantite' => 12, 'fonction_id' => 1], //Cdt
-            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 1,  'montant' => 35, 'quantite' => 12, 'fonction_id' => 3], //Resp inst
-            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 1,  'montant' => 35, 'quantite' => 12, 'fonction_id' => 2], //V-cdt
-            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 1,  'montant' => 25, 'quantite' => 12, 'fonction_id' => 23], //Fourrier adjoint
-            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 1,  'montant' => 25, 'quantite' => 12, 'fonction_id' => 5], //Fourrier
-            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 1,  'montant' => 25, 'quantite' => 12, 'fonction_id' => 4], //Caissier
-            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 1,  'montant' => 25, 'quantite' => 12, 'fonction_id' => 11], //Resp section
-            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 1,  'montant' => 25, 'quantite' => 12, 'fonction_id' => 12], //Officiers
-            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 1,  'montant' => 25, 'quantite' => 12, 'fonction_id' => 13], //Officiers
-            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 1,  'montant' => 35, 'quantite' => 12, 'fonction_id' => 17], //Chef mat
-            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 1,  'montant' => 25, 'quantite' => 12, 'fonction_id' => 6], //Ajoints chef mat
+            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 7, 'montant' => 35, 'quantite' => 12, 'fonction_id' => 1], //Cdt - MOIS
+            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 7, 'montant' => 35, 'quantite' => 12, 'fonction_id' => 3], //Resp inst - MOIS
+            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 7, 'montant' => 35, 'quantite' => 12, 'fonction_id' => 2], //V-cdt - MOIS
+            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 7, 'montant' => 25, 'quantite' => 12, 'fonction_id' => 23], //Fourrier adjoint - MOIS
+            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 7, 'montant' => 25, 'quantite' => 12, 'fonction_id' => 5], //Fourrier - MOIS
+            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 7, 'montant' => 25, 'quantite' => 12, 'fonction_id' => 4], //Caissier - MOIS
+            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 7, 'montant' => 25, 'quantite' => 12, 'fonction_id' => 11], //Resp section - MOIS
+            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 7, 'montant' => 25, 'quantite' => 12, 'fonction_id' => 12], //Officiers - MOIS
+            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 7, 'montant' => 25, 'quantite' => 12, 'fonction_id' => 13], //Officiers - MOIS
+            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 7, 'montant' => 35, 'quantite' => 12, 'fonction_id' => 17], //Chef mat - MOIS
+            ['frais_indemnite_annuel_type_id' => 3, 'type_unite_id' => 7, 'montant' => 25, 'quantite' => 12, 'fonction_id' => 6], //Ajoints chef mat - MOIS
         ]);
     }
 }

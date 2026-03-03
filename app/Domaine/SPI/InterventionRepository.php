@@ -12,17 +12,6 @@ interface InterventionRepository
     public function findInterventionById($interventionId);
 
     public function getInterventionStatutById($interventionId);
-
-    public function getInterventionAppels($interventionId);
-    public function getInterventionMissions($interventionId);
-    public function getInterventionVehicules($interventionId);
-    public function getInterventionMateriels($interventionId);
-    public function getInterventionPhases($interventionId);
-    public function getInterventionQuittances($interventionId);
-    public function getInterventionPresences($interventionId);
-    public function getInterventionGroupes($interventionId);
-
-    public function createNewIntervention($intervention);
     public function editInterventionInformationsById($interventionId, $infos);
     public function supprimerInterventionById($interventionId);
 

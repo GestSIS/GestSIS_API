@@ -4,6 +4,7 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\InterventionService;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\Phase;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -21,9 +22,9 @@ class InterventionPhasesController extends Controller
      *
      * @return Response
      */
-    public function index($intervention_id)
+    public function index($interventionId)
     {
-        $phases = $this->service->getInterventionPhases($intervention_id);
+        $phases = Phase::where('intervention_id', $interventionId)->get();
 
         return response()->json(['data' => $phases]);
     }
@@ -32,18 +33,18 @@ class InterventionPhasesController extends Controller
      * Store a newly created resource in storage.
      *
      * @param Request $request
-     * @param int $intervention_id
+     * @param int $interventionId
      * @return Response
      * @throws ArrayException
      */
-    public function store(Request $request, int $intervention_id)
+    public function store(Request $request, int $interventionId)
     {
         $data = $request->validate([
             'phases.*.phase_type_id' => 'required|integer',
             'phases.*.debut' => 'required|date_format:Y-m-d H:i'
         ]);
 
-        $phases = $this->service->addPhases($intervention_id, $data['phases']);
+        $phases = $this->service->addPhases($interventionId, $data['phases']);
 
         return response()->json(['data' => $phases]);
     }

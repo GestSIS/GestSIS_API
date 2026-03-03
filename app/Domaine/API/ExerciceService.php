@@ -79,10 +79,9 @@ class ExerciceService
      * Create a exercice
      *
      * @param $data
-     * @return ExerciceBusiness
      * @throws ArrayException
      */
-    public function createExercice($data)
+    public function createExercice($data): Exercice
     {
         return $this->business->createExercice($data);
     }

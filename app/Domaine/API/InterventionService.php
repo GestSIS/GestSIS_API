@@ -9,11 +9,18 @@ use App\Domaine\Business\InterventionBusiness;
 use App\Domaine\Business\Materiel\MaterielTypeBusiness;
 use App\Domaine\Business\SisParamBusiness;
 use App\Domaine\SPI\InterventionRepository;
+use App\Infrastructure\Models\Appel;
 use App\Infrastructure\Models\Article;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Groupe;
+use App\Infrastructure\Models\GroupeIntervention;
 use App\Infrastructure\Models\Intervention;
+use App\Infrastructure\Models\InterventionMateriel;
+use App\Infrastructure\Models\InterventionSapeur;
+use App\Infrastructure\Models\InterventionVehicule;
 use App\Infrastructure\Models\Materiel;
+use App\Infrastructure\Models\Mission;
+use App\Infrastructure\Models\Phase;
 use App\Infrastructure\Models\Quittance;
 use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\Vehicule;
@@ -42,7 +49,7 @@ class InterventionService
         return $this->repository->findInterventionById($interventionId);
     }
 
-    public function createIntervention($data)
+    public function createIntervention($data): Intervention
     {
         return $this->business->createIntervention($data);
     }
@@ -54,42 +61,37 @@ class InterventionService
 
     public function getInterventionAppels($interventionId)
     {
-        return $this->repository->getInterventionAppels($interventionId);
+        return Appel::where('intervention_id', $interventionId)->get();
     }
 
     public function getInterventionMissions($interventionId)
     {
-        return $this->repository->getInterventionMissions($interventionId);
+        return Mission::where('intervention_id', $interventionId)->get();
     }
 
     public function getInterventionVehicules($interventionId)
     {
-        return $this->repository->getInterventionVehicules($interventionId);
+        return InterventionVehicule::where('intervention_id', $interventionId)->get();
     }
 
     public function getInterventionMateriels($interventionId)
     {
-        return $this->repository->getInterventionMateriels($interventionId);
-    }
-
-    public function getInterventionPhases($interventionId)
-    {
-        return $this->repository->getInterventionPhases($interventionId);
+        return InterventionMateriel::where('intervention_id', $interventionId)->get();
     }
 
     public function getInterventionQuittances($interventionId)
     {
-        return $this->repository->getInterventionQuittances($interventionId);
+        return Quittance::where('intervention_id', $interventionId)->get();
     }
 
     public function getInterventionPresences($interventionId)
     {
-        return $this->repository->getInterventionPresences($interventionId);
+        return InterventionSapeur::where('intervention_id', $interventionId)->get();
     }
 
     public function getInterventionGroupes($interventionId)
     {
-        return $this->repository->getInterventionGroupes($interventionId);
+        return GroupeIntervention::where('intervention_id', $interventionId)->get();
     }
 
     /**
@@ -132,7 +134,7 @@ class InterventionService
         $statut = $this->business->addPresences($interventionId, $sapeurs);
         return [
             "statut" => $statut,
-            "sapeurs" => $this->repository->getInterventionPresences($interventionId)
+            "sapeurs" => InterventionSapeur::where('intervention_id', $interventionId)->get()
         ];
     }
 
@@ -146,7 +148,7 @@ class InterventionService
     public function updatePresences($interventionId, $sapeurs)
     {
         $this->business->updatePresences($interventionId, $sapeurs);
-        return $this->repository->getInterventionPresences($interventionId);
+        return InterventionSapeur::where('intervention_id', $interventionId)->get();
     }
 
     /**
@@ -185,7 +187,7 @@ class InterventionService
     public function addPhases($interventionId, $phases)
     {
         $this->business->addPhases($interventionId, $phases);
-        return $this->repository->getInterventionPhases($interventionId);
+        return Phase::where('intervention_id', $interventionId)->get();
     }
 
     /**
@@ -198,7 +200,7 @@ class InterventionService
     public function updatePhases($interventionId, $phases)
     {
         $this->business->updatePhases($interventionId, $phases);
-        return $this->repository->getInterventionPhases($interventionId);
+        return Phase::where('intervention_id', $interventionId)->get();
     }
 
     /**
@@ -221,7 +223,7 @@ class InterventionService
     public function addAppels($interventionId, $appels)
     {
         $this->business->addAppels($interventionId, $appels);
-        return $this->repository->getInterventionAppels($interventionId);
+        return Appel::where('intervention_id', $interventionId)->get();
     }
 
     /**
@@ -234,7 +236,7 @@ class InterventionService
     public function updateAppels($interventionId, $appels)
     {
         $this->business->updateAppels($interventionId, $appels);
-        return $this->repository->getInterventionAppels($interventionId);
+        return Appel::where('intervention_id', $interventionId)->get();
     }
 
     /**
@@ -257,7 +259,7 @@ class InterventionService
     public function addMissions($interventionId, $missions)
     {
         $this->business->addMissions($interventionId, $missions);
-        return $this->repository->getInterventionMissions($interventionId);
+        return Mission::where('intervention_id', $interventionId)->get();
     }
 
     /**
@@ -270,7 +272,7 @@ class InterventionService
     public function updateMissions($interventionId, $missions)
     {
         $this->business->updateMissions($interventionId, $missions);
-        return $this->repository->getInterventionMissions($interventionId);
+        return Mission::where('intervention_id', $interventionId)->get();
     }
 
     /**
@@ -293,7 +295,7 @@ class InterventionService
     public function addMateriels($interventionId, $materiels)
     {
         $this->business->addMateriels($interventionId, $materiels);
-        return $this->repository->getInterventionMateriels($interventionId);
+        return InterventionMateriel::where('intervention_id', $interventionId)->get();
     }
 
     /**
@@ -306,7 +308,7 @@ class InterventionService
     public function updateMateriels($interventionId, $materiels)
     {
         $this->business->updateMateriels($interventionId, $materiels);
-        return $this->repository->getInterventionMateriels($interventionId);
+        return InterventionMateriel::where('intervention_id', $interventionId)->get();
     }
 
     /**
@@ -329,7 +331,7 @@ class InterventionService
     public function addQuittances($interventionId, $quittances)
     {
         $this->business->addQuittances($interventionId, $quittances);
-        return $this->repository->getInterventionQuittances($interventionId);
+        return Quittance::where('intervention_id', $interventionId)->get();
     }
 
     /**
@@ -352,7 +354,7 @@ class InterventionService
     public function addVehicules($interventionId, $vehicules)
     {
         $this->business->addVehicules($interventionId, $vehicules);
-        return $this->repository->getInterventionVehicules($interventionId);
+        return InterventionVehicule::where('intervention_id', $interventionId)->get();
     }
 
     /**
@@ -375,7 +377,7 @@ class InterventionService
     public function addGroupes($interventionId, $groupes)
     {
         $this->business->addGroupes($interventionId, $groupes);
-        return $this->repository->getInterventionGroupes($interventionId);
+        return GroupeIntervention::where('intervention_id', $interventionId)->get();
     }
 
     /**
@@ -460,7 +462,7 @@ class InterventionService
         if (in_array('presences', $withOptions) || in_array('presencesResume', $withOptions)) {
             $sapeurs = Sapeur::get(['nom', 'prenom', 'id']);
             foreach ($sapeurs as $sapeur) {
-                $sapeursMap[$sapeur->id] = $sapeur->toArray();
+                $sapeursMap[$sapeur->id] = $sapeur;
             }
 
             foreach ($intervention->presences as $presence) {

@@ -4,12 +4,14 @@ namespace Tests\Feature;
 
 use App\Infrastructure\Models\Intervention;
 use App\Domaine\API\InterventionService;
+use App\Infrastructure\Models\Phase;
 use Exception;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
-use Carbon\Carbon;
 
 class InterventionPhaseTest extends TestCase
 {
+    use DatabaseTransactions;
 
     protected $interventionService;
     protected $interventionId;
@@ -41,7 +43,9 @@ class InterventionPhaseTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'intervention_id', 'phase_type_id', 'id'
+                        'intervention_id',
+                        'phase_type_id',
+                        'id'
                     ]
                 ]
             ]);
@@ -55,11 +59,13 @@ class InterventionPhaseTest extends TestCase
      */
     public function testAddInterventionPhases()
     {
-        $phases = [[
-            'debut' => '2019-12-12 12:30',
-            'phase_type_id' => 1,
-            'intervention_id' => $this->interventionId,
-        ]];
+        $phases = [
+            [
+                'debut' => '2019-12-12 12:30',
+                'phase_type_id' => 1,
+                'intervention_id' => $this->interventionId,
+            ]
+        ];
 
         $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/phases', ['phases' => $phases]);
 
@@ -78,19 +84,12 @@ class InterventionPhaseTest extends TestCase
      */
     public function testEditInterventionPhases()
     {
-        $res = $this->interventionService->getInterventionPhases($this->interventionId);
-        $res = array_map(
-            function ($s) {
+        $res = Phase::where('intervention_id', $this->interventionId)->get()
+            ->filter(fn($p) => $p->debut === null)
+            ->map(function ($s) {
                 $s->debut = '2019-12-12 13:00';
                 return $s;
-            },
-            array_filter(
-                $res,
-                function ($p) {
-                    return $p->debut === null;
-                }
-            )
-        );
+            });
 
         $response = $this->json('PUT', '/api/v2/interventions/' . $this->interventionId . '/phases', ['phases' => $res]);
 
@@ -109,23 +108,18 @@ class InterventionPhaseTest extends TestCase
      */
     public function testRemoveInterventionPhases()
     {
-        $phases = [[
-            'debut' => '2019-12-12 13:45',
-            'phase_type_id' => 1,
-            'intervention_id' => $this->interventionId,
-        ]];
+        $phases = [
+            [
+                'debut' => '2019-12-12 13:45',
+                'phase_type_id' => 1,
+                'intervention_id' => $this->interventionId,
+            ]
+        ];
 
-        $ids = array_map(
-            function ($s) {
-                return $s->id;
-            },
-            array_filter(
-                $this->interventionService->addPhases($this->interventionId, $phases),
-                function ($phase) {
-                    return $phase->debut !== null;
-                }
-            )
-        );
+        $ids = $this->interventionService->addPhases($this->interventionId, $phases)
+            ->filter(fn($phase) => $phase->debut !== null)
+            ->map(fn($s) => $s->id)
+            ->toArray();
 
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/phases', ['phases' => $ids]);
 

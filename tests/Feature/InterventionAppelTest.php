@@ -6,10 +6,12 @@ use App\Infrastructure\Models\Intervention;
 use App\Infrastructure\Models\Appel;
 use App\Domaine\API\InterventionService;
 use Exception;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class InterventionAppelTest extends TestCase
 {
+    use DatabaseTransactions;
 
     protected $interventionService;
     protected $interventionId;
@@ -40,7 +42,8 @@ class InterventionAppelTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'intervention_id', 'id'
+                        'intervention_id',
+                        'id'
                     ]
                 ]
             ]);
@@ -75,11 +78,11 @@ class InterventionAppelTest extends TestCase
     {
         $appels = Appel::factory()->count(3)->make()->toArray();
 
-        $res = $this->interventionService->addAppels($this->interventionId, $appels);
-        $res = array_map(function ($s) {
-            $s->date = substr($s->date, 0, 16);
-            return $s;
-        }, $res);
+        $res = $this->interventionService->addAppels($this->interventionId, $appels)
+            ->map(function ($s) {
+                $s->date = substr($s->date, 0, 16);
+                return $s;
+            })->toArray();
 
         $response = $this->json('PUT', '/api/v2/interventions/' . $this->interventionId . '/appels', ['appels' => $res]);
 
@@ -100,9 +103,9 @@ class InterventionAppelTest extends TestCase
     {
         $appels = Appel::factory()->count(3)->make()->toArray();
 
-        $ids = array_map(function ($s) {
-            return $s->id;
-        }, $this->interventionService->addAppels($this->interventionId, $appels));
+        $ids = $this->interventionService->addAppels($this->interventionId, $appels)
+            ->map(fn($s) => $s->id)
+            ->toArray();
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/appels', ['appels' => $ids]);
 
         $response

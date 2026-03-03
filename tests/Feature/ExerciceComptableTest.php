@@ -5,10 +5,12 @@ namespace Tests\Feature;
 use App\Domaine\API\ExerciceService;
 use App\Infrastructure\Models\Exercice;
 use Exception;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class ExerciceComptableTest extends TestCase
 {
+    use DatabaseTransactions;
 
     /**
      * Test index groupe
@@ -25,7 +27,11 @@ class ExerciceComptableTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'designation', 'annee', 'debut', 'fin'
+                        'id',
+                        'designation',
+                        'annee',
+                        'debut',
+                        'fin'
                     ]
                 ]
             ]);

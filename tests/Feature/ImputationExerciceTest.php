@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Sapeur;
 use Exception;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 use App\Domaine\API\ExerciceService;
 use App\Domaine\API\SapeurService;
@@ -12,6 +13,7 @@ use App\Domaine\API\ImputationService;
 
 class ImputationExerciceTest extends TestCase
 {
+    use DatabaseTransactions;
 
     protected $comptabiliteService;
     protected $sapeurOneId;

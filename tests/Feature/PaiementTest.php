@@ -3,10 +3,12 @@
 namespace Tests\Feature;
 
 use App\Infrastructure\Models\SisParam;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class PaiementTest extends TestCase
 {
+    use DatabaseTransactions;
 
     /**
      * get  paiements.

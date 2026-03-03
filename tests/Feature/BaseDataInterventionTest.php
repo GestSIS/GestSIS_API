@@ -2,13 +2,14 @@
 
 namespace Tests\Feature;
 
-use App\Domaine\API\ExerciceService;
-use App\Infrastructure\Models\Exercice;
 use Exception;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class BaseDataInterventionTest extends TestCase
 {
+    use DatabaseTransactions;
+
     /**
      * Test index missions types
      *
@@ -24,7 +25,8 @@ class BaseDataInterventionTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'titre'
+                        'id',
+                        'titre'
                     ]
                 ]
             ]);
@@ -45,7 +47,8 @@ class BaseDataInterventionTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'designation'
+                        'id',
+                        'designation'
                     ]
                 ]
             ]);
@@ -66,7 +69,8 @@ class BaseDataInterventionTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'designation'
+                        'id',
+                        'designation'
                     ]
                 ]
             ]);
@@ -87,7 +91,8 @@ class BaseDataInterventionTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'designation'
+                        'id',
+                        'designation'
                     ]
                 ]
             ]);
@@ -108,7 +113,8 @@ class BaseDataInterventionTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'designation'
+                        'id',
+                        'designation'
                     ]
                 ]
             ]);
@@ -129,7 +135,8 @@ class BaseDataInterventionTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'designation'
+                        'id',
+                        'designation'
                     ]
                 ]
             ]);
@@ -150,7 +157,8 @@ class BaseDataInterventionTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'designation'
+                        'id',
+                        'designation'
                     ]
                 ]
             ]);
@@ -171,7 +179,8 @@ class BaseDataInterventionTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
-                        'id', 'numero'
+                        'id',
+                        'numero'
                     ]
                 ]
             ]);

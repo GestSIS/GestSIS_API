@@ -8,10 +8,14 @@ use App\Infrastructure\Models\AvsParam;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\SisParam;
 use Carbon\Carbon;
+use DB;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class DecompteTest extends TestCase
 {
+    use DatabaseTransactions;
+
     /**
      * Test simple de création de décompte sans déductions
      */
@@ -28,7 +32,7 @@ class DecompteTest extends TestCase
                 "type" => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
                 "sapeur_id" => 1,
                 "compte_id" => 1,
-                "exercice_comptable_id" => 1,
+                "exercice_comptable_id" => 2,
                 "ecriture_categorie_id" => 1,
             ],
             [
@@ -41,7 +45,7 @@ class DecompteTest extends TestCase
                 "type" => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_INDEMNITE,
                 "sapeur_id" => 1,
                 "compte_id" => 1,
-                "exercice_comptable_id" => 1,
+                "exercice_comptable_id" => 2,
                 "ecriture_categorie_id" => 1,
             ],
             [
@@ -54,7 +58,7 @@ class DecompteTest extends TestCase
                 "type" => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_FRAIS_FORFAITAIRE,
                 "sapeur_id" => 1,
                 "compte_id" => 1,
-                "exercice_comptable_id" => 1,
+                "exercice_comptable_id" => 2,
                 "ecriture_categorie_id" => 1,
             ],
             [
@@ -67,7 +71,7 @@ class DecompteTest extends TestCase
                 "type" => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
                 "sapeur_id" => 2,
                 "compte_id" => 1,
-                "exercice_comptable_id" => 1,
+                "exercice_comptable_id" => 2,
                 "ecriture_categorie_id" => 1,
             ],
             [
@@ -80,7 +84,7 @@ class DecompteTest extends TestCase
                 "type" => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_INDEMNITE,
                 "sapeur_id" => 2,
                 "compte_id" => 1,
-                "exercice_comptable_id" => 1,
+                "exercice_comptable_id" => 2,
                 "ecriture_categorie_id" => 1,
             ],
             [
@@ -93,7 +97,7 @@ class DecompteTest extends TestCase
                 "type" => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_FRAIS_FORFAITAIRE,
                 "sapeur_id" => 2,
                 "compte_id" => 1,
-                "exercice_comptable_id" => 1,
+                "exercice_comptable_id" => 2,
                 "ecriture_categorie_id" => 1,
             ],
             [
@@ -106,12 +110,12 @@ class DecompteTest extends TestCase
                 "type" => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_FRAIS_EFFECTIF,
                 "sapeur_id" => 2,
                 "compte_id" => 1,
-                "exercice_comptable_id" => 1,
+                "exercice_comptable_id" => 2,
                 "ecriture_categorie_id" => 1,
             ]
         ];
         Ecriture::insert($ecritures);
-        $ecritures = Ecriture::where('exercice_comptable_id', 1)->get();
+        $ecritures = Ecriture::where('exercice_comptable_id', 2)->get();
 
         AvsParam::updateOrCreate([], [
             'taux_avs' => "1.0",
@@ -124,7 +128,7 @@ class DecompteTest extends TestCase
         $params = [
             'designation' => 'test',
             'deduction' => 0,
-            'exercice_comptable_id' => 1,
+            'exercice_comptable_id' => 2,
             'date' => Carbon::today()
         ];
 
@@ -554,16 +558,23 @@ class DecompteTest extends TestCase
      */
     public function testIso20022()
     {
-        $data = [
-            'decompteId' => 5,
-        ];
+        $decompteId = DB::table('decomptes')->insertGetId([
+            'designation' => 'iso20022 test',
+            'date' => '2025-01-31',
+            'exercice_comptable_id' => 2,
+            'deduction' => 0,
+            'avs_total' => 0,
+            'ac_total' => 0,
+            'total' => 0,
+        ]);
+
         SisParam::updateOrCreate([], [
             'nom' => "SIS Delémont",
             'iban' => 'CH51 0022 5225 9529 1301 C',
             'bic' => 'UBSWCHZH80A'
         ]);
 
-        $response = $this->json('GET', "api/v2/decomptes/5/iso20022", $data);
+        $response = $this->json('GET', "api/v2/decomptes/{$decompteId}/iso20022");
         $response->assertStatus(200);
     }
 }
