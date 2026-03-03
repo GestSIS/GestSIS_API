@@ -395,6 +395,33 @@ class ImputationBusiness
     }
 
     /**
+     * Calcule le nombre de mois d'activité entre deux périodes (arrondi au mois entamé)
+     */
+    private function calculerNombreMoisActifs($debutFonction, $finFonction, $debutExercice, $finExercice): int
+    {
+        $debutExerciceCarbon = Carbon::parse($debutExercice);
+        $finExerciceCarbon = Carbon::parse($finExercice);
+
+        // Intersection des périodes
+        $debutFonctionCarbon = Carbon::parse($debutFonction);
+        $finFonctionCarbon = $finFonction ? Carbon::parse($finFonction) : null;
+
+        $debut = $debutFonctionCarbon->max($debutExerciceCarbon);
+        $fin = $finFonctionCarbon ? $finFonctionCarbon->min($finExerciceCarbon) : $finExerciceCarbon;
+
+        if ($debut->gt($fin)) {
+            return 0;
+        }
+
+        // Calcul du nombre de mois distincts touchés (tout mois entamé compte pour 1)
+        // Méthode : calculer la différence entre (année*12 + mois) du début et de la fin
+        $moisDebut = $debut->year * 12 + $debut->month;
+        $moisFin = $fin->year * 12 + $fin->month;
+        
+        return $moisFin - $moisDebut + 1;
+    }
+
+    /**
      * Génères des frais annuels pour les sapeurs n'ayant pas encore de frais annuels
      */
     public function imputerAnnuel(int $exerciceComptableId)
@@ -408,7 +435,8 @@ class ImputationBusiness
         // 3. ~~ Tout supprimer pour l'année courante et tout regénérer~~
         //
         // Notes :
-        // - Ne prend actuellement en compte que la fonction actuelle et non pas la date de l'entrée en vigeure de cette fonction
+        // - Prend en compte la période d'entrée en vigueur de chaque fonction
+        // - Pour les indemnités mensuelles (UNITE_MOIS), calcule le nombre de mois réels d'activité
         // - Prend uniquement les sapeurs actifs
 
         $fraisIndemnitesTypes = FraisIndemniteAnnuelType::with('fraisIndemniteAnnuels')->get();
@@ -448,33 +476,38 @@ class ImputationBusiness
                 ->where(function ($query) use ($debut) {
                     $query
                         ->where([
-                            ['debut', '<=', $debut],
-                            ['fin', '>=', $debut],
+                            ['fonction_sapeur.debut', '<=', $debut],
+                            ['fonction_sapeur.fin', '>=', $debut],
                         ])
-                        ->whereNotNull('fin');
+                        ->whereNotNull('fonction_sapeur.fin');
                 })
                 ->orWhere(function ($query) use ($debut) {
                     $query
-                        ->where('debut', '<=', $debut)
-                        ->whereNull('fin');
+                        ->where('fonction_sapeur.debut', '<=', $debut)
+                        ->whereNull('fonction_sapeur.fin');
                 })
                 ->orWhere(function ($query) use ($debut, $fin) {
                     $query
                         ->where([
-                            ['debut', '>=', $debut],
-                            ['debut', '<=', $fin],
+                            ['fonction_sapeur.debut', '>=', $debut],
+                            ['fonction_sapeur.debut', '<=', $fin],
                         ]);
                 });
         })
             ->join('fonctions', 'fonctions.id', '=', 'fonction_sapeur.fonction_id')
             ->orderByDesc('fonctions.tri')
-            ->distinct(['sapeur_id', 'fonction_id'])
-            ->select(['sapeur_id', 'fonction_id', 'tri'])->get();
+            ->distinct(['fonction_sapeur.sapeur_id', 'fonction_sapeur.fonction_id'])
+            ->select(['fonction_sapeur.sapeur_id', 'fonction_sapeur.fonction_id', 'fonction_sapeur.debut', 'fonction_sapeur.fin', 'fonctions.tri'])->get();
 
-        // Group by sapeur_id
+        // Group by sapeur_id avec conservation des périodes de fonction
         $sapeursGrouped = [];
         foreach ($sapeurs as $sapeur) {
-            $sapeursGrouped[$sapeur->sapeur_id][] = $sapeur->fonction_id;
+            $sapeursGrouped[$sapeur->sapeur_id][] = [
+                'fonction_id' => $sapeur->fonction_id,
+                'debut' => $sapeur->debut,
+                'fin' => $sapeur->fin,
+                'tri' => $sapeur->tri
+            ];
         }
 
         // Foreach indemnité annuelle
@@ -484,29 +517,52 @@ class ImputationBusiness
             // Génère le mapping -> ["fonction_id" => 'indemnite'];
             $mapping = array_reduce(array_map(
                 fn($indemnite) => [$indemnite['fonction_id'] => $indemnite],
-                $type['fraisIndemniteAnnuels']->toArray()
+                $type->fraisIndemniteAnnuels->toArray()
             ), fn($a, $b) => $a + $b, []);
 
             foreach ($sapeursGrouped as $sapeurId => $fonctions) {
-                foreach ($fonctions as $fonctionId) {
+                foreach ($fonctions as $fonction) {
+                    $fonctionId = $fonction['fonction_id'];
+
                     if (array_key_exists($fonctionId, $mapping)) {
                         $indemnite = $mapping[$fonctionId];
 
+                        // Calcul de la quantité et du total
+                        $quantite = $indemnite['quantite'];
+                        $tarif = $indemnite['montant'];
+
+                        // Pour les unités mensuelles, calculer le nombre de mois réels d'activité
+                        if ($indemnite['type_unite_id'] == self::UNITE_MOIS) {
+                            $quantite = $this->calculerNombreMoisActifs(
+                                $fonction['debut'],
+                                $fonction['fin'],
+                                $debut,
+                                $fin
+                            );
+
+                            // Si aucun mois d'activité, ne pas générer d'écriture
+                            if ($quantite <= 0) {
+                                continue;
+                            }
+                        }
+
+                        $total = self::arrondi_5_centimes($tarif * $quantite);
+
                         $ecritures[] = [
-                            'tarif' => $indemnite['montant'],
-                            'quantite' => $indemnite['quantite'],
-                            'total' => self::arrondi_5_centimes($indemnite['montant'] * $indemnite['quantite']),
+                            'tarif' => $tarif,
+                            'quantite' => $quantite,
+                            'total' => $total,
                             'type_unite_id' => $indemnite['type_unite_id'],
-                            'designation' => $type['designation'] . ' (' . ($indexedFonctions[$indemnite['fonction_id']] ?? '') . ")",
+                            'designation' => $type->designation . ' (' . ($indexedFonctions[$indemnite['fonction_id']] ?? '') . ")",
                             'sapeur_id' => $sapeurId,
-                            'compte_id' => $type['compte_id'],
+                            'compte_id' => $type->compte_id,
                             'exercice_comptable_id' => $exerciceComptableId,
-                            'ecriture_categorie_id' => $type['ecriture_categorie_id'],
+                            'ecriture_categorie_id' => $type->ecriture_categorie_id,
                             'module' => self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL,
-                            'type' => $type['type'],
+                            'type' => $type->type,
                         ];
 
-                        if (!$type['cumulable']) {
+                        if (!$type->cumulable) {
                             // Non-cumulable, on passe au sapeur suivant
                             break;
                         }

@@ -79,6 +79,11 @@ class ComptabiliteParamBusiness
 
     public static function ajouterFraisIndemniteAnnuel($data)
     {
+        // Pour les unités mensuelles, forcer la quantité à 12
+        if (isset($data['type_unite_id']) && $data['type_unite_id'] == ImputationBusiness::UNITE_MOIS) {
+            $data['quantite'] = 12;
+        }
+
         $indemnite = new FraisIndemniteAnnuel();
         $indemnite->fill($data);
         $indemnite->save();
@@ -87,6 +92,11 @@ class ComptabiliteParamBusiness
 
     public static function modifierFraisIndemniteAnnuel($id, $data)
     {
+        // Pour les unités mensuelles, forcer la quantité à 12
+        if (isset($data['type_unite_id']) && $data['type_unite_id'] == ImputationBusiness::UNITE_MOIS) {
+            $data['quantite'] = 12;
+        }
+
         FraisIndemniteAnnuel::where('id', $id)->limit(1)->update($data);
         return FraisIndemniteAnnuel::find($id);
     }
