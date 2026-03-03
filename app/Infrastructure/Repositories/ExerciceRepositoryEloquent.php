@@ -86,14 +86,6 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         return Exercice::findOrFail($exerciceId, 'statut')->statut;
     }
 
-    public function deleteExerciceById($exerciceId)
-    {
-        ExerciceSapeur::where('exercice_id', '=', $exerciceId)->delete();
-        HeureExercice::where('exercice_id', '=', $exerciceId)->delete();
-        Sms::where('exercice_id', '=', $exerciceId)->delete();
-        Exercice::where('id', '=', $exerciceId)->delete();
-    }
-
     /**
      * @param array $data
      * @param $id
@@ -113,11 +105,6 @@ class ExerciceRepositoryEloquent implements ExerciceRepository
         $exercice->update($data);
 
         return $this->convertExercice($exercice);
-    }
-
-    public function getExerciceByIdWith(int $exerciceId, $with = [])
-    {
-        return $this->convertExercice(Exercice::with($with)->findOrFail($exerciceId), $with);
     }
 
     public function addSapeurToExercice(int $exerciceId, $data)

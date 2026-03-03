@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Domaine\API\ExerciceService;
+use App\Domaine\Business\ExerciceBusiness;
 use App\Infrastructure\Models\Exercice;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -11,13 +13,15 @@ class ExerciceSapeurTest extends TestCase
 {
     use DatabaseTransactions;
 
-    protected $exerciceService;
+    protected ExerciceService $exerciceService;
+    protected ExerciceBusiness $exerciceBusiness;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->exerciceService = $this->app->make('App\Domaine\API\ExerciceService');
+        $this->exerciceBusiness = new ExerciceBusiness($this->app->make('App\Domaine\SPI\ExerciceRepository'));
     }
 
     /**
@@ -105,7 +109,7 @@ class ExerciceSapeurTest extends TestCase
     public function testEditExerciceSapeurs()
     {
         $exercice = Exercice::factory()->make();
-        $exercice = $this->exerciceService->createExercice($exercice->toArray());
+        $exercice = $this->exerciceBusiness->createExercice($exercice->toArray());
 
         $sapeurs = [
             array(
@@ -160,7 +164,7 @@ class ExerciceSapeurTest extends TestCase
     public function testRemoveExerciceSapeurs()
     {
         $exercice = Exercice::factory()->make();
-        $exercice = $this->exerciceService->createExercice($exercice->toArray());
+        $exercice = $this->exerciceBusiness->createExercice($exercice->toArray());
 
         $sapeurs = [
             array(

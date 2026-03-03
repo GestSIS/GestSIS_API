@@ -417,7 +417,7 @@ class ImputationBusiness
         // Méthode : calculer la différence entre (année*12 + mois) du début et de la fin
         $moisDebut = $debut->year * 12 + $debut->month;
         $moisFin = $fin->year * 12 + $fin->month;
-        
+
         return $moisFin - $moisDebut + 1;
     }
 
@@ -1078,7 +1078,7 @@ class ImputationBusiness
 
     public function imputerExercice($exerciceId, $data)
     {
-        $exercice = $this->exerciceRepo->getExerciceByIdWith($exerciceId, ['sapeurs', 'localite']);
+        $exercice = Exercice::with(['sapeurs', 'localite'])->findOrFail($exerciceId);
         if (!$exercice) {
             throw new ArrayException([], "Exercice introuvable.");
         }

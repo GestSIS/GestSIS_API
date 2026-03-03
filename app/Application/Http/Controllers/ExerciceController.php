@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\API\ExerciceService;
+use App\Domaine\Business\ExerciceBusiness;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\HeureExercice;
 use Carbon\Carbon;
@@ -10,11 +11,13 @@ use Illuminate\Http\Request;
 
 class ExerciceController extends Controller
 {
-    protected $service;
+    protected ExerciceService $service;
+    protected ExerciceBusiness $business;
 
-    public function __construct(ExerciceService $service)
+    public function __construct(ExerciceService $service, ExerciceBusiness $business)
     {
         $this->service = $service;
+        $this->business = $business;
     }
 
     public function index(Request $request)
@@ -92,14 +95,14 @@ class ExerciceController extends Controller
             'exercice_comptable_id' => 'integer|exists:exercice_comptables,id|required'
         ]);
 
-        $exercice = $this->service->createExercice($data);
+        $exercice = $this->business->createExercice($data);
 
         return response()->json(['data' => $exercice]);
     }
 
     public function show(int $id)
     {
-        $exercice = $this->service->getExerciceById($id);
+        $exercice = Exercice::with(['sapeurs'])->findOrFail($id);
 
         return response()->json(['data' => $exercice]);
     }
@@ -118,35 +121,35 @@ class ExerciceController extends Controller
             'localite_id' => 'integer|exists:localites,id'
         ]);
 
-        $exercice = $this->service->updatExercice($id, $data);
+        $exercice = $this->business->updatExercice($id, $data);
 
         return response()->json(['data' => $exercice]);
     }
 
     public function destroy($id)
     {
-        $this->service->deleteExerciceById($id);
+        $this->business->deleteExerciceById($id);
 
         return response()->json(['data' => 'success']);
     }
 
     public function annuler($id)
     {
-        $statut = $this->service->cancelExerciceById($id);
+        $statut = $this->business->cancelExerciceById($id);
 
         return response()->json(['data' => ['statut' => $statut]]);
     }
 
     public function reactiver($id)
     {
-        $statut = $this->service->reactivateExerciceById($id);
+        $statut = $this->business->reactivateExerciceById($id);
 
         return response()->json(['data' => ['statut' => $statut]]);
     }
 
     public function valider($id)
     {
-        $exercice = $this->service->validateExerciceById($id);
+        $exercice = $this->business->validateExerciceById($id);
 
         return response()->json(['data' => $exercice]);
     }

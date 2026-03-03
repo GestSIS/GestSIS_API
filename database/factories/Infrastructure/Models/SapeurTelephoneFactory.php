@@ -22,10 +22,10 @@ class SapeurTelephoneFactory extends Factory
     {
         return [
             'sapeur_id' => Sapeur::factory(),
-            'telephone_type_id' => $this->faker->numberBetween(1, 5),
+            'telephone_type_id' => $this->faker->numberBetween(1, 3),
             'numero' => $this->faker->phoneNumber(),
             'rta' => $this->faker->boolean(),
-            'priorite' => $this->faker->numberBetween(1, 5),
+            'priorite' => $this->faker->numberBetween(1, 3),
         ];
     }
 }

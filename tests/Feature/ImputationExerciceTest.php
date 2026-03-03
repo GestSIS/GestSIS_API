@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Domaine\Business\ExerciceBusiness;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Sapeur;
 use Exception;
@@ -26,6 +27,7 @@ class ImputationExerciceTest extends TestCase
         parent::setUp();
 
         $exerciceService = $this->app->make(ExerciceService::class);
+        $exerciceBusiness = $this->app->make(ExerciceBusiness::class);
         $sapeurService = $this->app->make(SapeurService::class);
         $this->comptabiliteService = $this->app->make(ImputationService::class);
 
@@ -41,7 +43,7 @@ class ImputationExerciceTest extends TestCase
         $data['incorporation'] = "29.01.2019";
         $this->sapeurThreeId = $sapeurService->createSapeur($data)->id;
 
-        $this->exerciceId = $exerciceService->createExercice(Exercice::factory()->make()->toArray())->id;
+        $this->exerciceId = $exerciceBusiness->createExercice(Exercice::factory()->make()->toArray())->id;
 
         $exerciceService->addSapeurs($this->exerciceId, array(
             array(
@@ -72,7 +74,7 @@ class ImputationExerciceTest extends TestCase
                 'excuse_statut' => -1,
             )
         ));
-        $exerciceService->validateExerciceById($this->exerciceId);
+        $exerciceBusiness->validateExerciceById($this->exerciceId);
     }
 
     /**

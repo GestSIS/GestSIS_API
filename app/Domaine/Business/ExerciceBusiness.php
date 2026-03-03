@@ -10,6 +10,7 @@ use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\HeureExercice;
 use App\Infrastructure\Models\HeureExerciceType;
+use App\Infrastructure\Models\Sms;
 use Carbon\Carbon;
 use Ds\Set;
 use Illuminate\Database\Eloquent\Collection;
@@ -96,6 +97,11 @@ class ExerciceBusiness
         return $exercice;
     }
 
+    public function updatExercice($exerciceId, $data)
+    {
+        return $this->repository->updateExercicebyId($exerciceId, $data);
+    }
+
     public function cancelExerciceById($exerciceId)
     {
         $statut = $this->repository->getExerciceStatutById($exerciceId);
@@ -127,7 +133,10 @@ class ExerciceBusiness
             throw new InvalidActionException([], "Impossible de supprimer un exercice déjà imputé");
         }
 
-        $this->repository->deleteExerciceById($exerciceId);
+        ExerciceSapeur::where('exercice_id', '=', $exerciceId)->delete();
+        HeureExercice::where('exercice_id', '=', $exerciceId)->delete();
+        Sms::where('exercice_id', '=', $exerciceId)->delete();
+        Exercice::where('id', '=', $exerciceId)->delete();
     }
 
     public function validateExerciceById($exerciceId)

@@ -31,21 +31,6 @@ class ExerciceService
         $this->business = $business;
     }
 
-    public function getExerciceById(int $exerciceId)
-    {
-        return $this->repository->getExerciceByIdWith($exerciceId, ['sapeurs']);
-    }
-
-    public function getJustificatifExcuse($exerciceId, $sapeurId)
-    {
-        $presence = ExerciceSapeur::where([['exercice_id', '=', $exerciceId], ['sapeur_id', '=', $sapeurId]])->first();
-        if ($presence == null || !$presence->justificatif_filename) {
-            throw new ArrayException([], "Aucun justificatif !");
-        }
-
-        return ['path' => $presence->justificatif_path, 'filename' => $presence->justificatif_filename];
-    }
-
     public function listeExercice(int $exerciceComptableId)
     {
         return $this->repository->listExerciceLight($exerciceComptableId);
@@ -73,50 +58,6 @@ class ExerciceService
     public function listExerciceOfSapeurById($exerciceComptableId, $sapeurId)
     {
         return $this->repository->listExerciceOfSapeurById($exerciceComptableId, $sapeurId);
-    }
-
-    /**
-     * Create a exercice
-     *
-     * @param $data
-     * @throws ArrayException
-     */
-    public function createExercice($data): Exercice
-    {
-        return $this->business->createExercice($data);
-    }
-
-    /**
-     * Updates a post.
-     *
-     * @param int
-     * @param array
-     * @return Exercice
-     * @throws ArrayException
-     */
-    public function updatExercice($exerciceId, $data)
-    {
-        return $this->repository->updateExercicebyId($exerciceId, $data);
-    }
-
-    public function deleteExerciceById($exerciceId)
-    {
-        return $this->business->deleteExerciceById($exerciceId);
-    }
-
-    public function cancelExerciceById($exerciceId)
-    {
-        return $this->business->cancelExerciceById($exerciceId);
-    }
-
-    public function reactivateExerciceById($exerciceId)
-    {
-        return $this->business->reactivateExerciceById($exerciceId);
-    }
-
-    public function validateExerciceById($exerciceId)
-    {
-        return $this->business->validateExerciceById($exerciceId);
     }
 
     public function listeSapeurOfExerciceById($exerciceId, $hasPresencePermission = false)
@@ -345,7 +286,7 @@ class ExerciceService
 
     function listeAppel($exerciceId, string $sisKey)
     {
-        $exercice = $this->repository->getExerciceByIdWith($exerciceId, ['sapeurs', 'localite']);
+        $exercice = Exercice::with(['sapeurs', 'localite'])->findOrFail($exerciceId);
         $sapeurs = $this->sapeurRepository->listeSapeurLight();
         $exercice->sapeurs = array_map(function ($s) use ($sapeurs) {
             $id = $s->sapeur_id;
@@ -392,7 +333,7 @@ class ExerciceService
 
     function listePresence($exerciceId, string $sisKey)
     {
-        $exercice = $this->repository->getExerciceByIdWith($exerciceId, ['sapeurs', 'localite']);
+        $exercice = Exercice::with(['sapeurs', 'localite'])->findOrFail($exerciceId);
         $sapeurs = $this->sapeurRepository->listeSapeurLight();
         $exercice->sapeurs = array_map(function ($s) use ($sapeurs) {
             $id = $s->sapeur_id;

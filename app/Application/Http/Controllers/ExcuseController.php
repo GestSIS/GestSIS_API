@@ -4,6 +4,8 @@ namespace App\Application\Http\Controllers;
 
 use App\Application\Auth\TokenTools;
 use App\Domaine\API\ExerciceService;
+use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\ExerciceSapeur;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -21,7 +23,12 @@ class ExcuseController extends Controller
 
     public function downloadJustificatif(int $exerciceId, int $sapeurId)
     {
-        $justificatif = $this->service->getJustificatifExcuse($exerciceId, $sapeurId);
+        $presence = ExerciceSapeur::where([['exercice_id', '=', $exerciceId], ['sapeur_id', '=', $sapeurId]])->first();
+        if ($presence == null || !$presence->justificatif_filename) {
+            throw new ArrayException([], "Aucun justificatif !");
+        }
+
+        $justificatif = ['path' => $presence->justificatif_path, 'filename' => $presence->justificatif_filename];
 
         $headers = array(
             'Content-Type: application/pdf',
