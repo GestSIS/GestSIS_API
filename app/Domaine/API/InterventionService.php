@@ -460,7 +460,7 @@ class InterventionService
         $quittancesMap = [];
         $presences = [];
         if (in_array('presences', $withOptions) || in_array('presencesResume', $withOptions)) {
-            $sapeurs = Sapeur::get(['nom', 'prenom', 'id'])->toArray();
+            $sapeurs = Sapeur::get(['nom', 'prenom', 'id']);
             foreach ($sapeurs as $sapeur) {
                 $sapeursMap[$sapeur->id] = $sapeur->toArray();
             }
