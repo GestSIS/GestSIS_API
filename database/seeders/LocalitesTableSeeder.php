@@ -167,6 +167,8 @@ class LocalitesTableSeeder extends Seeder
             ['id' => '150', 'commune_id' => NULL, 'npa' => '2827', 'designation' => 'La Scheulte'],
             ['id' => '151', 'commune_id' => NULL, 'npa' => '1642', 'designation' => 'Sorens FR'],
             ['id' => '152', 'commune_id' => NULL, 'npa' => '1473', 'designation' => 'Châtillon FR'],
+            ['id' => '152', 'commune_id' => NULL, 'npa' => '2742', 'designation' => 'Perrefitte'],
+            ['id' => '152', 'commune_id' => NULL, 'npa' => '2762', 'designation' => 'Roches BE'],
         ]);
     }
 }

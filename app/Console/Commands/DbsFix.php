@@ -85,10 +85,10 @@ class DbsFix extends Command
             //     'affichage_pour_infor' => true,
             // ]);
 
-            // Localite::on("db_" . $db)->insert([
-            //     array('id' => '76', 'designation' => 'Porrentruy'),
-            //     array('id' => '77', 'designation' => 'Grand-Fontaine'),
-            // ]);
+            Localite::on("db_" . $db)->insert([
+                ['id' => 153, 'commune_id' => NULL, 'npa' => '2742', 'designation' => 'Perrefitte'],
+                ['id' => 154, 'commune_id' => NULL, 'npa' => '2762', 'designation' => 'Roches BE'],
+            ]);
 
             // Localite::on("db_" . $db)->where('commune_id', '=', 12)->update(['commune_id' => 9]);
             // Localite::on("db_" . $db)->where('commune_id', '=', 13)->update(['commune_id' => 9]);
