@@ -7,9 +7,15 @@
         "laravel"
     ],
     "license": "MIT",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:sdespont/swiss-payment.git"
+        }
+    ],
     "require": {
         "php": "^8.4",
-        "ch2877/swiss-payment": "^2.0.0",
+        "ch2877/swiss-payment": "3.0.1",
         "firebase/php-jwt": "^7.0",
         "guzzlehttp/guzzle": "^7.0.1",
         "laravel/framework": "^12.0",

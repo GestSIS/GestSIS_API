@@ -358,7 +358,7 @@ class PaiementBusiness
                 }
             }
         }
-        $message = new CustomerCreditTransfer('decompte-' . $decompteId, Text::sanitize($nom, 70));
+        $message = new CustomerCreditTransfer('decompte-' . $decompteId, Text::sanitize($nom, 70), CustomerCreditTransfer::SPS_2022);
         $message->addPayment($paiement);
 
         return $message->asXml();
@@ -395,7 +395,7 @@ class PaiementBusiness
             );
             $paiement->addTransaction($transaction);
 
-            $message = new CustomerCreditTransfer('message-001', $nom);
+            $message = new CustomerCreditTransfer('message-001', $nom, CustomerCreditTransfer::SPS_2022);
             $message->addPayment($paiement);
         }
 
