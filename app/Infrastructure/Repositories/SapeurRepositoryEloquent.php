@@ -282,7 +282,7 @@ class SapeurRepositoryEloquent implements SapeurRepository
 
     public function addMutation(int $sapeurId, $data)
     {
-        if (array_key_exists('motif', $data) && $data['motif'] === null) {
+        if (!array_key_exists('motif', $data) || $data['motif'] === null) {
             $data['motif'] = '';
         }
 
