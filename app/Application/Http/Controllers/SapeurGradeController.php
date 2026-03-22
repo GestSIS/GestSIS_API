@@ -86,7 +86,7 @@ class SapeurGradeController extends Controller
             'date' => 'date',
             'remarque' => 'string|nullable',
             'id' => 'required|integer|exists:grade_sapeur,id',
-            'gade_id' => 'integer|exists:grades,id',
+            'grade_id' => 'integer|exists:grades,id',
         ]);
 
         $grade = $this->service->updateGrade($sapeurId, $data);
