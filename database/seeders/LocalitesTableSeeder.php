@@ -159,7 +159,7 @@ class LocalitesTableSeeder extends Seeder
             ['id' => '142', 'commune_id' => NULL, 'npa' => '2534', 'designation' => 'Orvin'],
             ['id' => '143', 'commune_id' => NULL, 'npa' => '2603', 'designation' => 'Péry'],
             ['id' => '144', 'commune_id' => NULL, 'npa' => '2605', 'designation' => 'Sonceboz'],
-            ['id' => '145', 'commune_id' => NULL, 'npa' => '2610', 'designation' => 'St-Imier'],
+            ['id' => '145', 'commune_id' => NULL, 'npa' => '2610', 'designation' => 'Saint-Imier'],
             ['id' => '146', 'commune_id' => '69', 'npa' => '4710', 'designation' => 'Balsthal'],
             ['id' => '147', 'commune_id' => '60', 'npa' => '2829', 'designation' => 'Envelier'],
             ['id' => '148', 'commune_id' => NULL, 'npa' => '25150', 'designation' => 'Goux-Lès-Dambelin'],

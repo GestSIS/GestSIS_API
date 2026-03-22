@@ -85,7 +85,8 @@ class SapeurGradeController extends Controller
         $data = $request->validate([
             'date' => 'date',
             'remarque' => 'string|nullable',
-            'id' => 'required|integer|exists:grade_sapeur,id'
+            'id' => 'required|integer|exists:grade_sapeur,id',
+            'gade_id' => 'integer|exists:grades,id',
         ]);
 
         $grade = $this->service->updateGrade($sapeurId, $data);
