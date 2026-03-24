@@ -293,6 +293,7 @@ class ExerciceService
             $sap = array_values(array_filter($sapeurs, function ($sapeur) use ($id) {
                 return $sapeur['id'] == $id;
             }))[0];
+            $s['excuse_type_id'] = $s['excuse_type_id'] ?? -1;
             $s['display'] = $sap['nom_prenom'];
             $s['fonction_id'] = $sap['fonction_id'] ?? 0;
             return $s;
@@ -340,6 +341,7 @@ class ExerciceService
             $sap = array_values(array_filter($sapeurs, function ($sapeur) use ($id) {
                 return $sapeur['id'] == $id;
             }))[0];
+            $s['excuse_type_id'] = $s['excuse_type_id'] ?? -1;
             $s['display'] = $sap['nom_prenom'];
             return $s;
         }, array_values($exercice['sapeurs']));
