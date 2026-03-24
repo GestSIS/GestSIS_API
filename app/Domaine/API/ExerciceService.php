@@ -286,21 +286,21 @@ class ExerciceService
 
     function listeAppel($exerciceId, string $sisKey)
     {
-        $exercice = Exercice::with(['sapeurs', 'localite'])->findOrFail($exerciceId);
+        $exercice = Exercice::with(['sapeurs', 'localite'])->findOrFail($exerciceId)->toArray();
         $sapeurs = $this->sapeurRepository->listeSapeurLight();
-        $exercice->sapeurs = array_map(function ($s) use ($sapeurs) {
-            $id = $s->sapeur_id;
+        $exercice['sapeurs'] = array_map(function ($s) use ($sapeurs) {
+            $id = $s['sapeur_id'];
             $sap = array_values(array_filter($sapeurs, function ($sapeur) use ($id) {
                 return $sapeur['id'] == $id;
             }))[0];
-            $s->display = $sap['nom_prenom'];
-            $s->fonction_id = $sap['fonction_id'] ?? 0;
+            $s['display'] = $sap['nom_prenom'];
+            $s['fonction_id'] = $sap['fonction_id'] ?? 0;
             return $s;
-        }, array_values($exercice->sapeurs));
+        }, array_values($exercice['sapeurs']));
 
         // Tri des sapeurs par ordre alphabétique
-        usort($exercice->sapeurs, function ($a, $b) {
-            return strcmp($a->display, $b->display);
+        usort($exercice['sapeurs'], function ($a, $b) {
+            return strcmp($a['display'], $b['display']);
         });
 
         // Chargement des excuses types
@@ -333,20 +333,20 @@ class ExerciceService
 
     function listePresence($exerciceId, string $sisKey)
     {
-        $exercice = Exercice::with(['sapeurs', 'localite'])->findOrFail($exerciceId);
+        $exercice = Exercice::with(['sapeurs', 'localite'])->findOrFail($exerciceId)->toArray();
         $sapeurs = $this->sapeurRepository->listeSapeurLight();
-        $exercice->sapeurs = array_map(function ($s) use ($sapeurs) {
-            $id = $s->sapeur_id;
+        $exercice['sapeurs'] = array_map(function ($s) use ($sapeurs) {
+            $id = $s['sapeur_id'];
             $sap = array_values(array_filter($sapeurs, function ($sapeur) use ($id) {
                 return $sapeur['id'] == $id;
             }))[0];
-            $s->display = $sap['nom_prenom'];
+            $s['display'] = $sap['nom_prenom'];
             return $s;
-        }, array_values($exercice->sapeurs));
+        }, array_values($exercice['sapeurs']));
 
         // Tri des sapeurs par ordre alphabétique
-        usort($exercice->sapeurs, function ($a, $b) {
-            return strcmp($a->display, $b->display);
+        usort($exercice['sapeurs'], function ($a, $b) {
+            return strcmp($a['display'], $b['display']);
         });
 
         // Chargement des excuses types
