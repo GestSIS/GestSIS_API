@@ -18,7 +18,7 @@
         "ch2877/swiss-payment": "3.0.1",
         "firebase/php-jwt": "^7.0",
         "guzzlehttp/guzzle": "^7.0.1",
-        "laravel/framework": "^12.0",
+        "laravel/framework": "^13.2",
         "laravel/tinker": "^3.0",
         "laravel/ui": "^4.0",
         "maatwebsite/excel": "^3.1",
