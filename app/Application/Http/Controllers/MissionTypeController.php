@@ -2,21 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\InterventionParamService;
+use App\Domaine\Business\InterventionParamBusiness;
+use App\Infrastructure\Models\MissionType;
 use Illuminate\Http\Request;
 
 class MissionTypeController extends Controller
 {
-    protected $service;
-
-    public function __construct(InterventionParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $missions = $this->service->missions();
+        $missions = MissionType::all();
 
         return response()->json(['data' => $missions]);
     }
@@ -27,7 +21,7 @@ class MissionTypeController extends Controller
             'titre' => 'string|min:1'
         ]);
 
-        $mission = $this->service->ajouterMission($data);
+        $mission = InterventionParamBusiness::ajouterMission($data);
         return response()->json(['data' => $mission]);
     }
 
@@ -37,13 +31,13 @@ class MissionTypeController extends Controller
             'titre' => 'string|min:1'
         ]);
 
-        $mission = $this->service->modifierMission($id, $data);
+        $mission = InterventionParamBusiness::modifierMission($id, $data);
         return response()->json(['data' => $mission]);
     }
 
     public function destroy($id)
     {
-        $mission = $this->service->supprimerMission($id);
-        return response()->json(['data' => $mission]);
+        InterventionParamBusiness::supprimerMission($id);
+        return response()->json(['data' => 'ok']);
     }
 }

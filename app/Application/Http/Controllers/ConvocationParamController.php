@@ -2,21 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ConvocationParamService;
+use App\Domaine\Business\ConvocationParamBusiness;
+use App\Infrastructure\Models\ConvocationParam;
 use Illuminate\Http\Request;
 
 class ConvocationParamController extends Controller
 {
-    protected $service;
-
-    public function __construct(ConvocationParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $params = $this->service->params();
+        $params = ConvocationParam::first();
 
         return response()->json(['data' => $params]);
     }
@@ -32,7 +26,7 @@ class ConvocationParamController extends Controller
             'affichage_pour_info' => 'required|bool',
         ]);
 
-        $params = $this->service->updateParams($data);
+        $params = ConvocationParamBusiness::updateParams($data);
 
         return response()->json(['data' => $params]);
     }

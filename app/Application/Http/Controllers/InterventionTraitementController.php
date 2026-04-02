@@ -2,21 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\InterventionParamService;
+use App\Domaine\Business\InterventionParamBusiness;
+use App\Infrastructure\Models\InterventionTraitement;
 use Illuminate\Http\Request;
 
 class InterventionTraitementController extends Controller
 {
-    protected $service;
-
-    public function __construct(InterventionParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $traitements = $this->service->traitements();
+        $traitements = InterventionTraitement::all();
 
         return response()->json(['data' => $traitements]);
     }
@@ -28,7 +22,7 @@ class InterventionTraitementController extends Controller
             'tri' => 'integer'
         ]);
 
-        $traitement = $this->service->ajouterTraitement($data);
+        $traitement = InterventionParamBusiness::ajouterTraitement($data);
         return response()->json(['data' => $traitement]);
     }
 
@@ -39,13 +33,13 @@ class InterventionTraitementController extends Controller
             'tri' => 'integer'
         ]);
 
-        $traitement = $this->service->modifierTraitement($id, $data);
+        $traitement = InterventionParamBusiness::modifierTraitement($id, $data);
         return response()->json(['data' => $traitement]);
     }
 
     public function destroy($id)
     {
-        $traitement = $this->service->supprimerTraitement($id);
-        return response()->json(['data' => $traitement]);
+        InterventionParamBusiness::supprimerTraitement($id);
+        return response()->json(['data' => 'ok']);
     }
 }

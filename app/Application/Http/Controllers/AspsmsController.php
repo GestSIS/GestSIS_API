@@ -2,21 +2,14 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\AspsmsService;
+use App\Domaine\Business\AspsmsBusiness;
 use Illuminate\Http\Request;
 
 class AspsmsController extends Controller
 {
-    protected $service;
-
-    public function __construct(AspsmsService $service)
-    {
-        $this->service = $service;
-    }
-
     public function credit()
     {
-        $credit = $this->service->credit();
+        $credit = AspsmsBusiness::getCredit();
         return response()->json(['data' => $credit]);
     }
 
@@ -32,7 +25,7 @@ class AspsmsController extends Controller
             'exerciceId' => 'nullable|integer',
         ]);
 
-        $params = $this->service->send($data);
+        $params = AspsmsBusiness::send($data);
 
         return response()->json(['data' => $params]);
     }

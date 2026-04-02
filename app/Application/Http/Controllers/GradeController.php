@@ -2,27 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\SapeurParamService;
+use App\Domaine\Business\SapeurParamBusiness;
 use App\Infrastructure\Models\Grade;
 use Illuminate\Http\Request;
 
 class GradeController extends Controller
 {
-    protected $service;
-
-    public function __construct(SapeurParamService $service)
-    {
-        $this->service = $service;
-    }
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        $grades = $this->service->grades();
+        $grades = Grade::all();
 
         return response()->json(['data' => $grades]);
     }
@@ -36,7 +24,7 @@ class GradeController extends Controller
             'tri' => 'integer'
         ]);
 
-        $grade = $this->service->ajouterGrade($data);
+        $grade = SapeurParamBusiness::ajouterGrade($data);
         return response()->json(['data' => $grade]);
     }
 
@@ -53,7 +41,7 @@ class GradeController extends Controller
             'tri' => 'integer'
         ]);
 
-        $grade = $this->service->modifierGrade($id, $data);
+        $grade = SapeurParamBusiness::modifierGrade($id, $data);
         return response()->json(['data' => $grade]);
     }
 
@@ -63,7 +51,7 @@ class GradeController extends Controller
             return response()->json(['error' => 'Grade not found'], 404);
         }
 
-        $grade = $this->service->supprimerGrade($id);
+        $grade = SapeurParamBusiness::supprimerGrade($id);
         return response()->json(['data' => $grade]);
     }
 }

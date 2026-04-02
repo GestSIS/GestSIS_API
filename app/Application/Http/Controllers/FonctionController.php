@@ -2,27 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\SapeurParamService;
+use App\Domaine\Business\SapeurParamBusiness;
 use App\Infrastructure\Models\Fonction;
 use Illuminate\Http\Request;
 
 class FonctionController extends Controller
 {
-    protected $service;
-
-    public function __construct(SapeurParamService $service)
-    {
-        $this->service = $service;
-    }
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        $fonctions = $this->service->fonctions();
+        $fonctions = Fonction::all();
 
         return response()->json(['data' => $fonctions]);
     }
@@ -37,7 +25,7 @@ class FonctionController extends Controller
             'tri' => 'integer|required'
         ]);
 
-        $fonction = $this->service->ajouterFonction($data);
+        $fonction = SapeurParamBusiness::ajouterFonction($data);
         return response()->json(['data' => $fonction]);
     }
 
@@ -55,7 +43,7 @@ class FonctionController extends Controller
             'tri' => 'integer|required'
         ]);
 
-        $fonction = $this->service->modifierFonction($id, $data);
+        $fonction = SapeurParamBusiness::modifierFonction($id, $data);
         return response()->json(['data' => $fonction]);
     }
 
@@ -65,7 +53,7 @@ class FonctionController extends Controller
             return response()->json(['error' => 'Fonction not found'], 404);
         }
 
-        $fonction = $this->service->supprimerFonction($id);
+        $fonction = SapeurParamBusiness::supprimerFonction($id);
         return response()->json(['data' => $fonction]);
     }
 }

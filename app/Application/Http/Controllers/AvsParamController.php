@@ -2,21 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\AvsParamService;
+use App\Domaine\Business\AvsParamBusiness;
+use App\Infrastructure\Models\AvsParam;
 use Illuminate\Http\Request;
 
 class AvsParamController extends Controller
 {
-    protected $service;
-
-    public function __construct(AvsParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $params = $this->service->params();
+        $params = AvsParam::first();
 
         return response()->json(['data' => $params]);
     }
@@ -33,7 +27,7 @@ class AvsParamController extends Controller
             'ecriture_categorie_id' => 'required|integer'
         ]);
 
-        $params = $this->service->updateParams($data);
+        $params = AvsParamBusiness::updateParams($data);
 
         return response()->json(['data' => $params]);
     }

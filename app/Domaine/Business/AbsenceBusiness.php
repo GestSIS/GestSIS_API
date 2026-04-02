@@ -10,7 +10,7 @@ use Carbon\Carbon;
 class AbsenceBusiness
 {
 
-    private function checkOverlap($absenceId, $sapeurId, $absence): bool
+    private static function checkOverlap($absenceId, $sapeurId, $absence): bool
     {
         return Absence::where([
             ['id', '<>', $absenceId],
@@ -20,13 +20,13 @@ class AbsenceBusiness
         ])->exists();
     }
 
-    public function ajouterAbsence($data)
+    public static function ajouterAbsence($data)
     {
         if (Carbon::parse($data['debut'])->gt(Carbon::parse($data['fin']))) {
             throw new ArrayException(['fin' => 'Invalide'], 'La date de fin ne peut être antérieur à la date de début !');
         }
 
-        if ($this->checkOverlap(Null, $data['sapeur_id'], $data)) {
+        if (self::checkOverlap(Null, $data['sapeur_id'], $data)) {
             throw new ArrayException(['debut' => 'Invalide', 'fin' => 'Invalide'], 'Cette absence chevauche une autre absence');
         }
         $absence = new Absence();
@@ -36,7 +36,7 @@ class AbsenceBusiness
         return $absence;
     }
 
-    public function modifierAbsence($absenceId, $data)
+    public static function modifierAbsence($absenceId, $data)
     {
         if (Carbon::parse($data['debut'])->gt(Carbon::parse($data['fin']))) {
             throw new ArrayException(['fin' => 'Invalide'], 'La date de fin ne peut être antérieur à la date de début !');
@@ -48,7 +48,7 @@ class AbsenceBusiness
         }
 
         // Absence overlapping
-        if ($this->checkOverlap($absenceId, $absence->sapeur_id, $data)) {
+        if (self::checkOverlap($absenceId, $absence->sapeur_id, $data)) {
             throw new ArrayException(['debut' => 'Invalide', 'fin' => 'Invalide'], 'Cette absence chevauche une autre absence');
         }
         // Chargement des absences
@@ -56,7 +56,7 @@ class AbsenceBusiness
         return Absence::find($absenceId);
     }
 
-    public function supprimerAbsence($absenceId)
+    public static function supprimerAbsence($absenceId)
     {
         Absence::where('id', $absenceId)->limit(1)->delete();
     }

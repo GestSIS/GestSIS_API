@@ -2,21 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ExerciceParamService;
+use App\Domaine\Business\ExerciceParamBusiness;
+use App\Infrastructure\Models\ExerciceCategorie;
 use Illuminate\Http\Request;
 
 class ExerciceCategorieController extends Controller
 {
-    protected $service;
-
-    public function __construct(ExerciceParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $categorie = $this->service->categories();
+        $categorie = ExerciceCategorie::all();
 
         return response()->json(['data' => $categorie]);
     }
@@ -31,7 +25,7 @@ class ExerciceCategorieController extends Controller
             'tri' => 'integer|required'
         ]);
 
-        $categorie = $this->service->ajouterCategorie($data);
+        $categorie = ExerciceParamBusiness::ajouterCategorie($data);
         return response()->json(['data' => $categorie]);
     }
 
@@ -45,13 +39,13 @@ class ExerciceCategorieController extends Controller
             'tri' => 'integer|required'
         ]);
 
-        $categorie = $this->service->modifierCategorie($id, $data);
+        $categorie = ExerciceParamBusiness::modifierCategorie($id, $data);
         return response()->json(['data' => $categorie]);
     }
 
     public function destroy($id)
     {
-        $categorie = $this->service->supprimerCategorie($id);
-        return response()->json(['data' => $categorie]);
+        ExerciceParamBusiness::supprimerCategorie($id);
+        return response()->json(['data' => 'ok']);
     }
 }

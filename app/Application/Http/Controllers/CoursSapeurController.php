@@ -2,24 +2,12 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\CoursService;
+use App\Infrastructure\Models\CoursSapeur;
+use App\Infrastructure\Models\ExerciceComptable;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class CoursSapeurController extends Controller
 {
-    private $service = null;
-
-    public function __construct(CoursService $service)
-    {
-        $this->service = $service;
-    }
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
     public function index(Request $request, $exerciceComptableId)
     {
         // Check si permission comptabilite
@@ -28,6 +16,16 @@ class CoursSapeurController extends Controller
 
         $avecEcritures = $admin || in_array('comptabilite.lecture', $permissions);
 
-        return response()->json(['data' => $this->service->coursSapeurs($exerciceComptableId, $avecEcritures)]);
+        $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
+        if ($exerciceComptable == null) {
+            return response()->json(['data' => []]);
+        }
+
+        $data = CoursSapeur::with($avecEcritures ? ['cours', 'ecritures'] : [])->where([
+            ['date', '>=', $exerciceComptable->debut],
+            ['date', '<=', $exerciceComptable->fin],
+        ])->orderBy('date')->get();
+
+        return response()->json(['data' => $data]);
     }
 }

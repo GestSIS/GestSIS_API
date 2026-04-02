@@ -2,21 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ExcuseParamService;
+use App\Domaine\Business\ExcuseParamBusiness;
+use App\Infrastructure\Models\ExcuseParam;
 use Illuminate\Http\Request;
 
 class ExcuseParamController extends Controller
 {
-    protected $service;
-
-    public function __construct(ExcuseParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $params = $this->service->params();
+        $params = ExcuseParam::first();
 
         return response()->json(['data' => $params]);
     }
@@ -30,7 +24,7 @@ class ExcuseParamController extends Controller
             'texte_email_rappel' => 'nullable|string',
         ]);
 
-        $params = $this->service->updateParams($data);
+        $params = ExcuseParamBusiness::updateParams($data);
 
         return response()->json(['data' => $params]);
     }

@@ -2,22 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\InterventionParamService;
+use App\Domaine\Business\InterventionParamBusiness;
+use App\Infrastructure\Models\StatFederal;
 use Illuminate\Http\Request;
 
 class StatFederalController extends Controller
 {
-
-    protected $service;
-
-    public function __construct(InterventionParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $statsFederal = $this->service->statsFederal();
+        $statsFederal = StatFederal::all();
 
         return response()->json(['data' => $statsFederal]);
     }
@@ -30,7 +23,7 @@ class StatFederalController extends Controller
             'tri' => 'integer'
         ]);
 
-        $stat = $this->service->ajouterStatFederal($data);
+        $stat = InterventionParamBusiness::ajouterStatFederal($data);
         return response()->json(['data' => $stat]);
     }
 
@@ -42,13 +35,13 @@ class StatFederalController extends Controller
             'tri' => 'integer'
         ]);
 
-        $stat = $this->service->modifierStatFederal($id, $data);
+        $stat = InterventionParamBusiness::modifierStatFederal($id, $data);
         return response()->json(['data' => $stat]);
     }
 
     public function destroy($id)
     {
-        $stat = $this->service->supprimerStatFederal($id);
-        return response()->json(['data' => $stat]);
+        InterventionParamBusiness::supprimerStatFederal($id);
+        return response()->json(['data' => 'ok']);
     }
 }

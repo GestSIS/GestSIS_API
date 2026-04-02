@@ -2,38 +2,19 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ExerciceComptableService;
+use App\Domaine\Business\ExerciceComptableBusiness;
+use App\Infrastructure\Models\ExerciceComptable;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class ExerciceComptableController extends Controller
 {
-    protected $service;
-
-    public function __construct(ExerciceComptableService $service)
-    {
-        $this->service = $service;
-    }
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        $exerciceComptables = $this->service->all();
+        $exerciceComptables = ExerciceComptable::all();
 
         return response()->json(['data' => $exerciceComptables]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @return Response
-     * @throws ArrayException
-     */
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -44,7 +25,7 @@ class ExerciceComptableController extends Controller
             'boucle' => 'integer'
         ]);
 
-        $exercice = $this->service->creer($data);
+        $exercice = ExerciceComptableBusiness::creerExerciceComptable($data);
         return response()->json(['data' => $exercice]);
     }
 
@@ -58,19 +39,19 @@ class ExerciceComptableController extends Controller
             'boucle' => 'integer',
         ]);
 
-        $exercice = $this->service->modifier($id, $data);
+        $exercice = ExerciceComptableBusiness::modifierExerciceComptable($id, $data);
         return response()->json(['data' => $exercice]);
     }
 
     public function destroy($id)
     {
-        $exercice = $this->service->supprimer($id);
+        $exercice = ExerciceComptableBusiness::supprimerExerciceComptable($id);
         return response()->json(['data' => $exercice]);
     }
 
     public function cloturer($id)
     {
-        $exercice = $this->service->cloturer($id);
+        $exercice = ExerciceComptableBusiness::cloturerExerciceComptable($id);
         return response()->json(['data' => $exercice]);
     }
 }

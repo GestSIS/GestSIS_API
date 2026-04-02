@@ -2,21 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\InterventionParamService;
+use App\Domaine\Business\InterventionParamBusiness;
+use App\Infrastructure\Models\TypeIntervention;
 use Illuminate\Http\Request;
 
 class TypeInterventionController extends Controller
 {
-    protected $service;
-
-    public function __construct(InterventionParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $types = $this->service->types();
+        $types = TypeIntervention::all();
 
         return response()->json(['data' => $types]);
     }
@@ -29,7 +23,7 @@ class TypeInterventionController extends Controller
             'stat_intervention_id' => 'integer'
         ]);
 
-        $type = $this->service->ajouterType($data);
+        $type = InterventionParamBusiness::ajouterType($data);
         return response()->json(['data' => $type]);
     }
 
@@ -41,13 +35,13 @@ class TypeInterventionController extends Controller
             'stat_intervention_id' => 'integer'
         ]);
 
-        $type = $this->service->modifierType($id, $data);
+        $type = InterventionParamBusiness::modifierType($id, $data);
         return response()->json(['data' => $type]);
     }
 
     public function destroy($id)
     {
-        $type = $this->service->supprimerType($id);
-        return response()->json(['data' => $type]);
+        InterventionParamBusiness::supprimerType($id);
+        return response()->json(['data' => 'ok']);
     }
 }

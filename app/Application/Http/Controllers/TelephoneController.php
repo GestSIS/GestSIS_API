@@ -2,21 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\InterventionParamService;
+use App\Domaine\Business\InterventionParamBusiness;
+use App\Infrastructure\Models\Telephone;
 use Illuminate\Http\Request;
 
 class TelephoneController extends Controller
 {
-    protected $service;
-
-    public function __construct(InterventionParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $telephones = $this->service->telephones();
+        $telephones = Telephone::all();
 
         return response()->json(['data' => $telephones]);
     }
@@ -29,7 +23,7 @@ class TelephoneController extends Controller
             'tri' => 'integer',
         ]);
 
-        $materiel = $this->service->ajouterTelephone($data);
+        $materiel = InterventionParamBusiness::ajouterTelephone($data);
         return response()->json(['data' => $materiel]);
     }
 
@@ -41,13 +35,13 @@ class TelephoneController extends Controller
             'tri' => 'integer',
         ]);
 
-        $materiel = $this->service->modifierTelephone($id, $data);
+        $materiel = InterventionParamBusiness::modifierTelephone($id, $data);
         return response()->json(['data' => $materiel]);
     }
 
     public function destroy($id)
     {
-        $materiel = $this->service->supprimerTelephone($id);
-        return response()->json(['data' => $materiel]);
+        InterventionParamBusiness::supprimerTelephone($id);
+        return response()->json(['data' => 'ok']);
     }
 }

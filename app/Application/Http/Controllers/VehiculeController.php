@@ -2,21 +2,16 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\InterventionParamService;
-use Illuminate\Http\Request;
+use App\Domaine\Business\Materiel\MaterielTypeBusiness;
+use App\Infrastructure\Models\Article;
 
 class VehiculeController extends Controller
 {
-    protected $service;
-
-    public function __construct(InterventionParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $vehicules = $this->service->vehicules();
+        $vehicules = Article::join('materiel_types', 'articles.materiel_type_id', '=', 'materiel_types.id')
+            ->where('materiel_types.type', '=', MaterielTypeBusiness::TYPE_VEHICULE)
+            ->get(['articles.*']);
 
         return response()->json(['data' => $vehicules]);
     }

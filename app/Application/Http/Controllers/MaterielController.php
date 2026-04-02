@@ -2,21 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\InterventionParamService;
+use App\Domaine\Business\InterventionParamBusiness;
+use App\Infrastructure\Models\Materiel;
 use Illuminate\Http\Request;
 
 class MaterielController extends Controller
 {
-    protected $service;
-
-    public function __construct(InterventionParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $materiels = $this->service->materiels();
+        $materiels = Materiel::all();
 
         return response()->json(['data' => $materiels]);
     }
@@ -32,7 +26,7 @@ class MaterielController extends Controller
             'type_unite_id' => 'integer|required'
         ]);
 
-        $materiel = $this->service->ajouterMateriel($data);
+        $materiel = InterventionParamBusiness::ajouterMateriel($data);
         return response()->json(['data' => $materiel]);
     }
 
@@ -47,13 +41,13 @@ class MaterielController extends Controller
             'type_unite_id' => 'integer|required'
         ]);
 
-        $materiel = $this->service->modifierMateriel($id, $data);
+        $materiel = InterventionParamBusiness::modifierMateriel($id, $data);
         return response()->json(['data' => $materiel]);
     }
 
     public function destroy($id)
     {
-        $materiel = $this->service->supprimerMateriel($id);
-        return response()->json(['data' => $materiel]);
+        InterventionParamBusiness::supprimerMateriel($id);
+        return response()->json(['data' => 'ok']);
     }
 }

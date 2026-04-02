@@ -2,27 +2,22 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\AbsenceService;
+use App\Domaine\Business\AbsenceBusiness;
+use App\Infrastructure\Models\Absence;
+use App\Infrastructure\Models\ExerciceComptable;
 use Illuminate\Http\Request;
 
 class AbsenceController extends Controller
 {
-    protected $service;
-
-    public function __construct(AbsenceService $service)
-    {
-        $this->service = $service;
-    }
-
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index(int $exerciceComptableId)
     {
-        $absences = $this->service->listeAbsence($exerciceComptableId);
+        $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
+
+        $absences = Absence::where([
+            ['debut', '<', $exerciceComptable->fin],
+            ['fin', '>', $exerciceComptable->debut]
+        ])->get();
+
         return response()->json(['data' => $absences]);
     }
 
@@ -34,7 +29,7 @@ class AbsenceController extends Controller
             'fin' => 'date',
         ]);
 
-        $absence = $this->service->ajouterAbsence($data);
+        $absence = AbsenceBusiness::ajouterAbsence($data);
         return response()->json(['data' => $absence]);
     }
 
@@ -46,13 +41,13 @@ class AbsenceController extends Controller
             'fin' => 'date',
         ]);
 
-        $absence = $this->service->modifierAbsence($id, $data);
+        $absence = AbsenceBusiness::modifierAbsence($id, $data);
         return response()->json(['data' => $absence]);
     }
 
     public function destroy($id)
     {
-        $absence = $this->service->supprimerAbsence($id);
-        return response()->json(['data' => $absence]);
+        AbsenceBusiness::supprimerAbsence($id);
+        return response()->json(['data' => 'ok']);
     }
 }

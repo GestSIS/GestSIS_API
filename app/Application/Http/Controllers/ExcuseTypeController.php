@@ -2,21 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ExerciceParamService;
+use App\Domaine\Business\ExerciceParamBusiness;
+use App\Infrastructure\Models\ExcuseType;
 use Illuminate\Http\Request;
 
 class ExcuseTypeController extends Controller
 {
-    protected $service;
-
-    public function __construct(ExerciceParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $excusesTypes = $this->service->excusesTypes();
+        $excusesTypes = ExcuseType::all();
 
         return response()->json(['data' => $excusesTypes]);
     }
@@ -31,7 +25,7 @@ class ExcuseTypeController extends Controller
             'tri' => 'integer'
         ]);
 
-        $excuseType = $this->service->ajouterExcuseType($data);
+        $excuseType = ExerciceParamBusiness::ajouterExcuseType($data);
         return response()->json(['data' => $excuseType]);
     }
 
@@ -45,13 +39,13 @@ class ExcuseTypeController extends Controller
             'tri' => 'integer'
         ]);
 
-        $excuseType = $this->service->modifierExcuseType($id, $data);
+        $excuseType = ExerciceParamBusiness::modifierExcuseType($id, $data);
         return response()->json(['data' => $excuseType]);
     }
 
     public function destroy($id)
     {
-        $this->service->supprimerExcuseType($id);
+        ExerciceParamBusiness::supprimerExcuseType($id);
         return response()->json(['data' => 'ok']);
     }
 }

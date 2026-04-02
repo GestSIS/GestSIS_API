@@ -2,21 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\InterventionParamService;
+use App\Domaine\Business\InterventionParamBusiness;
+use App\Infrastructure\Models\StatIntervention;
 use Illuminate\Http\Request;
 
 class StatInterventionController extends Controller
 {
-    protected $service;
-
-    public function __construct(InterventionParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $stats = $this->service->stats();
+        $stats = StatIntervention::all();
 
         return response()->json(['data' => $stats]);
     }
@@ -28,7 +22,7 @@ class StatInterventionController extends Controller
             'tri' => 'integer'
         ]);
 
-        $stat = $this->service->ajouterStat($data);
+        $stat = InterventionParamBusiness::ajouterStat($data);
         return response()->json(['data' => $stat]);
     }
 
@@ -39,13 +33,13 @@ class StatInterventionController extends Controller
             'tri' => 'integer'
         ]);
 
-        $stat = $this->service->modifierStat($id, $data);
+        $stat = InterventionParamBusiness::modifierStat($id, $data);
         return response()->json(['data' => $stat]);
     }
 
     public function destroy($id)
     {
-        $stat = $this->service->supprimerStat($id);
-        return response()->json(['data' => $stat]);
+        InterventionParamBusiness::supprimerStat($id);
+        return response()->json(['data' => 'ok']);
     }
 }

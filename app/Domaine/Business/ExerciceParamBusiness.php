@@ -3,7 +3,6 @@
 
 namespace App\Domaine\Business;
 
-use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\Exceptions\InvalidActionException;
 use App\Infrastructure\Models\ExerciceCategorie;
 use App\Infrastructure\Models\ExcuseType;
@@ -57,7 +56,7 @@ class ExerciceParamBusiness
         ExcuseType::where('id', $id)->delete();
     }
 
-    public function ajouterHeureExerciceType($data)
+    public static function ajouterHeureExerciceType($data)
     {
         $type = new HeureExerciceType();
         $type->fill($data);
@@ -65,13 +64,13 @@ class ExerciceParamBusiness
         return $type;
     }
 
-    public function modifierHeureExerciceType($id, $data)
+    public static function modifierHeureExerciceType($id, $data)
     {
         HeureExerciceType::where('id', $id)->limit(1)->update($data);
         return HeureExerciceType::find($id);
     }
 
-    public function supprimerHeureExerciceType($id)
+    public static function supprimerHeureExerciceType($id)
     {
         HeureExerciceType::where('id', $id)->limit(1)->delete();
     }

@@ -2,22 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\SapeurParamService;
+use App\Domaine\Business\SapeurParamBusiness;
 use App\Infrastructure\Models\Cours;
 use Illuminate\Http\Request;
 
 class CoursController extends Controller
 {
-    protected $service;
-
-    public function __construct(SapeurParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $cours = $this->service->cours();
+        $cours = Cours::all();
 
         return response()->json(['data' => $cours]);
     }
@@ -36,7 +29,7 @@ class CoursController extends Controller
             'tri' => 'integer|required',
         ]);
 
-        $cours = $this->service->ajouterCours($data);
+        $cours = SapeurParamBusiness::ajouterCours($data);
         return response()->json(['data' => $cours]);
     }
 
@@ -58,7 +51,7 @@ class CoursController extends Controller
             'tri' => 'integer',
         ]);
 
-        $cours = $this->service->modifierCours($id, $data);
+        $cours = SapeurParamBusiness::modifierCours($id, $data);
         return response()->json(['data' => $cours]);
     }
 
@@ -68,7 +61,7 @@ class CoursController extends Controller
             return response()->json(['error' => 'Cours not found'], 404);
         }
 
-        $cours = $this->service->supprimerCours($id);
+        $cours = SapeurParamBusiness::supprimerCours($id);
         return response()->json(['data' => $cours]);
     }
 }

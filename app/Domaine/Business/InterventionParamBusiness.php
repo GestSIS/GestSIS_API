@@ -7,18 +7,16 @@ use App\Domaine\Exceptions\InvalidActionException;
 use App\Infrastructure\Models\Intervention;
 use App\Infrastructure\Models\InterventionMateriel;
 use App\Infrastructure\Models\InterventionTraitement;
-use App\Infrastructure\Models\InterventionVehicule;
 use App\Infrastructure\Models\Materiel;
 use App\Infrastructure\Models\MissionType;
 use App\Infrastructure\Models\StatFederal;
 use App\Infrastructure\Models\StatIntervention;
 use App\Infrastructure\Models\Telephone;
 use App\Infrastructure\Models\TypeIntervention;
-use App\Infrastructure\Models\Vehicule;
 
 class InterventionParamBusiness
 {
-    public function ajouterStat($data)
+    public static function ajouterStat($data)
     {
         $stat = new StatIntervention();
         $stat->fill($data);
@@ -26,7 +24,7 @@ class InterventionParamBusiness
         return $stat;
     }
 
-    public function modifierStat($id, $data)
+    public static function modifierStat($id, $data)
     {
         StatIntervention::where('id', $id)->limit(1)->update($data);
         return StatIntervention::find($id);
@@ -40,7 +38,7 @@ class InterventionParamBusiness
         StatIntervention::where('id', $id)->delete();
     }
 
-    public function ajouterStatFederal($data)
+    public static function ajouterStatFederal($data)
     {
         $stat = new StatFederal();
         $stat->fill($data);
@@ -48,7 +46,7 @@ class InterventionParamBusiness
         return $stat;
     }
 
-    public function modifierStatFederal($id, $data)
+    public static function modifierStatFederal($id, $data)
     {
         StatFederal::where('id', $id)->limit(1)->update($data);
         return StatFederal::find($id);
@@ -59,7 +57,7 @@ class InterventionParamBusiness
         //TODO: Not implemented now
     }
 
-    public function ajouterType($data)
+    public static function ajouterType($data)
     {
         $type = new TypeIntervention();
         $type->fill($data);
@@ -67,7 +65,7 @@ class InterventionParamBusiness
         return $type;
     }
 
-    public function modifierType($id, $data)
+    public static function modifierType($id, $data)
     {
         TypeIntervention::where('id', $id)->limit(1)->update($data);
         return TypeIntervention::find($id);
@@ -81,7 +79,7 @@ class InterventionParamBusiness
         TypeIntervention::where('id', $id)->delete();
     }
 
-    public function ajouterMission($data)
+    public static function ajouterMission($data)
     {
         $mission = new MissionType();
         $mission->fill($data);
@@ -89,7 +87,7 @@ class InterventionParamBusiness
         return $mission;
     }
 
-    public function modifierMission($id, $data)
+    public static function modifierMission($id, $data)
     {
         MissionType::where('id', $id)->limit(1)->update($data);
         return MissionType::find($id);
@@ -100,7 +98,7 @@ class InterventionParamBusiness
         MissionType::where('id', $id)->delete();
     }
 
-    public function ajouterTelephone($data)
+    public static function ajouterTelephone($data)
     {
         $telephone = new Telephone();
         $telephone->fill($data);
@@ -108,7 +106,7 @@ class InterventionParamBusiness
         return $telephone;
     }
 
-    public function modifierTelephone($id, $data)
+    public static function modifierTelephone($id, $data)
     {
         Telephone::where('id', $id)->limit(1)->update($data);
         return Telephone::find($id);
@@ -119,7 +117,7 @@ class InterventionParamBusiness
         Telephone::where('id', $id)->delete();
     }
 
-    public function ajouterMateriel($data)
+    public static function ajouterMateriel($data)
     {
         if (!array_key_exists('type_unite_id', $data) || $data['type_unite_id'] == "0") {
             $data['type_unite_id'] = null;
@@ -130,7 +128,7 @@ class InterventionParamBusiness
         return $materiel;
     }
 
-    public function modifierMateriel($id, $data)
+    public static function modifierMateriel($id, $data)
     {
         if (!array_key_exists('type_unite_id', $data) || $data['type_unite_id'] == "0") {
             $data['type_unite_id'] = null;
@@ -147,7 +145,7 @@ class InterventionParamBusiness
         Materiel::where('id', $id)->delete();
     }
 
-    public function ajouterTraitement($data)
+    public static function ajouterTraitement($data)
     {
         $categorie = new InterventionTraitement();
         $categorie->fill($data);
@@ -155,7 +153,7 @@ class InterventionParamBusiness
         return $categorie;
     }
 
-    public function modifierTraitement($id, $data)
+    public static function modifierTraitement($id, $data)
     {
         InterventionTraitement::where('id', $id)->limit(1)->update($data);
         return InterventionTraitement::find($id);

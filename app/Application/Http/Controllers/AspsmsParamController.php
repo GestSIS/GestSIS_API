@@ -2,21 +2,14 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\AspsmsService;
+use App\Domaine\Business\AspsmsBusiness;
 use Illuminate\Http\Request;
 
 class AspsmsParamController extends Controller
 {
-    protected $service;
-
-    public function __construct(AspsmsService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $params = $this->service->params();
+        $params = AspsmsBusiness::getParams();
 
         return response()->json(['data' => $params]);
     }
@@ -29,7 +22,7 @@ class AspsmsParamController extends Controller
             'origin' => 'string|min:1|max:11',
         ]);
 
-        $params = $this->service->updateParams($data);
+        $params = AspsmsBusiness::updateParams($data);
 
         return response()->json(['data' => $params]);
     }
