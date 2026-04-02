@@ -2,21 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\RtaParamService;
+use App\Domaine\Business\RtaParamBusiness;
 use Illuminate\Http\Request;
 
 class RtaParamController extends Controller
 {
-    protected $service;
-
-    public function __construct(RtaParamService $service)
-    {
-        $this->service = $service;
-    }
 
     public function index()
     {
-        $params = $this->service->params();
+        $params = RtaParamBusiness::getParams();
 
         return response()->json(['data' => $params]);
     }
@@ -27,7 +21,7 @@ class RtaParamController extends Controller
             'token' => 'required|string',
         ]);
 
-        $params = $this->service->updateParams($data);
+        $params = RtaParamBusiness::updateParams($data);
 
         return response()->json(['data' => $params]);
     }

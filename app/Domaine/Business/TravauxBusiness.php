@@ -13,10 +13,10 @@ class TravauxBusiness
     public const TRAVAIL_STATUT_IMPUTE = 2;
     public const TRAVAIL_STATUT_INVALIDE = -1;
 
-    public function ajouter($travaux, $auteurId, $hasSaisieCommunePermission)
+    public static function ajouter($travaux, $auteurId, $hasSaisieCommunePermission)
     {
         // Check que l'auteur a saisie commune si nécessaire
-        if (count(array_filter($travaux, fn ($t) => $t['sapeur_id'] != $auteurId)) > 0 && !$hasSaisieCommunePermission) {
+        if (count(array_filter($travaux, fn($t) => $t['sapeur_id'] != $auteurId)) > 0 && !$hasSaisieCommunePermission) {
             throw new ArrayException([], 'Permission insufisante pour saisir des travaux pour d\'autres sapeurs');
         }
 
@@ -35,7 +35,7 @@ class TravauxBusiness
         return $newTravaux;
     }
 
-    public function modifier($travailId, $data, $sapeurId)
+    public static function modifier($travailId, $data, $sapeurId)
     {
         // Check status du travail
         $travail = Travail::find($travailId);
@@ -56,7 +56,7 @@ class TravauxBusiness
         return $travail;
     }
 
-    public function supprimer($travailId, $sapeurId)
+    public static function supprimer($travailId, $sapeurId)
     {
         // Check status du travail  
         $travail = Travail::find($travailId);
@@ -75,7 +75,7 @@ class TravauxBusiness
         return 'ok';
     }
 
-    public function review($travailId, $accepte, $justification, $quantite)
+    public static function review($travailId, $accepte, $justification, $quantite)
     {
         $travail = Travail::find($travailId);
         if ($travail == null) {
@@ -95,7 +95,7 @@ class TravauxBusiness
         return $travail;
     }
 
-    public function cancelReview($travailId)
+    public static function cancelReview($travailId)
     {
         $travail = Travail::find($travailId);
         if ($travail == null) {

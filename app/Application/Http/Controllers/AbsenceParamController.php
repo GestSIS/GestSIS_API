@@ -2,23 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\AbsenceParamService;
+use App\Domaine\Business\AbsenceParamBusiness;
+use App\Infrastructure\Models\AbsenceParam;
 use Illuminate\Http\Request;
 
 class AbsenceParamController extends Controller
 {
-    protected $service;
-
-    public function __construct(AbsenceParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $params = $this->service->params();
-
-        return response()->json(['data' => $params]);
+        return response()->json(['data' => AbsenceParam::first()]);
     }
 
     public function store(Request $request)
@@ -27,8 +19,6 @@ class AbsenceParamController extends Controller
             'actif' => 'required|boolean',
         ]);
 
-        $params = $this->service->updateParams($data);
-
-        return response()->json(['data' => $params]);
+        return response()->json(['data' => AbsenceParamBusiness::updateParams($data)]);
     }
 }

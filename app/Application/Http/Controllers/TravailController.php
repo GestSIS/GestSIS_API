@@ -2,18 +2,12 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\TravauxService;
+use App\Domaine\Business\TravauxBusiness;
+use App\Infrastructure\Models\Travail;
 use Illuminate\Http\Request;
 
 class TravailController extends Controller
 {
-    protected $service;
-
-    public function __construct(TravauxService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index(Request $request, $exerciceComptableId)
     {
         // Auteur
@@ -26,7 +20,18 @@ class TravailController extends Controller
         if (!$hasLectureOuValidationPermission && !$sapeurId) {
             return response()->json(['error' => ['message' => 'Permissions insuffisantes']], 200);
         }
-        $travaux = $this->service->travaux($exerciceComptableId, $hasLectureOuValidationPermission ? null : $sapeurId, $withEcritures);
+
+        $query = Travail::where('exercice_comptable_id', '=', $exerciceComptableId);
+        if ($withEcritures) {
+            $query = $query->with('ecritures');
+        }
+        if (!$hasLectureOuValidationPermission && $sapeurId != null) {
+            $query = $query->where(function ($query) use ($sapeurId) {
+                $query->where('auteur_id', '=', $sapeurId)
+                    ->orWhere('sapeur_id', '=', $sapeurId);
+            });
+        }
+        $travaux = $query->get();
 
         return response()->json(['data' => $travaux]);
     }
@@ -53,7 +58,7 @@ class TravailController extends Controller
 
         $hasSaisieCommunePermission = $admin || in_array('fiche_travail.saisie_commune', $perms);
 
-        $travail = $this->service->ajouter($data['travaux'], $auteurId, $hasSaisieCommunePermission);
+        $travail = TravauxBusiness::ajouter($data['travaux'], $auteurId, $hasSaisieCommunePermission);
         return response()->json(['data' => $travail]);
     }
 
@@ -69,7 +74,7 @@ class TravailController extends Controller
 
         $sapeurId = $request->attributes->get('sapeurId', []);
 
-        $travail = $this->service->modifier($travailId, $data, $sapeurId);
+        $travail = TravauxBusiness::modifier($travailId, $data, $sapeurId);
         return response()->json(['data' => $travail]);
     }
 
@@ -81,13 +86,13 @@ class TravailController extends Controller
             'quantite' => 'numeric|required',
         ]);
 
-        $travail = $this->service->review($travailId, $data['accepte'], $data['justification'] ?? '', $data['quantite']);
+        $travail = TravauxBusiness::review($travailId, $data['accepte'], $data['justification'] ?? '', $data['quantite']);
         return response()->json(['data' => $travail]);
     }
 
     public function cancelReview(Request $request, $travailId)
     {
-        $travail = $this->service->cancelReview($travailId);
+        $travail = TravauxBusiness::cancelReview($travailId);
         return response()->json(['data' => $travail]);
     }
 
@@ -98,7 +103,7 @@ class TravailController extends Controller
             return response()->json(['error' => ['message' => 'Permissions insuffisantes']], 200);
         }
 
-        $travail = $this->service->supprimer($id, $sapeurId);
+        $travail = TravauxBusiness::supprimer($id, $sapeurId);
         return response()->json(['data' => $travail]);
     }
 }

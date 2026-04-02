@@ -18,7 +18,7 @@ class SisParamBusiness
 
     public static function ajouterLocalitesSis($data)
     {
-        LocaliteSis::insert(array_map(fn ($localite_id) => (['localite_id' => $localite_id]), $data));
+        LocaliteSis::insert(array_map(fn($localite_id) => (['localite_id' => $localite_id]), $data));
         return LocaliteSis::pluck('localite_id')->toArray();
     }
 
@@ -30,10 +30,12 @@ class SisParamBusiness
 
     public static function ajouterContactSis($data)
     {
-        if (SisContact::where([
-            ['email', '=', $data['email']],
-            ['liste', '=', $data['liste']],
-        ])->exists()) {
+        if (
+            SisContact::where([
+                ['email', '=', $data['email']],
+                ['liste', '=', $data['liste']],
+            ])->exists()
+        ) {
             throw new ArrayException(['email' => 'Email déjà saisi pour cette liste de diffusion'], 'Saisie à double');
         }
         $contact = new SisContact($data);
@@ -47,7 +49,7 @@ class SisParamBusiness
         SisContact::where('id', '=', $id)->delete();
     }
 
-    public function getLogo($sisKey)
+    public static function getLogo($sisKey)
     {
         $directory = "documents/" . $sisKey . "/logo";
         $exist = Storage::exists($directory);
@@ -62,7 +64,7 @@ class SisParamBusiness
         return null;
     }
 
-    public function updateLogo($sisKey, $file)
+    public static function updateLogo($sisKey, $file)
     {
         $directory = "documents/" . $sisKey . "/logo";
         Storage::deleteDirectory($directory);

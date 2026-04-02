@@ -2,21 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\SisParamService;
+use App\Domaine\Business\SisParamBusiness;
+use App\Infrastructure\Models\SisParam;
 use Illuminate\Http\Request;
 
 class SisParamController extends Controller
 {
-    protected $service;
-
-    public function __construct(SisParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $params = $this->service->params();
+        $params = SisParam::first();
 
         return response()->json(['data' => $params]);
     }
@@ -37,7 +31,7 @@ class SisParamController extends Controller
             'bic' => 'required|string',
         ]);
 
-        $params = $this->service->updateParams($data);
+        $params = SisParamBusiness::updateParams($data);
 
         return response()->json(['data' => $params]);
     }

@@ -2,25 +2,19 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\TravauxParamService;
+use App\Domaine\Business\TravauxParamBusiness;
+use App\Infrastructure\Models\TravailType;
 use Illuminate\Http\Request;
 
 class TravailTypeController extends Controller
 {
-    protected $service;
-
-    public function __construct(TravauxParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index(Request $request)
     {
         $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
         $avecTarifs = $admin || in_array('fiche_travail.config', $perms) || in_array('comptabilite.lecture', $perms);
 
-        $type = $this->service->travailTypes($avecTarifs);
+        $type = $avecTarifs ? TravailType::with('fonctions')->get() : TravailType::all();
 
         return response()->json(['data' => $type]);
     }
@@ -38,7 +32,7 @@ class TravailTypeController extends Controller
             'fonctions.*.fonction_id' => 'integer|nullable',
         ]);
 
-        $type = $this->service->ajouterType($data);
+        $type = TravauxParamBusiness::ajouterType($data);
         return response()->json(['data' => $type]);
     }
 
@@ -55,13 +49,13 @@ class TravailTypeController extends Controller
             'fonctions.*.fonction_id' => 'integer|nullable',
         ]);
 
-        $type = $this->service->modifierType($id, $data);
+        $type = TravauxParamBusiness::modifierType($id, $data);
         return response()->json(['data' => $type]);
     }
 
     public function destroy($id)
     {
-        $type = $this->service->supprimerType($id);
+        $type = TravauxParamBusiness::supprimerType($id);
         return response()->json(['data' => $type]);
     }
 }

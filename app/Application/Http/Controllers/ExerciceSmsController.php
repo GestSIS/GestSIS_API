@@ -2,20 +2,13 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\SmsService;
+use App\Infrastructure\Models\Sms;
 
 class ExerciceSmsController extends Controller
 {
-    protected $service;
-
-    public function __construct(SmsService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index(int $exerciceId)
     {
-        $sms = $this->service->smsParExercice($exerciceId);
+        $sms = Sms::with('smsNumeros')->where('exercice_id', '=', $exerciceId)->get();
         return response()->json(['data' => $sms]);
     }
 }

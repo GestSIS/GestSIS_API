@@ -2,21 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\SisParamService;
+use App\Domaine\Business\SisParamBusiness;
+use App\Infrastructure\Models\SisContact;
 use Illuminate\Http\Request;
 
 class SisContactController extends Controller
 {
-    protected $service;
-
-    public function __construct(SisParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $params = $this->service->contacts();
+        $params = SisContact::all();
 
         return response()->json(['data' => $params]);
     }
@@ -28,14 +22,14 @@ class SisContactController extends Controller
             'liste' => 'required|string',
         ]);
 
-        $contact = $this->service->ajouterContactSis($data);
+        $contact = SisParamBusiness::ajouterContactSis($data);
 
         return response()->json(['data' => $contact]);
     }
 
     public function destroy(int $contactId)
     {
-        $this->service->supprimerContactSis($contactId);
+        SisParamBusiness::supprimerContactSis($contactId);
         return response()->json(['data' => 'ok']);
     }
 }
