@@ -3,18 +3,12 @@
 namespace App\Domaine\API;
 
 use App\Infrastructure\Models\LocaliteSis;
+use App\Infrastructure\Models\SisContact;
 use App\Infrastructure\Models\SisParam;
 use Illuminate\Support\Facades\Config;
 
 class AdminService
 {
-    protected SisParamService $service;
-
-    public function __construct(SisParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function sisContacts()
     {
         // Iteration sur toutes les bases de données
@@ -22,7 +16,7 @@ class AdminService
         $res = [];
         foreach ($dbs as $db) {
             Config::set('database.default', 'db_' . $db);
-            $res[$db] = $this->service->contacts();
+            $res[$db] = SisContact::all();
         }
         return $res;
     }
