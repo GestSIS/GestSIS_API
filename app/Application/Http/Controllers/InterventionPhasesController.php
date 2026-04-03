@@ -2,41 +2,24 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\InterventionService;
-use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\Business\InterventionBusiness;
 use App\Infrastructure\Models\Phase;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class InterventionPhasesController extends Controller
 {
-    protected $service;
+    protected $business;
 
-    public function __construct(InterventionService $service)
+    public function __construct(InterventionBusiness $business)
     {
-        $this->service = $service;
+        $this->business = $business;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
     public function index($interventionId)
     {
-        $phases = Phase::where('intervention_id', $interventionId)->get();
-
-        return response()->json(['data' => $phases]);
+        return response()->json(['data' => Phase::where('intervention_id', $interventionId)->get()]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @param int $interventionId
-     * @return Response
-     * @throws ArrayException
-     */
     public function store(Request $request, int $interventionId)
     {
         $data = $request->validate([
@@ -44,19 +27,10 @@ class InterventionPhasesController extends Controller
             'phases.*.debut' => 'required|date_format:Y-m-d H:i'
         ]);
 
-        $phases = $this->service->addPhases($interventionId, $data['phases']);
-
-        return response()->json(['data' => $phases]);
+        $this->business->addPhases($interventionId, $data['phases']);
+        return response()->json(['data' => Phase::where('intervention_id', $interventionId)->get()]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param int $intervention_id
-     * @return Response
-     * @throws ArrayException
-     */
     public function update(Request $request, int $intervention_id)
     {
         $data = $request->validate([
@@ -65,26 +39,14 @@ class InterventionPhasesController extends Controller
             'phases.*.debut' => 'date_format:Y-m-d H:i|nullable'
         ]);
 
-        $phases = $this->service->updatePhases($intervention_id, $data['phases']);
-
-        return response()->json(['data' => $phases]);
+        $this->business->updatePhases($intervention_id, $data['phases']);
+        return response()->json(['data' => Phase::where('intervention_id', $intervention_id)->get()]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param Request $request
-     * @param int $intervention_id
-     * @return Response
-     */
     public function destroy(Request $request, int $intervention_id)
     {
-        $data = $request->validate([
-            'phases.*' => 'integer'
-        ]);
-
-        $this->service->removePhases($intervention_id, $data['phases']);
-
+        $data = $request->validate(['phases.*' => 'integer']);
+        $this->business->removePhases($intervention_id, $data['phases']);
         return response()->json(['data' => 'success']);
     }
 }

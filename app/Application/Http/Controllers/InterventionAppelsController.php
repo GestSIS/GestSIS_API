@@ -2,39 +2,24 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\InterventionService;
-use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\Business\InterventionBusiness;
+use App\Infrastructure\Models\Appel;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class InterventionAppelsController extends Controller
 {
-    protected $service;
+    protected $business;
 
-    public function __construct(InterventionService $service)
+    public function __construct(InterventionBusiness $business)
     {
-        $this->service = $service;
+        $this->business = $business;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
     public function index($intervention_id)
     {
-        $appels = $this->service->getInterventionAppels($intervention_id);
-        return response()->json(['data' => $appels]);
+        return response()->json(['data' => Appel::where('intervention_id', $intervention_id)->get()]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @param int $intervention_id
-     * @return Response
-     * @throws ArrayException
-     */
     public function store(Request $request, int $intervention_id)
     {
         $data = $request->validate([
@@ -44,19 +29,10 @@ class InterventionAppelsController extends Controller
             'appels.*.commentaire' => 'string|nullable'
         ]);
 
-        $appels = $this->service->addAppels($intervention_id, $data['appels']);
-
-        return response()->json(['data' => $appels]);
+        $this->business->addAppels($intervention_id, $data['appels']);
+        return response()->json(['data' => Appel::where('intervention_id', $intervention_id)->get()]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param int $intervention_id
-     * @return Response
-     * @throws ArrayException
-     */
     public function update(Request $request, int $intervention_id)
     {
         $data = $request->validate([
@@ -67,26 +43,14 @@ class InterventionAppelsController extends Controller
             'appels.*.commentaire' => 'string|nullable'
         ]);
 
-        $appels = $this->service->updateAppels($intervention_id, $data['appels']);
-
-        return response()->json(['data' => $appels]);
+        $this->business->updateAppels($intervention_id, $data['appels']);
+        return response()->json(['data' => Appel::where('intervention_id', $intervention_id)->get()]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param Request $request
-     * @param int $intervention_id
-     * @return Response
-     */
     public function destroy(Request $request, int $intervention_id)
     {
-        $data = $request->validate([
-            'appels.*' => 'integer'
-        ]);
-
-        $this->service->removeAppels($intervention_id, $data['appels']);
-
+        $data = $request->validate(['appels.*' => 'integer']);
+        $this->business->removeAppels($intervention_id, $data['appels']);
         return response()->json(['data' => 'success']);
     }
 }

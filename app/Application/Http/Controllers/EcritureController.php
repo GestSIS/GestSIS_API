@@ -2,52 +2,40 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ImputationService;
+use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\Ecriture;
+use App\Infrastructure\Models\Exercice;
 use Illuminate\Http\Request;
 
 class EcritureController extends Controller
 {
-    protected $service;
+    protected $business;
 
-    public function __construct(ImputationService $service)
+    public function __construct(ImputationBusiness $business)
     {
-        $this->service = $service;
+        $this->business = $business;
     }
 
     public function store(Request $request)
     {
         $data = $this->validateEcriture($request);
-
-        $ecriture = $this->service->ajouterEcriture($data);
+        $ecriture = $this->business->ajouterEcriture($data);
         return response()->json(['data' => $ecriture]);
     }
 
     public function update(Request $request, $id)
     {
         $data = $this->validateEcriture($request);
-
-        $ecriture = $this->service->modifierEcriture($id, $data);
+        $ecriture = $this->business->modifierEcriture($id, $data);
         return response()->json(['data' => $ecriture]);
     }
 
     private function validateEcriture($request)
     {
-
         $data = $request->validate([
             'module' => 'required|numeric|min:0',
         ]);
-        // Types effectifs:
-        // 0. Divers
-        // 1. Exercice
-        // 2. Intervention
-        // 3. Frais Annuel
-        // 4. Indemnité Annuel
-        // 5. AVS
-        // 6. Amende
-        // 7. Décompte d'heures
-        // 8. Cours
-        // 9. Remboursement à l'employeur ?
 
         $type = $request->get('module');
         $data = null;
@@ -88,56 +76,48 @@ class EcritureController extends Controller
 
     public function destroy($id)
     {
-        $ecriture = $this->service->supprimerEcriture($id);
+        $ecriture = $this->business->supprimerEcriture($id);
         return response()->json(['data' => $ecriture]);
     }
 
     public function all(int $exerciceComptableId)
     {
-        $ecritures = $this->service->getAllEcrituresForExerciceComptableById($exerciceComptableId);
-
-        return response()->json(['data' => $ecritures]);
+        return response()->json(['data' => Ecriture::where('exercice_comptable_id', $exerciceComptableId)->get()]);
     }
 
     public function divers(int $exerciceComptableId)
     {
-        $ecritures = $this->service->getEcrituresDiversForExerciceComptableById($exerciceComptableId);
-
-        return response()->json(['data' => $ecritures]);
+        return response()->json(['data' => Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+            ->where('module', ImputationBusiness::ECRITURE_MODULE_DIVERS)->get()]);
     }
 
     public function annuel(int $exerciceComptableId)
     {
-        $ecritures = $this->service->getEcrituresAnnuelsForExerciceComptableById($exerciceComptableId);
-
-        return response()->json(['data' => $ecritures]);
+        return response()->json(['data' => Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+            ->where('module', ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)->get()]);
     }
 
     public function amende(int $exerciceComptableId)
     {
-        $ecritures = $this->service->getEcrituresAmendesForExerciceComptableById($exerciceComptableId);
-
-        return response()->json(['data' => $ecritures]);
+        return response()->json(['data' => Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+            ->where('module', ImputationBusiness::ECRITURE_MODULE_AMENDE)->get()]);
     }
 
     public function intervention(int $interventionId)
     {
-        $ecritures = $this->service->getEcrituresForInterventionById($interventionId);
-
-        return response()->json(['data' => $ecritures]);
+        return response()->json(['data' => Ecriture::where('intervention_id', $interventionId)->get()]);
     }
 
     public function exercice(int $exerciceId)
     {
-        $ecritures = $this->service->getEcrituresForExerciceById($exerciceId);
-
-        return response()->json(['data' => $ecritures]);
+        return response()->json(['data' => Ecriture::where('exercice_id', $exerciceId)->get()]);
     }
 
     public function exercices(int $exerciceComptableId)
     {
-        $ecritures = $this->service->getEcrituresForExercicesByExerciceComptable($exerciceComptableId);
-
-        return response()->json(['data' => $ecritures]);
+        return response()->json(['data' => Exercice::where([
+            ['exercice_comptable_id', '=', $exerciceComptableId],
+            ['statut', '>', 2],
+        ])->with('ecritures')->get()]);
     }
 }

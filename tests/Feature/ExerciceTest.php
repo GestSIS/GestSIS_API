@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Domaine\API\ExerciceService;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Sapeur;
 use Exception;
@@ -12,15 +11,6 @@ use Tests\TestCase;
 class ExerciceTest extends TestCase
 {
     use DatabaseTransactions;
-
-    protected $service;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->service = $this->app->make(ExerciceService::class);
-    }
 
     /**
      * Test index exercices with filter
@@ -190,11 +180,12 @@ class ExerciceTest extends TestCase
                 'present' => 1,
                 'absent' => 0,
                 'remplace' => 0,
+                'amende' => 0,
                 'excuse_type_id' => null,
                 'excuse_statut' => 1,
             ],
         ];
-        $this->service->addSapeurs($exercice->id, $sapeurs);
+        $this->json('POST', "/api/v2/exercices/{$exercice->id}/sapeurs", ['sapeurs' => $sapeurs]);
 
         $response = $this->json('POST', "/api/v2/exercices/{$exercice->id}/valider");
 

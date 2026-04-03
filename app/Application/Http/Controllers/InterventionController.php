@@ -2,41 +2,31 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\InterventionService;
+use App\Domaine\Business\InterventionBusiness;
 use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\SPI\InterventionRepository;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
 class InterventionController extends Controller
 {
-    protected $service;
+    protected $repo;
+    protected $business;
 
-    public function __construct(InterventionService $service)
+    public function __construct(InterventionRepository $repo, InterventionBusiness $business)
     {
-        $this->service = $service;
+        $this->repo = $repo;
+        $this->business = $business;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
     public function index(Request $request)
     {
         $exercice_comptable_id = $request->get('exercice_comptable_id');
-
-        $interventions = $this->service->listeIntervention($exercice_comptable_id);
+        $interventions = $this->repo->listeIntervention($exercice_comptable_id);
         return response()->json(['data' => $interventions]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @return Response
-     */
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -65,17 +55,10 @@ class InterventionController extends Controller
             'type_intervention_id' => 'integer|min:1',
         ]);
 
-        $intervention = $this->service->createIntervention($data);
-
+        $intervention = $this->business->createIntervention($data);
         return response()->json(['data' => $intervention]);
     }
 
-    /**
-     * Store a newly created resource in storage with all data provided
-     *
-     * @param Request $request
-     * @return Response
-     */
     public function complet(Request $request)
     {
         $intervention = $request->validate([
@@ -102,9 +85,7 @@ class InterventionController extends Controller
             'type_intervention_id' => 'integer|min:1|required',
         ]);
 
-        $quittances = $request->validate([
-            'quittances.*' => 'integer',
-        ]);
+        $quittances = $request->validate(['quittances.*' => 'integer']);
         $quittances = isset($quittances['quittances']) ? $quittances['quittances'] : [];
         $sapeurs = $request->validate([
             'sapeurs.*.sapeur_id' => 'integer|required',
@@ -113,7 +94,6 @@ class InterventionController extends Controller
             'sapeurs.*.piquet' => 'boolean|required',
         ]);
         $sapeurs = isset($sapeurs['sapeurs']) ? $sapeurs['sapeurs'] : [];
-
         $missions = $request->validate([
             'missions.*.titre' => 'string|required',
             'missions.*.resume' => 'string|nullable',
@@ -123,7 +103,6 @@ class InterventionController extends Controller
             'missions.*.sapeur' => 'string|required_without:missions.*.sapeur_id',
         ]);
         $missions = isset($missions['missions']) ? $missions['missions'] : [];
-
         $appels = $request->validate([
             'appels.*.date' => 'string|required',
             'appels.*.numero' => 'string|required',
@@ -131,18 +110,13 @@ class InterventionController extends Controller
             'appels.*.commentaire' => 'string|nullable',
         ]);
         $appels = isset($appels['appels']) ? $appels['appels'] : [];
-
-        $vehicules = $request->validate([
-            'vehicules.*' => 'integer',
-        ]);
+        $vehicules = $request->validate(['vehicules.*' => 'integer']);
         $vehicules = isset($vehicules['vehicules']) ? $vehicules['vehicules'] : [];
-
         $groupes = $request->validate([
             'groupes.*.no' => 'integer|nullable',
             'groupes.*.designation' => 'string|required',
         ]);
         $groupes = isset($groupes['groupes']) ? $groupes['groupes'] : [];
-
         $materiel = $request->validate([
             'materiel.*.materiel_id' => 'integer|required',
             'materiel.*.quantite' => 'numeric|required',
@@ -150,7 +124,7 @@ class InterventionController extends Controller
         $materiel = isset($materiel['materiel']) ? $materiel['materiel'] : [];
 
         try {
-            $intervention = $this->service->importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel, $quittances);
+            $intervention = $this->business->importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel, $quittances);
         } catch (Exception $e) {
             Log::error("Intervention Export", [
                 "intervention" => $intervention,
@@ -168,27 +142,12 @@ class InterventionController extends Controller
         return response()->json(['data' => $intervention]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param int $id
-     * @return Response
-     */
     public function show($id)
     {
-        $intervention = $this->service->getInterventionById($id);
-
+        $intervention = $this->repo->findInterventionById($id);
         return response()->json(['data' => $intervention]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param int $id
-     * @return Response
-     * @throws ArrayException
-     */
     public function update(Request $request, $id)
     {
         $data = $request->validate([
@@ -216,15 +175,13 @@ class InterventionController extends Controller
             'type_intervention_id' => 'integer|min:1',
         ]);
 
-        $intervention = $this->service->editInterventionInformationsById($id, $data);
-
+        $intervention = $this->business->editInterventionInformationsById($id, $data);
         return response()->json(['data' => $intervention]);
     }
 
     public function valider($id)
     {
-        $statut = $this->service->validerInterventionById($id);
-
+        $statut = $this->business->validerInterventionById($id);
         return response()->json(['data' => $statut]);
     }
 
@@ -261,20 +218,12 @@ class InterventionController extends Controller
         ]);
 
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-
-        return $this->service->rapport($id, $params, $sisKey);
+        return InterventionBusiness::rapport($id, $params, $sisKey);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param int $id
-     * @return Response
-     */
     public function destroy($id)
     {
-        $statut = $this->service->deleteInterventionById($id);
-
+        $statut = $this->business->deleteInterventionById($id);
         return response()->json(['data' => $statut]);
     }
 }

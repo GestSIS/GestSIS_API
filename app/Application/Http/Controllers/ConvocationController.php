@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ConvocationService;
+use App\Domaine\Business\ExerciceBusiness;
 use Illuminate\Http\Request;
 
 /**
@@ -11,13 +11,6 @@ use Illuminate\Http\Request;
  */
 class ConvocationController extends Controller
 {
-    protected $service;
-
-    public function __construct(ConvocationService $service)
-    {
-        $this->service = $service;
-    }
-
     public function convoquer(Request $request, $exerciceComptableId)
     {
         $request->merge([
@@ -37,6 +30,6 @@ class ConvocationController extends Controller
         $sapeurIds = $sapeurIds['sapeurIds'] ?? [];
 
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        return $this->service->convoquer($exerciceComptableId, $sapeurIds, $sisKey);
+        return ExerciceBusiness::convoquer($exerciceComptableId, $sapeurIds, $sisKey);
     }
 }

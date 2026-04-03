@@ -2,85 +2,47 @@
 
 namespace App\Application\Http\Controllers;
 
+use App\Domaine\Business\ExerciceBusiness;
 use Illuminate\Http\Request;
-
-use App\Domaine\API\ExerciceService;
 
 class HeureExerciceController extends Controller
 {
-    private $service = null;
+    protected $business;
 
-    public function __construct(ExerciceService $service)
+    public function __construct(ExerciceBusiness $business)
     {
-        $this->service = $service;
+        $this->business = $business;
     }
 
-    /**
-     * Créer un fichier iso20022 pour un décompte
-     * 
-     * @param int $id id du décompte pour lequelle le fichier doit être créé
-     */
     public function index($exerciceId)
     {
-        return $this->service->heuresExercice($exerciceId);
+        return $this->business->heuresExercice($exerciceId);
     }
 
-    /**
-     * Retourne un décompte
-     * 
-     * @param int $id id du décompte souhaité
-     */
     public function store(Request $request, $exerciceId)
     {
         $data = $request->validate([
-            // 'designation' => 'string',
-            // 'quantite' => 'numeric',
-            // 'compte_id' => 'integer|exists:comptes,id',
-            // 'ecriture_categorie_id' => 'integer|exists:ecriture_categories,id',
-            // 'type_unite_id' => 'integer|exists:type_unites,id',
-            // 'indemnite' => 'boolean|required',
-            // Addition compare to type
             'montant' => 'numeric|require',
             'type' => 'integer|require',
             'sapeur_id' => 'integer|exists:sapeurs,id|require',
             'heure_exercice_type_id' => 'integer|exists:heure_exercice_types,id',
         ]);
-        $heure = $this->service->ajouterHeureExercice($exerciceId, $data);
-
+        $heure = $this->business->ajouterHeureExercice($exerciceId, $data);
         return response()->json(['data' => $heure]);
     }
 
-    /**
-     * Retourne un décompte
-     * 
-     * @param int $id id du décompte souhaité
-     */
     public function update(Request $request, $exerciceId, $id)
     {
         $data = $request->validate([
-            // 'designation' => 'string',
-            // 'quantite' => 'numeric',
-            // 'compte_id' => 'integer|exists:comptes,id',
-            // 'ecriture_categorie_id' => 'integer|exists:ecriture_categories,id',
-            // 'type_unite_id' => 'integer|exists:type_unites,id',
-            // 'indemnite' => 'boolean|required',
-            // Addition compare to type
             'montant' => 'numeric',
         ]);
-        $heure = $this->service->modifierHeureExercice($exerciceId, $id, $data);
-
+        $heure = $this->business->modifierHeureExercice($exerciceId, $id, $data);
         return response()->json(['data' => $heure]);
     }
 
-    /**
-     * Retourne un décompte
-     * 
-     * @param int $id id du décompte souhaité
-     */
     public function destroy($exerciceId, $id)
     {
-        $heure = $this->service->supprimerHeureExercice($exerciceId, $id);
-
+        $heure = $this->business->supprimerHeureExercice($exerciceId, $id);
         return response()->json(['data' => $heure]);
     }
 }

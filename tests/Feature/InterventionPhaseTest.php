@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Infrastructure\Models\Intervention;
-use App\Domaine\API\InterventionService;
 use App\Infrastructure\Models\Phase;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -13,19 +12,15 @@ class InterventionPhaseTest extends TestCase
 {
     use DatabaseTransactions;
 
-    protected $interventionService;
     protected $interventionId;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->interventionService = $this->app->make(InterventionService::class);
-
         $data = Intervention::factory()->make()->toArray();
         $data["date_debut"] = "2019-01-01";
-
-        $this->interventionId = $this->interventionService->createIntervention($data)->id;
+        $this->interventionId = $this->json('POST', '/api/v2/interventions', $data)->json('data.id');
     }
 
     /**
@@ -116,10 +111,8 @@ class InterventionPhaseTest extends TestCase
             ]
         ];
 
-        $ids = $this->interventionService->addPhases($this->interventionId, $phases)
-            ->filter(fn($phase) => $phase->debut !== null)
-            ->map(fn($s) => $s->id)
-            ->toArray();
+        $allPhases = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/phases', ['phases' => $phases])->json('data');
+        $ids = array_column(array_filter($allPhases, fn($p) => $p['debut'] !== null), 'id');
 
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/phases', ['phases' => $ids]);
 

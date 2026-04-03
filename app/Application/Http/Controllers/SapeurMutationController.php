@@ -2,47 +2,30 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\SapeurService;
-use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\Business\SapeurBusiness;
 use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\Sapeur;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class SapeurMutationController extends Controller
 {
-    protected $service;
-    protected $repository;
+    protected $repo;
+    protected $business;
 
-    public function __construct(SapeurService $service, SapeurRepository $repository)
+    public function __construct(SapeurRepository $repo, SapeurBusiness $business)
     {
-        $this->service = $service;
-        $this->repository = $repository;
+        $this->repo = $repo;
+        $this->business = $business;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
     public function index(int $sapeurId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-
-        $mutations = $this->service->getSapeurMutationsById($sapeurId);
-
-        return response()->json(['data' => $mutations]);
+        return response()->json(['data' => $this->repo->getSapeurMutationsById($sapeurId)]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @return Response
-     * @throws ArrayException
-     */
     public function store(Request $request, int $sapeurId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
@@ -56,20 +39,10 @@ class SapeurMutationController extends Controller
             'localite_id' => 'required|integer|exists:localites,id',
         ]);
 
-        $mutation = $this->service->addMutation($sapeurId, $data);
-
+        $mutation = $this->business->addMutation($sapeurId, $data);
         return response()->json(['data' => $mutation]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param int $sapeurId
-     * @param int $mutationId
-     * @return Response
-     * @throws ArrayException
-     */
     public function update(Request $request, int $sapeurId, int $mutationId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
@@ -88,42 +61,27 @@ class SapeurMutationController extends Controller
             return response()->json(['error' => 'invalid mutation id'], 400);
         }
 
-        // Check if mutation exists
-        $mutations = $this->service->getSapeurMutationsById($sapeurId);
-        $mutationExists = collect($mutations)->firstWhere('id', $mutationId);
-
-        if (!$mutationExists) {
+        $mutations = $this->repo->getSapeurMutationsById($sapeurId);
+        if (!collect($mutations)->firstWhere('id', $mutationId)) {
             return response()->json(['error' => 'Mutation non trouvée'], 404);
         }
 
-        $mutation = $this->service->updateMutation($sapeurId, $data);
-
+        $mutation = $this->business->updateMutation($sapeurId, $data);
         return response()->json(['data' => $mutation]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param int $sapeurId
-     * @param int $mutationId
-     * @return Response
-     */
     public function destroy(int $sapeurId, int $mutationId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
 
-        // Check if mutation exists
-        $mutations = $this->service->getSapeurMutationsById($sapeurId);
-        $mutationExists = collect($mutations)->firstWhere('id', $mutationId);
-
-        if (!$mutationExists) {
+        $mutations = $this->repo->getSapeurMutationsById($sapeurId);
+        if (!collect($mutations)->firstWhere('id', $mutationId)) {
             return response()->json(['error' => 'Mutation non trouvée'], 404);
         }
 
-        $data = $this->service->removeMutation($sapeurId, $mutationId);
-
+        $data = $this->business->removeMutation($sapeurId, $mutationId);
         return response()->json(['data' => $data]);
     }
 }

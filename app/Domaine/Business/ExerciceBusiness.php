@@ -2,14 +2,24 @@
 
 namespace App\Domaine\Business;
 
+use App\Application\Typst\TypstTemplate;
+use App\Application\Typst\TypstToPdfGenerator;
 use App\Domaine\Exceptions\InvalidActionException;
 use App\Domaine\SPI\ExerciceRepository;
+use App\Domaine\SPI\SapeurRepository;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\Civilite;
+use App\Infrastructure\Models\ConvocationParam;
 use App\Infrastructure\Models\ExcuseParam;
+use App\Infrastructure\Models\ExcuseType;
 use App\Infrastructure\Models\Exercice;
+use App\Infrastructure\Models\ExerciceCategorie;
 use App\Infrastructure\Models\ExerciceSapeur;
+use App\Infrastructure\Models\Fonction;
 use App\Infrastructure\Models\HeureExercice;
 use App\Infrastructure\Models\HeureExerciceType;
+use App\Infrastructure\Models\Localite;
+use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\Sms;
 use Carbon\Carbon;
 use Ds\Set;
@@ -806,5 +816,214 @@ class ExerciceBusiness
         }
 
         HeureExercice::where('id', '=', $heureId)->limit(1)->delete();
+    }
+
+    public static function listeSapeurOfExerciceById($exerciceId, $hasPresencePermission = false)
+    {
+        $champs = [
+            'id', 'created_at', 'updated_at', 'sapeur_id', 'exercice_id',
+            'excuse_type_id', 'convoque', 'present', 'remplace', 'absent',
+            'excuse_statut', 'date_demande', 'justificatif_path', 'date_validation',
+        ];
+        $heures = HeureExercice::where('exercice_id', $exerciceId)->get()->toArray();
+        $sapeurs = ExerciceSapeur::where('exercice_id', $exerciceId)
+            ->get($hasPresencePermission ? '*' : $champs)->toArray();
+
+        $dictionary = [];
+        foreach ($sapeurs as $sapeur) {
+            $dictionary[$sapeur['sapeur_id']] = $sapeur;
+            $dictionary[$sapeur['sapeur_id']]['heures'] = [];
+        }
+        foreach ($heures as $heure) {
+            if (!array_key_exists($heure['sapeur_id'], $dictionary)) {
+                $dictionary[$heure['sapeur_id']] = [
+                    'convoque' => False,
+                    'present' => False,
+                    'absent' => False,
+                    'remplace' => False,
+                    'excuse_type_id' => null,
+                    'heures' => [],
+                ];
+            }
+            $dictionary[$heure['sapeur_id']]['heures'][] = $heure;
+        }
+        return array_values($dictionary);
+    }
+
+    public static function sapeurOfExerciceById($exerciceId, $sapeurId)
+    {
+        $heures = HeureExercice::where('exercice_id', $exerciceId)
+            ->where('sapeur_id', $sapeurId)
+            ->get()->toArray();
+        $sapeur = ExerciceSapeur::where('exercice_id', $exerciceId)
+            ->where('sapeur_id', $sapeurId)
+            ->first();
+
+        if (!$sapeur) {
+            $sapeur = [
+                'convoque' => False,
+                'present' => False,
+                'absent' => False,
+                'remplace' => False,
+                'excuse_type_id' => null,
+                'heures' => [],
+            ];
+        } else {
+            $sapeur = $sapeur->toArray();
+        }
+        $sapeur['heures'] = $heures;
+
+        return $sapeur;
+    }
+
+    public static function convoquer($exerciceComptableId, array $sapeurIds, string $sisKey)
+    {
+        $civilites = Civilite::all();
+        $localites = Localite::all();
+        $categories = ExerciceCategorie::all();
+        $params = ConvocationParam::first();
+
+        $exercices = Exercice::with('sapeurs')->where('exercice_comptable_id', $exerciceComptableId)->orderBy('date')->orderBy('heure')->get();
+        $sapeurs = array_values(array_unique(
+            array_merge(...array_map(
+                fn($e) => array_map(fn($c) => $c['sapeur_id'], $e['sapeurs']),
+                $exercices->toArray()
+            ))
+        ));
+        if (count($sapeurIds) > 0) {
+            $sapeurs = array_intersect($sapeurs, $sapeurIds);
+        }
+        $sapeurs = Sapeur::whereIn('id', $sapeurs)->orderBy('nom')->orderBy('prenom')->get(['id', 'nom', 'prenom', 'civilite_id', 'no_rue', 'rue', 'localite_id']);
+
+        $civilitesMap = [];
+        $localitesMap = [];
+        $categoriesMap = [];
+        $sapeursMap = [];
+        $exercicesMap = [];
+        foreach ($civilites as $e) {
+            $civilitesMap[$e->id] = $e->forme_politesse;
+        }
+        foreach ($localites as $e) {
+            $localitesMap[$e->id] = $e->npa . ' ' . $e->designation;
+        }
+        foreach ($categories as $e) {
+            $categoriesMap[$e->id] = $e->designation;
+        }
+        foreach ($sapeurs as $e) {
+            $sapeur = $e->toArray();
+            $sapeur['exercices'] = [];
+            $sapeursMap[$e->id] = $sapeur;
+        }
+        foreach ($exercices as $e) {
+            foreach ($e['sapeurs'] as $s) {
+                if (array_key_exists(strval($s->sapeur_id), $sapeursMap)) {
+                    $sapeursMap[strval($s->sapeur_id)]['exercices'][] = $s->toArray();
+                }
+            }
+            $exercicesMap[$e->id] = $e;
+        }
+
+        $logoPath = SisParamBusiness::getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::Convocations,
+            [
+                "params" => $params ?? [],
+                "sapeurs" => $sapeursMap,
+                "exercices" => $exercicesMap,
+                "civilites" => $civilitesMap,
+                "localites" => $localitesMap,
+                "categories" => $categoriesMap,
+            ],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'convocations.pdf'
+        );
+    }
+
+    public function listeAppel(SapeurRepository $sapeurRepository, $exerciceId, string $sisKey)
+    {
+        $exercice = Exercice::with(['sapeurs', 'localite'])->findOrFail($exerciceId)->toArray();
+        $sapeurs = $sapeurRepository->listeSapeurLight();
+        $exercice['sapeurs'] = array_map(function ($s) use ($sapeurs) {
+            $id = $s['sapeur_id'];
+            $sap = array_values(array_filter($sapeurs, function ($sapeur) use ($id) {
+                return $sapeur['id'] == $id;
+            }))[0];
+            $s['excuse_type_id'] = $s['excuse_type_id'] ?? -1;
+            $s['display'] = $sap['nom_prenom'];
+            $s['fonction_id'] = $sap['fonction_id'] ?? 0;
+            return $s;
+        }, array_values($exercice['sapeurs']));
+
+        usort($exercice['sapeurs'], function ($a, $b) {
+            return strcmp($a['display'], $b['display']);
+        });
+
+        $excuses = ExcuseType::get();
+        $excusesMap = [];
+        foreach ($excuses as $excuse) {
+            $excusesMap[$excuse->id] = $excuse->designation;
+        }
+
+        $fonctions = Fonction::get();
+        $fonctionsMap = [];
+        foreach ($fonctions as $fonction) {
+            $fonctionsMap[$fonction->id] = $fonction->nom;
+        }
+
+        $logoPath = SisParamBusiness::getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::ListeAppel,
+            ["exercice" => $exercice, "fonctions" => $fonctionsMap, "excuses" => $excusesMap],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'liste-appel.pdf'
+        );
+    }
+
+    public function listePresence(SapeurRepository $sapeurRepository, $exerciceId, string $sisKey)
+    {
+        $exercice = Exercice::with(['sapeurs', 'localite'])->findOrFail($exerciceId)->toArray();
+        $sapeurs = $sapeurRepository->listeSapeurLight();
+        $exercice['sapeurs'] = array_map(function ($s) use ($sapeurs) {
+            $id = $s['sapeur_id'];
+            $sap = array_values(array_filter($sapeurs, function ($sapeur) use ($id) {
+                return $sapeur['id'] == $id;
+            }))[0];
+            $s['excuse_type_id'] = $s['excuse_type_id'] ?? -1;
+            $s['display'] = $sap['nom_prenom'];
+            return $s;
+        }, array_values($exercice['sapeurs']));
+
+        usort($exercice['sapeurs'], function ($a, $b) {
+            return strcmp($a['display'], $b['display']);
+        });
+
+        $excuses = ExcuseType::get();
+        $excusesMap = [];
+        foreach ($excuses as $excuse) {
+            $excusesMap[$excuse->id] = $excuse->designation;
+        }
+
+        $logoPath = SisParamBusiness::getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::ListePresence,
+            ["exercice" => $exercice, "excuses" => $excusesMap],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'liste-presence.pdf'
+        );
     }
 }

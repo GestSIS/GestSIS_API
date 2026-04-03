@@ -2,66 +2,46 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\SapeurService;
 use App\Domaine\Business\SapeurBusiness;
 use App\Domaine\SPI\SapeurRepository;
+use App\Infrastructure\Collections\ListeFoadExport;
+use App\Infrastructure\Collections\ListeFsspExport;
 use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SapeurController extends Controller
 {
     protected $repository;
     protected $business;
-    protected $service;
 
-    public function __construct(SapeurService $service, SapeurRepository $repository, SapeurBusiness $business)
+    public function __construct(SapeurRepository $repository, SapeurBusiness $business)
     {
         $this->repository = $repository;
         $this->business = $business;
-        $this->service = $service;
     }
 
-    /**
-     * Display a listing of the resource.
-     * 
-     * @param Request $request
-     * @return Response
-     */
     public function index(Request $request)
     {
         $actif = $request->input('actif', false) === 'true';
         $actifOuAvecMateriel = $request->input('avec-materiel', false) === 'true';
-
         return response()->json(["data" => $this->repository->listeSapeurLight($actif, $actifOuAvecMateriel)]);
     }
 
-    /**
-     * Display a listing of the resource.
-     * 
-     * @param Request $request
-     * @return Response
-     */
     public function trombinoscope(Request $request)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        return $this->service->trombinoscope($sisKey);
+        return $this->business->trombinoscope($sisKey);
     }
 
-    /**
-     * Return la fiche sapeur
-     */
     public function fiche(Request $request, $sapeurId)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        return $this->service->fiche($sapeurId, $sisKey);
+        return SapeurBusiness::fiche($sapeurId, $sisKey);
     }
 
-    /**
-     * Return the effectif
-     */
     public function effectif()
     {
         $sapeurs = Sapeur::with('telephones', 'permis', 'fonctions', 'groupes')
@@ -72,46 +52,30 @@ class SapeurController extends Controller
         return response()->json(['data' => $sapeurs]);
     }
 
-    /**
-     * Return la liste fssp
-     */
     public function listeFssp(Request $request)
     {
         $date = $request->get('date', Carbon::now());
-        return $this->service->listeFssp($date);
+        return Excel::download(new ListeFsspExport($date), 'liste_fssp.xlsx');
     }
 
-    /**
-     * Return la liste foad
-     */
     public function listeFoad(Request $request)
     {
         $date = $request->get('date', Carbon::now());
-        return $this->service->listeFoad($date);
+        return Excel::download(new ListeFoadExport($date), 'liste_foad.xlsx');
     }
 
-    /**
-     * Return la liste des téléphones
-     */
     public function sapeursTelephones()
     {
-        return response()->json(['data' => $this->service->telephones()]);
+        return response()->json(['data' => Sapeur::with('telephones')->get(['id'])->toArray()]);
     }
 
-    /**
-     * Return the effectif
-     */
     public function convocationSms()
     {
-        return response()->json(['data' => $this->service->convocationSms()]);
+        return response()->json(['data' => Sapeur::with('telephones')
+            ->where('actif', '=', '1')
+            ->get(['id', 'nom', 'prenom'])->toArray()]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @return Response
-     */
     public function store(Request $request)
     {
         $type = $request->validate([
@@ -165,44 +129,22 @@ class SapeurController extends Controller
         return response()->json(['error' => ['message' => 'Type invalid']]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @return Response
-     */
     public function autreStatut(Request $request, $sapeurId)
     {
         $data = $request->validate([
             'actif' => 'required|integer|min:0|max:1',
         ]);
-
         return response()->json(['data' => $this->business->updateNonSapeurStatut($sapeurId, $data)]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param int $id
-     * @return Response
-     */
     public function show(int $id)
     {
         if (!$sapeur = $this->repository->getSapeurDetailsById($id)) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-
         return response()->json(['data' => $sapeur]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param int $id
-     * @return Response
-     * @throws Exception
-     */
     public function update(Request $request, int $id)
     {
         $data = $request->validate([
@@ -229,24 +171,15 @@ class SapeurController extends Controller
         if (!$sapeur = $this->business->updateSapeurById($id, $data)) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-
         return response()->json(['data' => $sapeur]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param int $id
-     * @return Response
-     */
     public function destroy(int $id)
     {
         if (!Sapeur::where('id', $id)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-
         $this->business->deleteSapeurById($id);
-
         return response()->json(['data' => "success"]);
     }
 }

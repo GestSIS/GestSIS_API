@@ -12,18 +12,14 @@ class InterventionGroupeTest extends TestCase
 {
     use DatabaseTransactions;
 
-    protected $interventionService;
     protected $interventionId;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->interventionService = $this->app->make('App\Domaine\API\InterventionService');
-
-        $data = Intervention::factory()->make()->toArray();
-
-        $this->interventionId = $this->interventionService->createIntervention($data)->id;
+        $this->interventionId = $this->json('POST', '/api/v2/interventions', Intervention::factory()->make()->toArray())
+            ->json('data.id');
     }
 
     /**

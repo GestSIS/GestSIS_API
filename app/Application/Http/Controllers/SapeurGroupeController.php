@@ -2,35 +2,28 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\SapeurService;
-use App\Infrastructure\Models\GroupeSapeur;
+use App\Domaine\Business\SapeurBusiness;
+use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\Sapeur;
-use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 
 class SapeurGroupeController extends Controller
 {
-    protected $service;
+    protected $repo;
+    protected $business;
 
-    public function __construct(SapeurService $service)
+    public function __construct(SapeurRepository $repo, SapeurBusiness $business)
     {
-        $this->service = $service;
+        $this->repo = $repo;
+        $this->business = $business;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
     public function index(int $sapeurId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-
-        $groupes = $this->service->getSapeurGroupesById($sapeurId);
-
-        return response()->json(['data' => $groupes]);
+        return response()->json(['data' => $this->repo->getSapeurGroupesById($sapeurId)]);
     }
 
     public function quitter(Request $request, int $sapeurId)
@@ -43,8 +36,7 @@ class SapeurGroupeController extends Controller
             'groupes.*' => 'required|integer'
         ]);
 
-        $groupes = $this->service->finGroupes($sapeurId, $data['groupes']);
-
+        $groupes = $this->business->removeGroupes($sapeurId, $data['groupes']);
         return response()->json(['data' => $groupes]);
     }
 }

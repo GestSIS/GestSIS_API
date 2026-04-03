@@ -8,9 +8,6 @@ use App\Infrastructure\Models\Sapeur;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
-use App\Domaine\API\InterventionService;
-use App\Domaine\API\SapeurService;
-use App\Domaine\API\ImputationService;
 use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Business\InterventionBusiness;
 use Carbon\Carbon;
@@ -19,13 +16,10 @@ class ImputationInterventionTest extends TestCase
 {
     use DatabaseTransactions;
 
-    protected $comptabiliteService;
     protected $sapeurOneId;
     protected $sapeurTwoId;
     protected $sapeurThreeId;
     protected $interventionId;
-
-    protected $interventionService;
 
     protected int $indemniteTypeSimpleId;
     protected int $indemniteTypeComplexId;
@@ -35,9 +29,7 @@ class ImputationInterventionTest extends TestCase
     {
         parent::setUp();
 
-        $this->interventionService = $this->app->make(InterventionService::class);
-        $sapeurService = $this->app->make(SapeurService::class);
-        $this->comptabiliteService = $this->app->make(ImputationService::class);
+
 
         // Création des types d'indemnités propres au test
         $this->indemniteTypeSimpleId = IndemniteInterventionType::create([
@@ -98,24 +90,28 @@ class ImputationInterventionTest extends TestCase
         ])->id;
 
         $data = Sapeur::factory()->make()->toArray();
-        $data['incorporation'] = "29.01.2019";
-        $this->sapeurOneId = $sapeurService->createSapeur($data)->id;
+        $data['incorporation'] = "2019-01-29";
+        $data['type'] = 0;
+        $this->sapeurOneId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
 
         $data = Sapeur::factory()->make()->toArray();
-        $data['incorporation'] = "29.01.2019";
-        $this->sapeurTwoId = $sapeurService->createSapeur($data)->id;
+        $data['incorporation'] = "2019-01-29";
+        $data['type'] = 0;
+        $this->sapeurTwoId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
 
         $data = Sapeur::factory()->make()->toArray();
-        $data['incorporation'] = "29.01.2019";
-        $this->sapeurThreeId = $sapeurService->createSapeur($data)->id;
+        $data['incorporation'] = "2019-01-29";
+        $data['type'] = 0;
+        $this->sapeurThreeId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
 
         $intervention = Intervention::factory()->make();
-        $intervention->date_debut = Carbon::createMidnightDate(2019, 1, 1);
-        $intervention->heure_debut = "00:00";
-        $intervention->date_fin = Carbon::createMidnightDate(2019, 1, 3);
-        $intervention->heure_fin = "00:00";
+        $interventionData = $intervention->toArray();
+        $interventionData['date_debut'] = '2019-01-01';
+        $interventionData['heure_debut'] = '00:00';
+        $interventionData['date_fin'] = '2019-01-03';
+        $interventionData['heure_fin'] = '00:00';
 
-        $this->interventionId = $this->interventionService->createIntervention($intervention->toArray())->id;
+        $this->interventionId = $this->json('POST', '/api/v2/interventions', $interventionData)->json('data.id');
 
         $sapeurs = array(
             array(
@@ -138,8 +134,8 @@ class ImputationInterventionTest extends TestCase
             ),
         );
 
-        $this->interventionService->addPresences($this->interventionId, $sapeurs);
-        $this->interventionService->validerInterventionById($this->interventionId);
+        $this->json('POST', "/api/v2/interventions/{$this->interventionId}/sapeurs", ['sapeurs' => $sapeurs]);
+        $this->json('POST', "/api/v2/interventions/{$this->interventionId}/valider");
     }
 
     /**
@@ -435,8 +431,8 @@ class ImputationInterventionTest extends TestCase
             ],
         ];
 
-        $this->interventionService->addPresences($id, $sapeurs);
-        $this->interventionService->validerInterventionById($id);
+        $this->json('POST', "/api/v2/interventions/{$id}/sapeurs", ['sapeurs' => $sapeurs]);
+        $this->json('POST', "/api/v2/interventions/{$id}/valider");
 
         $response = $this->json('POST', "/api/v2/imputation/intervention/$id", $param);
         $response
@@ -703,7 +699,7 @@ class ImputationInterventionTest extends TestCase
         $intervention->date_fin = '2019-01-11';
         $intervention->heure_fin = '10:00';
 
-        $interventionId = $this->interventionService->createIntervention($intervention->toArray())->id;
+        $interventionId = $this->json('POST', '/api/v2/interventions', $intervention->toArray())->json('data.id');
 
         // Ajout d'une phase à 02h00 le 11/01
         $phases = [
@@ -713,7 +709,7 @@ class ImputationInterventionTest extends TestCase
                 'intervention_id' => $interventionId,
             ]
         ];
-        $this->interventionService->addPhases($interventionId, $phases);
+        $this->json('POST', "/api/v2/interventions/{$interventionId}/phases", ['phases' => $phases]);
 
         // Ajout des 4 présences
         $sapeurs = [
@@ -764,8 +760,8 @@ class ImputationInterventionTest extends TestCase
             ],
         ];
 
-        $this->interventionService->addPresences($interventionId, $sapeurs);
-        $this->interventionService->validerInterventionById($interventionId);
+        $this->json('POST', "/api/v2/interventions/{$interventionId}/sapeurs", ['sapeurs' => $sapeurs]);
+        $this->json('POST', "/api/v2/interventions/{$interventionId}/valider");
 
         // Imputation avec tarif min
         $param = [
@@ -920,12 +916,13 @@ class ImputationInterventionTest extends TestCase
     {
         // Créer une nouvelle intervention avec des durées précises au quart d'heure
         $intervention = Intervention::factory()->make();
-        $intervention->date_debut = Carbon::createMidnightDate(2019, 5, 15);
-        $intervention->heure_debut = "10:00";
-        $intervention->date_fin = Carbon::createMidnightDate(2019, 5, 15);
-        $intervention->heure_fin = "18:00";
+        $interventionData = $intervention->toArray();
+        $interventionData['date_debut'] = '2019-05-15';
+        $interventionData['heure_debut'] = '10:00';
+        $interventionData['date_fin'] = '2019-05-15';
+        $interventionData['heure_fin'] = '18:00';
 
-        $interventionId = $this->interventionService->createIntervention($intervention->toArray())->id;
+        $interventionId = $this->json('POST', '/api/v2/interventions', $interventionData)->json('data.id');
 
         // Présences avec durées au quart d'heure pour exposer le bug
         $sapeurs = [
@@ -949,8 +946,8 @@ class ImputationInterventionTest extends TestCase
             ],
         ];
 
-        $this->interventionService->addPresences($interventionId, $sapeurs);
-        $this->interventionService->validerInterventionById($interventionId);
+        $this->json('POST', "/api/v2/interventions/{$interventionId}/sapeurs", ['sapeurs' => $sapeurs]);
+        $this->json('POST', "/api/v2/interventions/{$interventionId}/valider");
 
         // Imputation avec tarif_pro_rata = false (tarif=30, tarif_min=40, tarif_min_pour=1)
         $param = [

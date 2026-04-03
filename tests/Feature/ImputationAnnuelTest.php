@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Domaine\API\ImputationService;
-use App\Domaine\API\SapeurService;
 use App\Domaine\Business\ImputationBusiness;
 use App\Infrastructure\Models\Commune;
 use App\Infrastructure\Models\Ecriture;
@@ -18,7 +16,6 @@ class ImputationAnnuelTest extends TestCase
 {
     use DatabaseTransactions;
 
-    protected $comptabiliteService;
     protected $sapeurOneId;
     protected $sapeurTwoId;
     protected $sapeurThreeId;
@@ -34,55 +31,56 @@ class ImputationAnnuelTest extends TestCase
         // donc les localités, civilités, fonctions, etc. existent déjà
         $this->localiteId = 1; // Localité créée par le seeder
 
-        $sapeurService = $this->app->make(SapeurService::class);
-        $this->comptabiliteService = $this->app->make(ImputationService::class);
-
         // Sapeur 1 : Commandant (fonction 1) - actif toute l'année
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "2019-01-29";
         $data['localite_id'] = $this->localiteId;
-        $this->sapeurOneId = $sapeurService->createSapeur($data)->id;
-        $sapeurService->addFonction($this->sapeurOneId, [
+        $data['type'] = 0;
+        $this->sapeurOneId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
+        $this->json('POST', "/api/v2/sapeurs/{$this->sapeurOneId}/fonctions", [
             'fonction_id' => 1,
             'debut' => "2019-01-01",
             'fin' => null,
-            'remarque' => 'Commandant actif toute l\'année'
+            'remarque' => "Commandant actif toute l'année"
         ]);
 
         // Sapeur 2 : Caissier (fonction 4) - actif 6 mois (janv-juin)
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "2019-01-29";
         $data['localite_id'] = $this->localiteId;
-        $this->sapeurTwoId = $sapeurService->createSapeur($data)->id;
-        $sapeurService->addFonction($this->sapeurTwoId, [
+        $data['type'] = 0;
+        $this->sapeurTwoId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
+        $this->json('POST', "/api/v2/sapeurs/{$this->sapeurTwoId}/fonctions", [
             'fonction_id' => 4,
             'debut' => "2019-01-01",
             'fin' => "2019-06-30",
-            'remarque' => '6 mois d\'activité'
+            'remarque' => "6 mois d'activité"
         ]);
 
         // Sapeur 3 : Fourrier (fonction 5) - actif 3 mois (mars-mai)
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "2019-01-29";
         $data['localite_id'] = $this->localiteId;
-        $this->sapeurThreeId = $sapeurService->createSapeur($data)->id;
-        $sapeurService->addFonction($this->sapeurThreeId, [
+        $data['type'] = 0;
+        $this->sapeurThreeId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
+        $this->json('POST', "/api/v2/sapeurs/{$this->sapeurThreeId}/fonctions", [
             'fonction_id' => 5,
             'debut' => "2019-03-01",
             'fin' => "2019-05-31",
-            'remarque' => '3 mois d\'activité'
+            'remarque' => "3 mois d'activité"
         ]);
 
         // Sapeur 4 : Vice-commandant (fonction 2) - actif du 15 mars au 10 septembre (7 mois entamés)
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "2019-01-29";
         $data['localite_id'] = $this->localiteId;
-        $this->sapeurFourId = $sapeurService->createSapeur($data)->id;
-        $sapeurService->addFonction($this->sapeurFourId, [
+        $data['type'] = 0;
+        $this->sapeurFourId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
+        $this->json('POST', "/api/v2/sapeurs/{$this->sapeurFourId}/fonctions", [
             'fonction_id' => 2,
             'debut' => "2019-03-15",
             'fin' => "2019-09-10",
-            'remarque' => '7 mois partiels'
+            'remarque' => "7 mois partiels"
         ]);
     }
 

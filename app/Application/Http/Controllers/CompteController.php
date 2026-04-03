@@ -2,26 +2,14 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ImputationService;
 use App\Domaine\Business\ComptabiliteParamBusiness;
+use App\Domaine\Business\ImputationBusiness;
 use App\Infrastructure\Models\Compte;
+use App\Infrastructure\Models\Ecriture;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class CompteController extends Controller
 {
-    protected $service;
-
-    public function __construct(ImputationService $service)
-    {
-        $this->service = $service;
-    }
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
     public function index()
     {
         return response()->json(['data' => Compte::all()]);
@@ -59,18 +47,19 @@ class CompteController extends Controller
 
     public function ecritures(int $id, int $exerciceComptableId)
     {
-        return response()->json(['data' => $this->service->getEcrituresByCompte($id, $exerciceComptableId)]);
+        return response()->json(['data' => Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+            ->where('compte_id', $id)->get()]);
     }
 
     public function justificatifIndividuel(Request $request, int $exerciceComptableId, int $compteId)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        return $this->service->justificatifIndividuel($exerciceComptableId, $compteId, $sisKey);
+        return ImputationBusiness::justificatifIndividuel($exerciceComptableId, $compteId, $sisKey);
     }
 
     public function justificatifComplet(Request $request, int $exerciceComptableId)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        return $this->service->justificatifComplet($exerciceComptableId, $sisKey);
+        return ImputationBusiness::justificatifComplet($exerciceComptableId, $sisKey);
     }
 }

@@ -2,42 +2,28 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\SapeurService;
+use App\Domaine\Business\SapeurBusiness;
 use App\Infrastructure\Models\Sapeur;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class SapeurPhotoController extends Controller
 {
-    protected $service;
+    protected $business;
 
-    public function __construct(SapeurService $service)
+    public function __construct(SapeurBusiness $business)
     {
-        $this->service = $service;
+        $this->business = $business;
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param int $id
-     * @return Response
-     */
     public function index(Request $request, int $id)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        return $this->service->downloadPhotoSapeur($id, $sisKey);
+        return $this->business->downloadPhotoSapeur($id, $sisKey);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @return Response
-     */
     public function store(Request $request, $sapeurId)
     {
         if ($request->hasFile('image')) {
-            //  Let's do everything here
             if ($request->file('image')->isValid()) {
                 $validated = $request->validate([
                     'image' => 'required|mimes:jpg,jpeg,png|max:1014',
@@ -47,7 +33,7 @@ class SapeurPhotoController extends Controller
                 }
 
                 $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-                $res = $this->service->uploadPhotoSapeur($validated['image'], $sapeurId, $sisKey);
+                $res = $this->business->uploadPhotoSapeur($validated['image'], $sapeurId, $sisKey);
                 return response()->json(['data' => $res]);
             }
             return response()->json(['data' => ['message' => 'Image invalide']], 500);
@@ -55,17 +41,10 @@ class SapeurPhotoController extends Controller
         return response()->json(['data' => ['message' => 'Image manquante']], 500);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param int $id
-     * @return Response
-     */
     public function destroy(Request $request, int $id)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        $this->service->deletePhotoSapeur($id, $sisKey);
-
+        $this->business->deletePhotoSapeur($id, $sisKey);
         return response()->json(['data' => "success"]);
     }
 }

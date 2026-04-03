@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\Materiel\ArticleBusiness;
+use App\Domaine\Business\Materiel\MaterielTypeBusiness;
 use Illuminate\Http\Request;
 
 class MaterielTypeArticleController extends Controller
@@ -29,7 +30,7 @@ class MaterielTypeArticleController extends Controller
             'tri' => 'integer'
         ]);
 
-        $type = $this->service->ajouterType($data);
+        $type = MaterielTypeBusiness::createProduct($data);
         return response()->json(['data' => $type]);
     }
 
@@ -43,13 +44,13 @@ class MaterielTypeArticleController extends Controller
             'tri' => 'integer'
         ]);
 
-        $type = $this->service->modifierType($id, $data);
+        $type = MaterielTypeBusiness::editProduct($id, $data);
         return response()->json(['data' => $type]);
     }
 
     public function destroy($id)
     {
-        $type = $this->service->supprimerType($id);
+        $type = MaterielTypeBusiness::deleteProduct($id);
         return response()->json(['data' => $type]);
     }
 }

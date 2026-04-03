@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Infrastructure\Models\Intervention;
 use App\Infrastructure\Models\InterventionMateriel;
-use App\Domaine\API\InterventionService;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -13,18 +12,14 @@ class InterventionMaterielTest extends TestCase
 {
     use DatabaseTransactions;
 
-    protected $interventionService;
     protected $interventionId;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->interventionService = $this->app->make(InterventionService::class);
-
-        $data = Intervention::factory()->make()->toArray();
-
-        $this->interventionId = $this->interventionService->createIntervention($data)->id;
+        $this->interventionId = $this->json('POST', '/api/v2/interventions', Intervention::factory()->make()->toArray())
+            ->json('data.id');
     }
 
     /**
@@ -76,13 +71,11 @@ class InterventionMaterielTest extends TestCase
      */
     public function testEditInterventionMateriels()
     {
-        $data = Intervention::factory()->make()->toArray();
-
-        $this->interventionId = $this->interventionService->createIntervention($data)->id;
+        $this->interventionId = $this->json('POST', '/api/v2/interventions', Intervention::factory()->make()->toArray())->json('data.id');
 
         $materiels = InterventionMateriel::factory()->count(1)->make(['intervention_id' => $this->interventionId])->toArray();
 
-        $res = $this->interventionService->addMateriels($this->interventionId, $materiels);
+        $res = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/materiels', ['materiels' => $materiels])->json('data');
 
         $response = $this->json('PUT', '/api/v2/interventions/' . $this->interventionId . '/materiels', ['materiels' => $res]);
 
@@ -101,15 +94,14 @@ class InterventionMaterielTest extends TestCase
      */
     public function testRemoveInterventionMateriels()
     {
-        $data = Intervention::factory()->make()->toArray();
-
-        $this->interventionId = $this->interventionService->createIntervention($data)->id;
+        $this->interventionId = $this->json('POST', '/api/v2/interventions', Intervention::factory()->make()->toArray())->json('data.id');
 
         $materiels = InterventionMateriel::factory()->count(1)->make(['intervention_id' => $this->interventionId])->toArray();
 
-        $ids = $this->interventionService->addMateriels($this->interventionId, $materiels)
-            ->map(fn($s) => $s->id)
-            ->toArray();
+        $ids = array_column(
+            $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/materiels', ['materiels' => $materiels])->json('data'),
+            'id'
+        );
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/materiels', ['materiels' => $ids]);
 
         $response

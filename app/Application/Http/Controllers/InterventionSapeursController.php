@@ -2,39 +2,25 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\InterventionService;
-use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\Business\InterventionBusiness;
+use App\Infrastructure\Models\InterventionSapeur;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class InterventionSapeursController extends Controller
 {
-    protected $service;
+    protected $business;
 
-    public function __construct(InterventionService $service)
+    public function __construct(InterventionBusiness $business)
     {
-        $this->service = $service;
+        $this->business = $business;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
     public function index($interventionId)
     {
-        $sapeurs = $this->service->getInterventionPresences($interventionId);
-        return response()->json(['data' => $sapeurs]);
+        return response()->json(['data' => InterventionSapeur::where('intervention_id', $interventionId)->get()]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @param int $interventionId
-     * @return Response
-     * @throws ArrayException
-     */
     public function store(Request $request, int $interventionId)
     {
         $data = $request->validate([
@@ -45,19 +31,13 @@ class InterventionSapeursController extends Controller
             'sapeurs.*.sapeur_id' => 'required|integer|exists:sapeurs,id'
         ]);
 
-        $sapeurs = $this->service->addPresences($interventionId, $data['sapeurs']);
-
-        return response()->json(['data' => $sapeurs]);
+        $statut = $this->business->addPresences($interventionId, $data['sapeurs']);
+        return response()->json(['data' => [
+            "statut" => $statut,
+            "sapeurs" => InterventionSapeur::where('intervention_id', $interventionId)->get(),
+        ]]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param int $interventionId
-     * @return Response
-     * @throws ArrayException
-     */
     public function update(Request $request, int $interventionId)
     {
         $data = $request->validate([
@@ -69,18 +49,10 @@ class InterventionSapeursController extends Controller
             'sapeurs.*.sapeur_id' => 'required|integer',
         ]);
 
-        $sapeurs = $this->service->updatePresences($interventionId, $data['sapeurs']);
-
-        return response()->json(['data' => $sapeurs]);
+        $this->business->updatePresences($interventionId, $data['sapeurs']);
+        return response()->json(['data' => InterventionSapeur::where('intervention_id', $interventionId)->get()]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param Request $request
-     * @param int $interventionId
-     * @return Response
-     */
     public function destroy(Request $request, int $interventionId)
     {
         $data = $request->validate([
@@ -88,20 +60,17 @@ class InterventionSapeursController extends Controller
             'sapeurs.*' => 'required|integer'
         ]);
 
-        $statut = $this->service->removePresences($interventionId, $data['sapeurs']);
+        $statut = $this->business->removePresences($interventionId, $data['sapeurs']);
         return response()->json(['data' => $statut]);
     }
 
-    /**
-     * Return les présences aux interventions pour l'année comptable
-     *
-     * @param Request $request
-     * @param int $exerciceComptableId
-     * @return Response
-     */
     public function stat(int $exerciceComptableId)
     {
-        $data = $this->service->statPresences($exerciceComptableId);
+        $data = DB::select("SELECT ins.*
+                FROM intervention_sapeur as ins
+                INNER JOIN interventions as i ON i.id = ins.intervention_id
+                WHERE i.exercice_comptable_id = ?
+            ", [$exerciceComptableId]);
 
         return response()->json(['data' => $data]);
     }

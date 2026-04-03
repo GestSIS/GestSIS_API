@@ -2,21 +2,25 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ExerciceService;
 use App\Domaine\Business\ExerciceBusiness;
+use App\Domaine\SPI\ExerciceRepository;
+use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\Exercice;
+use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\HeureExercice;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ExerciceController extends Controller
 {
-    protected ExerciceService $service;
+    protected ExerciceRepository $exerciceRepo;
+    protected SapeurRepository $sapeurRepo;
     protected ExerciceBusiness $business;
 
-    public function __construct(ExerciceService $service, ExerciceBusiness $business)
+    public function __construct(ExerciceRepository $exerciceRepo, SapeurRepository $sapeurRepo, ExerciceBusiness $business)
     {
-        $this->service = $service;
+        $this->exerciceRepo = $exerciceRepo;
+        $this->sapeurRepo = $sapeurRepo;
         $this->business = $business;
     }
 
@@ -26,27 +30,38 @@ class ExerciceController extends Controller
         if (!$exerciceComptableId) {
             return response()->json(["Missing `exercice_comptable_id` parameter", 400]);
         }
-        $exercices = $this->service->listeExercice($exerciceComptableId);
+        $exercices = $this->exerciceRepo->listExerciceLight($exerciceComptableId);
         return response()->json(['data' => $exercices]);
     }
 
     public function absences($exerciceComptableId)
     {
-        $absences = $this->service->absences($exerciceComptableId);
+        $absences = ExerciceSapeur::join('exercices', 'exercices.id', '=', 'exercice_sapeur.exercice_id')
+            ->join('exercice_categories', 'exercices.exercice_categorie_id', '=', 'exercice_categories.id')
+            ->where('exercices.exercice_comptable_id', '=', $exerciceComptableId)
+            ->where('exercices.date', '<=', Carbon::now())
+            ->where('exercice_categories.amendable', '=', True)
+            ->where('exercices.statut', '<>', ExerciceBusiness::EXERCICE_STATUT_ANNULE)
+            ->where(function ($q) {
+                $q->where('exercice_sapeur.present', '=', 0)
+                    ->where('exercice_sapeur.convoque', '=', 1)
+                    ->where('exercice_sapeur.remplace', '=', 0)
+                    ->where('exercice_sapeur.absent', '=', 1)
+                    ->orWhereNotNull('exercice_sapeur.excuse_type_id');
+            })
+            ->select('exercice_sapeur.*')
+            ->get()->toArray();
 
         return response()->json(['data' => $absences]);
     }
 
     public function last()
     {
-        // TODO: Refactor to service
         $threshold = Carbon::now()->subMonth()->toDateTimeString();
         $exercices = Exercice::with(['sapeurs'])->where('date', '>=', $threshold)->get()->toArray();
 
         $exerciceIds = array_map(fn($e) => $e['id'], $exercices);
-        $heures = HeureExercice
-            ::whereIn('exercice_id', $exerciceIds)
-            ->get()->toArray();
+        $heures = HeureExercice::whereIn('exercice_id', $exerciceIds)->get()->toArray();
 
         $indexedExercice = [];
         foreach ($exercices as $exercice) {
@@ -96,14 +111,12 @@ class ExerciceController extends Controller
         ]);
 
         $exercice = $this->business->createExercice($data);
-
         return response()->json(['data' => $exercice]);
     }
 
     public function show(int $id)
     {
         $exercice = Exercice::with(['sapeurs'])->findOrFail($id);
-
         return response()->json(['data' => $exercice]);
     }
 
@@ -122,47 +135,42 @@ class ExerciceController extends Controller
         ]);
 
         $exercice = $this->business->updatExercice($id, $data);
-
         return response()->json(['data' => $exercice]);
     }
 
     public function destroy($id)
     {
         $this->business->deleteExerciceById($id);
-
         return response()->json(['data' => 'success']);
     }
 
     public function annuler($id)
     {
         $statut = $this->business->cancelExerciceById($id);
-
         return response()->json(['data' => ['statut' => $statut]]);
     }
 
     public function reactiver($id)
     {
         $statut = $this->business->reactivateExerciceById($id);
-
         return response()->json(['data' => ['statut' => $statut]]);
     }
 
     public function valider($id)
     {
         $exercice = $this->business->validateExerciceById($id);
-
         return response()->json(['data' => $exercice]);
     }
 
-    function listeAppel(Request $request, $exerciceId)
+    public function listeAppel(Request $request, $exerciceId)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        return $this->service->listeAppel($exerciceId, $sisKey);
+        return $this->business->listeAppel($this->sapeurRepo, $exerciceId, $sisKey);
     }
 
-    function listePresence(Request $request, $exerciceId)
+    public function listePresence(Request $request, $exerciceId)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        return $this->service->listePresence($exerciceId, $sisKey);
+        return $this->business->listePresence($this->sapeurRepo, $exerciceId, $sisKey);
     }
 }

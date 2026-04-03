@@ -120,7 +120,6 @@ class SapeurBusiness {
 
 ### Dependency Injection
 - Repositories bound automatically (Laravel auto-resolution)
-- Some services as singletons in `AppServiceProvider`
 - Constructor injection preferred
 
 ## External Integrations

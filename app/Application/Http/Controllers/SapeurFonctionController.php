@@ -2,46 +2,31 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\SapeurService;
-use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\Business\SapeurBusiness;
+use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\FonctionSapeur;
 use App\Infrastructure\Models\Sapeur;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class SapeurFonctionController extends Controller
 {
-    protected $service;
+    protected $repo;
+    protected $business;
 
-    public function __construct(SapeurService $service)
+    public function __construct(SapeurRepository $repo, SapeurBusiness $business)
     {
-        $this->service = $service;
+        $this->repo = $repo;
+        $this->business = $business;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
     public function index(int $sapeurId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-
-        $fonctions = $this->service->getSapeurFonctionsById($sapeurId);
-
-        return response()->json(['data' => $fonctions]);
+        return response()->json(['data' => $this->repo->getSapeurFonctionsById($sapeurId)]);
     }
 
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @return Response
-     * @throws ArrayException
-     */
     public function store(Request $request, int $sapeurId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
@@ -55,30 +40,18 @@ class SapeurFonctionController extends Controller
             'remarque' => 'string|nullable',
         ]);
 
-        $fonction = $this->service->addFonction($sapeurId, $data);
-
+        $fonction = $this->business->addFonction($sapeurId, $data);
         return response()->json(['data' => $fonction]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param int $sapeurId
-     * @param int $fonctionId
-     * @return Response
-     * @throws ArrayException
-     */
     public function update(Request $request, int $sapeurId, int $fonctionId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-
         if (!FonctionSapeur::where(['id' => $fonctionId, 'sapeur_id' => $sapeurId])->exists()) {
             return response()->json(['error' => 'Fonction non trouvée'], 404);
         }
-
         if ($fonctionId !== $request->get('id')) {
             return response()->json(['error' => 'invalid fonction id']);
         }
@@ -90,30 +63,20 @@ class SapeurFonctionController extends Controller
             'remarque' => 'string|nullable',
         ]);
 
-        $fonction = $this->service->updateFonction($sapeurId, $data);
-
+        $fonction = $this->business->updateFonction($sapeurId, $data);
         return response()->json(['data' => $fonction]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param int $sapeurId
-     * @param int $fonctionId
-     * @return Response
-     */
     public function destroy(int $sapeurId, int $fonctionId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-
         if (!FonctionSapeur::where(['id' => $fonctionId, 'sapeur_id' => $sapeurId])->exists()) {
             return response()->json(['error' => 'Fonction non trouvée'], 404);
         }
 
-        $res = $this->service->removeFonction($sapeurId, $fonctionId);
-
+        $res = $this->business->removeFonction($sapeurId, $fonctionId);
         return response()->json(['data' => $res]);
     }
 
@@ -128,8 +91,7 @@ class SapeurFonctionController extends Controller
             'date' => 'required|date'
         ]);
 
-        $fonctions = $this->service->finFonctions($sapeurId, $data['date'], $data['ids']);
-
+        $fonctions = $this->business->finFonctions($sapeurId, $data['date'], $data['ids']);
         return response()->json(['data' => $fonctions]);
     }
 }

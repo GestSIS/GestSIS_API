@@ -11,15 +11,7 @@ class InterventionTest extends TestCase
 {
     use DatabaseTransactions;
 
-    protected $service;
     protected $interventionId;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->service = $this->app->make('App\Domaine\API\InterventionService');
-    }
 
     /**
      * Test index intervention
@@ -133,7 +125,7 @@ class InterventionTest extends TestCase
             ),
         );
 
-        $this->service->addPresences($intervention->id, $sapeurs);
+        $this->json('POST', "/api/v2/interventions/{$intervention->id}/sapeurs", ['sapeurs' => $sapeurs]);
 
         $response = $this->json('POST', "/api/v2/interventions/$intervention->id/valider");
 

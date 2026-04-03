@@ -2,66 +2,35 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\InterventionService;
-use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\Business\InterventionBusiness;
+use App\Infrastructure\Models\Quittance;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class InterventionQuittancesController extends Controller
 {
-    protected $service;
+    protected $business;
 
-    public function __construct(InterventionService $service)
+    public function __construct(InterventionBusiness $business)
     {
-        $this->service = $service;
+        $this->business = $business;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
     public function index($intervention_id)
     {
-        $quittances = $this->service->getInterventionQuittances($intervention_id);
-
-        return response()->json(['data' => $quittances]);
+        return response()->json(['data' => Quittance::where('intervention_id', $intervention_id)->get()]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @param int $intervention_id
-     * @return Response
-     * @throws ArrayException
-     */
     public function store(Request $request, int $intervention_id)
     {
-        $data = $request->validate([
-            'quittances.*' => 'required|integer|min:1'
-        ]);
-
-        $quittances = $this->service->addQuittances($intervention_id, $data['quittances']);
-
-        return response()->json(['data' => $quittances]);
+        $data = $request->validate(['quittances.*' => 'required|integer|min:1']);
+        $this->business->addQuittances($intervention_id, $data['quittances']);
+        return response()->json(['data' => Quittance::where('intervention_id', $intervention_id)->get()]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param Request $request
-     * @param int $intervention_id
-     * @return Response
-     */
     public function destroy(Request $request, int $intervention_id)
     {
-        $data = $request->validate([
-            'quittances.*' => 'required|integer|min:1'
-        ]);
-
-        $this->service->removeQuittances($intervention_id, $data['quittances']);
-
+        $data = $request->validate(['quittances.*' => 'required|integer|min:1']);
+        $this->business->removeQuittances($intervention_id, $data['quittances']);
         return response()->json(['data' => 'success']);
     }
 }

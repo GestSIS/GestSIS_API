@@ -2,23 +2,19 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Application\Auth\TokenTools;
-use App\Domaine\API\ExerciceService;
+use App\Domaine\Business\ExerciceBusiness;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\ExerciceSapeur;
-use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 
 class ExcuseController extends Controller
 {
+    protected $business;
 
-    protected $service;
-
-    public function __construct(ExerciceService $service)
+    public function __construct(ExerciceBusiness $business)
     {
-        $this->service = $service;
+        $this->business = $business;
     }
 
     public function downloadJustificatif(int $exerciceId, int $sapeurId)
@@ -39,14 +35,6 @@ class ExcuseController extends Controller
         return Storage::download($justificatif['path'], $justificatif['filename'], $headers);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param int $exerciceId
-     * @return Response
-     * @throws Exception
-     */
     public function store(Request $request, int $convocationId)
     {
         $request->merge([
@@ -57,42 +45,33 @@ class ExcuseController extends Controller
         $data = $request->validate([
             'excuse_type_id' => 'nullable|integer',
             'remarque' => 'nullable|string|max:1000',
-            // 'justificatif_filename' => 'required|boolean', // Nom du fichier
-            // 'justificatif_path' => 'required|boolean', // Nom du fichier
-
             'excuse_statut' => 'integer',
             'justification' => 'nullable|string',
         ]);
-
 
         if ($request->hasFile('justificatif_file') && !$request->file('justificatif_file')->isValid()) {
             return response()->json(['error' => 'Fichier justificatif_file invalide']);
         }
 
         $file = $request->file('justificatif_file');
-
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
         $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
         $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
-        $presences = $this->service->updateExcuse($convocationId, $data, $file, $hasValidationPermission, $sisKey);
 
-        return response()->json(['data' => $presences]);
+        $statut = $this->business->updateSapeurs($convocationId, $data, $hasValidationPermission);
+        return response()->json(['data' => [
+            'statut' => $statut,
+            'sapeurs' => ExerciceBusiness::listeSapeurOfExerciceById($convocationId),
+        ]]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param Request $request
-     * @param int $exerciceId
-     * @return Response
-     */
     public function destroy(Request $request, int $exerciceId, int $sapeurId)
     {
         $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
         $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
-        $presence = $this->service->removeExcuse($sapeurId, $exerciceId, $hasValidationPermission);
+        $presence = $this->business->removeExcuse($sapeurId, $exerciceId, $hasValidationPermission);
 
         return response()->json(['data' => $presence]);
     }

@@ -2,41 +2,24 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\InterventionService;
-use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\Business\InterventionBusiness;
+use App\Infrastructure\Models\Mission;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class InterventionMissionsController extends Controller
 {
+    protected $business;
 
-    protected $service;
-
-    public function __construct(InterventionService $service)
+    public function __construct(InterventionBusiness $business)
     {
-        $this->service = $service;
+        $this->business = $business;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
     public function index($intervention_id)
     {
-        $missions = $this->service->getInterventionMissions($intervention_id);
-
-        return response()->json(['data' => $missions]);
+        return response()->json(['data' => Mission::where('intervention_id', $intervention_id)->get()]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @param int $intervention_id
-     * @return Response
-     * @throws ArrayException
-     */
     public function store(Request $request, int $intervention_id)
     {
         $data = $request->validate([
@@ -48,19 +31,10 @@ class InterventionMissionsController extends Controller
             'missions.*.resume' => 'string|nullable'
         ]);
 
-        $missions = $this->service->addMissions($intervention_id, $data['missions']);
-
-        return response()->json(['data' => $missions]);
+        $this->business->addMissions($intervention_id, $data['missions']);
+        return response()->json(['data' => Mission::where('intervention_id', $intervention_id)->get()]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param int $intervention_id
-     * @return Response
-     * @throws ArrayException
-     */
     public function update(Request $request, int $intervention_id)
     {
         $data = $request->validate([
@@ -73,26 +47,14 @@ class InterventionMissionsController extends Controller
             'missions.*.resume' => 'string|nullable'
         ]);
 
-        $missions = $this->service->updateMissions($intervention_id, $data['missions']);
-
-        return response()->json(['data' => $missions]);
+        $this->business->updateMissions($intervention_id, $data['missions']);
+        return response()->json(['data' => Mission::where('intervention_id', $intervention_id)->get()]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param Request $request
-     * @param int $intervention_id
-     * @return Response
-     */
     public function destroy(Request $request, int $intervention_id)
     {
-        $data = $request->validate([
-            'missions.*' => 'integer|exists:missions,id'
-        ]);
-
-        $this->service->removeMissions($intervention_id, $data['missions']);
-
+        $data = $request->validate(['missions.*' => 'integer|exists:missions,id']);
+        $this->business->removeMissions($intervention_id, $data['missions']);
         return response()->json(['data' => 'success']);
     }
 }

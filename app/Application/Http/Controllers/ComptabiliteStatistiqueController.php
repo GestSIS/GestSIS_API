@@ -2,57 +2,47 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ImputationService;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class ComptabiliteStatistiqueController extends Controller
 {
-    protected $service;
-
-    public function __construct(ImputationService $service)
-    {
-        $this->service = $service;
-    }
-
-    /**
-     * Return le nombre le montant et le nombre d'écriture par compte
-     *
-     * @param Request $request
-     * @param int $exercice_comptable_id
-     * @return Response
-     */
     public function compte(int $exerciceComptableId)
     {
-        $data = $this->service->statCompte($exerciceComptableId);
+        $data = DB::select("SELECT e.compte_id, count(e.id) AS nb, sum(e.total) AS total
+                FROM ecritures AS e
+                WHERE e.exercice_comptable_id = ?
+                GROUP BY e.compte_id
+            ", [$exerciceComptableId]);
 
         return response()->json(['data' => $data]);
     }
 
-    /**
-     * Return le nombre le montant et le nombre d'écriture par catégorie comptable
-     *
-     * @param Request $request
-     * @param int $exercice_comptable_id
-     * @return Response
-     */
     public function categorie($exerciceComptableId)
     {
-        $data = $this->service->statCategorie($exerciceComptableId);
+        $data = DB::select("SELECT e.ecriture_categorie_id, count(e.id) AS nb, sum(CASE
+                    WHEN c.produit THEN -e.total
+                    ELSE e.total
+                END) AS total
+                FROM ecritures AS e
+                INNER JOIN comptes AS c ON c.id = e.compte_id
+                WHERE e.exercice_comptable_id = ?
+                GROUP BY e.ecriture_categorie_id
+            ", [$exerciceComptableId]);
 
         return response()->json(['data' => $data]);
     }
 
-    /**
-     * Return le nombre le montant et le nombre d'écriture par module comptable
-     *
-     * @param Request $request
-     * @param int $exercice_comptable_id
-     * @return Response
-     */
     public function module($exerciceComptableId)
     {
-        $materiels = $this->service->statModule($exerciceComptableId);
+        $materiels = DB::select("SELECT e.module, count(e.id) AS nb, sum(CASE
+                    WHEN c.produit THEN -e.total
+                    ELSE e.total
+                END) AS total
+                FROM ecritures AS e
+                INNER JOIN comptes AS c ON c.id = e.compte_id
+                WHERE e.exercice_comptable_id = ?
+                GROUP BY e.module
+            ", [$exerciceComptableId]);
 
         return response()->json(['data' => $materiels]);
     }

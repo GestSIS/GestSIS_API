@@ -2,62 +2,69 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ImputationService;
+use App\Domaine\Business\ImputationBusiness;
+use App\Infrastructure\Models\Ecriture;
 use Illuminate\Http\Request;
 
 class ImputationController extends Controller
 {
-    protected $service;
+    protected $business;
 
-    public function __construct(ImputationService $service)
+    public function __construct(ImputationBusiness $business)
     {
-        $this->service = $service;
+        $this->business = $business;
     }
 
     public function exercice(Request $request, int $id)
     {
         $data = $request->validate([
             'indemnite_exercice_type_id' => 'integer',
-            // 'date_imputation' => 'date' // TODO: Ajouter date d'imputation ?
         ]);
 
-        $res = $this->service->imputationExercice($id, $data);
-
-        return response()->json(['data' => $res]);
+        $statut = $this->business->imputerExercice($id, $data);
+        return response()->json(['data' => [
+            "statut" => $statut,
+            "ecritures" => Ecriture::where('exercice_id', $id)->get(),
+        ]]);
     }
 
     public function cancelExercice(Request $request, int $id)
     {
-        $res = $this->service->annulerImputationExercice($id);
-        return response()->json(['data' => $res]);
+        $statut = $this->business->annulerImputationExercice($id);
+        return response()->json(['data' => ["statut" => $statut]]);
     }
 
     public function intervention(Request $request, int $id)
     {
         $data = $request->validate([
             'indemnite_intervention_type_id' => 'integer',
-            // 'date_imputation' => 'date' // TODO: Ajouter date imputation ?
         ]);
 
-        $res = $this->service->imputationIntervention($id, $data);
-        return response()->json(['data' => $res]);
+        $statut = $this->business->imputerIntervention($id, $data);
+        return response()->json(['data' => [
+            "statut" => $statut,
+            "ecritures" => Ecriture::where('intervention_id', $id)->get(),
+        ]]);
     }
 
     public function cancelIntervention(int $id)
     {
-        $res = $this->service->annulerImputationIntervention($id);
-        return response()->json(['data' => $res]);
+        $statut = $this->business->annulerImputationIntervention($id);
+        return response()->json(['data' => ["statut" => $statut]]);
     }
 
     public function annuel(int $id)
     {
-        $res = $this->service->imputationAnnuel($id);
-        return response()->json(['data' => $res]);
+        $this->business->imputerAnnuel($id);
+        $ecritures = Ecriture::where('exercice_comptable_id', $id)
+            ->where('module', ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)
+            ->get();
+        return response()->json(['data' => $ecritures]);
     }
 
     public function cancelAnnuel(int $id)
     {
-        $res = $this->service->annulerImputationAnnuel($id);
+        $res = $this->business->annulerImputationAnnuel($id);
         return response()->json(['data' => $res ? 'ok' : 'ko']);
     }
 
@@ -68,13 +75,13 @@ class ImputationController extends Controller
             'exercice_comptable_id' => 'integer',
         ]);
 
-        $res = $this->service->imputationCours($id, $data);
+        $res = $this->business->imputerCours($id, $data);
         return response()->json(['data' => $res]);
     }
 
     public function cancelCours(int $id)
     {
-        $res = $this->service->annulerImputationCours($id);
+        $res = $this->business->annulerImputationCours($id);
         return response()->json(['data' => $res]);
     }
 
@@ -85,13 +92,13 @@ class ImputationController extends Controller
             'ids.*' => 'integer|required',
         ]);
 
-        $res = $this->service->imputationTravail($data['ids']);
+        $res = $this->business->imputerTravaux($data['ids']);
         return response()->json(['data' => $res]);
     }
 
     public function cancelTravail($id)
     {
-        $res = $this->service->annulerImputationTravail($id);
+        $res = $this->business->annulerImputationTravail($id);
         return response()->json(['data' => $res]);
     }
 }

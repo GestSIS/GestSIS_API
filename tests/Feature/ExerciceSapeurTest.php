@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Domaine\API\ExerciceService;
-use App\Domaine\Business\ExerciceBusiness;
 use App\Infrastructure\Models\Exercice;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -13,15 +11,9 @@ class ExerciceSapeurTest extends TestCase
 {
     use DatabaseTransactions;
 
-    protected ExerciceService $exerciceService;
-    protected ExerciceBusiness $exerciceBusiness;
-
     protected function setUp(): void
     {
         parent::setUp();
-
-        $this->exerciceService = $this->app->make('App\Domaine\API\ExerciceService');
-        $this->exerciceBusiness = new ExerciceBusiness($this->app->make('App\Domaine\SPI\ExerciceRepository'));
     }
 
     /**
@@ -108,8 +100,8 @@ class ExerciceSapeurTest extends TestCase
      */
     public function testEditExerciceSapeurs()
     {
-        $exercice = Exercice::factory()->make();
-        $exercice = $this->exerciceBusiness->createExercice($exercice->toArray());
+        $exerciceData = Exercice::factory()->make()->toArray();
+        $exerciceId = $this->json('POST', '/api/v2/exercices', $exerciceData)->json('data.id');
 
         $sapeurs = [
             array(
@@ -118,6 +110,7 @@ class ExerciceSapeurTest extends TestCase
                 'present' => 1,
                 'absent' => 0,
                 'remplace' => 0,
+                'amende' => 0,
                 'excuse_type_id' => null,
                 'excuse_statut' => 0,
             ),
@@ -127,6 +120,7 @@ class ExerciceSapeurTest extends TestCase
                 'present' => 0,
                 'absent' => 0,
                 'remplace' => 0,
+                'amende' => 0,
                 'excuse_type_id' => 4,
                 'excuse_statut' => -2,
             ),
@@ -136,12 +130,14 @@ class ExerciceSapeurTest extends TestCase
                 'present' => 0,
                 'absent' => 0,
                 'remplace' => 0,
+                'amende' => 0,
                 'excuse_type_id' => null,
                 'excuse_statut' => 0,
             )
         ];
 
-        $sapeurs = $this->exerciceService->addSapeurs($exercice->id, $sapeurs)['sapeurs'];
+        $addResponse = $this->json('POST', '/api/v2/exercices/' . $exerciceId . '/sapeurs', ['sapeurs' => $sapeurs]);
+        $sapeurs = $addResponse->json('data.sapeurs');
 
         $sapeurs[1]['present'] = 0;
         $sapeurs[1]['excuse_type_id'] = 1;
@@ -163,8 +159,8 @@ class ExerciceSapeurTest extends TestCase
      */
     public function testRemoveExerciceSapeurs()
     {
-        $exercice = Exercice::factory()->make();
-        $exercice = $this->exerciceBusiness->createExercice($exercice->toArray());
+        $exerciceData = Exercice::factory()->make()->toArray();
+        $exerciceId = $this->json('POST', '/api/v2/exercices', $exerciceData)->json('data.id');
 
         $sapeurs = [
             array(
@@ -173,6 +169,7 @@ class ExerciceSapeurTest extends TestCase
                 'present' => 1,
                 'absent' => 0,
                 'remplace' => 0,
+                'amende' => 0,
                 'excuse_type_id' => null,
                 'excuse_statut' => 0,
             ),
@@ -182,6 +179,7 @@ class ExerciceSapeurTest extends TestCase
                 'present' => 0,
                 'absent' => 0,
                 'remplace' => 0,
+                'amende' => 0,
                 'excuse_type_id' => 4,
                 'excuse_statut' => -2,
             ),
@@ -191,18 +189,20 @@ class ExerciceSapeurTest extends TestCase
                 'present' => 0,
                 'absent' => 0,
                 'remplace' => 0,
+                'amende' => 0,
                 'excuse_type_id' => null,
                 'excuse_statut' => 0,
             )
         ];
 
-        $sapeurs = $this->exerciceService->addSapeurs($exercice->id, $sapeurs)['sapeurs'];
+        $addResponse = $this->json('POST', '/api/v2/exercices/' . $exerciceId . '/sapeurs', ['sapeurs' => $sapeurs]);
+        $sapeurs = $addResponse->json('data.sapeurs');
 
         $ids = array_map(function ($sap) {
             return $sap['id'];
         }, $sapeurs);
 
-        $response = $this->json('DELETE', '/api/v2/exercices/' . $exercice->id . '/sapeurs/', array("sapeurs" => $ids));
+        $response = $this->json('DELETE', '/api/v2/exercices/' . $exerciceId . '/sapeurs/', array("sapeurs" => $ids));
         $response
             ->assertStatus(200)
             ->assertJson([

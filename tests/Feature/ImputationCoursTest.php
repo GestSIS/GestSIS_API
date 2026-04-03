@@ -11,15 +11,11 @@ use App\Infrastructure\Models\Sapeur;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
-use App\Domaine\API\SapeurService;
-use App\Domaine\API\ImputationService;
-use App\Domaine\API\CoursService;
 
 class ImputationCoursTest extends TestCase
 {
     use DatabaseTransactions;
 
-    protected $imputationService;
     protected $sapeurOneId;
     protected $sapeurTwoId;
     protected $sapeurThreeId;
@@ -35,21 +31,21 @@ class ImputationCoursTest extends TestCase
     {
         parent::setUp();
 
-        $sapeurService = $this->app->make(SapeurService::class);
-        $this->imputationService = $this->app->make(ImputationService::class);
-
         // Création de 3 sapeurs
         $data = Sapeur::factory()->make()->toArray();
-        $data['incorporation'] = "29.01.2019";
-        $this->sapeurOneId = $sapeurService->createSapeur($data)->id;
+        $data['incorporation'] = "2019-01-29";
+        $data['type'] = 0;
+        $this->sapeurOneId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
 
         $data = Sapeur::factory()->make()->toArray();
-        $data['incorporation'] = "29.01.2019";
-        $this->sapeurTwoId = $sapeurService->createSapeur($data)->id;
+        $data['incorporation'] = "2019-01-29";
+        $data['type'] = 0;
+        $this->sapeurTwoId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
 
         $data = Sapeur::factory()->make()->toArray();
-        $data['incorporation'] = "29.01.2019";
-        $this->sapeurThreeId = $sapeurService->createSapeur($data)->id;
+        $data['incorporation'] = "2019-01-29";
+        $data['type'] = 0;
+        $this->sapeurThreeId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
 
         // Création d'un cours de référence
         $cours = Cours::create([
@@ -159,10 +155,9 @@ class ImputationCoursTest extends TestCase
             "indemnite_cours_type_id" => $this->indemniteTypeJourId
         ];
 
-        $ecritures = $this->imputationService->imputationCours($this->coursSapeurOneId, $param);
-
-        // Vérifier qu'au moins une écriture a été créée
-        $this->assertTrue(count($ecritures) >= 1);
+        $response = $this->json('POST', "/api/v2/imputation/cours/{$this->coursSapeurOneId}", $param);
+        $response->assertStatus(200);
+        $this->assertTrue(count($response->json('data')) >= 1);
     }
 
     /**
@@ -178,10 +173,9 @@ class ImputationCoursTest extends TestCase
             "indemnite_cours_type_id" => $this->indemniteTypePieceId
         ];
 
-        $ecritures = $this->imputationService->imputationCours($this->coursSapeurTwoId, $param);
-
-        // Vérifier qu'au moins une écriture a été créée
-        $this->assertTrue(count($ecritures) >= 1);
+        $response = $this->json('POST', "/api/v2/imputation/cours/{$this->coursSapeurTwoId}", $param);
+        $response->assertStatus(200);
+        $this->assertTrue(count($response->json('data')) >= 1);
     }
 
     /**
@@ -197,10 +191,9 @@ class ImputationCoursTest extends TestCase
             "indemnite_cours_type_id" => $this->indemniteTypeForfaitId
         ];
 
-        $ecritures = $this->imputationService->imputationCours($this->coursSapeurThreeId, $param);
-
-        // Vérifier qu'au moins une écriture a été créée
-        $this->assertTrue(count($ecritures) >= 1);
+        $response = $this->json('POST', "/api/v2/imputation/cours/{$this->coursSapeurThreeId}", $param);
+        $response->assertStatus(200);
+        $this->assertTrue(count($response->json('data')) >= 1);
     }
 
     /**
@@ -217,13 +210,13 @@ class ImputationCoursTest extends TestCase
             "indemnite_cours_type_id" => $this->indemniteTypeJourId
         ];
 
-        $ecritures = $this->imputationService->imputationCours($this->coursSapeurOneId, $param);
-        $this->assertTrue(count($ecritures) >= 1);
+        $response = $this->json('POST', "/api/v2/imputation/cours/{$this->coursSapeurOneId}", $param);
+        $this->assertTrue(count($response->json('data')) >= 1);
 
         // Puis annuler l'imputation
-        $result = $this->imputationService->annulerImputationCours($this->coursSapeurOneId);
+        $result = $this->json('DELETE', "/api/v2/imputation/cours/{$this->coursSapeurOneId}");
 
         // Vérifier que l'annulation a réussi
-        $this->assertTrue($result === true || is_string($result));
+        $result->assertStatus(200);
     }
 }

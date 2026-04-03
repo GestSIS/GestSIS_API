@@ -1,27 +1,18 @@
 <?php
 
-namespace App\Domaine\API;
+namespace App\Domaine\Business;
 
-use App\Domaine\Business\SapeurBusiness;
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\ReferenceRta;
 use App\Infrastructure\Models\RtaParam;
 use App\Infrastructure\Models\Sapeur;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
-class RtaService
+class RtaBusiness
 {
-    protected $business;
-
-    public function __construct(SapeurBusiness $business)
-    {
-        $this->business = $business;
-    }
-
-    public function getReferenceGestSis()
+    public static function getReferenceGestSis()
     {
         $sapeurs = Sapeur::where('actif', true)
             ->where('type', '=', SapeurBusiness::TYPE_SAPEUR)
@@ -47,17 +38,8 @@ class RtaService
         }, $sapeurs));
     }
 
-    public function getReferenceRta()
+    public static function getReferenceRta()
     {
-        // FIXME: Temp migration for RTA
-        // $data = ReferenceRta::all()->toArray();
-        // return array_map(function ($s) {
-        //     $data = json_decode($s['data'], true);
-        //     unset($s['data']);
-        //     $s = $s + $data;
-        //     return $s;
-        // }, $data);
-
         $params = RtaParam::first();
         if (!$params) {
             throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
@@ -104,7 +86,7 @@ class RtaService
         ], $response->json('data.sapeurs'));
     }
 
-    public function setReference($sapeurs)
+    public static function setReference($sapeurs)
     {
         $params = RtaParam::first();
         if (!$params) {
@@ -155,6 +137,6 @@ class RtaService
             throw new ArrayException([], $response->json()['erreur'] ?? "Erreur lors de l'envoi RTA");
         }
 
-        return $this->getReferenceRta();
+        return static::getReferenceRta();
     }
 }

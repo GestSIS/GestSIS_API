@@ -2,45 +2,31 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\SapeurService;
-use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\Business\SapeurBusiness;
+use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\CoursSapeur;
 use App\Infrastructure\Models\Sapeur;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class SapeurCoursController extends Controller
 {
-    protected $service;
+    protected $repo;
+    protected $business;
 
-    public function __construct(SapeurService $service)
+    public function __construct(SapeurRepository $repo, SapeurBusiness $business)
     {
-        $this->service = $service;
+        $this->repo = $repo;
+        $this->business = $business;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
     public function index($sapeurId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-
-        $cours = $this->service->getSapeurCoursById($sapeurId);
-
-        return response()->json(['data' => $cours]);
+        return response()->json(['data' => $this->repo->getSapeurCoursById($sapeurId)]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @return Response
-     * @throws ArrayException
-     */
     public function store(Request $request, int $sapeurId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
@@ -59,29 +45,18 @@ class SapeurCoursController extends Controller
             'date_grade' => 'bail|required_with:grade_id|date|nullable'
         ]);
 
-        $cours = $this->service->addCours($sapeurId, $data);
+        $cours = $this->business->addCours($sapeurId, $data);
         return response()->json(['data' => $cours]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param int $sapeurId
-     * @param int $coursId
-     * @return Response
-     * @throws ArrayException
-     */
     public function update(Request $request, int $sapeurId, int $coursId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-
         if (!CoursSapeur::where(['id' => $coursId, 'sapeur_id' => $sapeurId])->exists()) {
             return response()->json(['error' => 'Cours non trouvé'], 404);
         }
-
         if ($coursId !== $request->get('id')) {
             return response()->json(['error' => 'invalid cours id']);
         }
@@ -93,29 +68,20 @@ class SapeurCoursController extends Controller
             'localite_id' => 'integer|exists:localites,id',
         ]);
 
-        $cours = $this->service->updateCours($sapeurId, $data);
+        $cours = $this->business->updateCours($sapeurId, $data);
         return response()->json(['data' => $cours]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param int $sapeurId
-     * @param int $coursId
-     * @return Response
-     */
     public function destroy(int $sapeurId, int $coursId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-
         if (!CoursSapeur::where(['id' => $coursId, 'sapeur_id' => $sapeurId])->exists()) {
             return response()->json(['error' => 'Cours non trouvé'], 404);
         }
 
-        $this->service->removeCours($sapeurId, $coursId);
-
+        $this->business->removeCours($sapeurId, $coursId);
         return response()->json(['data' => 'success']);
     }
 }

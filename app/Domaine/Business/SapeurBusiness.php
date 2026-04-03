@@ -3,14 +3,22 @@
 
 namespace App\Domaine\Business;
 
+use App\Application\Typst\TypstTemplate;
+use App\Application\Typst\TypstToPdfGenerator;
 use App\Domaine\SPI\SapeurRepository;
 use App\Domaine\Exceptions\ArrayException;
 use App\Infrastructure\Models\Article;
+use App\Infrastructure\Models\CoursSapeur;
 use App\Infrastructure\Models\Ecriture;
+use App\Infrastructure\Models\FonctionSapeur;
 use App\Infrastructure\Models\GradeSapeur;
 use App\Infrastructure\Models\Intervention;
+use App\Infrastructure\Models\Mutation;
+use App\Infrastructure\Models\Permis;
 use App\Infrastructure\Models\Sapeur;
+use App\Infrastructure\Models\SapeurTelephone;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class SapeurBusiness
 {
@@ -655,5 +663,112 @@ class SapeurBusiness
             "grade_id" => $maxId <= 0 ? null : $maxId
         ));
         return $maxId <= 0 ? null : $maxId;
+    }
+
+    private static $ALLOWED_PHOTO_EXTENSION = ['jpg', 'jpeg', 'png'];
+
+    public function downloadPhotoSapeur($sapeurId, $sisKey)
+    {
+        foreach (self::$ALLOWED_PHOTO_EXTENSION as $extension) {
+            $path = 'photos/' . $sisKey . '/' . $sapeurId . '.' . $extension;
+            if (Storage::exists($path)) {
+                return Storage::download($path, null, ['Response-Type' => 'arraybuffer']);
+            }
+        }
+        return response()->json(Null);
+    }
+
+    public function getPhotoSapeurPath($sapeurId, $sisKey)
+    {
+        foreach (self::$ALLOWED_PHOTO_EXTENSION as $extension) {
+            $path = 'photos/' . $sisKey . '/' . $sapeurId . '.' . $extension;
+            if (Storage::exists($path)) {
+                return $path;
+            }
+        }
+        return null;
+    }
+
+    public function deletePhotoSapeur($sapeurId, $sisKey)
+    {
+        $path = 'photos/' . $sisKey . '/' . $sapeurId . '.';
+        $files = array_map(function ($extension) use ($path) {
+            return $path . $extension;
+        }, self::$ALLOWED_PHOTO_EXTENSION);
+        Storage::delete($files);
+    }
+
+    public function uploadPhotoSapeur($image, $sapeurId, $sisKey)
+    {
+        $this->deletePhotoSapeur($sapeurId, $sisKey);
+        $extension = strtolower($image->extension());
+        return $image->storeAs('photos/' . $sisKey, $sapeurId . "." . $extension);
+    }
+
+    public function trombinoscope(string $sisKey)
+    {
+        $imageDefault = 'icon/user.svg';
+
+        $sapeurs = Sapeur::where([['actif', '=', 1], ['type', '=', self::TYPE_SAPEUR]])
+            ->orderBy('nom')
+            ->orderBy('prenom')
+            ->get(['id', 'nom', 'prenom']);
+
+        $sapeurs = array_map(
+            fn($sapeur) => [
+                ...$sapeur,
+                'photo' => $this->getPhotoSapeurPath($sapeur['id'], $sisKey)
+            ],
+            $sapeurs->toArray()
+        );
+        $logoPath = SisParamBusiness::getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::Trombinoscope,
+            [
+                "sapeurs" => $sapeurs,
+                "sisId" => $sisKey,
+                "imageDefault" => $imageDefault,
+            ],
+            $logoPath,
+            extraStorageFiles: [
+                $imageDefault,
+                ...array_filter(
+                    array_map(fn($s) => $s['photo'], $sapeurs),
+                    fn($path) => $path !== null
+                )
+            ]
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'trombinoscope.pdf'
+        );
+    }
+
+    public static function fiche($sapeurId, string $sisKey)
+    {
+        $sapeur = Sapeur::with(['localite', 'civilite', 'fonction', 'grade'])->find($sapeurId);
+
+        $logoPath = SisParamBusiness::getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::FicheSapeur,
+            [
+                "sapeur" => $sapeur,
+                "fonctions" => FonctionSapeur::with('fonction')->where('sapeur_id', '=', $sapeurId)->orderBy('debut')->get(),
+                "grades" => GradeSapeur::with('grade')->where('sapeur_id', '=', $sapeurId)->orderBy('date')->get(),
+                "mutations" => Mutation::with('localite')->where('sapeur_id', '=', $sapeurId)->orderBy('incorporation')->get(),
+                "cours" => CoursSapeur::with(['localite', 'cours'])->where('sapeur_id', '=', $sapeurId)->orderBy('date')->get(),
+                "telephones" => SapeurTelephone::with(['telephoneType'])->where('sapeur_id', '=', $sapeurId)->orderBy('priorite')->get(),
+                "permis" => Permis::with(['permisType'])->where('sapeur_id', '=', $sapeurId)->orderBy('date')->get(),
+            ],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'fiche-sapeur.pdf'
+        );
     }
 }

@@ -2,15 +2,25 @@
 
 namespace App\Domaine\Business;
 
+use App\Application\Typst\TypstTemplate;
+use App\Application\Typst\TypstToPdfGenerator;
+use App\Domaine\Business\Materiel\MaterielTypeBusiness;
 use App\Domaine\SPI\InterventionRepository;
 use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\Article;
+use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\ExerciceComptable;
+use App\Infrastructure\Models\Groupe;
+use App\Infrastructure\Models\GroupeIntervention;
 use App\Infrastructure\Models\Intervention;
+use App\Infrastructure\Models\InterventionMateriel;
 use App\Infrastructure\Models\InterventionSapeur;
 use App\Infrastructure\Models\InterventionVehicule;
+use App\Infrastructure\Models\Materiel;
 use App\Infrastructure\Models\Mission;
 use App\Infrastructure\Models\Phase;
 use App\Infrastructure\Models\Quittance;
+use App\Infrastructure\Models\Sapeur;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -580,5 +590,114 @@ class InterventionBusiness
         $this->checkIsNotImpute($interventionId);
 
         $this->repository->removeGroupesById($interventionId, $ids);
+    }
+
+    public static function rapport($interventionId, $params, string $sisKey)
+    {
+        $withOptions = ['statFederal', 'typeIntervention', 'localite', 'chefIntervention', 'traitement'];
+        $withMapping = [
+            'groupes' => 'groupes',
+            'presences' => 'presences',
+            'presencesResume' => 'presences',
+            'vehicules' => 'vehicules',
+            'materiel' => 'materiels',
+            'missions' => 'missions.sapeurObject',
+            'appels' => 'appels',
+        ];
+
+        foreach ($params as $param => $value) {
+            if ($value && array_key_exists($param, $withMapping)) {
+                $withOptions[] = $withMapping[$param];
+            }
+        }
+
+        $vehiculesMap = [];
+        if (in_array('vehicules', $withOptions)) {
+            $vehicules = Article::join('materiel_types', 'articles.materiel_type_id', '=', 'materiel_types.id')
+                ->where('materiel_types.type', '=', MaterielTypeBusiness::TYPE_VEHICULE)
+                ->get(['articles.*']);
+            foreach ($vehicules as $vehicule) {
+                $vehiculesMap[$vehicule->id] = $vehicule->designation;
+            }
+        }
+
+        $materielsMap = [];
+        if (in_array('materiels', $withOptions)) {
+            $materiels = Materiel::get();
+            foreach ($materiels as $materiel) {
+                $materielsMap[$materiel->id] = $materiel->designation;
+            }
+        }
+
+        $groupesMap = [];
+        if (in_array('groupes', $withOptions)) {
+            $groupes = Groupe::get();
+            foreach ($groupes as $groupe) {
+                $groupesMap[$groupe->id] = $groupe;
+            }
+        }
+
+        $ecritures = [];
+        if (isset($params['montants']) && $params['montants']) {
+            $ecritures = Ecriture::where('intervention_id', '=', $interventionId)
+                ->groupBy('sapeur_id')
+                ->selectRaw('sum(total) as total, sapeur_id')
+                ->pluck('total', 'sapeur_id')
+                ->toArray();
+
+            $total = array_sum(array_map(fn($e) => floatval($e), array_values($ecritures)));
+            $ecritures['total'] = number_format($total, 2);
+        }
+
+        $intervention = Intervention::with($withOptions)->find($interventionId);
+
+        $sapeursMap = [];
+        $quittancesMap = [];
+        $presences = [];
+        if (in_array('presences', $withOptions) || in_array('presencesResume', $withOptions)) {
+            $sapeurs = Sapeur::get(['nom', 'prenom', 'id']);
+            foreach ($sapeurs as $sapeur) {
+                $sapeursMap[$sapeur->id] = $sapeur->toArray();
+            }
+
+            foreach ($intervention->presences as $presence) {
+                if (!array_key_exists('presences', $sapeursMap[$presence->sapeur_id])) {
+                    $sapeursMap[$presence->sapeur_id]['presences'] = [];
+                }
+                $sapeursMap[$presence->sapeur_id]['presences'][] = $presence;
+            }
+
+            $quittances = Quittance::where('intervention_id', $interventionId)->get();
+            foreach ($quittances as $quittance) {
+                $quittancesMap[$quittance->sapeur_id] = $quittance;
+            }
+
+            $presences = array_filter($sapeursMap, function ($s) {
+                return array_key_exists('presences', $s);
+            });
+        }
+
+        $logoPath = SisParamBusiness::getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::RapportIntervention,
+            [
+                "intervention" => $intervention,
+                "params" => $params,
+                "vehicules" => $vehiculesMap,
+                "materiels" => $materielsMap,
+                "groupes" => $groupesMap,
+                "sapeurs" => $sapeursMap,
+                "quittances" => $quittancesMap,
+                "presences" => $presences,
+                "ecritures" => $ecritures,
+            ],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'rapport-intervention.pdf'
+        );
     }
 }

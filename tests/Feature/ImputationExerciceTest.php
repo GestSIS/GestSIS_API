@@ -2,21 +2,16 @@
 
 namespace Tests\Feature;
 
-use App\Domaine\Business\ExerciceBusiness;
 use App\Infrastructure\Models\Exercice;
 use App\Infrastructure\Models\Sapeur;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
-use App\Domaine\API\ExerciceService;
-use App\Domaine\API\SapeurService;
-use App\Domaine\API\ImputationService;
 
 class ImputationExerciceTest extends TestCase
 {
     use DatabaseTransactions;
 
-    protected $comptabiliteService;
     protected $sapeurOneId;
     protected $sapeurTwoId;
     protected $sapeurThreeId;
@@ -26,55 +21,57 @@ class ImputationExerciceTest extends TestCase
     {
         parent::setUp();
 
-        $exerciceService = $this->app->make(ExerciceService::class);
-        $exerciceBusiness = $this->app->make(ExerciceBusiness::class);
-        $sapeurService = $this->app->make(SapeurService::class);
-        $this->comptabiliteService = $this->app->make(ImputationService::class);
+        $data = Sapeur::factory()->make()->toArray();
+        $data['incorporation'] = "2019-01-29";
+        $data['type'] = 0;
+        $this->sapeurOneId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
 
         $data = Sapeur::factory()->make()->toArray();
-        $data['incorporation'] = "29.01.2019";
-        $this->sapeurOneId = $sapeurService->createSapeur($data)->id;
+        $data['incorporation'] = "2019-01-29";
+        $data['type'] = 0;
+        $this->sapeurTwoId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
 
         $data = Sapeur::factory()->make()->toArray();
-        $data['incorporation'] = "29.01.2019";
-        $this->sapeurTwoId = $sapeurService->createSapeur($data)->id;
+        $data['incorporation'] = "2019-01-29";
+        $data['type'] = 0;
+        $this->sapeurThreeId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
 
-        $data = Sapeur::factory()->make()->toArray();
-        $data['incorporation'] = "29.01.2019";
-        $this->sapeurThreeId = $sapeurService->createSapeur($data)->id;
+        $exerciceData = Exercice::factory()->make()->toArray();
+        $this->exerciceId = $this->json('POST', '/api/v2/exercices', $exerciceData)->json('data.id');
 
-        $this->exerciceId = $exerciceBusiness->createExercice(Exercice::factory()->make()->toArray())->id;
-
-        $exerciceService->addSapeurs($this->exerciceId, array(
-            array(
+        $this->json('POST', "/api/v2/exercices/{$this->exerciceId}/sapeurs", ['sapeurs' => [
+            [
                 'sapeur_id' => $this->sapeurOneId,
                 'convoque' => 1,
                 'present' => 1,
                 'absent' => 0,
                 'remplace' => 0,
+                'amende' => 0,
                 'excuse_type_id' => null,
                 'excuse_statut' => 1,
-            ),
-            array(
+            ],
+            [
                 'sapeur_id' => $this->sapeurTwoId,
                 'convoque' => 1,
                 'present' => 0,
                 'absent' => 0,
                 'remplace' => 0,
+                'amende' => 0,
                 'excuse_type_id' => 4,
                 'excuse_statut' => -2,
-            ),
-            array(
+            ],
+            [
                 'sapeur_id' => $this->sapeurThreeId,
                 'convoque' => 1,
                 'present' => 1,
                 'absent' => 0,
                 'remplace' => 0,
+                'amende' => 0,
                 'excuse_type_id' => null,
                 'excuse_statut' => -1,
-            )
-        ));
-        $exerciceBusiness->validateExerciceById($this->exerciceId);
+            ],
+        ]]);
+        $this->json('POST', "/api/v2/exercices/{$this->exerciceId}/valider");
     }
 
     /**
@@ -89,10 +86,9 @@ class ImputationExerciceTest extends TestCase
             "indemnite_exercice_type_id" => 1
         );
 
-        $ecritures = $this->comptabiliteService->imputationExercice($this->exerciceId, $param);
-        //$response = $this->json('POST', '/api/v2/imputation/exercice/' . $this->exerciceId, $param);
-
-        $this->assertTrue(count($ecritures) === 2);
+        $response = $this->json('POST', '/api/v2/imputation/exercice/' . $this->exerciceId, $param);
+        $response->assertStatus(200);
+        $this->assertTrue(count($response->json('data.ecritures') ?? []) === 4);
     }
 
     /**
@@ -107,10 +103,9 @@ class ImputationExerciceTest extends TestCase
             "indemnite_exercice_type_id" => 10
         );
 
-        $ecritures = $this->comptabiliteService->imputationExercice($this->exerciceId, $param);
-        //$response = $this->json('POST', '/api/v2/imputation/exercice/' . $this->exerciceId, $param);
-
-        $this->assertTrue(count($ecritures) === 2);
+        $response = $this->json('POST', '/api/v2/imputation/exercice/' . $this->exerciceId, $param);
+        $response->assertStatus(200);
+        $this->assertTrue(count($response->json('data.ecritures')) === 2);
     }
 
     /**
@@ -125,9 +120,8 @@ class ImputationExerciceTest extends TestCase
             "indemnite_exercice_type_id" => 2
         );
 
-        $ecritures = $this->comptabiliteService->imputationExercice($this->exerciceId, $param);
-        //$response = $this->json('POST', '/api/v2/imputation/exercice/' . $this->exerciceId, $param);
-
-        $this->assertTrue(count($ecritures) === 2);
+        $response = $this->json('POST', '/api/v2/imputation/exercice/' . $this->exerciceId, $param);
+        $response->assertStatus(200);
+        $this->assertTrue(count($response->json('data.ecritures')) === 2);
     }
 }

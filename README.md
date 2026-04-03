@@ -42,7 +42,7 @@ Ce projet utilise actuellement une **architecture hexagonale** (ports et adapter
 #### Flux de données (actuel)
 
 ```
-Controller → API Service → Business → SPI Interface → Repository Implementation → Model
+Controller → Business → SPI Interface → Repository Implementation → Model
 ```
 
 ### Couches
@@ -56,40 +56,13 @@ Point d'entrée HTTP, gère les aspects techniques de l'application :
 - **Mail** : Templates d'emails
 - **Typst** : Génération de documents PDF
 
-**Exemple** : `SapeurController::show()` → `SapeurService::getSapeur()`
+**Exemple** : `SapeurController::show($sapeurId)` → `Sapeur::find($sapeurId)`
 
 #### 2. Couche Domaine (`app/Domaine/`)
 
 Cœur métier de l'application, divisé en trois sous-couches :
 
-##### 2.1 API Services (`Domaine/API/`)
-
-Services exposant les points d'entrée vers la logique métier :
-- Gèrent directement les opérations de **lecture/listing**
-- Délèguent les opérations de **modification** à la couche Business
-- Injectent les dépendances nécessaires (SPI repositories)
-
-**Exemple** :
-```php
-class SapeurService {
-    public function __construct(
-        private SapeurRepository $sapeurRepository,
-        private SapeurBusiness $sapeurBusiness
-    ) {}
-    
-    // Listing direct
-    public function listSapeurs() {
-        return $this->sapeurRepository->findAll();
-    }
-    
-    // Modification via Business
-    public function updateSapeur($id, $data) {
-        return $this->sapeurBusiness->update($id, $data);
-    }
-}
-```
-
-##### 2.2 Business (`Domaine/Business/`)
+##### 2.1 Business (`Domaine/Business/`)
 
 Logique métier et règles de gestion :
 - Validation des règles métier
@@ -109,7 +82,7 @@ class SapeurBusiness {
 }
 ```
 
-##### 2.3 SPI - Service Provider Interface (`Domaine/SPI/`)
+##### 2.2 SPI - Service Provider Interface (`Domaine/SPI/`)
 
 Interfaces définissant les contrats d'accès aux données :
 - Découplage entre le domaine et l'infrastructure
@@ -226,8 +199,7 @@ class SapeurBusiness {
 ### Principes architecturaux actuels (hexagonale - deprecated) (architecture cible)
 
 ✅ **À faire** :
-- Controllers appellent uniquement les API Services
-- API Services délèguent les mutations à Business
+- Controllers appellent uniquement les Business
 - Business utilise les interfaces SPI
 - Repositories implémentent les interfaces SPI
 
@@ -235,7 +207,6 @@ class SapeurBusiness {
 - Logique métier dans les Controllers
 - Injection directe de Models dans Business
 - Repositories sans interface SPI
-- Contournement de la couche API Service
 
 ## 🛠 Technologies
 
@@ -528,7 +499,6 @@ $pdfPath = $generator->generateDocument(
 
 - **Interfaces SPI** : `SapeurRepository` (dans `Domaine/SPI/`)
 - **Implémentations** : `SapeurRepositoryEloquent` (dans `Infrastructure/Repositories/`)
-- **API Services** : `SapeurService` (dans `Domaine/API/`)
 - **Business** : `SapeurBusiness` (dans `Domaine/Business/`)
 - **Models** : `Sapeur` (dans `Infrastructure/Models/`)
 
@@ -547,17 +517,6 @@ class SapeurBusiness {
     const TYPE_CIVIL = 1;
     const STATUT_ACTIF = 'actif';
     const STATUT_INACTIF = 'inactif';
-}
-```
-
-### Injection de dépendances
-
-```php
-class SapeurService {
-    public function __construct(
-        private SapeurRepository $repository,
-        private SapeurBusiness $business
-    ) {}
 }
 ```
 

@@ -17,6 +17,10 @@ use App\Infrastructure\Models\ExerciceComptable;
 use App\Infrastructure\Models\ExerciceSapeur;
 use App\Infrastructure\Models\Fonction;
 use App\Infrastructure\Models\FonctionSapeur;
+use App\Application\Typst\TypstTemplate;
+use App\Application\Typst\TypstToPdfGenerator;
+use App\Infrastructure\Models\Compte;
+use App\Infrastructure\Models\Decompte;
 use App\Infrastructure\Models\FraisIndemniteAnnuelType;
 use App\Infrastructure\Models\HeureExercice;
 use App\Infrastructure\Models\HeureExerciceType;
@@ -24,6 +28,7 @@ use App\Infrastructure\Models\IndemniteCoursType;
 use App\Infrastructure\Models\IndemniteExerciceType;
 use App\Infrastructure\Models\IndemniteInterventionType;
 use App\Infrastructure\Models\Intervention;
+use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\Travail;
 use App\Infrastructure\Models\TravailType;
 
@@ -1492,5 +1497,83 @@ class ImputationBusiness
             ->update(['statut' => TravauxBusiness::TRAVAIL_STATUT_VALIDE]);
 
         return ['statut' => TravauxBusiness::TRAVAIL_STATUT_VALIDE];
+    }
+
+    public static function justificatifIndividuel(int $exerciceComptableId, int $compteId, string $sisKey)
+    {
+        $compte = Compte::with([
+            'ecritures' => function ($query) use ($exerciceComptableId) {
+                $query->where('exercice_comptable_id', $exerciceComptableId)->orderBy('date', 'asc');
+            }
+        ])->find($compteId);
+
+        $sapeursMap = [];
+        $sapeurs = Sapeur::get(['id', 'nom', 'prenom']);
+        foreach ($sapeurs as $sapeur) {
+            $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
+        }
+
+        $decomptesMap = [];
+        $decomptes = Decompte::where('exercice_comptable_id', $exerciceComptableId)->get(['id', 'date']);
+        foreach ($decomptes as $decompte) {
+            $decomptesMap[$decompte->id] = $decompte->date;
+        }
+
+        $logoPath = SisParamBusiness::getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::Comptes,
+            [
+                "date" => Carbon::now(),
+                "comptes" => [$compte],
+                "sapeurs" => $sapeursMap,
+                "decomptes" => $decomptesMap,
+            ],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'justificatif_complet.pdf'
+        );
+    }
+
+    public static function justificatifComplet(int $exerciceComptableId, string $sisKey)
+    {
+        $comptes = Compte::with([
+            'ecritures' => function ($query) use ($exerciceComptableId) {
+                $query->where('exercice_comptable_id', $exerciceComptableId)->orderBy('date', 'asc');
+            }
+        ])->orderBy('numero', 'asc')->get();
+
+        $sapeursMap = [];
+        $sapeurs = Sapeur::get(['id', 'nom', 'prenom']);
+        foreach ($sapeurs as $sapeur) {
+            $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
+        }
+
+        $decomptesMap = [];
+        $decomptes = Decompte::where('exercice_comptable_id', $exerciceComptableId)->get(['id', 'date']);
+        foreach ($decomptes as $decompte) {
+            $decomptesMap[$decompte->id] = $decompte->date;
+        }
+
+        $logoPath = SisParamBusiness::getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::Comptes,
+            [
+                "date" => Carbon::now(),
+                "comptes" => $comptes,
+                "sapeurs" => $sapeursMap,
+                "decomptes" => $decomptesMap,
+            ],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'justificatif_complet.pdf'
+        );
     }
 }

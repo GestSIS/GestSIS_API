@@ -2,53 +2,26 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\RtaService;
+use App\Domaine\Business\RtaBusiness;
 use Illuminate\Http\Request;
 
 class ReferenceRtaController extends Controller
 {
-    protected $service;
-
-    public function __construct(RtaService $service)
-    {
-        $this->service = $service;
-    }
-
-    /**
-     * Get the actual RTA reference
-     *
-     * @return Response
-     */
     public function getReferenceRta()
     {
-        return response()->json(["data" => $this->service->getReferenceRta()]);
+        return response()->json(["data" => RtaBusiness::getReferenceRta()]);
     }
 
-    /**
-     * Get the actual gestsis version
-     *
-     * @return Response
-     */
     public function getReferenceGestSis()
     {
-        return response()->json(["data" => $this->service->getReferenceGestSis()]);
+        return response()->json(["data" => RtaBusiness::getReferenceGestSis()]);
     }
 
-    /**
-     * Get the actual gestsis version
-     *
-     * @return Response
-     */
     public function resetReferenceRta()
     {
-        return response()->json(["data" => $this->service->resetReferenceRta()]);
+        return response()->json(["data" => RtaBusiness::resetReferenceRta()]);
     }
 
-    /**
-     * Maj de la référence RTA
-     *
-     * @return Response
-     */
     public function setReference(Request $request)
     {
         $data = $request->validate([
@@ -70,10 +43,8 @@ class ReferenceRtaController extends Controller
             'sapeurs.*.numeros.*.tri' => 'required|integer',
         ]);
 
-        $sis = $data['sis'];
-
         return response()->json([
-            "data" => $this->service->setReference($data['sapeurs'], $sis)
+            "data" => RtaBusiness::setReference($data['sapeurs'])
         ]);
     }
 }

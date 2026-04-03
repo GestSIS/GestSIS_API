@@ -2,47 +2,31 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\SapeurService;
-use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\Business\SapeurBusiness;
+use App\Domaine\SPI\SapeurRepository;
 use App\Infrastructure\Models\Sapeur;
 use App\Infrastructure\Models\SapeurTelephone;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class SapeurTelephoneController extends Controller
 {
-    protected $service;
+    protected $repo;
+    protected $business;
 
-    public function __construct(SapeurService $service)
+    public function __construct(SapeurRepository $repo, SapeurBusiness $business)
     {
-        $this->service = $service;
+        $this->repo = $repo;
+        $this->business = $business;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @param int $sapeurId
-     * @return JsonResponse
-     */
     public function index(int $sapeurId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-
-        $telephones = $this->service->getSapeurTelephonesById($sapeurId);
-
-        return response()->json(['data' => $telephones]);
+        return response()->json(['data' => $this->repo->getSapeurTelephonesById($sapeurId)]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @return Response
-     * @throws ArrayException
-     */
     public function store(Request $request, int $sapeurId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
@@ -56,20 +40,10 @@ class SapeurTelephoneController extends Controller
             'rta' => 'required|boolean',
         ]);
 
-        $telephone = $this->service->addTelephone($sapeurId, $data);
-
+        $telephone = $this->business->addTelephone($sapeurId, $data);
         return response()->json(['data' => $telephone]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param int $sapeurId
-     * @param int $telephoneId
-     * @return Response
-     * @throws ArrayException
-     */
     public function update(Request $request, int $sapeurId, int $telephoneId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
@@ -87,37 +61,24 @@ class SapeurTelephoneController extends Controller
         if ($telephoneId !== $request->get('id')) {
             return response()->json(['error' => 'invalid telephone id'], 400);
         }
-
-        // Check if telephone exists
         if (!SapeurTelephone::where(['id' => $telephoneId, 'sapeur_id' => $sapeurId])->exists()) {
             return response()->json(['error' => 'Téléphone non trouvé'], 404);
         }
 
-        $telephone = $this->service->updateTelephone($sapeurId, $data);
-
+        $telephone = $this->business->updateTelephone($sapeurId, $data);
         return response()->json(['data' => $telephone]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param int $sapeurId
-     * @param int $telephoneId
-     * @return Response
-     */
     public function destroy(int $sapeurId, int $telephoneId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-
-        // Check if telephone exists
         if (!SapeurTelephone::where(['id' => $telephoneId, 'sapeur_id' => $sapeurId])->exists()) {
             return response()->json(['error' => 'Téléphone non trouvé'], 404);
         }
 
-        $this->service->removeTelephone($sapeurId, $telephoneId);
-
+        $this->business->removeTelephone($sapeurId, $telephoneId);
         return response()->json(['data' => 'success']);
     }
 }

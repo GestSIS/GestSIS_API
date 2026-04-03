@@ -8,8 +8,6 @@ use Illuminate\Http\Response;
 
 class ArticleEmplacementController extends Controller
 {
-    protected $service;
-
     /**
      * Display a listing of the resource.
      *

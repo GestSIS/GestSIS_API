@@ -3,21 +3,29 @@
 namespace App\Application\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Domaine\API\EmailService;
+use Illuminate\Support\Facades\DB;
 
 class EmailController extends Controller
 {
-    protected $service;
-
-    public function __construct(EmailService $service)
-    {
-        $this->service = $service;
-    }
-
     public function validateEmail(Request $request)
     {
-        // Check for multiple sis
         $email = $request->input('email');
-        return response()->json(['data' => $this->service->checkEmail($email)]);
+
+        $dbs = config('database.dbs');
+        $res = [];
+        foreach ($dbs as $db) {
+            DB::reconnect('db_' . $db);
+            $sapeur = DB::connection('db_' . $db)
+                ->table('sapeurs')
+                ->where('email', '=', $email)
+                ->select('sapeurs.id')
+                ->first();
+            if (!is_null($sapeur)) {
+                $res[$db] = $sapeur->id;
+            }
+            DB::disconnect('db_' . $db);
+        }
+
+        return response()->json(['data' => $res]);
     }
 }
