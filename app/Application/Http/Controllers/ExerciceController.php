@@ -3,26 +3,14 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ExerciceBusiness;
-use App\Domaine\SPI\ExerciceRepository;
-use App\Domaine\SPI\SapeurRepository;
-use App\Infrastructure\Models\Exercice;
-use App\Infrastructure\Models\ExerciceSapeur;
-use App\Infrastructure\Models\HeureExercice;
+use App\Models\Exercice;
+use App\Models\ExerciceSapeur;
+use App\Models\HeureExercice;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ExerciceController extends Controller
 {
-    protected ExerciceRepository $exerciceRepo;
-    protected SapeurRepository $sapeurRepo;
-    protected ExerciceBusiness $business;
-
-    public function __construct(ExerciceRepository $exerciceRepo, SapeurRepository $sapeurRepo, ExerciceBusiness $business)
-    {
-        $this->exerciceRepo = $exerciceRepo;
-        $this->sapeurRepo = $sapeurRepo;
-        $this->business = $business;
-    }
 
     public function index(Request $request)
     {
@@ -30,7 +18,12 @@ class ExerciceController extends Controller
         if (!$exerciceComptableId) {
             return response()->json(["Missing `exercice_comptable_id` parameter", 400]);
         }
-        $exercices = $this->exerciceRepo->listExerciceLight($exerciceComptableId);
+
+        $columns = ['id', 'exercice_categorie_id', 'designation', 'date', 'heure', 'duree', 'lieu', 'communications', 'statut', 'localite_id', 'exercice_comptable_id'];
+        $exercices = Exercice::where('exercice_comptable_id', $exerciceComptableId)
+            ->withCount('sms')
+            ->get($columns);
+
         return response()->json(['data' => $exercices]);
     }
 
@@ -110,7 +103,7 @@ class ExerciceController extends Controller
             'exercice_comptable_id' => 'integer|exists:exercice_comptables,id|required'
         ]);
 
-        $exercice = $this->business->createExercice($data);
+        $exercice = ExerciceBusiness::createExercice($data);
         return response()->json(['data' => $exercice]);
     }
 
@@ -134,43 +127,43 @@ class ExerciceController extends Controller
             'localite_id' => 'integer|exists:localites,id'
         ]);
 
-        $exercice = $this->business->updatExercice($id, $data);
+        $exercice = ExerciceBusiness::updatExercice($id, $data);
         return response()->json(['data' => $exercice]);
     }
 
     public function destroy($id)
     {
-        $this->business->deleteExerciceById($id);
+        ExerciceBusiness::deleteExerciceById($id);
         return response()->json(['data' => 'success']);
     }
 
     public function annuler($id)
     {
-        $statut = $this->business->cancelExerciceById($id);
+        $statut = ExerciceBusiness::cancelExerciceById($id);
         return response()->json(['data' => ['statut' => $statut]]);
     }
 
     public function reactiver($id)
     {
-        $statut = $this->business->reactivateExerciceById($id);
+        $statut = ExerciceBusiness::reactivateExerciceById($id);
         return response()->json(['data' => ['statut' => $statut]]);
     }
 
     public function valider($id)
     {
-        $exercice = $this->business->validateExerciceById($id);
+        $exercice = ExerciceBusiness::validateExerciceById($id);
         return response()->json(['data' => $exercice]);
     }
 
     public function listeAppel(Request $request, $exerciceId)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        return $this->business->listeAppel($this->sapeurRepo, $exerciceId, $sisKey);
+        return ExerciceBusiness::listeAppel($exerciceId, $sisKey);
     }
 
     public function listePresence(Request $request, $exerciceId)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        return $this->business->listePresence($this->sapeurRepo, $exerciceId, $sisKey);
+        return ExerciceBusiness::listePresence($exerciceId, $sisKey);
     }
 }

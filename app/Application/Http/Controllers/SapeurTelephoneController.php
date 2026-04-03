@@ -3,28 +3,19 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\SapeurBusiness;
-use App\Domaine\SPI\SapeurRepository;
-use App\Infrastructure\Models\Sapeur;
-use App\Infrastructure\Models\SapeurTelephone;
+use App\Models\Sapeur;
+use App\Models\SapeurTelephone;
 use Illuminate\Http\Request;
 
 class SapeurTelephoneController extends Controller
 {
-    protected $repo;
-    protected $business;
-
-    public function __construct(SapeurRepository $repo, SapeurBusiness $business)
-    {
-        $this->repo = $repo;
-        $this->business = $business;
-    }
 
     public function index(int $sapeurId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-        return response()->json(['data' => $this->repo->getSapeurTelephonesById($sapeurId)]);
+        return response()->json(['data' => SapeurTelephone::where('sapeur_id', $sapeurId)->get()]);
     }
 
     public function store(Request $request, int $sapeurId)
@@ -40,7 +31,7 @@ class SapeurTelephoneController extends Controller
             'rta' => 'required|boolean',
         ]);
 
-        $telephone = $this->business->addTelephone($sapeurId, $data);
+        $telephone = SapeurBusiness::addTelephone($sapeurId, $data);
         return response()->json(['data' => $telephone]);
     }
 
@@ -65,7 +56,7 @@ class SapeurTelephoneController extends Controller
             return response()->json(['error' => 'Téléphone non trouvé'], 404);
         }
 
-        $telephone = $this->business->updateTelephone($sapeurId, $data);
+        $telephone = SapeurBusiness::updateTelephone($sapeurId, $data);
         return response()->json(['data' => $telephone]);
     }
 
@@ -78,7 +69,7 @@ class SapeurTelephoneController extends Controller
             return response()->json(['error' => 'Téléphone non trouvé'], 404);
         }
 
-        $this->business->removeTelephone($sapeurId, $telephoneId);
+        SapeurBusiness::removeTelephone($sapeurId, $telephoneId);
         return response()->json(['data' => 'success']);
     }
 }

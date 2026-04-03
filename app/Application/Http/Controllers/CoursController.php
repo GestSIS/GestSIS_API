@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\SapeurParamBusiness;
-use App\Infrastructure\Models\Cours;
+use App\Models\Cours;
 use Illuminate\Http\Request;
 
 class CoursController extends Controller

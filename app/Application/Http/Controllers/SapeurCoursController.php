@@ -3,28 +3,19 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\SapeurBusiness;
-use App\Domaine\SPI\SapeurRepository;
-use App\Infrastructure\Models\CoursSapeur;
-use App\Infrastructure\Models\Sapeur;
+use App\Models\CoursSapeur;
+use App\Models\Sapeur;
 use Illuminate\Http\Request;
 
 class SapeurCoursController extends Controller
 {
-    protected $repo;
-    protected $business;
-
-    public function __construct(SapeurRepository $repo, SapeurBusiness $business)
-    {
-        $this->repo = $repo;
-        $this->business = $business;
-    }
 
     public function index($sapeurId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-        return response()->json(['data' => $this->repo->getSapeurCoursById($sapeurId)]);
+        return response()->json(['data' => CoursSapeur::where('sapeur_id', $sapeurId)->get()]);
     }
 
     public function store(Request $request, int $sapeurId)
@@ -45,7 +36,7 @@ class SapeurCoursController extends Controller
             'date_grade' => 'bail|required_with:grade_id|date|nullable'
         ]);
 
-        $cours = $this->business->addCours($sapeurId, $data);
+        $cours = SapeurBusiness::addCours($sapeurId, $data);
         return response()->json(['data' => $cours]);
     }
 
@@ -68,7 +59,7 @@ class SapeurCoursController extends Controller
             'localite_id' => 'integer|exists:localites,id',
         ]);
 
-        $cours = $this->business->updateCours($sapeurId, $data);
+        $cours = SapeurBusiness::updateCours($sapeurId, $data);
         return response()->json(['data' => $cours]);
     }
 
@@ -81,7 +72,7 @@ class SapeurCoursController extends Controller
             return response()->json(['error' => 'Cours non trouvé'], 404);
         }
 
-        $this->business->removeCours($sapeurId, $coursId);
+        SapeurBusiness::removeCours($sapeurId, $coursId);
         return response()->json(['data' => 'success']);
     }
 }

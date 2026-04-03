@@ -4,8 +4,8 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\AbsenceBusiness;
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\Absence;
-use App\Infrastructure\Models\ExerciceComptable;
+use App\Models\Absence;
+use App\Models\ExerciceComptable;
 use Illuminate\Http\Request;
 
 class MesAbsencesController extends Controller

@@ -4,19 +4,12 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ExerciceBusiness;
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\ExerciceSapeur;
+use App\Models\ExerciceSapeur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ExcuseController extends Controller
 {
-    protected $business;
-
-    public function __construct(ExerciceBusiness $business)
-    {
-        $this->business = $business;
-    }
-
     public function downloadJustificatif(int $exerciceId, int $sapeurId)
     {
         $presence = ExerciceSapeur::where([['exercice_id', '=', $exerciceId], ['sapeur_id', '=', $sapeurId]])->first();
@@ -59,11 +52,13 @@ class ExcuseController extends Controller
         $perms = $request->attributes->get('permissions', []);
         $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
 
-        $statut = $this->business->updateSapeurs($convocationId, $data, $hasValidationPermission);
-        return response()->json(['data' => [
-            'statut' => $statut,
-            'sapeurs' => ExerciceBusiness::listeSapeurOfExerciceById($convocationId),
-        ]]);
+        $statut = ExerciceBusiness::updateSapeurs($convocationId, $data, $hasValidationPermission);
+        return response()->json([
+            'data' => [
+                'statut' => $statut,
+                'sapeurs' => ExerciceBusiness::listeSapeurOfExerciceById($convocationId),
+            ]
+        ]);
     }
 
     public function destroy(Request $request, int $exerciceId, int $sapeurId)
@@ -71,7 +66,7 @@ class ExcuseController extends Controller
         $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
         $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
-        $presence = $this->business->removeExcuse($sapeurId, $exerciceId, $hasValidationPermission);
+        $presence = ExerciceBusiness::removeExcuse($sapeurId, $exerciceId, $hasValidationPermission);
 
         return response()->json(['data' => $presence]);
     }

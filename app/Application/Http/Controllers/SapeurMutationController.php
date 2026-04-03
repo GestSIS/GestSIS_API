@@ -3,27 +3,19 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\SapeurBusiness;
-use App\Domaine\SPI\SapeurRepository;
-use App\Infrastructure\Models\Sapeur;
+use App\Models\Mutation;
+use App\Models\Sapeur;
 use Illuminate\Http\Request;
 
 class SapeurMutationController extends Controller
 {
-    protected $repo;
-    protected $business;
-
-    public function __construct(SapeurRepository $repo, SapeurBusiness $business)
-    {
-        $this->repo = $repo;
-        $this->business = $business;
-    }
 
     public function index(int $sapeurId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-        return response()->json(['data' => $this->repo->getSapeurMutationsById($sapeurId)]);
+        return response()->json(['data' => Mutation::where('sapeur_id', $sapeurId)->get()]);
     }
 
     public function store(Request $request, int $sapeurId)
@@ -39,7 +31,7 @@ class SapeurMutationController extends Controller
             'localite_id' => 'required|integer|exists:localites,id',
         ]);
 
-        $mutation = $this->business->addMutation($sapeurId, $data);
+        $mutation = SapeurBusiness::addMutation($sapeurId, $data);
         return response()->json(['data' => $mutation]);
     }
 
@@ -61,12 +53,11 @@ class SapeurMutationController extends Controller
             return response()->json(['error' => 'invalid mutation id'], 400);
         }
 
-        $mutations = $this->repo->getSapeurMutationsById($sapeurId);
-        if (!collect($mutations)->firstWhere('id', $mutationId)) {
+        if (!Mutation::where('sapeur_id', $sapeurId)->where('id', $mutationId)->exists()) {
             return response()->json(['error' => 'Mutation non trouvée'], 404);
         }
 
-        $mutation = $this->business->updateMutation($sapeurId, $data);
+        $mutation = SapeurBusiness::updateMutation($sapeurId, $data);
         return response()->json(['data' => $mutation]);
     }
 
@@ -76,12 +67,11 @@ class SapeurMutationController extends Controller
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
 
-        $mutations = $this->repo->getSapeurMutationsById($sapeurId);
-        if (!collect($mutations)->firstWhere('id', $mutationId)) {
+        if (!Mutation::where('sapeur_id', $sapeurId)->where('id', $mutationId)->exists()) {
             return response()->json(['error' => 'Mutation non trouvée'], 404);
         }
 
-        $data = $this->business->removeMutation($sapeurId, $mutationId);
+        $data = SapeurBusiness::removeMutation($sapeurId, $mutationId);
         return response()->json(['data' => $data]);
     }
 }

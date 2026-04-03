@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\TypeUnite;
+use App\Models\TypeUnite;
 
 class UniteController extends Controller
 {

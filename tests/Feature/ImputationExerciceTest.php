@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Infrastructure\Models\Exercice;
-use App\Infrastructure\Models\Sapeur;
+use App\Models\Exercice;
+use App\Models\Sapeur;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -39,38 +39,40 @@ class ImputationExerciceTest extends TestCase
         $exerciceData = Exercice::factory()->make()->toArray();
         $this->exerciceId = $this->json('POST', '/api/v2/exercices', $exerciceData)->json('data.id');
 
-        $this->json('POST', "/api/v2/exercices/{$this->exerciceId}/sapeurs", ['sapeurs' => [
-            [
-                'sapeur_id' => $this->sapeurOneId,
-                'convoque' => 1,
-                'present' => 1,
-                'absent' => 0,
-                'remplace' => 0,
-                'amende' => 0,
-                'excuse_type_id' => null,
-                'excuse_statut' => 1,
-            ],
-            [
-                'sapeur_id' => $this->sapeurTwoId,
-                'convoque' => 1,
-                'present' => 0,
-                'absent' => 0,
-                'remplace' => 0,
-                'amende' => 0,
-                'excuse_type_id' => 4,
-                'excuse_statut' => -2,
-            ],
-            [
-                'sapeur_id' => $this->sapeurThreeId,
-                'convoque' => 1,
-                'present' => 1,
-                'absent' => 0,
-                'remplace' => 0,
-                'amende' => 0,
-                'excuse_type_id' => null,
-                'excuse_statut' => -1,
-            ],
-        ]]);
+        $this->json('POST', "/api/v2/exercices/{$this->exerciceId}/sapeurs", [
+            'sapeurs' => [
+                [
+                    'sapeur_id' => $this->sapeurOneId,
+                    'convoque' => 1,
+                    'present' => 1,
+                    'absent' => 0,
+                    'remplace' => 0,
+                    'amende' => 0,
+                    'excuse_type_id' => null,
+                    'excuse_statut' => 1,
+                ],
+                [
+                    'sapeur_id' => $this->sapeurTwoId,
+                    'convoque' => 1,
+                    'present' => 0,
+                    'absent' => 0,
+                    'remplace' => 0,
+                    'amende' => 0,
+                    'excuse_type_id' => 4,
+                    'excuse_statut' => -2,
+                ],
+                [
+                    'sapeur_id' => $this->sapeurThreeId,
+                    'convoque' => 1,
+                    'present' => 1,
+                    'absent' => 0,
+                    'remplace' => 0,
+                    'amende' => 0,
+                    'excuse_type_id' => null,
+                    'excuse_statut' => -1,
+                ],
+            ]
+        ]);
         $this->json('POST', "/api/v2/exercices/{$this->exerciceId}/valider");
     }
 

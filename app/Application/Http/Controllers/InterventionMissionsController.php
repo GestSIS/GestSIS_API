@@ -3,17 +3,11 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\InterventionBusiness;
-use App\Infrastructure\Models\Mission;
+use App\Models\Mission;
 use Illuminate\Http\Request;
 
 class InterventionMissionsController extends Controller
 {
-    protected $business;
-
-    public function __construct(InterventionBusiness $business)
-    {
-        $this->business = $business;
-    }
 
     public function index($intervention_id)
     {
@@ -31,7 +25,7 @@ class InterventionMissionsController extends Controller
             'missions.*.resume' => 'string|nullable'
         ]);
 
-        $this->business->addMissions($intervention_id, $data['missions']);
+        InterventionBusiness::addMissions($intervention_id, $data['missions']);
         return response()->json(['data' => Mission::where('intervention_id', $intervention_id)->get()]);
     }
 
@@ -47,14 +41,14 @@ class InterventionMissionsController extends Controller
             'missions.*.resume' => 'string|nullable'
         ]);
 
-        $this->business->updateMissions($intervention_id, $data['missions']);
+        InterventionBusiness::updateMissions($intervention_id, $data['missions']);
         return response()->json(['data' => Mission::where('intervention_id', $intervention_id)->get()]);
     }
 
     public function destroy(Request $request, int $intervention_id)
     {
         $data = $request->validate(['missions.*' => 'integer|exists:missions,id']);
-        $this->business->removeMissions($intervention_id, $data['missions']);
+        InterventionBusiness::removeMissions($intervention_id, $data['missions']);
         return response()->json(['data' => 'success']);
     }
 }

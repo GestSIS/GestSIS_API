@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\ExerciceComptable;
+use App\Models\ExerciceComptable;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 

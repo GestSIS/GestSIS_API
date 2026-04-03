@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\AbsenceParamBusiness;
-use App\Infrastructure\Models\AbsenceParam;
+use App\Models\AbsenceParam;
 use Illuminate\Http\Request;
 
 class AbsenceParamController extends Controller

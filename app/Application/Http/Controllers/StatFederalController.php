@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\InterventionParamBusiness;
-use App\Infrastructure\Models\StatFederal;
+use App\Models\StatFederal;
 use Illuminate\Http\Request;
 
 class StatFederalController extends Controller

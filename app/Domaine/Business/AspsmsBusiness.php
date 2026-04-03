@@ -4,9 +4,9 @@ namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\Exceptions\InvalidActionException;
-use App\Infrastructure\Models\AspsmsParam;
-use App\Infrastructure\Models\Sms;
-use App\Infrastructure\Models\SmsNumero;
+use App\Models\AspsmsParam;
+use App\Models\Sms;
+use App\Models\SmsNumero;
 use Carbon\Carbon;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Client\ConnectionException;

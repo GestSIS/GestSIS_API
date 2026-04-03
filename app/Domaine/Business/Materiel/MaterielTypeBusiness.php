@@ -3,11 +3,11 @@
 namespace App\Domaine\Business\Materiel;
 
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\Article;
-use App\Infrastructure\Models\InterventionVehicule;
-use App\Infrastructure\Models\MaterielType;
-use App\Infrastructure\Models\MaterielTypeBatterie;
-use App\Infrastructure\Models\MaterielTypeTuyau;
+use App\Models\Article;
+use App\Models\InterventionVehicule;
+use App\Models\MaterielType;
+use App\Models\MaterielTypeBatterie;
+use App\Models\MaterielTypeTuyau;
 use DB;
 use Illuminate\Database\Eloquent\Collection;
 

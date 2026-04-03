@@ -3,9 +3,9 @@
 namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\ControleMedical;
-use App\Infrastructure\Models\ControleMedicalType;
-use App\Infrastructure\Models\Medecin;
+use App\Models\ControleMedical;
+use App\Models\ControleMedicalType;
+use App\Models\Medecin;
 use Illuminate\Support\Facades\Storage;
 
 class ControleMedicalBusiness

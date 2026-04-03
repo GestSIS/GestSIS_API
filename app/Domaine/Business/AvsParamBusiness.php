@@ -2,7 +2,7 @@
 
 namespace App\Domaine\Business;
 
-use App\Infrastructure\Models\AvsParam;
+use App\Models\AvsParam;
 
 class AvsParamBusiness
 {

@@ -1,0 +1,31 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Models\Sapeur;
+use App\Models\SapeurTelephone;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends Factory<SapeurTelephone>
+ */
+class SapeurTelephoneFactory extends Factory
+{
+    protected $model = SapeurTelephone::class;
+
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'sapeur_id' => Sapeur::factory(),
+            'telephone_type_id' => $this->faker->numberBetween(1, 3),
+            'numero' => $this->faker->phoneNumber(),
+            'rta' => $this->faker->boolean(),
+            'priorite' => $this->faker->numberBetween(1, 3),
+        ];
+    }
+}

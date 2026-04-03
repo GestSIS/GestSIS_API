@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ComptabiliteParamBusiness;
-use App\Infrastructure\Models\IndemniteCoursType;
+use App\Models\IndemniteCoursType;
 use Illuminate\Http\Request;
 
 class IndemniteCoursTypeController extends Controller

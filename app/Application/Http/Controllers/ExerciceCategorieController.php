@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ExerciceParamBusiness;
-use App\Infrastructure\Models\ExerciceCategorie;
+use App\Models\ExerciceCategorie;
 use Illuminate\Http\Request;
 
 class ExerciceCategorieController extends Controller

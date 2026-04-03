@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Infrastructure\Models\Intervention;
+use App\Models\Intervention;
 use Illuminate\Support\Facades\DB;
 
 class InterventionTableSeeder extends Seeder

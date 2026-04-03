@@ -4,7 +4,7 @@
 namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\Absence;
+use App\Models\Absence;
 use Carbon\Carbon;
 
 class AbsenceBusiness

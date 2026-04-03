@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ControleMedicalBusiness;
-use App\Infrastructure\Models\ControleMedical;
+use App\Models\ControleMedical;
 use Illuminate\Http\Request;
 
 class ControleMedicalController extends Controller

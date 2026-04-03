@@ -28,41 +28,32 @@ API de gestion des services d'incendie et de secours (SIS) construite avec **Lar
 
 ## 🏗 Architecture
 
-> ⚠️ **IMPORTANT - Évolution architecturale en cours**  
-> L'architecture hexagonale actuellement en place **sera abandonnée** prochainement. Elle sera remplacée par une architecture simplifiée à **2 couches** :
-> - **Controllers** : Gestion des requêtes HTTP et réponses
-> - **Business** : Logique métier directement avec Eloquent
-> 
-> **Raison** : La couche Repository (SPI + implémentation) n'apporte pas de valeur ajoutée avec Eloquent, qui fournit déjà une abstraction efficace de la base de données. Cette simplification réduira la complexité sans compromettre la maintenabilité.
+Le projet utilise une architecture applicative simplifiée à 2 couches métier :
+- **Controllers** : gestion HTTP (requêtes, validation, réponses)
+- **Business** : logique métier et accès aux données via Eloquent
 
-### Architecture actuelle (hexagonale - deprecated)
-
-Ce projet utilise actuellement une **architecture hexagonale** (ports et adapters) qui sera simplifiée.
-
-#### Flux de données (actuel)
+#### Flux de données
 
 ```
-Controller → Business → SPI Interface → Repository Implementation → Model
+Controller → Business (Eloquent) → Model
 ```
 
-### Couches
+### Structure du code
 
-#### 1. Couche Application (`app/Application/`)
+#### 1. Couche Controller / Application (`app/Application/`)
 
 Point d'entrée HTTP, gère les aspects techniques de l'application :
-- **Controllers** (`Http/Controllers/`) : Reçoivent les requêtes HTTP et délèguent aux API Services
+- **Controllers** (`Http/Controllers/`) : Reçoivent les requêtes HTTP et délèguent aux classes Business
 - **Middleware** : Authentification JWT, sélection de base de données multi-tenant
 - **Auth** : Validation des tokens JWT
 - **Mail** : Templates d'emails
 - **Typst** : Génération de documents PDF
 
-**Exemple** : `SapeurController::show($sapeurId)` → `Sapeur::find($sapeurId)`
+**Exemple** : `SapeurController::show($sapeurId)` → `SapeurBusiness::show($sapeurId)`
 
-#### 2. Couche Domaine (`app/Domaine/`)
+#### 2. Couche Business (`app/Domaine/Business/`)
 
-Cœur métier de l'application, divisé en trois sous-couches :
-
-##### 2.1 Business (`Domaine/Business/`)
+Cœur métier de l'application :
 
 Logique métier et règles de gestion :
 - Validation des règles métier
@@ -82,40 +73,15 @@ class SapeurBusiness {
 }
 ```
 
-##### 2.2 SPI - Service Provider Interface (`Domaine/SPI/`)
+#### Infrastructure technique (`app/`)
 
-Interfaces définissant les contrats d'accès aux données :
-- Découplage entre le domaine et l'infrastructure
-- Permet de changer d'implémentation (Eloquent, Doctrine, API externe, etc.)
-
-**Exemple** :
-```php
-interface SapeurRepository {
-    public function findById(int $id): ?Sapeur;
-    public function findAll(): array;
-    public function save(Sapeur $sapeur): Sapeur;
-}
-```
-
-#### 3. Couche Infrastructure (`app/Infrastructure/`)
-
-Implémentation technique, dépendances externes :
-- **Repositories** (`Repositories/`) : Implémentations Eloquent des interfaces SPI (suffixe `*RepositoryEloquent`)
+Composants techniques utilisés par la couche Business (ce n'est pas une couche métier supplémentaire) :
 - **Models** (`Models/`) : Modèles Eloquent pour l'ORM
 - **Collections** (`Collections/`) : Collections pour exports Excel (Maatwebspace)
 
-**Exemple** :
-```php
-class SapeurRepositoryEloquent implements SapeurRepository {
-    public function findById(int $id): ?Sapeur {
-        return Sapeur::find($id);
-    }
-}
-```
+### Architecture applicative
 
-### Architecture cible (simplifiée)
-
-La future architecture à 2 couches sera organisée ainsi :
+L'architecture à 2 couches est organisée ainsi :
 
 ```
 Controller → Business (avec Eloquent) → Model
@@ -182,7 +148,7 @@ class SapeurBusiness {
 }
 ```
 
-### Principes architecturaux (architecture cible)
+### Principes architecturaux
 
 ✅ **À faire** :
 - Controllers appellent uniquement les classes Business
@@ -195,18 +161,6 @@ class SapeurBusiness {
 - Requêtes Eloquent complexes dans les Controllers
 - Logique applicative dans les Models
 - Duplication de code métier
-
-### Principes architecturaux actuels (hexagonale - deprecated) (architecture cible)
-
-✅ **À faire** :
-- Controllers appellent uniquement les Business
-- Business utilise les interfaces SPI
-- Repositories implémentent les interfaces SPI
-
-❌ **À éviter** :
-- Logique métier dans les Controllers
-- Injection directe de Models dans Business
-- Repositories sans interface SPI
 
 ## 🛠 Technologies
 
@@ -428,7 +382,7 @@ DB_DATABASE=gestsis_test
 
 Utiliser les factories pour générer des données de test :
 ```php
-use App\Infrastructure\Models\Sapeur;
+use App\Models\Sapeur;
 
 $sapeur = Sapeur::factory()->make(); // Instance non persistée
 $sapeur = Sapeur::factory()->create(); // Instance persistée
@@ -497,8 +451,6 @@ $pdfPath = $generator->generateDocument(
 
 ### Nommage
 
-- **Interfaces SPI** : `SapeurRepository` (dans `Domaine/SPI/`)
-- **Implémentations** : `SapeurRepositoryEloquent` (dans `Infrastructure/Repositories/`)
 - **Business** : `SapeurBusiness` (dans `Domaine/Business/`)
 - **Models** : `Sapeur` (dans `Infrastructure/Models/`)
 
@@ -544,7 +496,7 @@ DEBUGBAR_ENABLED=true
 ### Workflow
 
 1. Créer une branche
-2. Implémenter les changements (suivre l'architecture hexagonale)
+2. Implémenter les changements (respecter la séparation Controller/Business)
 3. Écrire/mettre à jour les tests
 4. Créer une Pull Request vers `develop`
 
@@ -552,7 +504,7 @@ DEBUGBAR_ENABLED=true
 
 - [ ] Tests passent (`php artisan test`)
 - [ ] Code suit les conventions PSR-12
-- [ ] Architecture hexagonale respectée
+- [ ] Séparation Controller/Business respectée
 - [ ] Documentation mise à jour si nécessaire
 - [ ] Pas de secrets dans le code
 

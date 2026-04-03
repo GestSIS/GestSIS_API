@@ -4,8 +4,8 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ComptabiliteParamBusiness;
 use App\Domaine\Business\ImputationBusiness;
-use App\Infrastructure\Models\Compte;
-use App\Infrastructure\Models\Ecriture;
+use App\Models\Compte;
+use App\Models\Ecriture;
 use Illuminate\Http\Request;
 
 class CompteController extends Controller
@@ -47,8 +47,10 @@ class CompteController extends Controller
 
     public function ecritures(int $id, int $exerciceComptableId)
     {
-        return response()->json(['data' => Ecriture::where('exercice_comptable_id', $exerciceComptableId)
-            ->where('compte_id', $id)->get()]);
+        return response()->json([
+            'data' => Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+                ->where('compte_id', $id)->get()
+        ]);
     }
 
     public function justificatifIndividuel(Request $request, int $exerciceComptableId, int $compteId)

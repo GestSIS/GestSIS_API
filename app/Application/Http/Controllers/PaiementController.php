@@ -3,18 +3,11 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\PaiementBusiness;
-use App\Infrastructure\Models\Decompte;
-use App\Infrastructure\Models\Paiement;
+use App\Models\Decompte;
+use App\Models\Paiement;
 
 class PaiementController extends Controller
 {
-    protected $business;
-
-    public function __construct(PaiementBusiness $business)
-    {
-        $this->business = $business;
-    }
-
     /**
      * Créer un fichier iso20022 pour un paiement
      *
@@ -22,7 +15,7 @@ class PaiementController extends Controller
      */
     public function iso20022($id)
     {
-        return $this->business->iso20022PourPaiementStream($id);
+        return PaiementBusiness::iso20022PourPaiementStream($id);
     }
 
     /**

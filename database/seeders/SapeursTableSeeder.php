@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Infrastructure\Models\Mutation;
-use App\Infrastructure\Models\Sapeur;
+use App\Models\Mutation;
+use App\Models\Sapeur;
 use Illuminate\Database\Seeder;
 use Carbon\Carbon;
 use Faker\Factory;

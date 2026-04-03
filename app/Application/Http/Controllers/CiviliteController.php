@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Infrastructure\Models\Civilite;
+use App\Models\Civilite;
 
 class CiviliteController extends Controller
 {

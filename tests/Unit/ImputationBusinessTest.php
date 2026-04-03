@@ -8,14 +8,10 @@ use Tests\TestCase;
 
 class ImputationBusinessTest extends TestCase
 {
-
-    protected $business;
-    protected function setUp(): void
+    public function testPlaceholder(): void
     {
-        parent::setUp();
-        $this->business = $this->app->make(ImputationBusiness::class);
+        $this->markTestSkipped('Legacy unit tests not implemented yet.');
     }
-
 
     // /**
     //  * Test imputer intervention avec taux nuit/week-end
@@ -55,7 +51,7 @@ class ImputationBusinessTest extends TestCase
     //         'par_fonction' => null,
     //         'type' => null, # TODO: pas utilisé pour le moment
     //     ];
-    //     $ecritures = $this->business->imputerInterventionTaux($intervention, $indemniteType);
+    //     $ecritures = ImputationBusiness::imputerInterventionTaux($intervention, $indemniteType);
     // }
 
     // public function testImputerInterventionTarifMinOk()
@@ -67,7 +63,12 @@ class ImputationBusinessTest extends TestCase
     //         ->assertJsonStructure([
     //             'data' => [
     //                 '*' => [
-    //                     'designation', 'localite_id', 'date', 'lieu', 'heure', 'duree'
+    //                     'designation',
+    //                     'localite_id',
+    //                     'date',
+    //                     'lieu',
+    //                     'heure',
+    //                     'duree'
     //                 ]
     //             ]
     //         ]);

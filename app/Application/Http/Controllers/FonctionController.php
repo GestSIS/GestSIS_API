@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\SapeurParamBusiness;
-use App\Infrastructure\Models\Fonction;
+use App\Models\Fonction;
 use Illuminate\Http\Request;
 
 class FonctionController extends Controller

@@ -3,19 +3,19 @@
 namespace App\Console\Commands;
 
 use App\Domaine\Business\ImputationBusiness;
-use App\Infrastructure\Models\Article;
-use App\Infrastructure\Models\AvsParam;
-use App\Infrastructure\Models\Commune;
-use App\Infrastructure\Models\Decompte;
-use App\Infrastructure\Models\Ecriture;
-use App\Infrastructure\Models\Fonction;
-use App\Infrastructure\Models\Localite;
-use App\Infrastructure\Models\LocaliteSis;
-use App\Infrastructure\Models\Sms;
-use App\Infrastructure\Models\SmsNumero;
-use App\Infrastructure\Models\ConvocationParam;
-use App\Infrastructure\Models\MaterielEventType;
-use App\Infrastructure\Models\MaterielType;
+use App\Models\Article;
+use App\Models\AvsParam;
+use App\Models\Commune;
+use App\Models\Decompte;
+use App\Models\Ecriture;
+use App\Models\Fonction;
+use App\Models\Localite;
+use App\Models\LocaliteSis;
+use App\Models\Sms;
+use App\Models\SmsNumero;
+use App\Models\ConvocationParam;
+use App\Models\MaterielEventType;
+use App\Models\MaterielType;
 use Illuminate\Console\Command;
 
 class DbsFix extends Command

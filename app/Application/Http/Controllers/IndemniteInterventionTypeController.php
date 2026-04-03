@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ComptabiliteParamBusiness;
-use App\Infrastructure\Models\IndemniteInterventionType;
+use App\Models\IndemniteInterventionType;
 use Illuminate\Http\Request;
 
 class IndemniteInterventionTypeController extends Controller

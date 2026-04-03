@@ -4,7 +4,7 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ExerciceBusiness;
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\ExerciceSapeur;
+use App\Models\ExerciceSapeur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 

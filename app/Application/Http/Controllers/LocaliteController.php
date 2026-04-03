@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Infrastructure\Models\Localite;
+use App\Models\Localite;
 
 class LocaliteController extends Controller
 {

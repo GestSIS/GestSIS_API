@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\SisParamBusiness;
-use App\Infrastructure\Models\LocaliteSis;
+use App\Models\LocaliteSis;
 use Illuminate\Http\Request;
 
 class LocaliteSisController extends Controller

@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Infrastructure\Models\ControleMedical;
+use App\Models\ControleMedical;
 
 class ControleMedicauxTableSeeder extends Seeder
 {

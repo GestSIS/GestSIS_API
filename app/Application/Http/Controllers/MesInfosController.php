@@ -2,17 +2,16 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\SPI\SapeurRepository;
+use App\Models\CoursSapeur;
+use App\Models\FonctionSapeur;
+use App\Models\GradeSapeur;
+use App\Models\GroupeSapeur;
+use App\Models\Mutation;
+use App\Models\Sapeur;
 use Illuminate\Http\Request;
 
 class MesInfosController extends Controller
 {
-    private $sapeurRepo;
-
-    public function __construct(SapeurRepository $sapeurRepo)
-    {
-        $this->sapeurRepo = $sapeurRepo;
-    }
 
     /**
      * Récupère les informations du sapeur
@@ -24,7 +23,7 @@ class MesInfosController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        $data = $this->sapeurRepo->getSapeurDetailsById($sapeurId, ['telephones']);
+        $data = Sapeur::with(['telephones'])->find($sapeurId);
         return response()->json(['data' => $data]);
     }
 
@@ -35,7 +34,7 @@ class MesInfosController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        $data = $this->sapeurRepo->getSapeurFonctionsById($sapeurId);
+        $data = FonctionSapeur::where('sapeur_id', $sapeurId)->get();
         return response()->json(['data' => $data]);
     }
 
@@ -46,7 +45,7 @@ class MesInfosController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        $data = $this->sapeurRepo->getSapeurMutationsById($sapeurId);
+        $data = Mutation::where('sapeur_id', $sapeurId)->get();
         return response()->json(['data' => $data]);
     }
 
@@ -57,7 +56,7 @@ class MesInfosController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        $data = $this->sapeurRepo->getSapeurGradesById($sapeurId);
+        $data = GradeSapeur::where('sapeur_id', $sapeurId)->get();
         return response()->json(['data' => $data]);
     }
 
@@ -68,7 +67,7 @@ class MesInfosController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        $data = $this->sapeurRepo->getSapeurCoursById($sapeurId);
+        $data = CoursSapeur::where('sapeur_id', $sapeurId)->get();
         return response()->json(['data' => $data]);
     }
 
@@ -79,7 +78,7 @@ class MesInfosController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        $data = $this->sapeurRepo->getSapeurPermisById($sapeurId);
+        $data = Sapeur::find($sapeurId)->permis()->get();
         return response()->json(['data' => $data]);
     }
 
@@ -90,7 +89,7 @@ class MesInfosController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        $data = $this->sapeurRepo->getSapeurGroupesById($sapeurId);
+        $data = GroupeSapeur::where('sapeur_id', $sapeurId)->get();
         return response()->json(['data' => $data]);
     }
 }

@@ -4,30 +4,23 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\Ecriture;
-use App\Infrastructure\Models\Exercice;
+use App\Models\Ecriture;
+use App\Models\Exercice;
 use Illuminate\Http\Request;
 
 class EcritureController extends Controller
 {
-    protected $business;
-
-    public function __construct(ImputationBusiness $business)
-    {
-        $this->business = $business;
-    }
-
     public function store(Request $request)
     {
         $data = $this->validateEcriture($request);
-        $ecriture = $this->business->ajouterEcriture($data);
+        $ecriture = ImputationBusiness::ajouterEcriture($data);
         return response()->json(['data' => $ecriture]);
     }
 
     public function update(Request $request, $id)
     {
         $data = $this->validateEcriture($request);
-        $ecriture = $this->business->modifierEcriture($id, $data);
+        $ecriture = ImputationBusiness::modifierEcriture($id, $data);
         return response()->json(['data' => $ecriture]);
     }
 
@@ -76,7 +69,7 @@ class EcritureController extends Controller
 
     public function destroy($id)
     {
-        $ecriture = $this->business->supprimerEcriture($id);
+        $ecriture = ImputationBusiness::supprimerEcriture($id);
         return response()->json(['data' => $ecriture]);
     }
 
@@ -87,20 +80,26 @@ class EcritureController extends Controller
 
     public function divers(int $exerciceComptableId)
     {
-        return response()->json(['data' => Ecriture::where('exercice_comptable_id', $exerciceComptableId)
-            ->where('module', ImputationBusiness::ECRITURE_MODULE_DIVERS)->get()]);
+        return response()->json([
+            'data' => Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+                ->where('module', ImputationBusiness::ECRITURE_MODULE_DIVERS)->get()
+        ]);
     }
 
     public function annuel(int $exerciceComptableId)
     {
-        return response()->json(['data' => Ecriture::where('exercice_comptable_id', $exerciceComptableId)
-            ->where('module', ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)->get()]);
+        return response()->json([
+            'data' => Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+                ->where('module', ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)->get()
+        ]);
     }
 
     public function amende(int $exerciceComptableId)
     {
-        return response()->json(['data' => Ecriture::where('exercice_comptable_id', $exerciceComptableId)
-            ->where('module', ImputationBusiness::ECRITURE_MODULE_AMENDE)->get()]);
+        return response()->json([
+            'data' => Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+                ->where('module', ImputationBusiness::ECRITURE_MODULE_AMENDE)->get()
+        ]);
     }
 
     public function intervention(int $interventionId)
@@ -115,9 +114,11 @@ class EcritureController extends Controller
 
     public function exercices(int $exerciceComptableId)
     {
-        return response()->json(['data' => Exercice::where([
-            ['exercice_comptable_id', '=', $exerciceComptableId],
-            ['statut', '>', 2],
-        ])->with('ecritures')->get()]);
+        return response()->json([
+            'data' => Exercice::where([
+                ['exercice_comptable_id', '=', $exerciceComptableId],
+                ['statut', '>', 2],
+            ])->with('ecritures')->get()
+        ]);
     }
 }

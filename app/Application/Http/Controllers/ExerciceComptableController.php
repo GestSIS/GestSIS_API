@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ExerciceComptableBusiness;
-use App\Infrastructure\Models\ExerciceComptable;
+use App\Models\ExerciceComptable;
 use Illuminate\Http\Request;
 
 class ExerciceComptableController extends Controller

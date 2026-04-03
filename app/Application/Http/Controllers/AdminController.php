@@ -2,9 +2,9 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\LocaliteSis;
-use App\Infrastructure\Models\SisContact;
-use App\Infrastructure\Models\SisParam;
+use App\Models\LocaliteSis;
+use App\Models\SisContact;
+use App\Models\SisParam;
 use Illuminate\Support\Facades\Config;
 
 class AdminController extends Controller

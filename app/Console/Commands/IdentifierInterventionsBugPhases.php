@@ -4,11 +4,11 @@ namespace App\Console\Commands;
 
 use App\Domaine\Business\InterventionBusiness;
 use App\Domaine\Business\PaiementBusiness;
-use App\Infrastructure\Models\Ecriture;
-use App\Infrastructure\Models\ExerciceComptable;
-use App\Infrastructure\Models\IndemniteInterventionType;
-use App\Infrastructure\Models\Intervention;
-use App\Infrastructure\Models\Mutation;
+use App\Models\Ecriture;
+use App\Models\ExerciceComptable;
+use App\Models\IndemniteInterventionType;
+use App\Models\Intervention;
+use App\Models\Mutation;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
@@ -490,11 +490,8 @@ class IdentifierInterventionsBugPhases extends Command
         $designation = "Décompte de Correction bug phases - " . Carbon::now()->format('d.m.Y');
         $date = Carbon::now()->format('Y-m-d');
 
-        // Instancier PaiementBusiness
-        $paiementBusiness = new PaiementBusiness();
-
         try {
-            $decompte = $paiementBusiness->creerDecompte(
+            $decompte = PaiementBusiness::creerDecompte(
                 $ecritures,
                 $designation,
                 $exerciceComptable2025->id,

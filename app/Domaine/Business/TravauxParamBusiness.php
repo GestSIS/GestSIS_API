@@ -3,9 +3,9 @@
 namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\InvalidActionException;
-use App\Infrastructure\Models\Travail;
-use App\Infrastructure\Models\TravailType;
-use App\Infrastructure\Models\TravailTypeFonction;
+use App\Models\Travail;
+use App\Models\TravailType;
+use App\Models\TravailTypeFonction;
 
 class TravauxParamBusiness
 {

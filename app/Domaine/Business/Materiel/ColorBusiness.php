@@ -2,7 +2,7 @@
 
 namespace App\Domaine\Business\Materiel;
 
-use App\Infrastructure\Models\Couleur;
+use App\Models\Couleur;
 
 /**
  * Model for manipulating 'color' database table

@@ -3,8 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Domaine\Business\ExerciceBusiness;
-use App\Infrastructure\Models\Exercice;
-use App\Infrastructure\Repositories\ExerciceRepositoryEloquent;
+use App\Models\Exercice;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
@@ -43,13 +42,12 @@ class DbsExercicesStatus extends Command
     public function handle()
     {
         $dbs = config('database.dbs');
-        $exerciceBusiness = new ExerciceBusiness(new ExerciceRepositoryEloquent());
         foreach ($dbs as $db) {
             printf("Recompute for sis=" . $db . "\n");
             Config::set('database.default', 'db_' . $db);
             $exercices = Exercice::where('date', '>', Carbon::create(2023, 1, 1));
             foreach ($exercices as $exercice) {
-                $exerciceBusiness->updateStatut($exercice->id);
+                ExerciceBusiness::updateStatut($exercice->id);
             }
 
             printf("\n");

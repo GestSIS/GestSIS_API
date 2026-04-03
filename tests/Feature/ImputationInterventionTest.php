@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Infrastructure\Models\IndemniteInterventionType;
-use App\Infrastructure\Models\Intervention;
-use App\Infrastructure\Models\Sapeur;
+use App\Models\IndemniteInterventionType;
+use App\Models\Intervention;
+use App\Models\Sapeur;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;

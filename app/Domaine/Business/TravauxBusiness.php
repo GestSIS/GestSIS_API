@@ -3,7 +3,7 @@
 namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\Travail;
+use App\Models\Travail;
 use Carbon\Carbon;
 
 class TravauxBusiness

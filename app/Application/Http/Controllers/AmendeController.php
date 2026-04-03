@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ComptabiliteParamBusiness;
-use App\Infrastructure\Models\Amende;
+use App\Models\Amende;
 use Illuminate\Http\Request;
 
 class AmendeController extends Controller

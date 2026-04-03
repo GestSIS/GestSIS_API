@@ -3,7 +3,7 @@
 namespace App\Domaine\Business\Materiel;
 
 use \Illuminate\Database\Eloquent\Collection;
-use App\Infrastructure\Models\BatterieType;
+use App\Models\BatterieType;
 
 /**
  * Model for manipulating 'batterytype' database table

@@ -3,22 +3,15 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\SapeurBusiness;
-use App\Infrastructure\Models\Sapeur;
+use App\Models\Sapeur;
 use Illuminate\Http\Request;
 
 class SapeurPhotoController extends Controller
 {
-    protected $business;
-
-    public function __construct(SapeurBusiness $business)
-    {
-        $this->business = $business;
-    }
-
     public function index(Request $request, int $id)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        return $this->business->downloadPhotoSapeur($id, $sisKey);
+        return SapeurBusiness::downloadPhotoSapeur($id, $sisKey);
     }
 
     public function store(Request $request, $sapeurId)
@@ -33,7 +26,7 @@ class SapeurPhotoController extends Controller
                 }
 
                 $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-                $res = $this->business->uploadPhotoSapeur($validated['image'], $sapeurId, $sisKey);
+                $res = SapeurBusiness::uploadPhotoSapeur($validated['image'], $sapeurId, $sisKey);
                 return response()->json(['data' => $res]);
             }
             return response()->json(['data' => ['message' => 'Image invalide']], 500);
@@ -44,7 +37,7 @@ class SapeurPhotoController extends Controller
     public function destroy(Request $request, int $id)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        $this->business->deletePhotoSapeur($id, $sisKey);
+        SapeurBusiness::deletePhotoSapeur($id, $sisKey);
         return response()->json(['data' => "success"]);
     }
 }

@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Infrastructure\Models\Intervention;
-use App\Infrastructure\Models\InterventionMateriel;
+use App\Models\Intervention;
+use App\Models\InterventionMateriel;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;

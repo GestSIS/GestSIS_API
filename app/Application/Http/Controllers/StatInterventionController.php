@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\InterventionParamBusiness;
-use App\Infrastructure\Models\StatIntervention;
+use App\Models\StatIntervention;
 use Illuminate\Http\Request;
 
 class StatInterventionController extends Controller

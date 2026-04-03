@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Infrastructure\Models\SisParam;
+use App\Models\SisParam;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 

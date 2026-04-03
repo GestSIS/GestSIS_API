@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\Travail;
+use App\Models\Travail;
 use Illuminate\Http\Request;
 
 class MesTravauxController extends Controller

@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\PhaseType;
+use App\Models\PhaseType;
 use Illuminate\Http\Response;
 
 class PhaseTypeController extends Controller

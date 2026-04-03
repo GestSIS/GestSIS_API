@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\AvsParamBusiness;
-use App\Infrastructure\Models\AvsParam;
+use App\Models\AvsParam;
 use Illuminate\Http\Request;
 
 class AvsParamController extends Controller

@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Infrastructure\Models\CoursSapeur;
-use App\Infrastructure\Models\FonctionSapeur;
-use App\Infrastructure\Models\Sapeur;
+use App\Models\CoursSapeur;
+use App\Models\FonctionSapeur;
+use App\Models\Sapeur;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 

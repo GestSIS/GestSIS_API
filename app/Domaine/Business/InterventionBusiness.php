@@ -5,22 +5,22 @@ namespace App\Domaine\Business;
 use App\Application\Typst\TypstTemplate;
 use App\Application\Typst\TypstToPdfGenerator;
 use App\Domaine\Business\Materiel\MaterielTypeBusiness;
-use App\Domaine\SPI\InterventionRepository;
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\Article;
-use App\Infrastructure\Models\Ecriture;
-use App\Infrastructure\Models\ExerciceComptable;
-use App\Infrastructure\Models\Groupe;
-use App\Infrastructure\Models\GroupeIntervention;
-use App\Infrastructure\Models\Intervention;
-use App\Infrastructure\Models\InterventionMateriel;
-use App\Infrastructure\Models\InterventionSapeur;
-use App\Infrastructure\Models\InterventionVehicule;
-use App\Infrastructure\Models\Materiel;
-use App\Infrastructure\Models\Mission;
-use App\Infrastructure\Models\Phase;
-use App\Infrastructure\Models\Quittance;
-use App\Infrastructure\Models\Sapeur;
+use App\Models\Appel;
+use App\Models\Article;
+use App\Models\Ecriture;
+use App\Models\ExerciceComptable;
+use App\Models\Groupe;
+use App\Models\GroupeIntervention;
+use App\Models\Intervention;
+use App\Models\InterventionMateriel;
+use App\Models\InterventionSapeur;
+use App\Models\InterventionVehicule;
+use App\Models\Materiel;
+use App\Models\Mission;
+use App\Models\Phase;
+use App\Models\Quittance;
+use App\Models\Sapeur;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -32,16 +32,9 @@ class InterventionBusiness
     public const INTERVENTION_STATUT_VALIDE = 2;
     public const INTERVENTION_STATUT_IMPUTE = 3;
 
-    protected $repository;
-
-    public function __construct(InterventionRepository $repository)
+    private static function checkIsNotImpute($interventionId)
     {
-        $this->repository = $repository;
-    }
-
-    private function checkIsNotImpute($interventionId)
-    {
-        $statut = $this->repository->getInterventionStatutById($interventionId);
+        $statut = Intervention::findOrFail($interventionId)->statut;
         if ($statut >= self::INTERVENTION_STATUT_IMPUTE) {
             throw new ArrayException([], 'Intervention already impute');
         }
@@ -54,7 +47,7 @@ class InterventionBusiness
      * @return Intervention
      * @throws ArrayException
      */
-    public function createIntervention($data): Intervention
+    public static function createIntervention($data): Intervention
     {
         //TODO Vérifier intervention comptable
         $phaseTypeIntervention = 1;
@@ -79,10 +72,12 @@ class InterventionBusiness
         $intervention->exercice_comptable_id = $data['exercice_comptable_id'];
         $intervention->save();
 
-        $this->repository->addPhase($intervention->id, array(
-            "debut" => null,
-            "phase_type_id" => $phaseTypeIntervention,
-        ));
+        $phase = new Phase();
+        $phase->debut = null;
+        $phase->phase_type_id = $phaseTypeIntervention;
+        $phase->intervention_id = $intervention->id;
+        $phase->save();
+
         return $intervention;
     }
 
@@ -93,7 +88,7 @@ class InterventionBusiness
      * @return InterventionBusiness
      * @throws ArrayException
      */
-    public function importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel, $quittances)
+    public static function importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel, $quittances)
     {
         $phaseTypeIntervention = 1;
         $intervention['statut'] = self::INTERVENTION_STATUT_SAISI;
@@ -146,10 +141,11 @@ class InterventionBusiness
         $newIntervention->save();
 
         // Pour le moment pas de gestion des phases dans GestSIS Mobile
-        $this->repository->addPhase($newIntervention->id, array(
-            "debut" => null,
-            "phase_type_id" => $phaseTypeIntervention,
-        ));
+        $phase = new Phase();
+        $phase->debut = null;
+        $phase->phase_type_id = $phaseTypeIntervention;
+        $phase->intervention_id = $newIntervention->id;
+        $phase->save();
 
         // Ajout des quittances
         $quittances = array_map(function ($e) use ($newIntervention) {
@@ -212,13 +208,12 @@ class InterventionBusiness
      * @return mixed
      * @throws ArrayException
      */
-    public function validerInterventionById($interventionId)
+    public static function validerInterventionById($interventionId)
     {
-        $statut = $this->repository->getInterventionStatutById($interventionId);
-        if ($statut === self::INTERVENTION_STATUT_SAISI) {
-            return $this->repository->editInterventionInformationsById($interventionId, [
-                "statut" => self::INTERVENTION_STATUT_VALIDE
-            ])->statut;
+        $intervention = Intervention::findOrFail($interventionId);
+        if ($intervention->statut === self::INTERVENTION_STATUT_SAISI) {
+            $intervention->update(['statut' => self::INTERVENTION_STATUT_VALIDE]);
+            return $intervention->statut;
         }
         throw new ArrayException(["message" => "Impossible de valider l'exercice."]);
     }
@@ -231,9 +226,23 @@ class InterventionBusiness
      * @return Intervention
      * @throws ArrayException(
      */
-    public function editInterventionInformationsById($interventionId, $data)
+    public static function editInterventionInformationsById($interventionId, $data)
     {
-        $intervention = $this->repository->editInterventionInformationsById($interventionId, $data);
+        if (array_key_exists('lieu', $data) && $data['lieu'] === null)
+            $data['lieu'] = '';
+        if (!array_key_exists('agent', $data) || $data['agent'] === null)
+            $data['agent'] = '';
+        if (array_key_exists('description', $data) && $data['description'] === null)
+            $data['description'] = '';
+        if (array_key_exists('proprietaire', $data) && $data['proprietaire'] === null)
+            $data['proprietaire'] = '';
+        if (array_key_exists('responsable', $data) && $data['responsable'] === null)
+            $data['responsable'] = '';
+        if (array_key_exists('wgs84', $data) && $data['wgs84'] === null)
+            $data['wgs84'] = '';
+
+        $intervention = Intervention::find($interventionId);
+        $intervention->update($data);
         //TODO Update phase debut
         //TODO Check if date debut changed -> update first phase
 
@@ -245,10 +254,18 @@ class InterventionBusiness
      *
      * @param int
      */
-    public function deleteInterventionById($interventionId)
+    public static function deleteInterventionById($interventionId)
     {
-        $this->checkIsNotImpute($interventionId);
-        $this->repository->supprimerInterventionById($interventionId);
+        self::checkIsNotImpute($interventionId);
+        InterventionSapeur::where('intervention_id', '=', $interventionId)->delete();
+        GroupeIntervention::where('intervention_id', '=', $interventionId)->delete();
+        InterventionVehicule::where('intervention_id', '=', $interventionId)->delete();
+        InterventionMateriel::where('intervention_id', '=', $interventionId)->delete();
+        Quittance::where('intervention_id', '=', $interventionId)->delete();
+        Mission::where('intervention_id', '=', $interventionId)->delete();
+        Appel::where('intervention_id', '=', $interventionId)->delete();
+        Phase::where('intervention_id', '=', $interventionId)->delete();
+        Intervention::where('id', '=', $interventionId)->delete();
         return true;
     }
 
@@ -259,21 +276,25 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayException(
      */
-    public function addPresences($interventionId, $sapeurs)
+    public static function addPresences($interventionId, $sapeurs)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
         foreach ($sapeurs as $sapeur) {
             // TODO: Check duplicated period of time
 
-            $this->repository->addPresence($interventionId, $sapeur);
+            $sap = new InterventionSapeur();
+            $sap->fill($sapeur);
+            $sap->sapeur_id = $sapeur['sapeur_id'];
+            $sap->intervention_id = $interventionId;
+            $sap->save();
         }
 
-        $statut = $this->repository->getInterventionStatutById($interventionId);
-        if ($statut < self::INTERVENTION_STATUT_SAISI) {
-            $statut = $this->repository->editInterventionInformationsById($interventionId, ["statut" => self::INTERVENTION_STATUT_SAISI])->statut;
+        $intervention = Intervention::findOrFail($interventionId);
+        if ($intervention->statut < self::INTERVENTION_STATUT_SAISI) {
+            $intervention->update(['statut' => self::INTERVENTION_STATUT_SAISI]);
         }
-        return $statut;
+        return $intervention->statut;
     }
 
     /**
@@ -282,14 +303,16 @@ class InterventionBusiness
      * @param $data
      * @return Collection
      */
-    public function updatePresences($interventionId, $sapeurs)
+    public static function updatePresences($interventionId, $sapeurs)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
         foreach ($sapeurs as $sapeur) {
             // TODO: Check period non dupliqué
 
-            $this->repository->editPresenceInfoById($interventionId, $sapeur['id'], $sapeur);
+            InterventionSapeur::where('intervention_id', $interventionId)
+                ->where('id', $sapeur['id'])
+                ->update($sapeur);
         }
     }
 
@@ -298,18 +321,21 @@ class InterventionBusiness
      *
      * @param $data
      */
-    public function removePresences($interventionId, $ids)
+    public static function removePresences($interventionId, $ids)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
-        $this->repository->removePresencesById($interventionId, $ids);
-        $statut = $this->repository->getInterventionStatutById($interventionId);
+        InterventionSapeur::where('intervention_id', $interventionId)
+            ->whereIn('id', $ids)
+            ->delete();
 
         $presences = InterventionSapeur::where('intervention_id', $interventionId)->get();
         if ($presences->isEmpty()) {
-            $statut = $this->repository->editInterventionInformationsById($interventionId, ["statut" => self::INTERVENTION_STATUT_EMPTY]);
+            $intervention = Intervention::findOrFail($interventionId);
+            $intervention->update(['statut' => self::INTERVENTION_STATUT_EMPTY]);
+            return true;
         }
-        return $statut;
+        return true;
     }
 
     /**
@@ -319,12 +345,18 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayException(
      */
-    public function addAppels($interventionId, $appels)
+    public static function addAppels($interventionId, $appels)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
         foreach ($appels as $appel) {
-            $this->repository->addAppel($interventionId, $appel);
+            if (array_key_exists('commentaire', $appel) && $appel['commentaire'] === null)
+                $appel['commentaire'] = '';
+
+            $app = new Appel();
+            $app->fill($appel);
+            $app->intervention_id = $interventionId;
+            $app->save();
         }
     }
 
@@ -335,12 +367,17 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayException(
      */
-    public function updateAppels($interventionId, $appels)
+    public static function updateAppels($interventionId, $appels)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
         foreach ($appels as $appel) {
-            $this->repository->editAppelInfoById($interventionId, $appel['id'], $appel);
+            if (array_key_exists('commentaire', $appel) && $appel['commentaire'] === null)
+                $appel['commentaire'] = '';
+
+            Appel::where('intervention_id', $interventionId)
+                ->where('id', $appel['id'])
+                ->update($appel);
         }
     }
 
@@ -349,11 +386,13 @@ class InterventionBusiness
      *
      * @param $data
      */
-    public function removeAppels($interventionId, $ids)
+    public static function removeAppels($interventionId, $ids)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
-        $this->repository->removeAppelsById($interventionId, $ids);
+        Appel::where('intervention_id', $interventionId)
+            ->whereIn('id', $ids)
+            ->delete();
     }
 
     /**
@@ -363,12 +402,18 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayException(
      */
-    public function addMissions($interventionId, $missions)
+    public static function addMissions($interventionId, $missions)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
         foreach ($missions as $mission) {
-            $this->repository->addMission($interventionId, $mission);
+            if (array_key_exists('resume', $mission) && $mission['resume'] === null)
+                $mission['resume'] = '';
+
+            $mis = new Mission();
+            $mis->fill($mission);
+            $mis->intervention_id = $interventionId;
+            $mis->save();
         }
     }
 
@@ -379,12 +424,17 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayException(
      */
-    public function updateMissions($interventionId, $missions)
+    public static function updateMissions($interventionId, $missions)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
         foreach ($missions as $mission) {
-            $this->repository->editMissionInfoById($interventionId, $mission['id'], $mission);
+            if (array_key_exists('resume', $mission) && $mission['resume'] === null)
+                $mission['resume'] = '';
+
+            Mission::where('intervention_id', $interventionId)
+                ->where('id', $mission['id'])
+                ->update($mission);
         }
     }
 
@@ -393,11 +443,13 @@ class InterventionBusiness
      *
      * @param $data
      */
-    public function removeMissions($interventionId, $ids)
+    public static function removeMissions($interventionId, $ids)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
-        $this->repository->removeMissionsById($interventionId, $ids);
+        Mission::where('intervention_id', $interventionId)
+            ->whereIn('id', $ids)
+            ->delete();
     }
 
     /**
@@ -407,11 +459,11 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayException(
      */
-    public function addPhases($interventionId, $phases)
+    public static function addPhases($interventionId, $phases)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
-        $intervention = $this->repository->findInterventionById($interventionId);
+        $intervention = Intervention::find($interventionId);
         $existingPhases = Phase::where('intervention_id', $interventionId)->get();
 
         $debut = Carbon::parse($intervention->date_debut . " " . $intervention->heure_debut);
@@ -424,7 +476,10 @@ class InterventionBusiness
                         throw new ArrayException(["debut" => "Duplicated phase at same time"]);
                     }
                 }
-                $this->repository->addPhase($interventionId, $phase);
+                $newPhase = new Phase();
+                $newPhase->fill($phase);
+                $newPhase->intervention_id = $interventionId;
+                $newPhase->save();
             }
         }
     }
@@ -436,12 +491,14 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayException(
      */
-    public function updatePhases($interventionId, $phases)
+    public static function updatePhases($interventionId, $phases)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
         foreach ($phases as $phase) {
-            $this->repository->editPhaseInfosById($interventionId, $phase['id'], $phase);
+            Phase::where('intervention_id', $interventionId)
+                ->where('id', $phase['id'])
+                ->update($phase);
         }
     }
 
@@ -450,11 +507,13 @@ class InterventionBusiness
      *
      * @param $data
      */
-    public function removePhases($interventionId, $ids)
+    public static function removePhases($interventionId, $ids)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
-        $this->repository->removePhasesById($interventionId, $ids);
+        Phase::where('intervention_id', $interventionId)
+            ->whereIn('id', $ids)
+            ->delete();
     }
 
     /**
@@ -464,12 +523,16 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayException(
      */
-    public function addMateriels($interventionId, $materiels)
+    public static function addMateriels($interventionId, $materiels)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
         foreach ($materiels as $materiel) {
-            $this->repository->addMateriel($interventionId, $materiel);
+            $mis = new InterventionMateriel();
+            $mis->fill($materiel);
+            $mis->materiel_id = $materiel['materiel_id'];
+            $mis->intervention_id = $interventionId;
+            $mis->save();
         }
     }
 
@@ -480,12 +543,14 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayException(
      */
-    public function updateMateriels($interventionId, $materiels)
+    public static function updateMateriels($interventionId, $materiels)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
         foreach ($materiels as $materiel) {
-            $this->repository->editMaterielQuantiteById($interventionId, $materiel['id'], $materiel['quantite']);
+            InterventionMateriel::where('intervention_id', $interventionId)
+                ->where('id', $materiel['id'])
+                ->update(['quantite' => $materiel['quantite']]);
         }
     }
 
@@ -494,11 +559,13 @@ class InterventionBusiness
      *
      * @param $data
      */
-    public function removeMateriels($interventionId, $ids)
+    public static function removeMateriels($interventionId, $ids)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
-        $this->repository->removeMaterielsById($interventionId, $ids);
+        InterventionMateriel::where('intervention_id', $interventionId)
+            ->whereIn('id', $ids)
+            ->delete();
     }
 
     /**
@@ -508,12 +575,15 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayException(
      */
-    public function addQuittances($interventionId, $quittances)
+    public static function addQuittances($interventionId, $quittances)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
         foreach ($quittances as $quittance) {
-            $this->repository->addQuittance($interventionId, $quittance);
+            $newQuittance = new Quittance();
+            $newQuittance->sapeur_id = $quittance;
+            $newQuittance->intervention_id = $interventionId;
+            $newQuittance->save();
         }
     }
 
@@ -522,11 +592,13 @@ class InterventionBusiness
      *
      * @param $data
      */
-    public function removeQuittances($interventionId, $ids)
+    public static function removeQuittances($interventionId, $ids)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
-        $this->repository->removeQuittancesById($interventionId, $ids);
+        Quittance::where('intervention_id', $interventionId)
+            ->whereIn('id', $ids)
+            ->delete();
     }
 
     /**
@@ -536,9 +608,9 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayException(
      */
-    public function addVehicules($interventionId, $vehicules)
+    public static function addVehicules($interventionId, $vehicules)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
         //Check duplicated vehicules
         $vehiculeIds = InterventionVehicule::where('intervention_id', $interventionId)->get()
@@ -548,7 +620,10 @@ class InterventionBusiness
         });
 
         foreach ($vehicules as $vehicule) {
-            $this->repository->addVehicule($interventionId, $vehicule);
+            $newVehicule = new InterventionVehicule();
+            $newVehicule->vehicule_id = $vehicule;
+            $newVehicule->intervention_id = $interventionId;
+            $newVehicule->save();
         }
     }
 
@@ -557,11 +632,13 @@ class InterventionBusiness
      *
      * @param $data
      */
-    public function removeVehicules($interventionId, $ids)
+    public static function removeVehicules($interventionId, $ids)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
-        $this->repository->removeVehiculesById($interventionId, $ids);
+        InterventionVehicule::where('intervention_id', $interventionId)
+            ->whereIn('vehicule_id', $ids)
+            ->delete();
     }
 
     /**
@@ -571,12 +648,16 @@ class InterventionBusiness
      * @return Collection
      * @throws ArrayException(
      */
-    public function addGroupes($interventionId, $groupes)
+    public static function addGroupes($interventionId, $groupes)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
         foreach ($groupes as $groupe) {
-            $this->repository->addGroupe($interventionId, $groupe['no'], $groupe['designation']);
+            $newGroupe = new GroupeIntervention();
+            $newGroupe->no = $groupe['no'];
+            $newGroupe->designation = $groupe['designation'];
+            $newGroupe->intervention_id = $interventionId;
+            $newGroupe->save();
         }
     }
 
@@ -585,11 +666,13 @@ class InterventionBusiness
      *
      * @param $data
      */
-    public function removeGroupes($interventionId, $ids)
+    public static function removeGroupes($interventionId, $ids)
     {
-        $this->checkIsNotImpute($interventionId);
+        self::checkIsNotImpute($interventionId);
 
-        $this->repository->removeGroupesById($interventionId, $ids);
+        GroupeIntervention::where('intervention_id', $interventionId)
+            ->whereIn('id', $ids)
+            ->delete();
     }
 
     public static function rapport($interventionId, $params, string $sisKey)

@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use App\Infrastructure\Models\Exercice;
+use App\Models\Exercice;
 
 class ExerciceTableSeeder extends Seeder
 {

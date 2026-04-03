@@ -4,9 +4,9 @@ namespace Tests\Feature;
 
 use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Business\PaiementBusiness;
-use App\Infrastructure\Models\AvsParam;
-use App\Infrastructure\Models\Ecriture;
-use App\Infrastructure\Models\SisParam;
+use App\Models\AvsParam;
+use App\Models\Ecriture;
+use App\Models\SisParam;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -132,8 +132,8 @@ class DecompteTest extends TestCase
             'date' => Carbon::today()
         ];
 
-        $business = new PaiementBusiness();
-        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
+
+        $response = PaiementBusiness::creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
 
         $response = $this->json('GET', "api/v2/decomptes/" . $response['id']);
 
@@ -189,7 +189,7 @@ class DecompteTest extends TestCase
             );
 
         //vérification qu'on ne paye pas deux fois
-        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
+        $response = PaiementBusiness::creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
 
         $response = $this->json('GET', "api/v2/decomptes/" . $response['id']);
 
@@ -293,8 +293,7 @@ class DecompteTest extends TestCase
             'date' => Carbon::today(),
         ];
 
-        $business = new PaiementBusiness();
-        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
+        $response = PaiementBusiness::creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
         $response = $this->json('GET', "api/v2/decomptes/" . $response['id']);
 
         $response
@@ -444,8 +443,7 @@ class DecompteTest extends TestCase
             'date' => Carbon::today(),
         ];
 
-        $business = new PaiementBusiness();
-        $response = $business->creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
+        $response = PaiementBusiness::creerDecompte($ecritures, $params['designation'], $params['exercice_comptable_id'], $params['date'], $params['deduction']);
         $response = $this->json('GET', "api/v2/decomptes/" . $response['id']);
 
         $response

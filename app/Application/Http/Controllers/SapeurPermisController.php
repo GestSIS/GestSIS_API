@@ -3,21 +3,12 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\SapeurBusiness;
-use App\Domaine\SPI\SapeurRepository;
-use App\Infrastructure\Models\Permis;
-use App\Infrastructure\Models\Sapeur;
+use App\Models\Permis;
+use App\Models\Sapeur;
 use Illuminate\Http\Request;
 
 class SapeurPermisController extends Controller
 {
-    protected $repo;
-    protected $business;
-
-    public function __construct(SapeurRepository $repo, SapeurBusiness $business)
-    {
-        $this->repo = $repo;
-        $this->business = $business;
-    }
 
     public function index(int $sapeur_id)
     {
@@ -38,7 +29,7 @@ class SapeurPermisController extends Controller
             'date' => 'required|date|before:tomorrow'
         ]);
 
-        $permis = $this->business->addPermis($id, $data);
+        $permis = SapeurBusiness::addPermis($id, $data);
         return response()->json(['data' => $permis]);
     }
 
@@ -60,7 +51,7 @@ class SapeurPermisController extends Controller
             return response()->json(['error' => 'Permis non trouvé'], 404);
         }
 
-        $permis = $this->business->updatePermis($id, $data);
+        $permis = SapeurBusiness::updatePermis($id, $data);
         return response()->json(['data' => $permis]);
     }
 
@@ -73,7 +64,7 @@ class SapeurPermisController extends Controller
             return response()->json(['error' => 'Permis non trouvé'], 404);
         }
 
-        $this->business->removePermis($id, $permisId);
+        SapeurBusiness::removePermis($id, $permisId);
         return response()->json(['data' => 'success']);
     }
 }

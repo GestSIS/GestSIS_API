@@ -3,28 +3,19 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\SapeurBusiness;
-use App\Domaine\SPI\SapeurRepository;
-use App\Infrastructure\Models\FonctionSapeur;
-use App\Infrastructure\Models\Sapeur;
+use App\Models\FonctionSapeur;
+use App\Models\Sapeur;
 use Illuminate\Http\Request;
 
 class SapeurFonctionController extends Controller
 {
-    protected $repo;
-    protected $business;
-
-    public function __construct(SapeurRepository $repo, SapeurBusiness $business)
-    {
-        $this->repo = $repo;
-        $this->business = $business;
-    }
 
     public function index(int $sapeurId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-        return response()->json(['data' => $this->repo->getSapeurFonctionsById($sapeurId)]);
+        return response()->json(['data' => FonctionSapeur::where('sapeur_id', $sapeurId)->get()]);
     }
 
     public function store(Request $request, int $sapeurId)
@@ -40,7 +31,7 @@ class SapeurFonctionController extends Controller
             'remarque' => 'string|nullable',
         ]);
 
-        $fonction = $this->business->addFonction($sapeurId, $data);
+        $fonction = SapeurBusiness::addFonction($sapeurId, $data);
         return response()->json(['data' => $fonction]);
     }
 
@@ -63,7 +54,7 @@ class SapeurFonctionController extends Controller
             'remarque' => 'string|nullable',
         ]);
 
-        $fonction = $this->business->updateFonction($sapeurId, $data);
+        $fonction = SapeurBusiness::updateFonction($sapeurId, $data);
         return response()->json(['data' => $fonction]);
     }
 
@@ -76,7 +67,7 @@ class SapeurFonctionController extends Controller
             return response()->json(['error' => 'Fonction non trouvée'], 404);
         }
 
-        $res = $this->business->removeFonction($sapeurId, $fonctionId);
+        $res = SapeurBusiness::removeFonction($sapeurId, $fonctionId);
         return response()->json(['data' => $res]);
     }
 
@@ -91,7 +82,7 @@ class SapeurFonctionController extends Controller
             'date' => 'required|date'
         ]);
 
-        $fonctions = $this->business->finFonctions($sapeurId, $data['date'], $data['ids']);
+        $fonctions = SapeurBusiness::finFonctions($sapeurId, $data['date'], $data['ids']);
         return response()->json(['data' => $fonctions]);
     }
 }

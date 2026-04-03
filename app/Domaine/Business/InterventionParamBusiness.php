@@ -4,15 +4,15 @@ namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\Exceptions\InvalidActionException;
-use App\Infrastructure\Models\Intervention;
-use App\Infrastructure\Models\InterventionMateriel;
-use App\Infrastructure\Models\InterventionTraitement;
-use App\Infrastructure\Models\Materiel;
-use App\Infrastructure\Models\MissionType;
-use App\Infrastructure\Models\StatFederal;
-use App\Infrastructure\Models\StatIntervention;
-use App\Infrastructure\Models\Telephone;
-use App\Infrastructure\Models\TypeIntervention;
+use App\Models\Intervention;
+use App\Models\InterventionMateriel;
+use App\Models\InterventionTraitement;
+use App\Models\Materiel;
+use App\Models\MissionType;
+use App\Models\StatFederal;
+use App\Models\StatIntervention;
+use App\Models\Telephone;
+use App\Models\TypeIntervention;
 
 class InterventionParamBusiness
 {

@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\InterventionParamBusiness;
-use App\Infrastructure\Models\Telephone;
+use App\Models\Telephone;
 use Illuminate\Http\Request;
 
 class TelephoneController extends Controller

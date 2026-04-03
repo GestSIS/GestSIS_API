@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\InterventionParamBusiness;
-use App\Infrastructure\Models\InterventionTraitement;
+use App\Models\InterventionTraitement;
 use Illuminate\Http\Request;
 
 class InterventionTraitementController extends Controller

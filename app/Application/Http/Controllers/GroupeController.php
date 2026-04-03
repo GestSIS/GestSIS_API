@@ -3,18 +3,11 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\OrganisationBusiness;
-use App\Infrastructure\Models\Groupe;
+use App\Models\Groupe;
 use Illuminate\Http\Request;
 
 class GroupeController extends Controller
 {
-    protected $business;
-
-    public function __construct(OrganisationBusiness $business)
-    {
-        $this->business = $business;
-    }
-
 
     /**
      * Display a listing of the resource.
@@ -37,7 +30,7 @@ class GroupeController extends Controller
             'type' => 'integer',
         ]);
 
-        $groupe = $this->business->ajouterGroupe($data);
+        $groupe = OrganisationBusiness::ajouterGroupe($data);
         return response()->json(['data' => $groupe]);
     }
 
@@ -55,7 +48,7 @@ class GroupeController extends Controller
             'type' => 'integer',
         ]);
 
-        $groupe = $this->business->modifierGroupe($id, $data);
+        $groupe = OrganisationBusiness::modifierGroupe($id, $data);
         return response()->json(['data' => $groupe]);
     }
 
@@ -65,7 +58,7 @@ class GroupeController extends Controller
             return response()->json(['error' => 'Groupe not found'], 404);
         }
 
-        $this->business->supprimerGroupe($id);
+        OrganisationBusiness::supprimerGroupe($id);
         return response()->json(['data' => 'ok']);
     }
 }

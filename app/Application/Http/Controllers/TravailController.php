@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\TravauxBusiness;
-use App\Infrastructure\Models\Travail;
+use App\Models\Travail;
 use Illuminate\Http\Request;
 
 class TravailController extends Controller

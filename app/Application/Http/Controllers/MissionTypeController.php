@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\InterventionParamBusiness;
-use App\Infrastructure\Models\MissionType;
+use App\Models\MissionType;
 use Illuminate\Http\Request;
 
 class MissionTypeController extends Controller

@@ -2,7 +2,7 @@
 
 namespace App\Domaine\Business;
 
-use App\Infrastructure\Models\ConvocationParam;
+use App\Models\ConvocationParam;
 
 class ConvocationParamBusiness
 {

@@ -2,7 +2,7 @@
 
 namespace App\Domaine\Business;
 
-use App\Infrastructure\Models\AbsenceParam;
+use App\Models\AbsenceParam;
 
 class AbsenceParamBusiness
 {

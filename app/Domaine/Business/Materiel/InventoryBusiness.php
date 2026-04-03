@@ -4,7 +4,7 @@ namespace App\Domaine\Business\Materiel;
 
 use App\Exceptions\BadRequestException;
 use App\Exceptions\InternalException;
-use App\Infrastructure\Models\Inventaire;
+use App\Models\Inventaire;
 
 /**
  * Model for manipulating 'inventory' database table

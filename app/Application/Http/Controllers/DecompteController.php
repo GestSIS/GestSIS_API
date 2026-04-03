@@ -4,21 +4,15 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\PaiementBusiness;
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Collections\AFacturerExport;
-use App\Infrastructure\Collections\EcrituresExport;
-use App\Infrastructure\Models\Decompte;
-use App\Infrastructure\Models\Ecriture;
+use App\Collections\AFacturerExport;
+use App\Collections\EcrituresExport;
+use App\Models\Decompte;
+use App\Models\Ecriture;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
 class DecompteController extends Controller
 {
-    private $business;
-
-    public function __construct(PaiementBusiness $business)
-    {
-        $this->business = $business;
-    }
 
     /**
      * Créer un décompte annuel
@@ -44,7 +38,7 @@ class DecompteController extends Controller
         ]);
 
         try {
-            $decompte = $this->business->creerDecompteAnnuel(
+            $decompte = PaiementBusiness::creerDecompteAnnuel(
                 $data['exercice_comptable_id'],
                 $data['date'],
                 $data['designation'],
@@ -68,7 +62,7 @@ class DecompteController extends Controller
             'date' => 'required|date',
         ]);
 
-        $decompte = $this->business->creerDecompteSapeur($data['exercice_comptable_id'], $data['sapeur_id'], $data['date']);
+        $decompte = PaiementBusiness::creerDecompteSapeur($data['exercice_comptable_id'], $data['sapeur_id'], $data['date']);
         return response()->json(['data' => $decompte]);
     }
 
@@ -83,7 +77,7 @@ class DecompteController extends Controller
             'deduction' => 'required|boolean',
         ]);
 
-        $decompte = $this->business->creerDecompteExercice($data['exercice_id'], $data['date'], $data['deduction']);
+        $decompte = PaiementBusiness::creerDecompteExercice($data['exercice_id'], $data['date'], $data['deduction']);
         return response()->json(['data' => $decompte]);
     }
 
@@ -97,7 +91,7 @@ class DecompteController extends Controller
      */
     public function destroy($decompteId)
     {
-        $res = $this->business->supprimerDecompte($decompteId);
+        $res = PaiementBusiness::supprimerDecompte($decompteId);
         return response()->json(['data' => $res]);
     }
 
@@ -106,7 +100,7 @@ class DecompteController extends Controller
      */
     public function iso20022($id)
     {
-        return $this->business->iso20022PourDecompteStream($id);
+        return PaiementBusiness::iso20022PourDecompteStream($id);
     }
 
     public function exportEcritures($id)
@@ -190,7 +184,7 @@ class DecompteController extends Controller
      */
     public function certificatSalaireSapeur($exerciceComptableId, $sapeurId)
     {
-        return $this->business->certificatSalaireSapeur($exerciceComptableId, $sapeurId, true);
+        return PaiementBusiness::certificatSalaireSapeur($exerciceComptableId, $sapeurId, true);
     }
 
     /**
@@ -198,6 +192,6 @@ class DecompteController extends Controller
      */
     public function certificatSalaire($exerciceComptableId)
     {
-        return $this->business->certificatSalaire($exerciceComptableId, true);
+        return PaiementBusiness::certificatSalaire($exerciceComptableId, true);
     }
 }

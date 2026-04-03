@@ -3,10 +3,10 @@
 namespace App\Domaine\Business\Materiel;
 
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\Article;
+use App\Models\Article;
 use DB;
 use \Illuminate\Database\Eloquent\Collection;
-use App\Infrastructure\Models\Emplacement;
+use App\Models\Emplacement;
 
 /**
  * Model for manipulating 'emplacement' database table

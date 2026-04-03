@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Infrastructure\Models\Ecriture;
+use App\Models\Ecriture;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
 

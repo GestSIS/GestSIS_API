@@ -3,8 +3,8 @@
 namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\RtaParam;
-use App\Infrastructure\Models\Sapeur;
+use App\Models\RtaParam;
+use App\Models\Sapeur;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;

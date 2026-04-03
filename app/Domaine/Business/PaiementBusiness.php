@@ -4,14 +4,14 @@ namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\Exceptions\InvalidActionException;
-use App\Infrastructure\Models\AvsParam;
-use App\Infrastructure\Models\Compte;
-use App\Infrastructure\Models\Decompte;
-use App\Infrastructure\Models\Ecriture;
-use App\Infrastructure\Models\ExerciceComptable;
-use App\Infrastructure\Models\Paiement;
-use App\Infrastructure\Models\Sapeur;
-use App\Infrastructure\Models\SisParam;
+use App\Models\AvsParam;
+use App\Models\Compte;
+use App\Models\Decompte;
+use App\Models\Ecriture;
+use App\Models\ExerciceComptable;
+use App\Models\Paiement;
+use App\Models\Sapeur;
+use App\Models\SisParam;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
@@ -31,8 +31,8 @@ use mikehaertl\pdftk\Pdf;
 use Z38\SwissPayment\Text;
 use App\Application\Typst\TypstTemplate;
 use App\Application\Typst\TypstToPdfGenerator;
-use App\Infrastructure\Models\Exercice;
-use App\Infrastructure\Models\TypeUnite;
+use App\Models\Exercice;
+use App\Models\TypeUnite;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\DB;
 class PaiementBusiness
 {
 
-    public function controlerStatusExerciceComptable(int $exerciceComptableId)
+    public static function controlerStatusExerciceComptable(int $exerciceComptableId)
     {
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
         if ($exerciceComptable->boucle == 1) {
@@ -62,9 +62,9 @@ class PaiementBusiness
      * 
      * @return Decompte décompte créé
      */
-    public function creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction)
+    public static function creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction)
     {
-        $this->controlerStatusExerciceComptable($exerciceComptableId);
+        self::controlerStatusExerciceComptable($exerciceComptableId);
 
         $avsParam = AvsParam::first();
         if (is_null($avsParam)) {
@@ -295,10 +295,10 @@ class PaiementBusiness
      * 
      * @param int $decompteId id du décompte à supprimer
      */
-    public function supprimerDecompte(int $decompteId)
+    public static function supprimerDecompte(int $decompteId)
     {
         $decompte = Decompte::find($decompteId);
-        $this->controlerStatusExerciceComptable($decompte->exercice_comptable_id);
+        self::controlerStatusExerciceComptable($decompte->exercice_comptable_id);
 
         Ecriture::where('decompte_id', '=', $decompteId)->where('type', '=', ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_CHARGE_AVS_AC)->delete();
         Ecriture::where('decompte_id', '=', $decompteId)->update(['decompte_id' => null]);
@@ -315,7 +315,7 @@ class PaiementBusiness
      * 
      * @return string fichier xml répondant à la norme ISO 20022
      */
-    public function iso20022PourDecompte($decompteId, $nom, $bic, $iban)
+    public static function iso20022PourDecompte($decompteId, $nom, $bic, $iban)
     {
         $decompte = Decompte::find($decompteId);
         $paiements = Decompte::find($decompteId)->paiements()->get();
@@ -378,7 +378,7 @@ class PaiementBusiness
      * 
      * @return string fichier xml répondant à la norme ISO 20022
      */
-    public function iso20022PourPaiement($paiementId, $nom, $bic, $iban)
+    public static function iso20022PourPaiement($paiementId, $nom, $bic, $iban)
     {
         $paiement = new PaymentInformation(
             "payment-000",
@@ -416,7 +416,7 @@ class PaiementBusiness
      * @return pdf certificats de salaire
      */
 
-    public function certificatSalaire($exerciceComptableId, $affichageFrais = false)
+    public static function certificatSalaire($exerciceComptableId, $affichageFrais = false)
     {
         // Calcul des totaux
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
@@ -456,7 +456,7 @@ class PaiementBusiness
         try {
             // Génération du pdf de chaque sapeur
             foreach (Sapeur::whereIn('id', array_keys($totaux))->with(['localite', 'civilite'])->orderBy('nom')->get() as $sapeur) {
-                $path = $this->creationPdf($sapeur, $exerciceComptable, $totaux[$sapeur->id], $affichageFrais, true, $sisParam, $avsParam);
+                $path = self::creationPdf($sapeur, $exerciceComptable, $totaux[$sapeur->id], $affichageFrais, true, $sisParam, $avsParam);
                 $merged->addFile($path);
             }
 
@@ -495,7 +495,7 @@ class PaiementBusiness
      * 
      * @return pdf certificat de salaire
      */
-    public function certificatSalaireSapeur($exerciceComptableId, $sapeurId, $affichageFrais = false)
+    public static function certificatSalaireSapeur($exerciceComptableId, $sapeurId, $affichageFrais = false)
     {
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
         $sisParam = SisParam::with(['sapeur', 'localite'])->first();
@@ -532,7 +532,7 @@ class PaiementBusiness
         }
 
         $sapeur = Sapeur::with(['localite', 'civilite'])->find($sapeurId);
-        return $this->creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, false, $sisParam, $avsParam);
+        return self::creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, false, $sisParam, $avsParam);
     }
 
     /**
@@ -544,7 +544,7 @@ class PaiementBusiness
      * @param bool $affichageFrais true si les frais doivent apparaitre
      * @param bool $enregistrement true si le fichier doit 'etre enregistré, sortie navigateur sinon
      */
-    private function creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, $enregistrement, $sisParam, $avsParam)
+    private static function creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, $enregistrement, $sisParam, $avsParam)
     {
         $localite = $sapeur->localite;
         $civilite = $sapeur->civilite;
@@ -567,7 +567,7 @@ class PaiementBusiness
             "11" => round($total['solde'] + $total['indemnite']) - round($total['avs_ac']),
             "15-1" => "Répartition:\tTâches essentielles\t" . round($total['solde']),
             "15-2" => "\t\t\tIndemnités\t\t\t" . round($total['indemnite']),
-            "OrtDatum" => $this->dateFr(),
+            "OrtDatum" => self::dateFr(),
             "Unterschrift10" => $sisParam->nom,
             "Unterschrift11" => $sisParam->sapeur->nom . " " . $sisParam->sapeur->prenom,
             "Unterschrift12" => "$sisParam->rue $sisParam->numero",
@@ -607,13 +607,13 @@ class PaiementBusiness
      *
      * @return string date
      */
-    private function dateFr()
+    private static function dateFr()
     {
         $date = Carbon::now()->locale('fr_CH');
         return $date->day . " " . $date->monthName . " " . $date->year;
     }
 
-    public function creerDecompteAnnuel($exerciceComptableId, $date, $designation, $selection, $sapeurIds)
+    public static function creerDecompteAnnuel($exerciceComptableId, $date, $designation, $selection, $sapeurIds)
     {
         $avsParam = AvsParam::first();
         if ($avsParam == NULL) {
@@ -657,10 +657,10 @@ class PaiementBusiness
             throw new ArrayException([], 'Aucune écriture disponible pour la création du décompte.');
         }
 
-        return $this->creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction);
+        return self::creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction);
     }
 
-    public function creerDecompteSapeur($exerciceComptableId, $sapeurId, $date)
+    public static function creerDecompteSapeur($exerciceComptableId, $sapeurId, $date)
     {
         $sapeur = Sapeur::find($sapeurId);
         $designation = "Decompte $sapeur->nom $sapeur->prenom";
@@ -669,18 +669,18 @@ class PaiementBusiness
             ['exercice_comptable_id', '=', $exerciceComptableId],
             ['sapeur_id', '=', $sapeurId],
         ])->get();
-        return $this->creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction);
+        return self::creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction);
     }
 
-    public function creerDecompteExercice($exerciceId, $date, $deduction)
+    public static function creerDecompteExercice($exerciceId, $date, $deduction)
     {
         $designation = 'Decompte exercice';
         $exerciceComptableId = Exercice::find($exerciceId)->exercice_comptable_id;
         $ecritures = Ecriture::where('exercice_id', $exerciceId)->get();
-        return $this->creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction);
+        return self::creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction);
     }
 
-    public function iso20022PourDecompteStream($decompteId)
+    public static function iso20022PourDecompteStream($decompteId)
     {
         $params = SisParam::first();
         $nom = $params->nom;
@@ -688,7 +688,7 @@ class PaiementBusiness
         $iban = $params->iban;
 
         $nomFichier = preg_replace("([^\w\s\d\-_~,;\[\]\(\).])", "-", Decompte::find($decompteId)->designation) . ".xml";
-        $content = $this->iso20022PourDecompte($decompteId, $nom, $bic, $iban);
+        $content = self::iso20022PourDecompte($decompteId, $nom, $bic, $iban);
         return response()->streamDownload(
             function () use ($content) {
                 echo $content;
@@ -697,14 +697,14 @@ class PaiementBusiness
         );
     }
 
-    public function iso20022PourPaiementStream($paiementId)
+    public static function iso20022PourPaiementStream($paiementId)
     {
         $params = SisParam::first();
         $nom = $params->nom;
         $bic = $params->bic;
         $iban = $params->iban;
 
-        $content = $this->iso20022PourPaiement($paiementId, $nom, $bic, $iban);
+        $content = self::iso20022PourPaiement($paiementId, $nom, $bic, $iban);
         return response()->streamDownload(
             function () use ($content) {
                 echo $content;

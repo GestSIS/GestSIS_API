@@ -5,13 +5,13 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
-use App\Infrastructure\Models\Sapeur;
-use App\Infrastructure\Models\CoursSapeur;
-use App\Infrastructure\Models\FonctionSapeur;
-use App\Infrastructure\Models\GradeSapeur;
-use App\Infrastructure\Models\Permis;
-use App\Infrastructure\Models\SapeurTelephone;
-use App\Infrastructure\Models\Mutation;
+use App\Models\Sapeur;
+use App\Models\CoursSapeur;
+use App\Models\FonctionSapeur;
+use App\Models\GradeSapeur;
+use App\Models\Permis;
+use App\Models\SapeurTelephone;
+use App\Models\Mutation;
 
 class CloneSapeur extends Command
 {

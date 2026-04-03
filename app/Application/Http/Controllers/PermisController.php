@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\PermisType;
+use App\Models\PermisType;
 
 class PermisController extends Controller
 {

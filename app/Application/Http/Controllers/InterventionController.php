@@ -4,26 +4,18 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\InterventionBusiness;
 use App\Domaine\Exceptions\ArrayException;
-use App\Domaine\SPI\InterventionRepository;
+use App\Models\Intervention;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class InterventionController extends Controller
 {
-    protected $repo;
-    protected $business;
-
-    public function __construct(InterventionRepository $repo, InterventionBusiness $business)
-    {
-        $this->repo = $repo;
-        $this->business = $business;
-    }
 
     public function index(Request $request)
     {
         $exercice_comptable_id = $request->get('exercice_comptable_id');
-        $interventions = $this->repo->listeIntervention($exercice_comptable_id);
+        $interventions = Intervention::where('exercice_comptable_id', $exercice_comptable_id)->get();
         return response()->json(['data' => $interventions]);
     }
 
@@ -55,7 +47,7 @@ class InterventionController extends Controller
             'type_intervention_id' => 'integer|min:1',
         ]);
 
-        $intervention = $this->business->createIntervention($data);
+        $intervention = InterventionBusiness::createIntervention($data);
         return response()->json(['data' => $intervention]);
     }
 
@@ -124,7 +116,7 @@ class InterventionController extends Controller
         $materiel = isset($materiel['materiel']) ? $materiel['materiel'] : [];
 
         try {
-            $intervention = $this->business->importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel, $quittances);
+            $intervention = InterventionBusiness::importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel, $quittances);
         } catch (Exception $e) {
             Log::error("Intervention Export", [
                 "intervention" => $intervention,
@@ -144,7 +136,7 @@ class InterventionController extends Controller
 
     public function show($id)
     {
-        $intervention = $this->repo->findInterventionById($id);
+        $intervention = Intervention::find($id);
         return response()->json(['data' => $intervention]);
     }
 
@@ -175,13 +167,13 @@ class InterventionController extends Controller
             'type_intervention_id' => 'integer|min:1',
         ]);
 
-        $intervention = $this->business->editInterventionInformationsById($id, $data);
+        $intervention = InterventionBusiness::editInterventionInformationsById($id, $data);
         return response()->json(['data' => $intervention]);
     }
 
     public function valider($id)
     {
-        $statut = $this->business->validerInterventionById($id);
+        $statut = InterventionBusiness::validerInterventionById($id);
         return response()->json(['data' => $statut]);
     }
 
@@ -223,7 +215,7 @@ class InterventionController extends Controller
 
     public function destroy($id)
     {
-        $statut = $this->business->deleteInterventionById($id);
+        $statut = InterventionBusiness::deleteInterventionById($id);
         return response()->json(['data' => $statut]);
     }
 }

@@ -4,24 +4,16 @@
 namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\ArrayException;
-use App\Domaine\SPI\SapeurRepository;
-use App\Infrastructure\Models\Cours;
-use App\Infrastructure\Models\CoursSapeur;
-use App\Infrastructure\Models\Fonction;
-use App\Infrastructure\Models\FonctionSapeur;
-use App\Infrastructure\Models\Grade;
-use App\Infrastructure\Models\GradeSapeur;
-use App\Infrastructure\Models\Groupe;
+use App\Models\Cours;
+use App\Models\CoursSapeur;
+use App\Models\Fonction;
+use App\Models\FonctionSapeur;
+use App\Models\Grade;
+use App\Models\GradeSapeur;
+use App\Models\Groupe;
 
 class SapeurParamBusiness
 {
-
-    protected $repository;
-
-    public function __construct(SapeurRepository $repository)
-    {
-        $this->repository = $repository;
-    }
 
     public static function ajouterFonction($data)
     {

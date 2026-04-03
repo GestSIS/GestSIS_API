@@ -4,7 +4,7 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\AlarmesBusiness;
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\Sapeur;
+use App\Models\Sapeur;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;

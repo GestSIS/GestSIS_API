@@ -3,37 +3,64 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\SapeurBusiness;
-use App\Domaine\SPI\SapeurRepository;
-use App\Infrastructure\Collections\ListeFoadExport;
-use App\Infrastructure\Collections\ListeFsspExport;
-use App\Infrastructure\Models\Sapeur;
+use App\Collections\ListeFoadExport;
+use App\Collections\ListeFsspExport;
+use App\Models\Sapeur;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class SapeurController extends Controller
 {
-    protected $repository;
-    protected $business;
-
-    public function __construct(SapeurRepository $repository, SapeurBusiness $business)
+    private function serializeSapeur(Sapeur $sapeur): array
     {
-        $this->repository = $repository;
-        $this->business = $business;
+        $data = $sapeur->toArray();
+        $data['fonction_id'] = $data['fonction_id'] ?? 0;
+        $data['grade_id'] = $data['grade_id'] ?? 0;
+        $data['type'] = $data['type'] ?? 0;
+
+        return $data;
     }
 
     public function index(Request $request)
     {
         $actif = $request->input('actif', false) === 'true';
         $actifOuAvecMateriel = $request->input('avec-materiel', false) === 'true';
-        return response()->json(["data" => $this->repository->listeSapeurLight($actif, $actifOuAvecMateriel)]);
+
+        $now = Carbon::now();
+        $oneMonthFurther = Carbon::now()->addMonths(1);
+        $query = Sapeur::with([
+            'permis',
+            'fonctions' => function ($query) use ($oneMonthFurther, $now) {
+                $query->where('debut', '<=', $oneMonthFurther)->where(function ($query) use ($now) {
+                    $query->where('fin', '=', null)
+                        ->orWhere('fin', '>=', $now);
+                });
+            }
+        ]);
+
+        if ($actif) {
+            $query = $query->where('actif', '=', 1);
+        }
+        if ($actifOuAvecMateriel) {
+            $query = $query->where('actif', '=', 1)->orWhereHas('articles');
+        }
+
+        $columns = ['id', 'nom', 'prenom', 'suffixe', 'type', 'date_naissance', 'actif', 'fonction_id', 'grade_id', 'localite_id', 'annee_incorporation'];
+        $sapeurs = $query->get([...$columns, DB::raw("CONCAT(nom, ' ', prenom) AS nom_prenom")])
+            ->sortBy('nom_prenom')
+            ->map(fn($sapeur) => $this->serializeSapeur($sapeur))
+            ->values();
+
+        return response()->json(["data" => $sapeurs]);
     }
 
     public function trombinoscope(Request $request)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        return $this->business->trombinoscope($sisKey);
+        return SapeurBusiness::trombinoscope($sisKey);
     }
 
     public function fiche(Request $request, $sapeurId)
@@ -71,9 +98,11 @@ class SapeurController extends Controller
 
     public function convocationSms()
     {
-        return response()->json(['data' => Sapeur::with('telephones')
-            ->where('actif', '=', '1')
-            ->get(['id', 'nom', 'prenom'])->toArray()]);
+        return response()->json([
+            'data' => Sapeur::with('telephones')
+                ->where('actif', '=', '1')
+                ->get(['id', 'nom', 'prenom'])->toArray()
+        ]);
     }
 
     public function store(Request $request)
@@ -104,7 +133,7 @@ class SapeurController extends Controller
                     'localite_id' => 'integer|min:1',
                     'civilite_id' => 'integer|min:1'
                 ]);
-                return response()->json(['data' => $this->business->createSapeur($data)]);
+                return response()->json(['data' => $this->serializeSapeur(SapeurBusiness::createSapeur($data))]);
 
             case SapeurBusiness::TYPE_CIVIL:
                 $data = $request->validate([
@@ -121,7 +150,7 @@ class SapeurController extends Controller
                     'localite_id' => 'required|integer|min:1',
                     'civilite_id' => 'required|integer|min:1'
                 ]);
-                return response()->json(['data' => $this->business->createCivil($data)]);
+                return response()->json(['data' => $this->serializeSapeur(SapeurBusiness::createCivil($data))]);
 
             default:
         }
@@ -134,15 +163,15 @@ class SapeurController extends Controller
         $data = $request->validate([
             'actif' => 'required|integer|min:0|max:1',
         ]);
-        return response()->json(['data' => $this->business->updateNonSapeurStatut($sapeurId, $data)]);
+        return response()->json(['data' => SapeurBusiness::updateNonSapeurStatut($sapeurId, $data)]);
     }
 
     public function show(int $id)
     {
-        if (!$sapeur = $this->repository->getSapeurDetailsById($id)) {
+        if (!$sapeur = Sapeur::find($id)) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-        return response()->json(['data' => $sapeur]);
+        return response()->json(['data' => $this->serializeSapeur($sapeur)]);
     }
 
     public function update(Request $request, int $id)
@@ -168,10 +197,11 @@ class SapeurController extends Controller
             'civilite_id' => 'integer|min:1'
         ]);
 
-        if (!$sapeur = $this->business->updateSapeurById($id, $data)) {
+        if (!Sapeur::where('id', $id)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-        return response()->json(['data' => $sapeur]);
+        $sapeur = SapeurBusiness::updateSapeurById($id, $data);
+        return response()->json(['data' => $this->serializeSapeur($sapeur)]);
     }
 
     public function destroy(int $id)
@@ -179,7 +209,7 @@ class SapeurController extends Controller
         if (!Sapeur::where('id', $id)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-        $this->business->deleteSapeurById($id);
+        SapeurBusiness::deleteSapeurById($id);
         return response()->json(['data' => "success"]);
     }
 }

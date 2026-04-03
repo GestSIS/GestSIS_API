@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Infrastructure\Models\ControleMedical;
-use App\Infrastructure\Models\Medecin;
-use App\Infrastructure\Models\Sapeur;
+use App\Models\ControleMedical;
+use App\Models\Medecin;
+use App\Models\Sapeur;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;

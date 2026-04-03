@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\InterventionParamBusiness;
-use App\Infrastructure\Models\TypeIntervention;
+use App\Models\TypeIntervention;
 use Illuminate\Http\Request;
 
 class TypeInterventionController extends Controller

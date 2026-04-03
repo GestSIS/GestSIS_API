@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\Sms;
+use App\Models\Sms;
 
 class ExerciceSmsController extends Controller
 {

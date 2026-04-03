@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\Materiel\MaterielTypeBusiness;
-use App\Infrastructure\Models\Article;
+use App\Models\Article;
 
 class VehiculeController extends Controller
 {

@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ExerciceParamBusiness;
-use App\Infrastructure\Models\HeureExerciceType;
+use App\Models\HeureExerciceType;
 use Illuminate\Http\Request;
 
 class HeureExerciceTypeController extends Controller

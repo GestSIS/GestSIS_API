@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\SapeurParamBusiness;
-use App\Infrastructure\Models\Grade;
+use App\Models\Grade;
 use Illuminate\Http\Request;
 
 class GradeController extends Controller

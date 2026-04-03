@@ -3,8 +3,8 @@
 namespace App\Domaine\Business\Materiel;
 
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\MaterielCategorie;
-use App\Infrastructure\Models\MaterielType;
+use App\Models\MaterielCategorie;
+use App\Models\MaterielType;
 use DB;
 
 /**

@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
-use App\Infrastructure\Models\Cours;
-use App\Infrastructure\Models\CoursSapeur;
-use App\Infrastructure\Models\IndemniteCoursType;
-use App\Infrastructure\Models\IndemniteCoursFonction;
-use App\Infrastructure\Models\Localite;
-use App\Infrastructure\Models\Sapeur;
+use App\Models\Cours;
+use App\Models\CoursSapeur;
+use App\Models\IndemniteCoursType;
+use App\Models\IndemniteCoursFonction;
+use App\Models\Localite;
+use App\Models\Sapeur;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;

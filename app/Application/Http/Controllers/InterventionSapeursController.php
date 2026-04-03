@@ -3,19 +3,12 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\InterventionBusiness;
-use App\Infrastructure\Models\InterventionSapeur;
+use App\Models\InterventionSapeur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class InterventionSapeursController extends Controller
 {
-    protected $business;
-
-    public function __construct(InterventionBusiness $business)
-    {
-        $this->business = $business;
-    }
-
     public function index($interventionId)
     {
         return response()->json(['data' => InterventionSapeur::where('intervention_id', $interventionId)->get()]);
@@ -31,11 +24,13 @@ class InterventionSapeursController extends Controller
             'sapeurs.*.sapeur_id' => 'required|integer|exists:sapeurs,id'
         ]);
 
-        $statut = $this->business->addPresences($interventionId, $data['sapeurs']);
-        return response()->json(['data' => [
-            "statut" => $statut,
-            "sapeurs" => InterventionSapeur::where('intervention_id', $interventionId)->get(),
-        ]]);
+        $statut = InterventionBusiness::addPresences($interventionId, $data['sapeurs']);
+        return response()->json([
+            'data' => [
+                "statut" => $statut,
+                "sapeurs" => InterventionSapeur::where('intervention_id', $interventionId)->get(),
+            ]
+        ]);
     }
 
     public function update(Request $request, int $interventionId)
@@ -49,7 +44,7 @@ class InterventionSapeursController extends Controller
             'sapeurs.*.sapeur_id' => 'required|integer',
         ]);
 
-        $this->business->updatePresences($interventionId, $data['sapeurs']);
+        InterventionBusiness::updatePresences($interventionId, $data['sapeurs']);
         return response()->json(['data' => InterventionSapeur::where('intervention_id', $interventionId)->get()]);
     }
 
@@ -60,7 +55,7 @@ class InterventionSapeursController extends Controller
             'sapeurs.*' => 'required|integer'
         ]);
 
-        $statut = $this->business->removePresences($interventionId, $data['sapeurs']);
+        $statut = InterventionBusiness::removePresences($interventionId, $data['sapeurs']);
         return response()->json(['data' => $statut]);
     }
 

@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ComptabiliteParamBusiness;
-use App\Infrastructure\Models\FraisIndemniteAnnuelType;
+use App\Models\FraisIndemniteAnnuelType;
 use Illuminate\Http\Request;
 
 class FraisIndemniteAnnuelTypeController extends Controller

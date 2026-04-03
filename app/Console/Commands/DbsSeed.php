@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Infrastructure\Models\Cours;
-use App\Infrastructure\Models\Grade;
+use App\Models\Cours;
+use App\Models\Grade;
 use Exception;
 use Illuminate\Console\Command;
 

@@ -3,28 +3,19 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\SapeurBusiness;
-use App\Domaine\SPI\SapeurRepository;
-use App\Infrastructure\Models\GradeSapeur;
-use App\Infrastructure\Models\Sapeur;
+use App\Models\GradeSapeur;
+use App\Models\Sapeur;
 use Illuminate\Http\Request;
 
 class SapeurGradeController extends Controller
 {
-    protected $repo;
-    protected $business;
-
-    public function __construct(SapeurRepository $repo, SapeurBusiness $business)
-    {
-        $this->repo = $repo;
-        $this->business = $business;
-    }
 
     public function index(int $sapeurId)
     {
         if (!Sapeur::where('id', $sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
-        return response()->json(['data' => $this->repo->getSapeurGradesById($sapeurId)]);
+        return response()->json(['data' => GradeSapeur::where('sapeur_id', $sapeurId)->get()]);
     }
 
     public function store(Request $request, int $sapeurId)
@@ -39,7 +30,7 @@ class SapeurGradeController extends Controller
             'remarque' => 'string|nullable',
         ]);
 
-        $grade = $this->business->addGrade($sapeurId, $data);
+        $grade = SapeurBusiness::addGrade($sapeurId, $data);
         return response()->json(['data' => $grade]);
     }
 
@@ -62,7 +53,7 @@ class SapeurGradeController extends Controller
             'grade_id' => 'integer|exists:grades,id',
         ]);
 
-        $grade = $this->business->updateGrade($sapeurId, $data);
+        $grade = SapeurBusiness::updateGrade($sapeurId, $data);
         return response()->json(['data' => $grade]);
     }
 
@@ -75,7 +66,7 @@ class SapeurGradeController extends Controller
             return response()->json(['error' => 'Grade non trouvé'], 404);
         }
 
-        $res = $this->business->removeGrade($sapeurId, $gradeId);
+        $res = SapeurBusiness::removeGrade($sapeurId, $gradeId);
         return response()->json(['data' => $res]);
     }
 }

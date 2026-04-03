@@ -2,7 +2,7 @@
 
 namespace App\Domaine\Business;
 
-use App\Infrastructure\Models\RtaParam;
+use App\Models\RtaParam;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Crypt;
 

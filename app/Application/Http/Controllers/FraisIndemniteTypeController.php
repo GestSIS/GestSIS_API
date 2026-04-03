@@ -2,10 +2,10 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\FraisIndemniteAnnuelType;
-use App\Infrastructure\Models\IndemniteCoursType;
-use App\Infrastructure\Models\IndemniteExerciceType;
-use App\Infrastructure\Models\IndemniteInterventionType;
+use App\Models\FraisIndemniteAnnuelType;
+use App\Models\IndemniteCoursType;
+use App\Models\IndemniteExerciceType;
+use App\Models\IndemniteInterventionType;
 class FraisIndemniteTypeController extends Controller
 {
     public function index()

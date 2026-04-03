@@ -3,20 +3,15 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ExerciceBusiness;
+use App\Models\HeureExercice;
 use Illuminate\Http\Request;
 
 class HeureExerciceController extends Controller
 {
-    protected $business;
-
-    public function __construct(ExerciceBusiness $business)
-    {
-        $this->business = $business;
-    }
 
     public function index($exerciceId)
     {
-        return $this->business->heuresExercice($exerciceId);
+        return HeureExercice::where('exercice_id', '=', $exerciceId)->get();
     }
 
     public function store(Request $request, $exerciceId)
@@ -27,7 +22,7 @@ class HeureExerciceController extends Controller
             'sapeur_id' => 'integer|exists:sapeurs,id|require',
             'heure_exercice_type_id' => 'integer|exists:heure_exercice_types,id',
         ]);
-        $heure = $this->business->ajouterHeureExercice($exerciceId, $data);
+        $heure = ExerciceBusiness::ajouterHeureExercice($exerciceId, $data);
         return response()->json(['data' => $heure]);
     }
 
@@ -36,13 +31,13 @@ class HeureExerciceController extends Controller
         $data = $request->validate([
             'montant' => 'numeric',
         ]);
-        $heure = $this->business->modifierHeureExercice($exerciceId, $id, $data);
+        $heure = ExerciceBusiness::modifierHeureExercice($exerciceId, $id, $data);
         return response()->json(['data' => $heure]);
     }
 
     public function destroy($exerciceId, $id)
     {
-        $heure = $this->business->supprimerHeureExercice($exerciceId, $id);
+        $heure = ExerciceBusiness::supprimerHeureExercice($exerciceId, $id);
         return response()->json(['data' => $heure]);
     }
 }

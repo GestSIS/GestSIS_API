@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\InterventionParamBusiness;
-use App\Infrastructure\Models\Materiel;
+use App\Models\Materiel;
 use Illuminate\Http\Request;
 
 class MaterielController extends Controller

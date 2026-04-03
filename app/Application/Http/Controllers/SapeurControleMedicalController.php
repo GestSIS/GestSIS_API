@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\ControleMedical;
+use App\Models\ControleMedical;
 
 class SapeurControleMedicalController extends Controller
 {

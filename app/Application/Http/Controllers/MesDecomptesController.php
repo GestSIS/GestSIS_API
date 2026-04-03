@@ -3,8 +3,8 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\PaiementBusiness;
-use App\Infrastructure\Models\Ecriture;
-use App\Infrastructure\Models\Paiement;
+use App\Models\Ecriture;
+use App\Models\Paiement;
 use Illuminate\Http\Request;
 
 class MesDecomptesController extends Controller

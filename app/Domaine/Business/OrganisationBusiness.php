@@ -3,13 +3,13 @@
 
 namespace App\Domaine\Business;
 
-use App\Infrastructure\Models\Groupe;
-use App\Infrastructure\Models\GroupeSapeur;
+use App\Models\Groupe;
+use App\Models\GroupeSapeur;
 
 class OrganisationBusiness
 {
 
-    public function ajouterGroupe($data)
+    public static function ajouterGroupe($data)
     {
         $data['tri'] = Groupe::max('tri') + 1;
 
@@ -20,7 +20,7 @@ class OrganisationBusiness
         return Groupe::with('sapeurIds')->find($groupe->id);
     }
 
-    public function modifierGroupe($groupeId, $data)
+    public static function modifierGroupe($groupeId, $data)
     {
         // Chargement des groupes
         $groupes = Groupe::get();
@@ -44,12 +44,12 @@ class OrganisationBusiness
         return Groupe::with('sapeurIds')->find($groupeId);
     }
 
-    public function supprimerGroupe($groupeId)
+    public static function supprimerGroupe($groupeId)
     {
         Groupe::where('id', $groupeId)->limit(1)->delete();
     }
 
-    public function modifierGroupeSapeurs($groupeId, $sapeurIds)
+    public static function modifierGroupeSapeurs($groupeId, $sapeurIds)
     {
         $groupe = Groupe::find($groupeId);
         $groupe->sapeurs()->sync($sapeurIds);

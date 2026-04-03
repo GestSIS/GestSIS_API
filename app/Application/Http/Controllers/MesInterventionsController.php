@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\InterventionSapeur;
+use App\Models\InterventionSapeur;
 use Illuminate\Http\Request;
 
 class MesInterventionsController extends Controller

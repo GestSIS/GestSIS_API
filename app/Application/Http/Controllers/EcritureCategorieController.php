@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ComptabiliteParamBusiness;
-use App\Infrastructure\Models\EcritureCategorie;
+use App\Models\EcritureCategorie;
 use Illuminate\Http\Request;
 
 class EcritureCategorieController extends Controller

@@ -3,50 +3,34 @@
 namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\InvalidActionException;
-use App\Domaine\SPI\ExerciceRepository;
-use App\Domaine\SPI\InterventionRepository;
-use App\Domaine\SPI\SapeurRepository;
 use App\Domaine\Exceptions\ArrayException;
 use Carbon\Carbon;
-use App\Infrastructure\Models\Amende;
-use App\Infrastructure\Models\CoursSapeur;
-use App\Infrastructure\Models\Ecriture;
-use App\Infrastructure\Models\ExcuseType;
-use App\Infrastructure\Models\Exercice;
-use App\Infrastructure\Models\ExerciceComptable;
-use App\Infrastructure\Models\ExerciceSapeur;
-use App\Infrastructure\Models\Fonction;
-use App\Infrastructure\Models\FonctionSapeur;
+use App\Models\Amende;
+use App\Models\CoursSapeur;
+use App\Models\Ecriture;
+use App\Models\ExcuseType;
+use App\Models\Exercice;
+use App\Models\ExerciceComptable;
+use App\Models\ExerciceSapeur;
+use App\Models\Fonction;
+use App\Models\FonctionSapeur;
 use App\Application\Typst\TypstTemplate;
 use App\Application\Typst\TypstToPdfGenerator;
-use App\Infrastructure\Models\Compte;
-use App\Infrastructure\Models\Decompte;
-use App\Infrastructure\Models\FraisIndemniteAnnuelType;
-use App\Infrastructure\Models\HeureExercice;
-use App\Infrastructure\Models\HeureExerciceType;
-use App\Infrastructure\Models\IndemniteCoursType;
-use App\Infrastructure\Models\IndemniteExerciceType;
-use App\Infrastructure\Models\IndemniteInterventionType;
-use App\Infrastructure\Models\Intervention;
-use App\Infrastructure\Models\Sapeur;
-use App\Infrastructure\Models\Travail;
-use App\Infrastructure\Models\TravailType;
+use App\Models\Compte;
+use App\Models\Decompte;
+use App\Models\FraisIndemniteAnnuelType;
+use App\Models\HeureExercice;
+use App\Models\HeureExerciceType;
+use App\Models\IndemniteCoursType;
+use App\Models\IndemniteExerciceType;
+use App\Models\IndemniteInterventionType;
+use App\Models\Intervention;
+use App\Models\Sapeur;
+use App\Models\Travail;
+use App\Models\TravailType;
 
 class ImputationBusiness
 {
-    protected $exerciceRepo;
-    protected $sapeurRepo;
-    protected $interventionRepo;
-
-    public function __construct(
-        SapeurRepository $sapeur,
-        ExerciceRepository $exercice,
-        InterventionRepository $intervention
-    ) {
-        $this->exerciceRepo = $exercice;
-        $this->sapeurRepo = $sapeur;
-        $this->interventionRepo = $intervention;
-    }
 
     // Unités de GestSIS
     public const UNITE_PIECE = 1;
@@ -82,7 +66,7 @@ class ImputationBusiness
         return round(round($number / $precision) * $precision, 2);
     }
 
-    public function creerExerciceComptable($data)
+    public static function creerExerciceComptable($data)
     {
         $exerciceComptable = new ExerciceComptable();
         $exerciceComptable->fill($data);
@@ -91,7 +75,7 @@ class ImputationBusiness
         return $exerciceComptable;
     }
 
-    public function controlerStatusExerciceComptable(int $exerciceComptableId): void
+    public static function controlerStatusExerciceComptable(int $exerciceComptableId): void
     {
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
         if ($exerciceComptable === null) {
@@ -102,7 +86,7 @@ class ImputationBusiness
         }
     }
 
-    public function ajouterEcriture($data)
+    public static function ajouterEcriture($data)
     {
         // Validation et recalcul du total
         $totalCalcule = $data['tarif'] * $data['quantite'];
@@ -111,7 +95,7 @@ class ImputationBusiness
             throw new ArrayException([], "Le total fourni ({$data['total']}) ne correspond pas au calcul (tarif * quantité = {$totalAttendu})");
         }
 
-        $this->controlerStatusExerciceComptable($data['exercice_comptable_id']);
+        self::controlerStatusExerciceComptable($data['exercice_comptable_id']);
 
         // Seul le module DIVERS est supporté actuellement
         if ($data['module'] !== self::ECRITURE_MODULE_DIVERS) {
@@ -138,7 +122,7 @@ class ImputationBusiness
         return $ecriture;
     }
 
-    public function modifierEcriture($ecritureId, $data)
+    public static function modifierEcriture($ecritureId, $data)
     {
         // Validation et recalcul du total
         $totalCalcule = $data['tarif'] * $data['quantite'];
@@ -159,7 +143,7 @@ class ImputationBusiness
         }
 
         // Vérifier le statut de l'exercice comptable avec l'ID de l'écriture existante
-        $this->controlerStatusExerciceComptable($ecriture->exercice_comptable_id);
+        self::controlerStatusExerciceComptable($ecriture->exercice_comptable_id);
 
         // Contrôle que l'écriture n'est pas liée à un décompte
         if ($ecriture->decompte_id !== null) {
@@ -189,14 +173,14 @@ class ImputationBusiness
         return $ecriture;
     }
 
-    public function supprimerEcriture($ecritureId): string
+    public static function supprimerEcriture($ecritureId): string
     {
         $ecriture = Ecriture::find($ecritureId);
         if ($ecriture === null) {
             throw new ArrayException([], 'Écriture introuvable');
         }
 
-        $this->controlerStatusExerciceComptable($ecriture->exercice_comptable_id);
+        self::controlerStatusExerciceComptable($ecriture->exercice_comptable_id);
 
         // Contrôle que l'écriture n'est pas liée à un décompte
         if ($ecriture->decompte_id !== null) {
@@ -210,9 +194,9 @@ class ImputationBusiness
     /**
      * Générer les amendes pour un sapeur
      */
-    public function genererAmendesSapeur($exerciceComptableId, $sapeurId)
+    public static function genererAmendesSapeur($exerciceComptableId, $sapeurId)
     {
-        $this->controlerStatusExerciceComptable($exerciceComptableId);
+        self::controlerStatusExerciceComptable($exerciceComptableId);
 
         // Chargment de la config des amendes
         $amendes = Amende::orderBy('ordre', 'ASC')->get();
@@ -304,9 +288,9 @@ class ImputationBusiness
     /**
      * Générer les amendes pour l'année comptable en cours
      */
-    public function genererAmendesAnnuels($exerciceComptableId)
+    public static function genererAmendesAnnuels($exerciceComptableId)
     {
-        $this->controlerStatusExerciceComptable($exerciceComptableId);
+        self::controlerStatusExerciceComptable($exerciceComptableId);
 
         // Chargment de la config des amendes
         $amendes = Amende::orderBy('ordre', 'ASC')->get();
@@ -402,7 +386,7 @@ class ImputationBusiness
     /**
      * Calcule le nombre de mois d'activité entre deux périodes (arrondi au mois entamé)
      */
-    private function calculerNombreMoisActifs($debutFonction, $finFonction, $debutExercice, $finExercice): int
+    private static function calculerNombreMoisActifs($debutFonction, $finFonction, $debutExercice, $finExercice): int
     {
         $debutExerciceCarbon = Carbon::parse($debutExercice);
         $finExerciceCarbon = Carbon::parse($finExercice);
@@ -429,9 +413,9 @@ class ImputationBusiness
     /**
      * Génères des frais annuels pour les sapeurs n'ayant pas encore de frais annuels
      */
-    public function imputerAnnuel(int $exerciceComptableId)
+    public static function imputerAnnuel(int $exerciceComptableId)
     {
-        $this->controlerStatusExerciceComptable($exerciceComptableId);
+        self::controlerStatusExerciceComptable($exerciceComptableId);
 
         // Choix disponible pour une seule imputation annuelle :
         // FIXME: Actuellement regénère les frais pour tous les sapeurs ! et ne fait pas ce qui est écrit ci-dessous
@@ -538,7 +522,7 @@ class ImputationBusiness
 
                         // Pour les unités mensuelles, calculer le nombre de mois réels d'activité
                         if ($indemnite['type_unite_id'] == self::UNITE_MOIS) {
-                            $quantite = $this->calculerNombreMoisActifs(
+                            $quantite = self::calculerNombreMoisActifs(
                                 $fonction['debut'],
                                 $fonction['fin'],
                                 $debut,
@@ -581,13 +565,13 @@ class ImputationBusiness
         }
     }
 
-    public function annulerImputationExercice($exerciceId)
+    public static function annulerImputationExercice($exerciceId)
     {
         $exercice = Exercice::find($exerciceId);
         if ($exercice === null) {
             throw new ArrayException([], "Exercice introuvable.");
         }
-        $this->controlerStatusExerciceComptable($exercice->exercice_comptable_id);
+        self::controlerStatusExerciceComptable($exercice->exercice_comptable_id);
 
         // Vérifier si des écritures sont déjà liées à un décompte
         if (
@@ -607,13 +591,13 @@ class ImputationBusiness
         return ExerciceBusiness::EXERCICE_STATUT_VALIDE;
     }
 
-    public function annulerImputationIntervention($interventionId)
+    public static function annulerImputationIntervention($interventionId)
     {
         $intervention = Intervention::find($interventionId);
         if ($intervention === null) {
             throw new ArrayException([], "Intervention introuvable.");
         }
-        $this->controlerStatusExerciceComptable($intervention->exercice_comptable_id);
+        self::controlerStatusExerciceComptable($intervention->exercice_comptable_id);
 
         // Vérifier si des écritures sont déjà liées à un décompte
         if (
@@ -633,9 +617,9 @@ class ImputationBusiness
         return InterventionBusiness::INTERVENTION_STATUT_VALIDE;
     }
 
-    public function annulerImputationAnnuel($exerciceComptableId)
+    public static function annulerImputationAnnuel($exerciceComptableId)
     {
-        $this->controlerStatusExerciceComptable($exerciceComptableId);
+        self::controlerStatusExerciceComptable($exerciceComptableId);
 
         // Vérifier si des écritures sont déjà liées à un décompte
         if (
@@ -659,14 +643,14 @@ class ImputationBusiness
     /**
      * Générer les écritures liés aux présences des sapeurs durant cette intervention
      */
-    public function imputerIntervention($interventionId, $data)
+    public static function imputerIntervention($interventionId, $data)
     {
-        $intervention = $this->interventionRepo->findWith($interventionId, ['presences', 'phases', 'localite', 'typeIntervention']);
+        $intervention = Intervention::with(['presences', 'phases', 'localite', 'typeIntervention'])->find($interventionId);
         if ($intervention === null) {
             throw new ArrayException([], "Intervention introuvable.");
         }
 
-        $this->controlerStatusExerciceComptable($intervention->exercice_comptable_id);
+        self::controlerStatusExerciceComptable($intervention->exercice_comptable_id);
 
         $indemniteType = IndemniteInterventionType::with('fonctions')->find($data['indemnite_intervention_type_id']);
 
@@ -680,16 +664,15 @@ class ImputationBusiness
 
         $ecritures = [];
         if ($indemniteType->taux_weekend > 0 || $indemniteType->taux_nuit > 0) {
-            $ecritures = $this->imputerInterventionTaux($intervention, $indemniteType);
+            $ecritures = self::imputerInterventionTaux($intervention, $indemniteType);
         } else {
-            $ecritures = $this->imputerInterventionTarifMin($intervention, $indemniteType);
+            $ecritures = self::imputerInterventionTarifMin($intervention, $indemniteType);
         }
         Ecriture::insert($ecritures);
 
         // Update statut
-        return $this->interventionRepo->editInterventionInformationsById($interventionId, [
-            "statut" => InterventionBusiness::INTERVENTION_STATUT_IMPUTE
-        ])->statut;
+        Intervention::where('id', $interventionId)->update(['statut' => InterventionBusiness::INTERVENTION_STATUT_IMPUTE]);
+        return InterventionBusiness::INTERVENTION_STATUT_IMPUTE;
     }
 
     /**
@@ -697,7 +680,7 @@ class ImputationBusiness
      * 
      * Décompose le temps de chaque sapeurs entre les différentes phases et applique le tarif minimum
      */
-    private function imputerInterventionTarifMin($intervention, $indemniteType)
+    private static function imputerInterventionTarifMin($intervention, $indemniteType)
     {
         // Grouper les présences par sapeurs
         $sapeurs = [];
@@ -762,7 +745,7 @@ class ImputationBusiness
         $tarif = floatval($indemniteType->tarif);
         $tarifMin = floatval($indemniteType->tarif_min ?? $indemniteType->tarif);
         $tarifMinPour = floatval($indemniteType->tarif_min_pour) ?? 1.0;
-        $designation = "{$intervention->localite->designation} ({$intervention->type->designation}) $intervention->lieu";
+        $designation = "{$intervention->localite->designation} ({$intervention->typeIntervention->designation}) $intervention->lieu";
 
         $ecritures = [];
         foreach ($dureeTarifMin as $sapeurId => $dureeTarifMinSapeur) {
@@ -830,9 +813,9 @@ class ImputationBusiness
      * - Normal
      * Puis calcul le total avec les taux paramétrés.
      */
-    private function imputerInterventionTaux($intervention, $indemniteType): array
+    private static function imputerInterventionTaux($intervention, $indemniteType): array
     {
-        $designation = "{$intervention->localite->designation} ({$intervention->type->designation}) $intervention->lieu";
+        $designation = "{$intervention->localite->designation} ({$intervention->typeIntervention->designation}) $intervention->lieu";
 
         // Grouper les présences par sapeurs
         $sapeurs = [];
@@ -1081,14 +1064,14 @@ class ImputationBusiness
         return $ecritures;
     }
 
-    public function imputerExercice($exerciceId, $data)
+    public static function imputerExercice($exerciceId, $data)
     {
         $exercice = Exercice::with(['sapeurs', 'localite'])->findOrFail($exerciceId);
         if (!$exercice) {
             throw new ArrayException([], "Exercice introuvable.");
         }
 
-        $this->controlerStatusExerciceComptable($exercice->exercice_comptable_id);
+        self::controlerStatusExerciceComptable($exercice->exercice_comptable_id);
 
         if ($exercice->statut !== ExerciceBusiness::EXERCICE_STATUT_VALIDE) {
             throw new ArrayException([], "Impossible d'imputer cet exercice");
@@ -1106,22 +1089,23 @@ class ImputationBusiness
         })->values()->all();
 
         if ($unite === self::UNITE_PIECE || $unite === self::UNITE_FORFAIT) {
-            $this->imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation);
+            self::imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation);
         } else if ($unite === self::UNITE_HEURE) {
-            $this->imputerExerciceParHeure($exercice, $sapeurs, $indemniteType, $designation);
+            self::imputerExerciceParHeure($exercice, $sapeurs, $indemniteType, $designation);
         } else {
             throw new ArrayException([], "Unité non supportée");
         }
 
         // Imputation heure supp
         $heures = HeureExercice::where('exercice_id', $exerciceId)->get();
-        $this->imputerExerciceHeureSup($exercice, $heures, $designation);
+        self::imputerExerciceHeureSup($exercice, $heures, $designation);
 
         // Changer le statut de l'exercice
-        return $this->exerciceRepo->updateExerciceById($exerciceId, ["statut" => ExerciceBusiness::EXERCICE_STATUT_IMPUTE])->statut;
+        Exercice::where('id', $exerciceId)->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_IMPUTE]);
+        return ExerciceBusiness::EXERCICE_STATUT_IMPUTE;
     }
 
-    private function imputerExerciceHeureSup($exercice, $heures, $designation)
+    private static function imputerExerciceHeureSup($exercice, $heures, $designation)
     {
         if ($heures->isEmpty()) {
             return;
@@ -1172,7 +1156,7 @@ class ImputationBusiness
         }
     }
 
-    private function imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation)
+    private static function imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation)
     {
         if (empty($sapeurs)) {
             return;
@@ -1182,7 +1166,7 @@ class ImputationBusiness
         $sapeurIds = array_map(fn($s) => $s->sapeur_id, $sapeurs);
         $sapeursDetails = [];
         foreach ($sapeurIds as $sapeurId) {
-            $sapeursDetails[$sapeurId] = $this->sapeurRepo->getSapeurDetailsById($sapeurId);
+            $sapeursDetails[$sapeurId] = Sapeur::find($sapeurId);
         }
 
         // Prétraiter le mapping des tarifs par fonction pour éviter les filtrages répétés
@@ -1236,7 +1220,7 @@ class ImputationBusiness
         }
     }
 
-    private function imputerExerciceParHeure($exercice, $sapeurs, $indemniteType, $designation)
+    private static function imputerExerciceParHeure($exercice, $sapeurs, $indemniteType, $designation)
     {
         if (empty($sapeurs)) {
             return;
@@ -1248,7 +1232,7 @@ class ImputationBusiness
         $sapeurIds = array_map(fn($s) => $s->sapeur_id, $sapeurs);
         $sapeursDetails = [];
         foreach ($sapeurIds as $sapeurId) {
-            $sapeursDetails[$sapeurId] = $this->sapeurRepo->getSapeurDetailsById($sapeurId);
+            $sapeursDetails[$sapeurId] = Sapeur::find($sapeurId);
         }
 
         // Prétraiter le mapping des tarifs par fonction pour éviter les filtrages répétés
@@ -1307,14 +1291,14 @@ class ImputationBusiness
     /**
      * Génères des frais annuels pour les sapeurs n'ayant pas encore de frais annuels
      */
-    public function imputerCours(int $coursSapeurId, $data)
+    public static function imputerCours(int $coursSapeurId, $data)
     {
         // Validate required data keys
         if (!isset($data['exercice_comptable_id']) || !isset($data['indemnite_cours_type_id'])) {
             throw new ArrayException([], "Données requises manquantes");
         }
 
-        $this->controlerStatusExerciceComptable($data['exercice_comptable_id']);
+        self::controlerStatusExerciceComptable($data['exercice_comptable_id']);
 
         // Chargement du cours
         $cours = CoursSapeur::with(['cours', 'ecritures'])->find($coursSapeurId);
@@ -1382,7 +1366,7 @@ class ImputationBusiness
         return $ecritures;
     }
 
-    public function annulerImputationCours(int $coursSapeurId)
+    public static function annulerImputationCours(int $coursSapeurId)
     {
         // Charger toutes les écritures pour ce cours en une seule requête
         $ecritures = Ecriture::where('cours_sapeur_id', $coursSapeurId)->get();
@@ -1392,7 +1376,7 @@ class ImputationBusiness
         }
 
         // Utiliser la première écriture pour vérifier le statut de l'exercice comptable
-        $this->controlerStatusExerciceComptable($ecritures->first()->exercice_comptable_id);
+        self::controlerStatusExerciceComptable($ecritures->first()->exercice_comptable_id);
 
         // Vérifier si une écriture est déjà liée à un décompte
         if ($ecritures->contains(fn($e) => $e->decompte_id !== null)) {
@@ -1408,7 +1392,7 @@ class ImputationBusiness
     /**
      * Imputation de travaux
      */
-    public function imputerTravaux($ids)
+    public static function imputerTravaux($ids)
     {
         $travaux = Travail::whereIn('id', $ids)
             ->where('statut', TravauxBusiness::TRAVAIL_STATUT_VALIDE)
@@ -1421,7 +1405,7 @@ class ImputationBusiness
         // Vérifier que tous les exercices comptables ne sont pas cloturés
         $exercicesComptablesIds = $travaux->pluck('exercice_comptable_id')->unique();
         foreach ($exercicesComptablesIds as $exerciceComptableId) {
-            $this->controlerStatusExerciceComptable($exerciceComptableId);
+            self::controlerStatusExerciceComptable($exerciceComptableId);
         }
 
         // Chargement des types de travaux - charger uniquement les types nécessaires
@@ -1471,7 +1455,7 @@ class ImputationBusiness
         return $ecritures;
     }
 
-    public function annulerImputationTravail($travailId)
+    public static function annulerImputationTravail($travailId)
     {
         $travail = Travail::find($travailId);
 
@@ -1479,7 +1463,7 @@ class ImputationBusiness
             throw new ArrayException([], 'Travail introuvable');
         }
 
-        $this->controlerStatusExerciceComptable($travail->exercice_comptable_id);
+        self::controlerStatusExerciceComptable($travail->exercice_comptable_id);
 
         // Vérifier si des écritures sont déjà liées à un décompte
         if (

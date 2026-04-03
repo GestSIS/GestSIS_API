@@ -5,11 +5,11 @@ namespace App\Domaine\Business\Materiel;
 use App\Domaine\Exceptions\ArrayException;
 use App\Exceptions\InternalException;
 use App\Exceptions\BadRequestException;
-use App\Infrastructure\Models\Article;
-use App\Infrastructure\Models\BatterieType;
-use App\Infrastructure\Models\Emplacement;
-use App\Infrastructure\Models\MaterielType;
-use App\Infrastructure\Models\Vehicule;
+use App\Models\Article;
+use App\Models\BatterieType;
+use App\Models\Emplacement;
+use App\Models\MaterielType;
+use App\Models\Vehicule;
 use Illuminate\Database\Eloquent\Collection;
 use Nette\Utils\Arrays;
 

@@ -2,7 +2,7 @@
 
 namespace App\Domaine\Business\Materiel;
 
-use App\Infrastructure\Models\Lavage;
+use App\Models\Lavage;
 use Date;
 
 /**

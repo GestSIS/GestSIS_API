@@ -4,7 +4,7 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ControleMedicalBusiness;
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\ControleMedical;
+use App\Models\ControleMedical;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 

@@ -88,7 +88,7 @@ return new class extends Migration {
 
         Schema::table('materiel_types', function (Blueprint $table) {
 
-            // Champs déjà existants app/Infrastructure/Models/Vehicule.php
+            // Champs déjà existants app/Models/Vehicule.php
             // $table->bigIncrements('id');
             // $table->timestamps();
 

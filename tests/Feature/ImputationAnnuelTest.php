@@ -3,11 +3,11 @@
 namespace Tests\Feature;
 
 use App\Domaine\Business\ImputationBusiness;
-use App\Infrastructure\Models\Commune;
-use App\Infrastructure\Models\Ecriture;
-use App\Infrastructure\Models\ExerciceComptable;
-use App\Infrastructure\Models\Localite;
-use App\Infrastructure\Models\Sapeur;
+use App\Models\Commune;
+use App\Models\Ecriture;
+use App\Models\ExerciceComptable;
+use App\Models\Localite;
+use App\Models\Sapeur;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;

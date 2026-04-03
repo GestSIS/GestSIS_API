@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Infrastructure\Models\Localite;
+use App\Models\Localite;
 use Illuminate\Console\Command;
 
 class DbsLocaliteUpdate extends Command

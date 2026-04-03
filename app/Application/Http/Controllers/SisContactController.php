@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\SisParamBusiness;
-use App\Infrastructure\Models\SisContact;
+use App\Models\SisContact;
 use Illuminate\Http\Request;
 
 class SisContactController extends Controller

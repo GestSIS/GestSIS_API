@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Infrastructure\Models\GroupeSapeur;
-use App\Infrastructure\Models\Sapeur;
+use App\Models\GroupeSapeur;
+use App\Models\Sapeur;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 

@@ -3,19 +3,19 @@
 namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\InvalidActionException;
-use App\Infrastructure\Models\Amende;
-use App\Infrastructure\Models\AvsParam;
-use App\Infrastructure\Models\Compte;
-use App\Infrastructure\Models\Ecriture;
-use App\Infrastructure\Models\EcritureCategorie;
-use App\Infrastructure\Models\FraisIndemniteAnnuel;
-use App\Infrastructure\Models\FraisIndemniteAnnuelType;
-use App\Infrastructure\Models\HeureExerciceType;
-use App\Infrastructure\Models\IndemniteCoursFonction;
-use App\Infrastructure\Models\IndemniteCoursType;
-use App\Infrastructure\Models\IndemniteExerciceFonction;
-use App\Infrastructure\Models\IndemniteExerciceType;
-use App\Infrastructure\Models\IndemniteInterventionType;
+use App\Models\Amende;
+use App\Models\AvsParam;
+use App\Models\Compte;
+use App\Models\Ecriture;
+use App\Models\EcritureCategorie;
+use App\Models\FraisIndemniteAnnuel;
+use App\Models\FraisIndemniteAnnuelType;
+use App\Models\HeureExerciceType;
+use App\Models\IndemniteCoursFonction;
+use App\Models\IndemniteCoursType;
+use App\Models\IndemniteExerciceFonction;
+use App\Models\IndemniteExerciceType;
+use App\Models\IndemniteInterventionType;
 
 class ComptabiliteParamBusiness
 {

@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ExcuseParamBusiness;
-use App\Infrastructure\Models\ExcuseParam;
+use App\Models\ExcuseParam;
 use Illuminate\Http\Request;
 
 class ExcuseParamController extends Controller

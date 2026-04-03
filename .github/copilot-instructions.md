@@ -7,27 +7,21 @@ GestSIS API is a Laravel 12 (PHP 8.4) firefighter management system API server u
 
 The codebase strictly follows hexagonal architecture with these layers:
 
-### Layer Flow: Controller → API Service → Business → SPI Interface → Repository Implementation
+### Layer Flow: Controller → Business
 
 **Application Layer** (`app/Application/`): HTTP entry points, middleware, auth
 - Controllers in `Http/Controllers/` call API Services
 - Example: `SapeurController` → `SapeurService`
 
 **Domain Layer** (`app/Domaine/`):
-- **API Services** (`Domaine/API/`): Entry points to business logic. Handle listing operations directly; mutations MUST go through Business layer
 - **Business** (`Domaine/Business/`): Core business logic and domain rules (e.g., `SapeurBusiness::isActif()` calculates firefighter active status)
-- **SPI** (`Domaine/SPI/`): Repository interfaces defining data access contracts
 
-**Infrastructure Layer** (`app/Infrastructure/`):
-- **Repositories** (`Infrastructure/Repositories/`): Eloquent implementations of SPI interfaces (suffix: `*RepositoryEloquent`)
+**Infrastructure Layer** (`app/`):
 - **Models** (`Infrastructure/Models/`): Eloquent models
 - **Collections** (`Infrastructure/Collections/`): Excel export implementations using Maatwebspace
 
 ### When Adding Features:
-1. Controller calls API Service
-2. API Service delegates writes to Business layer
-3. Business uses SPI interface for data access
-4. Create/update corresponding Repository implementation if needed
+1. Controller calls Business classes
 
 ## Multi-Tenant Database Architecture
 
@@ -99,9 +93,6 @@ vendor/bin/phpunit tests/Feature     # Feature tests
 ## Key Conventions
 
 ### Naming
-- Repository interfaces: `SapeurRepository` (SPI)
-- Repository implementations: `SapeurRepositoryEloquent` (Infrastructure)
-- API Services: `SapeurService` (API layer)
 - Business classes: `SapeurBusiness` (Business layer)
 
 ### Date Handling

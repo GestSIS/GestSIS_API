@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Infrastructure\Models\Cours;
+use App\Models\Cours;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 

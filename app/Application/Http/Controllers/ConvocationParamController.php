@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ConvocationParamBusiness;
-use App\Infrastructure\Models\ConvocationParam;
+use App\Models\ConvocationParam;
 use Illuminate\Http\Request;
 
 class ConvocationParamController extends Controller

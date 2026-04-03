@@ -2,7 +2,7 @@
 
 namespace App\Application\Mail;
 
-use App\Infrastructure\Models\Sapeur;
+use App\Models\Sapeur;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
@@ -36,7 +36,7 @@ class DecompteSapeur extends Mailable
     public function attachments()
     {
         return [
-            Attachment::fromData(fn () => $this->pdf, 'decompte.pdf')
+            Attachment::fromData(fn() => $this->pdf, 'decompte.pdf')
                 ->withMime('application/pdf'),
         ];
     }

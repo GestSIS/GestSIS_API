@@ -2,8 +2,8 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Infrastructure\Models\CoursSapeur;
-use App\Infrastructure\Models\ExerciceComptable;
+use App\Models\CoursSapeur;
+use App\Models\ExerciceComptable;
 use Illuminate\Http\Request;
 
 class CoursSapeurController extends Controller

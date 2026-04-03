@@ -2,7 +2,7 @@
 
 namespace App\Domaine\Business;
 
-use App\Infrastructure\Models\ExcuseParam;
+use App\Models\ExcuseParam;
 
 class ExcuseParamBusiness
 {

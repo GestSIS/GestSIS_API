@@ -3,34 +3,29 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\ImputationBusiness;
-use App\Infrastructure\Models\Ecriture;
+use App\Models\Ecriture;
 use Illuminate\Http\Request;
 
 class ImputationController extends Controller
 {
-    protected $business;
-
-    public function __construct(ImputationBusiness $business)
-    {
-        $this->business = $business;
-    }
-
     public function exercice(Request $request, int $id)
     {
         $data = $request->validate([
             'indemnite_exercice_type_id' => 'integer',
         ]);
 
-        $statut = $this->business->imputerExercice($id, $data);
-        return response()->json(['data' => [
-            "statut" => $statut,
-            "ecritures" => Ecriture::where('exercice_id', $id)->get(),
-        ]]);
+        $statut = ImputationBusiness::imputerExercice($id, $data);
+        return response()->json([
+            'data' => [
+                "statut" => $statut,
+                "ecritures" => Ecriture::where('exercice_id', $id)->get(),
+            ]
+        ]);
     }
 
     public function cancelExercice(Request $request, int $id)
     {
-        $statut = $this->business->annulerImputationExercice($id);
+        $statut = ImputationBusiness::annulerImputationExercice($id);
         return response()->json(['data' => ["statut" => $statut]]);
     }
 
@@ -40,22 +35,24 @@ class ImputationController extends Controller
             'indemnite_intervention_type_id' => 'integer',
         ]);
 
-        $statut = $this->business->imputerIntervention($id, $data);
-        return response()->json(['data' => [
-            "statut" => $statut,
-            "ecritures" => Ecriture::where('intervention_id', $id)->get(),
-        ]]);
+        $statut = ImputationBusiness::imputerIntervention($id, $data);
+        return response()->json([
+            'data' => [
+                "statut" => $statut,
+                "ecritures" => Ecriture::where('intervention_id', $id)->get(),
+            ]
+        ]);
     }
 
     public function cancelIntervention(int $id)
     {
-        $statut = $this->business->annulerImputationIntervention($id);
+        $statut = ImputationBusiness::annulerImputationIntervention($id);
         return response()->json(['data' => ["statut" => $statut]]);
     }
 
     public function annuel(int $id)
     {
-        $this->business->imputerAnnuel($id);
+        ImputationBusiness::imputerAnnuel($id);
         $ecritures = Ecriture::where('exercice_comptable_id', $id)
             ->where('module', ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)
             ->get();
@@ -64,7 +61,7 @@ class ImputationController extends Controller
 
     public function cancelAnnuel(int $id)
     {
-        $res = $this->business->annulerImputationAnnuel($id);
+        $res = ImputationBusiness::annulerImputationAnnuel($id);
         return response()->json(['data' => $res ? 'ok' : 'ko']);
     }
 
@@ -75,13 +72,13 @@ class ImputationController extends Controller
             'exercice_comptable_id' => 'integer',
         ]);
 
-        $res = $this->business->imputerCours($id, $data);
+        $res = ImputationBusiness::imputerCours($id, $data);
         return response()->json(['data' => $res]);
     }
 
     public function cancelCours(int $id)
     {
-        $res = $this->business->annulerImputationCours($id);
+        $res = ImputationBusiness::annulerImputationCours($id);
         return response()->json(['data' => $res]);
     }
 
@@ -92,13 +89,13 @@ class ImputationController extends Controller
             'ids.*' => 'integer|required',
         ]);
 
-        $res = $this->business->imputerTravaux($data['ids']);
+        $res = ImputationBusiness::imputerTravaux($data['ids']);
         return response()->json(['data' => $res]);
     }
 
     public function cancelTravail($id)
     {
-        $res = $this->business->annulerImputationTravail($id);
+        $res = ImputationBusiness::annulerImputationTravail($id);
         return response()->json(['data' => $res]);
     }
 }

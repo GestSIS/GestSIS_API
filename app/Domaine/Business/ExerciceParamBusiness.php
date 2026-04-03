@@ -4,11 +4,11 @@
 namespace App\Domaine\Business;
 
 use App\Domaine\Exceptions\InvalidActionException;
-use App\Infrastructure\Models\ExerciceCategorie;
-use App\Infrastructure\Models\ExcuseType;
-use App\Infrastructure\Models\Exercice;
-use App\Infrastructure\Models\ExerciceSapeur;
-use App\Infrastructure\Models\HeureExerciceType;
+use App\Models\ExerciceCategorie;
+use App\Models\ExcuseType;
+use App\Models\Exercice;
+use App\Models\ExerciceSapeur;
+use App\Models\HeureExerciceType;
 
 class ExerciceParamBusiness
 {

@@ -3,7 +3,7 @@
 namespace App\Domaine\Business\Materiel;
 
 use App\Exceptions\InternalException;
-use App\Infrastructure\Models\TuyauDiametre;
+use App\Models\TuyauDiametre;
 
 /**
  * Model for manipulating 'diameter' database table

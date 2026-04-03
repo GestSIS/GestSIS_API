@@ -5,25 +5,24 @@ namespace App\Domaine\Business;
 use App\Application\Typst\TypstTemplate;
 use App\Application\Typst\TypstToPdfGenerator;
 use App\Domaine\Exceptions\InvalidActionException;
-use App\Domaine\SPI\ExerciceRepository;
-use App\Domaine\SPI\SapeurRepository;
 use App\Domaine\Exceptions\ArrayException;
-use App\Infrastructure\Models\Civilite;
-use App\Infrastructure\Models\ConvocationParam;
-use App\Infrastructure\Models\ExcuseParam;
-use App\Infrastructure\Models\ExcuseType;
-use App\Infrastructure\Models\Exercice;
-use App\Infrastructure\Models\ExerciceCategorie;
-use App\Infrastructure\Models\ExerciceSapeur;
-use App\Infrastructure\Models\Fonction;
-use App\Infrastructure\Models\HeureExercice;
-use App\Infrastructure\Models\HeureExerciceType;
-use App\Infrastructure\Models\Localite;
-use App\Infrastructure\Models\Sapeur;
-use App\Infrastructure\Models\Sms;
+use App\Models\Civilite;
+use App\Models\ConvocationParam;
+use App\Models\ExcuseParam;
+use App\Models\ExcuseType;
+use App\Models\Exercice;
+use App\Models\ExerciceCategorie;
+use App\Models\ExerciceSapeur;
+use App\Models\Fonction;
+use App\Models\HeureExercice;
+use App\Models\HeureExerciceType;
+use App\Models\Localite;
+use App\Models\Sapeur;
+use App\Models\Sms;
 use Carbon\Carbon;
 use Ds\Set;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class ExerciceBusiness
@@ -45,28 +44,21 @@ class ExerciceBusiness
     public const EXCUSE_STATUT_A_TRAITER = 0;
     public const EXCUSE_STATUT_ACCEPTEE = 1;
 
-    protected $repository;
-
-    public function __construct(ExerciceRepository $repository)
-    {
-        $this->repository = $repository;
-    }
-
     /**
      * Modifie le statut de l'exercice saisi si toutes les présences ont été saisies
      */
-    public function updateStatut($exerciceId)
+    public static function updateStatut($exerciceId)
     {
-        $statut = $this->repository->getExerciceStatutById($exerciceId);
+        $statut = Exercice::findOrFail($exerciceId)->statut;
         if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_VALIDE) {
             return $statut;
         }
 
         // Check saisi des présences sont saisies
-        $presences = $this->repository->listeSapeurOfExerciceById($exerciceId);
+        $presences = ExerciceSapeur::where('exercice_id', $exerciceId)->get()->toArray();
         $presenceIncompletes = array_filter($presences, function ($p) {
             // Si convoqué alors une saisie doit être faite pour chaque sapeur
-            return $p->convoque && !$p->present && !$p->absent && !$p->amende && !$p->remplace && !$p->excuse_type_id;
+            return ($p['convoque'] ?? false) && !($p['present'] ?? false) && !($p['absent'] ?? false) && !($p['amende'] ?? false) && !($p['remplace'] ?? false) && !($p['excuse_type_id'] ?? null);
         });
 
         // Update statut si l'exercice est incomplet
@@ -75,7 +67,8 @@ class ExerciceBusiness
         } else {
             $statut = max($statut, self::EXERCICE_STATUT_SAISI);
         }
-        $this->repository->updateExerciceById($exerciceId, array("statut" => $statut));
+
+        self::updateExerciceById($exerciceId, array("statut" => $statut));
 
         return $statut;
     }
@@ -86,7 +79,7 @@ class ExerciceBusiness
      * @param $data
      * @throws ArrayException
      */
-    public function createExercice($data): Exercice
+    public static function createExercice($data): Exercice
     {
         $data['statut'] = self::EXERCICE_STATUT_VIDE;
 
@@ -107,38 +100,54 @@ class ExerciceBusiness
         return $exercice;
     }
 
-    public function updatExercice($exerciceId, $data)
+    private static function updateExerciceById($exerciceId, $data)
     {
-        return $this->repository->updateExercicebyId($exerciceId, $data);
+        if (array_key_exists('lieu', $data) && $data['lieu'] === null) {
+            $data['lieu'] = '';
+        }
+
+        if (array_key_exists('communications', $data) && $data['communications'] === null) {
+            $data['communications'] = '';
+        }
+
+        $exercice = Exercice::findOrFail($exerciceId);
+        $exercice->update($data);
+
+        return $exercice;
     }
 
-    public function cancelExerciceById($exerciceId)
+    public static function updatExercice($exerciceId, $data)
     {
-        $statut = $this->repository->getExerciceStatutById($exerciceId);
+        return self::updateExerciceById($exerciceId, $data);
+    }
+
+    public static function cancelExerciceById($exerciceId)
+    {
+        $statut = Exercice::findOrFail($exerciceId)->statut;
         if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_VALIDE) {
             return $statut;
         }
 
-        $this->repository->updateExerciceById($exerciceId, array("statut" => self::EXERCICE_STATUT_ANNULE));
+        self::updateExerciceById($exerciceId, array("statut" => self::EXERCICE_STATUT_ANNULE));
         return self::EXERCICE_STATUT_ANNULE;
     }
 
-    public function reactivateExerciceById($exerciceId)
+    public static function reactivateExerciceById($exerciceId)
     {
-        $statut = $this->repository->getExerciceStatutById($exerciceId);
+        $statut = Exercice::findOrFail($exerciceId)->statut;
         if ($statut != self::EXERCICE_STATUT_ANNULE) {
             return $statut;
         }
 
-        $this->repository->updateExerciceById($exerciceId, array("statut" => self::EXERCICE_STATUT_VIDE));
-        $statut = $this->updateStatut($exerciceId);
+        self::updateExerciceById($exerciceId, array("statut" => self::EXERCICE_STATUT_VIDE));
+        $statut = self::updateStatut($exerciceId);
         return $statut;
     }
 
-    public function deleteExerciceById($exerciceId)
+    public static function deleteExerciceById($exerciceId)
     {
         // Check pas déjà imputé
-        $statut = $this->repository->getExerciceStatutById($exerciceId);
+        $statut = Exercice::findOrFail($exerciceId)->statut;
         if ($statut > self::EXERCICE_STATUT_VALIDE) {
             throw new InvalidActionException([], "Impossible de supprimer un exercice déjà imputé");
         }
@@ -149,18 +158,23 @@ class ExerciceBusiness
         Exercice::where('id', '=', $exerciceId)->delete();
     }
 
-    public function validateExerciceById($exerciceId)
+    public static function validateExerciceById($exerciceId)
     {
-        $statut = $this->repository->getExerciceStatutById($exerciceId);
+        $statut = Exercice::findOrFail($exerciceId)->statut;
         if ($statut !== self::EXERCICE_STATUT_SAISI) {
             throw new ArrayException(["message" => "Impossible de valider l'exercice."]);
         }
 
         // Check saisi des présences sont saisies
-        $presences = $this->repository->listeSapeurOfExerciceById($exerciceId);
+        $presences = ExerciceSapeur::where('exercice_id', $exerciceId)->get()->toArray();
         $presenceIncompletes = array_filter($presences, function ($p) {
             // Si convoqué alors une saisie doit être faite pour chaque sapeur
-            return $p->convoque && !$p->present && !$p->absent && !$p->amende && !$p->remplace && !$p->excuse_type_id;
+            return ($p['convoque'] ?? false)
+                && !($p['present'] ?? false)
+                && !($p['absent'] ?? false)
+                && !($p['amende'] ?? false)
+                && !($p['remplace'] ?? false)
+                && !($p['excuse_type_id'] ?? null);
         });
         if (count($presenceIncompletes)) {
             throw new ArrayException(["message" => "Certains sapeurs convoqué sont incomplet"]);
@@ -168,7 +182,7 @@ class ExerciceBusiness
 
         // TODO: Valider les absences amendées ?? Non
 
-        return $this->repository->updateExerciceById($exerciceId, [
+        return self::updateExerciceById($exerciceId, [
             "statut" => self::EXERCICE_STATUT_VALIDE
         ]);
     }
@@ -180,7 +194,7 @@ class ExerciceBusiness
      * @return Collection
      * @throws ArrayException
      */
-    public function updateSapeurPresences($presences, $hasValidationPermission)
+    public static function updateSapeurPresences($presences, $hasValidationPermission)
     {
         $exerciceIds = array_map(fn($e) => $e['exercice_id'], $presences);
 
@@ -249,7 +263,7 @@ class ExerciceBusiness
         }
     }
 
-    public function creerExcuse($sapeurId, $exerciceId, $excuse, $file, $sisKey)
+    public static function creerExcuse($sapeurId, $exerciceId, $excuse, $file, $sisKey)
     {
         $param = ExcuseParam::first();
 
@@ -318,7 +332,7 @@ class ExerciceBusiness
      * @return Collection
      * @throws ArrayException
      */
-    public function updatePresences($exerciceId, $presences)
+    public static function updatePresences($exerciceId, $presences)
     {
         // Fetch exercice
         $exercice = Exercice::with("sapeurs")->where('id', '=', $exerciceId)->first();
@@ -341,16 +355,16 @@ class ExerciceBusiness
 
         // Sapeurs non présent mais avec des heures pas pris en compte ?
         $sapeursAjoutes = array_filter($presences, fn($e) => !$sapeursIdsActuel->contains($e['sapeur_id']));
-        $this->addSapeurs($exerciceId, $sapeursAjoutes);
+        self::addSapeurs($exerciceId, $sapeursAjoutes);
 
         // Updated sapeurs
         $sapeursModifies = array_filter($presences, fn($e) => $sapeursIdsActuel->contains($e['sapeur_id']));
-        $this->updateSapeurs($exerciceId, $sapeursModifies, false);
+        self::updateSapeurs($exerciceId, $sapeursModifies, false);
 
         // On ignore les sapeurs déjà saisi mais non présent dans les présences envoyées
 
         // Modification du status
-        $this->updateStatut($exerciceId);
+        self::updateStatut($exerciceId);
     }
 
     /**
@@ -360,7 +374,7 @@ class ExerciceBusiness
      * @return Collection
      * @throws ArrayException
      */
-    public function updatePresence($presenceId, $presence, $file, $hasValidationPermission, $sisKey)
+    public static function updatePresence($presenceId, $presence, $file, $hasValidationPermission, $sisKey)
     {
         $exerciceSapeur = ExerciceSapeur::with('exercice')->find($presenceId);
 
@@ -380,7 +394,7 @@ class ExerciceBusiness
 
         // Check si pas déjà imputé
         if ($exercice->statut >= self::EXERCICE_STATUT_IMPUTE) {
-            $this->checkValiditeChangementsSiImpute($presenceId, $exerciceId, $sapeurId, $presence);
+            self::checkValiditeChangementsSiImpute($presenceId, $exerciceId, $sapeurId, $presence);
         }
 
         // Check si justificatif
@@ -424,10 +438,10 @@ class ExerciceBusiness
                 ]);
         }
 
-        return $this->updateStatut($exerciceId);
+        return self::updateStatut($exerciceId);
     }
 
-    private function checkValiditeChangementsSiImpute($exerciceSapeurId, $exerciceId, $sapeurId, $presenceEffective)
+    private static function checkValiditeChangementsSiImpute($exerciceSapeurId, $exerciceId, $sapeurId, $presenceEffective)
     {
         // check que les modifications n'ont lieu que sur l'excuse type, remplacé ou amende
         $presenceReference = ExerciceSapeur
@@ -490,25 +504,25 @@ class ExerciceBusiness
      * @return Collection
      * @throws ArrayException
      */
-    public function addSapeurs($exerciceId, $sapeurs)
+    public static function addSapeurs($exerciceId, $sapeurs)
     {
         // Check pas déjà imputé
-        $statut = $this->repository->getExerciceStatutById($exerciceId);
+        $statut = Exercice::findOrFail($exerciceId)->statut;
         if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_VALIDE) {
             throw new ArrayException([], 'Impossible de modifier un exercice déjà imputé');
         }
 
         // Check sapeur not duplicated
         $ids = array_map(function ($sap) {
-            return $sap->sapeur_id;
-        }, $this->repository->listeSapeurOfExerciceById($exerciceId));
+            return $sap['sapeur_id'];
+        }, ExerciceSapeur::where('exercice_id', $exerciceId)->get()->toArray());
 
         $sapeurFiltered = array_filter($sapeurs, function ($sap) use ($ids) {
             return !in_array($sap['sapeur_id'], $ids);
         });
 
         foreach ($sapeurFiltered as $sapeur) {
-            $this->repository->addSapeurToExercice($exerciceId, $sapeur);
+            self::addSapeurToExercice($exerciceId, $sapeur);
 
             // Ajout heures sup if any
             $heures = array_filter(
@@ -522,11 +536,34 @@ class ExerciceBusiness
                     continue;
                 }
                 $heure['sapeur_id'] = $sapeur['sapeur_id'];
-                $this->ajouterHeureExercice($exerciceId, $heure);
+                self::ajouterHeureExercice($exerciceId, $heure);
             }
         }
 
-        return $this->updateStatut($exerciceId);
+        return self::updateStatut($exerciceId);
+    }
+
+    public static function addSapeurToExercice($exerciceId, $data)
+    {
+        $sapeur = new ExerciceSapeur();
+        $sapeur->fill($data);
+        $sapeur->exercice_id = $exerciceId;
+        $sapeur->sapeur_id = $data['sapeur_id'];
+        $sapeur->save();
+        return $sapeur->toArray();
+    }
+
+    public static function ajouterHeureExercice($exerciceId, $heure)
+    {
+        $type = HeureExerciceType::find($heure['heure_exercice_type_id']);
+
+        $heureExercice = new HeureExercice();
+        $heureExercice->fill($type->toArray());
+        $heureExercice->fill($heure);
+        $heureExercice->exercice_id = $exerciceId;
+        $heureExercice->save();
+
+        return $heureExercice;
     }
 
     /**
@@ -536,11 +573,11 @@ class ExerciceBusiness
      * @return Collection
      * @throws ArrayException
      */
-    public function updateSapeurs($exerciceId, $sapeurs, $hasValidationPermission)
+    public static function updateSapeurs($exerciceId, $sapeurs, $hasValidationPermission)
     {
         // FIXME:update sapeurs d'un exercice
         // Check pas déjà imputé
-        $statut = $this->repository->getExerciceStatutById($exerciceId);
+        $statut = Exercice::findOrFail($exerciceId)->statut;
 
         if (!$hasValidationPermission && $statut >= self::EXERCICE_STATUT_VALIDE) {
             throw new ArrayException([$statut], 'Permissions insuffisantes pour modifier les présences.');
@@ -661,7 +698,7 @@ class ExerciceBusiness
                     continue;
                 }
                 $heure['sapeur_id'] = $sapeur['sapeur_id'];
-                $this->ajouterHeureExercice($exerciceId, $heure);
+                self::ajouterHeureExercice($exerciceId, $heure);
             }
 
             // Heures modifiées
@@ -675,7 +712,7 @@ class ExerciceBusiness
             // throw new ArrayException(['ajoutes' => $heuresAjoutees, 'modifies' => $heuresModifiees, 'supprimes' => $heuresSupprimeesId]);
         }
 
-        return $this->updateStatut($exerciceId);
+        return self::updateStatut($exerciceId);
     }
 
     /**
@@ -683,7 +720,7 @@ class ExerciceBusiness
      *
      * @param $data
      */
-    public function removeExcuse($sapeurId, $exerciceId, $hasValidationPermission)
+    public static function removeExcuse($sapeurId, $exerciceId, $hasValidationPermission)
     {
         $exerciceSapeur = ExerciceSapeur::with('exercice')->where([
             ['sapeur_id', '=', $sapeurId],
@@ -723,27 +760,31 @@ class ExerciceBusiness
      *
      * @param $data
      */
-    public function removeSapeurs($exerciceId, $ids)
+    public static function removeSapeurs($exerciceId, $ids)
     {
         // Check pas déjà imputé
-        $statut = $this->repository->getExerciceStatutById($exerciceId);
+        $statut = Exercice::findOrFail($exerciceId)->statut;
         if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_SAISI) {
             throw new ArrayException([], 'Impossible de modifier un exercice déjà imputé');
         }
 
         // FIXME: Supprimer excuse si existante
 
-        $this->repository->removeSapeursFromExercice($exerciceId, $ids);
+        ExerciceSapeur::where('exercice_id', $exerciceId)
+            ->whereIn('sapeur_id', $ids)
+            ->delete();
         HeureExercice::where('exercice_id', $exerciceId)
             ->whereIn('sapeur_id', $ids)
             ->delete();
 
-        return $this->updateStatut($exerciceId);
+        return self::updateStatut($exerciceId);
     }
 
-    public function supprimerConvocations($sapeurId, $exercicesIds)
+    public static function supprimerConvocations($sapeurId, $exercicesIds)
     {
-        $this->repository->supprimerConvocations($sapeurId, $exercicesIds);
+        ExerciceSapeur::where('sapeur_id', $sapeurId)
+            ->whereIn('exercice_id', $exercicesIds)
+            ->delete();
         HeureExercice::whereIn('exercice_id', $exercicesIds)
             ->where('sapeur_id', $sapeurId)
             ->whereHas("exercice", function ($q) {
@@ -755,9 +796,9 @@ class ExerciceBusiness
         return true;
     }
 
-    public function createHeure($data, $hasValidationPermission)
+    public static function createHeure($data, $hasValidationPermission)
     {
-        $statut = $this->repository->getExerciceStatutById($data['exercice_id']);
+        $statut = Exercice::findOrFail($data['exercice_id'])->statut;
         if ($statut == self::EXERCICE_STATUT_ANNULE) {
             throw new ArrayException([], "Impossible de modifier un exercice annulé");
         }
@@ -777,13 +818,13 @@ class ExerciceBusiness
         return $heure;
     }
 
-    public function updateHeure($heureId, $data, $hasValidationPermission)
+    public static function updateHeure($heureId, $data, $hasValidationPermission)
     {
         $heure = HeureExercice::find($heureId);
         if ($heure == NULL) {
             throw new ArrayException([], "Heure inexistante");
         }
-        $statut = $this->repository->getExerciceStatutById($heure->exercice_id);
+        $statut = Exercice::findOrFail($heure->exercice_id)->statut;
         if ($statut == self::EXERCICE_STATUT_ANNULE) {
             throw new ArrayException([], "Impossible de modifier un exercice annulé");
         }
@@ -798,13 +839,13 @@ class ExerciceBusiness
         return HeureExercice::find($heureId);
     }
 
-    public function removeHeure($heureId, $hasValidationPermission)
+    public static function removeHeure($heureId, $hasValidationPermission)
     {
         $heure = HeureExercice::find($heureId);
         if ($heure == NULL) {
             throw new ArrayException([], "Heure inexistante");
         }
-        $statut = $this->repository->getExerciceStatutById($heure->exercice_id);
+        $statut = Exercice::findOrFail($heure->exercice_id)->statut;
         if ($statut == self::EXERCICE_STATUT_ANNULE) {
             throw new ArrayException([], "Impossible de modifier un exercice annulé");
         }
@@ -821,9 +862,20 @@ class ExerciceBusiness
     public static function listeSapeurOfExerciceById($exerciceId, $hasPresencePermission = false)
     {
         $champs = [
-            'id', 'created_at', 'updated_at', 'sapeur_id', 'exercice_id',
-            'excuse_type_id', 'convoque', 'present', 'remplace', 'absent',
-            'excuse_statut', 'date_demande', 'justificatif_path', 'date_validation',
+            'id',
+            'created_at',
+            'updated_at',
+            'sapeur_id',
+            'exercice_id',
+            'excuse_type_id',
+            'convoque',
+            'present',
+            'remplace',
+            'absent',
+            'excuse_statut',
+            'date_demande',
+            'justificatif_path',
+            'date_validation',
         ];
         $heures = HeureExercice::where('exercice_id', $exerciceId)->get()->toArray();
         $sapeurs = ExerciceSapeur::where('exercice_id', $exerciceId)
@@ -944,10 +996,36 @@ class ExerciceBusiness
         );
     }
 
-    public function listeAppel(SapeurRepository $sapeurRepository, $exerciceId, string $sisKey)
+    public static function listeAppel($exerciceId, string $sisKey)
     {
         $exercice = Exercice::with(['sapeurs', 'localite'])->findOrFail($exerciceId)->toArray();
-        $sapeurs = $sapeurRepository->listeSapeurLight();
+
+        $now = Carbon::now();
+        $oneMonthFurther = Carbon::now()->addMonths(1);
+        $sapeurs = Sapeur::with([
+            'permis',
+            'fonctions' => function ($query) use ($oneMonthFurther, $now) {
+                $query->where('debut', '<=', $oneMonthFurther)->where(function ($query) use ($now) {
+                    $query->where('fin', '=', null)
+                        ->orWhere('fin', '>=', $now);
+                });
+            }
+        ])->orderBy('nom_prenom')->get([
+                    'id',
+                    'nom',
+                    'prenom',
+                    'actif',
+                    'email',
+                    'localite_id',
+                    'fonction_id',
+                    'grade_id',
+                    'civilite_id',
+                    'date_naissance',
+                    'type',
+                    'annee_incorporation',
+                    DB::raw("CONCAT(nom, ' ', prenom) AS nom_prenom")
+                ])->toArray();
+
         $exercice['sapeurs'] = array_map(function ($s) use ($sapeurs) {
             $id = $s['sapeur_id'];
             $sap = array_values(array_filter($sapeurs, function ($sapeur) use ($id) {
@@ -989,10 +1067,36 @@ class ExerciceBusiness
         );
     }
 
-    public function listePresence(SapeurRepository $sapeurRepository, $exerciceId, string $sisKey)
+    public static function listePresence($exerciceId, string $sisKey)
     {
         $exercice = Exercice::with(['sapeurs', 'localite'])->findOrFail($exerciceId)->toArray();
-        $sapeurs = $sapeurRepository->listeSapeurLight();
+
+        $now = Carbon::now();
+        $oneMonthFurther = Carbon::now()->addMonths(1);
+        $sapeurs = Sapeur::with([
+            'permis',
+            'fonctions' => function ($query) use ($oneMonthFurther, $now) {
+                $query->where('debut', '<=', $oneMonthFurther)->where(function ($query) use ($now) {
+                    $query->where('fin', '=', null)
+                        ->orWhere('fin', '>=', $now);
+                });
+            }
+        ])->orderBy('nom_prenom')->get([
+                    'id',
+                    'nom',
+                    'prenom',
+                    'actif',
+                    'email',
+                    'localite_id',
+                    'fonction_id',
+                    'grade_id',
+                    'civilite_id',
+                    'date_naissance',
+                    'type',
+                    'annee_incorporation',
+                    DB::raw("CONCAT(nom, ' ', prenom) AS nom_prenom")
+                ])->toArray();
+
         $exercice['sapeurs'] = array_map(function ($s) use ($sapeurs) {
             $id = $s['sapeur_id'];
             $sap = array_values(array_filter($sapeurs, function ($sapeur) use ($id) {

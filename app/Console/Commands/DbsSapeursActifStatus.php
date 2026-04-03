@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Domaine\Business\SapeurBusiness;
-use App\Infrastructure\Repositories\SapeurRepositoryEloquent;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
 
@@ -41,13 +40,12 @@ class DbsSapeursActifStatus extends Command
     public function handle()
     {
         $dbs = config('database.dbs');
-        $sapeurBusiness = new SapeurBusiness(new SapeurRepositoryEloquent());
         foreach ($dbs as $db) {
             printf("Recompute for sis=" . $db . "\n");
             Config::set('database.default', 'db_' . $db);
-            $sapeurBusiness->recomputeSapeurActifStatus();
-            $sapeurBusiness->recomputeSapeurFonctionPrincipale();
-            $sapeurBusiness->recomputeSapeurGradePrincipal();
+            SapeurBusiness::recomputeSapeurActifStatus();
+            SapeurBusiness::recomputeSapeurFonctionPrincipale();
+            SapeurBusiness::recomputeSapeurGradePrincipal();
 
             printf("\n");
         }

@@ -11,12 +11,6 @@ use Illuminate\Http\Request;
  */
 class ConvocationsController extends Controller
 {
-    protected $business;
-
-    public function __construct(ExerciceBusiness $business)
-    {
-        $this->business = $business;
-    }
 
     public function index(Request $request, $exerciceId)
     {
@@ -40,11 +34,13 @@ class ConvocationsController extends Controller
             'sapeurs.*.excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
         ]);
 
-        $statut = $this->business->addSapeurs($exerciceId, $data['sapeurs']);
-        return response()->json(['data' => [
-            "statut" => $statut,
-            "sapeurs" => ExerciceBusiness::listeSapeurOfExerciceById($exerciceId),
-        ]]);
+        $statut = ExerciceBusiness::addSapeurs($exerciceId, $data['sapeurs']);
+        return response()->json([
+            'data' => [
+                "statut" => $statut,
+                "sapeurs" => ExerciceBusiness::listeSapeurOfExerciceById($exerciceId),
+            ]
+        ]);
     }
 
     public function updatePresence(Request $request, $id)
@@ -80,12 +76,14 @@ class ConvocationsController extends Controller
         $perms = $request->attributes->get('permissions', []);
         $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
 
-        $statut = $this->business->updatePresence($id, $data, $file, $hasValidationPermission, $sisKey);
-        $exerciceSapeur = \App\Infrastructure\Models\ExerciceSapeur::with('exercice')->find($id);
-        return response()->json(['data' => [
-            'statut' => $statut,
-            'sapeur' => ExerciceBusiness::sapeurOfExerciceById($exerciceSapeur->exercice_id, $exerciceSapeur->sapeur_id),
-        ]]);
+        $statut = ExerciceBusiness::updatePresence($id, $data, $file, $hasValidationPermission, $sisKey);
+        $exerciceSapeur = \App\Models\ExerciceSapeur::with('exercice')->find($id);
+        return response()->json([
+            'data' => [
+                'statut' => $statut,
+                'sapeur' => ExerciceBusiness::sapeurOfExerciceById($exerciceSapeur->exercice_id, $exerciceSapeur->sapeur_id),
+            ]
+        ]);
     }
 
     public function updatePresences(Request $request, int $exerciceId)
@@ -103,11 +101,13 @@ class ConvocationsController extends Controller
             'sapeurs.*.heures.*.heure_exercice_type_id' => 'nullable|integer',
         ]);
 
-        $statut = $this->business->updatePresences($exerciceId, $data['sapeurs']);
-        return response()->json(['data' => [
-            'statut' => $statut,
-            'sapeurs' => ExerciceBusiness::listeSapeurOfExerciceById($exerciceId),
-        ]]);
+        $statut = ExerciceBusiness::updatePresences($exerciceId, $data['sapeurs']);
+        return response()->json([
+            'data' => [
+                'statut' => $statut,
+                'sapeurs' => ExerciceBusiness::listeSapeurOfExerciceById($exerciceId),
+            ]
+        ]);
     }
 
     public function destroy(Request $request, int $exerciceId)
@@ -116,7 +116,7 @@ class ConvocationsController extends Controller
             'sapeurs.*' => 'integer'
         ]);
 
-        $statut = $this->business->removeSapeurs($exerciceId, $data['sapeurs']);
+        $statut = ExerciceBusiness::removeSapeurs($exerciceId, $data['sapeurs']);
         return response()->json(['data' => $statut]);
     }
 
@@ -132,7 +132,7 @@ class ConvocationsController extends Controller
         $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
         $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
-        $heure = $this->business->createHeure($data, $hasValidationPermission);
+        $heure = ExerciceBusiness::createHeure($data, $hasValidationPermission);
 
         return response()->json(['data' => $heure]);
     }
@@ -147,7 +147,7 @@ class ConvocationsController extends Controller
         $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
         $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
-        $heure = $this->business->updateHeure($heureId, $data, $hasValidationPermission);
+        $heure = ExerciceBusiness::updateHeure($heureId, $data, $hasValidationPermission);
 
         return response()->json(['data' => $heure]);
     }
@@ -157,7 +157,7 @@ class ConvocationsController extends Controller
         $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
         $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
-        $statut = $this->business->removeHeure($heureId, $hasValidationPermission);
+        $statut = ExerciceBusiness::removeHeure($heureId, $hasValidationPermission);
 
         return response()->json(['data' => $statut]);
     }
@@ -169,7 +169,7 @@ class ConvocationsController extends Controller
             'convocations.*' => 'integer'
         ]);
 
-        $statut = $this->business->supprimerConvocations($sapeurId, $data['convocations']);
+        $statut = ExerciceBusiness::supprimerConvocations($sapeurId, $data['convocations']);
         return response()->json(['data' => $statut]);
     }
 }

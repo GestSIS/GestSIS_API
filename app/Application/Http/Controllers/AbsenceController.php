@@ -3,8 +3,8 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\AbsenceBusiness;
-use App\Infrastructure\Models\Absence;
-use App\Infrastructure\Models\ExerciceComptable;
+use App\Models\Absence;
+use App\Models\ExerciceComptable;
 use Illuminate\Http\Request;
 
 class AbsenceController extends Controller

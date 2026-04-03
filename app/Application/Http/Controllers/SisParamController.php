@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\SisParamBusiness;
-use App\Infrastructure\Models\SisParam;
+use App\Models\SisParam;
 use Illuminate\Http\Request;
 
 class SisParamController extends Controller

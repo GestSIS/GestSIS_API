@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Infrastructure\Models\Sapeur;
-use App\Infrastructure\Models\SapeurTelephone;
+use App\Models\Sapeur;
+use App\Models\SapeurTelephone;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 

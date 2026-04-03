@@ -2,14 +2,14 @@
 
 namespace App\Domaine\Business;
 
-use App\Infrastructure\Models\ExerciceComptable;
+use App\Models\ExerciceComptable;
 
 
 class ExerciceComptableBusiness
 {
 
     public static function creerExerciceComptable($data)
-    {        
+    {
         $exercice = new ExerciceComptable();
         $exercice->fill($data);
         $exercice->boucle = false;
