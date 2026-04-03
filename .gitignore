@@ -17,6 +17,7 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+/typst
 
 # Storage keys
 /storage/keys/*.key
