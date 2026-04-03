@@ -2,19 +2,14 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\MesInfosService;
+use App\Domaine\Business\ControleMedicalBusiness;
+use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\ControleMedical;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class MesControlesMedicauxController extends Controller
 {
-    private $service = null;
-
-    public function __construct(MesInfosService $service)
-    {
-        $this->service = $service;
-    }
-
     /**
      * Récupération des exercices du sapeur
      */
@@ -25,7 +20,7 @@ class MesControlesMedicauxController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        $data = $this->service->mesControlesMedicaux($sapeurId);
+        $data = ControleMedical::where('sapeur_id', $sapeurId)->get();
         return response()->json(['data' => $data]);
     }
 
@@ -39,7 +34,11 @@ class MesControlesMedicauxController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        $justificatif = $this->service->monJustificatifMedical($sapeurId, $controleMedicalId);
+        $controle = ControleMedical::find($controleMedicalId);
+        if (!$controle || $sapeurId !== $controle->sapeur_id) {
+            throw new ArrayException([], 'Accès refusé');
+        }
+        $justificatif = ControleMedicalBusiness::getJustificatif($controleMedicalId);
 
         $headers = array(
             'Content-Type: application/pdf',

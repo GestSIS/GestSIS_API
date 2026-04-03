@@ -2,23 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ComptabiliteParamService;
+use App\Domaine\Business\ComptabiliteParamBusiness;
+use App\Infrastructure\Models\FraisIndemniteAnnuelType;
 use Illuminate\Http\Request;
 
 class FraisIndemniteAnnuelTypeController extends Controller
 {
-    protected $service;
-
-    public function __construct(ComptabiliteParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $indemnites = $this->service->fraisIndemnitesAnnuel();
-
-        return response()->json(['data' => $indemnites]);
+        return response()->json(['data' => FraisIndemniteAnnuelType::with('fraisIndemniteAnnuels')->get()]);
     }
 
     public function store(Request $request)
@@ -31,7 +23,7 @@ class FraisIndemniteAnnuelTypeController extends Controller
             'type' => 'integer|required',
         ]);
 
-        $indemnite = $this->service->ajouterFraisIndemniteAnnuelType($data);
+        $indemnite = ComptabiliteParamBusiness::ajouterFraisIndemniteAnnuelType($data);
         return response()->json(['data' => $indemnite]);
     }
 
@@ -45,13 +37,13 @@ class FraisIndemniteAnnuelTypeController extends Controller
             'type' => 'integer|required',
         ]);
 
-        $indemnite = $this->service->modifierFraisIndemniteAnnuelType($id, $data);
+        $indemnite = ComptabiliteParamBusiness::modifierFraisIndemniteAnnuelType($id, $data);
         return response()->json(['data' => $indemnite]);
     }
 
     public function destroy($id)
     {
-        $indemnite = $this->service->supprimerFraisIndemniteAnnuelType($id);
+        $indemnite = ComptabiliteParamBusiness::supprimerFraisIndemniteAnnuelType($id);
         return response()->json(['data' => $indemnite]);
     }
 }

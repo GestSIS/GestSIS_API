@@ -2,23 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ComptabiliteParamService;
+use App\Domaine\Business\ComptabiliteParamBusiness;
+use App\Infrastructure\Models\Amende;
 use Illuminate\Http\Request;
 
 class AmendeController extends Controller
 {
-    protected $service;
-
-    public function __construct(ComptabiliteParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $amendes = $this->service->amendes();
-
-        return response()->json(['data' => $amendes]);
+        return response()->json(['data' => Amende::all()]);
     }
 
     public function store(Request $request)
@@ -28,7 +20,7 @@ class AmendeController extends Controller
             'ecriture_categorie_id' => 'required|integer',
             'amendes.*.montant' => 'required|numeric',
         ]);
-        $amendes = $this->service->updateAmendes($data);
+        $amendes = ComptabiliteParamBusiness::updateAmendes($data);
 
         return response()->json(['data' => $amendes]);
     }

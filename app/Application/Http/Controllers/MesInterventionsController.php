@@ -2,18 +2,11 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\MesInfosService;
+use App\Infrastructure\Models\InterventionSapeur;
 use Illuminate\Http\Request;
 
 class MesInterventionsController extends Controller
 {
-    private $service = null;
-
-    public function __construct(MesInfosService $service)
-    {
-        $this->service = $service;
-    }
-
     /**
      * Récupération des exercices du sapeur
      */
@@ -24,7 +17,21 @@ class MesInterventionsController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        $data = $this->service->mesInterventions($sapeurId, $exerciceComptableId);
+        $data = InterventionSapeur::where('intervention_sapeur.sapeur_id', '=', $sapeurId)
+            ->join('interventions', 'interventions.id', '=', 'intervention_sapeur.intervention_id')
+            ->where('interventions.exercice_comptable_id', '=', $exerciceComptableId)
+            ->select(
+                'intervention_sapeur.*',
+                'interventions.date_debut',
+                'interventions.heure_debut',
+                'interventions.date_fin',
+                'interventions.heure_fin',
+                'interventions.lieu',
+                'interventions.objet',
+                'interventions.localite_id',
+                'interventions.stat_federal_id',
+                'interventions.type_intervention_id',
+            )->get()->toArray();
         return response()->json(['data' => $data]);
     }
 }

@@ -2,17 +2,19 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\MesInfosService;
+use App\Domaine\Business\ExerciceBusiness;
+use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\ExerciceSapeur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class MesExcusesController extends Controller
 {
-    private $service = null;
+    private $exerciceBusiness;
 
-    public function __construct(MesInfosService $service)
+    public function __construct(ExerciceBusiness $exerciceBusiness)
     {
-        $this->service = $service;
+        $this->exerciceBusiness = $exerciceBusiness;
     }
 
     /**
@@ -27,14 +29,11 @@ class MesExcusesController extends Controller
 
         $request->merge([
             'excuse_type_id' => (int) $request->get('excuse_type_id'),
-            // 'remarque' => (string) $request->get('remarque'),
         ]);
 
         $data = $request->validate([
             'excuse_type_id' => 'required|integer|min:1',
             'remarque' => 'string|required|min:1|max:1000',
-            // 'justificatif_filename' => 'required|boolean', // Nom du fichier
-            // 'justificatif_path' => 'required|boolean', // Nom du fichier
         ]);
 
         if ($request->hasFile('justificatif_file') && !$request->file('justificatif_file')->isValid()) {
@@ -42,10 +41,9 @@ class MesExcusesController extends Controller
         }
 
         $file = $request->file('justificatif_file');
-
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
 
-        $data = $this->service->creerExcuse($sapeurId, $exerciceId, $data, $file, $sisKey);
+        $data = $this->exerciceBusiness->creerExcuse($sapeurId, $exerciceId, $data, $file, $sisKey);
         return response()->json(['data' => $data]);
     }
 
@@ -63,7 +61,7 @@ class MesExcusesController extends Controller
         $perms = $request->attributes->get('permissions', []);
         $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
 
-        $data = $this->service->removeExcuse($sapeurId, $exerciceId, $hasValidationPermission);
+        $data = $this->exerciceBusiness->removeExcuse($sapeurId, $exerciceId, $hasValidationPermission);
         return response()->json(['data' => $data]);
     }
 
@@ -71,7 +69,11 @@ class MesExcusesController extends Controller
     {
         $sapeurId = $request->attributes->get('sapeurId');
 
-        $justificatif = $this->service->getJustificatif($exerciceId, $sapeurId);
+        $presence = ExerciceSapeur::where([['exercice_id', '=', $exerciceId], ['sapeur_id', '=', $sapeurId]])->first();
+        if ($presence == null || !$presence->justificatif_filename) {
+            throw new ArrayException([], "Aucun justificatif !");
+        }
+        $justificatif = ['path' => $presence->justificatif_path, 'filename' => $presence->justificatif_filename];
 
         $headers = array(
             'Content-Type: application/pdf',

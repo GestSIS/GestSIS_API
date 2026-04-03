@@ -2,23 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ControleMedicalService;
+use App\Domaine\Business\ControleMedicalBusiness;
+use App\Infrastructure\Models\Medecin;
 use Illuminate\Http\Request;
 
 class MedecinController extends Controller
 {
-    protected $service;
-
-    public function __construct(ControleMedicalService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $medecins = $this->service->medecins();
-
-        return response()->json(['data' => $medecins]);
+        return response()->json(['data' => Medecin::all()]);
     }
 
     public function store(Request $request)
@@ -30,7 +22,7 @@ class MedecinController extends Controller
             'actif' => 'boolean|required'
         ]);
 
-        $medecin = $this->service->ajouterMedecin($data);
+        $medecin = ControleMedicalBusiness::ajouterMedecin($data);
         return response()->json(['data' => $medecin]);
     }
 
@@ -43,13 +35,13 @@ class MedecinController extends Controller
             'actif' => 'boolean'
         ]);
 
-        $medecin = $this->service->modifierMedecin($id, $data);
+        $medecin = ControleMedicalBusiness::modifierMedecin($id, $data);
         return response()->json(['data' => $medecin]);
     }
 
     public function destroy($id)
     {
-        $medecin = $this->service->supprimerMedecin($id);
+        $medecin = ControleMedicalBusiness::supprimerMedecin($id);
         return response()->json(['data' => $medecin]);
     }
 }

@@ -2,23 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ComptabiliteParamService;
+use App\Domaine\Business\ComptabiliteParamBusiness;
+use App\Infrastructure\Models\IndemniteExerciceType;
 use Illuminate\Http\Request;
 
 class IndemniteExerciceTypeController extends Controller
 {
-    protected $service;
-
-    public function __construct(ComptabiliteParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $indemnites = $this->service->indemnitesExercice();
-
-        return response()->json(['data' => $indemnites]);
+        return response()->json(['data' => IndemniteExerciceType::with('fonctions')->get()]);
     }
 
     public function store(Request $request)
@@ -34,7 +26,7 @@ class IndemniteExerciceTypeController extends Controller
             'fonctions.*.fonction_id' => 'integer|nullable',
         ]);
 
-        $indemnite = $this->service->ajouterIndemniteExercice($data);
+        $indemnite = ComptabiliteParamBusiness::ajouterIndemniteExercice($data);
         return response()->json(['data' => $indemnite]);
     }
 
@@ -51,13 +43,13 @@ class IndemniteExerciceTypeController extends Controller
             'fonctions.*.fonction_id' => 'integer|nullable'
         ]);
 
-        $indemnite = $this->service->modifierIndemniteExercice($id, $data);
+        $indemnite = ComptabiliteParamBusiness::modifierIndemniteExercice($id, $data);
         return response()->json(['data' => $indemnite]);
     }
 
     public function destroy($id)
     {
-        $indemnite = $this->service->supprimerIndemniteExercice($id);
+        $indemnite = ComptabiliteParamBusiness::supprimerIndemniteExercice($id);
         return response()->json(['data' => $indemnite]);
     }
 }

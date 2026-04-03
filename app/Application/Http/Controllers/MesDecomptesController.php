@@ -2,18 +2,17 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\MesInfosService;
 use App\Domaine\API\PaiementService;
+use App\Infrastructure\Models\Ecriture;
+use App\Infrastructure\Models\Paiement;
 use Illuminate\Http\Request;
 
 class MesDecomptesController extends Controller
 {
-    protected $mesInfosService;
     protected $paiementService;
 
-    public function __construct(MesInfosService $mesInfosService, PaiementService $paiementService)
+    public function __construct(PaiementService $paiementService)
     {
-        $this->mesInfosService = $mesInfosService;
         $this->paiementService = $paiementService;
     }
 
@@ -27,7 +26,16 @@ class MesDecomptesController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        $data = $this->mesInfosService->mesDecomptes($sapeurId, $exerciceComptableId);
+        $paiements = Paiement::where('sapeur_id', '=', $sapeurId)
+            ->join('decomptes', 'paiements.decompte_id', '=', 'decomptes.id')
+            ->where('decomptes.exercice_comptable_id', '=', $exerciceComptableId)
+            ->select('paiements.*', 'decomptes.date as date', 'decomptes.designation as decompte')->get();
+        $ecritures = Ecriture::where('sapeur_id', '=', $sapeurId)->whereNotNull('decompte_id')->get();
+
+        $data = [
+            'paiements' => $paiements,
+            'ecritures' => $ecritures,
+        ];
         return response()->json(['data' => $data]);
     }
 
@@ -39,7 +47,7 @@ class MesDecomptesController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        return $this->mesInfosService->printResumeAnnuel($sapeurId, $exerciceComptableId, $sisKey);
+        return PaiementService::impressionResumePourSapeur($exerciceComptableId, $sapeurId, $sisKey);
     }
 
     /**
@@ -53,7 +61,7 @@ class MesDecomptesController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        return $this->mesInfosService->printDecompte($sapeurId, $decompteId, $sisKey);
+        return PaiementService::impressionDecompteSapeur($decompteId, $sapeurId, $sisKey);
     }
 
     /**

@@ -2,18 +2,11 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\MesInfosService;
+use App\Infrastructure\Models\Travail;
 use Illuminate\Http\Request;
 
 class MesTravauxController extends Controller
 {
-    private $service = null;
-
-    public function __construct(MesInfosService $service)
-    {
-        $this->service = $service;
-    }
-
     /**
      * Récupération des exercices du sapeur
      */
@@ -24,7 +17,10 @@ class MesTravauxController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        $data = $this->service->mesTravaux($sapeurId, $exerciceComptableId);
+        $data = Travail::where([
+            ['sapeur_id', '=', $sapeurId],
+            ['exercice_comptable_id', '=', $exerciceComptableId]
+        ])->get();
         return response()->json(['data' => $data]);
     }
 }

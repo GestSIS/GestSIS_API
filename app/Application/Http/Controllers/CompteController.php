@@ -2,20 +2,19 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ComptabiliteParamService;
 use App\Domaine\API\ImputationService;
+use App\Domaine\Business\ComptabiliteParamBusiness;
+use App\Infrastructure\Models\Compte;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class CompteController extends Controller
 {
-    protected $paramService;
     protected $service;
 
-    public function __construct(ImputationService $service, ComptabiliteParamService $paramService)
+    public function __construct(ImputationService $service)
     {
         $this->service = $service;
-        $this->paramService = $paramService;
     }
 
     /**
@@ -25,7 +24,7 @@ class CompteController extends Controller
      */
     public function index()
     {
-        return response()->json(['data' => $this->paramService->comptes()]);
+        return response()->json(['data' => Compte::all()]);
     }
 
     public function store(Request $request)
@@ -36,7 +35,7 @@ class CompteController extends Controller
             'produit' => 'boolean|required',
         ]);
 
-        $compte = $this->paramService->ajouterCompte($data);
+        $compte = ComptabiliteParamBusiness::ajouterCompte($data);
         return response()->json(['data' => $compte]);
     }
 
@@ -48,13 +47,13 @@ class CompteController extends Controller
             'produit' => 'boolean|required',
         ]);
 
-        $compte = $this->paramService->modifierCompte($id, $data);
+        $compte = ComptabiliteParamBusiness::modifierCompte($id, $data);
         return response()->json(['data' => $compte]);
     }
 
     public function destroy($id)
     {
-        $this->paramService->supprimerCompte($id);
+        ComptabiliteParamBusiness::supprimerCompte($id);
         return response()->json(['data' => 'ok']);
     }
 

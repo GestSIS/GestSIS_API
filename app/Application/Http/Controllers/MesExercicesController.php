@@ -2,16 +2,16 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\MesInfosService;
+use App\Domaine\SPI\ExerciceRepository;
 use Illuminate\Http\Request;
 
 class MesExercicesController extends Controller
 {
-    private $service = null;
+    private $exerciceRepo;
 
-    public function __construct(MesInfosService $service)
+    public function __construct(ExerciceRepository $exerciceRepo)
     {
-        $this->service = $service;
+        $this->exerciceRepo = $exerciceRepo;
     }
 
     /**
@@ -24,7 +24,7 @@ class MesExercicesController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        $data = $this->service->mesExercices($sapeurId, $exerciceComptableId);
+        $data = $this->exerciceRepo->listExerciceOfSapeurById($exerciceComptableId, $sapeurId);
         return response()->json(['data' => $data]);
     }
 }

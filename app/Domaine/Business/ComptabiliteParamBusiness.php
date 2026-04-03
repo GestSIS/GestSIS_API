@@ -19,7 +19,7 @@ use App\Infrastructure\Models\IndemniteInterventionType;
 
 class ComptabiliteParamBusiness
 {
-    public function updateAmendes($data)
+    public static function updateAmendes($data)
     {
         $compteId = $data['compte_id'];
         $ecitureCategorieId = $data['ecriture_categorie_id'];
@@ -36,7 +36,7 @@ class ComptabiliteParamBusiness
         return Amende::all();
     }
 
-    public function ajouterCategorie($data)
+    public static function ajouterCategorie($data)
     {
         $categorie = new EcritureCategorie();
         $categorie->fill($data);
@@ -44,13 +44,13 @@ class ComptabiliteParamBusiness
         return $categorie;
     }
 
-    public function modifierCategorie($id, $data)
+    public static function modifierCategorie($id, $data)
     {
         EcritureCategorie::where('id', $id)->limit(1)->update($data);
         return EcritureCategorie::find($id);
     }
 
-    public function supprimerCategorie($id)
+    public static function supprimerCategorie($id)
     {
         if (Ecriture::where('ecriture_categorie_id', '=', $id)->count() > 0) {
             throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié à des écritures");

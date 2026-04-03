@@ -2,25 +2,18 @@
 
 namespace App\Application\Http\Controllers;
 
+use App\Domaine\Business\ComptabiliteParamBusiness;
+use App\Infrastructure\Models\IndemniteCoursType;
 use Illuminate\Http\Request;
-
-use App\Domaine\API\ComptabiliteParamService;
 
 class IndemniteCoursTypeController extends Controller
 {
-    private $service = null;
-
-    public function __construct(ComptabiliteParamService $service)
-    {
-        $this->service = $service;
-    }
-
     /**
      * Liste des indemnités de cours types
      */
     public function index()
     {
-        return $this->service->indemnitesCoursTypes();
+        return IndemniteCoursType::with('fonctions')->get();
     }
 
     public function store(Request $request)
@@ -35,7 +28,7 @@ class IndemniteCoursTypeController extends Controller
             'fonctions.*.type_unite_id' => 'integer|required',
         ]);
 
-        $indemnite = $this->service->ajouterIndemniteCoursType($data);
+        $indemnite = ComptabiliteParamBusiness::ajouterIndemniteCoursType($data);
         return response()->json(['data' => $indemnite]);
     }
 
@@ -51,18 +44,18 @@ class IndemniteCoursTypeController extends Controller
             'fonctions.*.type_unite_id' => 'integer|required',
         ]);
 
-        $indemnite = $this->service->modifierIndemniteCoursType($id, $data);
+        $indemnite = ComptabiliteParamBusiness::modifierIndemniteCoursType($id, $data);
         return response()->json(['data' => $indemnite]);
     }
 
     /**
      * Retourne un type
-     * 
+     *
      * @param int $id id du type souhaité
      */
     public function destroy($id)
     {
-        $this->service->supprimerIndemniteCoursType($id);
+        ComptabiliteParamBusiness::supprimerIndemniteCoursType($id);
         return response()->json(['data' => 'ok']);
     }
 }

@@ -2,48 +2,22 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ControleMedicalService;
+use App\Domaine\Business\ControleMedicalBusiness;
+use App\Infrastructure\Models\ControleMedical;
 use Illuminate\Http\Request;
 
 class ControleMedicalController extends Controller
 {
-    protected $service;
-
-    public function __construct(ControleMedicalService $service)
-    {
-        $this->service = $service;
-    }
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
     public function index()
     {
-        $controles = $this->service->listeAllControlesMedicaux();
-
-        return response()->json(['data' => $controles]);
+        return response()->json(['data' => ControleMedical::all()]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param int $id
-     * @return Response
-     */
     public function show(int $id)
     {
-        $controle = $this->service->getControleMedical($id);
-        return response()->json(['data' => $controle]);
+        return response()->json(['data' => ControleMedical::find($id)]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @return Response
-     */
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -57,19 +31,11 @@ class ControleMedicalController extends Controller
             'accepter' => 'boolean'
         ]);
 
-        $controle = $this->service->createControleMedical($data);
+        $controle = ControleMedicalBusiness::createControleMedical($data);
 
         return response()->json(['data' => $controle]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param int $id
-     * @return Response
-     * @throws Exception
-     */
     public function update(Request $request, int $id)
     {
         $data = $request->validate([
@@ -83,19 +49,13 @@ class ControleMedicalController extends Controller
             'accepter' => 'boolean'
         ]);
 
-        $controle = $this->service->updateControleMedical($id, $data);
+        $controle = ControleMedicalBusiness::updateControleMedical($id, $data);
         return response()->json(['data' => $controle]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param int $id
-     * @return Response
-     */
     public function destroy(int $id)
     {
-        $this->service->deleteControleMedical($id);
+        ControleMedicalBusiness::removeControleMedical($id);
 
         return response()->json(['data' => "success"]);
     }

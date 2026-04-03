@@ -2,23 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ComptabiliteParamService;
+use App\Domaine\Business\ComptabiliteParamBusiness;
+use App\Infrastructure\Models\EcritureCategorie;
 use Illuminate\Http\Request;
 
 class EcritureCategorieController extends Controller
 {
-    protected $service;
-
-    public function __construct(ComptabiliteParamService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $categories = $this->service->categories();
-
-        return response()->json(['data' => $categories]);
+        return response()->json(['data' => EcritureCategorie::all()]);
     }
 
     public function store(Request $request)
@@ -28,7 +20,7 @@ class EcritureCategorieController extends Controller
             'tri' => 'required|numeric',
         ]);
 
-        $categorie = $this->service->ajouterCategorie($data);
+        $categorie = ComptabiliteParamBusiness::ajouterCategorie($data);
         return response()->json(['data' => $categorie]);
     }
 
@@ -39,13 +31,13 @@ class EcritureCategorieController extends Controller
             'tri' => 'required|numeric',
         ]);
 
-        $categorie = $this->service->modifierCategorie($id, $data);
+        $categorie = ComptabiliteParamBusiness::modifierCategorie($id, $data);
         return response()->json(['data' => $categorie]);
     }
 
     public function destroy($id)
     {
-        $this->service->supprimerCategorie($id);
+        ComptabiliteParamBusiness::supprimerCategorie($id);
         return response()->json(['data' => 'ok']);
     }
 }

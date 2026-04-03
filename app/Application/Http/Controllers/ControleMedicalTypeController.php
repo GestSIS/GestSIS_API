@@ -2,28 +2,15 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\ControleMedicalService;
+use App\Domaine\Business\ControleMedicalBusiness;
+use App\Infrastructure\Models\ControleMedicalType;
 use Illuminate\Http\Request;
 
 class ControleMedicalTypeController extends Controller
 {
-    protected $service;
-
-    public function __construct(ControleMedicalService $service)
-    {
-        $this->service = $service;
-    }
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        $types = $this->service->types();
-
-        return response()->json(['data' => $types]);
+        return response()->json(['data' => ControleMedicalType::all()]);
     }
 
     public function store(Request $request)
@@ -36,7 +23,7 @@ class ControleMedicalTypeController extends Controller
             'tri' => 'integer'
         ]);
 
-        $type = $this->service->ajouterType($data);
+        $type = ControleMedicalBusiness::ajouterType($data);
         return response()->json(['data' => $type]);
     }
 
@@ -50,13 +37,13 @@ class ControleMedicalTypeController extends Controller
             'tri' => 'integer'
         ]);
 
-        $type = $this->service->modifierType($id, $data);
+        $type = ControleMedicalBusiness::modifierType($id, $data);
         return response()->json(['data' => $type]);
     }
 
     public function destroy($id)
     {
-        $type = $this->service->supprimerType($id);
+        $type = ControleMedicalBusiness::supprimerType($id);
         return response()->json(['data' => $type]);
     }
 }

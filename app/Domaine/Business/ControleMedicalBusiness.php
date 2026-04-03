@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 class ControleMedicalBusiness
 {
 
-    public function ajouterMedecin($data)
+    public static function ajouterMedecin($data)
     {
         if (!array_key_exists('adresse', $data) or is_null($data['adresse'])) {
             $data['adresse'] = "";
@@ -22,13 +22,13 @@ class ControleMedicalBusiness
         return $medecin;
     }
 
-    public function modifierMedecin($id, $data)
+    public static function modifierMedecin($id, $data)
     {
         Medecin::where('id', $id)->limit(1)->update($data);
         return Medecin::find($id);
     }
 
-    public function supprimerMedecin($id)
+    public static function supprimerMedecin($id)
     {
         if (ControleMedical::where('medecin_id', '=', $id)->exists()) {
             throw new ArrayException([], 'Impossible de supprimer ce médecin, celui-ci est utilisé dans un contrôle médical.');
@@ -36,7 +36,7 @@ class ControleMedicalBusiness
         Medecin::where('id', $id)->delete();
     }
 
-    public function ajouterType($data)
+    public static function ajouterType($data)
     {
         $data['remarque'] = $data['remarque'] ?? '';
         $type = new ControleMedicalType();
@@ -45,14 +45,14 @@ class ControleMedicalBusiness
         return $type;
     }
 
-    public function modifierType($id, $data)
+    public static function modifierType($id, $data)
     {
         $data['remarque'] = $data['remarque'] ?? '';
         ControleMedicalType::where('id', $id)->limit(1)->update($data);
         return ControleMedicalType::find($id);
     }
 
-    public function supprimerType($id)
+    public static function supprimerType($id)
     {
         if (ControleMedical::where('controle_medical_type_id', '=', $id)->exists()) {
             throw new ArrayException([], 'Impossible de supprimer ce type de contrôle médical, celui-ci est utilisé dans un contrôle médical.');
@@ -60,7 +60,7 @@ class ControleMedicalBusiness
         ControleMedicalType::where('id', $id)->delete();
     }
 
-    public function createControleMedical($controleMedical)
+    public static function createControleMedical($controleMedical)
     {
         //TODO Change this
         $controleMedical['en_cours'] = true;
@@ -74,7 +74,7 @@ class ControleMedicalBusiness
         return $controle;
     }
 
-    public function updateControleMedical($controleId, $controleMedical)
+    public static function updateControleMedical($controleId, $controleMedical)
     {
         //TODO Change this
         $controleMedical['en_cours'] = true;
@@ -84,17 +84,17 @@ class ControleMedicalBusiness
         return ControleMedical::find($controleId);
     }
 
-    public function removeControleMedical($controleId)
+    public static function removeControleMedical($controleId)
     {
         //First remove justificatif
-        $this->removeJustificatif($controleId);
+        self::removeJustificatif($controleId);
         ControleMedical::destroy($controleId);
     }
 
-    public function addJustificatif($controleMedicalId, $file, $sisKey)
+    public static function addJustificatif($controleMedicalId, $file, $sisKey)
     {
         //First remove potential already existing document
-        $this->removeJustificatif($controleMedicalId);
+        self::removeJustificatif($controleMedicalId);
 
         // Then add the new one
         $path = $file->store('documents/' . $sisKey . '/controles_medicaux');
@@ -107,14 +107,14 @@ class ControleMedicalBusiness
         return $controle;
     }
 
-    public function getJustificatif($controleMedicalId)
+    public static function getJustificatif($controleMedicalId)
     {
         //Return the file
         $controle = ControleMedical::find($controleMedicalId);
         return ['path' => $controle->path, 'filename' => $controle->filename];
     }
 
-    public function removeJustificatif($controleMedicalId)
+    public static function removeJustificatif($controleMedicalId)
     {
         $controle = ControleMedical::find($controleMedicalId);
         if ($controle && $controle->path) {

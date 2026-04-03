@@ -2,19 +2,11 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\MesInfosService;
 use App\Domaine\Business\Materiel\ArticleBusiness;
 use Illuminate\Http\Request;
 
 class MonMaterielController extends Controller
 {
-    private $service = null;
-
-    public function __construct(MesInfosService $service)
-    {
-        $this->service = $service;
-    }
-
     /**
      * Récupère les informations du sapeur
      */
