@@ -2,33 +2,18 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Application\Auth\TokenTools;
-use App\Domaine\API\AlarmeService;
+use App\Domaine\Business\AlarmesBusiness;
+use App\Domaine\Exceptions\ArrayException;
+use App\Infrastructure\Models\Sapeur;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Http;
 
 class AlarmeController extends Controller
 {
-    protected $service;
-
-    public function __construct(AlarmeService $service)
-    {
-        $this->service = $service;
-    }
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @param old Boolean True pour récupérer également récupérer les alarmes déjà validées
-     * @param force Boolean True pour l'api d'alarme a récupérer les données depuis le serveur mail
-     * @return Response
-     */
     public function index(Request $request)
     {
-        // Param
         $force = $request->get('force', false);
-        $old = $request->get('old', false);
 
         $token = null;
         try {
@@ -38,7 +23,25 @@ class AlarmeController extends Controller
         }
         $sisKey = $request->header('Sis-Key', Null);
 
-        $interventions = $this->service->listeAlarme($sisKey, $token, $force);
-        return response()->json(['data' => $interventions]);
+        try {
+            $response = Http::withHeaders([
+                'Sis-Key' => $sisKey,
+                'Authorization' => 'Bearer ' . $token
+            ])
+                ->acceptJson()
+                ->timeout(3)
+                ->get(config('gestsis.alarm_url', '') . '/api/v1/alarm', ['force_update' => $force]);
+
+            $alarmes = [];
+            if ($response->successful()) {
+                $alarmes = $response->object();
+            }
+
+            $sapeurs = Sapeur::with('telephones')->where('actif', '=', 1)->get(['nom', 'prenom', 'suffixe', 'id']);
+            $interventions = AlarmesBusiness::resoudreAlarmes($alarmes, $sapeurs);
+            return response()->json(['data' => $interventions]);
+        } catch (Exception $e) {
+            throw new ArrayException([], "Une erreur est survenue lors de la récupération des alarmes");
+        }
     }
 }

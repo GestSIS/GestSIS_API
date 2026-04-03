@@ -63,7 +63,7 @@ class ConvocationService
             $exercicesMap[$e->id] = $e;
         }
 
-        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        $logoPath = SisParamBusiness::getLogo($sisKey);
         $content = TypstToPdfGenerator::generateDocument(
             TypstTemplate::Convocations,
             [

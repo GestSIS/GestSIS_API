@@ -318,7 +318,7 @@ class ExerciceService
             $fonctionsMap[$fonction->id] = $fonction->nom;
         }
 
-        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        $logoPath = SisParamBusiness::getLogo($sisKey);
         $content = TypstToPdfGenerator::generateDocument(
             TypstTemplate::ListeAppel,
             ["exercice" => $exercice, "fonctions" => $fonctionsMap, "excuses" => $excusesMap],
@@ -358,7 +358,7 @@ class ExerciceService
             $excusesMap[$excuse->id] = $excuse->designation;
         }
 
-        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        $logoPath = SisParamBusiness::getLogo($sisKey);
         $content = TypstToPdfGenerator::generateDocument(
             TypstTemplate::ListePresence,
             ["exercice" => $exercice, "excuses" => $excusesMap],

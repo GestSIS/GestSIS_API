@@ -2,25 +2,27 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\PaiementService;
+use App\Domaine\Business\PaiementBusiness;
+use App\Infrastructure\Models\Decompte;
+use App\Infrastructure\Models\Paiement;
 
 class PaiementController extends Controller
 {
-    protected $service;
+    protected $business;
 
-    public function __construct(PaiementService $service)
+    public function __construct(PaiementBusiness $business)
     {
-        $this->service = $service;
+        $this->business = $business;
     }
 
     /**
      * Créer un fichier iso20022 pour un paiement
-     * 
+     *
      * @param int $id du paiement pour lequelle le fichier doit être créé
      */
     public function iso20022($id)
     {
-        return $this->service->iso20022PourPaiementSapeur($id);
+        return $this->business->iso20022PourPaiementStream($id);
     }
 
     /**
@@ -29,13 +31,11 @@ class PaiementController extends Controller
      */
     public function get($id)
     {
-        $paiement = $this->service->getPaiementSapeurParId($id);
-        return response()->json(['data' => $paiement]);
+        return response()->json(['data' => Paiement::find($id)]);
     }
 
     public function getByExerciceComptable($exerciceComptableId)
     {
-        $paiements = $this->service->getPaiementsPourExerciceComptable($exerciceComptableId);
-        return response()->json(['data' => $paiements]);
+        return response()->json(['data' => Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get()]);
     }
 }

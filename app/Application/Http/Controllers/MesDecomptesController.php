@@ -2,18 +2,18 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\API\PaiementService;
+use App\Domaine\Business\PaiementBusiness;
 use App\Infrastructure\Models\Ecriture;
 use App\Infrastructure\Models\Paiement;
 use Illuminate\Http\Request;
 
 class MesDecomptesController extends Controller
 {
-    protected $paiementService;
+    protected $paiementBusiness;
 
-    public function __construct(PaiementService $paiementService)
+    public function __construct(PaiementBusiness $paiementBusiness)
     {
-        $this->paiementService = $paiementService;
+        $this->paiementBusiness = $paiementBusiness;
     }
 
     /**
@@ -47,7 +47,7 @@ class MesDecomptesController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        return PaiementService::impressionResumePourSapeur($exerciceComptableId, $sapeurId, $sisKey);
+        return PaiementBusiness::impressionResumePourSapeur($exerciceComptableId, $sapeurId, $sisKey);
     }
 
     /**
@@ -61,7 +61,7 @@ class MesDecomptesController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        return PaiementService::impressionDecompteSapeur($decompteId, $sapeurId, $sisKey);
+        return PaiementBusiness::impressionDecompteSapeur($decompteId, $sapeurId, $sisKey);
     }
 
     /**
@@ -74,6 +74,6 @@ class MesDecomptesController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        return $this->paiementService->certificatSalaireSapeur($exerciceComptableId, $sapeurId);
+        return $this->paiementBusiness->certificatSalaireSapeur($exerciceComptableId, $sapeurId);
     }
 }

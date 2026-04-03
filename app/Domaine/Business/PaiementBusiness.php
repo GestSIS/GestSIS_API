@@ -29,6 +29,11 @@ use Z38\SwissPayment\TransactionInformation\BankCreditTransfer;
 use Z38\SwissPayment\Money;
 use mikehaertl\pdftk\Pdf;
 use Z38\SwissPayment\Text;
+use App\Application\Typst\TypstTemplate;
+use App\Application\Typst\TypstToPdfGenerator;
+use App\Infrastructure\Models\Exercice;
+use App\Infrastructure\Models\TypeUnite;
+use Illuminate\Support\Facades\DB;
 
 /**
  * PaiementBusiness
@@ -599,12 +604,315 @@ class PaiementBusiness
 
     /**
      * retourne la date sous la forme jour mois année (ex 1 janvier 2000)
-     * 
+     *
      * @return string date
      */
     private function dateFr()
     {
         $date = Carbon::now()->locale('fr_CH');
         return $date->day . " " . $date->monthName . " " . $date->year;
+    }
+
+    public function creerDecompteAnnuel($exerciceComptableId, $date, $designation, $selection, $sapeurIds)
+    {
+        $avsParam = AvsParam::first();
+        if ($avsParam == NULL) {
+            throw new InvalidActionException([], 'Erreur, paramètres AVS manquant, veuillez les compléter dans paramètres.');
+        }
+
+        $deduction = true;
+        $modules = [];
+        if ($selection['ecrituresExercice']) {
+            $modules[] = ImputationBusiness::ECRITURE_MODULE_EXERCICE;
+        }
+        if ($selection['ecrituresIntervention']) {
+            $modules[] = ImputationBusiness::ECRITURE_MODULE_INTERVENTION;
+        }
+        if ($selection['ecrituresCours']) {
+            $modules[] = ImputationBusiness::ECRITURE_MODULE_COURS;
+        }
+        if ($selection['ecrituresDivers']) {
+            $modules[] = ImputationBusiness::ECRITURE_MODULE_DIVERS;
+        }
+        if ($selection['ecrituresAnnuel']) {
+            $modules[] = ImputationBusiness::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL;
+        }
+        if ($selection['ecrituresAmende']) {
+            $modules[] = ImputationBusiness::ECRITURE_MODULE_AMENDE;
+        }
+        if ($selection['ecrituresTravail']) {
+            $modules[] = ImputationBusiness::ECRITURE_MODULE_FICHE_TRAVAIL;
+        }
+
+        $ecrituresRequest = Ecriture::whereNull('decompte_id')
+            ->where('exercice_comptable_id', $exerciceComptableId)
+            ->whereIn('module', $modules);
+
+        if (count($sapeurIds) > 0) {
+            $ecrituresRequest = $ecrituresRequest->whereIn('sapeur_id', $sapeurIds);
+        }
+
+        $ecritures = $ecrituresRequest->get();
+        if ($ecritures->count() === 0) {
+            throw new ArrayException([], 'Aucune écriture disponible pour la création du décompte.');
+        }
+
+        return $this->creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction);
+    }
+
+    public function creerDecompteSapeur($exerciceComptableId, $sapeurId, $date)
+    {
+        $sapeur = Sapeur::find($sapeurId);
+        $designation = "Decompte $sapeur->nom $sapeur->prenom";
+        $deduction = true;
+        $ecritures = Ecriture::where([
+            ['exercice_comptable_id', '=', $exerciceComptableId],
+            ['sapeur_id', '=', $sapeurId],
+        ])->get();
+        return $this->creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction);
+    }
+
+    public function creerDecompteExercice($exerciceId, $date, $deduction)
+    {
+        $designation = 'Decompte exercice';
+        $exerciceComptableId = Exercice::find($exerciceId)->exercice_comptable_id;
+        $ecritures = Ecriture::where('exercice_id', $exerciceId)->get();
+        return $this->creerDecompte($ecritures, $designation, $exerciceComptableId, $date, $deduction);
+    }
+
+    public function iso20022PourDecompteStream($decompteId)
+    {
+        $params = SisParam::first();
+        $nom = $params->nom;
+        $bic = $params->bic;
+        $iban = $params->iban;
+
+        $nomFichier = preg_replace("([^\w\s\d\-_~,;\[\]\(\).])", "-", Decompte::find($decompteId)->designation) . ".xml";
+        $content = $this->iso20022PourDecompte($decompteId, $nom, $bic, $iban);
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            $nomFichier
+        );
+    }
+
+    public function iso20022PourPaiementStream($paiementId)
+    {
+        $params = SisParam::first();
+        $nom = $params->nom;
+        $bic = $params->bic;
+        $iban = $params->iban;
+
+        $content = $this->iso20022PourPaiement($paiementId, $nom, $bic, $iban);
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            "paiement.xml"
+        );
+    }
+
+    public static function impressionDecompte($decompteId, $sisKey)
+    {
+        $decompte = Decompte::find($decompteId);
+        $ecritures = Ecriture::where('decompte_id', '=', $decompteId)->orderBy('date')->get();
+        $sapeursMap = [];
+        foreach (Sapeur::get(['id', 'nom', 'prenom']) as $sapeur) {
+            $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
+        }
+        $unitesMap = [];
+        foreach (TypeUnite::all() as $unite) {
+            $unitesMap[$unite->id] = $unite->abreviation;
+        }
+
+        $logoPath = SisParamBusiness::getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::Decompte,
+            ["decompte" => $decompte, "sapeurs" => $sapeursMap, "ecritures" => $ecritures, "unites" => $unitesMap],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'decompte.pdf'
+        );
+    }
+
+    public static function impressionDecompteSapeur($decompteId, $sapeurId, string $sisKey)
+    {
+        $ecritures = DB::table('ecritures')
+            ->where('ecritures.sapeur_id', '=', $sapeurId)
+            ->where('ecritures.decompte_id', '=', $decompteId)
+            ->join('sapeurs', 'ecritures.sapeur_id', '=', 'sapeurs.id')
+            ->join('ecriture_categories', 'ecritures.ecriture_categorie_id', '=', 'ecriture_categories.id')
+            ->join('type_unites', 'ecritures.type_unite_id', '=', 'type_unites.id')
+            ->join('civilites', 'sapeurs.civilite_id', '=', 'civilites.id')
+            ->select(
+                'ecritures.*',
+                DB::raw('CONCAT(sapeurs.nom, " ", sapeurs.prenom) as sapeur'),
+                'sapeurs.iban',
+                'ecriture_categories.tri',
+                'ecriture_categories.designation AS categorie',
+                'type_unites.abreviation as unite',
+                'civilites.forme_politesse as civilite'
+            )
+            ->orderBy('sapeur')
+            ->orderBy('ecriture_categories.tri', 'ASC')
+            ->orderBy('ecritures.module', 'ASC')
+            ->orderBy('ecritures.date')
+            ->orderBy('ecritures.heure')
+            ->get();
+
+        return self::printDecompteSapeur($decompteId, $ecritures, $sisKey, false);
+    }
+
+    public static function impressionDecompteParSapeur($decompteId, string $sisKey)
+    {
+        $ecritures = DB::table('ecritures')
+            ->join('sapeurs', 'ecritures.sapeur_id', '=', 'sapeurs.id')
+            ->join('ecriture_categories', 'ecritures.ecriture_categorie_id', '=', 'ecriture_categories.id')
+            ->join('type_unites', 'ecritures.type_unite_id', '=', 'type_unites.id')
+            ->join('civilites', 'sapeurs.civilite_id', '=', 'civilites.id')
+            ->where('ecritures.decompte_id', '=', $decompteId)
+            ->select(
+                'ecritures.*',
+                DB::raw('CONCAT(sapeurs.nom, " ", sapeurs.prenom) as sapeur'),
+                'sapeurs.iban',
+                'ecriture_categories.tri',
+                'ecriture_categories.designation AS categorie',
+                'type_unites.abreviation as unite',
+                'civilites.forme_politesse as civilite'
+            )
+            ->orderBy('sapeur')
+            ->orderBy('ecriture_categories.tri', 'ASC')
+            ->orderBy('ecritures.module', 'ASC')
+            ->orderBy('ecritures.date')
+            ->orderBy('ecritures.heure')
+            ->get();
+
+        return self::printDecompteSapeur($decompteId, $ecritures, $sisKey, true);
+    }
+
+    public static function impressionResumePourSapeur(int $exerciceComptableId, int $sapeurId, string $sisKey)
+    {
+        $ecritures = DB::table('ecritures')
+            ->join('sapeurs', 'ecritures.sapeur_id', '=', 'sapeurs.id')
+            ->join('ecriture_categories', 'ecritures.ecriture_categorie_id', '=', 'ecriture_categories.id')
+            ->join('type_unites', 'ecritures.type_unite_id', '=', 'type_unites.id')
+            ->join('civilites', 'sapeurs.civilite_id', '=', 'civilites.id')
+            ->join('decomptes', 'ecritures.decompte_id', '=', 'decomptes.id')
+            ->where('decomptes.exercice_comptable_id', '=', $exerciceComptableId)
+            ->where('sapeurs.id', '=', $sapeurId)
+            ->select(
+                'ecritures.*',
+                DB::raw('CONCAT(sapeurs.nom, " ", sapeurs.prenom) as sapeur'),
+                'sapeurs.iban',
+                'ecriture_categories.tri',
+                'ecriture_categories.designation AS categorie',
+                'type_unites.abreviation as unite',
+                'civilites.forme_politesse as civilite'
+            )
+            ->orderBy('ecriture_categories.tri', 'ASC')
+            ->orderBy('ecritures.module', 'ASC')
+            ->orderBy('ecritures.date')
+            ->orderBy('ecritures.heure')
+            ->get();
+
+        return self::printResumeSapeur($exerciceComptableId, $ecritures, $sisKey);
+    }
+
+    public static function impressionResumeParSapeur(int $exerciceComptableId, string $sisKey)
+    {
+        $ecritures = DB::table('ecritures')
+            ->join('sapeurs', 'ecritures.sapeur_id', '=', 'sapeurs.id')
+            ->join('ecriture_categories', 'ecritures.ecriture_categorie_id', '=', 'ecriture_categories.id')
+            ->join('type_unites', 'ecritures.type_unite_id', '=', 'type_unites.id')
+            ->join('civilites', 'sapeurs.civilite_id', '=', 'civilites.id')
+            ->join('decomptes', 'ecritures.decompte_id', '=', 'decomptes.id')
+            ->where('decomptes.exercice_comptable_id', '=', $exerciceComptableId)
+            ->select(
+                'ecritures.*',
+                DB::raw('CONCAT(sapeurs.nom, " ", sapeurs.prenom) as sapeur'),
+                'sapeurs.iban',
+                'ecriture_categories.tri',
+                'ecriture_categories.designation AS categorie',
+                'type_unites.abreviation as unite',
+                'civilites.forme_politesse as civilite'
+            )
+            ->orderBy('sapeur')
+            ->orderBy('ecriture_categories.tri', 'ASC')
+            ->orderBy('ecritures.module', 'ASC')
+            ->orderBy('ecritures.date')
+            ->orderBy('ecritures.heure')
+            ->get();
+
+        return self::printResumeSapeur($exerciceComptableId, $ecritures, $sisKey);
+    }
+
+    private static function printResumeSapeur(int $exerciceComptableId, $ecritures, string $sisKey)
+    {
+        $decomptes = Decompte::with('paiements')->where('exercice_comptable_id', $exerciceComptableId)->get();
+        $decomptesMap = [];
+        foreach ($decomptes as $d) {
+            $decomptesMap[$d->id] = $d;
+        }
+
+        $comptesMap = [];
+        foreach (Compte::all() as $compte) {
+            $comptesMap[$compte->id] = $compte;
+        }
+
+        $sapeursMap = [];
+        foreach (Sapeur::get(['id', 'nom', 'prenom']) as $sapeur) {
+            $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
+        }
+
+        $logoPath = SisParamBusiness::getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::ResumeParSapeur,
+            ["decomptes" => $decomptesMap, "sapeurs" => $sapeursMap, "ecritures" => $ecritures, "comptes" => $comptesMap],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'resume-par-sapeur.pdf'
+        );
+    }
+
+    private static function printDecompteSapeur($decompteId, $ecritures, string $sisKey, bool $resume = false)
+    {
+        $decompte = Decompte::with('paiements')->find($decompteId);
+        $decomptes = Decompte::where('exercice_comptable_id', $decompte->exercice_comptable_id)->get();
+        $decomptesMap = [];
+        foreach ($decomptes as $d) {
+            $decomptesMap[$d->id] = $d;
+        }
+
+        $comptesMap = [];
+        foreach (Compte::all() as $compte) {
+            $comptesMap[$compte->id] = $compte;
+        }
+
+        $sapeursMap = [];
+        foreach (Sapeur::get(['id', 'nom', 'prenom']) as $sapeur) {
+            $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
+        }
+
+        $logoPath = SisParamBusiness::getLogo($sisKey);
+        $content = TypstToPdfGenerator::generateDocument(
+            TypstTemplate::DecompteParSapeur,
+            ["decompte" => $decompte, "decomptes" => $decomptesMap, "sapeurs" => $sapeursMap, "ecritures" => $ecritures, "comptes" => $comptesMap, 'resume' => $resume],
+            $logoPath
+        );
+        return response()->streamDownload(
+            function () use ($content) {
+                echo $content;
+            },
+            'decompte-par-sapeur.pdf'
+        );
     }
 }

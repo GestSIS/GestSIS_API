@@ -2,27 +2,26 @@
 
 namespace App\Application\Http\Controllers;
 
-use Illuminate\Http\Request;
-
-use App\Domaine\API\PaiementService;
+use App\Domaine\Business\PaiementBusiness;
 use App\Domaine\Exceptions\ArrayException;
-use Exception;
+use App\Infrastructure\Collections\AFacturerExport;
+use App\Infrastructure\Collections\EcrituresExport;
+use App\Infrastructure\Models\Decompte;
+use App\Infrastructure\Models\Ecriture;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DecompteController extends Controller
 {
-    private $service = null;
+    private $business;
 
-    public function __construct(PaiementService $service)
+    public function __construct(PaiementBusiness $business)
     {
-        $this->service = $service;
+        $this->business = $business;
     }
 
     /**
      * Créer un décompte annuel
-     * 
-     * @param string $designation - nom du décompte
-     * @param int $exerciceComptableId - id de l'exercice comptable pour lequel créer les paiements
-     * @param date $date - date de la création du décompte
      */
     public function creerAnnuel(Request $request)
     {
@@ -45,7 +44,7 @@ class DecompteController extends Controller
         ]);
 
         try {
-            $decompte = $this->service->creerDecompteAnnuel(
+            $decompte = $this->business->creerDecompteAnnuel(
                 $data['exercice_comptable_id'],
                 $data['date'],
                 $data['designation'],
@@ -59,11 +58,7 @@ class DecompteController extends Controller
     }
 
     /**
-     * Créer un décompte
-     * 
-     * @param int $exerciceComptableId - id de l'exercice comptable pour lequel créer les paiements
-     * @param date $date - date de la création du décompte
-     * @param boolean $deduction - true si les déduction doivent être faites sur ce paiement
+     * Créer un décompte pour un sapeur
      */
     public function creerSapeur(Request $request)
     {
@@ -73,16 +68,12 @@ class DecompteController extends Controller
             'date' => 'required|date',
         ]);
 
-        $decompte = $this->service->creerDecompteSapeur($data['exercice_comptable_id'], $data['sapeur_id'], $data['date']);
+        $decompte = $this->business->creerDecompteSapeur($data['exercice_comptable_id'], $data['sapeur_id'], $data['date']);
         return response()->json(['data' => $decompte]);
     }
 
     /**
-     * Créer un décompte
-     * 
-     * @param int $exerciceId - id de l'exercice
-     * @param date $date - date de la création du décompte
-     * @param boolean $deduction - true si les déduction doivent être faites sur ce paiement
+     * Créer un décompte pour un exercice
      */
     public function creerExercice(Request $request)
     {
@@ -92,167 +83,121 @@ class DecompteController extends Controller
             'deduction' => 'required|boolean',
         ]);
 
-        $decompte = $this->service->creerDecompteExercice($data['exercice_id'], $data['date'], $data['deduction']);
+        $decompte = $this->business->creerDecompteExercice($data['exercice_id'], $data['date'], $data['deduction']);
         return response()->json(['data' => $decompte]);
     }
 
     public function ecritures(int $decompteId)
     {
-        $ecritures = $this->service->getEcrituresPourDecompte($decompteId);
-        return response()->json(['data' => $ecritures]);
+        return response()->json(['data' => Ecriture::where('decompte_id', '=', $decompteId)->get()]);
     }
 
     /**
      * Supprimer un décompte
-     * 
-     * @param int $exerciceId - id de l'exercice
-     * @param date $date - date de la création du décompte
-     * @param boolean $deduction - true si les déduction doivent être faites sur ce paiement
      */
     public function destroy($decompteId)
     {
-        $res = $this->service->supprimerDecompte($decompteId);
+        $res = $this->business->supprimerDecompte($decompteId);
         return response()->json(['data' => $res]);
     }
 
     /**
      * Créer un fichier iso20022 pour un décompte
-     * 
-     * @param int $id id du décompte pour lequelle le fichier doit être créé
      */
     public function iso20022($id)
     {
-        return $this->service->iso20022PourDecompte($id);
+        return $this->business->iso20022PourDecompteStream($id);
     }
 
-    /**
-     * Créer un fichier iso20022 pour un décompte
-     * 
-     * @param int $id id du décompte pour lequelle le fichier doit être créé
-     */
     public function exportEcritures($id)
     {
-        return $this->service->exportEcritures($id);
+        return Excel::download(new EcrituresExport($id), 'ecritures.xlsx');
     }
 
     /**
      * Créer un fichier pdf pour un décompte
-     * 
-     * @param int $id id du décompte pour lequelle le fichier doit être créé
      */
     public function print(Request $request, $id)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        return $this->service->impressionDecompte($id, $sisKey);
+        return PaiementBusiness::impressionDecompte($id, $sisKey);
     }
 
     /**
      * Retourne un décompte pour tous les sapeurs
-     * 
-     * @param int $id id du décompte pour lequelle le fichier doit être créé
      */
     public function printParSapeur(Request $request, $decompteId)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        return $this->service->impressionDecompteParSapeur($decompteId, $sisKey);
+        return PaiementBusiness::impressionDecompteParSapeur($decompteId, $sisKey);
     }
 
     /**
      * Retourne un résumé comptable pour tous les sapeurs
-     * 
-     * @param int $exerciceComptableId id de l'exercice comptabée pour lequelle le fichier doit être créé
      */
     public function resumeParSapeur(Request $request, int $exerciceComptableId)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        return $this->service->impressionResumeParSapeur($exerciceComptableId, $sisKey);
+        return PaiementBusiness::impressionResumeParSapeur($exerciceComptableId, $sisKey);
     }
 
     /**
      * Retourne un résumé comptable pour 1 sapeur
-     * 
-     * @param int $exerciceComptableId id de l'exercice comptabée pour lequelle le fichier doit être créé
-     * @param int $sapeurId id du sapeur
      */
     public function resumePourSapeur(Request $request, int $exerciceComptableId, int $sapeurId)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        return $this->service->impressionResumePourSapeur($exerciceComptableId, $sapeurId, $sisKey);
+        return PaiementBusiness::impressionResumePourSapeur($exerciceComptableId, $sapeurId, $sisKey);
     }
 
     /**
      * Retourne un décompte pour 1 sapeur
-     * 
-     * @param int $id id du décompte pour lequelle le fichier doit être créé
      */
     public function printPourSapeur(Request $request, $decompteId, $sapeurId)
     {
         $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
-        return $this->service->impressionDecompteSapeur($decompteId, $sapeurId, $sisKey);
+        return PaiementBusiness::impressionDecompteSapeur($decompteId, $sapeurId, $sisKey);
     }
 
-    /**
-     * Créer un fichier iso20022 pour un décompte
-     * 
-     * @param int $id id du décompte pour lequelle le fichier doit être créé
-     */
     public function printParCompte($exerciceComptableId)
     {
-        return $this->service->impressionDecompteParCompte($exerciceComptableId);
+        throw new ArrayException([], "Non implémenté pour le moment");
     }
 
-    /**
-     * Créer un fichier iso20022 pour un décompte
-     * 
-     * @param int $id id du décompte pour lequelle le fichier doit être créé
-     */
     public function aFacturer($decompteId)
     {
-        return $this->service->decompteMontantsAFacturer($decompteId);
+        return Excel::download(new AFacturerExport($decompteId), 'a_facturer.xlsx');
     }
 
     /**
      * Retourne un décompte
-     * 
-     * @param int $id id du décompte souhaité
      */
     public function show($id)
     {
-        $decompte = $this->service->getDecompteParId($id);
-
-        return response()->json(['data' => $decompte]);
+        return response()->json(['data' => Decompte::where('id', $id)->with('paiements')->first()]);
     }
 
     /**
-     * Retourne tous les décompte pour un exercice comptable
-     * 
-     * @param int $id id de l'exercice comptable
+     * Retourne tous les décomptes pour un exercice comptable
      */
     public function getByExerciceComptable($id)
     {
-        $decomptes = $this->service->getDecomptePourExerciceComptable($id);
-
-        return response()->json(['data' => $decomptes]);
+        return response()->json(['data' => Decompte::where('exercice_comptable_id', $id)->get()]);
     }
 
     /**
      * Retourne le certificat d'un sapeur pour un exercice comptable
-     * 
-     * @param int $exerciceComptableId id de l'exercice comp
-     * @param int $sapeurId id du sapeur
      */
     public function certificatSalaireSapeur($exerciceComptableId, $sapeurId)
     {
-        return $this->service->certificatSalaireSapeur($exerciceComptableId, $sapeurId);
+        return $this->business->certificatSalaireSapeur($exerciceComptableId, $sapeurId, true);
     }
 
     /**
      * Retourne le certificat de tous les sapeurs pour un exercice comptable
-     * 
-     * @param int $exerciceComptableId id de l'exercice comp
      */
     public function certificatSalaire($exerciceComptableId)
     {
-        return $this->service->certificatSalairePourExerciceComptable($exerciceComptableId);
+        return $this->business->certificatSalaire($exerciceComptableId, true);
     }
 }

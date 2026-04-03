@@ -484,7 +484,7 @@ class InterventionService
             //TODO: Trier par nom, prénom
         }
 
-        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        $logoPath = SisParamBusiness::getLogo($sisKey);
         $content = TypstToPdfGenerator::generateDocument(
             TypstTemplate::RapportIntervention,
             [

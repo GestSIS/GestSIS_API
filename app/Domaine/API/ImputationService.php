@@ -242,7 +242,7 @@ class ImputationService
         }
 
 
-        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        $logoPath = SisParamBusiness::getLogo($sisKey);
         $content = TypstToPdfGenerator::generateDocument(
             TypstTemplate::Comptes,
             [
@@ -282,7 +282,7 @@ class ImputationService
             $decomptesMap[$decompte->id] = $decompte->date;
         }
 
-        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        $logoPath = SisParamBusiness::getLogo($sisKey);
         $content = TypstToPdfGenerator::generateDocument(
             TypstTemplate::Comptes,
             [

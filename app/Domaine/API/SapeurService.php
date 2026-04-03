@@ -50,7 +50,7 @@ class SapeurService
             ],
             $sapeurs->toArray()
         );
-        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        $logoPath = SisParamBusiness::getLogo($sisKey);
         $content = TypstToPdfGenerator::generateDocument(
             TypstTemplate::Trombinoscope,
             [
@@ -82,7 +82,7 @@ class SapeurService
     {
         $sapeur = Sapeur::with(['localite', 'civilite', 'fonction', 'grade'])->find($sapeurId);
 
-        $logoPath = (new SisParamBusiness())->getLogo($sisKey);
+        $logoPath = SisParamBusiness::getLogo($sisKey);
         $content = TypstToPdfGenerator::generateDocument(
             TypstTemplate::FicheSapeur,
             [
