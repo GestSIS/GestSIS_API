@@ -30,7 +30,7 @@ class EcritureController extends Controller
             'module' => 'required|numeric|min:0',
         ]);
 
-        $type = $request->get('module');
+        $type = $request->input('module');
         $data = null;
 
         switch ($type) {

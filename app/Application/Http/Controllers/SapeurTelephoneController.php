@@ -49,7 +49,7 @@ class SapeurTelephoneController extends Controller
             'rta' => 'boolean',
         ]);
 
-        if ($telephoneId !== $request->get('id')) {
+        if ($telephoneId !== $request->input('id')) {
             return response()->json(['error' => 'invalid telephone id'], 400);
         }
         if (!SapeurTelephone::where(['id' => $telephoneId, 'sapeur_id' => $sapeurId])->exists()) {

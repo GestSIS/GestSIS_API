@@ -28,7 +28,7 @@ class MesExcusesController extends Controller
         }
 
         $request->merge([
-            'excuse_type_id' => (int) $request->get('excuse_type_id'),
+            'excuse_type_id' => (int) $request->input('excuse_type_id'),
         ]);
 
         $data = $request->validate([

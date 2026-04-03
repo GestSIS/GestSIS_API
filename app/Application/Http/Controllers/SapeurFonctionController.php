@@ -43,7 +43,7 @@ class SapeurFonctionController extends Controller
         if (!FonctionSapeur::where(['id' => $fonctionId, 'sapeur_id' => $sapeurId])->exists()) {
             return response()->json(['error' => 'Fonction non trouvée'], 404);
         }
-        if ($fonctionId !== $request->get('id')) {
+        if ($fonctionId !== $request->input('id')) {
             return response()->json(['error' => 'invalid fonction id']);
         }
 

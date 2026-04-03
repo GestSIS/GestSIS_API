@@ -81,13 +81,13 @@ class SapeurController extends Controller
 
     public function listeFssp(Request $request)
     {
-        $date = $request->get('date', Carbon::now());
+        $date = $request->input('date', Carbon::now());
         return Excel::download(new ListeFsspExport($date), 'liste_fssp.xlsx');
     }
 
     public function listeFoad(Request $request)
     {
-        $date = $request->get('date', Carbon::now());
+        $date = $request->input('date', Carbon::now());
         return Excel::download(new ListeFoadExport($date), 'liste_foad.xlsx');
     }
 

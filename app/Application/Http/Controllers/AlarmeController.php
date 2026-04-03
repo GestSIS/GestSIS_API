@@ -13,7 +13,7 @@ class AlarmeController extends Controller
 {
     public function index(Request $request)
     {
-        $force = $request->get('force', false);
+        $force = $request->input('force', false);
 
         $token = null;
         try {

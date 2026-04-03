@@ -14,7 +14,7 @@ class ExerciceController extends Controller
 
     public function index(Request $request)
     {
-        $exerciceComptableId = $request->get('exercice_comptable_id');
+        $exerciceComptableId = $request->input('exercice_comptable_id');
         if (!$exerciceComptableId) {
             return response()->json(["Missing `exercice_comptable_id` parameter", 400]);
         }

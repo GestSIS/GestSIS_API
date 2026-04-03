@@ -14,7 +14,7 @@ class InterventionController extends Controller
 
     public function index(Request $request)
     {
-        $exercice_comptable_id = $request->get('exercice_comptable_id');
+        $exercice_comptable_id = $request->input('exercice_comptable_id');
         $interventions = Intervention::where('exercice_comptable_id', $exercice_comptable_id)->get();
         return response()->json(['data' => $interventions]);
     }
@@ -180,18 +180,18 @@ class InterventionController extends Controller
     public function rapport(Request $request, $id)
     {
         $request->merge([
-            'infoGeneral' => $request->get('infoGeneral') == 'true',
-            'description' => $request->get('description') == 'true',
-            'groupes' => $request->get('groupes') == 'true',
-            'presences' => $request->get('presences') == 'true',
-            'presencesResume' => $request->get('presencesResume') == 'true',
-            'montants' => $request->get('montants') == 'true',
-            'vehicules' => $request->get('vehicules') == 'true',
-            'materiel' => $request->get('materiel') == 'true',
-            'absents' => $request->get('absents') == 'true',
-            'statut' => $request->get('statut') == 'true',
-            'missions' => $request->get('missions') == 'true',
-            'appels' => $request->get('appels') == 'true',
+            'infoGeneral' => $request->input('infoGeneral') == 'true',
+            'description' => $request->input('description') == 'true',
+            'groupes' => $request->input('groupes') == 'true',
+            'presences' => $request->input('presences') == 'true',
+            'presencesResume' => $request->input('presencesResume') == 'true',
+            'montants' => $request->input('montants') == 'true',
+            'vehicules' => $request->input('vehicules') == 'true',
+            'materiel' => $request->input('materiel') == 'true',
+            'absents' => $request->input('absents') == 'true',
+            'statut' => $request->input('statut') == 'true',
+            'missions' => $request->input('missions') == 'true',
+            'appels' => $request->input('appels') == 'true',
         ]);
 
         $params = $request->validate([

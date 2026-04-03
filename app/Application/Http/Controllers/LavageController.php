@@ -14,7 +14,7 @@ class LavageController extends Controller
      */
     public function index(Request $request)
     {
-        $depuis = $request->get('depuis', null);
+        $depuis = $request->input('depuis', null);
         if ($depuis) {
             $lavages = LavageBusiness::getLavagesDepuis($depuis);
         } else {

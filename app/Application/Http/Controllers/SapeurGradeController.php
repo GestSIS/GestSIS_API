@@ -42,7 +42,7 @@ class SapeurGradeController extends Controller
         if (!GradeSapeur::where(['id' => $gradeId, 'sapeur_id' => $sapeurId])->exists()) {
             return response()->json(['error' => 'Grade non trouvé'], 404);
         }
-        if ($gradeId !== $request->get('id')) {
+        if ($gradeId !== $request->input('id')) {
             return response()->json(['error' => 'invalid grade id']);
         }
 

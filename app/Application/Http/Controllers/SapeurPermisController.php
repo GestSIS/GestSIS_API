@@ -44,7 +44,7 @@ class SapeurPermisController extends Controller
             'date' => 'required|date|before:tomorrow'
         ]);
 
-        if ($permisId !== $request->get('id')) {
+        if ($permisId !== $request->input('id')) {
             return response()->json(['error' => 'invalid permis id'], 400);
         }
         if (!Permis::where(['id' => $permisId, 'sapeur_id' => $id])->exists()) {

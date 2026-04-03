@@ -14,9 +14,9 @@ class ConvocationController extends Controller
     public function convoquer(Request $request, $exerciceComptableId)
     {
         $request->merge([
-            'affichage_duree' => (bool) $request->get('affichage_duree', true),
-            'affichage_pour_info' => (bool) $request->get('affichage_pour_info', false),
-            'sapeurIds' => is_string($request->get('sapeurIds', '')) ? explode(',', $request->get('sapeurIds', '')) : $request->get('sapeurIds', ''),
+            'affichage_duree' => (bool) $request->input('affichage_duree', true),
+            'affichage_pour_info' => (bool) $request->input('affichage_pour_info', false),
+            'sapeurIds' => is_string($request->input('sapeurIds', '')) ? explode(',', $request->input('sapeurIds', '')) : $request->input('sapeurIds', ''),
         ]);
 
         $sapeurIds = $request->validate([

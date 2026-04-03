@@ -49,7 +49,7 @@ class SapeurMutationController extends Controller
             'localite_id' => 'integer|exists:localites,id',
         ]);
 
-        if ($mutationId !== $request->get('id')) {
+        if ($mutationId !== $request->input('id')) {
             return response()->json(['error' => 'invalid mutation id'], 400);
         }
 

@@ -46,13 +46,13 @@ class ConvocationsController extends Controller
     public function updatePresence(Request $request, $id)
     {
         $request->merge([
-            'id' => (int) $request->get('id'),
-            'convoque' => (int) $request->get('convoque'),
-            'present' => (int) $request->get('present'),
-            'absent' => (int) $request->get('absent'),
-            'remplace' => (int) $request->get('remplace'),
-            'excuse_type_id' => (int) $request->get('excuse_type_id'),
-            'excuse_statut' => (int) $request->get('excuse_statut'),
+            'id' => (int) $request->input('id'),
+            'convoque' => (int) $request->input('convoque'),
+            'present' => (int) $request->input('present'),
+            'absent' => (int) $request->input('absent'),
+            'remplace' => (int) $request->input('remplace'),
+            'excuse_type_id' => (int) $request->input('excuse_type_id'),
+            'excuse_statut' => (int) $request->input('excuse_statut'),
         ]);
 
         $data = $request->validate([

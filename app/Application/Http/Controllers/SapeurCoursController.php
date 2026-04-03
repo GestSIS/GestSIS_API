@@ -48,7 +48,7 @@ class SapeurCoursController extends Controller
         if (!CoursSapeur::where(['id' => $coursId, 'sapeur_id' => $sapeurId])->exists()) {
             return response()->json(['error' => 'Cours non trouvé'], 404);
         }
-        if ($coursId !== $request->get('id')) {
+        if ($coursId !== $request->input('id')) {
             return response()->json(['error' => 'invalid cours id']);
         }
 
