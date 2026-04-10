@@ -38,8 +38,8 @@ class CategoryBusiness // extends OrderModel
   {
     $order = DB::table('materiel_categories')->max('id');
     return MaterielCategorie::create([
-      'designation' => $category['designation'],
-      'parent_id' => $category['parent_id'],
+      'designation' => $category['designation'] ?? '',
+      'parent_id' => $category['parent_id'] ?? null,
       'couleur_id' => $category['couleur_id'],
       'tri' => ($order ?? 0) + 1,
     ]);
