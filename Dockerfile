@@ -1,30 +1,26 @@
-FROM php:8.4-fpm
+FROM php:8.5-fpm
 
-RUN apt update && apt install -y zlib1g-dev libpng-dev libzip-dev && rm -rf /var/lib/apt/lists/*
-
-RUN mkdir -p /usr/share/man/man1 \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends curl wget vim zip git \
-    && docker-php-ext-install gd \
+RUN apt-get update \
+    && apt-get install -y zlib1g-dev libpng-dev libzip-dev \
+    # fix pour pdftk
+    && mkdir -p /usr/share/man/man1 \
+    # dev
+    && apt-get install -y --no-install-recommends wget vim zip git \
     # gmp
     && apt-get install -y --no-install-recommends libgmp-dev \
-    && docker-php-ext-install gmp \
     # pdftk
-    && apt-get install -y --no-install-recommends pdftk \
+    && apt-get install -y --no-install-recommends default-jre-headless \
+    libcommons-lang3-java libbcprov-java pdftk-java \
     # pdo_mysql
-    && docker-php-ext-install pdo_mysql \
-    # opcache
-    && docker-php-ext-enable opcache \
-    # zip
-    && docker-php-ext-install zip \
+    && docker-php-ext-install gd gmp pdo_mysql zip \
     # clean up
-    && apt-get autoclean -y \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /tmp/pear/
+    && apt-get autoremove -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install nvm & node
 SHELL ["/bin/bash", "--login", "-i", "-c"]
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
 RUN source /root/.bashrc && nvm install node 
 RUN npm install --global yarn
 SHELL ["/bin/bash", "--login", "-c"]
@@ -42,7 +38,18 @@ RUN set -e ; \
     rm -rf typst-x86_64-unknown-linux-musl* \
     ;
 
-# TODO: Installs fonts locally for typst to use
+WORKDIR /app
+
+# Installs fonts for typst to use
+RUN mkdir typst/fonts && \
+    cd typst/fonts && \
+    wget https://github.com/googlefonts/dm-fonts/raw/refs/heads/main/Sans/fonts/ttf/DMSans-Bold.ttf \
+    https://github.com/googlefonts/dm-fonts/raw/refs/heads/main/Sans/fonts/ttf/DMSans-BoldItalic.ttf \
+    https://github.com/googlefonts/dm-fonts/raw/refs/heads/main/Sans/fonts/ttf/DMSans-Italic.ttf \
+    https://github.com/googlefonts/dm-fonts/raw/refs/heads/main/Sans/fonts/ttf/DMSans-Medium.ttf \
+    https://github.com/googlefonts/dm-fonts/raw/refs/heads/main/Sans/fonts/ttf/DMSans-MediumItalic.ttf \
+    https://github.com/googlefonts/dm-fonts/raw/refs/heads/main/Sans/fonts/ttf/DMSans-Regular.ttf \
+    ;
 
 RUN composer global require laravel/installer
 
