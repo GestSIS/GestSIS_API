@@ -48,7 +48,7 @@ class SapeurController extends Controller
             $query = $query->where('actif', '=', 1)->orWhereHas('articles');
         }
 
-        $columns = ['id', 'nom', 'prenom', 'email', 'suffixe', 'type', 'date_naissance', 'actif', 'fonction_id', 'grade_id', 'localite_id', 'annee_incorporation'];
+        $columns = ['id', 'nom', 'prenom', 'civilite_id', 'email', 'suffixe', 'type', 'date_naissance', 'actif', 'fonction_id', 'grade_id', 'localite_id', 'annee_incorporation'];
         $sapeurs = $query->get([...$columns, DB::raw("CONCAT(nom, ' ', prenom) AS nom_prenom")])
             ->sortBy('nom_prenom')
             ->map(fn($sapeur) => $this->serializeSapeur($sapeur))
