@@ -35,6 +35,67 @@ return [
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#send-default-pii
     'send_default_pii' => env('SENTRY_SEND_DEFAULT_PII', false),
 
+    // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#before-send
+    'before_send' => function (\Sentry\Event $event): ?\Sentry\Event {
+        // Liste des champs sensibles à masquer
+        $sensitiveKeys = [
+            'password',
+            'password_confirmation',
+            'current_password',
+            'new_password',
+            'old_password',
+            'api_token',
+            'token',
+            'secret',
+            'api_key',
+            'access_token',
+            'refresh_token',
+            'private_key',
+            'credit_card',
+            'cvv',
+            'ssn',
+        ];
+
+        // Fonction récursive pour nettoyer les données
+        $sanitizeData = function ($data) use (&$sanitizeData, $sensitiveKeys) {
+            if (is_array($data)) {
+                foreach ($data as $key => $value) {
+                    $lowerKey = strtolower($key);
+                    foreach ($sensitiveKeys as $sensitiveKey) {
+                        if (str_contains($lowerKey, $sensitiveKey)) {
+                            $data[$key] = '[Filtered]';
+                            continue 2;
+                        }
+                    }
+                    if (is_array($value)) {
+                        $data[$key] = $sanitizeData($value);
+                    }
+                }
+            }
+            return $data;
+        };
+
+        // Nettoyer les données de la requête
+        if ($request = $event->getRequest()) {
+            if ($data = $request['data'] ?? null) {
+                $request['data'] = $sanitizeData($data);
+                $event->setRequest($request);
+            }
+        }
+
+        // Nettoyer les contextes
+        foreach ($event->getContexts() as $contextName => $context) {
+            $event->setContext($contextName, $sanitizeData($context));
+        }
+
+        // Nettoyer les données extra
+        if ($extra = $event->getExtra()) {
+            $event->setExtra($sanitizeData($extra));
+        }
+
+        return $event;
+    },
+
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#ignore-exceptions
     // 'ignore_exceptions' => [],
 
