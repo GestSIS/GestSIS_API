@@ -138,7 +138,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenVali
 });
 
 Route::group(['prefix' => 'v2'], function () {
-    Route::resource('sis-logo', SisLogoController::class)->only(['show']);
+    Route::apiResource('sis-logo', SisLogoController::class)->only(['show']);
 });
 
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
@@ -178,15 +178,15 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Paramètres accessible pour tout droit config
     Route::group(['middleware' => 'jwtTokenRole:utilisateur.config,sis.config,sapeur.config,organisation.modification,exercice.config,intervention.config,comptabilite.config,controle_medical.config'], function () {
-        Route::resource('sis-param', SisParamController::class)->only(['index']);
-        Route::resource('sis-contacts', SisContactController::class)->only(['index']);
+        Route::apiResource('sis-param', SisParamController::class)->only(['index']);
+        Route::apiResource('sis-contacts', SisContactController::class)->only(['index']);
     });
 
     // Sis Params
     Route::group(['middleware' => 'jwtTokenRole:sis.config'], function () {
-        Route::resource('sis-contacts', SisContactController::class)->only(['store', 'destroy']);
-        Route::resource('sis-param', SisParamController::class)->only(['store']);
-        Route::resource('sis-logo', SisLogoController::class)->only(['store']);
+        Route::apiResource('sis-contacts', SisContactController::class)->only(['store', 'destroy']);
+        Route::apiResource('sis-param', SisParamController::class)->only(['store']);
+        Route::apiResource('sis-logo', SisLogoController::class)->only(['store']);
         Route::post('localites-sis', [LocaliteSisController::class, 'store'])->name('api.v2.localite-sis-store');
         Route::delete('localites-sis', [LocaliteSisController::class, 'destroy'])->name('api.v2.localites-sis-destroy');
     });
@@ -209,28 +209,28 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('permis', [PermisController::class, 'index'])->name('api.v2.permis');
 
         // Params Sapeurs
-        Route::resource('grades', GradeController::class)->only(['index']);
-        Route::resource('fonctions', FonctionController::class)->only(['index']);
-        Route::resource('cours', CoursController::class)->only(['index']);
+        Route::apiResource('grades', GradeController::class)->only(['index']);
+        Route::apiResource('fonctions', FonctionController::class)->only(['index']);
+        Route::apiResource('cours', CoursController::class)->only(['index']);
 
         // Interventions
-        Route::resource('type-intervention', TypeInterventionController::class)->only(['index']);
+        Route::apiResource('type-intervention', TypeInterventionController::class)->only(['index']);
 
         // Exercices
-        Route::resource('exercice-categories', ExerciceCategorieController::class)->only(['index']);
-        Route::resource('excuses-types', ExcuseTypeController::class)->only(['index']);
+        Route::apiResource('exercice-categories', ExerciceCategorieController::class)->only(['index']);
+        Route::apiResource('excuses-types', ExcuseTypeController::class)->only(['index']);
 
         // Contrôles médicaux
-        Route::resource('medecins', MedecinController::class)->only(['index']);
-        Route::resource('controles-medicaux-types', ControleMedicalTypeController::class)->only(['index']);
+        Route::apiResource('medecins', MedecinController::class)->only(['index']);
+        Route::apiResource('controles-medicaux-types', ControleMedicalTypeController::class)->only(['index']);
 
         // Heures supp
-        Route::resource('heure-exercice-types', HeureExerciceTypeController::class)->only(['index']);
+        Route::apiResource('heure-exercice-types', HeureExerciceTypeController::class)->only(['index']);
     });
 
     // Sapeurs
     Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,exercice.lecture,intervention.lecture,organisation.modification,comptabilite.lecture,cours.lecture,materiel.lecture,fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation,fiche_travail.lecture'], function () {
-        Route::resource('sapeurs', SapeurController::class)->only(['index', 'show']);
+        Route::apiResource('sapeurs', SapeurController::class)->only(['index', 'show']);
 
         Route::get('sapeurs/{id}/fiche', [SapeurController::class, 'fiche']);
 
@@ -242,15 +242,15 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture'], function () {
-        Route::resource('sapeurs.permis', SapeurPermisController::class)->only(['index']);
-        Route::resource('sapeurs.telephones', SapeurTelephoneController::class)->only(['index']);
-        Route::resource('sapeurs.fonctions', SapeurFonctionController::class)->only(['index']);
-        Route::resource('sapeurs.grades', SapeurGradeController::class)->only(['index']);
-        Route::resource('sapeurs.mutations', SapeurMutationController::class)->only(['index']);
-        Route::resource('sapeurs.cours', SapeurCoursController::class)->only(['index']);
-        Route::resource('sapeurs.photo', SapeurPhotoController::class)->only(['index']);
-        Route::resource('sapeurs.groupes', SapeurGroupeController::class)->only(['index']);
-        Route::resource('sapeurs.articles', ArticleSapeurController::class)->only(['index']);
+        Route::apiResource('sapeurs.permis', SapeurPermisController::class)->only(['index']);
+        Route::apiResource('sapeurs.telephones', SapeurTelephoneController::class)->only(['index']);
+        Route::apiResource('sapeurs.fonctions', SapeurFonctionController::class)->only(['index']);
+        Route::apiResource('sapeurs.grades', SapeurGradeController::class)->only(['index']);
+        Route::apiResource('sapeurs.mutations', SapeurMutationController::class)->only(['index']);
+        Route::apiResource('sapeurs.cours', SapeurCoursController::class)->only(['index']);
+        Route::apiResource('sapeurs.photo', SapeurPhotoController::class)->only(['index']);
+        Route::apiResource('sapeurs.groupes', SapeurGroupeController::class)->only(['index']);
+        Route::apiResource('sapeurs.articles', ArticleSapeurController::class)->only(['index']);
 
         // Publipostage
         Route::post('publipostage', [PublipostageController::class, 'index'])->name('publipostage');
@@ -259,14 +259,14 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
     // Sapeurs
     Route::group(['middleware' => 'jwtTokenRole:sapeur.modification'], function () {
-        Route::resource('sapeurs', SapeurController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('sapeurs.permis', SapeurPermisController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('sapeurs.telephones', SapeurTelephoneController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('sapeurs.fonctions', SapeurFonctionController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('sapeurs.grades', SapeurGradeController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('sapeurs.mutations', SapeurMutationController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('sapeurs.cours', SapeurCoursController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('sapeurs.photo', SapeurPhotoController::class)->only(['store', 'delete']);
+        Route::apiResource('sapeurs', SapeurController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('sapeurs.permis', SapeurPermisController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('sapeurs.telephones', SapeurTelephoneController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('sapeurs.fonctions', SapeurFonctionController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('sapeurs.grades', SapeurGradeController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('sapeurs.mutations', SapeurMutationController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('sapeurs.cours', SapeurCoursController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('sapeurs.photo', SapeurPhotoController::class)->only(['store', 'delete']);
         Route::delete('sapeurs/{sapeurId}/photo', [SapeurPhotoController::class, 'destroy'])->name('api.v2.sapeur.photo-destroy');
 
         // Route spécial pour les civils et autres afin de changer leur statut
@@ -279,44 +279,44 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Params Sapeur
     Route::group(['middleware' => 'jwtTokenRole:sapeur.config'], function () {
-        Route::resource('grades', GradeController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('fonctions', FonctionController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('cours', CoursController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('grades', GradeController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('fonctions', FonctionController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('cours', CoursController::class)->only(['store', 'update', 'destroy']);
     });
 
     // Absences
     Route::group(['middleware' => 'jwtTokenSapeurOrRole:absence.lecture'], function () {
-        Route::resource('absence-param', AbsenceParamController::class)->only(['index']);
+        Route::apiResource('absence-param', AbsenceParamController::class)->only(['index']);
     });
     Route::group(['middleware' => 'jwtTokenRole:absence.lecture'], function () {
         Route::get('absences/{exerciceComptableId}', [AbsenceController::class, 'index'])->name('absences.index');
     });
     Route::group(['middleware' => 'jwtTokenRole:absence.modification'], function () {
-        Route::resource('absences', AbsenceController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('absences', AbsenceController::class)->only(['store', 'update', 'destroy']);
     });
     Route::group(['middleware' => 'jwtTokenRole:absence.config'], function () {
-        Route::resource('absence-param', AbsenceParamController::class)->only(['store']);
+        Route::apiResource('absence-param', AbsenceParamController::class)->only(['store']);
     });
 
     // Organisation
     Route::group(['middleware' => 'jwtTokenSapeurOrRole:intervention.lecture,effectif.tout,sapeur.lecture,organisation.modification,comptabilite.lecture'], function () {
-        Route::resource('groupes', GroupeController::class)->only(['index']);
+        Route::apiResource('groupes', GroupeController::class)->only(['index']);
     });
 
     // Param organisation
     Route::group(['middleware' => 'jwtTokenRole:organisation.modification'], function () {
-        Route::resource('groupes', GroupeController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('groupes.sapeurs', GroupeSapeursController::class)->only(['store']);
+        Route::apiResource('groupes', GroupeController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('groupes.sapeurs', GroupeSapeursController::class)->only(['store']);
     });
 
     // Exercices
     Route::group(['middleware' => 'jwtTokenSapeurOrRole:exercice.lecture,exercice.presence,comptabilite.lecture'], function () {
         // Paramètres publiques car nécessaire pour le frontend
-        Route::resource('excuse-param', ExcuseParamController::class)->only(['index']);
+        Route::apiResource('excuse-param', ExcuseParamController::class)->only(['index']);
     });
     Route::group(['middleware' => 'jwtTokenRole:exercice.lecture,exercice.presence,comptabilite.lecture'], function () {
-        Route::resource('exercices', ExerciceController::class)->only(['index', 'show']);
-        Route::resource('exercices.sapeurs', ConvocationsController::class)->only(['index']);
+        Route::apiResource('exercices', ExerciceController::class)->only(['index', 'show']);
+        Route::apiResource('exercices.sapeurs', ConvocationsController::class)->only(['index']);
 
         Route::get('exercices/{id}/liste-presence', [ExerciceController::class, 'listePresence']);
         Route::get('exercices/{id}/liste-appel', [ExerciceController::class, 'listeAppel']);
@@ -325,7 +325,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         // Convocations
         Route::get('convocation/{id}', [ConvocationController::class, 'convoquer']);
-        Route::resource('convocation-param', ConvocationParamController::class)->only(['index', 'store']);
+        Route::apiResource('convocation-param', ConvocationParamController::class)->only(['index', 'store']);
 
         // Statistiques
         Route::get('statistiques/{id}/presence-exercice', [SapeurExerciceController::class, 'stat']);
@@ -351,20 +351,20 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('exercices/{exerciceId}/excuses/{sapeurId}/justificatif', [ExcuseController::class, 'downloadJustificatif'])->name('api.v2.exercices.excuse.justificatif');
     });
     Route::group(['middleware' => 'jwtTokenRole:exercice.modification'], function () {
-        Route::resource('exercices', ExerciceController::class)->only(['store', 'update']);
+        Route::apiResource('exercices', ExerciceController::class)->only(['store', 'update']);
         Route::get('sapeurs-convocation', [SapeurController::class, 'convocationSms'])->name('sapeurs-convocation');
     });
     Route::group(['middleware' => 'jwtTokenRole:exercice.validation'], function () {
-        Route::resource('exercices', ExerciceController::class)->only(['destroy']);
+        Route::apiResource('exercices', ExerciceController::class)->only(['destroy']);
         Route::post('exercices/{id}/valider', [ExerciceController::class, 'valider'])->name('api.v2.exercices.valider');
         Route::post('exercices/{id}/annuler', [ExerciceController::class, 'annuler'])->name('api.v2.exercices.annuler');
         Route::post('exercices/{id}/reactiver', [ExerciceController::class, 'reactiver'])->name('api.v2.exercices.reactiver');
     });
     Route::group(['middleware' => 'jwtTokenRole:exercice.config'], function () {
-        Route::resource('exercice-categories', ExerciceCategorieController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('excuses-types', ExcuseTypeController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('exercice-categories', ExerciceCategorieController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('excuses-types', ExcuseTypeController::class)->only(['store', 'update', 'destroy']);
 
-        Route::resource('excuse-param', ExcuseParamController::class)->only(['store']);
+        Route::apiResource('excuse-param', ExcuseParamController::class)->only(['store']);
     });
 
     // Fiche de travail
@@ -373,17 +373,17 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::delete('travaux/{id}/review', [TravailController::class, 'cancelReview'])->name('api.v2.travaux.cancel-review');
     });
     Route::group(['middleware' => 'jwtTokenSapeurOrRole::comptabilite.lecture,comptabilite.modification,fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation,fiche_travail.lecture'], function () {
-        Route::resource('travail-types', TravailTypeController::class)->only(['index']);
+        Route::apiResource('travail-types', TravailTypeController::class)->only(['index']);
     });
     Route::group(['middleware' => 'jwtTokenRole:fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation,fiche_travail.lecture'], function () {
-        Route::resource('travaux', TravailController::class)->only(['index']);
+        Route::apiResource('travaux', TravailController::class)->only(['index']);
         Route::get('travaux/{exerciceComptableId}', [TravailController::class, 'index'])->name('api.v2.travaux.index');
     });
     Route::group(['middleware' => 'jwtTokenRole:fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation'], function () {
-        Route::resource('travaux', TravailController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('travaux', TravailController::class)->only(['store', 'update', 'destroy']);
     });
     Route::group(['middleware' => 'jwtTokenRole:fiche_travail.config'], function () {
-        Route::resource('travail-types', TravailTypeController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('travail-types', TravailTypeController::class)->only(['store', 'update', 'destroy']);
     });
 
     // SMS
@@ -393,11 +393,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('aspsms/credit', [AspsmsController::class, 'credit'])->name('credit');
     });
     Route::group(['middleware' => 'jwtTokenRole:sms.config'], function () {
-        Route::resource('aspsms/param', AspsmsParamController::class)->only(['index', 'store']);
+        Route::apiResource('aspsms/param', AspsmsParamController::class)->only(['index', 'store']);
     });
     Route::group(['middleware' => 'jwtTokenRole:sms.envoie'], function () {
-        Route::resource('sms', SmsController::class)->only('index');
-        Route::resource('exercices.sms', ExerciceSmsController::class)->only('index');
+        Route::apiResource('sms', SmsController::class)->only('index');
+        Route::apiResource('exercices.sms', ExerciceSmsController::class)->only('index');
     });
 
     // RTA
@@ -409,20 +409,20 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('rta', [ReferenceRtaController::class, 'setReference'])->name('api.v2.rta.set');
     });
     Route::group(['middleware' => 'jwtTokenRole:rta.config'], function () {
-        Route::resource('rta-param', RtaParamController::class)->only(['index', 'store']);
+        Route::apiResource('rta-param', RtaParamController::class)->only(['index', 'store']);
     });
 
     // Interventions
     Route::group(['middleware' => 'jwtTokenRole:intervention.lecture,comptabilite.lecture'], function () {
-        Route::resource('interventions', InterventionController::class)->only(['index', 'show']);
-        Route::resource('interventions.materiels', InterventionMaterielsController::class)->only(['index']);
-        Route::resource('interventions.vehicules', InterventionVehiculesController::class)->only(['index']);
-        Route::resource('interventions.missions', InterventionMissionsController::class)->only(['index']);
-        Route::resource('interventions.appels', InterventionAppelsController::class)->only(['index']);
-        Route::resource('interventions.sapeurs', InterventionSapeursController::class)->only(['index']);
-        Route::resource('interventions.quittances', InterventionQuittancesController::class)->only(['index']);
-        Route::resource('interventions.groupes', InterventionGroupesController::class)->only(['index']);
-        Route::resource('interventions.phases', InterventionPhasesController::class)->only(['index']);
+        Route::apiResource('interventions', InterventionController::class)->only(['index', 'show']);
+        Route::apiResource('interventions.materiels', InterventionMaterielsController::class)->only(['index']);
+        Route::apiResource('interventions.vehicules', InterventionVehiculesController::class)->only(['index']);
+        Route::apiResource('interventions.missions', InterventionMissionsController::class)->only(['index']);
+        Route::apiResource('interventions.appels', InterventionAppelsController::class)->only(['index']);
+        Route::apiResource('interventions.sapeurs', InterventionSapeursController::class)->only(['index']);
+        Route::apiResource('interventions.quittances', InterventionQuittancesController::class)->only(['index']);
+        Route::apiResource('interventions.groupes', InterventionGroupesController::class)->only(['index']);
+        Route::apiResource('interventions.phases', InterventionPhasesController::class)->only(['index']);
 
         // Impressions interventions
         Route::get('interventions/{id}/rapport', [InterventionController::class, 'rapport'])->name('api.v2.interventions.rapport');
@@ -435,7 +435,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('statistiques/{id}/intervention-traitement', [InterventionStatistiqueController::class, 'traitement']);
     });
     Route::group(['middleware' => 'jwtTokenRole:intervention.modification'], function () {
-        Route::resource('interventions', InterventionController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('interventions', InterventionController::class)->only(['store', 'update', 'destroy']);
         Route::post('interventions-complet', [InterventionController::class, 'complet'])->name('complet');
 
         Route::post('interventions/{id}/materiels', [InterventionMaterielsController::class, 'store'])->name('api.v2.interventions.materiels.store');
@@ -472,35 +472,35 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
     Route::group(['middleware' => 'jwtTokenRole:intervention.lecture,intervention.modification,comptabilite.lecture'], function () {
         // TODO: see to add the correct right for the following routes : 'store', 'update']);
-        Route::resource('phase-types', PhaseTypeController::class)->only(['index']);
-        Route::resource('stat-federal', StatFederalController::class)->only(['index']);
-        Route::resource('stat-intervention', StatInterventionController::class)->only(['index']);
-        Route::resource('intervention-traitement', InterventionTraitementController::class)->only(['index']);
+        Route::apiResource('phase-types', PhaseTypeController::class)->only(['index']);
+        Route::apiResource('stat-federal', StatFederalController::class)->only(['index']);
+        Route::apiResource('stat-intervention', StatInterventionController::class)->only(['index']);
+        Route::apiResource('intervention-traitement', InterventionTraitementController::class)->only(['index']);
 
         // Statistiques
         Route::get('statistiques/{id}/presence-intervention', [InterventionSapeursController::class, 'stat']);
     });
     Route::group(['middleware' => 'jwtTokenRole:intervention.lecture'], function () {
-        Route::resource('alarmes', AlarmeController::class)->only(['index']);
+        Route::apiResource('alarmes', AlarmeController::class)->only(['index']);
 
-        Route::resource('vehicules', VehiculeController::class)->only(['index']);
-        Route::resource('materiels', MaterielController::class)->only(['index']);
-        Route::resource('mission-types', MissionTypeController::class)->only(['index']);
-        Route::resource('telephones', TelephoneController::class)->only(['index']);
+        Route::apiResource('vehicules', VehiculeController::class)->only(['index']);
+        Route::apiResource('materiels', MaterielController::class)->only(['index']);
+        Route::apiResource('mission-types', MissionTypeController::class)->only(['index']);
+        Route::apiResource('telephones', TelephoneController::class)->only(['index']);
     });
     Route::group(['middleware' => 'jwtTokenRole:intervention.config'], function () {
-        Route::resource('type-intervention', TypeInterventionController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('vehicules', VehiculeController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('materiels', MaterielController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('stat-intervention', StatInterventionController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('intervention-traitement', InterventionTraitementController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('telephones', TelephoneController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('mission-types', MissionTypeController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('type-intervention', TypeInterventionController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('vehicules', VehiculeController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('materiels', MaterielController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('stat-intervention', StatInterventionController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('intervention-traitement', InterventionTraitementController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('telephones', TelephoneController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('mission-types', MissionTypeController::class)->only(['store', 'update', 'destroy']);
     });
 
     // Exercices comptables
     Route::group(['middleware' => 'jwtTokenSapeurOrRole'], function () {
-        Route::resource('exercices-comptable', ExerciceComptableController::class)->only(['index']);
+        Route::apiResource('exercices-comptable', ExerciceComptableController::class)->only(['index']);
 
         // Static param Comptabilite
         Route::get('unites', [UniteController::class, 'index'])->name('api.v2.unites');
@@ -511,8 +511,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     Route::group(['middleware' => 'jwtTokenRole:comptabilite.lecture,fiche_travail.config'], function () {
-        Route::resource('comptes', CompteController::class)->only(['index']);
-        Route::resource('ecriture-categories', EcritureCategorieController::class)->only(['index']);
+        Route::apiResource('comptes', CompteController::class)->only(['index']);
+        Route::apiResource('ecriture-categories', EcritureCategorieController::class)->only(['index']);
     });
 
     // Comptabilite
@@ -528,12 +528,12 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('imputation/intervention/{id}', [ImputationController::class, 'intervention']);
         Route::delete('imputation/intervention/{id}', [ImputationController::class, 'cancelIntervention']);
 
-        Route::resource('ecritures', EcritureController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('ecritures', EcritureController::class)->only(['store', 'update', 'destroy']);
 
         Route::post('decomptes/creer-annuel', [DecompteController::class, 'creerAnnuel']);
         Route::post('decomptes/creer-sapeur', [DecompteController::class, 'creerSapeur']);
         Route::post('decomptes/creer-exercice', [DecompteController::class, 'creerExercice']);
-        Route::resource('decomptes', DecompteController::class)->only(['destroy']);
+        Route::apiResource('decomptes', DecompteController::class)->only(['destroy']);
 
         // Amendes
         Route::post('generer-amendes/{id}/sapeur/{sapeurId}', [AmendeController::class, 'sapeur']);
@@ -555,11 +555,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('exercices-comptable/{exercieComptableId}/justificatif', [CompteController::class, 'justificatifComplet']);
 
         // Params Comptabilite
-        Route::resource('indemnites-exercice-types', IndemniteExerciceTypeController::class)->only(['index']);
-        Route::resource('indemnites-intervention-types', IndemniteInterventionTypeController::class)->only(['index']);
-        Route::resource('indemnites-cours-types', IndemniteCoursTypeController::class)->only(['index']);
-        Route::resource('frais-indemnites-types', FraisIndemniteTypeController::class)->only(['index']);
-        Route::resource('frais-indemnites-annuel-types', FraisIndemniteAnnuelTypeController::class)->only(['index']);
+        Route::apiResource('indemnites-exercice-types', IndemniteExerciceTypeController::class)->only(['index']);
+        Route::apiResource('indemnites-intervention-types', IndemniteInterventionTypeController::class)->only(['index']);
+        Route::apiResource('indemnites-cours-types', IndemniteCoursTypeController::class)->only(['index']);
+        Route::apiResource('frais-indemnites-types', FraisIndemniteTypeController::class)->only(['index']);
+        Route::apiResource('frais-indemnites-annuel-types', FraisIndemniteAnnuelTypeController::class)->only(['index']);
 
         // Décomptes
         Route::get('decomptes/{id}/ecritures', [DecompteController::class, 'ecritures']);
@@ -571,10 +571,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('decomptes/{id}/print-par-sapeur', [DecompteController::class, 'printParSapeur']);
         Route::get('decomptes/{id}/print-par-sapeur/{sapeurId}', [DecompteController::class, 'printPourSapeur']);
         Route::get('decomptes/{id}/print-par-compte', [DecompteController::class, 'printParCompte']);
-        Route::resource('decomptes', DecompteController::class)->only(['show']);
+        Route::apiResource('decomptes', DecompteController::class)->only(['show']);
 
         // Params Amendes
-        Route::resource('amendes', AmendeController::class)->only(['index']);
+        Route::apiResource('amendes', AmendeController::class)->only(['index']);
 
         // Paiements
         Route::get('paiements/exercice-comptable/{id}', [PaiementController::class, 'getByExerciceComptable']);
@@ -595,63 +595,63 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     Route::group(['middleware' => 'jwtTokenRole:comptabilite.config'], function () {
         //TODO: Suppression d'exercices comptable ???
-        Route::resource('exercices-comptable', ExerciceComptableController::class)->only(['store', 'update']);
+        Route::apiResource('exercices-comptable', ExerciceComptableController::class)->only(['store', 'update']);
         //TODO: Regarder que faire avec cloturer, déjà modifiable via la route update pour le moment
         // Route::post('exercice-comptable/{id}/cloturer', [ExerciceComptableController::class, 'cloturer']);
 
-        Route::resource('avs-param', AvsParamController::class)->only(['index', 'store']);
+        Route::apiResource('avs-param', AvsParamController::class)->only(['index', 'store']);
 
-        Route::resource('comptes', CompteController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('indemnites-exercice-types', IndemniteExerciceTypeController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('indemnites-intervention-types', IndemniteInterventionTypeController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('frais-indemnites-annuel', FraisIndemniteAnnuelController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('frais-indemnites-annuel-types', FraisIndemniteAnnuelTypeController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('ecriture-categories', EcritureCategorieController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('comptes', CompteController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('indemnites-exercice-types', IndemniteExerciceTypeController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('indemnites-intervention-types', IndemniteInterventionTypeController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('frais-indemnites-annuel', FraisIndemniteAnnuelController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('frais-indemnites-annuel-types', FraisIndemniteAnnuelTypeController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('ecriture-categories', EcritureCategorieController::class)->only(['store', 'update', 'destroy']);
 
-        Route::resource('amendes', AmendeController::class)->only(['store']);
-        Route::resource('heure-exercice-types', HeureExerciceTypeController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('amendes', AmendeController::class)->only(['store']);
+        Route::apiResource('heure-exercice-types', HeureExerciceTypeController::class)->only(['store', 'update', 'destroy']);
 
-        Route::resource('indemnites-cours-types', IndemniteCoursTypeController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('indemnites-cours-types', IndemniteCoursTypeController::class)->only(['store', 'update', 'destroy']);
     });
 
     // Controles médicaux
     Route::group(['middleware' => 'jwtTokenRole:controle_medical.tout'], function () {
-        Route::resource('controles-medicaux', ControleMedicalController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
+        Route::apiResource('controles-medicaux', ControleMedicalController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
         Route::get('controles-medicaux/{id}/justificatif', [JustificatifController::class, 'show']);
         Route::post('controles-medicaux/{id}/justificatif', [JustificatifController::class, 'store']);
         Route::delete('controles-medicaux/{id}/justificatif', [JustificatifController::class, 'destroy']);
 
         // Controles médicaux pour sapeur
-        Route::resource('sapeurs.controles-medicaux', SapeurControleMedicalController::class)->only(['index']);
+        Route::apiResource('sapeurs.controles-medicaux', SapeurControleMedicalController::class)->only(['index']);
     });
 
     Route::group(['middleware' => 'jwtTokenRole:controle_medical.config'], function () {
-        Route::resource('medecins', MedecinController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('controles-medicaux-types', ControleMedicalTypeController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('medecins', MedecinController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('controles-medicaux-types', ControleMedicalTypeController::class)->only(['store', 'update', 'destroy']);
     });
 
     // Matériel
     Route::group(['middleware' => 'jwtTokenSapeurOrRole:materiel.lecture'], function () {
-        Route::resource('materiel-types', MaterielTypeController::class)->only(['index']);
-        Route::resource('materiel-types.articles', MaterielTypeArticleController::class)->only(['index']);
-        Route::resource('materiel-categories', MaterielCategorieController::class)->only(['index']);
-        Route::resource('couleurs', CouleurController::class)->only(['index']);
-        Route::resource('batterie-types', BatterieTypeController::class)->only(['index']);
-        Route::resource('tuyau-diametres', TuyauDiametreController::class)->only(['index']);
+        Route::apiResource('materiel-types', MaterielTypeController::class)->only(['index']);
+        Route::apiResource('materiel-types.articles', MaterielTypeArticleController::class)->only(['index']);
+        Route::apiResource('materiel-categories', MaterielCategorieController::class)->only(['index']);
+        Route::apiResource('couleurs', CouleurController::class)->only(['index']);
+        Route::apiResource('batterie-types', BatterieTypeController::class)->only(['index']);
+        Route::apiResource('tuyau-diametres', TuyauDiametreController::class)->only(['index']);
 
-        Route::resource('emplacements', EmplacementController::class)->only(['index']);
-        Route::resource('articles', ArticleController::class)->only(['index']);
-        Route::resource('lavages', LavageController::class)->only(['index']);
+        Route::apiResource('emplacements', EmplacementController::class)->only(['index']);
+        Route::apiResource('articles', ArticleController::class)->only(['index']);
+        Route::apiResource('lavages', LavageController::class)->only(['index']);
 
-        Route::resource('emplacements.articles', ArticleEmplacementController::class)->only(['index']);
+        Route::apiResource('emplacements.articles', ArticleEmplacementController::class)->only(['index']);
     });
 
     Route::group(['middleware' => 'jwtTokenRole:materiel.modification'], function () {
-        Route::resource('emplacements', EmplacementController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('emplacements', EmplacementController::class)->only(['store', 'update', 'destroy']);
 
         // Attribution et retour de matériel
-        Route::resource('sapeurs.articles', ArticleSapeurController::class)->only(['store']);
-        Route::resource('emplacements.articles', ArticleEmplacementController::class)->only(['store']);
+        Route::apiResource('sapeurs.articles', ArticleSapeurController::class)->only(['store']);
+        Route::apiResource('emplacements.articles', ArticleEmplacementController::class)->only(['store']);
 
         // Batch Modifier des articles
         Route::post('articles', [ArticleController::class, 'create'])->name('articles.create');
@@ -664,11 +664,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     Route::group(['middleware' => 'jwtTokenRole:materiel.config'], function () {
-        Route::resource('couleurs', CouleurController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('materiel-categories', MaterielCategorieController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('materiel-types', MaterielTypeController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('batterie-types', BatterieTypeController::class)->only(['store', 'update', 'destroy']);
-        Route::resource('tuyau-diametres', TuyauDiametreController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('couleurs', CouleurController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('materiel-categories', MaterielCategorieController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('materiel-types', MaterielTypeController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('batterie-types', BatterieTypeController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('tuyau-diametres', TuyauDiametreController::class)->only(['store', 'update', 'destroy']);
     });
 
     // TODO: Ajouter route type d'unité
