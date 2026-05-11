@@ -24,7 +24,7 @@ class GroupeController extends Controller
     {
         $data = $request->validate([
             'designation' => 'string|min:1',
-            'no' => 'string|nullable',
+            'no' => 'string|nullable|max:10',
             'parent_id' => 'integer|nullable',
             'tri' => 'integer',
             'type' => 'integer',
@@ -42,7 +42,7 @@ class GroupeController extends Controller
 
         $data = $request->validate([
             'designation' => 'string|min:1',
-            'no' => 'string|nullable',
+            'no' => 'string|nullable|max:10',
             'parent_id' => 'integer|nullable',
             'tri' => 'integer',
             'type' => 'integer',
