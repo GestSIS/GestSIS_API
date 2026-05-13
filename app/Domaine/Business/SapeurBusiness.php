@@ -58,7 +58,7 @@ class SapeurBusiness
         foreach ($mutations as $mutation) {
             if (
                 (Carbon::parse($mutation->sortie)->gte($now) && Carbon::parse($mutation->incorporation)->subMonths(3)->lte($now)) ||
-                ($mutation->sortie === NULL && Carbon::parse($mutation->incorporation)->lte($now))
+                ($mutation->sortie === null && Carbon::parse($mutation->incorporation)->lte($now))
             ) {
                 return true;
             }
@@ -75,7 +75,7 @@ class SapeurBusiness
     {
         // TODO: Could be optimised via a single SQL Query
         // Sub query 1 -> check if one mutation contains the current date
-        $sapeurs = Sapeur::where('type', '=', self::TYPE_SAPEUR)->with('mutations')->get();
+        $sapeurs = Sapeur::where('type', self::TYPE_SAPEUR)->with('mutations')->get();
         foreach ($sapeurs as $sapeur) {
             $sapeur->actif = self::isActif($sapeur->mutations);
             $sapeur->save();
@@ -85,9 +85,9 @@ class SapeurBusiness
     public static function recomputeSapeurFonctionPrincipale()
     {
         $now = Carbon::now();
-        $sapeurs = Sapeur::where('type', '=', self::TYPE_SAPEUR)->with([
+        $sapeurs = Sapeur::where('type', self::TYPE_SAPEUR)->with([
             'fonctions' => function ($query) use ($now) {
-                $query->where('debut', '<=', $now)->where(fn($query) => $query->where('fin', '=', null)
+                $query->where('debut', '<=', $now)->where(fn($query) => $query->whereNull('fin')
                     ->orWhere('fin', '>=', $now))
                     ->join('fonctions', 'fonctions.id', '=', 'fonction_sapeur.fonction_id')
                     ->orderByDesc('fonctions.tri');
@@ -103,7 +103,7 @@ class SapeurBusiness
     public static function recomputeSapeurGradePrincipal()
     {
         $now = Carbon::now();
-        $sapeurs = Sapeur::where('type', '=', self::TYPE_SAPEUR)->with([
+        $sapeurs = Sapeur::where('type', self::TYPE_SAPEUR)->with([
             'grades' => function ($query) use ($now) {
                 $query->where('date', '<=', $now)
                     ->join('grades', 'grades.id', '=', 'grade_sapeur.grade_id')
@@ -119,7 +119,7 @@ class SapeurBusiness
 
     private static function isSapeur($sapeurId)
     {
-        return Sapeur::where([['id', '=', $sapeurId], ['type', '=', self::TYPE_SAPEUR]])->exists();
+        return Sapeur::where('id', $sapeurId)->where('type', self::TYPE_SAPEUR)->exists();
     }
 
     public static function createSapeur($data)
@@ -181,35 +181,30 @@ class SapeurBusiness
 
     public static function deleteSapeurById(int $sapeurId)
     {
-        if (Ecriture::where('sapeur_id', '=', $sapeurId)->exists()) {
+        if (Ecriture::where('sapeur_id', $sapeurId)->exists()) {
             throw new ArrayException([], "Impossible de supprimer un sapeur lié à une écriture comptable");
         }
 
-        if (
-            Article::where([
-                ['sapeur_id', '=', $sapeurId],
-                ['retour', '=', null]
-            ])->exists()
-        ) {
+        if (Article::where('sapeur_id', $sapeurId)->whereNull('retour')->exists()) {
             throw new ArrayException([], "Impossible de supprimer un sapeur possédant du matériel personnel non rendu");
         }
 
-        if (Intervention::where('sapeur_id', '=', $sapeurId)->exists()) {
+        if (Intervention::where('sapeur_id', $sapeurId)->exists()) {
             throw new ArrayException([], "Impossible de supprimer un sapeur ayant été chef d'intervention");
         }
 
-        CoursSapeur::where('sapeur_id', '=', $sapeurId)->delete();
-        Permis::where('sapeur_id', '=', $sapeurId)->delete();
-        GradeSapeur::where('sapeur_id', '=', $sapeurId)->delete();
-        FonctionSapeur::where('sapeur_id', '=', $sapeurId)->delete();
-        SapeurTelephone::where('sapeur_id', '=', $sapeurId)->delete();
-        ExerciceSapeur::where('sapeur_id', '=', $sapeurId)->delete();
-        HeureExercice::where('sapeur_id', '=', $sapeurId)->delete();
-        InterventionSapeur::where('sapeur_id', '=', $sapeurId)->delete();
-        GroupeSapeur::where('sapeur_id', '=', $sapeurId)->delete();
-        ControleMedical::where('sapeur_id', '=', $sapeurId)->delete();
-        Mutation::where('sapeur_id', '=', $sapeurId)->delete();
-        Travail::where('sapeur_id', '=', $sapeurId)->delete();
+        CoursSapeur::where('sapeur_id', $sapeurId)->delete();
+        Permis::where('sapeur_id', $sapeurId)->delete();
+        GradeSapeur::where('sapeur_id', $sapeurId)->delete();
+        FonctionSapeur::where('sapeur_id', $sapeurId)->delete();
+        SapeurTelephone::where('sapeur_id', $sapeurId)->delete();
+        ExerciceSapeur::where('sapeur_id', $sapeurId)->delete();
+        HeureExercice::where('sapeur_id', $sapeurId)->delete();
+        InterventionSapeur::where('sapeur_id', $sapeurId)->delete();
+        GroupeSapeur::where('sapeur_id', $sapeurId)->delete();
+        ControleMedical::where('sapeur_id', $sapeurId)->delete();
+        Mutation::where('sapeur_id', $sapeurId)->delete();
+        Travail::where('sapeur_id', $sapeurId)->delete();
         Sapeur::findOrFail($sapeurId)->delete();
     }
 
@@ -274,7 +269,7 @@ class SapeurBusiness
     public static function removeCours(int $sapeurId, int $coursSapeurId)
     {
         // Check que le cours n'est pas lié à une écriture
-        if (Ecriture::where('cours_sapeur_id', '=', $coursSapeurId)->count() > 0) {
+        if (Ecriture::where('cours_sapeur_id', $coursSapeurId)->exists()) {
             throw new ArrayException([], 'Impossible de supprimer un cours facturé');
         }
         CoursSapeur::where('sapeur_id', $sapeurId)->findOrFail($coursSapeurId)->delete();
@@ -646,52 +641,40 @@ class SapeurBusiness
 
     private static function updateFonctionPrincipale($sapeurId)
     {
-        $maxTri = -1;
-        $maxId = -1;
-
         // Recupérer avec fonctions pour le tri
         $now = Carbon::now();
-        $fonctions = FonctionSapeur::with('fonction')
+        $fonctionMax = FonctionSapeur::with('fonction')
             ->where('sapeur_id', $sapeurId)
             ->get()
-            ->filter(fn($fonction) => $now->gte($fonction->debut) && ($fonction->fin === null || $now->lte($fonction->fin)));
+            ->filter(fn($fonction) => $now->gte($fonction->debut) && ($fonction->fin === null || $now->lte($fonction->fin)))
+            ->sortByDesc(fn($f) => $f->fonction->tri)
+            ->first();
 
-        foreach ($fonctions as $fonctionSapeur) {
-            if ($fonctionSapeur->fonction->tri > $maxTri) {
-                $maxId = $fonctionSapeur->fonction->id;
-                $maxTri = $fonctionSapeur->fonction->tri;
-            }
-        }
+        $maxId = $fonctionMax?->fonction->id;
 
         $sapeur = Sapeur::findOrFail($sapeurId);
-        $sapeur->fonction_id = $maxId <= 0 ? null : $maxId;
+        $sapeur->fonction_id = $maxId;
         $sapeur->save();
-        return $maxId <= 0 ? null : $maxId;
+        return $maxId;
     }
 
     private static function updateMainGrade($sapeurId)
     {
-        $maxTri = -1;
-        $maxId = -1;
-
         // Recupérer avec grades pour le tri
         $now = Carbon::now();
-        $grades = GradeSapeur::with('grade')
+        $gradeMax = GradeSapeur::with('grade')
             ->where('sapeur_id', $sapeurId)
             ->get()
-            ->filter(fn($grade) => $now->gte($grade->date));
+            ->filter(fn($grade) => $now->gte($grade->date))
+            ->sortByDesc(fn($g) => $g->grade->tri)
+            ->first();
 
-        foreach ($grades as $gradeSapeur) {
-            if ($gradeSapeur->grade->tri > $maxTri) {
-                $maxId = $gradeSapeur->grade->id;
-                $maxTri = $gradeSapeur->grade->tri;
-            }
-        }
+        $maxId = $gradeMax?->grade->id;
 
         $sapeur = Sapeur::findOrFail($sapeurId);
-        $sapeur->grade_id = $maxId <= 0 ? null : $maxId;
+        $sapeur->grade_id = $maxId;
         $sapeur->save();
-        return $maxId <= 0 ? null : $maxId;
+        return $maxId;
     }
 
     private static $ALLOWED_PHOTO_EXTENSION = ['jpg', 'jpeg', 'png'];
@@ -699,18 +682,18 @@ class SapeurBusiness
     public static function downloadPhotoSapeur($sapeurId, $sisKey)
     {
         foreach (self::$ALLOWED_PHOTO_EXTENSION as $extension) {
-            $path = 'photos/' . $sisKey . '/' . $sapeurId . '.' . $extension;
+            $path = "photos/$sisKey/$sapeurId.$extension";
             if (Storage::exists($path)) {
                 return Storage::download($path, null, ['Response-Type' => 'arraybuffer']);
             }
         }
-        return response()->json(Null);
+        return response()->json(null);
     }
 
     public static function getPhotoSapeurPath($sapeurId, $sisKey)
     {
         foreach (self::$ALLOWED_PHOTO_EXTENSION as $extension) {
-            $path = 'photos/' . $sisKey . '/' . $sapeurId . '.' . $extension;
+            $path = "photos/$sisKey/$sapeurId.$extension";
             if (Storage::exists($path)) {
                 return $path;
             }
@@ -720,8 +703,9 @@ class SapeurBusiness
 
     public static function deletePhotoSapeur($sapeurId, $sisKey)
     {
-        $path = 'photos/' . $sisKey . '/' . $sapeurId . '.';
-        $files = array_map(fn($extension) => $path . $extension, self::$ALLOWED_PHOTO_EXTENSION);
+        $files = collect(self::$ALLOWED_PHOTO_EXTENSION)
+            ->map(fn($ext) => "photos/$sisKey/$sapeurId.$ext")
+            ->all();
         Storage::delete($files);
     }
 
@@ -729,14 +713,15 @@ class SapeurBusiness
     {
         self::deletePhotoSapeur($sapeurId, $sisKey);
         $extension = strtolower($image->extension());
-        return $image->storeAs('photos/' . $sisKey, $sapeurId . "." . $extension);
+        return $image->storeAs("photos/$sisKey", "$sapeurId.$extension");
     }
 
     public static function trombinoscope(string $sisKey)
     {
         $imageDefault = 'icon/user.svg';
 
-        $sapeurs = Sapeur::where([['actif', '=', 1], ['type', '=', self::TYPE_SAPEUR]])
+        $sapeurs = Sapeur::where('actif', 1)
+            ->where('type', self::TYPE_SAPEUR)
             ->orderBy('nom')
             ->orderBy('prenom')
             ->get(['id', 'nom', 'prenom']);
@@ -783,12 +768,12 @@ class SapeurBusiness
             TypstTemplate::FicheSapeur,
             [
                 "sapeur" => $sapeur,
-                "fonctions" => FonctionSapeur::with('fonction')->where('sapeur_id', '=', $sapeurId)->orderBy('debut')->get(),
-                "grades" => GradeSapeur::with('grade')->where('sapeur_id', '=', $sapeurId)->orderBy('date')->get(),
-                "mutations" => Mutation::with('localite')->where('sapeur_id', '=', $sapeurId)->orderBy('incorporation')->get(),
-                "cours" => CoursSapeur::with(['localite', 'cours'])->where('sapeur_id', '=', $sapeurId)->orderBy('date')->get(),
-                "telephones" => SapeurTelephone::with(['telephoneType'])->where('sapeur_id', '=', $sapeurId)->orderBy('priorite')->get(),
-                "permis" => Permis::with(['permisType'])->where('sapeur_id', '=', $sapeurId)->orderBy('date')->get(),
+                "fonctions" => FonctionSapeur::with('fonction')->where('sapeur_id', $sapeurId)->orderBy('debut')->get(),
+                "grades" => GradeSapeur::with('grade')->where('sapeur_id', $sapeurId)->orderBy('date')->get(),
+                "mutations" => Mutation::with('localite')->where('sapeur_id', $sapeurId)->orderBy('incorporation')->get(),
+                "cours" => CoursSapeur::with(['localite', 'cours'])->where('sapeur_id', $sapeurId)->orderBy('date')->get(),
+                "telephones" => SapeurTelephone::with(['telephoneType'])->where('sapeur_id', $sapeurId)->orderBy('priorite')->get(),
+                "permis" => Permis::with(['permisType'])->where('sapeur_id', $sapeurId)->orderBy('date')->get(),
             ],
             $logoPath
         );

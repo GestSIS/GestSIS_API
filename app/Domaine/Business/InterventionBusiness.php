@@ -96,11 +96,11 @@ class InterventionBusiness
 
         // Création de l'exercice comptable automatique si année en cours et aucun exercice comptable existant
         $anneeEnCours = Carbon::now()->year;
-        if ($exerciceComptable == NULL && $anneeEnCours == Carbon::parse($intervention['date_debut'])->year) {
+        if ($exerciceComptable === null && $anneeEnCours == Carbon::parse($intervention['date_debut'])->year) {
             // Création de l'exercice comptable
             $exerciceComptable = new ExerciceComptable();
             $exerciceComptable->annee = $anneeEnCours;
-            $exerciceComptable->designation = "Année comptable " . $anneeEnCours;
+            $exerciceComptable->designation = "Année comptable $anneeEnCours";
             $exerciceComptable->debut = Carbon::createFromDate($anneeEnCours, 1, 1);
             $exerciceComptable->fin = Carbon::createFromDate($anneeEnCours, 12, 31);
             $exerciceComptable->boucle = false;
@@ -108,9 +108,9 @@ class InterventionBusiness
         }
 
         // Check pas déjà cloturé
-        if ($exerciceComptable == NULL) {
+        if ($exerciceComptable === null) {
             throw new ArrayException(["message" => "Exercice comptable inexistant"]);
-        } else if ($exerciceComptable->boucle) {
+        } elseif ($exerciceComptable->boucle) {
             throw new ArrayException(["message" => "Exercice comptable déjà bouclé"]);
         }
 
@@ -157,12 +157,9 @@ class InterventionBusiness
 
         // Ajout des missions
         $missions = array_map(function ($e) use ($newIntervention) {
-            if (!isset($e['resume']) || is_null($e['resume']))
-                $e['resume'] = '';
-            if (!isset($e['sapeur_id']))
-                $e['sapeur_id'] = null;
-            if (!isset($e['sapeur']))
-                $e['sapeur'] = null;
+            $e['resume'] ??= '';
+            $e['sapeur_id'] ??= null;
+            $e['sapeur'] ??= null;
             $e['intervention_id'] = $newIntervention->id;
             return $e;
         }, $missions);
@@ -171,8 +168,7 @@ class InterventionBusiness
 
         // Ajout des appels
         $appels = array_map(function ($e) use ($newIntervention) {
-            if (!isset($e['commentaire']) || is_null($e['commentaire']))
-                $e['commentaire'] = '';
+            $e['commentaire'] ??= '';
             $e['intervention_id'] = $newIntervention->id;
             return $e;
         }, $appels);
@@ -247,7 +243,7 @@ class InterventionBusiness
         Mission::where('intervention_id', '=', $interventionId)->delete();
         Appel::where('intervention_id', '=', $interventionId)->delete();
         Phase::where('intervention_id', '=', $interventionId)->delete();
-        Intervention::where('id', '=', $interventionId)->delete();
+        Intervention::destroy($interventionId);
         return true;
     }
 
@@ -315,7 +311,6 @@ class InterventionBusiness
         if ($presences->isEmpty()) {
             $intervention = Intervention::findOrFail($interventionId);
             $intervention->update(['statut' => self::INTERVENTION_STATUT_EMPTY]);
-            return true;
         }
         return true;
     }
@@ -448,17 +443,17 @@ class InterventionBusiness
         foreach ($phases as $phase) {
             if ($debut >= Carbon::parse($phase['debut'])) {
                 throw new ArrayException(["debut" => "Debut trop tôt"]);
-            } else {
-                foreach ($existingPhases as $existingPhase) {
-                    if ($existingPhase->debut !== null && $debut === Carbon::parse($existingPhase->debut)) {
-                        throw new ArrayException(["debut" => "Duplicated phase at same time"]);
-                    }
-                }
-                $newPhase = new Phase();
-                $newPhase->fill($phase);
-                $newPhase->intervention_id = $interventionId;
-                $newPhase->save();
             }
+
+            foreach ($existingPhases as $existingPhase) {
+                if ($existingPhase->debut !== null && $debut === Carbon::parse($existingPhase->debut)) {
+                    throw new ArrayException(["debut" => "Duplicated phase at same time"]);
+                }
+            }
+            $newPhase = new Phase();
+            $newPhase->fill($phase);
+            $newPhase->intervention_id = $interventionId;
+            $newPhase->save();
         }
     }
 
@@ -506,11 +501,11 @@ class InterventionBusiness
         self::checkIsNotImpute($interventionId);
 
         foreach ($materiels as $materiel) {
-            $mis = new InterventionMateriel();
-            $mis->fill($materiel);
-            $mis->materiel_id = $materiel['materiel_id'];
-            $mis->intervention_id = $interventionId;
-            $mis->save();
+            $mat = new InterventionMateriel();
+            $mat->fill($materiel);
+            $mat->materiel_id = $materiel['materiel_id'];
+            $mat->intervention_id = $interventionId;
+            $mat->save();
         }
     }
 
@@ -591,11 +586,9 @@ class InterventionBusiness
         self::checkIsNotImpute($interventionId);
 
         //Check duplicated vehicules
-        $vehiculeIds = InterventionVehicule::where('intervention_id', $interventionId)->get()
-            ->map(fn($s) => $s->vehicule_id)->toArray();
-        $vehicules = array_filter($vehicules, function ($vehicule) use ($vehiculeIds) {
-            return !in_array($vehicule, $vehiculeIds);
-        });
+        $vehiculeIds = InterventionVehicule::where('intervention_id', $interventionId)
+            ->pluck('vehicule_id')->toArray();
+        $vehicules = array_diff($vehicules, $vehiculeIds);
 
         foreach ($vehicules as $vehicule) {
             $newVehicule = new InterventionVehicule();
@@ -674,28 +667,20 @@ class InterventionBusiness
 
         $vehiculesMap = [];
         if (in_array('vehicules', $withOptions)) {
-            $vehicules = Article::join('materiel_types', 'articles.materiel_type_id', '=', 'materiel_types.id')
+            $vehiculesMap = Article::join('materiel_types', 'articles.materiel_type_id', '=', 'materiel_types.id')
                 ->where('materiel_types.type', '=', MaterielTypeBusiness::TYPE_VEHICULE)
-                ->get(['articles.*']);
-            foreach ($vehicules as $vehicule) {
-                $vehiculesMap[$vehicule->id] = $vehicule->designation;
-            }
+                ->pluck('articles.designation', 'articles.id')
+                ->toArray();
         }
 
         $materielsMap = [];
         if (in_array('materiels', $withOptions)) {
-            $materiels = Materiel::get();
-            foreach ($materiels as $materiel) {
-                $materielsMap[$materiel->id] = $materiel->designation;
-            }
+            $materielsMap = Materiel::pluck('designation', 'id')->toArray();
         }
 
         $groupesMap = [];
         if (in_array('groupes', $withOptions)) {
-            $groupes = Groupe::get();
-            foreach ($groupes as $groupe) {
-                $groupesMap[$groupe->id] = $groupe;
-            }
+            $groupesMap = Groupe::all()->keyBy('id')->toArray();
         }
 
         $ecritures = [];
@@ -706,7 +691,7 @@ class InterventionBusiness
                 ->pluck('total', 'sapeur_id')
                 ->toArray();
 
-            $total = array_sum(array_map(fn($e) => floatval($e), array_values($ecritures)));
+            $total = array_sum(array_map(floatval(...), array_values($ecritures)));
             $ecritures['total'] = number_format($total, 2);
         }
 
@@ -731,9 +716,7 @@ class InterventionBusiness
                 $quittancesMap[$quittance->sapeur_id] = $quittance;
             }
 
-            $presences = array_filter($sapeursMap, function ($s) {
-                return array_key_exists('presences', $s);
-            });
+            $presences = collect($sapeursMap)->filter(fn($s) => isset($s['presences']))->all();
         }
 
         $logoPath = SisParamBusiness::getLogo($sisKey);

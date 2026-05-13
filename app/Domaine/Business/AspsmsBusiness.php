@@ -21,7 +21,7 @@ class AspsmsBusiness
         AspsmsParam::updateOrCreate([], [
             'username' => Crypt::encryptString($data['username']),
             'password' => Crypt::encryptString($data['password']),
-            'origin' => isset($data['origin']) ? $data['origin'] : 'GestSIS',
+            'origin' => $data['origin'] ?? 'GestSIS',
         ]);
         return self::getParams();
     }
