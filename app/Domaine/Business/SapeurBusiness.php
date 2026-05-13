@@ -508,6 +508,7 @@ class SapeurBusiness
         self::verifyMutationPeriode($data, $mutations);
 
         $mutation = Mutation::where('sapeur_id', $sapeurId)->findOrFail($data['id']);
+        $data['motif'] ??= '';
         $mutation->update($data);
 
         // Update actif statut depending of end of all mutation
