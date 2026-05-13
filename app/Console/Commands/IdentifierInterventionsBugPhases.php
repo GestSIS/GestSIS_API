@@ -296,9 +296,7 @@ class IdentifierInterventionsBugPhases extends Command
         // Grouper les présences par sapeur
         $sapeurs = [];
         foreach ($intervention->presences as $presence) {
-            if (!array_key_exists($presence->sapeur_id, $sapeurs)) {
-                $sapeurs[$presence->sapeur_id] = [];
-            }
+            $sapeurs[$presence->sapeur_id] ??= [];
             $sapeurs[$presence->sapeur_id][] = $presence;
         }
 

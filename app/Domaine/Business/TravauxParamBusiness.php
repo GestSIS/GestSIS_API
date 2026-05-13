@@ -12,9 +12,7 @@ class TravauxParamBusiness
     public static function ajouterType($data)
     {
         $type = TravailType::create($data);
-        if (!array_key_exists('fonctions', $data)) {
-            $data['fonctions'] = [];
-        }
+        $data['fonctions'] ??= [];
         $type->fonctions()->createMany($data['fonctions']);
         $type->fonctions;
         return $type;
@@ -26,9 +24,7 @@ class TravauxParamBusiness
         $type->update($data);
 
         $type->fonctions()->delete();
-        if (!array_key_exists('fonctions', $data)) {
-            $data['fonctions'] = [];
-        }
+        $data['fonctions'] ??= [];
         $type->fonctions()->createMany($data['fonctions']);
 
         $type->fonctions;

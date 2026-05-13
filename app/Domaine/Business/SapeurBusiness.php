@@ -38,9 +38,7 @@ class SapeurBusiness
     {
         $nullableFields = ['suffixe', 'remarque', 'profession', 'employeur', 'lieu_de_travail', 'iban', 'email', 'no_avs'];
         foreach ($nullableFields as $field) {
-            if (array_key_exists($field, $data) && $data[$field] === null) {
-                $data[$field] = '';
-            }
+            $data[$field] ??= '';
         }
         return $data;
     }
@@ -50,9 +48,7 @@ class SapeurBusiness
      */
     private static function normalizeRemarque($data)
     {
-        if (array_key_exists('remarque', $data) && $data['remarque'] === null) {
-            $data['remarque'] = '';
-        }
+        $data['remarque'] ??= '';
         return $data;
     }
 

@@ -83,13 +83,8 @@ class ExerciceBusiness
     {
         $data['statut'] = self::EXERCICE_STATUT_VIDE;
 
-        if (array_key_exists('lieu', $data) && $data['lieu'] === null) {
-            $data['lieu'] = '';
-        }
-
-        if (array_key_exists('communications', $data) && $data['communications'] === null) {
-            $data['communications'] = '';
-        }
+        $data['lieu'] ??= '';
+        $data['communications'] ??= '';
 
         $exercice = new Exercice();
         $exercice->fill($data);
@@ -102,13 +97,8 @@ class ExerciceBusiness
 
     private static function updateExerciceById($exerciceId, $data)
     {
-        if (array_key_exists('lieu', $data) && $data['lieu'] === null) {
-            $data['lieu'] = '';
-        }
-
-        if (array_key_exists('communications', $data) && $data['communications'] === null) {
-            $data['communications'] = '';
-        }
+        $data['lieu'] ??= '';
+        $data['communications'] ??= '';
 
         $exercice = Exercice::findOrFail($exerciceId);
         $exercice->update($data);

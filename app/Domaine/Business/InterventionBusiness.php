@@ -53,18 +53,12 @@ class InterventionBusiness
         $phaseTypeIntervention = 1;
         $data['statut'] = self::INTERVENTION_STATUT_EMPTY;
 
-        if (!array_key_exists('lieu', $data) || $data['lieu'] === null)
-            $data['lieu'] = '';
-        if (!array_key_exists('agent', $data) || $data['agent'] === null)
-            $data['agent'] = '';
-        if (!array_key_exists('description', $data) || $data['description'] === null)
-            $data['description'] = '';
-        if (!array_key_exists('proprietaire', $data) || $data['proprietaire'] === null)
-            $data['proprietaire'] = '';
-        if (!array_key_exists('responsable', $data) || $data['responsable'] === null)
-            $data['responsable'] = '';
-        if (array_key_exists('wgs84', $data) && $data['wgs84'] === null)
-            $data['wgs84'] = '';
+        $data['lieu'] ??= '';
+        $data['agent'] ??= '';
+        $data['description'] ??= '';
+        $data['proprietaire'] ??= '';
+        $data['responsable'] ??= '';
+        $data['wgs84'] ??= '';
 
         $intervention = new Intervention();
         $intervention->fill($data);
@@ -121,18 +115,12 @@ class InterventionBusiness
         }
 
         $intervention['exercice_comptable_id'] = $exerciceComptable->id;
-        if (!array_key_exists('wgs84', $intervention) || is_null($intervention['wgs84']))
-            $intervention['wgs84'] = '';
-        if (!array_key_exists('lieu', $intervention) || is_null($intervention['lieu']))
-            $intervention['lieu'] = '';
-        if (!array_key_exists('agent', $intervention) || is_null($intervention['agent']))
-            $intervention['agent'] = '';
-        if (!array_key_exists('description', $intervention) || is_null($intervention['description']))
-            $intervention['description'] = '';
-        if (!array_key_exists('proprietaire', $intervention) || is_null($intervention['proprietaire']))
-            $intervention['proprietaire'] = '';
-        if (!array_key_exists('responsable', $intervention) || is_null($intervention['responsable']))
-            $intervention['responsable'] = '';
+        $intervention['wgs84'] ??= '';
+        $intervention['lieu'] ??= '';
+        $intervention['agent'] ??= '';
+        $intervention['description'] ??= '';
+        $intervention['proprietaire'] ??= '';
+        $intervention['responsable'] ??= '';
 
         $newIntervention = new Intervention();
         $newIntervention->fill($intervention);
@@ -228,18 +216,12 @@ class InterventionBusiness
      */
     public static function editInterventionInformationsById($interventionId, $data)
     {
-        if (array_key_exists('lieu', $data) && $data['lieu'] === null)
-            $data['lieu'] = '';
-        if (!array_key_exists('agent', $data) || $data['agent'] === null)
-            $data['agent'] = '';
-        if (array_key_exists('description', $data) && $data['description'] === null)
-            $data['description'] = '';
-        if (array_key_exists('proprietaire', $data) && $data['proprietaire'] === null)
-            $data['proprietaire'] = '';
-        if (array_key_exists('responsable', $data) && $data['responsable'] === null)
-            $data['responsable'] = '';
-        if (array_key_exists('wgs84', $data) && $data['wgs84'] === null)
-            $data['wgs84'] = '';
+        $data['lieu'] ??= '';
+        $data['agent'] ??= '';
+        $data['description'] ??= '';
+        $data['proprietaire'] ??= '';
+        $data['responsable'] ??= '';
+        $data['wgs84'] ??= '';
 
         $intervention = Intervention::find($interventionId);
         $intervention->update($data);
@@ -350,8 +332,7 @@ class InterventionBusiness
         self::checkIsNotImpute($interventionId);
 
         foreach ($appels as $appel) {
-            if (array_key_exists('commentaire', $appel) && $appel['commentaire'] === null)
-                $appel['commentaire'] = '';
+            $appel['commentaire'] ??= '';
 
             $app = new Appel();
             $app->fill($appel);
@@ -372,8 +353,7 @@ class InterventionBusiness
         self::checkIsNotImpute($interventionId);
 
         foreach ($appels as $appel) {
-            if (array_key_exists('commentaire', $appel) && $appel['commentaire'] === null)
-                $appel['commentaire'] = '';
+            $appel['commentaire'] ??= '';
 
             Appel::where('intervention_id', $interventionId)
                 ->where('id', $appel['id'])
@@ -407,8 +387,7 @@ class InterventionBusiness
         self::checkIsNotImpute($interventionId);
 
         foreach ($missions as $mission) {
-            if (array_key_exists('resume', $mission) && $mission['resume'] === null)
-                $mission['resume'] = '';
+            $mission['resume'] ??= '';
 
             $mis = new Mission();
             $mis->fill($mission);
@@ -429,8 +408,7 @@ class InterventionBusiness
         self::checkIsNotImpute($interventionId);
 
         foreach ($missions as $mission) {
-            if (array_key_exists('resume', $mission) && $mission['resume'] === null)
-                $mission['resume'] = '';
+            $mission['resume'] ??= '';
 
             Mission::where('intervention_id', $interventionId)
                 ->where('id', $mission['id'])
@@ -744,9 +722,7 @@ class InterventionBusiness
             }
 
             foreach ($intervention->presences as $presence) {
-                if (!array_key_exists('presences', $sapeursMap[$presence->sapeur_id])) {
-                    $sapeursMap[$presence->sapeur_id]['presences'] = [];
-                }
+                $sapeursMap[$presence->sapeur_id]['presences'] ??= [];
                 $sapeursMap[$presence->sapeur_id]['presences'][] = $presence;
             }
 

@@ -685,9 +685,7 @@ class ImputationBusiness
         // Grouper les présences par sapeurs
         $sapeurs = [];
         foreach ($intervention->presences as $presence) {
-            if (!array_key_exists($presence->sapeur_id, $sapeurs)) {
-                $sapeurs[$presence->sapeur_id] = [];
-            }
+            $sapeurs[$presence->sapeur_id] ??= [];
             $sapeurs[$presence->sapeur_id][] = $presence;
         }
 
@@ -820,9 +818,7 @@ class ImputationBusiness
         // Grouper les présences par sapeurs
         $sapeurs = [];
         foreach ($intervention->presences as $presence) {
-            if (!array_key_exists($presence->sapeur_id, $sapeurs)) {
-                $sapeurs[$presence->sapeur_id] = [];
-            }
+            $sapeurs[$presence->sapeur_id] ??= [];
             array_push($sapeurs[$presence->sapeur_id], $presence);
         }
 

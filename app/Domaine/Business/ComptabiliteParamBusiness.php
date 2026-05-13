@@ -134,9 +134,7 @@ class ComptabiliteParamBusiness
             $data['par_fonction'] = false;
         }
         $indemnite = IndemniteExerciceType::create($data);
-        if (!array_key_exists('fonctions', $data)) {
-            $data['fonctions'] = [];
-        }
+        $data['fonctions'] ??= [];
         $indemnite->fonctions()->createMany($data['fonctions']);
         $indemnite->fonctions;
         return $indemnite;
@@ -152,9 +150,7 @@ class ComptabiliteParamBusiness
         $indemnite->update($data);
 
         $indemnite->fonctions()->delete();
-        if (!array_key_exists('fonctions', $data)) {
-            $data['fonctions'] = [];
-        }
+        $data['fonctions'] ??= [];
         $indemnite->fonctions()->createMany($data['fonctions']);
 
         $indemnite->fonctions;
@@ -259,9 +255,7 @@ class ComptabiliteParamBusiness
     public static function ajouterIndemniteCoursType($data)
     {
         $indemnite = IndemniteCoursType::create($data);
-        if (!array_key_exists('fonctions', $data)) {
-            $data['fonctions'] = [];
-        }
+        $data['fonctions'] ??= [];
         $indemnite->fonctions()->createMany($data['fonctions']);
         $indemnite->fonctions;
         return $indemnite;
@@ -273,9 +267,7 @@ class ComptabiliteParamBusiness
         $indemnite->update($data);
 
         $indemnite->fonctions()->delete();
-        if (!array_key_exists('fonctions', $data)) {
-            $data['fonctions'] = [];
-        }
+        $data['fonctions'] ??= [];
         $indemnite->fonctions()->createMany($data['fonctions']);
 
         $indemnite->fonctions;
