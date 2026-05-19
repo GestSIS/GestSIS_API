@@ -46,41 +46,41 @@ class ComptabiliteParamBusiness
 
     public static function modifierCategorie($id, $data)
     {
-        EcritureCategorie::where('id', $id)->limit(1)->update($data);
+        EcritureCategorie::whereId($id)->limit(1)->update($data);
         return EcritureCategorie::find($id);
     }
 
     public static function supprimerCategorie($id)
     {
-        if (Ecriture::where('ecriture_categorie_id', '=', $id)->count() > 0) {
+        if (Ecriture::where('ecriture_categorie_id', $id)->exists()) {
             throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié à des écritures");
         }
-        if (IndemniteExerciceType::where('ecriture_categorie_id', '=', $id)->count() > 0) {
+        if (IndemniteExerciceType::where('ecriture_categorie_id', $id)->exists()) {
             throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié à type d'indemnité d'exercice");
         }
-        if (IndemniteInterventionType::where('ecriture_categorie_id', '=', $id)->count() > 0) {
+        if (IndemniteInterventionType::where('ecriture_categorie_id', $id)->exists()) {
             throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié à type d'indemnité d'intervention");
         }
-        if (FraisIndemniteAnnuelType::where('ecriture_categorie_id', '=', $id)->count() > 0) {
+        if (FraisIndemniteAnnuelType::where('ecriture_categorie_id', $id)->exists()) {
             throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié à type d'indemnité annuel");
         }
-        if (HeureExerciceType::where('ecriture_categorie_id', '=', $id)->count() > 0) {
+        if (HeureExerciceType::where('ecriture_categorie_id', $id)->exists()) {
             throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié à type d'heure supplémentaires");
         }
-        if (AvsParam::where('ecriture_categorie_id', '=', $id)->count() > 0) {
+        if (AvsParam::where('ecriture_categorie_id', $id)->exists()) {
             throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié aux paramètres d'imputation AVS/AC");
         }
-        if (Amende::where('ecriture_categorie_id', '=', $id)->count() > 0) {
+        if (Amende::where('ecriture_categorie_id', $id)->exists()) {
             throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié à une amende");
         }
-        EcritureCategorie::where('id', '=', $id)->limit(1)->delete();
+        EcritureCategorie::whereId($id)->limit(1)->delete();
         return true;
     }
 
     public static function ajouterFraisIndemniteAnnuel($data)
     {
         // Pour les unités mensuelles, forcer la quantité à 12
-        if (isset($data['type_unite_id']) && $data['type_unite_id'] == ImputationBusiness::UNITE_MOIS) {
+        if (isset($data['type_unite_id']) && $data['type_unite_id'] === ImputationBusiness::UNITE_MOIS) {
             $data['quantite'] = 12;
         }
 
@@ -93,17 +93,17 @@ class ComptabiliteParamBusiness
     public static function modifierFraisIndemniteAnnuel($id, $data)
     {
         // Pour les unités mensuelles, forcer la quantité à 12
-        if (isset($data['type_unite_id']) && $data['type_unite_id'] == ImputationBusiness::UNITE_MOIS) {
+        if (isset($data['type_unite_id']) && $data['type_unite_id'] === ImputationBusiness::UNITE_MOIS) {
             $data['quantite'] = 12;
         }
 
-        FraisIndemniteAnnuel::where('id', $id)->limit(1)->update($data);
+        FraisIndemniteAnnuel::whereId($id)->limit(1)->update($data);
         return FraisIndemniteAnnuel::find($id);
     }
 
     public static function supprimerFraisIndemniteAnnuel($id)
     {
-        FraisIndemniteAnnuel::where('id', $id)->limit(1)->delete();
+        FraisIndemniteAnnuel::whereId($id)->limit(1)->delete();
     }
 
     public static function ajouterFraisIndemniteAnnuelType($data)
@@ -118,13 +118,13 @@ class ComptabiliteParamBusiness
 
     public static function modifierFraisIndemniteAnnuelType($id, $data)
     {
-        FraisIndemniteAnnuelType::where('id', $id)->limit(1)->update($data);
+        FraisIndemniteAnnuelType::whereId($id)->limit(1)->update($data);
         return FraisIndemniteAnnuelType::with('fraisIndemniteAnnuels')->find($id);
     }
 
     public static function supprimerFraisIndemniteAnnuelType($id)
     {
-        FraisIndemniteAnnuelType::where('id', $id)->limit(1)->delete();
+        FraisIndemniteAnnuelType::whereId($id)->limit(1)->delete();
     }
 
     public static function ajouterIndemniteExercice($data)
@@ -159,16 +159,16 @@ class ComptabiliteParamBusiness
 
     public static function supprimerIndemniteExercice($id)
     {
-        IndemniteExerciceType::where('id', $id)->limit(1)->delete();
+        IndemniteExerciceType::whereId($id)->limit(1)->delete();
     }
 
     public static function ajouterIndemniteIntervention($data)
     {
         $parFonction = array_key_exists('par_fonction', $data) && $data['par_fonction'];
-        if (array_key_exists('phase_id', $data) && $data['phase_id'] == 0) {
-            $data['phase_id'] = NULL;
+        if (array_key_exists('phase_id', $data) && $data['phase_id'] === 0) {
+            $data['phase_id'] = null;
         }
-        if (array_key_exists('tarif_pro_rata', $data) && ($data['tarif_pro_rata'] == 0 || $data['tarif_pro_rata'] == null)) {
+        if (array_key_exists('tarif_pro_rata', $data) && ($data['tarif_pro_rata'] === 0 || $data['tarif_pro_rata'] === null)) {
             $data['tarif_pro_rata'] = false;
         }
         if (!$parFonction) {
@@ -185,10 +185,10 @@ class ComptabiliteParamBusiness
     public static function modifierIndemniteIntervention($id, $data)
     {
         $parFonction = array_key_exists('par_fonction', $data) && $data['par_fonction'];
-        if (array_key_exists('phase_id', $data) && $data['phase_id'] == 0) {
-            $data['phase_id'] = NULL;
+        if (array_key_exists('phase_id', $data) && $data['phase_id'] === 0) {
+            $data['phase_id'] = null;
         }
-        if (array_key_exists('tarif_pro_rata', $data) && ($data['tarif_pro_rata'] == 0 || $data['tarif_pro_rata'] == null)) {
+        if (array_key_exists('tarif_pro_rata', $data) && ($data['tarif_pro_rata'] === 0 || $data['tarif_pro_rata'] === null)) {
             $data['tarif_pro_rata'] = false;
         }
         $indemnite = IndemniteInterventionType::find($id);
@@ -196,7 +196,7 @@ class ComptabiliteParamBusiness
         if (!$parFonction) {
             $indemnite->fonctions()->delete();
         } else {
-            $indemnite->fonctions()->whereNotIn('fonction_id', array_filter(array_map(fn($f) => $f['fonction_id'], $data['fonctions']), fn($f) => !is_null($f)))->delete();
+            $indemnite->fonctions()->whereNotIn('fonction_id', collect($data['fonctions'])->pluck('fonction_id')->filter()->all())->delete();
             foreach ($data['fonctions'] as $f) {
                 $indemnite->fonctions()->updateOrCreate(['fonction_id' => $f['fonction_id']], $f);
             }
@@ -208,7 +208,7 @@ class ComptabiliteParamBusiness
 
     public static function supprimerIndemniteIntervention($id)
     {
-        IndemniteInterventionType::where('id', $id)->limit(1)->delete();
+        IndemniteInterventionType::whereId($id)->limit(1)->delete();
     }
 
     public static function ajouterCompte($data)
@@ -227,28 +227,28 @@ class ComptabiliteParamBusiness
 
     public static function supprimerCompte($id)
     {
-        if (Ecriture::where('compte_id', '=', $id)->count() > 0) {
+        if (Ecriture::where('compte_id', $id)->exists()) {
             throw new InvalidActionException(message: "Impossible de supprimer un compte lié à des écritures");
         }
-        if (IndemniteExerciceFonction::where('compte_id', '=', $id)->count() > 0) {
+        if (IndemniteExerciceFonction::where('compte_id', $id)->exists()) {
             throw new InvalidActionException(message: "Impossible de supprimer un compte lié à type d'indemnité d'exercice");
         }
-        if (IndemniteInterventionType::where('compte_id', '=', $id)->count() > 0) {
+        if (IndemniteInterventionType::where('compte_id', $id)->exists()) {
             throw new InvalidActionException(message: "Impossible de supprimer un compte lié à type d'indemnité d'intervention");
         }
-        if (FraisIndemniteAnnuelType::where('compte_id', '=', $id)->count() > 0) {
+        if (FraisIndemniteAnnuelType::where('compte_id', $id)->exists()) {
             throw new InvalidActionException(message: "Impossible de supprimer un compte lié à type d'indemnité annuel");
         }
-        if (HeureExerciceType::where('compte_id', '=', $id)->count() > 0) {
+        if (HeureExerciceType::where('compte_id', $id)->exists()) {
             throw new InvalidActionException(message: "Impossible de supprimer un compte lié à type d'heure supplémentaires");
         }
-        if (AvsParam::where('compte_id', '=', $id)->count() > 0) {
+        if (AvsParam::where('compte_id', $id)->exists()) {
             throw new InvalidActionException(message: "Impossible de supprimer un compte lié aux paramètres d'imputation AVS/AC");
         }
-        if (Amende::where('compte_id', '=', $id)->count() > 0) {
+        if (Amende::where('compte_id', $id)->exists()) {
             throw new InvalidActionException(message: "Impossible de supprimer un compte lié à une amende");
         }
-        Compte::where('id', '=', $id)->limit(1)->delete();
+        Compte::whereId($id)->limit(1)->delete();
         return true;
     }
 
@@ -277,6 +277,6 @@ class ComptabiliteParamBusiness
     public static function supprimerIndemniteCoursType($id)
     {
         IndemniteCoursFonction::where('indemnite_cours_id', $id)->delete();
-        IndemniteCoursType::where('id', $id)->limit(1)->delete();
+        IndemniteCoursType::whereId($id)->limit(1)->delete();
     }
 }

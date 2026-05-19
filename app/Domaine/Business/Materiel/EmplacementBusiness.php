@@ -60,7 +60,7 @@ class EmplacementBusiness
   public static function editEmplacement($id, $data)
   {
     $data['remarque'] ??= '';
-    Emplacement::where('id', '=', $id)
+    Emplacement::whereId($id)
       ->update($data);
     return Emplacement::find($id);
   }
@@ -75,6 +75,6 @@ class EmplacementBusiness
     if (Article::where('emplacement_id', $id)->exists()) {
       throw new ArrayException([], "Veuillez d'abord supprimer les article de cet emplacement");
     }
-    return Emplacement::where('id', $id)->delete();
+    return Emplacement::whereId($id)->delete();
   }
 }

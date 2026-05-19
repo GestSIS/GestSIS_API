@@ -24,29 +24,26 @@ class OrganisationBusiness
     {
         // Chargement des groupes
         $groupes = Groupe::get();
-        $groupesMap = [];
-        foreach ($groupes as $groupe) {
-            $groupesMap[$groupe->id] = $groupe->parent_id;
-        }
+        $groupesMap = $groupes->mapWithKeys(fn($groupe) => [$groupe->id => $groupe->parent_id]);
 
         // Controle qu'il n'y ait pas de loop dans la hierarchie des groupes
         $pereId = array_key_exists('parent_id', $data) ? $data['parent_id'] : null;
-        $visited = [];
-        while (!is_null($pereId)) {
-            if (in_array($pereId, $visited) || $pereId == $groupeId) {
+        $visited = collect();
+        while ($pereId !== null) {
+            if ($visited->contains($pereId) || $pereId === $groupeId) {
                 return response()->json(["message" => "Groupe parent invalide, création d'une boucle"], 501);
             }
-            $visited[] = $pereId;
+            $visited->push($pereId);
             $pereId = $groupesMap[$pereId];
         }
 
-        Groupe::where('id', $groupeId)->limit(1)->update($data);
+        Groupe::whereId($groupeId)->limit(1)->update($data);
         return Groupe::with('sapeurIds')->find($groupeId);
     }
 
     public static function supprimerGroupe($groupeId)
     {
-        Groupe::where('id', $groupeId)->limit(1)->delete();
+        Groupe::whereId($groupeId)->limit(1)->delete();
     }
 
     public static function modifierGroupeSapeurs($groupeId, $sapeurIds)

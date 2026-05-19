@@ -22,16 +22,16 @@ class ExerciceParamBusiness
 
     public static function modifierCategorie($id, $data)
     {
-        ExerciceCategorie::where('id', $id)->limit(1)->update($data);
+        ExerciceCategorie::whereId($id)->limit(1)->update($data);
         return ExerciceCategorie::find($id);
     }
 
     public static function supprimerCategorie($id)
     {
-        if (Exercice::where('exercice_categorie_id', '=', $id)->exists()) {
+        if (Exercice::where('exercice_categorie_id', $id)->exists()) {
             throw new InvalidActionException(message: 'Impossible de supprimer cette catégorie, celle-ci est utilisée dans un exercice.');
         }
-        ExerciceCategorie::where('id', $id)->delete();
+        ExerciceCategorie::whereId($id)->delete();
     }
 
     public static function ajouterExcuseType($data)
@@ -44,16 +44,16 @@ class ExerciceParamBusiness
 
     public static function modifierExcuseType($id, $data)
     {
-        ExcuseType::where('id', $id)->limit(1)->update($data);
+        ExcuseType::whereId($id)->limit(1)->update($data);
         return ExcuseType::find($id);
     }
 
     public static function supprimerExcuseType($id)
     {
-        if (ExerciceSapeur::where('excuse_type_id', '=', $id)->exists()) {
+        if (ExerciceSapeur::where('excuse_type_id', $id)->exists()) {
             throw new InvalidActionException(message: 'Impossible de supprimer cette excuse, celle-ci est utilisée dans un exercice.');
         }
-        ExcuseType::where('id', $id)->delete();
+        ExcuseType::whereId($id)->delete();
     }
 
     public static function ajouterHeureExerciceType($data)
@@ -66,12 +66,12 @@ class ExerciceParamBusiness
 
     public static function modifierHeureExerciceType($id, $data)
     {
-        HeureExerciceType::where('id', $id)->limit(1)->update($data);
+        HeureExerciceType::whereId($id)->limit(1)->update($data);
         return HeureExerciceType::find($id);
     }
 
     public static function supprimerHeureExerciceType($id)
     {
-        HeureExerciceType::where('id', $id)->limit(1)->delete();
+        HeureExerciceType::whereId($id)->limit(1)->delete();
     }
 }

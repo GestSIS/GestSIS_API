@@ -26,7 +26,7 @@ class AbsenceBusiness
             throw new ArrayException(['fin' => 'Invalide'], 'La date de fin ne peut être antérieur à la date de début !');
         }
 
-        if (self::checkOverlap(Null, $data['sapeur_id'], $data)) {
+        if (self::checkOverlap(null, $data['sapeur_id'], $data)) {
             throw new ArrayException(['debut' => 'Invalide', 'fin' => 'Invalide'], 'Cette absence chevauche une autre absence');
         }
         $absence = new Absence();
@@ -52,12 +52,12 @@ class AbsenceBusiness
             throw new ArrayException(['debut' => 'Invalide', 'fin' => 'Invalide'], 'Cette absence chevauche une autre absence');
         }
         // Chargement des absences
-        Absence::where('id', $absenceId)->limit(1)->update($data);
+        Absence::whereId($absenceId)->limit(1)->update($data);
         return Absence::find($absenceId);
     }
 
     public static function supprimerAbsence($absenceId)
     {
-        Absence::where('id', $absenceId)->limit(1)->delete();
+        Absence::whereId($absenceId)->limit(1)->delete();
     }
 }

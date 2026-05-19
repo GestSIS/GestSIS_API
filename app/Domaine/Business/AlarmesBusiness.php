@@ -9,13 +9,13 @@ class AlarmesBusiness
         $indexedSapeursByNomPrenom = [];
         $indexedSapeursByPhone = [];
         foreach ($sapeurs as $sapeur) {
-            $key = strtolower($sapeur['nom'] . " " . $sapeur['prenom']);
+            $key = strtolower("{$sapeur['nom']} {$sapeur['prenom']}");
             $indexedSapeursByNomPrenom[$key] = $sapeur;
             foreach ($sapeur->telephones as $telephone) {
                 $numero = self::normaliserTelephone($telephone->numero);
 
                 // Edge case lorsqu'un unique numéro est partagé par plusieurs sapeurs
-                if (array_key_exists($numero, $indexedSapeursByPhone) && $indexedSapeursByPhone[$numero] != $sapeur->id) {
+                if (array_key_exists($numero, $indexedSapeursByPhone) && $indexedSapeursByPhone[$numero] !== $sapeur->id) {
                     $indexedSapeursByPhone[$numero] = null;
                 } else {
                     $indexedSapeursByPhone[$numero] = $sapeur->id;
@@ -23,7 +23,7 @@ class AlarmesBusiness
             }
         }
 
-        return array_map(function ($alarme) use ($indexedSapeursByPhone, $indexedSapeursByNomPrenom) {
+        return collect($alarmes)->map(function ($alarme) use ($indexedSapeursByPhone, $indexedSapeursByNomPrenom) {
             $tmp = [];
             $missing = [];
 
@@ -35,7 +35,7 @@ class AlarmesBusiness
                     $numero = self::normaliserTelephone($phone);
                     if ($numero !== "" && array_key_exists($numero, $indexedSapeursByPhone) && $indexedSapeursByPhone[$numero] !== null) {
                         $f->id = $indexedSapeursByPhone[$numero];
-                        array_push($tmp, $f);
+                        $tmp[] = $f;
                         $resolved = true;
                         break;
                     }
@@ -49,27 +49,27 @@ class AlarmesBusiness
                 $nomPrenom = strtolower($f->fullname);
                 if (array_key_exists($nomPrenom, $indexedSapeursByNomPrenom)) {
                     $f->id = $indexedSapeursByNomPrenom[$nomPrenom]->id;
-                    array_push($tmp, $f);
+                    $tmp[] = $f;
                 } else {
-                    array_push($missing, $f);
+                    $missing[] = $f;
                 }
             }
 
             $alarme->firefighters = $tmp;
             $alarme->unresolved = [];
 
-            if (count($missing) > 0) {
+            if ($missing !== []) {
                 $alarme->unresolved = $missing;
             }
 
             return $alarme;
-        }, $alarmes);
+        })->all();
     }
 
     private static function normaliserTelephone(string $phone): string
     {
         $tmp = str_replace(" ", "", trim($phone));
-        if (strlen($tmp) > 0 && substr($tmp, 0, 1) === "0") {
+        if ($tmp !== "" && str_starts_with($tmp, "0")) {
             return "+41" . substr($tmp, 1);
         }
         return $tmp;

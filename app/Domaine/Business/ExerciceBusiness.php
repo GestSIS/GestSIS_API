@@ -145,7 +145,7 @@ class ExerciceBusiness
         ExerciceSapeur::where('exercice_id', '=', $exerciceId)->delete();
         HeureExercice::where('exercice_id', '=', $exerciceId)->delete();
         Sms::where('exercice_id', '=', $exerciceId)->delete();
-        Exercice::where('id', '=', $exerciceId)->delete();
+        Exercice::whereId($exerciceId)->delete();
     }
 
     public static function validateExerciceById($exerciceId)
@@ -325,7 +325,7 @@ class ExerciceBusiness
     public static function updatePresences($exerciceId, $presences)
     {
         // Fetch exercice
-        $exercice = Exercice::with("sapeurs")->where('id', '=', $exerciceId)->first();
+        $exercice = Exercice::with("sapeurs")->whereId($exerciceId)->first();
 
         // Ignore si l'exercice n'existe plus
         if ($exercice == NULL) {
@@ -409,7 +409,7 @@ class ExerciceBusiness
             // Permission: Saisie présence 
             ExerciceSapeur
                 ::where('exercice_id', $exerciceId)
-                ->where('id', $presenceId)
+                ->whereId($presenceId)
                 ->update([
                     'convoque' => $presence['convoque'],
                     'present' => $presence['present'],
@@ -520,7 +520,7 @@ class ExerciceBusiness
                 fn($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
             );
             foreach ($heures as $heure) {
-                if (!HeureExerciceType::where('id', '=', $heure['heure_exercice_type_id'])->exists()) {
+                if (!HeureExerciceType::whereId($heure['heure_exercice_type_id'])->exists()) {
                     // On ignore le type d'heure n'existant plus
                     throw new ArrayException(["Message" => "Unknown heure type"]);
                     continue;
@@ -657,7 +657,7 @@ class ExerciceBusiness
         foreach ($sapeurs as $sapeur) {
             ExerciceSapeur
                 ::where('exercice_id', $exerciceId)
-                ->where('id', $sapeur['id'])
+                ->whereId($sapeur['id'])
                 ->update([
                     'convoque' => $sapeur['convoque'],
                     'present' => $sapeur['present'],
@@ -696,7 +696,7 @@ class ExerciceBusiness
             foreach ($heuresModifiees as $heure) {
                 HeureExercice::where('exercice_id', $exerciceId)
                     ->where('sapeur_id', $sapeur['sapeur_id'])
-                    ->where('id', $heure['id'])
+                    ->whereId($heure['id'])
                     ->update(['quantite' => $heure['quantite']]);
             }
             // throw new ArrayException(['ajoutes' => $heuresAjoutees, 'modifies' => $heuresModifiees, 'supprimes' => $heuresSupprimeesId]);
@@ -825,7 +825,7 @@ class ExerciceBusiness
             throw new ArrayException([], "Permissions insuffisantes");
         }
 
-        HeureExercice::where('id', '=', $heureId)->limit(1)->update($data);
+        HeureExercice::whereId($heureId)->limit(1)->update($data);
         return HeureExercice::find($heureId);
     }
 
@@ -846,7 +846,7 @@ class ExerciceBusiness
             throw new ArrayException([], "Permissions insuffisantes");
         }
 
-        HeureExercice::where('id', '=', $heureId)->limit(1)->delete();
+        HeureExercice::whereId($heureId)->limit(1)->delete();
     }
 
     public static function listeSapeurOfExerciceById($exerciceId, $hasPresencePermission = false)

@@ -289,7 +289,7 @@ class InterventionBusiness
             // TODO: Check period non dupliqué
 
             InterventionSapeur::where('intervention_id', $interventionId)
-                ->where('id', $sapeur['id'])
+                ->whereId($sapeur['id'])
                 ->update($sapeur);
         }
     }
@@ -351,7 +351,7 @@ class InterventionBusiness
             $appel['commentaire'] ??= '';
 
             Appel::where('intervention_id', $interventionId)
-                ->where('id', $appel['id'])
+                ->whereId($appel['id'])
                 ->update($appel);
         }
     }
@@ -406,7 +406,7 @@ class InterventionBusiness
             $mission['resume'] ??= '';
 
             Mission::where('intervention_id', $interventionId)
-                ->where('id', $mission['id'])
+                ->whereId($mission['id'])
                 ->update($mission);
         }
     }
@@ -470,7 +470,7 @@ class InterventionBusiness
 
         foreach ($phases as $phase) {
             Phase::where('intervention_id', $interventionId)
-                ->where('id', $phase['id'])
+                ->whereId($phase['id'])
                 ->update($phase);
         }
     }
@@ -522,7 +522,7 @@ class InterventionBusiness
 
         foreach ($materiels as $materiel) {
             InterventionMateriel::where('intervention_id', $interventionId)
-                ->where('id', $materiel['id'])
+                ->whereId($materiel['id'])
                 ->update(['quantite' => $materiel['quantite']]);
         }
     }

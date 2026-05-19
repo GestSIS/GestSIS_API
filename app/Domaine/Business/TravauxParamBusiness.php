@@ -33,10 +33,10 @@ class TravauxParamBusiness
 
     public static function supprimerType($id)
     {
-        if (Travail::where('travail_type_id', '=', $id)->exists()) {
+        if (Travail::where('travail_type_id', $id)->exists()) {
             throw new InvalidActionException(message: 'Impossible de supprimer ce travail type, des travaux ont été saisie');
         }
         TravailTypeFonction::where('travail_type_id', $id)->delete();
-        TravailType::where('id', $id)->limit(1)->delete();
+        TravailType::whereId($id)->limit(1)->delete();
     }
 }

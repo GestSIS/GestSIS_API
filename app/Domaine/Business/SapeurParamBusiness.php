@@ -25,16 +25,16 @@ class SapeurParamBusiness
 
     public static function modifierFonction($id, $data)
     {
-        Fonction::where('id', $id)->limit(1)->update($data);
+        Fonction::whereId($id)->limit(1)->update($data);
         return Fonction::find($id);
     }
 
-    public static function supprimerFonction($id)
+    public static function supprimerFonction($id): void
     {
-        if (FonctionSapeur::where('fonction_id', '=', $id)->exists()) {
+        if (FonctionSapeur::where('fonction_id', $id)->exists()) {
             throw new ArrayException([], 'Impossible de supprimer cette fonction, celle-ci est attribuée à un sapeur.');
         }
-        Fonction::where('id', $id)->delete();
+        Fonction::whereId($id)->delete();
     }
 
     public static function ajouterCours($data)
@@ -47,16 +47,16 @@ class SapeurParamBusiness
 
     public static function modifierCours($id, $data)
     {
-        Cours::where('id', $id)->limit(1)->update($data);
+        Cours::whereId($id)->limit(1)->update($data);
         return Cours::find($id);
     }
 
     public static function supprimerCours($id)
     {
-        if (CoursSapeur::where('cours_id', '=', $id)->exists()) {
+        if (CoursSapeur::where('cours_id', $id)->exists()) {
             throw new ArrayException([], 'Impossible de supprimer ce cours, celui-ci est attribué à un sapeur.');
         }
-        Cours::where('id', $id)->delete();
+        Cours::whereId($id)->delete();
     }
 
     public static function ajouterGrade($data)
@@ -69,16 +69,16 @@ class SapeurParamBusiness
 
     public static function modifierGrade($id, $data)
     {
-        Grade::where('id', $id)->limit(1)->update($data);
+        Grade::whereId($id)->limit(1)->update($data);
         return Grade::find($id);
     }
 
     public static function supprimerGrade($id)
     {
-        if (GradeSapeur::where('grade_id', '=', $id)->exists()) {
+        if (GradeSapeur::where('grade_id', $id)->exists()) {
             throw new ArrayException([], 'Impossible de supprimer ce grade, celui-ci est attribué à un sapeur.');
         }
-        Grade::where('id', $id)->delete();
+        Grade::whereId($id)->delete();
     }
 
     public static function ajouterGroupe($data)
@@ -91,7 +91,7 @@ class SapeurParamBusiness
 
     public static function modifierGroupe($id, $data)
     {
-        Groupe::where('id', $id)->limit(1)->update($data);
+        Groupe::whereId($id)->limit(1)->update($data);
         return Groupe::find($id);
     }
 

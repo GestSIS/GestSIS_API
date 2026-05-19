@@ -12,7 +12,7 @@ class SapeurPermisController extends Controller
 
     public function index(int $sapeur_id)
     {
-        if (!Sapeur::where('id', $sapeur_id)->exists()) {
+        if (!Sapeur::whereId($sapeur_id)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
         return response()->json(['data' => Sapeur::find($sapeur_id)->permis()->get()]);
@@ -20,7 +20,7 @@ class SapeurPermisController extends Controller
 
     public function store(Request $request, int $id)
     {
-        if (!Sapeur::where('id', $id)->exists()) {
+        if (!Sapeur::whereId($id)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
 
@@ -35,7 +35,7 @@ class SapeurPermisController extends Controller
 
     public function update(Request $request, int $id, int $permisId)
     {
-        if (!Sapeur::where('id', $id)->exists()) {
+        if (!Sapeur::whereId($id)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
 
@@ -57,7 +57,7 @@ class SapeurPermisController extends Controller
 
     public function destroy(int $id, int $permisId)
     {
-        if (!Sapeur::where('id', $id)->exists()) {
+        if (!Sapeur::whereId($id)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
         if (!Permis::where(['id' => $permisId, 'sapeur_id' => $id])->exists()) {

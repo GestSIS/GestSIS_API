@@ -31,7 +31,7 @@ class FonctionController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (!Fonction::where('id', $id)->exists()) {
+        if (!Fonction::whereId($id)->exists()) {
             return response()->json(['error' => 'Fonction not found'], 404);
         }
 
@@ -49,11 +49,11 @@ class FonctionController extends Controller
 
     public function destroy($id)
     {
-        if (!Fonction::where('id', $id)->exists()) {
+        if (!Fonction::whereId($id)->exists()) {
             return response()->json(['error' => 'Fonction not found'], 404);
         }
 
-        $fonction = SapeurParamBusiness::supprimerFonction($id);
-        return response()->json(['data' => $fonction]);
+        SapeurParamBusiness::supprimerFonction($id);
+        return response()->json(['data' => 'ok']);
     }
 }

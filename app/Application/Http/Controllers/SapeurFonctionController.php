@@ -12,7 +12,7 @@ class SapeurFonctionController extends Controller
 
     public function index(int $sapeurId)
     {
-        if (!Sapeur::where('id', $sapeurId)->exists()) {
+        if (!Sapeur::whereId($sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
         return response()->json(['data' => FonctionSapeur::where('sapeur_id', $sapeurId)->get()]);
@@ -20,7 +20,7 @@ class SapeurFonctionController extends Controller
 
     public function store(Request $request, int $sapeurId)
     {
-        if (!Sapeur::where('id', $sapeurId)->exists()) {
+        if (!Sapeur::whereId($sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
 
@@ -37,7 +37,7 @@ class SapeurFonctionController extends Controller
 
     public function update(Request $request, int $sapeurId, int $fonctionId)
     {
-        if (!Sapeur::where('id', $sapeurId)->exists()) {
+        if (!Sapeur::whereId($sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
         if (!FonctionSapeur::where(['id' => $fonctionId, 'sapeur_id' => $sapeurId])->exists()) {
@@ -60,7 +60,7 @@ class SapeurFonctionController extends Controller
 
     public function destroy(int $sapeurId, int $fonctionId)
     {
-        if (!Sapeur::where('id', $sapeurId)->exists()) {
+        if (!Sapeur::whereId($sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
         if (!FonctionSapeur::where(['id' => $fonctionId, 'sapeur_id' => $sapeurId])->exists()) {
@@ -73,7 +73,7 @@ class SapeurFonctionController extends Controller
 
     public function fin(Request $request, int $sapeurId)
     {
-        if (!Sapeur::where('id', $sapeurId)->exists()) {
+        if (!Sapeur::whereId($sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
 

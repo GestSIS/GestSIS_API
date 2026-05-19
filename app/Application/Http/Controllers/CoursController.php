@@ -35,7 +35,7 @@ class CoursController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (!Cours::where('id', $id)->exists()) {
+        if (!Cours::whereId($id)->exists()) {
             return response()->json(['error' => 'Cours not found'], 404);
         }
 
@@ -57,7 +57,7 @@ class CoursController extends Controller
 
     public function destroy($id)
     {
-        if (!Cours::where('id', $id)->exists()) {
+        if (!Cours::whereId($id)->exists()) {
             return response()->json(['error' => 'Cours not found'], 404);
         }
 

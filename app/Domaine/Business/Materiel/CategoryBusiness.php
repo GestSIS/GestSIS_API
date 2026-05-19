@@ -57,7 +57,7 @@ class CategoryBusiness // extends OrderModel
     }
 
     // TODO: Controller récursivity du parent multi-niveau
-    MaterielCategorie::where('id', $id)->limit(1)->update([
+    MaterielCategorie::whereId($id)->limit(1)->update([
       'designation' => $data['designation'],
       'parent_id' => $data['parent_id'],
       'couleur_id' => $data['couleur_id']
@@ -79,7 +79,7 @@ class CategoryBusiness // extends OrderModel
     ) {
       throw new ArrayException([], "Veuillez d'abord supprimer les catégories ou matériels types enfant");
     }
-    return MaterielCategorie::where('id', $id)->delete();
+    return MaterielCategorie::whereId($id)->delete();
   }
 
   /**

@@ -12,7 +12,7 @@ class SapeurMutationController extends Controller
 
     public function index(int $sapeurId)
     {
-        if (!Sapeur::where('id', $sapeurId)->exists()) {
+        if (!Sapeur::whereId($sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
         return response()->json(['data' => Mutation::where('sapeur_id', $sapeurId)->get()]);
@@ -20,7 +20,7 @@ class SapeurMutationController extends Controller
 
     public function store(Request $request, int $sapeurId)
     {
-        if (!Sapeur::where('id', $sapeurId)->exists()) {
+        if (!Sapeur::whereId($sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
 
@@ -37,7 +37,7 @@ class SapeurMutationController extends Controller
 
     public function update(Request $request, int $sapeurId, int $mutationId)
     {
-        if (!Sapeur::where('id', $sapeurId)->exists()) {
+        if (!Sapeur::whereId($sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
 
@@ -53,7 +53,7 @@ class SapeurMutationController extends Controller
             return response()->json(['error' => 'invalid mutation id'], 400);
         }
 
-        if (!Mutation::where('sapeur_id', $sapeurId)->where('id', $mutationId)->exists()) {
+        if (!Mutation::where('sapeur_id', $sapeurId)->whereId($mutationId)->exists()) {
             return response()->json(['error' => 'Mutation non trouvée'], 404);
         }
 
@@ -63,11 +63,11 @@ class SapeurMutationController extends Controller
 
     public function destroy(int $sapeurId, int $mutationId)
     {
-        if (!Sapeur::where('id', $sapeurId)->exists()) {
+        if (!Sapeur::whereId($sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
 
-        if (!Mutation::where('sapeur_id', $sapeurId)->where('id', $mutationId)->exists()) {
+        if (!Mutation::where('sapeur_id', $sapeurId)->whereId($mutationId)->exists()) {
             return response()->json(['error' => 'Mutation non trouvée'], 404);
         }
 

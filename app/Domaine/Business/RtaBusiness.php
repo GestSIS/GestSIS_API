@@ -15,7 +15,7 @@ class RtaBusiness
     public static function getReferenceGestSis()
     {
         $sapeurs = Sapeur::where('actif', true)
-            ->where('type', '=', SapeurBusiness::TYPE_SAPEUR)
+            ->where('type', SapeurBusiness::TYPE_SAPEUR)
             ->with([
                 'groupes',
                 'telephones' => function ($query) {
@@ -24,18 +24,16 @@ class RtaBusiness
             ])
             ->get(
                 ['id', 'nom', 'prenom', 'fonction_id', 'localite_id', 'date_naissance', 'suffixe', DB::raw('CONCAT(rue," ",no_rue) as adresse')]
-            )->toArray();
-
-        $sapeurs = array_filter($sapeurs, function ($sapeur) {
-            return count($sapeur['groupes']) > 0 && count($sapeur['telephones']);
-        });
-
-        return array_values(array_map(function ($sapeur) {
-            $sapeur['groupes'] = array_map(function ($groupe) {
-                return $groupe['groupe_id'];
-            }, $sapeur['groupes']);
-            return $sapeur;
-        }, $sapeurs));
+            )
+            ->filter(fn($sapeur) => !empty($sapeur['groupes']) && !empty($sapeur['telephones']))
+            ->map(function ($sapeur) {
+                $sapeur['groupes'] = collect($sapeur['groupes'])
+                    ->map(fn($groupe) => $groupe['groupe_id'])
+                    ->toArray();
+                return $sapeur;
+            })
+            ->values()
+            ->toArray();
     }
 
     public static function getReferenceRta()
@@ -54,7 +52,7 @@ class RtaBusiness
         try {
             $response = Http::withHeaders([
                 'Accept' => 'application/json',
-                'Authorization' => 'Bearer ' . $bearerToken,
+                'Authorization' => "Bearer $bearerToken",
             ])->get($url);
         } catch (\Exception $e) {
             throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
@@ -69,7 +67,7 @@ class RtaBusiness
         try {
             $response = Http::withHeaders([
                 'Accept' => 'application/json',
-                'Authorization' => 'Bearer ' . $bearerToken,
+                'Authorization' => "Bearer $bearerToken",
             ])->get($url);
         } catch (\Exception $e) {
             throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
@@ -78,12 +76,14 @@ class RtaBusiness
             throw new ArrayException(["api_res" => $response->body()], "Erreur lors de la récupération RTA");
         }
 
-        return array_map(fn($s) => [
-            ...$s,
-            "sapeur_id" => intval($s['uuid']),
-            "groupes" => array_map(fn($g) => ["no" => $g['numero']], $s['groupes']),
-            "numeros" => $s['moyens_contact'],
-        ], $response->json('data.sapeurs'));
+        return collect($response->json('data.sapeurs'))
+            ->map(fn($s) => [
+                ...$s,
+                "sapeur_id" => intval($s['uuid']),
+                "groupes" => collect($s['groupes'])->map(fn($g) => ["no" => $g['numero']])->toArray(),
+                "numeros" => $s['moyens_contact'],
+            ])
+            ->toArray();
     }
 
     public static function setReference($sapeurs)
@@ -98,14 +98,14 @@ class RtaBusiness
             throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
         }
 
-        if (count($sapeurs) <= 0) {
+        if (empty($sapeurs)) {
             throw new ArrayException(['sapeurs' => 'Aucun sapeur'], "Aucun sapeur présent dans la communication rta");
         }
 
         $url = config("rta.api_url") . "/api/v2/demandes";
 
-        $data = array_map(function ($sapeur) {
-            return [
+        $data = collect($sapeurs)
+            ->map(fn($sapeur) => [
                 'uuid' => strval($sapeur['sapeur_id']),
                 'nom' => $sapeur['nom'],
                 'prenom' => $sapeur['prenom'],
@@ -114,15 +114,15 @@ class RtaBusiness
                 'suffixe' => $sapeur['suffixe'] ?? "",
                 'localite' => $sapeur['localite'],
                 'fonction' => $sapeur['fonction'] ?? "",
-                'groupes' => array_map(fn($groupe) => ['numero' => strval($groupe['no'])], $sapeur['groupes']),
+                'groupes' => collect($sapeur['groupes'])->map(fn($groupe) => ['numero' => strval($groupe['no'])])->toArray(),
                 'moyens_contact' => $sapeur['numeros'],
-            ];
-        }, $sapeurs);
+            ])
+            ->toArray();
 
         try {
             $response = Http::withHeaders([
                 'Accept' => 'application/json',
-                'Authorization' => 'Bearer ' . $bearerToken,
+                'Authorization' => "Bearer $bearerToken",
             ])
                 ->post($url, [
                     'sapeurs' => $data,

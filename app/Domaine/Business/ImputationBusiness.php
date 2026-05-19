@@ -200,22 +200,17 @@ class ImputationBusiness
 
         // Chargment de la config des amendes
         $amendes = Amende::orderBy('ordre', 'ASC')->get();
-        $nbAmende = count($amendes);
 
-        if ($nbAmende <= 0) {
+        if ($amendes->isEmpty()) {
             throw new ArrayException(['config' => 'Pas de configurations d\'amendes'], "Aucune amende configurée");
         }
 
-        $excusesTypes = ExcuseType::all();
-        $indexedExcuses = [];
-        foreach ($excusesTypes as $excuse) {
-            $indexedExcuses[$excuse->id] = $excuse;
-        }
+        $indexedExcuses = ExcuseType::all()->keyBy('id');
 
         // Chargement des exercices amendés du sapeur
         $exercices = ExerciceSapeur::where([
-            ['sapeur_id', '=', $sapeurId],
-            ['excuse_statut', '=', ExerciceBusiness::EXCUSE_STATUT_AMENDEE]
+            ['sapeur_id', $sapeurId],
+            ['excuse_statut', ExerciceBusiness::EXCUSE_STATUT_AMENDEE]
         ])->join('exercices', 'exercices.id', '=', 'exercice_sapeur.exercice_id')
             ->where('exercices.exercice_comptable_id', $exerciceComptableId)
             ->orderBy('exercices.date', 'ASC')
@@ -225,9 +220,9 @@ class ImputationBusiness
         // Vérifier qu'aucune amende n'est déjà payée
         if (
             Ecriture::where([
-                ['exercice_comptable_id', '=', $exerciceComptableId],
-                ['sapeur_id', '=', $sapeurId],
-                ['module', '=', self::ECRITURE_MODULE_AMENDE]
+                ['exercice_comptable_id', $exerciceComptableId],
+                ['sapeur_id', $sapeurId],
+                ['module', self::ECRITURE_MODULE_AMENDE]
             ])->whereNotNull('decompte_id')->exists()
         ) {
             throw new ArrayException([], 'Des amendes sont déjà facturées dans un décompte.');
@@ -235,14 +230,15 @@ class ImputationBusiness
 
         // Suppression de amendes existantes
         Ecriture::where([
-            ['exercice_comptable_id', '=', $exerciceComptableId],
-            ['sapeur_id', '=', $sapeurId],
-            ['module', '=', self::ECRITURE_MODULE_AMENDE]
+            ['exercice_comptable_id', $exerciceComptableId],
+            ['sapeur_id', $sapeurId],
+            ['module', self::ECRITURE_MODULE_AMENDE]
         ])->delete();
 
         // Pour l'instant juste générer de nouvelles amendes
         $ecritures = [];
         $i = 0;
+        $nbAmende = $amendes->count();
         foreach ($exercices as $exercice) {
 
             $amende = $amendes[$i];
@@ -255,7 +251,7 @@ class ImputationBusiness
                 'type_unite_id' => self::UNITE_PIECE,
 
                 'designation' => $exercice->designation,
-                'complement' => $exercice->excuse_type_id ? $indexedExcuses[$exercice->excuse_type_id]->designation : "",
+                'complement' => $indexedExcuses[$exercice->excuse_type_id]?->designation ?? "",
 
                 'sapeur_id' => $exercice->sapeur_id,
                 'exercice_id' => $exercice->exercice_id,
@@ -294,33 +290,27 @@ class ImputationBusiness
 
         // Chargment de la config des amendes
         $amendes = Amende::orderBy('ordre', 'ASC')->get();
-        $nbAmende = count($amendes);
 
-        if ($nbAmende <= 0) {
+        if ($amendes->isEmpty()) {
             throw new ArrayException(['config' => 'Pas de configurations d\'amendes'], "Aucune amende configurée");
         }
 
         // Chargement des exercices amendés du sapeur
-        $exercices = ExerciceSapeur::where([
-            ['excuse_statut', '=', ExerciceBusiness::EXCUSE_STATUT_AMENDEE]
-        ])->join('exercices', 'exercices.id', '=', 'exercice_sapeur.exercice_id')
+        $exercices = ExerciceSapeur::where('excuse_statut', ExerciceBusiness::EXCUSE_STATUT_AMENDEE)
+            ->join('exercices', 'exercices.id', '=', 'exercice_sapeur.exercice_id')
             ->where('exercices.exercice_comptable_id', $exerciceComptableId)
             ->orderBy('exercice_sapeur.sapeur_id', 'ASC')
             ->orderBy('exercices.date', 'ASC')
             ->orderBy('exercices.heure')
             ->get();
 
-        $excusesTypes = ExcuseType::all();
-        $indexedExcuses = [];
-        foreach ($excusesTypes as $excuse) {
-            $indexedExcuses[$excuse->id] = $excuse;
-        }
+        $indexedExcuses = ExcuseType::all()->keyBy('id');
 
         // Vérifier qu'aucune amende n'est déjà payée
         if (
             Ecriture::where([
-                ['exercice_comptable_id', '=', $exerciceComptableId],
-                ['module', '=', self::ECRITURE_MODULE_AMENDE]
+                ['exercice_comptable_id', $exerciceComptableId],
+                ['module', self::ECRITURE_MODULE_AMENDE]
             ])->whereNotNull('decompte_id')->exists()
         ) {
             throw new ArrayException([], 'Des amendes sont déjà facturées dans un décompte.');
@@ -328,14 +318,15 @@ class ImputationBusiness
 
         // Suppression de amendes existantes
         Ecriture::where([
-            ['exercice_comptable_id', '=', $exerciceComptableId],
-            ['module', '=', self::ECRITURE_MODULE_AMENDE]
+            ['exercice_comptable_id', $exerciceComptableId],
+            ['module', self::ECRITURE_MODULE_AMENDE]
         ])->delete();
 
         // Pour l'instant juste générer de nouvelles amendes
         $newEcritures = [];
         $i = 0;
         $sapeurId = -1;
+        $nbAmende = $amendes->count();
 
         foreach ($exercices as $exercice) {
             if ($sapeurId !== $exercice->sapeur_id) {
@@ -353,7 +344,7 @@ class ImputationBusiness
                 'type_unite_id' => self::UNITE_PIECE,
 
                 'designation' => $exercice->designation,
-                'complement' => $exercice->excuse_type_id ? $indexedExcuses[$exercice->excuse_type_id]->designation : "",
+                'complement' => $indexedExcuses[$exercice->excuse_type_id]?->designation ?? "",
 
                 'sapeur_id' => $exercice->sapeur_id,
                 'exercice_id' => $exercice->exercice_id,
@@ -430,19 +421,15 @@ class ImputationBusiness
 
         $fraisIndemnitesTypes = FraisIndemniteAnnuelType::with('fraisIndemniteAnnuels')->get();
 
-        $fonctions = Fonction::all();
-        $indexedFonctions = [];
-        foreach ($fonctions as $fonction) {
-            $indexedFonctions[$fonction['id']] = $fonction['nom'];
-        }
+        $indexedFonctions = Fonction::pluck('nom', 'id');
 
         // FIXME: regénérer que pour les sapeurs ne possédants pas d'indemnités ???
 
         // Vérifier qu'aucune indemnité n'est déjà payée
         if (
             Ecriture::where([
-                ['exercice_comptable_id', '=', $exerciceComptableId],
-                ['module', '=', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL]
+                ['exercice_comptable_id', $exerciceComptableId],
+                ['module', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL]
             ])->whereNotNull('decompte_id')->exists()
         ) {
             throw new ArrayException([], 'Des indemnités annuelles sont déjà facturées dans un décompte.');
@@ -450,8 +437,8 @@ class ImputationBusiness
 
         // Suppression des indemnités annuelles existantes pour cet exercice comptable uniquement
         Ecriture::where([
-            ['exercice_comptable_id', '=', $exerciceComptableId],
-            ['module', '=', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL]
+            ['exercice_comptable_id', $exerciceComptableId],
+            ['module', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL]
         ])->delete();
 
         // Exercice comptable
@@ -464,10 +451,8 @@ class ImputationBusiness
             $query
                 ->where(function ($query) use ($debut) {
                     $query
-                        ->where([
-                            ['fonction_sapeur.debut', '<=', $debut],
-                            ['fonction_sapeur.fin', '>=', $debut],
-                        ])
+                        ->where('fonction_sapeur.debut', '<=', $debut)
+                        ->where('fonction_sapeur.fin', '>=', $debut)
                         ->whereNotNull('fonction_sapeur.fin');
                 })
                 ->orWhere(function ($query) use ($debut) {
@@ -477,10 +462,8 @@ class ImputationBusiness
                 })
                 ->orWhere(function ($query) use ($debut, $fin) {
                     $query
-                        ->where([
-                            ['fonction_sapeur.debut', '>=', $debut],
-                            ['fonction_sapeur.debut', '<=', $fin],
-                        ]);
+                        ->where('fonction_sapeur.debut', '>=', $debut)
+                        ->where('fonction_sapeur.debut', '<=', $fin);
                 });
         })
             ->join('fonctions', 'fonctions.id', '=', 'fonction_sapeur.fonction_id')
@@ -489,25 +472,21 @@ class ImputationBusiness
             ->select(['fonction_sapeur.sapeur_id', 'fonction_sapeur.fonction_id', 'fonction_sapeur.debut', 'fonction_sapeur.fin', 'fonctions.tri'])->get();
 
         // Group by sapeur_id avec conservation des périodes de fonction
-        $sapeursGrouped = [];
-        foreach ($sapeurs as $sapeur) {
-            $sapeursGrouped[$sapeur->sapeur_id][] = [
+        $sapeursGrouped = $sapeurs->groupBy('sapeur_id')
+            ->map(fn($group) => $group->map(fn($sapeur) => [
                 'fonction_id' => $sapeur->fonction_id,
                 'debut' => $sapeur->debut,
                 'fin' => $sapeur->fin,
                 'tri' => $sapeur->tri
-            ];
-        }
+            ])->all())
+            ->all();
 
         // Foreach indemnité annuelle
         $ecritures = [];
         foreach ($fraisIndemnitesTypes as $type) {
 
             // Génère le mapping -> ["fonction_id" => 'indemnite'];
-            $mapping = array_reduce(array_map(
-                fn($indemnite) => [$indemnite['fonction_id'] => $indemnite],
-                $type->fraisIndemniteAnnuels->toArray()
-            ), fn($a, $b) => $a + $b, []);
+            $mapping = $type->fraisIndemniteAnnuels->keyBy('fonction_id')->all();
 
             foreach ($sapeursGrouped as $sapeurId => $fonctions) {
                 foreach ($fonctions as $fonction) {
@@ -521,7 +500,7 @@ class ImputationBusiness
                         $tarif = $indemnite['montant'];
 
                         // Pour les unités mensuelles, calculer le nombre de mois réels d'activité
-                        if ($indemnite['type_unite_id'] == self::UNITE_MOIS) {
+                        if ($indemnite['type_unite_id'] === self::UNITE_MOIS) {
                             $quantite = self::calculerNombreMoisActifs(
                                 $fonction['debut'],
                                 $fonction['fin'],
@@ -537,12 +516,13 @@ class ImputationBusiness
 
                         $total = self::arrondi_5_centimes($tarif * $quantite);
 
+                        $fonctionNom = $indexedFonctions[$indemnite['fonction_id']] ?? '';
                         $ecritures[] = [
                             'tarif' => $tarif,
                             'quantite' => $quantite,
                             'total' => $total,
                             'type_unite_id' => $indemnite['type_unite_id'],
-                            'designation' => $type->designation . ' (' . ($indexedFonctions[$indemnite['fonction_id']] ?? '') . ")",
+                            'designation' => "{$type->designation} ($fonctionNom)",
                             'sapeur_id' => $sapeurId,
                             'compte_id' => $type->compte_id,
                             'exercice_comptable_id' => $exerciceComptableId,
@@ -587,7 +567,7 @@ class ImputationBusiness
             ->delete();
 
         // Modification du statut de l'exercice
-        Exercice::where('id', $exerciceId)->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_VALIDE]);
+        Exercice::whereId($exerciceId)->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_VALIDE]);
         return ExerciceBusiness::EXERCICE_STATUT_VALIDE;
     }
 
@@ -613,7 +593,7 @@ class ImputationBusiness
             ->delete();
 
         // Modification du statut de l'intervention
-        Intervention::where('id', $interventionId)->update(['statut' => InterventionBusiness::INTERVENTION_STATUT_VALIDE]);
+        Intervention::whereId($interventionId)->update(['statut' => InterventionBusiness::INTERVENTION_STATUT_VALIDE]);
         return InterventionBusiness::INTERVENTION_STATUT_VALIDE;
     }
 
@@ -623,8 +603,8 @@ class ImputationBusiness
 
         // Vérifier si des écritures sont déjà liées à un décompte
         if (
-            Ecriture::where('exercice_comptable_id', '=', $exerciceComptableId)
-                ->where('module', '=', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)
+            Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+                ->where('module', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)
                 ->whereNotNull('decompte_id')
                 ->exists()
         ) {
@@ -632,8 +612,8 @@ class ImputationBusiness
         }
 
         // Suppression des écritures
-        Ecriture::where('exercice_comptable_id', '=', $exerciceComptableId)
-            ->where('module', '=', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)
+        Ecriture::where('exercice_comptable_id', $exerciceComptableId)
+            ->where('module', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL)
             ->whereNull('decompte_id')
             ->delete();
 
@@ -671,7 +651,7 @@ class ImputationBusiness
         Ecriture::insert($ecritures);
 
         // Update statut
-        Intervention::where('id', $interventionId)->update(['statut' => InterventionBusiness::INTERVENTION_STATUT_IMPUTE]);
+        Intervention::whereId($interventionId)->update(['statut' => InterventionBusiness::INTERVENTION_STATUT_IMPUTE]);
         return InterventionBusiness::INTERVENTION_STATUT_IMPUTE;
     }
 
@@ -813,14 +793,10 @@ class ImputationBusiness
      */
     private static function imputerInterventionTaux($intervention, $indemniteType): array
     {
-        $designation = "{$intervention->localite->designation} ({$intervention->typeIntervention->designation}) $intervention->lieu";
+        $designation = "{$intervention->localite->designation} ({$intervention->typeIntervention->designation}) {$intervention->lieu}";
 
         // Grouper les présences par sapeurs
-        $sapeurs = [];
-        foreach ($intervention->presences as $presence) {
-            $sapeurs[$presence->sapeur_id] ??= [];
-            array_push($sapeurs[$presence->sapeur_id], $presence);
-        }
+        $sapeurs = $intervention->presences->groupBy('sapeur_id')->all();
 
         $ecritures = [];
 
@@ -1079,14 +1055,12 @@ class ImputationBusiness
         }
 
         $unite = $indemniteType->type_unite_id;
-        $designation = "{$exercice->localite->designation} ({$exercice->lieu}) $exercice->designation";
-        $sapeurs = collect($exercice->sapeurs)->filter(function ($sap) {
-            return $sap->present;
-        })->values()->all();
+        $designation = "{$exercice->localite->designation} ({$exercice->lieu}) {$exercice->designation}";
+        $sapeurs = collect($exercice->sapeurs)->filter(fn($sap) => $sap->present)->values()->all();
 
         if ($unite === self::UNITE_PIECE || $unite === self::UNITE_FORFAIT) {
             self::imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation);
-        } else if ($unite === self::UNITE_HEURE) {
+        } elseif ($unite === self::UNITE_HEURE) {
             self::imputerExerciceParHeure($exercice, $sapeurs, $indemniteType, $designation);
         } else {
             throw new ArrayException([], "Unité non supportée");
@@ -1097,7 +1071,7 @@ class ImputationBusiness
         self::imputerExerciceHeureSup($exercice, $heures, $designation);
 
         // Changer le statut de l'exercice
-        Exercice::where('id', $exerciceId)->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_IMPUTE]);
+        Exercice::whereId($exerciceId)->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_IMPUTE]);
         return ExerciceBusiness::EXERCICE_STATUT_IMPUTE;
     }
 
@@ -1159,26 +1133,17 @@ class ImputationBusiness
         }
 
         // Charger tous les détails des sapeurs en amont pour éviter les requêtes N+1
-        $sapeurIds = array_map(fn($s) => $s->sapeur_id, $sapeurs);
-        $sapeursDetails = [];
-        foreach ($sapeurIds as $sapeurId) {
-            $sapeursDetails[$sapeurId] = Sapeur::find($sapeurId);
-        }
+        $sapeurIds = collect($sapeurs)->pluck('sapeur_id');
+        $sapeursDetails = Sapeur::whereIn('id', $sapeurIds)->get()->keyBy('id');
 
         // Prétraiter le mapping des tarifs par fonction pour éviter les filtrages répétés
-        $tarifsByFonction = [];
-        $defaultTarifs = [];
-        foreach ($indemniteType->fonctions as $fonction) {
-            if ($fonction->fonction_id === null) {
-                $defaultTarifs[] = $fonction;
-            } else {
-                $tarifsByFonction[$fonction->fonction_id][] = $fonction;
-            }
-        }
+        $groupedFonctions = $indemniteType->fonctions->groupBy('fonction_id');
+        $tarifsByFonction = $groupedFonctions->forget(null)->all();
+        $defaultTarifs = $groupedFonctions->get(null, collect())->all();
 
         $ecritures = [];
         foreach ($sapeurs as $sapeur) {
-            $sapeurDetails = $sapeursDetails[$sapeur->sapeur_id] ?? null;
+            $sapeurDetails = $sapeursDetails->get($sapeur->sapeur_id);
             if (!$sapeurDetails) {
                 continue;
             }
@@ -1225,26 +1190,17 @@ class ImputationBusiness
         $duree = $exercice->duree / 60;
 
         // Charger tous les détails des sapeurs en amont pour éviter les requêtes N+1
-        $sapeurIds = array_map(fn($s) => $s->sapeur_id, $sapeurs);
-        $sapeursDetails = [];
-        foreach ($sapeurIds as $sapeurId) {
-            $sapeursDetails[$sapeurId] = Sapeur::find($sapeurId);
-        }
+        $sapeurIds = collect($sapeurs)->pluck('sapeur_id');
+        $sapeursDetails = Sapeur::whereIn('id', $sapeurIds)->get()->keyBy('id');
 
         // Prétraiter le mapping des tarifs par fonction pour éviter les filtrages répétés
-        $tarifsByFonction = [];
-        $defaultTarifs = [];
-        foreach ($indemniteType->fonctions as $fonction) {
-            if ($fonction->fonction_id === null) {
-                $defaultTarifs[] = $fonction;
-            } else {
-                $tarifsByFonction[$fonction->fonction_id][] = $fonction;
-            }
-        }
+        $groupedFonctions = $indemniteType->fonctions->groupBy('fonction_id');
+        $tarifsByFonction = $groupedFonctions->forget(null)->all();
+        $defaultTarifs = $groupedFonctions->get(null, collect())->all();
 
         $ecritures = [];
         foreach ($sapeurs as $sapeur) {
-            $sapeurDetails = $sapeursDetails[$sapeur->sapeur_id] ?? null;
+            $sapeurDetails = $sapeursDetails->get($sapeur->sapeur_id);
             if (!$sapeurDetails) {
                 continue;
             }
@@ -1375,7 +1331,7 @@ class ImputationBusiness
         self::controlerStatusExerciceComptable($ecritures->first()->exercice_comptable_id);
 
         // Vérifier si une écriture est déjà liée à un décompte
-        if ($ecritures->contains(fn($e) => $e->decompte_id !== null)) {
+        if ($ecritures->whereNotNull('decompte_id')->isNotEmpty()) {
             throw new ArrayException([], 'Des écritures sont déjà facturées dans un décompte.');
         }
 
@@ -1473,7 +1429,7 @@ class ImputationBusiness
         // Suppression des écritures
         Ecriture::where('travail_id', $travailId)->delete();
 
-        Travail::where('id', $travailId)
+        Travail::whereId($travailId)
             ->update(['statut' => TravauxBusiness::TRAVAIL_STATUT_VALIDE]);
 
         return ['statut' => TravauxBusiness::TRAVAIL_STATUT_VALIDE];
@@ -1487,17 +1443,13 @@ class ImputationBusiness
             }
         ])->find($compteId);
 
-        $sapeursMap = [];
-        $sapeurs = Sapeur::get(['id', 'nom', 'prenom']);
-        foreach ($sapeurs as $sapeur) {
-            $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
-        }
+        $sapeursMap = Sapeur::get(['id', 'nom', 'prenom'])
+            ->mapWithKeys(fn($sapeur) => [$sapeur->id => "$sapeur->nom $sapeur->prenom"])
+            ->all();
 
-        $decomptesMap = [];
-        $decomptes = Decompte::where('exercice_comptable_id', $exerciceComptableId)->get(['id', 'date']);
-        foreach ($decomptes as $decompte) {
-            $decomptesMap[$decompte->id] = $decompte->date;
-        }
+        $decomptesMap = Decompte::where('exercice_comptable_id', $exerciceComptableId)
+            ->pluck('date', 'id')
+            ->all();
 
         $logoPath = SisParamBusiness::getLogo($sisKey);
         $content = TypstToPdfGenerator::generateDocument(
@@ -1526,17 +1478,13 @@ class ImputationBusiness
             }
         ])->orderBy('numero', 'asc')->get();
 
-        $sapeursMap = [];
-        $sapeurs = Sapeur::get(['id', 'nom', 'prenom']);
-        foreach ($sapeurs as $sapeur) {
-            $sapeursMap[$sapeur->id] = "$sapeur->nom $sapeur->prenom";
-        }
+        $sapeursMap = Sapeur::get(['id', 'nom', 'prenom'])
+            ->mapWithKeys(fn($sapeur) => [$sapeur->id => "$sapeur->nom $sapeur->prenom"])
+            ->all();
 
-        $decomptesMap = [];
-        $decomptes = Decompte::where('exercice_comptable_id', $exerciceComptableId)->get(['id', 'date']);
-        foreach ($decomptes as $decompte) {
-            $decomptesMap[$decompte->id] = $decompte->date;
-        }
+        $decomptesMap = Decompte::where('exercice_comptable_id', $exerciceComptableId)
+            ->pluck('date', 'id')
+            ->all();
 
         $logoPath = SisParamBusiness::getLogo($sisKey);
         $content = TypstToPdfGenerator::generateDocument(

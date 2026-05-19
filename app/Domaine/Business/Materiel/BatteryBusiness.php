@@ -54,7 +54,7 @@ class BatteryBusiness
    */
   public static function editBattery($id, $data)
   {
-    BatterieType::where('id', '=', $id)->update($data);
+    BatterieType::whereId($id)->update($data);
     return BatterieType::find($id);
   }
 
@@ -65,6 +65,6 @@ class BatteryBusiness
    */
   public static function deleteBattery($id)
   {
-    return BatterieType::where('id', '=', $id)->delete();
+    return BatterieType::whereId($id)->delete();
   }
 }

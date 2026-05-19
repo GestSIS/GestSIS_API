@@ -6,9 +6,8 @@ use App\Models\AvsParam;
 
 class AvsParamBusiness
 {
-    public static function updateParams($data)
+    public static function updateParams($data): AvsParam
     {
-        AvsParam::updateOrCreate([], $data);
-        return AvsParam::first();
+        return AvsParam::updateOrCreate([], $data);
     }
 }

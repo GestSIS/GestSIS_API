@@ -119,7 +119,7 @@ class SapeurBusiness
 
     private static function isSapeur($sapeurId)
     {
-        return Sapeur::where('id', $sapeurId)->where('type', self::TYPE_SAPEUR)->exists();
+        return Sapeur::whereId($sapeurId)->where('type', self::TYPE_SAPEUR)->exists();
     }
 
     public static function createSapeur($data)
@@ -255,7 +255,7 @@ class SapeurBusiness
             );
         }
 
-        $sapeur = Sapeur::where('id', $sapeurId)->first(['fonction_id', 'grade_id']);
+        $sapeur = Sapeur::whereId($sapeurId)->first(['fonction_id', 'grade_id']);
         return ['cours' => $cours, 'main_fonction_id' => $sapeur->fonction_id, 'main_grade_id' => $sapeur->grade_id];
     }
 

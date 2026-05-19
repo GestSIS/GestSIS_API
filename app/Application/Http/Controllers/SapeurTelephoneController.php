@@ -12,7 +12,7 @@ class SapeurTelephoneController extends Controller
 
     public function index(int $sapeurId)
     {
-        if (!Sapeur::where('id', $sapeurId)->exists()) {
+        if (!Sapeur::whereId($sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
         return response()->json(['data' => SapeurTelephone::where('sapeur_id', $sapeurId)->get()]);
@@ -20,7 +20,7 @@ class SapeurTelephoneController extends Controller
 
     public function store(Request $request, int $sapeurId)
     {
-        if (!Sapeur::where('id', $sapeurId)->exists()) {
+        if (!Sapeur::whereId($sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
 
@@ -37,7 +37,7 @@ class SapeurTelephoneController extends Controller
 
     public function update(Request $request, int $sapeurId, int $telephoneId)
     {
-        if (!Sapeur::where('id', $sapeurId)->exists()) {
+        if (!Sapeur::whereId($sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
 
@@ -62,7 +62,7 @@ class SapeurTelephoneController extends Controller
 
     public function destroy(int $sapeurId, int $telephoneId)
     {
-        if (!Sapeur::where('id', $sapeurId)->exists()) {
+        if (!Sapeur::whereId($sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
         if (!SapeurTelephone::where(['id' => $telephoneId, 'sapeur_id' => $sapeurId])->exists()) {

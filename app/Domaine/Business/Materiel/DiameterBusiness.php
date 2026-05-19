@@ -52,7 +52,7 @@ class DiameterBusiness
    */
   public static function editDiameter($id, $data)
   {
-    TuyauDiametre::where('id', '=', $id)->update($data);
+    TuyauDiametre::whereId($id)->update($data);
     return TuyauDiametre::find($id);
   }
 
@@ -63,6 +63,6 @@ class DiameterBusiness
    */
   public static function deleteDiameter($id)
   {
-    return TuyauDiametre::where('id', '=', $id)->delete();
+    return TuyauDiametre::whereId($id)->delete();
   }
 }

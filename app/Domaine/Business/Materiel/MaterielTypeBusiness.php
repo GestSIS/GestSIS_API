@@ -98,26 +98,26 @@ class MaterielTypeBusiness // extends OrderModel
     $oldType = MaterielType::find($id)->get(['type']);
     if (
       $oldType === self::TYPE_VEHICULE && $data['type'] !== self::TYPE_VEHICULE &&
-      InterventionVehicule::join('articles', 'articles.id' . '=', 'intervention_vehicules.vehicule_id')
-        ->where('articles.materiel_type_id', '=', $id)
+      InterventionVehicule::join('articles', 'articles.id', '=', 'intervention_vehicules.vehicule_id')
+        ->where('articles.materiel_type_id', $id)
         ->exists()
     ) {
       throw new ArrayException([], "Impossible d'enlever le type véhicule, des véhicules sont lié à ce type et utilisé pour des rapports d'intervention");
     }
 
-    MaterielType::where('id', $id)
+    MaterielType::whereId($id)
       ->limit(1)
       ->update($data);
 
     if ($data['type'] === self::TYPE_PIPE && $tuyau) {
       MaterielTypeTuyau::insert(['id' => $id, ...$tuyau]);
     } else {
-      MaterielTypeTuyau::where('id', '=', $id)->delete();
+      MaterielTypeTuyau::whereId($id)->delete();
     }
     if ($data['type'] === self::TYPE_BATTERY && $batterie) {
       MaterielTypeBatterie::insert(['id' => $id, ...$batterie]);
     } else {
-      MaterielTypeBatterie::where('id', '=', $id)->delete();
+      MaterielTypeBatterie::whereId($id)->delete();
     }
 
     // Gestion du changement de type en cas de véhicule
@@ -126,7 +126,7 @@ class MaterielTypeBusiness // extends OrderModel
     // if ($data['type'] === self::TYPE_VEHICULE) {
     //   MaterielTypeBatterie::insert(['id' => $id, ...$batterie]);
     // } else {
-    //   MaterielTypeBatterie::where('id', '=', $id)->delete();
+    //   MaterielTypeBatterie::whereId($id)->delete();
     // }
 
     return MaterielType::with(['tuyau', 'batterie'])->find($id);
@@ -144,7 +144,7 @@ class MaterielTypeBusiness // extends OrderModel
     ) {
       throw new ArrayException([], "Veuillez d'abord supprimer les articles");
     }
-    return MaterielType::where('id', $id)->delete();
+    return MaterielType::whereId($id)->delete();
   }
 
   /**

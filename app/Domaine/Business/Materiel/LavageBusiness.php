@@ -46,7 +46,7 @@ class LavageBusiness
    */
   public static function createLavages($lavages)
   {
-    return array_map(fn($lavage) => Lavage::create($lavage), $lavages);
+    return collect($lavages)->map(Lavage::create(...))->all();
   }
 
   /**
@@ -55,10 +55,10 @@ class LavageBusiness
    */
   public static function editLavages($lavages)
   {
-    $ids = array_map(function ($lavage) {
-      Lavage::where('id', '=', $lavage['id'])->update($lavage);
+    $ids = collect($lavages)->map(function ($lavage) {
+      Lavage::whereId($lavage['id'])->update($lavage);
       return $lavage['id'];
-    }, $lavages);
+    })->all();
     return Lavage::whereIn('id', $ids);
   }
 

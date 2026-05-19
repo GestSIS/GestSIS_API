@@ -38,7 +38,7 @@ class AspsmsBusiness
         }
 
         $contacts = $data['contacts'];
-        $numeros = array_map(fn($num) => $num['numero'], $contacts);
+        $numeros = collect($contacts)->pluck('numero')->toArray();
         try {
             $params = AspsmsParam::first();
             if (!$params) {
@@ -59,11 +59,11 @@ class AspsmsBusiness
             ]);
             $sms->save();
 
-            SmsNumero::insert(array_map(fn($contact) => ([
+            SmsNumero::insert(collect($contacts)->map(fn($contact) => [
                 'sms_id' => $sms->id,
                 'numero' => $contact['numero'],
                 'sapeur_id' => $contact['sapeurId'] ?? null,
-            ]), $contacts));
+            ])->toArray());
 
             return $response;
         } catch (DecryptException $e) {
@@ -122,8 +122,7 @@ class AspsmsBusiness
                 switch ($response['StatusCode']) {
                     case "1":
                         // Valid response
-                        $credit = $response['Credits'];
-                        return $credit;
+                        return $response['Credits'];
                     case "2":
                     // Connect failed
                     case "3":
@@ -151,12 +150,12 @@ class AspsmsBusiness
                 'Originator' => $origin,
                 'Recipients' => $numeros,
                 'MessageText' => $message,
-                'DeferredDeliveryTime' => $differe ? $date : NULL,
+                'DeferredDeliveryTime' => $differe ? $date : null,
                 'FlashingSMS' => false,
-                'URLBufferedMessageNotification' => NULL,
-                'URLDeliveryNotification' => NULL,
-                'URLNonDeliveryNotification' => NULL,
-                'AffiliateID' => NULL,
+                'URLBufferedMessageNotification' => null,
+                'URLDeliveryNotification' => null,
+                'URLNonDeliveryNotification' => null,
+                'AffiliateID' => null,
             ]);
 
             if ($response->successful()) {

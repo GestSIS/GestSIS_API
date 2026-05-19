@@ -30,7 +30,7 @@ class GradeController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (!Grade::where('id', $id)->exists()) {
+        if (!Grade::whereId($id)->exists()) {
             return response()->json(['error' => 'Grade not found'], 404);
         }
 
@@ -47,7 +47,7 @@ class GradeController extends Controller
 
     public function destroy($id)
     {
-        if (!Grade::where('id', $id)->exists()) {
+        if (!Grade::whereId($id)->exists()) {
             return response()->json(['error' => 'Grade not found'], 404);
         }
 

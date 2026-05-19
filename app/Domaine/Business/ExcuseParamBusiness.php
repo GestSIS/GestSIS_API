@@ -6,10 +6,9 @@ use App\Models\ExcuseParam;
 
 class ExcuseParamBusiness
 {
-    public static function updateParams($data)
+    public static function updateParams(array $data): ?ExcuseParam
     {
         $data['texte_email_rappel'] = $data['texte_email_rappel'] ?? '';
-        ExcuseParam::updateOrCreate([], $data);
-        return ExcuseParam::first();
+        return ExcuseParam::updateOrCreate([], $data);
     }
 }

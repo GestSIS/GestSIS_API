@@ -50,7 +50,7 @@ class ColorBusiness
    */
   public static function editCouleur($id, $data)
   {
-    Couleur::where('id', '=', $id)->update($data);
+    Couleur::whereId($id)->update($data);
     return Couleur::find($id);
   }
 
@@ -61,6 +61,6 @@ class ColorBusiness
    */
   public static function deleteCouleur($id)
   {
-    return Couleur::where("id", '=', $id)->delete();
+    return Couleur::whereId($id)->delete();
   }
 }

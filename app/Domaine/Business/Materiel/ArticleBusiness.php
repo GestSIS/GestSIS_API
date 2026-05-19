@@ -55,7 +55,7 @@ class ArticleBusiness
     // Controle que les articles sont attribuable
     $nonAttribuable = Article::whereIn('articles.id', $articleIds)
       ->join('materiel_types', 'materiel_types.id', '=', 'articles.materiel_type_id')
-      ->where('materiel_types.est_attribuable', '=', false)
+      ->where('materiel_types.est_attribuable', false)
       ->select(['articles.id', 'articles.materiel_type_id'])
       ->get();
 
@@ -91,12 +91,12 @@ class ArticleBusiness
 
       $type = $indexedTypes[$article['materiel_type_id']];
       if (!$type->est_attribuable && $article['sapeur_id'] !== null) {
-        throw new ArrayException([], message: "Article de type '$type->designation' n'est pas attribuable");
+        throw new ArrayException([], message: "Article de type '{$type->designation}' n'est pas attribuable");
       }
     }
 
     // Controller numérotation correcte
-    $articles = array_map(function ($article) use ($indexedTypes) {
+    $articles = collect($articles)->map(function ($article) use ($indexedTypes) {
       $type = $indexedTypes[$article['materiel_type_id']];
       return [
         'quantite' => $type->est_numerote ? 1 : $article['quantite'],
@@ -117,15 +117,10 @@ class ArticleBusiness
         'designation' => $article['designation'] ?? '',
         'immatriculation' => $article['immatriculation'] ?? '',
       ];
-    }, $articles);
-
-    $articles = array_merge([], ...array_map(fn($article) => array_fill(0, $article['quantite'], $article), $articles));
-    $articles = array_map(fn($article) => [...$article, 'uuid' => uniqid()], $articles);
-
-    return array_map(function ($data) {
-      $article = Article::create($data);
-      return $article;
-    }, $articles);
+    })->flatMap(fn($article) => array_fill(0, $article['quantite'], $article))
+      ->map(fn($article) => [...$article, 'uuid' => uniqid()])
+      ->map(fn($data) => Article::create($data))
+      ->all();
   }
 
   public static function editArticles(array $articles): array
@@ -134,7 +129,7 @@ class ArticleBusiness
     $indexedTypes = MaterielType::all()->keyBy('id');
 
     // Controller qu'un article appartiennent soit à un sapeur soit à un emplacement
-    $articles = array_map(function ($article) use ($indexedTypes) {
+    $articles = collect($articles)->map(function ($article) use ($indexedTypes) {
       if (
         ($article['sapeur_id'] === null && $article['emplacement_id'] === null) ||
         ($article['sapeur_id'] !== null && $article['emplacement_id'] !== null)
@@ -146,13 +141,13 @@ class ArticleBusiness
       $article['materiel_type_id'] = $existant->materiel_type_id;
       $type = $indexedTypes[$existant->materiel_type_id];
       if (!$type->est_attribuable && $article['sapeur_id'] !== null) {
-        throw new ArrayException([], message: "Article de type '$type->designation' n'est pas attribuable");
+        throw new ArrayException([], message: "Article de type '{$type->designation}' n'est pas attribuable");
       }
       return $article;
-    }, $articles);
+    })->all();
 
     // Controller numérotation correcte
-    $articles = array_map(function ($article) use ($indexedTypes) {
+    $articles = collect($articles)->map(function ($article) use ($indexedTypes) {
       $type = $indexedTypes[$article['materiel_type_id']];
       return [
         'id' => $article['id'],
@@ -172,9 +167,8 @@ class ArticleBusiness
         'immatriculation' => $article['immatriculation'] ?? '',
         'statut' => $article['statut'] ?? true,
       ];
-    }, $articles);
-
-    return array_map(fn($article) => Article::find($article['id'])->update($article), $articles);
+    })->map(fn($article) => Article::find($article['id'])->update($article))
+      ->all();
   }
 
   public static function deleteArticles(array $articleIds): bool
@@ -189,7 +183,7 @@ class ArticleBusiness
    */
   public static function getArticlesPourSapeur($sapeurId)
   {
-    return Article::where('sapeur_id', '=', $sapeurId)->get();
+    return Article::where('sapeur_id', $sapeurId)->get();
   }
 
   /**
@@ -200,7 +194,7 @@ class ArticleBusiness
   {
     return Article::whereNull('sapeur_id')
       ->leftJoin('materiel_types', 'articles.materiel_type_id', '=', 'materiel_types.id')
-      ->where('materiel_types.est_attribuable', '=', true)
+      ->where('materiel_types.est_attribuable', true)
       ->get(['articles.*']);
   }
 
@@ -211,7 +205,7 @@ class ArticleBusiness
   public static function getArticlesLavable()
   {
     return Article::leftJoin('materiel_types', 'articles.materiel_type_id', '=', 'materiel_types.id')
-      ->where('materiel_types.est_lavable', '=', true)
+      ->where('materiel_types.est_lavable', true)
       ->get(['articles.*']);
   }
 
@@ -231,7 +225,7 @@ class ArticleBusiness
    */
   public static function getArticlesParMaterielType($materielTypeId)
   {
-    return Article::where('materiel_type_id', '=', $materielTypeId)->with(['lavages'])->get();
+    return Article::where('materiel_type_id', $materielTypeId)->with(['lavages'])->get();
   }
 
   /**

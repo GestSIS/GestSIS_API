@@ -6,9 +6,14 @@ use App\Models\AbsenceParam;
 
 class AbsenceParamBusiness
 {
-    public static function updateParams($data)
+    /**
+     * Update absence parameters
+     *
+     * @param array<string, mixed> $data
+     * @return AbsenceParam
+     */
+    public static function updateParams(array $data): AbsenceParam
     {
-        AbsenceParam::updateOrCreate([], $data);
-        return AbsenceParam::first();
+        return AbsenceParam::updateOrCreate([], $data);
     }
 }

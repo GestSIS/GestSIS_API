@@ -197,7 +197,7 @@ class SapeurController extends Controller
             'civilite_id' => 'integer|min:1'
         ]);
 
-        if (!Sapeur::where('id', $id)->exists()) {
+        if (!Sapeur::whereId($id)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
         $sapeur = SapeurBusiness::updateSapeurById($id, $data);
@@ -206,7 +206,7 @@ class SapeurController extends Controller
 
     public function destroy(int $id)
     {
-        if (!Sapeur::where('id', $id)->exists()) {
+        if (!Sapeur::whereId($id)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
         SapeurBusiness::deleteSapeurById($id);

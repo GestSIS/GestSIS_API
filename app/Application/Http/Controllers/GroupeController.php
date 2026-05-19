@@ -36,7 +36,7 @@ class GroupeController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (!Groupe::where('id', $id)->exists()) {
+        if (!Groupe::whereId($id)->exists()) {
             return response()->json(['error' => 'Groupe not found'], 404);
         }
 
@@ -54,7 +54,7 @@ class GroupeController extends Controller
 
     public function destroy($id)
     {
-        if (!Groupe::where('id', $id)->exists()) {
+        if (!Groupe::whereId($id)->exists()) {
             return response()->json(['error' => 'Groupe not found'], 404);
         }
 

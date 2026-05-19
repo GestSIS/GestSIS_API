@@ -26,16 +26,16 @@ class InterventionParamBusiness
 
     public static function modifierStat($id, $data)
     {
-        StatIntervention::where('id', $id)->limit(1)->update($data);
+        StatIntervention::whereId($id)->limit(1)->update($data);
         return StatIntervention::find($id);
     }
 
     public function supprimerStat($id)
     {
-        if (TypeIntervention::where('stat_intervention_id', '=', $id)->exists()) {
+        if (TypeIntervention::where('stat_intervention_id', $id)->exists()) {
             throw new ArrayException([], 'Impossible de supprimer cette catégorie statististique, celle-ci est liée à un type d\'intervention.');
         }
-        StatIntervention::where('id', $id)->delete();
+        StatIntervention::whereId($id)->delete();
     }
 
     public static function ajouterStatFederal($data)
@@ -48,7 +48,7 @@ class InterventionParamBusiness
 
     public static function modifierStatFederal($id, $data)
     {
-        StatFederal::where('id', $id)->limit(1)->update($data);
+        StatFederal::whereId($id)->limit(1)->update($data);
         return StatFederal::find($id);
     }
 
@@ -67,16 +67,16 @@ class InterventionParamBusiness
 
     public static function modifierType($id, $data)
     {
-        TypeIntervention::where('id', $id)->limit(1)->update($data);
+        TypeIntervention::whereId($id)->limit(1)->update($data);
         return TypeIntervention::find($id);
     }
 
     public static function supprimerType($id)
     {
-        if (Intervention::where('type_intervention_id', '=', $id)->exists()) {
+        if (Intervention::where('type_intervention_id', $id)->exists()) {
             throw new ArrayException([], 'Impossible de supprimer ce type d\'intervention, celui-ci est utilisé dans une intervention.');
         }
-        TypeIntervention::where('id', $id)->delete();
+        TypeIntervention::whereId($id)->delete();
     }
 
     public static function ajouterMission($data)
@@ -89,13 +89,13 @@ class InterventionParamBusiness
 
     public static function modifierMission($id, $data)
     {
-        MissionType::where('id', $id)->limit(1)->update($data);
+        MissionType::whereId($id)->limit(1)->update($data);
         return MissionType::find($id);
     }
 
     public static function supprimerMission($id)
     {
-        MissionType::where('id', $id)->delete();
+        MissionType::whereId($id)->delete();
     }
 
     public static function ajouterTelephone($data)
@@ -108,18 +108,18 @@ class InterventionParamBusiness
 
     public static function modifierTelephone($id, $data)
     {
-        Telephone::where('id', $id)->limit(1)->update($data);
+        Telephone::whereId($id)->limit(1)->update($data);
         return Telephone::find($id);
     }
 
     public static function supprimerTelephone($id)
     {
-        Telephone::where('id', $id)->delete();
+        Telephone::whereId($id)->delete();
     }
 
     public static function ajouterMateriel($data)
     {
-        if (!array_key_exists('type_unite_id', $data) || $data['type_unite_id'] == "0") {
+        if (!array_key_exists('type_unite_id', $data) || $data['type_unite_id'] === "0") {
             $data['type_unite_id'] = null;
         }
         $materiel = new Materiel();
@@ -130,19 +130,19 @@ class InterventionParamBusiness
 
     public static function modifierMateriel($id, $data)
     {
-        if (!array_key_exists('type_unite_id', $data) || $data['type_unite_id'] == "0") {
+        if (!array_key_exists('type_unite_id', $data) || $data['type_unite_id'] === "0") {
             $data['type_unite_id'] = null;
         }
-        Materiel::where('id', $id)->limit(1)->update($data);
+        Materiel::whereId($id)->limit(1)->update($data);
         return Materiel::find($id);
     }
 
     public static function supprimerMateriel($id)
     {
-        if (InterventionMateriel::where('materiel_id', '=', $id)->exists()) {
+        if (InterventionMateriel::where('materiel_id', $id)->exists()) {
             throw new InvalidActionException([], 'Impossible de supprimer ce matériel, celui-ci est utilisé dans une intervention.');
         }
-        Materiel::where('id', $id)->delete();
+        Materiel::whereId($id)->delete();
     }
 
     public static function ajouterTraitement($data)
@@ -155,15 +155,15 @@ class InterventionParamBusiness
 
     public static function modifierTraitement($id, $data)
     {
-        InterventionTraitement::where('id', $id)->limit(1)->update($data);
+        InterventionTraitement::whereId($id)->limit(1)->update($data);
         return InterventionTraitement::find($id);
     }
 
     public static function supprimerTraitement($id)
     {
-        if (Intervention::where('intervention_traitement_id', '=', $id)->exists()) {
+        if (Intervention::where('intervention_traitement_id', $id)->exists()) {
             throw new ArrayException([], 'Impossible de supprimer ce traitement, celui-ci est utilisé dans un exercice.');
         }
-        InterventionTraitement::where('id', $id)->delete();
+        InterventionTraitement::whereId($id)->delete();
     }
 }

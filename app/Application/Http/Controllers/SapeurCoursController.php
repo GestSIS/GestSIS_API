@@ -12,7 +12,7 @@ class SapeurCoursController extends Controller
 
     public function index($sapeurId)
     {
-        if (!Sapeur::where('id', $sapeurId)->exists()) {
+        if (!Sapeur::whereId($sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
         return response()->json(['data' => CoursSapeur::where('sapeur_id', $sapeurId)->get()]);
@@ -20,7 +20,7 @@ class SapeurCoursController extends Controller
 
     public function store(Request $request, int $sapeurId)
     {
-        if (!Sapeur::where('id', $sapeurId)->exists()) {
+        if (!Sapeur::whereId($sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
 
@@ -42,7 +42,7 @@ class SapeurCoursController extends Controller
 
     public function update(Request $request, int $sapeurId, int $coursId)
     {
-        if (!Sapeur::where('id', $sapeurId)->exists()) {
+        if (!Sapeur::whereId($sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
         if (!CoursSapeur::where(['id' => $coursId, 'sapeur_id' => $sapeurId])->exists()) {
@@ -65,7 +65,7 @@ class SapeurCoursController extends Controller
 
     public function destroy(int $sapeurId, int $coursId)
     {
-        if (!Sapeur::where('id', $sapeurId)->exists()) {
+        if (!Sapeur::whereId($sapeurId)->exists()) {
             return response()->json(['error' => 'Sapeur non trouvé'], 404);
         }
         if (!CoursSapeur::where(['id' => $coursId, 'sapeur_id' => $sapeurId])->exists()) {

@@ -104,8 +104,8 @@ class DbsFix extends Command
             // LocaliteSis::on("db_" . $db)->whereIn('localite_id', [32, 43])->delete();
             // Localite::on("db_" . $db)->whereIn('id', [32, 43])->delete();
 
-            // Localite::on("db_" . $db)->where('id', '=', 110)->update(['designation' => 'La Chaux-de-Fonds']);
-            // Localite::on("db_" . $db)->where('id', '=', 46)->update(['commune_id' => 77]);
+            // Localite::on("db_" . $db)->whereId(110)->update(['designation' => 'La Chaux-de-Fonds']);
+            // Localite::on("db_" . $db)->whereId(46)->update(['commune_id' => 77]);
 
             printf("\n");
         }

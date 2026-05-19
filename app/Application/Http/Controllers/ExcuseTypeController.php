@@ -18,10 +18,10 @@ class ExcuseTypeController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'designation' => 'string|min:1',
-            'abreviation' => 'string|min:1',
-            'amende' => 'boolean',
-            'statut' => 'integer',
+            'designation' => 'string|min:1|required',
+            'abreviation' => 'string|min:1|required',
+            'amende' => 'boolean|required',
+            'statut' => 'integer|required',
             'tri' => 'integer'
         ]);
 

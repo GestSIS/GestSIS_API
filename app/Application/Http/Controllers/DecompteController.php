@@ -168,7 +168,7 @@ class DecompteController extends Controller
      */
     public function show($id)
     {
-        return response()->json(['data' => Decompte::where('id', $id)->with('paiements')->first()]);
+        return response()->json(['data' => Decompte::whereId($id)->with('paiements')->first()]);
     }
 
     /**
