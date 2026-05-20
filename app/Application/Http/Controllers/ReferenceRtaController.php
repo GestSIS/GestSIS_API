@@ -17,11 +17,6 @@ class ReferenceRtaController extends Controller
         return response()->json(["data" => RtaBusiness::getReferenceGestSis()]);
     }
 
-    public function resetReferenceRta()
-    {
-        return response()->json(["data" => RtaBusiness::resetReferenceRta()]);
-    }
-
     public function setReference(Request $request)
     {
         $data = $request->validate([
