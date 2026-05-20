@@ -14,7 +14,7 @@ class RtaBusiness
 {
     public static function getReferenceGestSis()
     {
-        $sapeurs = Sapeur::where('actif', true)
+        return Sapeur::where('actif', true)
             ->where('type', SapeurBusiness::TYPE_SAPEUR)
             ->with([
                 'groupes',
