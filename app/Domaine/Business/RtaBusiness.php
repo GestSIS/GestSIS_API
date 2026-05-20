@@ -25,12 +25,11 @@ class RtaBusiness
             ->get(
                 ['id', 'nom', 'prenom', 'fonction_id', 'localite_id', 'date_naissance', 'suffixe', DB::raw('CONCAT(rue," ",no_rue) as adresse')]
             )
-            ->filter(fn($sapeur) => !empty($sapeur['groupes']) && !empty($sapeur['telephones']))
+            ->filter(fn($sapeur) => !empty($sapeur->groupes) && !empty($sapeur->telephones))
             ->map(function ($sapeur) {
-                $sapeur['groupes'] = collect($sapeur['groupes'])
-                    ->map(fn($groupe) => $groupe['groupe_id'])
-                    ->toArray();
-                return $sapeur;
+                return array_merge($sapeur->toArray(), [
+                    'groupes' => $sapeur->groupes->pluck('groupe_id')->toArray(),
+                ]);
             })
             ->values()
             ->toArray();
