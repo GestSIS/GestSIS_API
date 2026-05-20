@@ -9,7 +9,7 @@ class AlarmesBusiness
         $indexedSapeursByNomPrenom = [];
         $indexedSapeursByPhone = [];
         foreach ($sapeurs as $sapeur) {
-            $key = strtolower("{$sapeur['nom']} {$sapeur['prenom']}");
+            $key = strtolower("{$sapeur->nom} {$sapeur->prenom}");
             $indexedSapeursByNomPrenom[$key] = $sapeur;
             foreach ($sapeur->telephones as $telephone) {
                 $numero = self::normaliserTelephone($telephone->numero);
