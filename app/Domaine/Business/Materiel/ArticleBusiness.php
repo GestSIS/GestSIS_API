@@ -220,7 +220,7 @@ class ArticleBusiness
 
   /**
    * Get list of items of a given product
-   * @param integer $productId ID of the product for which to get items
+   * @param integer $materielTypeId ID of the product for which to get items
    * @return Collection of #item_existing_details
    */
   public static function getArticlesParMaterielType($materielTypeId)

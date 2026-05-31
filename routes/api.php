@@ -404,6 +404,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenRole:rta.lecture'], function () {
         Route::get('rta-gestsis', [ReferenceRtaController::class, 'getReferenceGestSis'])->name('api.v2.rta.get-gestsis');
         Route::get('rta', [ReferenceRtaController::class, 'getReferenceRta'])->name('api.v2.rta.get');
+
+        Route::get('rta/demandes', [ReferenceRtaController::class, 'demandes'])->name('api.v2.rta.demandes');
+        Route::get('rta/fichiers', [ReferenceRtaController::class, 'fichiers'])->name('api.v2.rta.fichiers');
+        Route::get('rta/fichiers/{fichierId}', [ReferenceRtaController::class, 'downloadFichier'])->name('api.v2.rta.fichier.download');
     });
     Route::group(['middleware' => 'jwtTokenRole:rta.modification'], function () {
         Route::post('rta', [ReferenceRtaController::class, 'setReference'])->name('api.v2.rta.set');

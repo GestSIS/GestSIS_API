@@ -35,6 +35,96 @@ class RtaBusiness
             ->toArray();
     }
 
+    public static function getDemandes()
+    {
+        $params = RtaParam::first();
+        if (!$params) {
+            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
+        }
+        try {
+            $bearerToken = Crypt::decryptString($params->token);
+        } catch (DecryptException $e) {
+            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
+        }
+
+        $url = config("rta.api_url") . "/api/v2/demandes";
+        try {
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => "Bearer $bearerToken",
+            ])->get($url);
+        } catch (\Exception $e) {
+            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+        }
+        if ($response->failed()) {
+            throw new ArrayException(["api_res" => $response->body()], "Erreur lors de la récupération RTA");
+        }
+
+        return $response->json();
+    }
+
+    public static function getFichiers()
+    {
+        $params = RtaParam::first();
+        if (!$params) {
+            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
+        }
+        try {
+            $bearerToken = Crypt::decryptString($params->token);
+        } catch (DecryptException $e) {
+            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
+        }
+
+        $url = config("rta.api_url") . "/api/v2/fichiers";
+        try {
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => "Bearer $bearerToken",
+            ])->get($url);
+        } catch (\Exception $e) {
+            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+        }
+        if ($response->failed()) {
+            throw new ArrayException(["api_res" => $response->body()], "Erreur lors de la récupération RTA");
+        }
+
+        return $response->json();
+    }
+
+    public static function downloadFichier(int $fichierId)
+    {
+        $params = RtaParam::first();
+        if (!$params) {
+            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
+        }
+        try {
+            $bearerToken = Crypt::decryptString($params->token);
+        } catch (DecryptException $e) {
+            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
+        }
+
+        $url = config("rta.api_url") . "/api/v2/fichiers/$fichierId";
+        try {
+            $response = Http::withHeaders([
+                'Accept' => 'application/octet-stream',
+                'Authorization' => "Bearer $bearerToken",
+            ])->get($url);
+        } catch (\Exception $e) {
+            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+        }
+        if ($response->failed()) {
+            throw new ArrayException(["api_res" => $response->body()], "Erreur lors de la récupération RTA");
+        }
+
+        return [
+            'content' => $response->body(),
+            'content_type' => $response->header('Content-Type') ?? 'application/pdf',
+            'filename' => $response->header('Content-Disposition')
+                ? basename(explode('filename=', $response->header('Content-Disposition'))[1] ?? 'file.pdf')
+                : "fichier-$fichierId.pdf"
+        ];
+    }
+
     public static function getReferenceRta()
     {
         $params = RtaParam::first();
