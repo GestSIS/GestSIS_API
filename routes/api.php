@@ -393,7 +393,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('aspsms/credit', [AspsmsController::class, 'credit'])->name('credit');
     });
     Route::group(['middleware' => 'jwtTokenRole:sms.config'], function () {
-        Route::apiResource('aspsms/param', AspsmsParamController::class)->only(['index', 'store']);
+        Route::apiResource('aspsms/param', AspsmsParamController::class)->only(['index', 'store'])->names([
+            'index' => 'api.v2.aspsms.param.index',
+            'store' => 'api.v2.aspsms.param.store',
+        ]);
     });
     Route::group(['middleware' => 'jwtTokenRole:sms.envoie'], function () {
         Route::apiResource('sms', SmsController::class)->only('index');
@@ -413,7 +416,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('rta/reference', [ReferenceRtaController::class, 'setReference'])->name('api.v2.rta.set');
     });
     Route::group(['middleware' => 'jwtTokenRole:rta.config'], function () {
-        Route::apiResource('rta/param', RtaParamController::class)->only(['index', 'store']);
+        Route::apiResource('rta/param', RtaParamController::class)->only(['index', 'store'])->names([
+            'index' => 'api.v2.rta.param.index',
+            'store' => 'api.v2.rta.param.store',
+        ]);
     });
 
     // Interventions
