@@ -51,12 +51,13 @@ class Sapeur extends Model
 
     protected $attributes = [
         'suffixe' => '',
+        'no_avs' => '',
         'remarque' => '',
         'profession' => '',
         'employeur' => '',
         'lieu_de_travail' => '',
         'email' => '',
-        'iban' => ''
+        'iban' => '',
     ];
     /**
      * Les cours du sapeurs

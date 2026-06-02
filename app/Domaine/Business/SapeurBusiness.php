@@ -30,15 +30,13 @@ class SapeurBusiness
     const TYPE_SAPEUR = 0;
     const TYPE_CIVIL = 1;
 
-    /**
-     * Normalise les champs nullable en convertissant null en string vide
-     * pour éviter les erreurs SQL avec les colonnes NOT NULL de la base
-     */
-    private static function normalizeNullableFields($data)
+    private static function normalizeNullableFields($data): array
     {
         $nullableFields = ['suffixe', 'remarque', 'profession', 'employeur', 'lieu_de_travail', 'iban', 'email', 'no_avs'];
         foreach ($nullableFields as $field) {
-            $data[$field] ??= '';
+            if (array_key_exists($field, $data)) {
+                $data[$field] ??= '';
+            }
         }
         return $data;
     }
@@ -126,7 +124,6 @@ class SapeurBusiness
     {
         //TODO: Add iban statut système validation
         //TODO: Add no_avs validation
-        $data = self::normalizeNullableFields($data);
         $data['iban_statut'] = 1;
         $data['actif'] = 1;
         $data['annee_incorporation'] = Carbon::parse($data['incorporation'])->year;
@@ -149,7 +146,6 @@ class SapeurBusiness
     {
         //TODO: Add iban statut système validation
         //TODO: Add no_avs validation
-        $data = self::normalizeNullableFields($data);
         $data['iban_statut'] = 1;
         $data['actif'] = 1;
         $data['porteur'] = 0;
