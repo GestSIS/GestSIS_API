@@ -3,6 +3,7 @@
 namespace App\Collections;
 
 use App\Models\Decompte;
+use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -17,7 +18,7 @@ class AFacturerExport implements FromQuery, WithHeadings
     $this->decompteId = $decompteId;
   }
 
-  public function query()
+  public function query(): Builder
   {
 
     // TODO: Charger le décompte avec ses paiements négatif

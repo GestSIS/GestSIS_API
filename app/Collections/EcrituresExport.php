@@ -4,6 +4,8 @@ namespace App\Collections;
 
 use App\Models\Decompte;
 use App\Models\Ecriture;
+
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
@@ -19,7 +21,7 @@ class EcrituresExport implements FromQuery, WithHeadings
     $this->decompteId = $decompteId;
   }
 
-  public function query()
+  public function query(): Builder
   {
     return Ecriture::query()
       ->where('ecritures.decompte_id', '=', $this->decompteId)

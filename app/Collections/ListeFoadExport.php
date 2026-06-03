@@ -4,6 +4,7 @@ namespace App\Collections;
 
 use App\Domaine\Business\SapeurBusiness;
 use App\Models\Sapeur;
+use Illuminate\Support\Enumerable;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -20,7 +21,7 @@ class ListeFoadExport implements FromCollection, WithHeadings
     $this->date = $date;
   }
 
-  public function collection()
+  public function collection(): Enumerable
   {
     $date = $this->date;
     return Sapeur::query()

@@ -3,6 +3,7 @@
 namespace App\Collections;
 
 use App\Models\Sapeur;
+use Illuminate\Support\Enumerable;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -17,7 +18,7 @@ class SapeursExport implements FromCollection, WithHeadings
     $this->ids = $sapeursIds;
   }
 
-  public function collection()
+  public function collection(): Enumerable
   {
     $query = Sapeur::query();
 
