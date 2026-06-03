@@ -1,4 +1,4 @@
-[![CI](https://github.com/Ph0tonic/GestSIS_API/actions/workflows/main.yml/badge.svg)](https://github.com/Ph0tonic/GestSIS_API/actions/workflows/main.yml)
+[![CI](https://github.com/GestSIS/GestSIS_API/actions/workflows/main.yml/badge.svg)](https://github.com/GestSIS/GestSIS_API/actions/workflows/main.yml)
 
 # GestSIS_API
 
@@ -408,11 +408,11 @@ Config::set('database.default', 'db_' . $sisKey);
 
 ### Commandes multi-tenant
 
-| Commande | Description |
-|----------|-------------|
-| `php artisan dbs:migrate` | Migrer toutes les bases tenant |
-| `php artisan dbs:init` | Fresh migration + seed pour toutes les bases |
-| `php artisan dbs:sapeurs-actif-status` | Job batch de calcul statut actif |
+| Commande                               | Description                                  |
+| -------------------------------------- | -------------------------------------------- |
+| `php artisan dbs:migrate`              | Migrer toutes les bases tenant               |
+| `php artisan dbs:init`                 | Fresh migration + seed pour toutes les bases |
+| `php artisan dbs:sapeurs-actif-status` | Job batch de calcul statut actif             |
 
 ### Exemple d'appel API
 
