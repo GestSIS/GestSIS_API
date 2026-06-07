@@ -212,12 +212,11 @@ class InterventionBusiness
      */
     public static function editInterventionInformationsById($interventionId, $data)
     {
-        $data['lieu'] ??= '';
-        $data['agent'] ??= '';
-        $data['description'] ??= '';
-        $data['proprietaire'] ??= '';
-        $data['responsable'] ??= '';
-        $data['wgs84'] ??= '';
+        foreach (['lieu', 'agent', 'description', 'proprietaire', 'responsable', 'wgs84'] as $field) {
+            if (\array_key_exists($field, $data)) {
+                $data[$field] ??= '';
+            }
+        }
 
         $intervention = Intervention::find($interventionId);
         $intervention->update($data);
