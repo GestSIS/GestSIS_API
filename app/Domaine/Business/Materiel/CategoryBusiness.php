@@ -7,16 +7,6 @@ use App\Models\MaterielCategorie;
 use App\Models\MaterielType;
 use DB;
 
-/**
- * Model for manipulating 'category' database table
- * Available public methods
- * @static listCategoriesWithProducts()
- * @static getCategoryBasic($id)
- * @static createCategory($category)
- * @static editCategory($id, $data)
- * @static deleteCategory($id)
- * @static reorderCategory($id, $reorder)
- */
 class CategoryBusiness // extends OrderModel
 {
 
