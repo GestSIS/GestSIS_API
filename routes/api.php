@@ -22,6 +22,8 @@ use App\Application\Http\Controllers\CouleurController;
 use App\Application\Http\Controllers\EmplacementController;
 use App\Application\Http\Controllers\LavageController;
 use App\Application\Http\Controllers\MaterielTypeArticleController;
+use App\Application\Http\Controllers\RtaAgriculteurController;
+use App\Application\Http\Controllers\RtaFichierController;
 use App\Application\Http\Controllers\RtaParamController;
 use App\Application\Http\Controllers\TuyauDiametreController;
 use Illuminate\Support\Facades\Route;
@@ -404,22 +406,27 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // RTA
-    Route::group(['middleware' => 'jwtTokenRole:rta.lecture'], function () {
-        Route::get('rta/gestsis', [ReferenceRtaController::class, 'getReferenceGestSis'])->name('api.v2.rta.get-gestsis');
-        Route::get('rta/reference', [ReferenceRtaController::class, 'getReferenceRta'])->name('api.v2.rta.get');
+    Route::group(['prefix' => 'rta'], function () {
+        Route::group(['middleware' => 'jwtTokenRole:rta.lecture'], function () {
+            Route::get('gestsis', [ReferenceRtaController::class, 'getReferenceGestSis'])->name('api.v2.rta.get-gestsis');
+            Route::get('reference', [ReferenceRtaController::class, 'getReferenceRta'])->name('api.v2.rta.get');
 
-        Route::get('rta/demandes', [ReferenceRtaController::class, 'demandes'])->name('api.v2.rta.demandes');
-        Route::get('rta/fichiers', [ReferenceRtaController::class, 'fichiers'])->name('api.v2.rta.fichiers');
-        Route::get('rta/fichiers/{fichierId}', [ReferenceRtaController::class, 'downloadFichier'])->name('api.v2.rta.fichier.download');
-    });
-    Route::group(['middleware' => 'jwtTokenRole:rta.modification'], function () {
-        Route::post('rta/reference', [ReferenceRtaController::class, 'setReference'])->name('api.v2.rta.set');
-    });
-    Route::group(['middleware' => 'jwtTokenRole:rta.config'], function () {
-        Route::apiResource('rta/param', RtaParamController::class)->only(['index', 'store'])->names([
-            'index' => 'api.v2.rta.param.index',
-            'store' => 'api.v2.rta.param.store',
-        ]);
+            Route::get('demandes', [ReferenceRtaController::class, 'demandes'])->name('api.v2.rta.demandes');
+            Route::apiResource('fichiers', RtaFichierController::class)->only(['index', 'show']);
+            Route::apiResource('agriculteurs', RtaAgriculteurController::class);
+            Route::put('agriculteurs/{agriculteurId}/tri', [RtaAgriculteurController::class, 'tri'])->name('api.v2.rta.agriculteurs.tri');
+        });
+
+        Route::group(['middleware' => 'jwtTokenRole:rta.modification'], function () {
+            Route::post('reference', [ReferenceRtaController::class, 'setReference'])->name('api.v2.rta.set');
+        });
+
+        Route::group(['middleware' => 'jwtTokenRole:rta.config'], function () {
+            Route::apiResource('param', RtaParamController::class)->only(['index', 'store'])->names([
+                'index' => 'api.v2.rta.param.index',
+                'store' => 'api.v2.rta.param.store',
+            ]);
+        });
     });
 
     // Interventions

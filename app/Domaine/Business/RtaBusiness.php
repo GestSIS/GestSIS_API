@@ -12,6 +12,138 @@ use Illuminate\Support\Facades\Http;
 
 class RtaBusiness
 {
+    public static function getAgriculteurs(): array
+    {
+        [$bearerToken] = static::getRtaCredentials();
+
+        $url = config("rta.api_url") . "/api/v2/agriculteurs";
+        try {
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => "Bearer $bearerToken",
+            ])->get($url);
+        } catch (\Exception $e) {
+            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+        }
+        if ($response->failed()) {
+            throw new ArrayException(["api_res" => $response->body()], "Erreur lors de la récupération des agriculteurs RTA");
+        }
+
+        return $response->json();
+    }
+
+    public static function getAgriculteur(int $agriculteurId): ?array
+    {
+        [$bearerToken] = static::getRtaCredentials();
+
+        $url = config("rta.api_url") . "/api/v2/agriculteurs/$agriculteurId";
+        try {
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => "Bearer $bearerToken",
+            ])->get($url);
+        } catch (\Exception $e) {
+            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+        }
+        if ($response->status() === 404) {
+            return null;
+        }
+        if ($response->failed()) {
+            throw new ArrayException(["api_res" => $response->body()], "Erreur lors de la récupération de l'agriculteur RTA");
+        }
+
+        return $response->json();
+    }
+
+    public static function createAgriculteur(array $data): ?array
+    {
+        [$bearerToken] = static::getRtaCredentials();
+
+        $url = config("rta.api_url") . "/api/v2/agriculteurs";
+        try {
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => "Bearer $bearerToken",
+            ])->post($url, $data);
+        } catch (\Exception $e) {
+            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+        }
+        if ($response->failed()) {
+            return null;
+        }
+
+        return $response->json();
+    }
+
+    public static function updateAgriculteur(int $agriculteurId, array $data): ?array
+    {
+        [$bearerToken] = static::getRtaCredentials();
+
+        $url = config("rta.api_url") . "/api/v2/agriculteurs/$agriculteurId";
+        try {
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => "Bearer $bearerToken",
+            ])->put($url, $data);
+        } catch (\Exception $e) {
+            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+        }
+        if ($response->status() === 404) {
+            return null;
+        }
+        if ($response->failed()) {
+            throw new ArrayException(["api_res" => $response->body()], "Erreur lors de la mise à jour de l'agriculteur RTA");
+        }
+
+        return $response->json();
+    }
+
+    public static function updateAgriculteurTri(int $agriculteurId, array $data): ?array
+    {
+        [$bearerToken] = static::getRtaCredentials();
+
+        $url = config("rta.api_url") . "/api/v2/agriculteurs/$agriculteurId/tri";
+        try {
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => "Bearer $bearerToken",
+            ])->put($url, $data);
+        } catch (\Exception $e) {
+            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+        }
+        if ($response->status() === 404) {
+            return null;
+        }
+        if ($response->failed()) {
+            throw new ArrayException(["api_res" => $response->body()], "Erreur lors de la mise à jour du tri de l'agriculteur RTA");
+        }
+
+        return $response->json();
+    }
+
+    public static function deleteAgriculteur(int $agriculteurId): bool
+    {
+        [$bearerToken] = static::getRtaCredentials();
+
+        $url = config("rta.api_url") . "/api/v2/agriculteurs/$agriculteurId";
+        try {
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => "Bearer $bearerToken",
+            ])->delete($url);
+        } catch (\Exception $e) {
+            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+        }
+        if ($response->status() === 404) {
+            return false;
+        }
+        if ($response->failed()) {
+            throw new ArrayException(["api_res" => $response->body()], "Erreur lors de la suppression de l'agriculteur RTA");
+        }
+
+        return true;
+    }
+
     public static function getReferenceGestSis()
     {
         return Sapeur::where('actif', true)
@@ -37,15 +169,7 @@ class RtaBusiness
 
     public static function getDemandes()
     {
-        $params = RtaParam::first();
-        if (!$params) {
-            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
-        }
-        try {
-            $bearerToken = Crypt::decryptString($params->token);
-        } catch (DecryptException $e) {
-            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
-        }
+        [$bearerToken] = static::getRtaCredentials();
 
         $url = config("rta.api_url") . "/api/v2/demandes";
         try {
@@ -65,15 +189,7 @@ class RtaBusiness
 
     public static function getFichiers()
     {
-        $params = RtaParam::first();
-        if (!$params) {
-            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
-        }
-        try {
-            $bearerToken = Crypt::decryptString($params->token);
-        } catch (DecryptException $e) {
-            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
-        }
+        [$bearerToken] = static::getRtaCredentials();
 
         $url = config("rta.api_url") . "/api/v2/fichiers";
         try {
@@ -93,15 +209,7 @@ class RtaBusiness
 
     public static function downloadFichier(int $fichierId)
     {
-        $params = RtaParam::first();
-        if (!$params) {
-            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
-        }
-        try {
-            $bearerToken = Crypt::decryptString($params->token);
-        } catch (DecryptException $e) {
-            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
-        }
+        [$bearerToken] = static::getRtaCredentials();
 
         $url = config("rta.api_url") . "/api/v2/fichiers/$fichierId";
         try {
@@ -127,15 +235,7 @@ class RtaBusiness
 
     public static function getReferenceRta()
     {
-        $params = RtaParam::first();
-        if (!$params) {
-            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
-        }
-        try {
-            $bearerToken = Crypt::decryptString($params->token);
-        } catch (DecryptException $e) {
-            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
-        }
+        [$bearerToken] = static::getRtaCredentials();
 
         $url = config("rta.api_url") . "/api/v2/demandes?limit=1";
         try {
@@ -177,15 +277,7 @@ class RtaBusiness
 
     public static function setReference($sapeurs)
     {
-        $params = RtaParam::first();
-        if (!$params) {
-            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
-        }
-        try {
-            $bearerToken = Crypt::decryptString($params->token);
-        } catch (DecryptException $e) {
-            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
-        }
+        [$bearerToken] = static::getRtaCredentials();
 
         if (empty($sapeurs)) {
             throw new ArrayException(['sapeurs' => 'Aucun sapeur'], "Aucun sapeur présent dans la communication rta");
@@ -227,5 +319,21 @@ class RtaBusiness
         }
 
         return static::getReferenceRta();
+    }
+
+    /**
+     * @return array{0: string}
+     */
+    private static function getRtaCredentials(): array
+    {
+        $params = RtaParam::first();
+        if (!$params) {
+            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
+        }
+        try {
+            return [Crypt::decryptString($params->token)];
+        } catch (DecryptException $e) {
+            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
+        }
     }
 }

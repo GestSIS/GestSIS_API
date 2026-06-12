@@ -12,25 +12,6 @@ class ReferenceRtaController extends Controller
         return response()->json(["data" => RtaBusiness::getDemandes()]);
     }
 
-    public function downloadFichier($fichierId)
-    {
-        $fichier = RtaBusiness::downloadFichier($fichierId);
-        if (!$fichier) {
-            return response()->json(["message" => "Fichier non trouvé"], 404);
-        }
-
-        return response()->streamDownload(
-            fn() => print ($fichier['content']),
-            $fichier['filename'],
-            ['Content-Type' => $fichier['content_type']]
-        );
-    }
-
-    public function fichiers()
-    {
-        return response()->json(["data" => RtaBusiness::getFichiers()]);
-    }
-
     public function getReferenceRta()
     {
         return response()->json(["data" => RtaBusiness::getReferenceRta()]);
