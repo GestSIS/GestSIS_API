@@ -43,7 +43,9 @@ class InterventionTest extends TestCase
      */
     public function testInterventionShowOk()
     {
-        $response = $this->json('GET', "/api/v2/interventions/393");
+        $intervention = Intervention::factory()->create();
+
+        $response = $this->json('GET', "/api/v2/interventions/{$intervention->id}");
 
         $response
             ->assertStatus(200)

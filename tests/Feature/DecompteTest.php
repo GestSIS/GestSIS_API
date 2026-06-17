@@ -535,7 +535,17 @@ class DecompteTest extends TestCase
      */
     public function testDecompte()
     {
-        $response = $this->json('GET', "api/v2/decomptes/1");
+        $decompteId = DB::table('decomptes')->insertGetId([
+            'designation' => 'test decompte',
+            'date' => '2018-01-31',
+            'exercice_comptable_id' => 2,
+            'deduction' => 0,
+            'avs_total' => 0,
+            'ac_total' => 0,
+            'total' => 0,
+        ]);
+
+        $response = $this->json('GET', "api/v2/decomptes/{$decompteId}");
 
         $response
             ->assertStatus(200)

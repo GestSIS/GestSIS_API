@@ -2,36 +2,43 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Exercice;
 use App\Models\ExerciceSapeur;
+use App\Models\Sapeur;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ExerciceSapeurFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = ExerciceSapeur::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array
-     */
-    public function definition()
+    public function definition(): array
     {
+        $present = $this->faker->boolean(80);
+
         return [
-            "exercice_comptable_id" => 4,
-            "exercice_categorie_id" => $this->faker->numberBetween(1, 11),
-            "designation" => $this->faker->randomElement($array = array('Exercice section', 'Exercice Porteur', 'Séance', 'Etat-Major')),
-            "date" => $this->faker->dateTimeThisYear()->format('Y-m-d'),
-            "heure" => $this->faker->time('H:i'),
-            "lieu" => $this->faker->address,
-            "communications" => $this->faker->realText(),
-            "duree" => $this->faker->randomElement($array = array(90, 120, 180)),
-            "statut" => 1,
-            'localite_id' => $this->faker->randomElement($array = array(3, 5, 23, 44, 93)),
+            'exercice_id' => Exercice::inRandomOrder()->first()?->id ?? Exercice::factory(),
+            'sapeur_id' => Sapeur::inRandomOrder()->first()?->id ?? Sapeur::factory(),
+            'convoque' => true,
+            'present' => $present,
+            'remplace' => false,
+            'absent' => !$present,
+            'excuse_statut' => null,
+            'date_demande' => null,
+            'remarque' => null,
+            'justificatif_path' => null,
+            'justificatif_filename' => null,
+            'date_validation' => null,
+            'justification' => null,
         ];
+    }
+
+    public function present(): static
+    {
+        return $this->state(['present' => true, 'absent' => false]);
+    }
+
+    public function absent(): static
+    {
+        return $this->state(['present' => false, 'absent' => true]);
     }
 }

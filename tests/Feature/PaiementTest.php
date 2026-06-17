@@ -4,20 +4,50 @@ namespace Tests\Feature;
 
 use App\Models\SisParam;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class PaiementTest extends TestCase
 {
     use DatabaseTransactions;
 
+    private function createDecompteWithPaiement(): array
+    {
+        $decompteId = DB::table('decomptes')->insertGetId([
+            'designation' => 'test paiement',
+            'date' => '2018-01-31',
+            'exercice_comptable_id' => 2,
+            'deduction' => 0,
+            'avs_total' => 0,
+            'ac_total' => 0,
+            'total' => 100,
+        ]);
+
+        $paiementId = DB::table('paiements')->insertGetId([
+            'decompte_id' => $decompteId,
+            'sapeur_id' => 1,
+            'solde' => 100,
+            'indemnite' => 0,
+            'frais_forfaitaire' => 0,
+            'frais_effectif' => 0,
+            'autre' => 0,
+            'avs_ac' => 0,
+            'total' => 100,
+        ]);
+
+        return ['decompte_id' => $decompteId, 'paiement_id' => $paiementId];
+    }
+
     /**
-     * get  paiements.
+     * get paiements.
      *
      * @return void
      */
     public function testPaiement()
     {
-        $response = $this->json('GET', "api/v2/paiements/1");
+        $ids = $this->createDecompteWithPaiement();
+
+        $response = $this->json('GET', "api/v2/paiements/{$ids['paiement_id']}");
 
         $response
             ->assertStatus(200)
@@ -83,16 +113,15 @@ class PaiementTest extends TestCase
      */
     public function testIso20022()
     {
-        $data = [
-            'paiementId' => 3,
-        ];
+        $ids = $this->createDecompteWithPaiement();
+
         SisParam::updateOrCreate([], [
             'nom' => "SIS Delémont",
             'iban' => 'CH51 0022 5225 9529 1301 C',
             'bic' => 'UBSWCHZH80A'
         ]);
 
-        $response = $this->json('GET', "/api/v2/paiements/3/iso20022", $data);
+        $response = $this->json('GET', "/api/v2/paiements/{$ids['paiement_id']}/iso20022");
         $response->assertStatus(200);
     }
 }

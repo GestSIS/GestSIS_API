@@ -20,6 +20,9 @@ class InterventionPhaseTest extends TestCase
 
         $data = Intervention::factory()->make()->toArray();
         $data["date_debut"] = "2019-01-01";
+        $data["date_fin"] = "2019-01-01";
+        $data["heure_debut"] = "08:00";
+        $data["heure_fin"] = "18:00";
         $this->interventionId = $this->json('POST', '/api/v2/interventions', $data)->json('data.id');
     }
 
@@ -111,7 +114,8 @@ class InterventionPhaseTest extends TestCase
             ]
         ];
 
-        $allPhases = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/phases', ['phases' => $phases])->json('data');
+        $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/phases', ['phases' => $phases]);
+        $allPhases = $this->json('GET', '/api/v2/interventions/' . $this->interventionId . '/phases')->json('data');
         $ids = array_column(array_filter($allPhases, fn($p) => $p['debut'] !== null), 'id');
 
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/phases', ['phases' => $ids]);

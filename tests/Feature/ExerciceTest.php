@@ -17,11 +17,11 @@ class ExerciceTest extends TestCase
      */
     public function testIndexExercicesWithFilter()
     {
-        $exercice1 = Exercice::factory()->create(['exercice_comptable_id' => 5]);
-        $exercice2 = Exercice::factory()->create(['exercice_comptable_id' => 5]);
-        Exercice::factory()->create(['exercice_comptable_id' => 6]); // Should not appear
+        $exercice1 = Exercice::factory()->create(['exercice_comptable_id' => 2]);
+        $exercice2 = Exercice::factory()->create(['exercice_comptable_id' => 2]);
+        Exercice::factory()->create(['exercice_comptable_id' => 3]); // Should not appear
 
-        $response = $this->json('GET', "/api/v2/exercices?exercice_comptable_id=5");
+        $response = $this->json('GET', "/api/v2/exercices?exercice_comptable_id=2");
 
         $response
             ->assertStatus(200)

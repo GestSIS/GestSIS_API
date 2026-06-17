@@ -106,6 +106,7 @@ class ImputationInterventionTest extends TestCase
 
         $intervention = Intervention::factory()->make();
         $interventionData = $intervention->toArray();
+        $interventionData['exercice_comptable_id'] = 1;
         $interventionData['date_debut'] = '2019-01-01';
         $interventionData['heure_debut'] = '00:00';
         $interventionData['date_fin'] = '2019-01-03';
@@ -365,6 +366,7 @@ class ImputationInterventionTest extends TestCase
 
         $intervention = Intervention::factory()->make();
         // Intervention du jeudi au mercredi incluant un weekend complet
+        $intervention->exercice_comptable_id = 1;
         $intervention->date_debut = '2025-02-27';
         $intervention->heure_debut = '12:00';
         $intervention->date_fin = '2025-03-05';
@@ -454,7 +456,7 @@ class ImputationInterventionTest extends TestCase
                                 "taux" => null,
                                 "taux_description" => null,
                                 "sapeur_id" => 1,
-                                "exercice_comptable_id" => 4,
+                                "exercice_comptable_id" => 1,
                                 "type" => 1,
                                 "module" => 2,
                             ],
@@ -469,7 +471,7 @@ class ImputationInterventionTest extends TestCase
                                 "taux" => "1.25",
                                 "taux_description" => "Nuit",
                                 "sapeur_id" => 2,
-                                "exercice_comptable_id" => 4,
+                                "exercice_comptable_id" => 1,
                                 "type" => 1,
                                 "module" => 2,
                             ],
@@ -484,7 +486,7 @@ class ImputationInterventionTest extends TestCase
                                 "taux" => "1.25",
                                 "taux_description" => "Weekend",
                                 "sapeur_id" => 3,
-                                "exercice_comptable_id" => 4,
+                                "exercice_comptable_id" => 1,
                                 "type" => 1,
                                 "module" => 2,
                             ],

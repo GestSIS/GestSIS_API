@@ -2,61 +2,56 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\ExerciceComptable;
 use App\Models\Intervention;
+use App\Models\InterventionTraitement;
+use App\Models\Localite;
 use App\Models\Phase;
+use App\Models\Sapeur;
+use App\Models\StatFederal;
+use App\Models\TypeIntervention;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class InterventionFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = Intervention::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array
-     */
-    public function definition()
+    public function definition(): array
     {
-        $date = $this->faker->dateTimeThisYear();
-        $dateTwo = clone $date;
+        $exerciceComptable = ExerciceComptable::inRandomOrder()->first();
+        $year = $exerciceComptable?->annee ?? now()->year;
+
+        $date = $this->faker->dateTimeBetween("$year-01-01", "$year-12-31");
+        $dateFin = clone $date;
+        $dateFin->modify('+' . $this->faker->numberBetween(1, 6) . ' hours');
 
         return [
             'date_debut' => $date->format('Y-m-d'),
-            'heure_debut' => $date->format('H:m'),
+            'heure_debut' => $date->format('H:i'),
             'lieu' => $this->faker->streetAddress,
-            'objet' => $this->faker->randomElement(['Inondation', 'Incendie']),
-            'date_fin' => $dateTwo->format('Y-m-d'),
-            'heure_fin' => $dateTwo->format('H:m'),
+            'objet' => $this->faker->randomElement(['Inondation', 'Incendie', 'Accident de la route', 'Fuite de gaz', 'Secours à personne']),
+            'date_fin' => $dateFin->format('Y-m-d'),
+            'heure_fin' => $dateFin->format('H:i'),
             'rapport_police' => 0,
             'degre' => $this->faker->numberBetween(1, 3),
             'sauve_personne' => $this->faker->numberBetween(0, 5),
             'sauve_animaux' => $this->faker->numberBetween(0, 2),
             'description' => $this->faker->text,
-            'proprietaire' => $this->faker->name . '\n' . $this->faker->address,
-            'responsable' => $this->faker->name . '\n' . $this->faker->address,
+            'proprietaire' => $this->faker->name . "\n" . $this->faker->address,
+            'responsable' => $this->faker->name . "\n" . $this->faker->address,
             'stat_nb' => 1,
             'statut' => 0,
-            'exercice_comptable_id' => 4,
-            'localite_id' => $this->faker->randomElement($array = array(3, 5, 23, 44, 93)),
-            'type_intervention_id' => $this->faker->numberBetween(1, 4),
-            'sapeur_id' => $this->faker->numberBetween(1, 10),
-            'stat_federal_id' => $this->faker->numberBetween(1, 5),
-            'intervention_traitement_id' => 1,
-            'date_imputation' => null
+            'exercice_comptable_id' => $exerciceComptable?->id ?? 1,
+            'localite_id' => Localite::inRandomOrder()->first()?->id ?? 1,
+            'type_intervention_id' => TypeIntervention::inRandomOrder()->first()?->id ?? 1,
+            'sapeur_id' => Sapeur::inRandomOrder()->first()?->id ?? 1,
+            'stat_federal_id' => StatFederal::inRandomOrder()->first()?->id ?? 1,
+            'intervention_traitement_id' => InterventionTraitement::inRandomOrder()->first()?->id ?? 1,
+            'date_imputation' => null,
         ];
     }
 
-    /**
-     * Configure the model factory.
-     *
-     * @return $this
-     */
-    public function configure()
+    public function configure(): static
     {
         return $this->afterCreating(function (Intervention $intervention) {
             $phase = new Phase();

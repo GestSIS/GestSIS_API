@@ -3,64 +3,46 @@
 namespace Database\Factories;
 
 use App\Domaine\Business\SapeurBusiness;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Civilite;
+use App\Models\Localite;
 use App\Models\Sapeur;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class SapeurFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = Sapeur::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array
-     */
-    public function definition()
+    public function definition(): array
     {
         return [
             'nom' => $this->faker->lastName,
             'prenom' => $this->faker->firstName,
             'suffixe' => '',
             'rue' => $this->faker->streetName,
-            'no_rue' => $this->faker->streetSuffix,
+            'no_rue' => $this->faker->buildingNumber,
             'date_naissance' => $this->faker->dateTimeBetween('-60years', '-18years')->format('Y-m-d'),
             'no_avs' => $this->faker->avs13,
             'profession' => $this->faker->jobTitle,
             'employeur' => 'Canton du Jura',
             'lieu_de_travail' => $this->faker->city,
-
-            'email' => $this->faker->email,
+            'email' => $this->faker->unique()->safeEmail,
             'actif' => 1,
-
             'iban' => $this->faker->iban('CH'),
             'iban_statut' => 1,
             'remarque' => $this->faker->text,
             'porteur' => 0,
-            'localite_id' => $this->faker->numberBetween(1, 10),
-            'civilite_id' => $this->faker->numberBetween(1, 2),
-
+            'localite_id' => Localite::inRandomOrder()->first()?->id ?? 1,
+            'civilite_id' => Civilite::inRandomOrder()->first()?->id ?? 1,
             'type' => SapeurBusiness::TYPE_SAPEUR,
         ];
     }
 
-    /**
-     * Configure the factory to create an entry mutation after creating a sapeur.
-     */
-    public function configure()
+    public function configure(): static
     {
         return $this->afterCreating(function (Sapeur $sapeur) {
-            // Create an entry mutation with incorporation date
-            // Use a default date if not set (mimics the API behavior)
-            $incorporationDate = $this->faker->dateTimeBetween('-10years', '-1year')->format('Y-m-d');
-
             $sapeur->mutations()->create([
                 'localite_id' => $sapeur->localite_id,
-                'incorporation' => $incorporationDate,
+                'incorporation' => $this->faker->dateTimeBetween('-10years', '-1year')->format('Y-m-d'),
                 'sortie' => null,
                 'motif' => 'Incorporation',
             ]);
