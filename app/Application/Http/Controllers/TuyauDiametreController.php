@@ -4,6 +4,7 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\Materiel\DiameterBusiness;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class TuyauDiametreController extends Controller
 {
@@ -22,7 +23,7 @@ class TuyauDiametreController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'diametre' => 'integer|min:1|required',
+            'diametre' => 'integer|min:1|required|unique:tuyau_diametres,diametre',
         ]);
 
         $diametre = DiameterBusiness::createDiameter($data);
@@ -32,7 +33,10 @@ class TuyauDiametreController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->validate([
-            'diametre' => 'integer|min:1|required',
+            'diametre' => [
+                'integer', 'min:1', 'required',
+                Rule::unique('tuyau_diametres', 'diametre')->ignore($id),
+            ],
         ]);
 
         $diametre = DiameterBusiness::editDiameter($id, $data);
