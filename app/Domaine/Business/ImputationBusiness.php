@@ -91,7 +91,9 @@ class ImputationBusiness
         // Validation et recalcul du total
         $totalCalcule = $data['tarif'] * $data['quantite'];
         $totalAttendu = self::arrondi_5_centimes($totalCalcule);
-        if (abs($totalAttendu - $data['total']) > 0.01) {
+        // On compare le total fourni après le même arrondi (5 centimes) pour éviter
+        // les faux rejets dus aux imprécisions de virgule flottante côté client.
+        if (abs($totalAttendu - self::arrondi_5_centimes($data['total'])) > 0.001) {
             throw new ArrayException([], "Le total fourni ({$data['total']}) ne correspond pas au calcul (tarif * quantité = {$totalAttendu})");
         }
 
@@ -127,7 +129,9 @@ class ImputationBusiness
         // Validation et recalcul du total
         $totalCalcule = $data['tarif'] * $data['quantite'];
         $totalAttendu = self::arrondi_5_centimes($totalCalcule);
-        if (abs($totalAttendu - $data['total']) > 0.01) {
+        // On compare le total fourni après le même arrondi (5 centimes) pour éviter
+        // les faux rejets dus aux imprécisions de virgule flottante côté client.
+        if (abs($totalAttendu - self::arrondi_5_centimes($data['total'])) > 0.001) {
             throw new ArrayException([], "Le total fourni ({$data['total']}) ne correspond pas au calcul (tarif * quantité = {$totalAttendu})");
         }
 
