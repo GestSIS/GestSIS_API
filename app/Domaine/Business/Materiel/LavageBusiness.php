@@ -59,7 +59,7 @@ class LavageBusiness
       Lavage::whereId($lavage['id'])->update($lavage);
       return $lavage['id'];
     })->all();
-    return Lavage::whereIn('id', $ids);
+    return Lavage::whereIn('id', $ids)->get();
   }
 
   /**

@@ -54,6 +54,7 @@ class MaterielTypeBusiness // extends OrderModel
     $product['reparateur'] ??= '';
     $product['remarque'] ??= '';
     $product['prefix'] ??= '';
+    $product['type'] = (int) $product['type'];
 
     $order = DB::table('materiel_types')->max('id');
 
@@ -68,10 +69,10 @@ class MaterielTypeBusiness // extends OrderModel
     ]);
 
     if ($product['type'] === self::TYPE_PIPE && $tuyau) {
-      MaterielTypeTuyau::insert(['id' => $type->id, ...$tuyau]);
+      MaterielTypeTuyau::create(['id' => $type->id, ...$tuyau]);
     }
     if ($product['type'] === self::TYPE_BATTERY && $batterie) {
-      MaterielTypeBatterie::insert(['id' => $type->id, ...$batterie]);
+      MaterielTypeBatterie::create(['id' => $type->id, ...$batterie]);
     }
 
     return MaterielType::with(['tuyau', 'batterie'])->find($type->id);
@@ -89,13 +90,14 @@ class MaterielTypeBusiness // extends OrderModel
     $data['reparateur'] ??= '';
     $data['remarque'] ??= '';
     $data['prefix'] ??= '';
+    $data['type'] = (int) $data['type'];
 
     $tuyau = $data['tuyau'] ?? null;
     unset($data['tuyau']);
     $batterie = $data['batterie'] ?? null;
     unset($data['batterie']);
 
-    $oldType = MaterielType::find($id)->get(['type']);
+    $oldType = (int) MaterielType::find($id)->type;
     if (
       $oldType === self::TYPE_VEHICULE && $data['type'] !== self::TYPE_VEHICULE &&
       InterventionVehicule::join('articles', 'articles.id', '=', 'intervention_vehicules.vehicule_id')
@@ -110,12 +112,12 @@ class MaterielTypeBusiness // extends OrderModel
       ->update($data);
 
     if ($data['type'] === self::TYPE_PIPE && $tuyau) {
-      MaterielTypeTuyau::insert(['id' => $id, ...$tuyau]);
+      MaterielTypeTuyau::updateOrCreate(['id' => $id], $tuyau);
     } else {
       MaterielTypeTuyau::whereId($id)->delete();
     }
     if ($data['type'] === self::TYPE_BATTERY && $batterie) {
-      MaterielTypeBatterie::insert(['id' => $id, ...$batterie]);
+      MaterielTypeBatterie::updateOrCreate(['id' => $id], $batterie);
     } else {
       MaterielTypeBatterie::whereId($id)->delete();
     }

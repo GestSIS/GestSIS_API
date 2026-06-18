@@ -9,7 +9,10 @@ class MaterielTypeBatterie extends Model
 {
     use HasFactory;
 
+    public $incrementing = false;
+
     protected $fillable = [
+        'id',
         'nombre',
         'batterie_type_id'
     ];

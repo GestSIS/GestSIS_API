@@ -46,7 +46,7 @@ class EmplacementBusiness
    */
   public static function createEmplacement($emplacement)
   {
-    $order = DB::table('materiel_categories')->max('id');
+    $order = DB::table('emplacements')->max('id');
     $emplacement['remarque'] ??= '';
     $emplacement['tri'] = ($order ?? 0) + 1;
     return Emplacement::create($emplacement);

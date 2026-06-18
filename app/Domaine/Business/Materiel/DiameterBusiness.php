@@ -32,7 +32,7 @@ class DiameterBusiness
    */
   public static function getDiameter($id)
   {
-    TuyauDiametre::find($id);
+    return TuyauDiametre::find($id);
   }
 
   /**
