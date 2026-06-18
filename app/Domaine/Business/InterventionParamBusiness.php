@@ -119,7 +119,7 @@ class InterventionParamBusiness
 
     public static function ajouterMateriel($data)
     {
-        if (!array_key_exists('type_unite_id', $data) || $data['type_unite_id'] === "0") {
+        if (!array_key_exists('type_unite_id', $data) || (int) $data['type_unite_id'] === 0) {
             $data['type_unite_id'] = null;
         }
         $materiel = new Materiel();
@@ -130,7 +130,7 @@ class InterventionParamBusiness
 
     public static function modifierMateriel($id, $data)
     {
-        if (!array_key_exists('type_unite_id', $data) || $data['type_unite_id'] === "0") {
+        if (!array_key_exists('type_unite_id', $data) || (int) $data['type_unite_id'] === 0) {
             $data['type_unite_id'] = null;
         }
         Materiel::whereId($id)->limit(1)->update($data);
