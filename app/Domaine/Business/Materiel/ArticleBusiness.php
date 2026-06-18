@@ -147,7 +147,7 @@ class ArticleBusiness
     })->all();
 
     // Controller numérotation correcte
-    $articles = collect($articles)->map(function ($article) use ($indexedTypes) {
+    return collect($articles)->map(function ($article) use ($indexedTypes) {
       $type = $indexedTypes[$article['materiel_type_id']];
       return [
         'id' => $article['id'],
