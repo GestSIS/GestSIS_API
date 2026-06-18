@@ -71,7 +71,7 @@ class ArticleBusiness
     return Article::whereIn('id', $articleIds)->get();
   }
 
-  public static function creerArticles(array $articles)
+  public static function creerArticles(array $articles): array
   {
     //TODO: Fail safe
     // fetch types equivalents
@@ -96,7 +96,7 @@ class ArticleBusiness
     }
 
     // Controller numérotation correcte
-    $articles = collect($articles)->map(function ($article) use ($indexedTypes) {
+    return collect($articles)->map(function ($article) use ($indexedTypes) {
       $type = $indexedTypes[$article['materiel_type_id']];
       return [
         'quantite' => $type->est_numerote ? 1 : $article['quantite'],
@@ -123,7 +123,7 @@ class ArticleBusiness
       ->all();
   }
 
-  public static function editArticles(array $articles): array
+  public static function editArticles(array $articles): Collection
   {
     // fetch types equivalents
     $indexedTypes = MaterielType::all()->keyBy('id');
@@ -147,7 +147,7 @@ class ArticleBusiness
     })->all();
 
     // Controller numérotation correcte
-    return collect($articles)->map(function ($article) use ($indexedTypes) {
+    $articles = collect($articles)->map(function ($article) use ($indexedTypes) {
       $type = $indexedTypes[$article['materiel_type_id']];
       return [
         'id' => $article['id'],
@@ -167,8 +167,12 @@ class ArticleBusiness
         'immatriculation' => $article['immatriculation'] ?? '',
         'statut' => $article['statut'] ?? true,
       ];
-    })->map(fn($article) => Article::find($article['id'])->update($article))
-      ->all();
+    })->map(function ($article) {
+      Article::find($article['id'])->update($article);
+      return $article['id'];
+    });
+
+    return Article::whereIn('id', $articles)->get();
   }
 
   public static function deleteArticles(array $articleIds): bool

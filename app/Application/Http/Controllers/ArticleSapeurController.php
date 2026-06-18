@@ -52,7 +52,7 @@ class ArticleSapeurController extends Controller
             'articleIds.*' => 'integer|min:1',
         ]);
 
-        $articles = ArticleBusiness::retourArticles($data['date'], $data['articleIds'], $data['emplacementId']);
+        $articles = ArticleBusiness::retourArticles($data['emplacementId'], $data['date'], $data['articleIds']);
 
         return response()->json(['data' => $articles]);
     }
