@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\ExerciceComptable;
 use App\Models\Intervention;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -160,5 +161,54 @@ class InterventionTest extends TestCase
             ->assertJson([
                 'data' => true
             ]);
+    }
+
+    /**
+     * Test import complet intervention with a past year date_debut
+     * where no ExerciceComptable exists for that year.
+     * The system should auto-create one and succeed.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testImportInterventionCompletAutoCreatesExerciceComptableForPastYear()
+    {
+        $pastYear = now()->subYear()->year;
+
+        // Ensure no ExerciceComptable exists for the past year
+        ExerciceComptable::where('annee', $pastYear)->delete();
+
+        $payload = [
+            'date_debut' => "$pastYear-06-15",
+            'heure_debut' => '10:00',
+            'date_fin' => "$pastYear-06-15",
+            'heure_fin' => '12:00',
+            'objet' => 'Test past year intervention',
+            'lieu' => 'Test lieu',
+            'degre' => 2,
+            'stat_nb' => 1,
+            'sauve_personne' => 0,
+            'sauve_animaux' => 0,
+            'rapport_police' => false,
+            'localite_id' => 1,
+            'stat_federal_id' => 1,
+            'sapeur_id' => 1,
+            'type_intervention_id' => 1,
+            'sapeurs' => [],
+            'missions' => [],
+            'appels' => [],
+            'vehicules' => [],
+            'groupes' => [],
+            'quittances' => [],
+            'materiel' => [],
+        ];
+
+        $response = $this->json('POST', '/api/v2/interventions-complet', $payload);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure(['data' => ['id']]);
+
+        $this->assertDatabaseHas('exercice_comptables', ['annee' => $pastYear]);
     }
 }

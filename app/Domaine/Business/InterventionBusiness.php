@@ -94,15 +94,14 @@ class InterventionBusiness
             ['fin', '>=', $intervention['date_debut']],
         ])->first();
 
-        // Création de l'exercice comptable automatique si année en cours et aucun exercice comptable existant
-        $anneeEnCours = Carbon::now()->year;
-        if ($exerciceComptable === null && $anneeEnCours == Carbon::parse($intervention['date_debut'])->year) {
-            // Création de l'exercice comptable
+        // Création de l'exercice comptable automatique si aucun exercice comptable existant
+        if ($exerciceComptable === null) {
+            $anneeIntervention = Carbon::parse($intervention['date_debut'])->year;
             $exerciceComptable = new ExerciceComptable();
-            $exerciceComptable->annee = $anneeEnCours;
-            $exerciceComptable->designation = "Année comptable $anneeEnCours";
-            $exerciceComptable->debut = Carbon::createFromDate($anneeEnCours, 1, 1);
-            $exerciceComptable->fin = Carbon::createFromDate($anneeEnCours, 12, 31);
+            $exerciceComptable->annee = $anneeIntervention;
+            $exerciceComptable->designation = "Année comptable $anneeIntervention";
+            $exerciceComptable->debut = Carbon::createFromDate($anneeIntervention, 1, 1);
+            $exerciceComptable->fin = Carbon::createFromDate($anneeIntervention, 12, 31);
             $exerciceComptable->boucle = false;
             $exerciceComptable->save();
         }
