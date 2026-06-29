@@ -78,6 +78,9 @@ class SapeurParamBusiness
         if (GradeSapeur::where('grade_id', $id)->exists()) {
             throw new ArrayException([], 'Impossible de supprimer ce grade, celui-ci est attribué à un sapeur.');
         }
+        if (Cours::where('grade_id', $id)->exists()) {
+            throw new ArrayException([], 'Impossible de supprimer ce grade, celui-ci est lié à un cours.');
+        }
         Grade::whereId($id)->delete();
     }
 

@@ -153,6 +153,50 @@ class SapeurTest extends TestCase
         $this->assertEquals($updateData['prenom'], $getResponse->json('data.prenom'));
     }
 
+    public function testPartialUpdateOfProReferencesKeepsAvsAndEmail()
+    {
+        $sapeur = Sapeur::factory()->create([
+            'localite_id' => $this->localiteId,
+            'no_avs' => '756.1234.5678.97',
+            'email' => 'sapeur@example.com',
+            'lieu_de_travail' => 'Ancien lieu',
+        ]);
+
+        // Frontend "Références professionnelles" save sends only the pro fields.
+        $this->json('PUT', '/api/v2/sapeurs/' . $sapeur->id, [
+            'profession' => 'Mécanicien',
+            'employeur' => 'Garage SA',
+            'lieu_de_travail' => 'Nouveau lieu',
+        ])->assertStatus(200);
+
+        $sapeur->refresh();
+        $this->assertEquals('Nouveau lieu', $sapeur->lieu_de_travail);
+        $this->assertEquals('756.1234.5678.97', $sapeur->no_avs);
+        $this->assertEquals('sapeur@example.com', $sapeur->email);
+    }
+
+    public function testPartialUpdateOfPersonalDataKeepsProReferences()
+    {
+        $sapeur = Sapeur::factory()->create([
+            'localite_id' => $this->localiteId,
+            'profession' => 'Mécanicien',
+            'employeur' => 'Garage SA',
+            'lieu_de_travail' => 'Atelier',
+        ]);
+
+        // Frontend "Données personnelles" save sends only the personal fields.
+        $this->json('PUT', '/api/v2/sapeurs/' . $sapeur->id, [
+            'nom' => 'Nouveau',
+            'prenom' => 'Prenom',
+            'email' => 'new@example.com',
+        ])->assertStatus(200);
+
+        $sapeur->refresh();
+        $this->assertEquals('Mécanicien', $sapeur->profession);
+        $this->assertEquals('Garage SA', $sapeur->employeur);
+        $this->assertEquals('Atelier', $sapeur->lieu_de_travail);
+    }
+
     public function testUpdateSapeurReturnsErrorWhenNotFound()
     {
         $data = Sapeur::factory()->make()->toArray();

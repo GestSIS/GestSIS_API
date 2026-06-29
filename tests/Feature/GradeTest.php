@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Cours;
 use App\Models\Grade;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -137,5 +138,26 @@ class GradeTest extends TestCase
 
         $response->assertStatus(404);
         $response->assertJson(['error' => 'Grade not found']);
+    }
+
+    public function testDestroyGradeReturnsErrorWhenLinkedToCours(): void
+    {
+        $grade = Grade::factory()->create();
+        Cours::factory()->create(['grade_id' => $grade->id]);
+
+        $response = $this->json('DELETE', '/api/v2/grades/' . $grade->id, [], [
+            'Sis-Id' => 1,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'error' => [
+                'message' => 'Impossible de supprimer ce grade, celui-ci est lié à un cours.',
+            ],
+        ]);
+
+        $this->assertDatabaseHas('grades', [
+            'id' => $grade->id,
+        ]);
     }
 }
