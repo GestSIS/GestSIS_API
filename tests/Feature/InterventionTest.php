@@ -211,4 +211,115 @@ class InterventionTest extends TestCase
 
         $this->assertDatabaseHas('exercice_comptables', ['annee' => $pastYear]);
     }
+
+    /**
+     * Test import complet intervention with groupes whose "no" is alphanumeric,
+     * a numeric string or an integer. All must pass validation and be stored,
+     * since group numbers are not necessarily pure integers (e.g. "91n").
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testImportInterventionCompletAcceptsAlphanumericAndIntegerGroupeNo()
+    {
+        $year = now()->year;
+
+        $payload = [
+            'date_debut' => "$year-06-15",
+            'heure_debut' => '10:00',
+            'date_fin' => "$year-06-15",
+            'heure_fin' => '12:00',
+            'objet' => 'Test groupe no alphanumeric',
+            'lieu' => 'Test lieu',
+            'degre' => 2,
+            'stat_nb' => 1,
+            'sauve_personne' => 0,
+            'sauve_animaux' => 0,
+            'rapport_police' => false,
+            'localite_id' => 1,
+            'stat_federal_id' => 1,
+            'sapeur_id' => 1,
+            'type_intervention_id' => 1,
+            'sapeurs' => [],
+            'missions' => [],
+            'appels' => [],
+            'vehicules' => [],
+            'groupes' => [
+                ['no' => '91n', 'designation' => '1er secours, FMO Nord'],
+                ['no' => '90', 'designation' => 'Groupe EM SIS FMO'],
+                ['no' => 42, 'designation' => 'Groupe entier'],
+            ],
+            'quittances' => [],
+            'materiel' => [],
+        ];
+
+        $response = $this->json('POST', '/api/v2/interventions-complet', $payload);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure(['data' => ['id']]);
+
+        $interventionId = $response->json('data.id');
+
+        $this->assertDatabaseHas('groupe_intervention', [
+            'intervention_id' => $interventionId,
+            'no' => '91n',
+        ]);
+        $this->assertDatabaseHas('groupe_intervention', [
+            'intervention_id' => $interventionId,
+            'no' => '90',
+        ]);
+        $this->assertDatabaseHas('groupe_intervention', [
+            'intervention_id' => $interventionId,
+            'no' => '42',
+        ]);
+    }
+
+    /**
+     * Test import complet intervention rejects a groupe "no" longer than
+     * the 10-character database column.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testImportInterventionCompletRejectsTooLongGroupeNo()
+    {
+        $year = now()->year;
+
+        $payload = [
+            'date_debut' => "$year-06-15",
+            'heure_debut' => '10:00',
+            'date_fin' => "$year-06-15",
+            'heure_fin' => '12:00',
+            'objet' => 'Test groupe no too long',
+            'degre' => 2,
+            'stat_nb' => 1,
+            'sauve_personne' => 0,
+            'sauve_animaux' => 0,
+            'rapport_police' => false,
+            'localite_id' => 1,
+            'stat_federal_id' => 1,
+            'sapeur_id' => 1,
+            'type_intervention_id' => 1,
+            'sapeurs' => [],
+            'missions' => [],
+            'appels' => [],
+            'vehicules' => [],
+            'groupes' => [
+                ['no' => '12345678901', 'designation' => 'Trop long'],
+            ],
+            'quittances' => [],
+            'materiel' => [],
+        ];
+
+        $response = $this->json('POST', '/api/v2/interventions-complet', $payload);
+
+        // This API returns validation errors as HTTP 200 with an "error" payload
+        // (see bootstrap/app.php withExceptions), not the default 422.
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure(['error' => ['groupes.0.no']]);
+
+        $this->assertDatabaseMissing('groupe_intervention', ['no' => '12345678901']);
+    }
 }
