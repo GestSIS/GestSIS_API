@@ -66,6 +66,11 @@ class PaiementBusiness
     {
         self::controlerStatusExerciceComptable($exerciceComptableId);
 
+        return DB::transaction(fn() => self::creerDecompteInterne($ecritures, $designation, $exerciceComptableId, $date, $deduction));
+    }
+
+    private static function creerDecompteInterne($ecritures, $designation, $exerciceComptableId, $date, $deduction)
+    {
         $avsParam = AvsParam::first();
         if ($avsParam === null) {
             throw new ArrayException(["message" => "Paramètres AVS non configurés"]);
@@ -195,6 +200,7 @@ class PaiementBusiness
                 $total['autre'];
         }
 
+        $now = Carbon::now();
         $paiements = [];
         $ecritureAvsAc = [];
         $ecritureAvsGlobale = [
@@ -215,16 +221,20 @@ class PaiementBusiness
 
             'module' => ImputationBusiness::ECRITURE_MODULE_AVS,
             'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_CHARGE_AVS_AC,
+
+            'created_at' => $now,
+            'updated_at' => $now,
         ];
 
         // Création paiements
         foreach ($totaux as $key => $total) {
             if (
-                $total['solde_a_percevoir'] !== 0.0 ||
-                $total['indemnite_a_percevoir'] !== 0.0 ||
-                $total['frais_forfaitaire_a_percevoir'] !== 0.0 ||
-                $total['avs_ac_a_cotiser'] !== 0.0 ||
-                $total['autre'] !== 0.0
+                round($total['solde_a_percevoir'], 2) !== 0.0 ||
+                round($total['indemnite_a_percevoir'], 2) !== 0.0 ||
+                round($total['frais_forfaitaire_a_percevoir'], 2) !== 0.0 ||
+                round($total['frais_effectif_a_percevoir'], 2) !== 0.0 ||
+                round($total['avs_ac_a_cotiser'], 2) !== 0.0 ||
+                round($total['autre'], 2) !== 0.0
             ) {
                 $paiements[] = [
                     'decompte_id' => $decompte->id,
@@ -235,7 +245,9 @@ class PaiementBusiness
                     'avs_ac' => $total['avs_ac_a_cotiser'],
                     'autre' => $total['autre'],
                     'total' => $total['total_final'],
-                    'sapeur_id' => $key
+                    'sapeur_id' => $key,
+                    'created_at' => $now,
+                    'updated_at' => $now,
                 ];
 
                 // Maj décompte
@@ -269,13 +281,16 @@ class PaiementBusiness
 
                         'module' => ImputationBusiness::ECRITURE_MODULE_AVS,
                         'type' => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_CHARGE_AVS_AC,
+
+                        'created_at' => $now,
+                        'updated_at' => $now,
                     ];
                 }
             }
         }
 
         // Génération écriture AVS/AC pour le décompze
-        if ($deduction && $ecritureAvsGlobale['total'] !== 0) {
+        if ($deduction && round($ecritureAvsGlobale['total'], 2) !== 0.0) {
             $decompte->total += $ecritureAvsGlobale['total'] / 2.0;
             $ecritureAvsAc[] = $ecritureAvsGlobale;
         }
@@ -294,11 +309,16 @@ class PaiementBusiness
     public static function supprimerDecompte(int $decompteId)
     {
         $decompte = Decompte::find($decompteId);
+        if ($decompte === null) {
+            throw new InvalidActionException([], "Décompte introuvable");
+        }
         self::controlerStatusExerciceComptable($decompte->exercice_comptable_id);
 
-        Ecriture::where('decompte_id', $decompteId)->where('type', ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_CHARGE_AVS_AC)->delete();
-        Ecriture::where('decompte_id', $decompteId)->update(['decompte_id' => null]);
-        Decompte::whereId($decompteId)->delete(); // Cascade delete des paiements
+        DB::transaction(function () use ($decompteId) {
+            Ecriture::where('decompte_id', $decompteId)->where('type', ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_CHARGE_AVS_AC)->delete();
+            Ecriture::where('decompte_id', $decompteId)->update(['decompte_id' => null]);
+            Decompte::whereId($decompteId)->delete(); // Cascade delete des paiements
+        });
     }
 
     /**
@@ -339,7 +359,7 @@ class PaiementBusiness
                     $transaction = new BankCreditTransfer(
                         "instr-$i",
                         "e2e-$i",
-                        new Money\CHF((int) ($p->total * 100)),
+                        new Money\CHF((int) round(ImputationBusiness::arrondi_5_centimes($p->total) * 100)),
                         // TODO: Could be improved en remplacant les charactères accentués par leur version non accentué
                         Text::sanitize("$sapeur->prenom $sapeur->nom", 70),
                         new StructuredPostalAddress(
@@ -355,7 +375,7 @@ class PaiementBusiness
                     $paiement->addTransaction($transaction);
                     $i++;
                 } catch (InvalidArgumentException $e) {
-                    throw new ArrayException(['error' => $e->getMessage(), 'type' => typeOf($e)], "Informations de paiement pour '$sapeur->nom $sapeur->prenom' invalides : $sapeur->iban");
+                    throw new ArrayException(['error' => $e->getMessage(), 'type' => $e::class], "Informations de paiement pour '$sapeur->nom $sapeur->prenom' invalides : $sapeur->iban");
                 }
             }
         }
@@ -376,34 +396,41 @@ class PaiementBusiness
      */
     public static function iso20022PourPaiement($paiementId, $nom, $bic, $iban)
     {
-        $paiement = new PaymentInformation(
-            "payment-000",
-            $nom,
-            new BIC($bic),
-            new IBAN($iban)
-        );
         $p = Paiement::find($paiementId);
-        if ($p->total > 0) {
-            $sapeur = $p->sapeur()->get()[0];
-            $transaction = new BankCreditTransfer(
-                "instr-001",
-                "e2e-001",
-                new Money\CHF((int) ($p->total * 100)),
-                "$sapeur->prenom $sapeur->nom",
-                new StructuredPostalAddress(
-                    $sapeur->rue === "" ? null : $sapeur->rue,
-                    $sapeur->no_rue === "" ? null : $sapeur->no_rue,
-                    $sapeur->localite()->get()[0]->npa,
-                    $sapeur->localite()->get()[0]->designation
-                ),
-                new IBAN($sapeur->iban),
-                IID::fromIBAN(new IBAN($sapeur->iban))
-            );
-            $paiement->addTransaction($transaction);
-
-            $message = new CustomerCreditTransfer('message-001', $nom, CustomerCreditTransfer::SPS_2022);
-            $message->addPayment($paiement);
+        if ($p === null || $p->total <= 0) {
+            throw new InvalidActionException([], "Impossible de générer le fichier de paiement : paiement introuvable ou montant nul/négatif");
         }
+
+        try {
+            $paiement = new PaymentInformation(
+                "payment-000",
+                $nom,
+                new BIC($bic),
+                new IBAN($iban)
+            );
+        } catch (Exception $e) {
+            throw new InvalidActionException([], 'Veuillez vérifier les informations de paiement de votre SIS');
+        }
+
+        $sapeur = $p->sapeur()->get()[0];
+        $transaction = new BankCreditTransfer(
+            "instr-001",
+            "e2e-001",
+            new Money\CHF((int) round(ImputationBusiness::arrondi_5_centimes($p->total) * 100)),
+            "$sapeur->prenom $sapeur->nom",
+            new StructuredPostalAddress(
+                $sapeur->rue === "" ? null : $sapeur->rue,
+                $sapeur->no_rue === "" ? null : $sapeur->no_rue,
+                $sapeur->localite()->get()[0]->npa,
+                $sapeur->localite()->get()[0]->designation
+            ),
+            new IBAN($sapeur->iban),
+            IID::fromIBAN(new IBAN($sapeur->iban))
+        );
+        $paiement->addTransaction($transaction);
+
+        $message = new CustomerCreditTransfer('message-001', $nom, CustomerCreditTransfer::SPS_2022);
+        $message->addPayment($paiement);
 
         return $message->asXml();
     }
@@ -481,6 +508,7 @@ class PaiementBusiness
             Log::error("Certificat de salaire creation", [
                 "exception" => $e,
             ]);
+            throw $e;
         } finally {
             // Suppression du dossier même si erreur php
             Storage::deleteDirectory("tmp/" . $exerciceComptableId);
@@ -496,7 +524,7 @@ class PaiementBusiness
      * 
      * @return pdf certificat de salaire
      */
-    public static function certificatSalaireSapeur($exerciceComptableId, $sapeurId, $affichageFrais = false)
+    public static function certificatSalaireSapeur(int $exerciceComptableId, int $sapeurId, bool $affichageFrais = false)
     {
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
         $sisParam = SisParam::with(['sapeur', 'localite'])->first();
@@ -508,16 +536,32 @@ class PaiementBusiness
             throw new ArrayException([], "Paramètres de l'AVS non configuré");
         }
 
-        // Calcul des totaux
-        $total['solde'] = 0;
-        $total['indemnite'] = 0;
-        $total['avs_ac'] = 0;
-        $total['frais_effectif'] = 0;
-        $total['frais_forfaitaire'] = 0;
+        $total = self::totauxPaiementsSapeur($exerciceComptableId, $sapeurId);
 
-        $count = 0;
-        foreach (Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get() as $d) {
-            $count++;
+        $sapeur = Sapeur::with(['localite', 'civilite'])->find($sapeurId);
+        return self::creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, false, $sisParam, $avsParam);
+    }
+
+    /**
+     * Totaux des paiements d'un sapeur pour un exercice comptable
+     *
+     * @return array{solde: float, indemnite: float, avs_ac: float, frais_effectif: float, frais_forfaitaire: float}
+     */
+    public static function totauxPaiementsSapeur(int $exerciceComptableId, int $sapeurId): array
+    {
+        $decomptes = Decompte::where('exercice_comptable_id', $exerciceComptableId)->with('paiements')->get();
+        if ($decomptes->isEmpty()) {
+            throw new ArrayException([], "Impossible de générer le certificat de salaire, aucun décompte trouvé !");
+        }
+
+        $total = [
+            'solde' => 0.0,
+            'indemnite' => 0.0,
+            'avs_ac' => 0.0,
+            'frais_effectif' => 0.0,
+            'frais_forfaitaire' => 0.0,
+        ];
+        foreach ($decomptes as $d) {
             foreach ($d->paiements as $p) {
                 if ($p->sapeur_id === $sapeurId) {
                     $total['solde'] += $p->solde;
@@ -528,12 +572,8 @@ class PaiementBusiness
                 }
             }
         }
-        if ($count === 0) {
-            throw new ArrayException([], "Impossible de générer le certificat de salaire, aucun décompte trouvé !");
-        }
 
-        $sapeur = Sapeur::with(['localite', 'civilite'])->find($sapeurId);
-        return self::creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, false, $sisParam, $avsParam);
+        return $total;
     }
 
     /**

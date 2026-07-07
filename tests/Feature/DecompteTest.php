@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Domaine\Business\ImputationBusiness;
 use App\Domaine\Business\PaiementBusiness;
+use App\Domaine\Exceptions\ArrayException;
 use App\Models\AvsParam;
 use App\Models\Ecriture;
 use App\Models\SisParam;
@@ -557,6 +558,190 @@ class DecompteTest extends TestCase
                     'deduction'
                 ]
             ]);
+    }
+
+    /**
+     * Un sapeur avec uniquement des frais effectifs doit recevoir un paiement
+     */
+    public function testDecompteFraisEffectifSeul()
+    {
+        Ecriture::insert([
+            [
+                "designation" => "test frais effectif",
+                "total" => 12.50,
+                "tarif" => 12.50,
+                "type_unite_id" => ImputationBusiness::UNITE_PIECE,
+                "quantite" => 1,
+                "module" => ImputationBusiness::ECRITURE_MODULE_DIVERS,
+                "type" => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_FRAIS_EFFECTIF,
+                "sapeur_id" => 1,
+                "compte_id" => 1,
+                "exercice_comptable_id" => 2,
+                "ecriture_categorie_id" => 1,
+            ],
+        ]);
+        $ecritures = Ecriture::where('exercice_comptable_id', 2)->get();
+
+        AvsParam::updateOrCreate([], [
+            'taux_avs' => "1.0",
+            'taux_ac' => "1.0",
+            'franchise_avs' => 2300,
+            'franchise_imposition' => 5000,
+            'franchise_imposition_cantonale' => 8000,
+        ]);
+
+        $decompte = PaiementBusiness::creerDecompte($ecritures, 'test frais effectif', 2, Carbon::today(), 0);
+
+        $response = $this->json('GET', "api/v2/decomptes/" . $decompte['id']);
+
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                "data" => [
+                    'a_payer_total' => "12.50",
+                    'paiements' => [
+                        [
+                            "sapeur_id" => 1,
+                            "solde" => "0.00",
+                            "indemnite" => "0.00",
+                            "frais_forfaitaire" => "0.00",
+                            "frais_effectif" => "12.50",
+                            "autre" => "0.00",
+                            "avs_ac" => "0.00",
+                            "total" => "12.50",
+                        ],
+                    ],
+                ],
+            ]);
+    }
+
+    /**
+     * Les montants iso20022 sont arrondis aux 5 centimes (pas de troncature du centime)
+     */
+    public function testIso20022ArrondiCinqCentimes()
+    {
+        $decompteId = DB::table('decomptes')->insertGetId([
+            'designation' => 'iso20022 arrondi',
+            'date' => '2025-01-31',
+            'exercice_comptable_id' => 2,
+            'deduction' => 0,
+            'avs_total' => 0,
+            'ac_total' => 0,
+            'total' => 19.97,
+        ]);
+        DB::table('paiements')->insert([
+            'decompte_id' => $decompteId,
+            'sapeur_id' => 1,
+            'solde' => 19.97,
+            'indemnite' => 0,
+            'frais_forfaitaire' => 0,
+            'frais_effectif' => 0,
+            'autre' => 0,
+            'avs_ac' => 0,
+            'total' => 19.97,
+        ]);
+
+        $xml = PaiementBusiness::iso20022PourDecompte($decompteId, 'SIS Test', 'UBSWCHZH80A', 'CH51 0022 5225 9529 1301 C');
+
+        $this->assertStringContainsString('19.95', $xml);
+        $this->assertStringNotContainsString('19.96', $xml);
+        $this->assertStringNotContainsString('19.97', $xml);
+    }
+
+    /**
+     * Un IBAN de sapeur invalide doit lever une ArrayException explicite
+     */
+    public function testIso20022IbanSapeurInvalide()
+    {
+        DB::table('sapeurs')->where('id', 1)->update(['iban' => 'CH00INVALIDE']);
+
+        $decompteId = DB::table('decomptes')->insertGetId([
+            'designation' => 'iso20022 iban invalide',
+            'date' => '2025-01-31',
+            'exercice_comptable_id' => 2,
+            'deduction' => 0,
+            'avs_total' => 0,
+            'ac_total' => 0,
+            'total' => 10,
+        ]);
+        DB::table('paiements')->insert([
+            'decompte_id' => $decompteId,
+            'sapeur_id' => 1,
+            'solde' => 10,
+            'indemnite' => 0,
+            'frais_forfaitaire' => 0,
+            'frais_effectif' => 0,
+            'autre' => 0,
+            'avs_ac' => 0,
+            'total' => 10,
+        ]);
+
+        $this->expectException(ArrayException::class);
+        $this->expectExceptionMessage('invalides');
+
+        PaiementBusiness::iso20022PourDecompte($decompteId, 'SIS Test', 'UBSWCHZH80A', 'CH51 0022 5225 9529 1301 C');
+    }
+
+    /**
+     * Les totaux d'un sapeur sont trouvés même avec des ids reçus en string (paramètres de route)
+     */
+    public function testTotauxPaiementsSapeurAvecIdsString()
+    {
+        $exerciceComptableId = DB::table('exercice_comptables')->insertGetId([
+            'annee' => 2099,
+            'designation' => 'test certificat',
+            'debut' => '2099-01-01',
+            'fin' => '2099-12-31',
+            'boucle' => 0,
+        ]);
+        $decompteId = DB::table('decomptes')->insertGetId([
+            'designation' => 'test certificat',
+            'date' => '2099-01-31',
+            'exercice_comptable_id' => $exerciceComptableId,
+            'deduction' => 0,
+            'avs_total' => 0,
+            'ac_total' => 0,
+            'total' => 145,
+        ]);
+        DB::table('paiements')->insert([
+            'decompte_id' => $decompteId,
+            'sapeur_id' => 1,
+            'solde' => 100,
+            'indemnite' => 30,
+            'frais_forfaitaire' => 0,
+            'frais_effectif' => 20,
+            'autre' => 0,
+            'avs_ac' => 5,
+            'total' => 145,
+        ]);
+
+        $total = PaiementBusiness::totauxPaiementsSapeur("$exerciceComptableId", "1");
+
+        $this->assertEquals(100.0, $total['solde']);
+        $this->assertEquals(30.0, $total['indemnite']);
+        $this->assertEquals(5.0, $total['avs_ac']);
+        $this->assertEquals(20.0, $total['frais_effectif']);
+        $this->assertEquals(0.0, $total['frais_forfaitaire']);
+    }
+
+    /**
+     * Une erreur durant la génération des certificats doit être signalée, pas avalée
+     */
+    public function testCertificatSalaireSansDecompteRetourneErreur()
+    {
+        AvsParam::updateOrCreate([], [
+            'taux_avs' => "1.0",
+            'taux_ac' => "1.0",
+            'franchise_avs' => 2300,
+            'franchise_imposition' => 5000,
+            'franchise_imposition_cantonale' => 8000,
+        ]);
+
+        $response = $this->json('GET', "api/v2/exercices-comptable/99999/certificat-salaire");
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure(['error' => ['message']]);
     }
 
     /**

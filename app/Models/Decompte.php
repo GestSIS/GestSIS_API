@@ -9,7 +9,7 @@ class Decompte extends Model
     protected function casts(): array
     {
         return [
-            'exercice-comptable_id' => 'integer',
+            'exercice_comptable_id' => 'integer',
             'avs_total' => 'decimal:2',
             'ac_total' => 'decimal:2',
             'total' => 'decimal:2',

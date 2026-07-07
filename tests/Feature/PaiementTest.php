@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Domaine\Business\PaiementBusiness;
+use App\Domaine\Exceptions\InvalidActionException;
 use App\Models\SisParam;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -123,5 +125,69 @@ class PaiementTest extends TestCase
 
         $response = $this->json('GET', "/api/v2/paiements/{$ids['paiement_id']}/iso20022");
         $response->assertStatus(200);
+    }
+
+    /**
+     * Le montant iso20022 d'un paiement est arrondi aux 5 centimes
+     */
+    public function testIso20022ArrondiCinqCentimes()
+    {
+        $decompteId = DB::table('decomptes')->insertGetId([
+            'designation' => 'iso20022 arrondi paiement',
+            'date' => '2025-01-31',
+            'exercice_comptable_id' => 2,
+            'deduction' => 0,
+            'avs_total' => 0,
+            'ac_total' => 0,
+            'total' => 19.97,
+        ]);
+        $paiementId = DB::table('paiements')->insertGetId([
+            'decompte_id' => $decompteId,
+            'sapeur_id' => 1,
+            'solde' => 19.97,
+            'indemnite' => 0,
+            'frais_forfaitaire' => 0,
+            'frais_effectif' => 0,
+            'autre' => 0,
+            'avs_ac' => 0,
+            'total' => 19.97,
+        ]);
+
+        $xml = PaiementBusiness::iso20022PourPaiement($paiementId, 'SIS Test', 'UBSWCHZH80A', 'CH51 0022 5225 9529 1301 C');
+
+        $this->assertStringContainsString('19.95', $xml);
+        $this->assertStringNotContainsString('19.96', $xml);
+        $this->assertStringNotContainsString('19.97', $xml);
+    }
+
+    /**
+     * iso20022 pour un paiement à montant nul ou négatif doit lever une exception claire
+     */
+    public function testIso20022PaiementTotalNegatif()
+    {
+        $decompteId = DB::table('decomptes')->insertGetId([
+            'designation' => 'iso20022 paiement négatif',
+            'date' => '2025-01-31',
+            'exercice_comptable_id' => 2,
+            'deduction' => 0,
+            'avs_total' => 0,
+            'ac_total' => 0,
+            'total' => -50,
+        ]);
+        $paiementId = DB::table('paiements')->insertGetId([
+            'decompte_id' => $decompteId,
+            'sapeur_id' => 1,
+            'solde' => -50,
+            'indemnite' => 0,
+            'frais_forfaitaire' => 0,
+            'frais_effectif' => 0,
+            'autre' => 0,
+            'avs_ac' => 0,
+            'total' => -50,
+        ]);
+
+        $this->expectException(InvalidActionException::class);
+
+        PaiementBusiness::iso20022PourPaiement($paiementId, 'SIS Test', 'UBSWCHZH80A', 'CH51 0022 5225 9529 1301 C');
     }
 }
