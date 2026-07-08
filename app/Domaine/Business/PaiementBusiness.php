@@ -43,10 +43,7 @@ class PaiementBusiness
 
     public static function controlerStatusExerciceComptable(int $exerciceComptableId)
     {
-        $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
-        if ($exerciceComptable->boucle === 1) {
-            throw new InvalidActionException(message: "Excercice comptable cloturé, impossible d'effectuer cette action");
-        }
+        ImputationBusiness::controlerStatusExerciceComptable($exerciceComptableId);
     }
 
     /**

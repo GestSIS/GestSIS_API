@@ -28,6 +28,7 @@ use App\Models\Intervention;
 use App\Models\Sapeur;
 use App\Models\Travail;
 use App\Models\TravailType;
+use Illuminate\Support\Facades\DB;
 
 class ImputationBusiness
 {
@@ -84,6 +85,38 @@ class ImputationBusiness
         if ($exerciceComptable->boucle === 1) {
             throw new InvalidActionException(message: "Exercice comptable clôturé, impossible d'effectuer cette action");
         }
+    }
+
+    /**
+     * Insertion par lot d'écritures, en renseignant les timestamps que Ecriture::insert() ne gère pas
+     *
+     * @param array<int, array<string, mixed>> $ecritures
+     */
+    private static function insererEcritures(array $ecritures): void
+    {
+        if ($ecritures === []) {
+            return;
+        }
+
+        $now = Carbon::now();
+        Ecriture::insert(array_map(
+            fn($ecriture) => $ecriture + ['created_at' => $now, 'updated_at' => $now],
+            $ecritures
+        ));
+    }
+
+    /**
+     * Remplace atomiquement les écritures correspondant aux critères par les nouvelles
+     *
+     * @param array<int, array<int, mixed>> $where
+     * @param array<int, array<string, mixed>> $ecritures
+     */
+    private static function remplacerEcritures(array $where, array $ecritures): void
+    {
+        DB::transaction(function () use ($where, $ecritures) {
+            Ecriture::where($where)->delete();
+            self::insererEcritures($ecritures);
+        });
     }
 
     public static function ajouterEcriture($data)
@@ -149,9 +182,19 @@ class ImputationBusiness
         // Vérifier le statut de l'exercice comptable avec l'ID de l'écriture existante
         self::controlerStatusExerciceComptable($ecriture->exercice_comptable_id);
 
+        // Si l'écriture change d'exercice comptable, contrôler aussi le statut du nouveau
+        if ((int) $data['exercice_comptable_id'] !== (int) $ecriture->exercice_comptable_id) {
+            self::controlerStatusExerciceComptable($data['exercice_comptable_id']);
+        }
+
         // Contrôle que l'écriture n'est pas liée à un décompte
         if ($ecriture->decompte_id !== null) {
             throw new ArrayException([], 'Écriture déjà payée dans un décompte !');
+        }
+
+        // Seules les écritures manuelles (module divers) peuvent être modifiées
+        if ($ecriture->module !== self::ECRITURE_MODULE_DIVERS) {
+            throw new ArrayException([], 'Seules les écritures du module divers peuvent être modifiées');
         }
 
         // Seul le module DIVERS est supporté actuellement
@@ -189,6 +232,11 @@ class ImputationBusiness
         // Contrôle que l'écriture n'est pas liée à un décompte
         if ($ecriture->decompte_id !== null) {
             throw new ArrayException([], 'Écriture déjà payée dans un décompte !');
+        }
+
+        // Seules les écritures manuelles (module divers) peuvent être supprimées
+        if ($ecriture->module !== self::ECRITURE_MODULE_DIVERS) {
+            throw new ArrayException([], 'Seules les écritures du module divers peuvent être supprimées');
         }
 
         $ecriture->delete();
@@ -232,13 +280,6 @@ class ImputationBusiness
             throw new ArrayException([], 'Des amendes sont déjà facturées dans un décompte.');
         }
 
-        // Suppression de amendes existantes
-        Ecriture::where([
-            ['exercice_comptable_id', $exerciceComptableId],
-            ['sapeur_id', $sapeurId],
-            ['module', self::ECRITURE_MODULE_AMENDE]
-        ])->delete();
-
         // Pour l'instant juste générer de nouvelles amendes
         $ecritures = [];
         $i = 0;
@@ -279,9 +320,12 @@ class ImputationBusiness
             }
         }
 
-        if (!empty($ecritures)) {
-            Ecriture::insert($ecritures);
-        }
+        // Suppression des amendes existantes et régénération, de façon atomique
+        self::remplacerEcritures([
+            ['exercice_comptable_id', $exerciceComptableId],
+            ['sapeur_id', $sapeurId],
+            ['module', self::ECRITURE_MODULE_AMENDE]
+        ], $ecritures);
         return $ecritures;
     }
 
@@ -319,12 +363,6 @@ class ImputationBusiness
         ) {
             throw new ArrayException([], 'Des amendes sont déjà facturées dans un décompte.');
         }
-
-        // Suppression de amendes existantes
-        Ecriture::where([
-            ['exercice_comptable_id', $exerciceComptableId],
-            ['module', self::ECRITURE_MODULE_AMENDE]
-        ])->delete();
 
         // Pour l'instant juste générer de nouvelles amendes
         $newEcritures = [];
@@ -372,16 +410,21 @@ class ImputationBusiness
             }
         }
 
-        if (!empty($newEcritures)) {
-            Ecriture::insert($newEcritures);
-        }
+        // Suppression des amendes existantes et régénération, de façon atomique
+        self::remplacerEcritures([
+            ['exercice_comptable_id', $exerciceComptableId],
+            ['module', self::ECRITURE_MODULE_AMENDE]
+        ], $newEcritures);
         return $newEcritures;
     }
 
     /**
-     * Calcule le nombre de mois d'activité entre deux périodes (arrondi au mois entamé)
+     * Index (année * 12 + mois) des mois touchés par la période de fonction, intersectée avec l'exercice.
+     * Tout mois entamé compte ; permet de cumuler plusieurs périodes sans compter deux fois le même mois.
+     *
+     * @return array<int, int>
      */
-    private static function calculerNombreMoisActifs($debutFonction, $finFonction, $debutExercice, $finExercice): int
+    private static function moisActifs($debutFonction, $finFonction, $debutExercice, $finExercice): array
     {
         $debutExerciceCarbon = Carbon::parse($debutExercice);
         $finExerciceCarbon = Carbon::parse($finExercice);
@@ -394,15 +437,10 @@ class ImputationBusiness
         $fin = $finFonctionCarbon ? $finFonctionCarbon->min($finExerciceCarbon) : $finExerciceCarbon;
 
         if ($debut->gt($fin)) {
-            return 0;
+            return [];
         }
 
-        // Calcul du nombre de mois distincts touchés (tout mois entamé compte pour 1)
-        // Méthode : calculer la différence entre (année*12 + mois) du début et de la fin
-        $moisDebut = $debut->year * 12 + $debut->month;
-        $moisFin = $fin->year * 12 + $fin->month;
-
-        return $moisFin - $moisDebut + 1;
+        return range($debut->year * 12 + $debut->month, $fin->year * 12 + $fin->month);
     }
 
     /**
@@ -420,7 +458,9 @@ class ImputationBusiness
         //
         // Notes :
         // - Prend en compte la période d'entrée en vigueur de chaque fonction
-        // - Pour les indemnités mensuelles (UNITE_MOIS), calcule le nombre de mois réels d'activité
+        // - Pour les indemnités mensuelles (UNITE_MOIS), calcule le nombre de mois réels d'activité (une écriture par période)
+        // - Pour toutes les autres unités, la quantité configurée est proratisée aux mois d'activité (mois/12),
+        //   toutes périodes de la fonction confondues (une seule écriture)
         // - Prend uniquement les sapeurs actifs
 
         $fraisIndemnitesTypes = FraisIndemniteAnnuelType::with('fraisIndemniteAnnuels')->get();
@@ -438,12 +478,6 @@ class ImputationBusiness
         ) {
             throw new ArrayException([], 'Des indemnités annuelles sont déjà facturées dans un décompte.');
         }
-
-        // Suppression des indemnités annuelles existantes pour cet exercice comptable uniquement
-        Ecriture::where([
-            ['exercice_comptable_id', $exerciceComptableId],
-            ['module', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL]
-        ])->delete();
 
         // Exercice comptable
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
@@ -472,17 +506,17 @@ class ImputationBusiness
         })
             ->join('fonctions', 'fonctions.id', '=', 'fonction_sapeur.fonction_id')
             ->orderByDesc('fonctions.tri')
-            ->distinct(['fonction_sapeur.sapeur_id', 'fonction_sapeur.fonction_id'])
+            ->distinct()
             ->select(['fonction_sapeur.sapeur_id', 'fonction_sapeur.fonction_id', 'fonction_sapeur.debut', 'fonction_sapeur.fin', 'fonctions.tri'])->get();
 
-        // Group by sapeur_id avec conservation des périodes de fonction
+        // Group by sapeur_id puis par fonction, avec conservation des périodes (ordre par tri décroissant)
         $sapeursGrouped = $sapeurs->groupBy('sapeur_id')
             ->map(fn($group) => $group->map(fn($sapeur) => [
                 'fonction_id' => $sapeur->fonction_id,
                 'debut' => $sapeur->debut,
                 'fin' => $sapeur->fin,
                 'tri' => $sapeur->tri
-            ])->all())
+            ])->groupBy('fonction_id'))
             ->all();
 
         // Foreach indemnité annuelle
@@ -492,39 +526,40 @@ class ImputationBusiness
             // Génère le mapping -> ["fonction_id" => 'indemnite'];
             $mapping = $type->fraisIndemniteAnnuels->keyBy('fonction_id')->all();
 
-            foreach ($sapeursGrouped as $sapeurId => $fonctions) {
-                foreach ($fonctions as $fonction) {
-                    $fonctionId = $fonction['fonction_id'];
+            foreach ($sapeursGrouped as $sapeurId => $periodesParFonction) {
+                foreach ($periodesParFonction as $fonctionId => $periodes) {
+                    if (!array_key_exists($fonctionId, $mapping)) {
+                        continue;
+                    }
 
-                    if (array_key_exists($fonctionId, $mapping)) {
-                        $indemnite = $mapping[$fonctionId];
+                    $indemnite = $mapping[$fonctionId];
+                    $tarif = $indemnite['montant'];
 
-                        // Calcul de la quantité et du total
-                        $quantite = $indemnite['quantite'];
-                        $tarif = $indemnite['montant'];
+                    // Mois d'activité de chaque période, intersectés avec l'exercice comptable
+                    $moisParPeriode = $periodes
+                        ->map(fn($periode) => self::moisActifs($periode['debut'], $periode['fin'], $debut, $fin));
 
-                        // Pour les unités mensuelles, calculer le nombre de mois réels d'activité
-                        if ($indemnite['type_unite_id'] === self::UNITE_MOIS) {
-                            $quantite = self::calculerNombreMoisActifs(
-                                $fonction['debut'],
-                                $fonction['fin'],
-                                $debut,
-                                $fin
-                            );
+                    if ($indemnite['type_unite_id'] === self::UNITE_MOIS) {
+                        // Une écriture par période, au nombre de mois réels d'activité
+                        $quantites = $moisParPeriode->map(fn($mois) => count($mois))->filter()->all();
+                    } else {
+                        // Prorata temporis : fraction de l'année selon les mois d'activité, toutes périodes confondues
+                        $nbMois = $moisParPeriode->flatten()->unique()->count();
+                        $quantite = round($indemnite['quantite'] * $nbMois / 12.0, 2);
+                        $quantites = $quantite > 0 ? [$quantite] : [];
+                    }
 
-                            // Si aucun mois d'activité, ne pas générer d'écriture
-                            if ($quantite <= 0) {
-                                continue;
-                            }
-                        }
+                    // Si aucun mois d'activité, ne pas générer d'écriture
+                    if ($quantites === []) {
+                        continue;
+                    }
 
-                        $total = self::arrondi_5_centimes($tarif * $quantite);
-
-                        $fonctionNom = $indexedFonctions[$indemnite['fonction_id']] ?? '';
+                    $fonctionNom = $indexedFonctions[$indemnite['fonction_id']] ?? '';
+                    foreach ($quantites as $quantite) {
                         $ecritures[] = [
                             'tarif' => $tarif,
                             'quantite' => $quantite,
-                            'total' => $total,
+                            'total' => self::arrondi_5_centimes($tarif * $quantite),
                             'type_unite_id' => $indemnite['type_unite_id'],
                             'designation' => "{$type->designation} ($fonctionNom)",
                             'sapeur_id' => $sapeurId,
@@ -534,19 +569,21 @@ class ImputationBusiness
                             'module' => self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL,
                             'type' => $type->type,
                         ];
+                    }
 
-                        if (!$type->cumulable) {
-                            // Non-cumulable, on passe au sapeur suivant
-                            break;
-                        }
+                    if (!$type->cumulable) {
+                        // Non-cumulable, on passe au sapeur suivant
+                        break;
                     }
                 }
             }
         }
 
-        if (!empty($ecritures)) {
-            Ecriture::insert($ecritures);
-        }
+        // Suppression des indemnités annuelles existantes et régénération, de façon atomique
+        self::remplacerEcritures([
+            ['exercice_comptable_id', $exerciceComptableId],
+            ['module', self::ECRITURE_MODULE_FRAIS_INDEMNITE_ANNUEL]
+        ], $ecritures);
     }
 
     public static function annulerImputationExercice($exerciceId)
@@ -566,12 +603,14 @@ class ImputationBusiness
             throw new ArrayException([], 'Des écritures sont déjà facturées dans un décompte.');
         }
 
-        // Suppression des écritures
-        Ecriture::where('exercice_id', $exerciceId)
-            ->delete();
+        DB::transaction(function () use ($exerciceId) {
+            // Suppression des écritures
+            Ecriture::where('exercice_id', $exerciceId)
+                ->delete();
 
-        // Modification du statut de l'exercice
-        Exercice::whereId($exerciceId)->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_VALIDE]);
+            // Modification du statut de l'exercice
+            Exercice::whereId($exerciceId)->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_VALIDE]);
+        });
         return ExerciceBusiness::EXERCICE_STATUT_VALIDE;
     }
 
@@ -592,12 +631,14 @@ class ImputationBusiness
             throw new ArrayException([], 'Des écritures sont déjà facturées dans un décompte.');
         }
 
-        // Suppression des écritures
-        Ecriture::where('intervention_id', $interventionId)
-            ->delete();
+        DB::transaction(function () use ($interventionId) {
+            // Suppression des écritures
+            Ecriture::where('intervention_id', $interventionId)
+                ->delete();
 
-        // Modification du statut de l'intervention
-        Intervention::whereId($interventionId)->update(['statut' => InterventionBusiness::INTERVENTION_STATUT_VALIDE]);
+            // Modification du statut de l'intervention
+            Intervention::whereId($interventionId)->update(['statut' => InterventionBusiness::INTERVENTION_STATUT_VALIDE]);
+        });
         return InterventionBusiness::INTERVENTION_STATUT_VALIDE;
     }
 
@@ -652,10 +693,11 @@ class ImputationBusiness
         } else {
             $ecritures = self::imputerInterventionTarifMin($intervention, $indemniteType);
         }
-        Ecriture::insert($ecritures);
 
-        // Update statut
-        Intervention::whereId($interventionId)->update(['statut' => InterventionBusiness::INTERVENTION_STATUT_IMPUTE]);
+        DB::transaction(function () use ($interventionId, $ecritures) {
+            self::insererEcritures($ecritures);
+            Intervention::whereId($interventionId)->update(['statut' => InterventionBusiness::INTERVENTION_STATUT_IMPUTE]);
+        });
         return InterventionBusiness::INTERVENTION_STATUT_IMPUTE;
     }
 
@@ -726,7 +768,7 @@ class ImputationBusiness
         // Récupération du type de frais
         $tarif = floatval($indemniteType->tarif);
         $tarifMin = floatval($indemniteType->tarif_min ?? $indemniteType->tarif);
-        $tarifMinPour = floatval($indemniteType->tarif_min_pour) ?? 1.0;
+        $tarifMinPour = floatval($indemniteType->tarif_min_pour ?? 1.0);
         $designation = "{$intervention->localite->designation} ({$intervention->typeIntervention->designation}) $intervention->lieu";
 
         $ecritures = [];
@@ -787,8 +829,33 @@ class ImputationBusiness
     }
 
     /**
+     * Les deux périodes de nuit susceptibles de chevaucher une présence autour du jour donné
+     *
+     * Cale $debutNuit/$finNuit sur le jour puis retourne [oneStart, oneEnd, twoStart, twoEnd] :
+     * la nuit commençant la veille et celle commençant le jour même.
+     *
+     * @return array{0: Carbon, 1: Carbon, 2: Carbon, 3: Carbon}
+     */
+    private static function periodesDeNuit(Carbon $debutNuit, Carbon $finNuit, Carbon $jour): array
+    {
+        $debutNuit->setDate($jour->year, $jour->month, $jour->day);
+        $finNuit->setDate($jour->year, $jour->month, $jour->day);
+        if ($finNuit <= $debutNuit) {
+            // La plage de nuit traverse minuit
+            $finNuit->addDay();
+        }
+
+        return [
+            $debutNuit->copy()->subDay(),
+            $finNuit->copy()->subDay(),
+            $debutNuit->copy(),
+            $finNuit->copy(),
+        ];
+    }
+
+    /**
      * Générer les écritures liés aux présences des sapeurs durant cette intervention
-     * 
+     *
      * Décompose le temps de chaque sapeurs entre
      * - Week-end (nuit inclus)
      * - Nuit
@@ -802,6 +869,29 @@ class ImputationBusiness
         // Grouper les présences par sapeurs
         $sapeurs = $intervention->presences->groupBy('sapeur_id')->all();
 
+        // Récupération des tarifs (un taux null ou à 0 est considéré comme absent)
+        $tarif = floatval($indemniteType->tarif);
+        $tauxWeekend = floatval($indemniteType->taux_weekend);
+        $tauxNuit = floatval($indemniteType->taux_nuit);
+
+        $testWeekend = $tauxWeekend > 0;
+        $testNuit = $tauxNuit > 0;
+
+        // Durée de la période de nuit
+        $dureeNuit = 0;
+        $debutNuit = null;
+        $finNuit = null;
+
+        if ($testNuit) {
+            $debutNuit = Carbon::parse($indemniteType->debut);
+            $finNuit = Carbon::parse($indemniteType->fin);
+
+            if (!($finNuit > $debutNuit)) {
+                $finNuit->addDays(1);
+            }
+            $dureeNuit += $debutNuit->diffInHours($finNuit);
+        }
+
         $ecritures = [];
 
         // Calcul la durée de présence dans chaque catégorie (week-end, nuit, standard)
@@ -810,29 +900,6 @@ class ImputationBusiness
             $dureeTarifStandard = 0;
             $dureeTarifWeekend = 0;
             $dureeTarifNuit = 0;
-
-            // Durée de la période de nuit
-            $dureeNuit = 0;
-            $debutNuit = null;
-            $finNuit = null;
-
-            if ($indemniteType->taux_nuit !== null) {
-                $debutNuit = Carbon::parse($indemniteType->debut);
-                $finNuit = Carbon::parse($indemniteType->fin);
-
-                if (!($finNuit > $debutNuit)) {
-                    $finNuit->addDays(1);
-                }
-                $dureeNuit += $debutNuit->diffInHours($finNuit);
-            }
-
-            // Récupération des tarifs
-            $tarif = floatVal($indemniteType->tarif);
-            $tauxWeekend = floatVal($indemniteType->taux_weekend);
-            $tauxNuit = floatVal($indemniteType->taux_nuit);
-
-            $testWeekend = $tauxWeekend !== null;
-            $testNuit = $tauxNuit !== null;
 
             foreach ($presences as $presence) {
                 $debut = Carbon::parse($presence->debut);
@@ -867,7 +934,7 @@ class ImputationBusiness
                         $dureeTarifNuit += $nbJourSemaine * $dureeNuit;
                     } elseif ($testWeekend) {
                         $dureeTarifWeekend += $nbJourWeekend * 24;
-                        $dureeTarifNuit += $nbJourSemaine * 24;
+                        $dureeTarifStandard += $nbJourSemaine * 24;
                     } elseif ($testNuit) {
                         $dureeTarifStandard += ($nbJourSemaine + $nbJourWeekend) * (24 - $dureeNuit);
                         $dureeTarifNuit += ($nbJourSemaine + $nbJourWeekend) * $dureeNuit;
@@ -876,12 +943,14 @@ class ImputationBusiness
                     }
 
                     // Définition des deux périodes de nuit qui peuvent potentiellement overlap sur la présence
-                    $debutNuit->setDate($debut->year, $debut->month, $debut->day);
-                    $finNuit->setDate($debut->year, $debut->month, $debut->day);
-                    $nightPeriodOneStart = $debutNuit->copy()->subDay();
-                    $nightPeriodOneEnd = $finNuit->copy();
-                    $nightPeriodTwoStart = $nightPeriodOneStart->copy()->addDay();
-                    $nightPeriodTwoEnd = $nightPeriodOneEnd->copy()->addDay();
+                    $nightPeriodOneStart = null;
+                    $nightPeriodOneEnd = null;
+                    $nightPeriodTwoStart = null;
+                    $nightPeriodTwoEnd = null;
+                    if ($testNuit) {
+                        [$nightPeriodOneStart, $nightPeriodOneEnd, $nightPeriodTwoStart, $nightPeriodTwoEnd] =
+                            self::periodesDeNuit($debutNuit, $finNuit, $debut);
+                    }
 
                     if ($debutCarbon->copy()->subDay() == $finCarbon) {
                         // Debut et fin la même journée
@@ -892,9 +961,6 @@ class ImputationBusiness
                             $overlapping += max($debut->max($nightPeriodOneStart)->diffInHours($fin->min($nightPeriodOneEnd), false), 0.0);
                             $overlapping += max($debut->max($nightPeriodTwoStart)->diffInHours($fin->min($nightPeriodTwoEnd), false), 0.0);
                             $dureeTarifNuit += $overlapping;
-
-                            // if ($presence->sapeur_id == '2')
-                            //     dd([$duree, $overlapping, $debut, $fin]);
                             $dureeTarifStandard += $duree - $overlapping;
                         } else {
                             $dureeTarifStandard += $duree;
@@ -933,12 +999,8 @@ class ImputationBusiness
                         } elseif ($testNuit) {
                             $overlapping = 0;
 
-                            $debutNuit->setDate($fin->year, $fin->month, $fin->day);
-                            $finNuit->setDate($fin->year, $fin->month, $fin->day);
-                            $nightPeriodOneStart = $debutNuit->copy()->subDay();
-                            $nightPeriodOneEnd = $finNuit->copy();
-                            $nightPeriodTwoStart = $nightPeriodOneStart->copy()->addDay();
-                            $nightPeriodTwoEnd = $nightPeriodOneEnd->copy()->addDay();
+                            [$nightPeriodOneStart, $nightPeriodOneEnd, $nightPeriodTwoStart, $nightPeriodTwoEnd] =
+                                self::periodesDeNuit($debutNuit, $finNuit, $fin);
 
                             $overlapping += max($debutJour->max($nightPeriodOneStart)->diffInHours($fin->min($nightPeriodOneEnd), false), 0);
                             $overlapping += max($debutJour->max($nightPeriodTwoStart)->diffInHours($fin->min($nightPeriodTwoEnd), false), 0);
@@ -1042,7 +1104,7 @@ class ImputationBusiness
 
     public static function imputerExercice($exerciceId, $data)
     {
-        $exercice = Exercice::with(['sapeurs', 'localite'])->findOrFail($exerciceId);
+        $exercice = Exercice::with(['sapeurs', 'localite'])->find($exerciceId);
         if (!$exercice) {
             throw new ArrayException([], "Exercice introuvable.");
         }
@@ -1062,20 +1124,22 @@ class ImputationBusiness
         $designation = "{$exercice->localite->designation} ({$exercice->lieu}) {$exercice->designation}";
         $sapeurs = collect($exercice->sapeurs)->filter(fn($sap) => $sap->present)->values()->all();
 
-        if ($unite === self::UNITE_PIECE || $unite === self::UNITE_FORFAIT) {
-            self::imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation);
-        } elseif ($unite === self::UNITE_HEURE) {
-            self::imputerExerciceParHeure($exercice, $sapeurs, $indemniteType, $designation);
-        } else {
-            throw new ArrayException([], "Unité non supportée");
-        }
+        DB::transaction(function () use ($exercice, $exerciceId, $sapeurs, $indemniteType, $designation, $unite) {
+            if ($unite === self::UNITE_PIECE || $unite === self::UNITE_FORFAIT) {
+                self::imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation);
+            } elseif ($unite === self::UNITE_HEURE) {
+                self::imputerExerciceParHeure($exercice, $sapeurs, $indemniteType, $designation);
+            } else {
+                throw new ArrayException([], "Unité non supportée");
+            }
 
-        // Imputation heure supp
-        $heures = HeureExercice::where('exercice_id', $exerciceId)->get();
-        self::imputerExerciceHeureSup($exercice, $heures, $designation);
+            // Imputation heure supp
+            $heures = HeureExercice::where('exercice_id', $exerciceId)->get();
+            self::imputerExerciceHeureSup($exercice, $heures, $designation);
 
-        // Changer le statut de l'exercice
-        Exercice::whereId($exerciceId)->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_IMPUTE]);
+            // Changer le statut de l'exercice
+            Exercice::whereId($exerciceId)->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_IMPUTE]);
+        });
         return ExerciceBusiness::EXERCICE_STATUT_IMPUTE;
     }
 
@@ -1100,7 +1164,7 @@ class ImputationBusiness
             }
 
             $designationSapeur = $designation . " - " . $heure->designation;
-            $total = $heure->quantite * $tarifType->montant;
+            $total = self::arrondi_5_centimes($heure->quantite * $tarifType->montant);
 
             // Par heure -> calcul de la durée
             $ecritures[] = [
@@ -1125,14 +1189,12 @@ class ImputationBusiness
             ];
         }
 
-        if (!empty($ecritures)) {
-            Ecriture::insert($ecritures);
-        }
+        self::insererEcritures($ecritures);
     }
 
     private static function imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation)
     {
-        if (empty($sapeurs)) {
+        if ($sapeurs === []) {
             return;
         }
 
@@ -1141,9 +1203,10 @@ class ImputationBusiness
         $sapeursDetails = Sapeur::whereIn('id', $sapeurIds)->get()->keyBy('id');
 
         // Prétraiter le mapping des tarifs par fonction pour éviter les filtrages répétés
-        $groupedFonctions = $indemniteType->fonctions->groupBy('fonction_id');
-        $tarifsByFonction = $groupedFonctions->forget(null)->all();
-        $defaultTarifs = $groupedFonctions->get(null, collect())->all();
+        // Les lignes sans fonction (clé '' après groupBy) servent de tarifs par défaut
+        $groupedFonctions = $indemniteType->fonctions->toBase()->groupBy('fonction_id');
+        $defaultTarifs = $groupedFonctions->get('', collect())->all();
+        $tarifsByFonction = $groupedFonctions->except([''])->all();
 
         $ecritures = [];
         foreach ($sapeurs as $sapeur) {
@@ -1180,14 +1243,12 @@ class ImputationBusiness
             }
         }
 
-        if (!empty($ecritures)) {
-            Ecriture::insert($ecritures);
-        }
+        self::insererEcritures($ecritures);
     }
 
     private static function imputerExerciceParHeure($exercice, $sapeurs, $indemniteType, $designation)
     {
-        if (empty($sapeurs)) {
+        if ($sapeurs === []) {
             return;
         }
 
@@ -1198,9 +1259,10 @@ class ImputationBusiness
         $sapeursDetails = Sapeur::whereIn('id', $sapeurIds)->get()->keyBy('id');
 
         // Prétraiter le mapping des tarifs par fonction pour éviter les filtrages répétés
-        $groupedFonctions = $indemniteType->fonctions->groupBy('fonction_id');
-        $tarifsByFonction = $groupedFonctions->forget(null)->all();
-        $defaultTarifs = $groupedFonctions->get(null, collect())->all();
+        // Les lignes sans fonction (clé '' après groupBy) servent de tarifs par défaut
+        $groupedFonctions = $indemniteType->fonctions->toBase()->groupBy('fonction_id');
+        $defaultTarifs = $groupedFonctions->get('', collect())->all();
+        $tarifsByFonction = $groupedFonctions->except([''])->all();
 
         $ecritures = [];
         foreach ($sapeurs as $sapeur) {
@@ -1212,7 +1274,7 @@ class ImputationBusiness
             $fonction_tarifs = $tarifsByFonction[$sapeurDetails->fonction_id] ?? $defaultTarifs;
 
             foreach ($fonction_tarifs as $indemnite) {
-                $total = $indemnite->tarif * $duree;
+                $total = self::arrondi_5_centimes($indemnite->tarif * $duree);
 
                 // Par heure -> calcul de la durée
                 $ecritures[] = [
@@ -1239,9 +1301,7 @@ class ImputationBusiness
             }
         }
 
-        if (!empty($ecritures)) {
-            Ecriture::insert($ecritures);
-        }
+        self::insererEcritures($ecritures);
     }
 
     /**
@@ -1290,7 +1350,7 @@ class ImputationBusiness
                 'exercice_comptable_id' => $data['exercice_comptable_id'],
                 'ecriture_categorie_id' => $indemniteType->ecriture_categorie_id,
                 'date' => $cours->date,
-                'heure' => '',
+                'heure' => '00:00:00',
                 'module' => self::ECRITURE_MODULE_COURS,
                 'type' => $fonction->type,
             ];
@@ -1299,7 +1359,7 @@ class ImputationBusiness
                 case self::UNITE_JOUR:
                     $ecriture['tarif'] = $fonction->tarif;
                     $ecriture['quantite'] = $cours->duree;
-                    $ecriture['total'] = $cours->duree * $fonction->tarif;
+                    $ecriture['total'] = self::arrondi_5_centimes($cours->duree * $fonction->tarif);
                     break;
 
                 case self::UNITE_FORFAIT:
@@ -1316,9 +1376,7 @@ class ImputationBusiness
             $ecritures[] = $ecriture;
         }
 
-        if (!empty($ecritures)) {
-            Ecriture::insert($ecritures);
-        }
+        self::insererEcritures($ecritures);
         return $ecritures;
     }
 
@@ -1384,7 +1442,7 @@ class ImputationBusiness
                 $ecritures[] = [
                     'tarif' => $fonction->tarif,
                     'quantite' => $travail->quantite,
-                    'total' => $travail->quantite * $fonction->tarif,
+                    'total' => self::arrondi_5_centimes($travail->quantite * $fonction->tarif),
                     'compte_id' => $fonction->compte_id,
                     'designation' => $type->designation . " - " . $travail->designation,
                     'type_unite_id' => $type->type_unite_id,
@@ -1393,20 +1451,20 @@ class ImputationBusiness
                     'exercice_comptable_id' => $travail->exercice_comptable_id,
                     'ecriture_categorie_id' => $type->ecriture_categorie_id,
                     'date' => $travail->date,
-                    'heure' => '',
+                    'heure' => '00:00:00',
                     'module' => self::ECRITURE_MODULE_FICHE_TRAVAIL,
                     'type' => $fonction->type,
                 ];
             }
         }
 
-        if (!empty($ecritures)) {
-            Ecriture::insert($ecritures);
-        }
+        DB::transaction(function () use ($ids, $ecritures) {
+            self::insererEcritures($ecritures);
 
-        Travail::whereIn('id', $ids)
-            ->where('statut', TravauxBusiness::TRAVAIL_STATUT_VALIDE)
-            ->update(['statut' => TravauxBusiness::TRAVAIL_STATUT_IMPUTE]);
+            Travail::whereIn('id', $ids)
+                ->where('statut', TravauxBusiness::TRAVAIL_STATUT_VALIDE)
+                ->update(['statut' => TravauxBusiness::TRAVAIL_STATUT_IMPUTE]);
+        });
 
         return $ecritures;
     }
@@ -1430,11 +1488,13 @@ class ImputationBusiness
             throw new ArrayException([], 'Des écritures sont déjà facturées dans un décompte.');
         }
 
-        // Suppression des écritures
-        Ecriture::where('travail_id', $travailId)->delete();
+        DB::transaction(function () use ($travailId) {
+            // Suppression des écritures
+            Ecriture::where('travail_id', $travailId)->delete();
 
-        Travail::whereId($travailId)
-            ->update(['statut' => TravauxBusiness::TRAVAIL_STATUT_VALIDE]);
+            Travail::whereId($travailId)
+                ->update(['statut' => TravauxBusiness::TRAVAIL_STATUT_VALIDE]);
+        });
 
         return ['statut' => TravauxBusiness::TRAVAIL_STATUT_VALIDE];
     }
@@ -1446,6 +1506,9 @@ class ImputationBusiness
                 $query->where('exercice_comptable_id', $exerciceComptableId)->orderBy('date', 'asc');
             }
         ])->find($compteId);
+        if ($compte === null) {
+            throw new ArrayException([], 'Compte introuvable');
+        }
 
         $sapeursMap = Sapeur::get(['id', 'nom', 'prenom'])
             ->mapWithKeys(fn($sapeur) => [$sapeur->id => "$sapeur->nom $sapeur->prenom"])
@@ -1470,7 +1533,7 @@ class ImputationBusiness
             function () use ($content) {
                 echo $content;
             },
-            'justificatif_complet.pdf'
+            'justificatif_individuel.pdf'
         );
     }
 

@@ -1012,4 +1012,250 @@ class ImputationInterventionTest extends TestCase
                 ]
             ]);
     }
+
+    /**
+     * Test imputation avec uniquement un taux week-end (taux_nuit null)
+     *
+     * Régression : provoquait un fatal error (période de nuit non initialisée) et
+     * les jours de semaine complets étaient comptés au taux nuit inexistant.
+     *
+     * Scénarios:
+     * - Sapeur 1: vendredi 12h-14h → 2h standard = 60 CHF
+     * - Sapeur 2: samedi 10h-11h → 1h week-end = 37.50 CHF
+     * - Sapeur 3: vendredi 18h - dimanche 21h → 6h standard (180) + 45h week-end (1687.50)
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testImputationTauxWeekendSeul()
+    {
+        $typeWeekendId = IndemniteInterventionType::create([
+            'designation' => 'Type Weekend seul',
+            'tarif' => 30,
+            'tarif_min' => null,
+            'tarif_min_pour' => null,
+            'taux_weekend' => 1.25,
+            'taux_nuit' => null,
+            'debut' => null,
+            'fin' => null,
+            'compte_id' => 4,
+            'phase_id' => null,
+            'type_unite_id' => 2,
+            'ecriture_categorie_id' => 4,
+            'par_fonction' => false,
+            'type' => 1,
+            'tarif_pro_rata' => true,
+            'tarif_min_pro_rata' => false,
+        ])->id;
+
+        $intervention = Intervention::factory()->make();
+        $intervention->exercice_comptable_id = 1;
+        $intervention->date_debut = '2025-02-27';
+        $intervention->heure_debut = '12:00';
+        $intervention->date_fin = '2025-03-05';
+        $intervention->heure_fin = '12:00';
+        $id = $this->json('POST', '/api/v2/interventions', $intervention->toArray())->json('data.id');
+
+        $sapeurs = [
+            [
+                'sapeur_id' => $this->sapeurOneId,
+                'debut' => '2025-02-28 12:00',
+                'fin' => '2025-02-28 14:00',
+                'piquet' => 0
+            ],
+            [
+                'sapeur_id' => $this->sapeurTwoId,
+                'debut' => '2025-03-01 10:00',
+                'fin' => '2025-03-01 11:00',
+                'piquet' => 0
+            ],
+            [
+                'sapeur_id' => $this->sapeurThreeId,
+                'debut' => '2025-02-28 18:00',
+                'fin' => '2025-03-02 21:00',
+                'piquet' => 0
+            ],
+        ];
+        $this->json('POST', "/api/v2/interventions/{$id}/sapeurs", ['sapeurs' => $sapeurs]);
+        $this->json('POST', "/api/v2/interventions/{$id}/valider");
+
+        $param = ["indemnite_intervention_type_id" => $typeWeekendId];
+        $response = $this->json('POST', "/api/v2/imputation/intervention/$id", $param);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonCount(4, 'data.ecritures')
+            ->assertJson([
+                "data" => [
+                    'statut' => InterventionBusiness::INTERVENTION_STATUT_IMPUTE,
+                    'ecritures' => [
+                        [
+                            'total' => '60.00',
+                            'quantite' => '2.00',
+                            'taux' => null,
+                            'taux_description' => null,
+                            'sapeur_id' => $this->sapeurOneId,
+                        ],
+                        [
+                            'total' => '37.50',
+                            'quantite' => '1.00',
+                            'taux' => '1.25',
+                            'taux_description' => 'Weekend',
+                            'sapeur_id' => $this->sapeurTwoId,
+                        ],
+                        [
+                            'total' => '180.00',
+                            'quantite' => '6.00',
+                            'taux' => null,
+                            'taux_description' => null,
+                            'sapeur_id' => $this->sapeurThreeId,
+                        ],
+                        [
+                            'total' => '1687.50',
+                            'quantite' => '45.00',
+                            'taux' => '1.25',
+                            'taux_description' => 'Weekend',
+                            'sapeur_id' => $this->sapeurThreeId,
+                        ],
+                    ]
+                ]
+            ]);
+    }
+
+    /**
+     * Test imputation avec un taux nuit dont la plage ne traverse pas minuit (00h-06h)
+     *
+     * Régression : les deux périodes de nuit candidates se chevauchaient et
+     * doublaient les heures de nuit (4h de présence comptées 8h de nuit).
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testImputationTauxNuitSansTraverseeDeMinuit()
+    {
+        $typeNuitId = IndemniteInterventionType::create([
+            'designation' => 'Type Nuit 00h-06h',
+            'tarif' => 30,
+            'tarif_min' => null,
+            'tarif_min_pour' => null,
+            'taux_weekend' => null,
+            'taux_nuit' => 1.25,
+            'debut' => '00:00',
+            'fin' => '06:00',
+            'compte_id' => 4,
+            'phase_id' => null,
+            'type_unite_id' => 2,
+            'ecriture_categorie_id' => 4,
+            'par_fonction' => false,
+            'type' => 1,
+            'tarif_pro_rata' => true,
+            'tarif_min_pro_rata' => false,
+        ])->id;
+
+        $intervention = Intervention::factory()->make();
+        $intervention->exercice_comptable_id = 1;
+        $intervention->date_debut = '2025-02-27';
+        $intervention->heure_debut = '12:00';
+        $intervention->date_fin = '2025-03-05';
+        $intervention->heure_fin = '12:00';
+        $id = $this->json('POST', '/api/v2/interventions', $intervention->toArray())->json('data.id');
+
+        $sapeurs = [
+            [
+                'sapeur_id' => $this->sapeurOneId,
+                'debut' => '2025-02-28 01:00',
+                'fin' => '2025-02-28 05:00',
+                'piquet' => 0
+            ],
+        ];
+        $this->json('POST', "/api/v2/interventions/{$id}/sapeurs", ['sapeurs' => $sapeurs]);
+        $this->json('POST', "/api/v2/interventions/{$id}/valider");
+
+        $param = ["indemnite_intervention_type_id" => $typeNuitId];
+        $response = $this->json('POST', "/api/v2/imputation/intervention/$id", $param);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonCount(1, 'data.ecritures')
+            ->assertJson([
+                "data" => [
+                    'statut' => InterventionBusiness::INTERVENTION_STATUT_IMPUTE,
+                    'ecritures' => [
+                        [
+                            // 4h de présence entièrement dans la plage de nuit 00h-06h
+                            'total' => '150.00',
+                            'quantite' => '4.00',
+                            'taux' => '1.25',
+                            'taux_description' => 'Nuit',
+                            'sapeur_id' => $this->sapeurOneId,
+                        ],
+                    ]
+                ]
+            ]);
+    }
+
+    /**
+     * Test imputation horaire sans tarif minimum configuré
+     *
+     * Régression : tarif_min_pour null devenait 0 au lieu du défaut 1.0,
+     * ce qui ajoutait un forfait en trop au total.
+     *
+     * Avec tarif=30, tarif_min et tarif_min_pour null (défauts: tarif, 1h):
+     * - Sapeur 1: 16.25h → 30 (1h min) + floor(15.25) × 30 = 480 CHF
+     * - Sapeur 2: 0.5h → 30 CHF (minimum)
+     * - Sapeur 3: 3.25h → 30 + floor(2.25) × 30 = 90 CHF
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testImputationTarifSansMinimumConfigure()
+    {
+        $typeSansMinId = IndemniteInterventionType::create([
+            'designation' => 'Type sans minimum',
+            'tarif' => 30,
+            'tarif_min' => null,
+            'tarif_min_pour' => null,
+            'taux_weekend' => null,
+            'taux_nuit' => null,
+            'debut' => null,
+            'fin' => null,
+            'compte_id' => 4,
+            'phase_id' => null,
+            'type_unite_id' => 2,
+            'ecriture_categorie_id' => 4,
+            'par_fonction' => false,
+            'type' => 1,
+            'tarif_pro_rata' => false,
+            'tarif_min_pro_rata' => false,
+        ])->id;
+
+        $param = ["indemnite_intervention_type_id" => $typeSansMinId];
+        $response = $this->json('POST', "/api/v2/imputation/intervention/$this->interventionId", $param);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonCount(3, 'data.ecritures')
+            ->assertJson([
+                "data" => [
+                    'statut' => InterventionBusiness::INTERVENTION_STATUT_IMPUTE,
+                    'ecritures' => [
+                        [
+                            'total' => '480.00',
+                            'quantite' => '16.25',
+                            'sapeur_id' => $this->sapeurOneId,
+                        ],
+                        [
+                            'total' => '30.00',
+                            'quantite' => '0.50',
+                            'sapeur_id' => $this->sapeurTwoId,
+                        ],
+                        [
+                            'total' => '90.00',
+                            'quantite' => '3.25',
+                            'sapeur_id' => $this->sapeurThreeId,
+                        ],
+                    ]
+                ]
+            ]);
+    }
 }

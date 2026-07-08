@@ -184,3 +184,9 @@ This project has domain-specific skills available. You MUST activate the relevan
 - To filter on a particular test name: `php artisan test --compact --filter=testName` (recommended after making a change to a related file).
 
 </laravel-boost-guidelines>
+
+# Règles projet
+
+## PHP
+
+- Ne jamais utiliser `empty()` : trop permissif (`0`, `"0"`, `null`, `false`, `[]` sont tous « empty ») et masque les fautes de frappe sur les variables. Utiliser un test explicite selon le type : `$array === []`, `$string === ''`, `$value === null`, `$collection->isEmpty()`.
