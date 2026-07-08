@@ -16,9 +16,12 @@ class MaterielCategorie extends Model
         'tri'
     ];
 
-    protected $cast = [
-        'parent_id' => 'integer',
-        'couleur_id' => 'integer',
-        'tri' => 'integer'
-    ];
+    protected function casts(): array
+    {
+        return [
+            'parent_id' => 'integer',
+            'couleur_id' => 'integer',
+            'tri' => 'integer'
+        ];
+    }
 }

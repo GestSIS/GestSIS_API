@@ -13,7 +13,7 @@ class Medecin extends Model
     protected function casts(): array
     {
         return [
-            'actif' => 'integer',
+            'actif' => 'boolean',
             'localite_id' => 'integer'
         ];
     }

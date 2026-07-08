@@ -161,7 +161,7 @@ class SapeurController extends Controller
     public function autreStatut(Request $request, $sapeurId)
     {
         $data = $request->validate([
-            'actif' => 'required|integer|min:0|max:1',
+            'actif' => 'required|boolean',
         ]);
         return response()->json(['data' => SapeurBusiness::updateNonSapeurStatut($sapeurId, $data)]);
     }

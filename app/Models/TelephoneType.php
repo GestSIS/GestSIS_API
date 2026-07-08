@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class TelephoneType extends Model
 {
-    //
+    protected $fillable = ['type'];
 }

@@ -21,6 +21,6 @@ class Localite extends Model
 
     public function commune()
     {
-        return $this->hasOne(Commune::class);
+        return $this->belongsTo(Commune::class);
     }
 }

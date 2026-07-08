@@ -128,9 +128,9 @@ class SapeurBusiness
         //TODO: Add no_avs validation
         $data = self::normalizeNullableFields($data);
         $data['iban_statut'] = 1;
-        $data['actif'] = 1;
+        $data['actif'] = true;
         $data['annee_incorporation'] = Carbon::parse($data['incorporation'])->year;
-        $data['porteur'] = 0;
+        $data['porteur'] = false;
         $data['type'] = self::TYPE_SAPEUR;
         $sapeur = Sapeur::create($data);
 
@@ -149,8 +149,8 @@ class SapeurBusiness
         //TODO: Add no_avs validation
         $data = self::normalizeNullableFields($data);
         $data['iban_statut'] = 1;
-        $data['actif'] = 1;
-        $data['porteur'] = 0;
+        $data['actif'] = true;
+        $data['porteur'] = false;
         $data['type'] = self::TYPE_CIVIL;
         $data['date_naissance'] = Carbon::yesterday();
         $sapeur = Sapeur::create($data);
@@ -416,12 +416,12 @@ class SapeurBusiness
     /**
      * Recalcule le statut actif et l'année d'incorporation du sapeur à partir de ses mutations
      *
-     * @return array{actif: int, annee_incorporation: mixed}
+     * @return array{actif: bool, annee_incorporation: mixed}
      */
     private static function majStatutActifSapeur(int $sapeurId, $mutations): array
     {
         $sapeur = Sapeur::findOrFail($sapeurId);
-        $sapeur->actif = self::isActif($mutations) ? 1 : 0;
+        $sapeur->actif = self::isActif($mutations);
         $sapeur->annee_incorporation = self::anneeIncorporation($mutations);
         $sapeur->save();
 

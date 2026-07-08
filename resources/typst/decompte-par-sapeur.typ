@@ -33,13 +33,13 @@
 
 #let formatTotal(ecriture) = {
   let compte = comptes.at(str(ecriture.compte_id))
-  return if compte.produit == 1 [-#ecriture.total] else [#ecriture.total]
+  return if compte.produit [-#ecriture.total] else [#ecriture.total]
 }
 
 #let calculateSubTotal(ecritures) = {
   return ecritures
     .map(
-      e => if comptes.at(str(e.compte_id)).produit == 1 { -decimal(e.total) } else { decimal(e.total) },
+      e => if comptes.at(str(e.compte_id)).produit { -decimal(e.total) } else { decimal(e.total) },
     )
     .sum()
 }

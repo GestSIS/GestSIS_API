@@ -21,7 +21,6 @@ class Inventaire extends Model
     {
         return [
             'emplacement_id' => 'integer',
-            'sapeur_id' => 'integer',
         ];
     }
 }

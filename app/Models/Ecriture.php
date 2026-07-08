@@ -31,6 +31,7 @@ class Ecriture extends Model
         'decompte_id',
         'ecriture_categorie_id',
         'cours_sapeur_id',
+        'travail_id',
 
         'type',
         // Types pour imposition
@@ -75,7 +76,9 @@ class Ecriture extends Model
             'sapeur_id' => 'integer',
             'intervention_id' => 'integer',
             'exercice_id' => 'integer',
+            'decompte_id' => 'integer',
             'cours_sapeur_id' => 'integer',
+            'travail_id' => 'integer',
         ];
     }
 

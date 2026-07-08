@@ -22,7 +22,7 @@ class ExerciceComptableController extends Controller
             'designation' => 'required|string|min:1',
             'debut' => 'required|date',
             'fin' => 'required|date',
-            'boucle' => 'integer'
+            'boucle' => 'boolean'
         ]);
 
         $exercice = ExerciceComptableBusiness::creerExerciceComptable($data);
@@ -36,7 +36,7 @@ class ExerciceComptableController extends Controller
             'designation' => 'string|min:1',
             'debut' => 'date',
             'fin' => 'date',
-            'boucle' => 'integer',
+            'boucle' => 'boolean',
         ]);
 
         $exercice = ExerciceComptableBusiness::modifierExerciceComptable($id, $data);

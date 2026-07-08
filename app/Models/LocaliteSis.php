@@ -8,6 +8,8 @@ class LocaliteSis extends Model
 {
     protected $table = 'localite_sis';
 
+    protected $fillable = ['localite_id'];
+
     protected function casts(): array
     {
         return [

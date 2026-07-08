@@ -16,7 +16,7 @@ class AvsParam extends Model
             'franchise_imposition' => 'decimal:2',
             'franchise_imposition_cantonale' => 'decimal:2',
             'compte_id' => 'integer',
-            'ecriture-categorie_id' => 'integer'
+            'ecriture_categorie_id' => 'integer'
         ];
     }
 }

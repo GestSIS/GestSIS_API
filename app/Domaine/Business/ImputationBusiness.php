@@ -71,7 +71,7 @@ class ImputationBusiness
     {
         $exerciceComptable = new ExerciceComptable();
         $exerciceComptable->fill($data);
-        $exerciceComptable->boucle = 0;
+        $exerciceComptable->boucle = false;
         $exerciceComptable->save();
         return $exerciceComptable;
     }
@@ -82,7 +82,7 @@ class ImputationBusiness
         if ($exerciceComptable === null) {
             throw new ArrayException([], 'Exercice comptable introuvable');
         }
-        if ($exerciceComptable->boucle === 1) {
+        if ($exerciceComptable->boucle) {
             throw new InvalidActionException(message: "Exercice comptable clôturé, impossible d'effectuer cette action");
         }
     }

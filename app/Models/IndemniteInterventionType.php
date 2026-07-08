@@ -28,6 +28,7 @@ class IndemniteInterventionType extends Model
     {
         return [
             'tarif' => 'decimal:2',
+            'tarif_min' => 'decimal:2',
             'tarif_min_pour' => 'decimal:2',
             'taux_weekend' => 'decimal:2',
             'taux_nuit' => 'decimal:2',

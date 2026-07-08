@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Quittance extends Model
 {
+    protected $fillable = ['sapeur_id', 'intervention_id'];
+
     protected function casts(): array
     {
         return [

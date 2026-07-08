@@ -6,6 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Decompte extends Model
 {
+    protected $fillable = [
+        'exercice_comptable_id',
+        'designation',
+        'deduction',
+        'date',
+        'avs_total',
+        'ac_total',
+        'total',
+        'a_payer_total',
+        'a_facturer_total',
+    ];
+
     protected function casts(): array
     {
         return [

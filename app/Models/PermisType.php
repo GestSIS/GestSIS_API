@@ -6,4 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class PermisType extends Model
 {
+    protected $fillable = ['type'];
 }

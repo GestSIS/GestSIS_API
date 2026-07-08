@@ -11,7 +11,7 @@ class ExerciceComptable extends Model
     {
         return [
             'annee' => 'integer',
-            'boucle' => 'integer'
+            'boucle' => 'boolean'
         ];
     }
 }

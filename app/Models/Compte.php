@@ -10,7 +10,7 @@ class Compte extends Model
     protected function casts(): array
     {
         return [
-            'produit' => 'integer'
+            'produit' => 'boolean'
         ];
     }
 

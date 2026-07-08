@@ -20,7 +20,6 @@ class Article extends Model
         'retour',
         'sapeur_id',
         'emplacement_id',
-        'remarque',
         'compartiment',
         'est_etiquete',
         'est_unique',

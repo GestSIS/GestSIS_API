@@ -9,7 +9,6 @@ use App\Models\Article;
 use App\Models\BatterieType;
 use App\Models\Emplacement;
 use App\Models\MaterielType;
-use App\Models\Vehicule;
 use Illuminate\Database\Eloquent\Collection;
 use Nette\Utils\Arrays;
 

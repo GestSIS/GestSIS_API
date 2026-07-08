@@ -29,6 +29,23 @@ class SapeurTest extends TestCase
         $this->localiteId = $localite->id;
     }
 
+    /**
+     * Les champs booléens du sapeur sont exposés en true/false dans l'API
+     */
+    public function testIndexExposeLesBooleensSapeur()
+    {
+        Sapeur::factory()->create([
+            'localite_id' => $this->localiteId,
+            'actif' => 1,
+            'type' => 0,
+        ]);
+
+        $response = $this->json('GET', '/api/v2/sapeurs');
+
+        $response->assertStatus(200);
+        $this->assertIsBool($response->json('data.0.actif'));
+    }
+
     public function testIndexSapeurReturnsListOfSapeurs()
     {
         $sapeur1 = Sapeur::factory()->create([

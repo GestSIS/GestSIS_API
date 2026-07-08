@@ -37,12 +37,12 @@ class Sapeur extends Model
     protected function casts(): array
     {
         return [
-            'actif' => 'integer',
+            'actif' => 'boolean',
             'iban_statut' => 'integer',
-            'cotisation_avs' => 'integer',
+            'cotisation_avs' => 'boolean',
             'localite_id' => 'integer',
             'civilite_id' => 'integer',
-            'porteur' => 'integer',
+            'porteur' => 'boolean',
             'fonction_id' => 'integer',
             'grade_id' => 'integer',
             'type' => 'integer'
