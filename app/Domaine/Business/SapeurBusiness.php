@@ -27,8 +27,10 @@ use Illuminate\Support\Facades\Storage;
 
 class SapeurBusiness
 {
-    const TYPE_SAPEUR = 0;
-    const TYPE_CIVIL = 1;
+    public const TYPE_SAPEUR = 0;
+    public const TYPE_CIVIL = 1;
+
+    private const ALLOWED_PHOTO_EXTENSIONS = ['jpg', 'jpeg', 'png'];
 
     private static function normalizeNullableFields($data): array
     {
@@ -138,8 +140,6 @@ class SapeurBusiness
             "incorporation" => $data['incorporation'],
             "motif" => ""
         ));
-        $sapeur->fonction_id = $sapeur->fonction_id ?? 0;
-        $sapeur->grade_id = $sapeur->grade_id ?? 0;
         return $sapeur;
     }
 
@@ -215,11 +215,9 @@ class SapeurBusiness
         $cours = CoursSapeur::create($data);
 
         // Add Grade
-        if (array_key_exists('grade_id', $data) && $data['grade_id'] !== null) {
-            $gradeId = $data['grade_id'];
-
+        if (isset($data['grade_id'])) {
             // Add grade if not already there
-            if (!GradeSapeur::where('sapeur_id', $sapeurId)->where('grade_id', $gradeId)->exists()) {
+            if (!GradeSapeur::where('sapeur_id', $sapeurId)->where('grade_id', $data['grade_id'])->exists()) {
                 self::addGrade($sapeurId, array(
                     'grade_id' => $data['grade_id'],
                     'date' => $data['date_grade'],
@@ -229,7 +227,7 @@ class SapeurBusiness
         }
 
         // Edit old fonction
-        if (array_key_exists('fonction_sapeur_id', $data) && $data['fonction_sapeur_id'] !== null) {
+        if (isset($data['fonction_sapeur_id'])) {
             self::updateFonction(
                 $sapeurId,
                 array(
@@ -241,7 +239,7 @@ class SapeurBusiness
         }
 
         // Add Fonction
-        if (array_key_exists('fonction_id', $data) && $data['fonction_id'] !== null) {
+        if (isset($data['fonction_id'])) {
             self::addFonction(
                 $sapeurId,
                 array(
@@ -279,12 +277,9 @@ class SapeurBusiness
             throw new ArrayException([], "Impossible d'ajouter un grade à un civil.");
         }
         $data = self::normalizeRemarque($data);
-        $gradeId = intval($data['grade_id']);
 
         //Check si déjà présent
-        $nb = GradeSapeur::where('grade_id', $gradeId)->where('sapeur_id', $sapeurId)->count();
-
-        if ($nb > 0) {
+        if (GradeSapeur::where('grade_id', $data['grade_id'])->where('sapeur_id', $sapeurId)->exists()) {
             throw new ArrayException(array('id' => "Grade déjà existant"));
         }
 
@@ -312,25 +307,13 @@ class SapeurBusiness
         return ['main_grade_id' => $mainGradeId];
     }
 
-    public static function addFonction(int $sapeurId, $data)
+    /**
+     * Contrôle que la période [$debut, $fin] ne chevauche aucune des périodes existantes
+     */
+    private static function controlerChevauchementFonction($periodes, $debut, $fin): void
     {
-        //Check duplicated fonction during period of time
-        $fonctionId = $data['fonction_id'];
-
-        //Check si déjà présent
-        $fonctions = FonctionSapeur::where('sapeur_id', $sapeurId)
-            ->get()
-            ->filter(fn($fonction) => $fonction->fonction_id === $fonctionId);
-
-        $startDate = array_key_exists('debut', $data) ? date($data['debut']) : null;
-        $endDate = array_key_exists('fin', $data) ? date($data['fin']) : null;
-
-        //Check overlaps of a fonction
-        foreach ($fonctions as $fonction) {
-            $start = $fonction->debut;
-            $end = $fonction->fin;
-
-            if (self::checkOverlappingPeriod($start, $end, $startDate, $endDate)) {
+        foreach ($periodes as $periode) {
+            if (self::checkOverlappingPeriod($periode->debut, $periode->fin, $debut, $fin)) {
                 throw new ArrayException([
                     "debut" => "Duplicated period",
                     "fin" => "Duplicated period",
@@ -338,6 +321,15 @@ class SapeurBusiness
                 ]);
             }
         }
+    }
+
+    public static function addFonction(int $sapeurId, $data)
+    {
+        //Check duplicated fonction during period of time
+        $periodes = FonctionSapeur::where('sapeur_id', $sapeurId)
+            ->where('fonction_id', $data['fonction_id'])
+            ->get();
+        self::controlerChevauchementFonction($periodes, $data['debut'] ?? null, $data['fin'] ?? null);
 
         $data = self::normalizeRemarque($data);
         $data['sapeur_id'] = $sapeurId;
@@ -349,49 +341,18 @@ class SapeurBusiness
 
     public static function updateFonction(int $sapeurId, $data)
     {
-        $id = $data['id'];
-
-        //Check si déjà présent
-        $fonctions = FonctionSapeur::where('sapeur_id', $sapeurId)->get();
-
-        //Get fonction to update
-        $fonction = $fonctions->firstWhere('id', $id);
-        $fonctionId = $fonction->fonction_id;
-
-        $fonctions = $fonctions->filter(fn($f) => $f->fonction_id === $fonctionId && $f->id !== $id);
-
-        // Check si déjà présent
-        $startDate = null;
-        $endDate = null;
-
-        if (array_key_exists('debut', $data)) {
-            $startDate = $data['debut'] !== null ? date($data['debut']) : null;
-        } else {
-            $startDate = $fonction->debut;
-        }
-        if (array_key_exists('fin', $data)) {
-            $endDate = $data['fin'] !== null ? date($data['fin']) : null;
-        } else {
-            $endDate = $fonction->fin;
-        }
-
-        // Check overlaps of a fonction
-        foreach ($fonctions as $fct) {
-            $start = $fct->debut;
-            $end = $fct->fin;
-
-            if (self::checkOverlappingPeriod($start, $end, $startDate, $endDate)) {
-                throw new ArrayException([
-                    'debut' => "Duplicated period",
-                    'fin' => 'Duplicated period',
-                ]);
-            }
-        }
-
-        // Update fonction
-        $data = self::normalizeRemarque($data);
         $fonction = FonctionSapeur::where('sapeur_id', $sapeurId)->findOrFail($data['id']);
-        $fonction->update($data);
+
+        //Check duplicated fonction during period of time, sur les autres périodes de la même fonction
+        $periodes = FonctionSapeur::where('sapeur_id', $sapeurId)
+            ->where('fonction_id', $fonction->fonction_id)
+            ->where('id', '!=', $fonction->id)
+            ->get();
+        $debut = array_key_exists('debut', $data) ? $data['debut'] : $fonction->debut;
+        $fin = array_key_exists('fin', $data) ? $data['fin'] : $fonction->fin;
+        self::controlerChevauchementFonction($periodes, $debut, $fin);
+
+        $fonction->update(self::normalizeRemarque($data));
         $mainFonctionId = self::updateFonctionPrincipale($sapeurId);
 
         return ['fonction' => $fonction, 'main_fonction_id' => $mainFonctionId];
@@ -419,15 +380,10 @@ class SapeurBusiness
             }
         }
 
-        foreach ($fonctionsId as $id) {
-            if ($fonctions->contains('id', intval($id))) {
-                $fonction = FonctionSapeur::where('sapeur_id', $sapeurId)->findOrFail($id);
-                $fonction->fin = $date;
-                $fonction->save();
-            }
-        }
+        FonctionSapeur::where('sapeur_id', $sapeurId)
+            ->whereIn('id', $fonctionsId)
+            ->update(['fin' => $date]);
 
-        //$fonctions
         self::updateFonctionPrincipale($sapeurId);
 
         return FonctionSapeur::where('sapeur_id', $sapeurId)->get();
@@ -435,36 +391,41 @@ class SapeurBusiness
 
     private static function verifyMutationPeriode($editedMutation, $mutations)
     {
+        $sortie = isset($editedMutation['sortie']) ? Carbon::parse($editedMutation['sortie']) : null;
+
         //Contrôle qu'une seule mutation peut ne pas avoir de date de fin
-        if (!array_key_exists('sortie', $editedMutation) || is_null($editedMutation['sortie'])) {
-            foreach ($mutations as $m) {
-                if (is_null($m->sortie)) {
-                    throw new ArrayException([
-                        "sortie" => "Une seule mutation active à la fois",
-                    ]);
-                }
-            }
+        if ($sortie === null && $mutations->contains(fn($m) => $m->sortie === null)) {
+            throw new ArrayException([
+                "sortie" => "Une seule mutation active à la fois",
+            ]);
         }
 
         //Contrôle que deux mutations ne se chevauchent pas
         $incorporation = Carbon::parse($editedMutation['incorporation']);
-        $sortie = (!array_key_exists('sortie', $editedMutation) || is_null($editedMutation['sortie'])) ? Null : Carbon::parse($editedMutation['sortie']);
         foreach ($mutations as $m) {
-            //Check overlapping periodes
-            $incorporationTemp = Carbon::parse($m->incorporation);
-            $sortieTemp = is_null($m->sortie) ? null : Carbon::parse($m->sortie);
-            if (
-                is_null($sortieTemp) && $sortie->gte($incorporationTemp) ||
-                is_null($sortie) && $incorporation->lte($sortieTemp) ||
-                !is_null($sortieTemp) && !is_null($sortie) && ($incorporation->gte($incorporationTemp) && $incorporation->lte($sortieTemp) ||
-                    $sortie->gte($incorporationTemp) && $sortie->lte($sortieTemp))
-            ) {
+            $sortieTemp = $m->sortie === null ? null : Carbon::parse($m->sortie);
+            if (self::checkOverlappingPeriod(Carbon::parse($m->incorporation), $sortieTemp, $incorporation, $sortie)) {
                 throw new ArrayException([
                     "sortie" => "Deux mutations en conflits",
                     "incorporation" => "Deux mutations en conflits",
                 ]);
             }
         }
+    }
+
+    /**
+     * Recalcule le statut actif et l'année d'incorporation du sapeur à partir de ses mutations
+     *
+     * @return array{actif: int, annee_incorporation: mixed}
+     */
+    private static function majStatutActifSapeur(int $sapeurId, $mutations): array
+    {
+        $sapeur = Sapeur::findOrFail($sapeurId);
+        $sapeur->actif = self::isActif($mutations) ? 1 : 0;
+        $sapeur->annee_incorporation = self::anneeIncorporation($mutations);
+        $sapeur->save();
+
+        return ["actif" => $sapeur->actif, "annee_incorporation" => $sapeur->annee_incorporation];
     }
 
     public static function addMutation($sapeurId, $data)
@@ -480,13 +441,7 @@ class SapeurBusiness
 
         // Update actif statut depending of end of all mutation
         $mutations->push($mutation);
-        $actif = self::isActif($mutations) ? 1 : 0;
-        $anneeIncorporation = self::anneeIncorporation($mutations);
-        $sapeur = Sapeur::findOrFail($sapeurId);
-        $sapeur->actif = $actif;
-        $sapeur->annee_incorporation = $anneeIncorporation;
-        $sapeur->save();
-        return ["mutation" => $mutation, "actif" => $actif, "annee_incorporation" => $anneeIncorporation];
+        return array_merge(["mutation" => $mutation], self::majStatutActifSapeur($sapeurId, $mutations));
     }
 
     public static function updateMutation(int $sapeurId, $data)
@@ -502,13 +457,7 @@ class SapeurBusiness
 
         // Update actif statut depending of end of all mutation
         $mutations->push($mutation);
-        $actif = self::isActif($mutations) ? 1 : 0;
-        $anneeIncorporation = self::anneeIncorporation($mutations);
-        $sapeur = Sapeur::findOrFail($sapeurId);
-        $sapeur->actif = $actif;
-        $sapeur->annee_incorporation = $anneeIncorporation;
-        $sapeur->save();
-        return ["mutation" => $mutation, "actif" => $actif, "annee_incorporation" => $anneeIncorporation];
+        return array_merge(["mutation" => $mutation], self::majStatutActifSapeur($sapeurId, $mutations));
     }
 
     /**
@@ -528,28 +477,21 @@ class SapeurBusiness
         Mutation::where('sapeur_id', $sapeurId)->findOrFail($mutationId)->delete();
 
         // Update actif statut depending of end of all mutation
-        $mutations = Mutation::where('sapeur_id', $sapeurId)->get();
-        $actif = self::isActif($mutations) ? 1 : 0;
-        $anneeIncorporation = self::anneeIncorporation($mutations);
-        $sapeur = Sapeur::findOrFail($sapeurId);
-        $sapeur->actif = $actif;
-        $sapeur->annee_incorporation = $anneeIncorporation;
-        $sapeur->save();
-        return ["actif" => $actif, "annee_incorporation" => $anneeIncorporation];
+        return self::majStatutActifSapeur($sapeurId, Mutation::where('sapeur_id', $sapeurId)->get());
+    }
+
+    private static function numeroNormalise($numero): string
+    {
+        return trim(preg_replace('/\s+/', ' ', $numero));
     }
 
     public static function addTelephone(int $sapeurId, $data)
     {
-        $telephones = SapeurTelephone::where('sapeur_id', $sapeurId)->get();
-        foreach ($telephones as $tel) {
-            if (
-                strcmp(
-                    trim(preg_replace('/\s+/', ' ', $tel->numero)),
-                    trim(preg_replace('/\s+/', ' ', $data['numero']))
-                ) === 0
-            ) {
-                throw new ArrayException(['numero' => 'Duplicated numero']);
-            }
+        $numero = self::numeroNormalise($data['numero']);
+        $existeDeja = SapeurTelephone::where('sapeur_id', $sapeurId)->get()
+            ->contains(fn($tel) => self::numeroNormalise($tel->numero) === $numero);
+        if ($existeDeja) {
+            throw new ArrayException(['numero' => 'Duplicated numero']);
         }
 
         $data['sapeur_id'] = $sapeurId;
@@ -558,21 +500,12 @@ class SapeurBusiness
 
     public static function updateTelephone(int $sapeurId, $data)
     {
-        $telephones = SapeurTelephone::where('sapeur_id', $sapeurId)->get();
-
-        $telephoneId = $data['id'];
-
-        $telephones = $telephones->reject(fn($t) => $t->id === $telephoneId);
-
-        foreach ($telephones as $tel) {
-            if (
-                strcmp(
-                    trim(preg_replace('/\s+/', ' ', $tel->numero)),
-                    trim(preg_replace('/\s+/', ' ', $data['numero']))
-                ) === 0
-            ) {
-                throw new ArrayException(['numéro' => 'Numéro à double'], 'Numéro déjà existant');
-            }
+        $numero = self::numeroNormalise($data['numero']);
+        $existeDeja = SapeurTelephone::where('sapeur_id', $sapeurId)->get()
+            ->reject(fn($t) => $t->id === $data['id'])
+            ->contains(fn($tel) => self::numeroNormalise($tel->numero) === $numero);
+        if ($existeDeja) {
+            throw new ArrayException(['numéro' => 'Numéro à double'], 'Numéro déjà existant');
         }
 
         $telephone = SapeurTelephone::where('sapeur_id', $sapeurId)->findOrFail($data['id']);
@@ -618,11 +551,11 @@ class SapeurBusiness
     public static function removeGroupes($sapeurId, $groupesIds)
     {
         Sapeur::findOrFail($sapeurId);
-        \App\Models\GroupeSapeur::where('sapeur_id', $sapeurId)
+        GroupeSapeur::where('sapeur_id', $sapeurId)
             ->whereIn('id', $groupesIds)
             ->delete();
 
-        return \App\Models\GroupeSapeur::where('sapeur_id', $sapeurId)->get();
+        return GroupeSapeur::where('sapeur_id', $sapeurId)->get();
     }
 
     /* ************************************************** *
@@ -648,7 +581,7 @@ class SapeurBusiness
             ->sortByDesc(fn($f) => $f->fonction->tri)
             ->first();
 
-        $maxId = $fonctionMax?->fonction->id;
+        $maxId = $fonctionMax?->fonction_id;
 
         $sapeur = Sapeur::findOrFail($sapeurId);
         $sapeur->fonction_id = $maxId;
@@ -667,7 +600,7 @@ class SapeurBusiness
             ->sortByDesc(fn($g) => $g->grade->tri)
             ->first();
 
-        $maxId = $gradeMax?->grade->id;
+        $maxId = $gradeMax?->grade_id;
 
         $sapeur = Sapeur::findOrFail($sapeurId);
         $sapeur->grade_id = $maxId;
@@ -675,22 +608,18 @@ class SapeurBusiness
         return $maxId;
     }
 
-    private static $ALLOWED_PHOTO_EXTENSION = ['jpg', 'jpeg', 'png'];
-
     public static function downloadPhotoSapeur($sapeurId, $sisKey)
     {
-        foreach (self::$ALLOWED_PHOTO_EXTENSION as $extension) {
-            $path = "photos/$sisKey/$sapeurId.$extension";
-            if (Storage::exists($path)) {
-                return Storage::download($path, null, ['Response-Type' => 'arraybuffer']);
-            }
+        $path = self::getPhotoSapeurPath($sapeurId, $sisKey);
+        if ($path !== null) {
+            return Storage::download($path, null, ['Response-Type' => 'arraybuffer']);
         }
         return response()->json(null);
     }
 
     public static function getPhotoSapeurPath($sapeurId, $sisKey)
     {
-        foreach (self::$ALLOWED_PHOTO_EXTENSION as $extension) {
+        foreach (self::ALLOWED_PHOTO_EXTENSIONS as $extension) {
             $path = "photos/$sisKey/$sapeurId.$extension";
             if (Storage::exists($path)) {
                 return $path;
@@ -701,7 +630,7 @@ class SapeurBusiness
 
     public static function deletePhotoSapeur($sapeurId, $sisKey)
     {
-        $files = collect(self::$ALLOWED_PHOTO_EXTENSION)
+        $files = collect(self::ALLOWED_PHOTO_EXTENSIONS)
             ->map(fn($ext) => "photos/$sisKey/$sapeurId.$ext")
             ->all();
         Storage::delete($files);

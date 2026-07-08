@@ -107,6 +107,29 @@ class SapeurMutationTest extends TestCase
         $this->assertContains($mutationId, array_column($mutations, 'id'));
     }
 
+    public function testAddMutationEnglobanteRefusee()
+    {
+        // Mutation existante 2005-2008
+        $this->json('POST', "/api/v2/sapeurs/{$this->sapeurId}/mutations", [
+            'incorporation' => "2005-01-01",
+            'sortie' => "2008-12-31",
+            'motif' => 'Première période',
+            'localite_id' => $this->localiteId
+        ])->assertStatus(200)->assertJsonMissingPath('error');
+
+        // Mutation englobant complètement la première → conflit
+        $response = $this->json('POST', "/api/v2/sapeurs/{$this->sapeurId}/mutations", [
+            'incorporation' => "2004-01-01",
+            'sortie' => "2009-12-31",
+            'motif' => 'Période englobante',
+            'localite_id' => $this->localiteId
+        ]);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonPath('error.incorporation', 'Deux mutations en conflits');
+    }
+
     public function testEditMutationSuccessfully()
     {
         // First, create a mutation with dates BEFORE the initial one (2019)
