@@ -64,6 +64,38 @@ class InterventionMaterielTest extends TestCase
     }
 
     /**
+     * Ajouter deux fois le même matériel renvoie une erreur propre, pas un crash
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testAddInterventionMaterielDuplicatRefuse()
+    {
+        $materiel = InterventionMateriel::factory()->make()->toArray();
+
+        $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/materiels', ['materiels' => [$materiel]])
+            ->assertStatus(200)
+            ->assertJsonMissingPath('error');
+
+        $response = $this->json(
+            'POST',
+            '/api/v2/interventions/' . $this->interventionId . '/materiels',
+            ['materiels' => [['materiel_id' => $materiel['materiel_id'], 'quantite' => 99]]]
+        );
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonPath('error.materiel_id', 'Matériel déjà présent');
+
+        // La quantité d'origine n'a pas été écrasée et il n'y a qu'une seule ligne
+        $lignes = InterventionMateriel::where('intervention_id', $this->interventionId)
+            ->where('materiel_id', $materiel['materiel_id'])
+            ->get();
+        $this->assertCount(1, $lignes);
+        $this->assertEquals($materiel['quantite'], $lignes[0]->quantite);
+    }
+
+    /**
      * Test edit presence
      *
      * @return void

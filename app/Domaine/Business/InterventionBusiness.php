@@ -23,6 +23,7 @@ use App\Models\Quittance;
 use App\Models\Sapeur;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 class InterventionBusiness
 {
@@ -503,7 +504,14 @@ class InterventionBusiness
             $mat->fill($materiel);
             $mat->materiel_id = $materiel['materiel_id'];
             $mat->intervention_id = $interventionId;
-            $mat->save();
+            try {
+                $mat->save();
+            } catch (UniqueConstraintViolationException) {
+                throw new ArrayException(
+                    ['materiel_id' => 'Matériel déjà présent'],
+                    "Ce matériel est déjà attribué à l'intervention, modifiez plutôt sa quantité."
+                );
+            }
         }
     }
 
