@@ -13,7 +13,6 @@ use App\Models\Paiement;
 use App\Models\Sapeur;
 use App\Models\SisParam;
 use Carbon\Carbon;
-use DateTime;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
@@ -330,103 +329,64 @@ class PaiementBusiness
      */
     public static function iso20022PourDecompte($decompteId, $nom, $bic, $iban)
     {
-        $decompte = Decompte::find($decompteId);
-        $paiements = Decompte::find($decompteId)->paiements()->get();
+        $decompte = Decompte::with('paiements.sapeur.localite')->find($decompteId);
+        if ($decompte === null) {
+            throw new InvalidActionException([], "Décompte introuvable");
+        }
+
+        $nomDebiteur = Text::sanitize($nom, 70);
+
         try {
-            $paiement = new PaymentInformation(
-                "payment-000",
-                $nom,
-                new BIC($bic),
-                new IBAN($iban)
-            );
+            // PmtInfId : identifiant du groupe de paiement, unique dans le message (un seul groupe ici)
+            $paiement = new PaymentInformation("paiement-001", $nomDebiteur, new BIC($bic), new IBAN($iban));
         } catch (Exception $e) {
             throw new InvalidActionException([], 'Veuillez vérifier les informations de paiement de votre SIS');
         }
-
-        $paiement->setExecutionDate(DateTime::createFromFormat('Y-m-d', $decompte->date));
+        $paiement->setExecutionDate(Carbon::parse($decompte->date));
 
         $i = 0;
-        foreach ($paiements as $p) {
-            $sapeur = $p->sapeur()->get()[0];
-            if ($p->total > 0) {
-                if ($sapeur->iban === "") {
-                    throw new ArrayException([], "Numéro IBAN manquant pour '$sapeur->nom $sapeur->prenom'");
-                }
-                try {
-                    $transaction = new BankCreditTransfer(
-                        "instr-$i",
-                        "e2e-$i",
-                        new Money\CHF((int) round(ImputationBusiness::arrondi_5_centimes($p->total) * 100)),
-                        // TODO: Could be improved en remplacant les charactères accentués par leur version non accentué
-                        Text::sanitize("$sapeur->prenom $sapeur->nom", 70),
-                        new StructuredPostalAddress(
-                            $sapeur->rue === "" ? null : Text::sanitize($sapeur->rue, 70),
-                            $sapeur->no_rue === "" ? null : Text::sanitize($sapeur->no_rue, 16),
-                            Text::sanitize($sapeur->localite()->get()[0]->npa, 16),
-                            Text::sanitize($sapeur->localite()->get()[0]->designation, 35)
-                        ),
-                        new IBAN($sapeur->iban),
-                        IID::fromIBAN(new IBAN($sapeur->iban))
-                    );
-
-                    $paiement->addTransaction($transaction);
-                    $i++;
-                } catch (InvalidArgumentException $e) {
-                    throw new ArrayException(['error' => $e->getMessage(), 'type' => $e::class], "Informations de paiement pour '$sapeur->nom $sapeur->prenom' invalides : $sapeur->iban");
-                }
+        foreach ($decompte->paiements as $p) {
+            if ($p->total <= 0) {
+                continue;
+            }
+            $sapeur = $p->sapeur;
+            if ($sapeur->iban === '') {
+                throw new ArrayException([], "Numéro IBAN manquant pour '$sapeur->nom $sapeur->prenom'");
+            }
+            try {
+                $ibanSapeur = new IBAN($sapeur->iban);
+                $paiement->addTransaction(new BankCreditTransfer(
+                    "instr-$i",
+                    "e2e-$i",
+                    new Money\CHF((int) round(ImputationBusiness::arrondi_5_centimes($p->total) * 100)),
+                    Text::sanitize("$sapeur->prenom $sapeur->nom", 70),
+                    new StructuredPostalAddress(
+                        $sapeur->rue === '' ? null : Text::sanitize($sapeur->rue, 70),
+                        $sapeur->no_rue === '' ? null : Text::sanitize($sapeur->no_rue, 16),
+                        Text::sanitize($sapeur->localite->npa, 16),
+                        Text::sanitize($sapeur->localite->designation, 35)
+                    ),
+                    $ibanSapeur,
+                    IID::fromIBAN($ibanSapeur)
+                ));
+                $i++;
+            } catch (InvalidArgumentException $e) {
+                throw new ArrayException(['error' => $e->getMessage(), 'type' => $e::class], "Informations de paiement pour '$sapeur->nom $sapeur->prenom' invalides : $sapeur->iban");
             }
         }
-        $message = new CustomerCreditTransfer('decompte-' . $decompteId, Text::sanitize($nom, 70), CustomerCreditTransfer::SPS_2022);
-        $message->addPayment($paiement);
 
-        return $message->asXml();
-    }
-    /**
-     * Créer un fichier iso20022 pour un paiement
-     * 
-     * @param int $paiementId id du paiement pour lequelle le fichier doit être créé
-     * @param string $nom titulaire du compte débiteur
-     * @param string $bic bic de la banque du compte débiteur
-     * @param string $iban iban du compte débiteur
-     * 
-     * @return string fichier xml répondant à la norme ISO 20022
-     */
-    public static function iso20022PourPaiement($paiementId, $nom, $bic, $iban)
-    {
-        $p = Paiement::find($paiementId);
-        if ($p === null || $p->total <= 0) {
-            throw new InvalidActionException([], "Impossible de générer le fichier de paiement : paiement introuvable ou montant nul/négatif");
+        // Un PmtInf sans transaction n'est pas conforme au schéma pain.001 (rejet banque)
+        if ($i === 0) {
+            throw new ArrayException([], "Aucun versement à effectuer dans ce décompte (aucun montant positif).");
         }
 
-        try {
-            $paiement = new PaymentInformation(
-                "payment-000",
-                $nom,
-                new BIC($bic),
-                new IBAN($iban)
-            );
-        } catch (Exception $e) {
-            throw new InvalidActionException([], 'Veuillez vérifier les informations de paiement de votre SIS');
-        }
-
-        $sapeur = $p->sapeur()->get()[0];
-        $transaction = new BankCreditTransfer(
-            "instr-001",
-            "e2e-001",
-            new Money\CHF((int) round(ImputationBusiness::arrondi_5_centimes($p->total) * 100)),
-            "$sapeur->prenom $sapeur->nom",
-            new StructuredPostalAddress(
-                $sapeur->rue === "" ? null : $sapeur->rue,
-                $sapeur->no_rue === "" ? null : $sapeur->no_rue,
-                $sapeur->localite()->get()[0]->npa,
-                $sapeur->localite()->get()[0]->designation
-            ),
-            new IBAN($sapeur->iban),
-            IID::fromIBAN(new IBAN($sapeur->iban))
+        $message = new CustomerCreditTransfer(
+            'decompte-' . $decompteId . '-' . Carbon::now()->format('YmdHis'),
+            $nomDebiteur,
+            CustomerCreditTransfer::SPS_2022,
+            "GestSIS",
+            "2.0"
         );
-        $paiement->addTransaction($transaction);
-
-        $message = new CustomerCreditTransfer('message-001', $nom, CustomerCreditTransfer::SPS_2022);
         $message->addPayment($paiement);
 
         return $message->asXml();
@@ -723,30 +683,16 @@ class PaiementBusiness
         $nom = $params->nom;
         $bic = $params->bic;
         $iban = $params->iban;
-
+        
         $nomFichier = preg_replace("([^\w\s\d\-_~,;\[\]\(\).])", "-", Decompte::find($decompteId)->designation) . ".xml";
         $content = self::iso20022PourDecompte($decompteId, $nom, $bic, $iban);
+
+        // TODO: Refactor est-ce que ce code ne devrait pas se trouver du cote du controller ?
         return response()->streamDownload(
             function () use ($content) {
                 echo $content;
             },
             $nomFichier
-        );
-    }
-
-    public static function iso20022PourPaiementStream($paiementId)
-    {
-        $params = SisParam::first();
-        $nom = $params->nom;
-        $bic = $params->bic;
-        $iban = $params->iban;
-
-        $content = self::iso20022PourPaiement($paiementId, $nom, $bic, $iban);
-        return response()->streamDownload(
-            function () use ($content) {
-                echo $content;
-            },
-            "paiement.xml"
         );
     }
 

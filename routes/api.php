@@ -98,7 +98,6 @@ use App\Application\Http\Controllers\MesInterventionsController;
 use App\Application\Http\Controllers\MesTravauxController;
 use App\Application\Http\Controllers\MissionTypeController;
 use App\Application\Http\Controllers\MonMaterielController;
-use App\Application\Http\Controllers\PaiementController;
 use App\Application\Http\Controllers\PermisController;
 use App\Application\Http\Controllers\PhaseTypeController;
 use App\Application\Http\Controllers\PublipostageController;
@@ -592,11 +591,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         // Params Amendes
         Route::apiResource('amendes', AmendeController::class)->only(['index']);
-
-        // Paiements
-        Route::get('paiements/exercice-comptable/{id}', [PaiementController::class, 'getByExerciceComptable']);
-        Route::get('paiements/{id}/iso20022', [PaiementController::class, 'iso20022']);
-        Route::get('paiements/{id}', [PaiementController::class, 'get']);
 
         // Certificats de salaire et résumé
         Route::get('exercices-comptable/{ExerciceComptableId}/resume-pour-sapeur/{sapeurId}', [DecompteController::class, 'resumePourSapeur']);
