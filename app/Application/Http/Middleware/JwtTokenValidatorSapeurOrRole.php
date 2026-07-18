@@ -33,11 +33,17 @@ class JwtTokenValidatorSapeurOrRole
             return response()->json(["error" => "Sis non sélectionné"], 401);
         }
 
-        // Check is a valid sapeur for the provided sis
+        // Check is a valid sapeur for the provided sis, or has one of the required roles
         $sapeurs = (array) $token->data->sapeurs;
         $permissions = (array) $token->data->permissions;
-        if ($token->data->admin !== True && !array_key_exists($sisKey, $sapeurs) && !array_key_exists($sisKey, $permissions)) {
-            return response()->json(["error" => "Votre compte n'est pas lié à un sapeur de ce SIS"], 401);
+        if ($token->data->admin !== True && !array_key_exists($sisKey, $sapeurs)) {
+            if (!array_key_exists($sisKey, $permissions)) {
+                return response()->json(["error" => "Votre compte n'est pas lié à un sapeur de ce SIS"], 401);
+            }
+
+            if (count($roles) > 0 && count(array_intersect($roles, (array) $permissions[$sisKey])) == 0) {
+                return response()->json(["error" => "Au moins 1 des rôles suivant est requis [" . join(", ", $roles) . "]."], 401);
+            }
         }
 
         if ($token->data->admin === True) {

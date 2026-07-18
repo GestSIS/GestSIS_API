@@ -373,7 +373,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('travaux/{id}/review', [TravailController::class, 'review'])->name('api.v2.travaux.review');
         Route::delete('travaux/{id}/review', [TravailController::class, 'cancelReview'])->name('api.v2.travaux.cancel-review');
     });
-    Route::group(['middleware' => 'jwtTokenSapeurOrRole::comptabilite.lecture,comptabilite.modification,fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation,fiche_travail.lecture'], function () {
+    Route::group(['middleware' => 'jwtTokenSapeurOrRole:comptabilite.lecture,comptabilite.modification,fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation,fiche_travail.lecture'], function () {
         Route::apiResource('travail-types', TravailTypeController::class)->only(['index']);
     });
     Route::group(['middleware' => 'jwtTokenRole:fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation,fiche_travail.lecture'], function () {
@@ -552,7 +552,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::apiResource('decomptes', DecompteController::class)->only(['destroy']);
 
         // Amendes
-        Route::post('generer-amendes/{id}/sapeur/{sapeurId}', [AmendeController::class, 'sapeur']);
+        Route::post('generer-amendes/{id}/sapeur/{sapeurId}', [AmendeSapeurController::class, 'sapeur']);
         Route::post('generer-amendes/{id}', [AmendeSapeurController::class, 'annuel']);
     });
 
