@@ -269,17 +269,16 @@ class ExerciceBusiness
             ->where('exercice_id', '=', $exerciceId)
             ->first();
 
+        if (!$exerciceSapeur) {
+            throw new ArrayException([], "Convocation introuvable");
+        }
+
         // Check que le délai de réponse n'est pas dépassé
         $now = Carbon::now();
         $now->setTime(0, 0);
 
         if (Carbon::createFromFormat("Y-m-d", $exerciceSapeur->exercice->date)->addDays($param->delai_excuse)->lt($now)) {
             throw new ArrayException([], "Délai d'excuse expiré, $param->delai_excuse jours");
-        }
-
-        // Vérifier que l'excuse n'a pas encore été traité
-        if (!$exerciceSapeur) {
-            throw new ArrayException([], "Convocation introuvable");
         }
 
         // Vérifier que le délai d'excuse n'est pas dépassé

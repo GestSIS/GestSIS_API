@@ -21,6 +21,9 @@ class MesAbsencesController extends Controller
         }
 
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
+        if ($exerciceComptable === null) {
+            throw new ArrayException([], 'Exercice comptable introuvable');
+        }
         $data = Absence::where('sapeur_id', '=', $sapeurId)->where([
             ['debut', '<', $exerciceComptable->fin],
             ['fin', '>', $exerciceComptable->debut]
@@ -39,8 +42,8 @@ class MesAbsencesController extends Controller
         }
 
         $data = $request->validate([
-            'debut' => 'date',
-            'fin' => 'date',
+            'debut' => 'required|date',
+            'fin' => 'required|date',
         ]);
 
         $data['sapeur_id'] = $sapeurId;
@@ -59,12 +62,12 @@ class MesAbsencesController extends Controller
         }
 
         $data = $request->validate([
-            'debut' => 'date',
-            'fin' => 'date',
+            'debut' => 'required|date',
+            'fin' => 'required|date',
         ]);
 
         $absence = Absence::find($absenceId);
-        if ($absence->sapeur_id !== $sapeurId) {
+        if ($absence?->sapeur_id !== $sapeurId) {
             throw new ArrayException([], 'Absence invalide');
         }
         $data['sapeur_id'] = $sapeurId;

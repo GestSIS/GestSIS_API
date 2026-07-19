@@ -84,6 +84,15 @@ class TokenTools
         //        Log::debug("VALIDATE TOKEN");
         $publicKey = Storage::disk('keys')->get(self::PUBLIC_KEY_FILE);
 
-        return JWT::decode($token, new Key($publicKey, 'RS256'));
+        $decoded = JWT::decode($token, new Key($publicKey, 'RS256'));
+
+        // firebase/php-jwt only verifies signature/exp/nbf: iss and aud must be
+        // asserted explicitly, otherwise any token signed with the trusted key
+        // (e.g. minted for another service) would be accepted
+        if (($decoded->iss ?? null) !== self::ISSUER || ($decoded->aud ?? null) !== self::AUDIENCE) {
+            throw new \UnexpectedValueException('Invalid token issuer or audience');
+        }
+
+        return $decoded;
     }
 }
