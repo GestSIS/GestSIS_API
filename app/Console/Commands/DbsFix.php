@@ -17,6 +17,7 @@ use App\Models\ConvocationParam;
 use App\Models\MaterielEventType;
 use App\Models\MaterielType;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class DbsFix extends Command
 {
@@ -85,10 +86,10 @@ class DbsFix extends Command
             //     'affichage_pour_infor' => true,
             // ]);
 
-            Localite::on("db_" . $db)->insert([
-                ['id' => 153, 'commune_id' => NULL, 'npa' => '2742', 'designation' => 'Perrefitte'],
-                ['id' => 154, 'commune_id' => NULL, 'npa' => '2762', 'designation' => 'Roches BE'],
-            ]);
+            // Localite::on("db_" . $db)->insert([
+            //     ['id' => 153, 'commune_id' => NULL, 'npa' => '2742', 'designation' => 'Perrefitte'],
+            //     ['id' => 154, 'commune_id' => NULL, 'npa' => '2762', 'designation' => 'Roches BE'],
+            // ]);
 
             // Localite::on("db_" . $db)->where('commune_id', '=', 12)->update(['commune_id' => 9]);
             // Localite::on("db_" . $db)->where('commune_id', '=', 13)->update(['commune_id' => 9]);
@@ -106,6 +107,41 @@ class DbsFix extends Command
 
             // Localite::on("db_" . $db)->whereId(110)->update(['designation' => 'La Chaux-de-Fonds']);
             // Localite::on("db_" . $db)->whereId(46)->update(['commune_id' => 77]);
+
+            // Fix 2026-07: avs_total/ac_total ne comptabilisaient que la part employé
+            // de la charge AVS/AC (au lieu de la charge complète part employé +
+            // employeur), et `total` ne rajoutait que cette même moitié (au lieu de la
+            // charge complète). Voir PaiementBusiness::creerDecompteInterne.
+            //
+            // Idempotent sans migration ni colonne supplémentaire : Paiement.avs_ac
+            // (part employé, avs+ac combinés) n'est touché ni par le bug ni par ce
+            // correctif — c'est une référence stable. Si avs_total+ac_total du
+            // décompte ≈ Σ Paiement.avs_ac, il n'a pas encore été corrigé (une seule
+            // part) ; si ≈ 2×Σ Paiement.avs_ac, il l'a déjà été → on saute.
+            $fixed = 0;
+            $skipped = 0;
+            DB::connection("db_" . $db)->transaction(function () use ($db, &$fixed, &$skipped) {
+                foreach (
+                    Decompte::on("db_" . $db)->where('deduction', true)
+                        ->with('paiements')->cursor() as $decompte
+                ) {
+                    $sumAvsAc = (float) $decompte->paiements->sum('avs_ac');
+                    $currentCharge = (float) $decompte->avs_total + (float) $decompte->ac_total;
+
+                    if ($sumAvsAc <= 0.0 || abs($currentCharge - $sumAvsAc) > 0.01) {
+                        // Pas de charge AVS/AC sur ce décompte, ou déjà à ~2x (corrigé)
+                        $skipped++;
+                        continue;
+                    }
+
+                    $decompte->total += $decompte->avs_total + $decompte->ac_total;
+                    $decompte->avs_total *= 2;
+                    $decompte->ac_total *= 2;
+                    $decompte->save();
+                    $fixed++;
+                }
+            });
+            printf("  %d décompte(s) corrigé(s), %d ignoré(s) (déjà corrects)\n", $fixed, $skipped);
 
             printf("\n");
         }

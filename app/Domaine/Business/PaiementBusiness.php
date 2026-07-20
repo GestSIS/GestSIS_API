@@ -178,8 +178,11 @@ class PaiementBusiness
                         ImputationBusiness::arrondi_5_centimes($total_imposable * ($avsParam->taux_ac / 2.0))
                         - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_ac / 2.0))
                     );
-                    $decompte->avs_total += $avs;
-                    $decompte->ac_total += $ac;
+                    // Charge sociale complète (part employé + part employeur paritaire),
+                    // alors que $avs/$ac ne représentent qu'une part (utilisée telle
+                    // quelle comme retenue sur la solde du sapeur ci-dessous)
+                    $decompte->avs_total += $avs * 2;
+                    $decompte->ac_total += $ac * 2;
                     $totaux[$key]['avs_ac_a_cotiser'] = $avs + $ac;
                 }
             }
@@ -285,9 +288,13 @@ class PaiementBusiness
             }
         }
 
-        // Génération écriture AVS/AC pour le décompze
+        // Génération écriture AVS/AC pour le décompte
+        // $ecritureAvsGlobale['total'] est la charge sociale complète (part employé,
+        // déjà déduite dans total_final, + part employeur) : $decompte->total
+        // représente le coût total réel pour le SIS, donc on ajoute le montant
+        // complet ici, pas seulement la part employé (d'où pas de /2.0).
         if ($deduction && round($ecritureAvsGlobale['total'], 2) !== 0.0) {
-            $decompte->total += $ecritureAvsGlobale['total'] / 2.0;
+            $decompte->total += $ecritureAvsGlobale['total'];
             $ecritureAvsAc[] = $ecritureAvsGlobale;
         }
         $decompte->save();
