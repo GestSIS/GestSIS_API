@@ -207,7 +207,7 @@ class PaiementBusiness
             'quantite' => 1,
             'total' => 0,
 
-            'designation' => "$designation - Charges AVS/AI/APG - AC",
+            'designation' => "$designation - Côtisations AVS/AI/APG - AC",
             'type_unite_id' => ImputationBusiness::UNITE_FORFAIT,
             'exercice_comptable_id' => $exerciceComptableId,
             'ecriture_categorie_id' => $avsParam->ecriture_categorie_id,

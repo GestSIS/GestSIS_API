@@ -47,7 +47,7 @@ class EcrituresExport implements FromQuery, WithHeadings
         'ecritures.taux_description',
         'comptes.designation AS compte_designation',
         'comptes.numero AS compte_numero',
-        DB::Raw("CASE ecritures.type WHEN 0 THEN 'autre' WHEN 1 THEN 'solde' WHEN 2 THEN 'indemnite' WHEN 3 THEN 'frais forfaitaire' WHEN 4 THEN 'frais effectif' WHEN 5 THEN 'charges AVS/AC' END")
+        DB::Raw("CASE ecritures.type WHEN 0 THEN 'autre' WHEN 1 THEN 'solde' WHEN 2 THEN 'indemnite' WHEN 3 THEN 'frais forfaitaire' WHEN 4 THEN 'frais effectif' WHEN 5 THEN 'cotisations AVS/AC' END")
       ]);
 
     // 'module',

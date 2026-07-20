@@ -31,7 +31,7 @@ return new class extends Migration {
             // 2. 'Indemnité',
             // 3. 'Frais forfaitaire',
             // 4. 'Frais effectif',
-            // 5. 'Charges AVS/AC'
+            // 5. 'Côtisations AVS/AC'
         });
 
         Ecriture::whereNotNull('exercice_id')->update(['module' => 1]);

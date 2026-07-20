@@ -22,7 +22,7 @@ return new class extends Migration
             // 2 : indemnité
             // 3 : frais forfaitaire
             // 4 : frais effectif
-            // 5 : charges AVS/AC
+            // 5 : cotisations AVS/AC
         });
     }
 

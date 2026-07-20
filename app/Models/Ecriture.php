@@ -40,7 +40,7 @@ class Ecriture extends Model
         // 2. Indemnité
         // 3. Frais forfaitaire
         // 4. Frais effectif
-        // 5. Charges AVS/AC
+        // 5. Côtisations AVS/AC
 
         'module',
         // Module effectifs:
