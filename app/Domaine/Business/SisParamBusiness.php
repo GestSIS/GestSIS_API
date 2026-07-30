@@ -51,6 +51,10 @@ class SisParamBusiness
 
     public static function getLogo($sisKey)
     {
+        if (!in_array($sisKey, config('database.dbs'), true)) {
+            return null;
+        }
+
         $directory = "documents/$sisKey/logo";
         $exist = Storage::exists($directory);
         if (!$exist) {
