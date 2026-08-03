@@ -7,6 +7,7 @@ use App\Domaine\Exceptions\InvalidActionException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Application\Http\Middleware\JwtTokenValidatorAny;
 use App\Application\Http\Middleware\JwtTokenValidatorRole;
 use App\Application\Http\Middleware\JwtTokenValidatorSapeur;
 use App\Domaine\Exceptions\ArrayException;
@@ -28,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'jwtTokenAuth' => JwtTokenValidatorAuth::class,
             'jwtTokenSapeur' => JwtTokenValidatorSapeur::class,
             'jwtTokenSapeurOrRole' => JwtTokenValidatorSapeurOrRole::class,
+            'jwtTokenAny' => JwtTokenValidatorAny::class,
             'dbSelector' => DbSelector::class,
         ]);
     })
