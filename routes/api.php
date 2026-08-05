@@ -93,6 +93,8 @@ use App\Application\Http\Controllers\MesControlesMedicauxController;
 use App\Application\Http\Controllers\MesDecomptesController;
 use App\Application\Http\Controllers\MesExcusesController;
 use App\Application\Http\Controllers\MesExercicesController;
+use App\Application\Http\Controllers\IcsController;
+use App\Application\Http\Controllers\IcsTokenController;
 use App\Application\Http\Controllers\MesInfosController;
 use App\Application\Http\Controllers\MesInterventionsController;
 use App\Application\Http\Controllers\MesProchainsExercicesController;
@@ -142,10 +144,13 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenVali
 // Routes sapeur, tous SIS confondus (pas de Sis-Id : le contrôleur boucle sur les SIS du sapeur connecté)
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, 'jwtTokenAny']], function () {
     Route::get('mes-prochains-exercices', [MesProchainsExercicesController::class, 'index'])->name('mes-prochains-exercices');
+    Route::get('ics-tokens', [IcsTokenController::class, 'index'])->name('ics-tokens.index');
+    Route::post('ics-tokens/{sisKey}/regenerate', [IcsTokenController::class, 'regenerate'])->name('ics-tokens.regenerate');
 });
 
 Route::group(['prefix' => 'v2'], function () {
     Route::apiResource('sis-logo', SisLogoController::class)->only(['show']);
+    Route::get('ics/{sisKey}/{token}', [IcsController::class, 'show'])->name('ics.show');
 });
 
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
