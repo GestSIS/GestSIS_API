@@ -22,12 +22,19 @@ class MesProchainsExercicesController extends Controller
         foreach ($sapeurs as $sisKey => $sapeurId) {
             Config::set('database.default', 'db_' . $sisKey);
 
-            $exerciceIds = ExerciceSapeur::where('sapeur_id', $sapeurId)->pluck('exercice_id');
+            $convoqueParExerciceId = ExerciceSapeur::where('sapeur_id', $sapeurId)
+                ->pluck('convoque', 'exercice_id');
 
-            $res[$sisKey] = Exercice::whereIn('id', $exerciceIds)
+            $exercices = Exercice::whereIn('id', $convoqueParExerciceId->keys())
                 ->where('date', '>=', Carbon::now())
                 ->orderBy('date')
                 ->get();
+
+            $exercices->each(function (Exercice $exercice) use ($convoqueParExerciceId) {
+                $exercice->convoque = (bool) $convoqueParExerciceId->get($exercice->id);
+            });
+
+            $res[$sisKey] = $exercices;
         }
 
         return response()->json(['data' => $res]);
