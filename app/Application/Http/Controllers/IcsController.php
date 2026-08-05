@@ -37,8 +37,6 @@ class IcsController extends Controller
         $exerciceIds = ExerciceSapeur::where('sapeur_id', $icsToken->sapeur_id)->pluck('exercice_id');
 
         $exercices = Exercice::whereIn('id', $exerciceIds)
-            ->where('date', '>=', Carbon::now()->subMonth())
-            ->where('date', '<=', Carbon::now()->addMonths(18))
             ->orderBy('date')
             ->get();
 
