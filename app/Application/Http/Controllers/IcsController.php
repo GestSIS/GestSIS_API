@@ -5,12 +5,14 @@ namespace App\Application\Http\Controllers;
 use App\Models\Exercice;
 use App\Models\IcsToken;
 use App\Models\ExerciceSapeur;
+use App\Models\SisParam;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Spatie\IcalendarGenerator\Components\Calendar;
 use Spatie\IcalendarGenerator\Components\Event;
+use Spatie\IcalendarGenerator\Enums\EventStatus;
 use Symfony\Component\HttpFoundation\Response;
 
 class IcsController extends Controller
@@ -34,22 +36,30 @@ class IcsController extends Controller
             abort(404);
         }
 
-        $exerciceIds = ExerciceSapeur::where('sapeur_id', $icsToken->sapeur_id)->pluck('exercice_id');
+        $convoqueParExerciceId = ExerciceSapeur::where('sapeur_id', $icsToken->sapeur_id)
+            ->pluck('convoque', 'exercice_id');
 
-        $exercices = Exercice::whereIn('id', $exerciceIds)
+        $exercices = Exercice::whereIn('id', $convoqueParExerciceId->keys())
             ->orderBy('date')
             ->get();
 
-        $calendar = Calendar::create('Agenda GestSIS')
+        $sisNom = SisParam::first()?->nom;
+
+        $calendar = Calendar::create($sisNom !== null ? "GestSIS - {$sisNom}" : 'GestSIS')
             ->refreshInterval(60)
-            ->event($exercices->map(function (Exercice $exercice) {
+            ->event($exercices->map(function (Exercice $exercice) use ($convoqueParExerciceId) {
                 $starts = Carbon::parse($exercice->date . ' ' . $exercice->heure);
                 $ends = $starts->clone()->addMinutes((int) $exercice->duree);
+                $convoque = (bool) $convoqueParExerciceId->get($exercice->id);
 
-                $event = Event::create($exercice->designation)
+                $event = Event::create($exercice->designation . ($convoque ? '' : ' - pour info'))
                     ->uniqueIdentifier("exercice-{$exercice->id}@gestsis")
                     ->startsAt($starts)
                     ->endsAt($ends);
+
+                if (!$convoque) {
+                    $event->status(EventStatus::Tentative)->transparent();
+                }
 
                 if ($exercice->communications !== null && $exercice->communications !== '') {
                     $event->description($exercice->communications);

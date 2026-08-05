@@ -65,4 +65,41 @@ class IcsTest extends TestCase
 
         $response->assertStatus(404);
     }
+
+    /**
+     * Test qu'un exercice où le sapeur n'est pas convoqué (juste ajouté) apparaît quand même,
+     * marqué comme "pour info" et en statut tentative/transparent.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testIcsShowMarksNonConvoqueExerciceAsPourInfo()
+    {
+        $sapeur = Sapeur::factory()->create();
+        $icsToken = IcsToken::factory()->create(['sapeur_id' => $sapeur->id]);
+
+        $exercice = Exercice::factory()->create([
+            'date' => now()->addWeek()->format('Y-m-d'),
+            'heure' => '19:00:00',
+        ]);
+        ExerciceSapeur::factory()->create([
+            'sapeur_id' => $sapeur->id,
+            'exercice_id' => $exercice->id,
+            'convoque' => 0,
+            'excuse_statut' => 0,
+            'date_demande' => now(),
+            'remarque' => '',
+            'justificatif_path' => '',
+            'justificatif_filename' => '',
+            'justification' => '',
+        ]);
+
+        $response = $this->get("/api/v2/ics/test/{$icsToken->token}");
+
+        $response->assertStatus(200);
+        $content = $response->getContent();
+        $this->assertStringContainsString($exercice->designation . ' - pour info', $content);
+        $this->assertStringContainsString('STATUS:TENTATIVE', $content);
+        $this->assertStringContainsString('TRANSP:TRANSPARENT', $content);
+    }
 }
