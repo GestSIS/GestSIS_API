@@ -48,16 +48,25 @@ class IcsController extends Controller
         $calendar = Calendar::create($sisNom !== null ? "GestSIS - {$sisNom}" : 'GestSIS')
             ->refreshInterval(60)
             ->event($exercices->map(function (Exercice $exercice) use ($convoqueParExerciceId) {
-                $starts = Carbon::parse($exercice->date . ' ' . $exercice->heure);
+                $starts = Carbon::parse($exercice->date . ' ' . $exercice->heure, 'Europe/Zurich');
                 $ends = $starts->clone()->addMinutes((int) $exercice->duree);
                 $convoque = (bool) $convoqueParExerciceId->get($exercice->id);
+                $annule = $exercice->statut === 0;
 
-                $event = Event::create($exercice->designation . ($convoque ? '' : ' - pour info'))
+                $suffixe = match (true) {
+                    $annule => ' - ANNULÉ',
+                    !$convoque => ' - pour info',
+                    default => '',
+                };
+
+                $event = Event::create($exercice->designation . $suffixe)
                     ->uniqueIdentifier("exercice-{$exercice->id}@gestsis")
                     ->startsAt($starts)
                     ->endsAt($ends);
 
-                if (!$convoque) {
+                if ($annule) {
+                    $event->status(EventStatus::Cancelled)->transparent();
+                } elseif (!$convoque) {
                     $event->status(EventStatus::Tentative)->transparent();
                 }
 
