@@ -97,7 +97,7 @@ use App\Application\Http\Controllers\IcsController;
 use App\Application\Http\Controllers\IcsTokenController;
 use App\Application\Http\Controllers\MesInfosController;
 use App\Application\Http\Controllers\MesInterventionsController;
-use App\Application\Http\Controllers\MesProchainsExercicesController;
+use App\Application\Http\Controllers\MesProchainesConvocationsController;
 use App\Application\Http\Controllers\MesTravauxController;
 use App\Application\Http\Controllers\MissionTypeController;
 use App\Application\Http\Controllers\MonMaterielController;
@@ -143,7 +143,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenVali
 
 // Routes sapeur, tous SIS confondus (pas de Sis-Id : le contrôleur boucle sur les SIS du sapeur connecté)
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, 'jwtTokenAny']], function () {
-    Route::get('mes-prochains-exercices', [MesProchainsExercicesController::class, 'index'])->name('mes-prochains-exercices');
+    Route::get('mes-prochaines-convocations', [MesProchainesConvocationsController::class, 'index'])->name('mes-prochaines-convocations');
     Route::get('ics-tokens', [IcsTokenController::class, 'index'])->name('ics-tokens.index');
     Route::post('ics-tokens/{sisKey}/regenerate', [IcsTokenController::class, 'regenerate'])->name('ics-tokens.regenerate');
 });

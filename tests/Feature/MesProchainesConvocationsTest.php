@@ -6,7 +6,7 @@ use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
-class MesProchainsExercicesTest extends TestCase
+class MesProchainesConvocationsTest extends TestCase
 {
     use DatabaseTransactions;
 
@@ -21,9 +21,9 @@ class MesProchainsExercicesTest extends TestCase
      * @return void
      * @throws Exception
      */
-    public function testMesProchainsExercicesOk()
+    public function testMesProchainesConvocationsOk()
     {
-        $response = $this->json('GET', '/api/v2/mes-prochains-exercices');
+        $response = $this->json('GET', '/api/v2/mes-prochaines-convocations');
 
         $response
             ->assertStatus(200)
