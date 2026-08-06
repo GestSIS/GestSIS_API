@@ -15,7 +15,7 @@ class CoursTest extends TestCase
         Cours::factory()->count(3)->create();
 
         $response = $this->json('GET', '/api/v2/cours/', [], [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);
@@ -48,7 +48,7 @@ class CoursTest extends TestCase
         ];
 
         $response = $this->json('POST', '/api/v2/cours/', $coursData, [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);
@@ -90,7 +90,7 @@ class CoursTest extends TestCase
         ];
 
         $response = $this->json('PUT', '/api/v2/cours/' . $cours->id, $updateData, [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);
@@ -119,7 +119,7 @@ class CoursTest extends TestCase
         ];
 
         $response = $this->json('PUT', '/api/v2/cours/99999', $updateData, [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(404);
@@ -133,7 +133,7 @@ class CoursTest extends TestCase
         ]);
 
         $response = $this->json('DELETE', '/api/v2/cours/' . $cours->id, [], [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);
@@ -146,7 +146,7 @@ class CoursTest extends TestCase
     public function testDestroyCoursReturnsErrorWhenCoursNotFound(): void
     {
         $response = $this->json('DELETE', '/api/v2/cours/99999', [], [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(404);

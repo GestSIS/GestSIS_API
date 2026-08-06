@@ -218,7 +218,7 @@ class ControleMedicalTest extends TestCase
         $response = $this->json('POST', '/api/v2/controles-medicaux/' . $controle->id . '/justificatif', [
             'justificatif' => $file
         ], [
-            'Sis-Id' => 'test_sis'
+            'Sis-Key' => 'test_sis'
         ]);
 
         $response
@@ -266,7 +266,7 @@ class ControleMedicalTest extends TestCase
         $this->json('POST', '/api/v2/controles-medicaux/' . $controle->id . '/justificatif', [
             'justificatif' => $file
         ], [
-            'Sis-Id' => 'test_sis'
+            'Sis-Key' => 'test_sis'
         ]);
 
         // TEST - Download justificatif
@@ -292,7 +292,7 @@ class ControleMedicalTest extends TestCase
         $this->json('POST', '/api/v2/controles-medicaux/' . $controle->id . '/justificatif', [
             'justificatif' => $file
         ], [
-            'Sis-Id' => 'test_sis'
+            'Sis-Key' => 'test_sis'
         ]);
 
         // TEST - Remove justificatif

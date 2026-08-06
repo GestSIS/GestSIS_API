@@ -28,7 +28,7 @@ class JustificatifController extends Controller
         }
 
         $file = $request->file('justificatif');
-        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
+        $sisKey = $request->header('Sis-Key', Null);
         $justificatif = ControleMedicalBusiness::addJustificatif($id, $file, $sisKey);
 
         return response()->json(['data' => $justificatif]);

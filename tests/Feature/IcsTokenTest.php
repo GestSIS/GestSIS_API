@@ -16,7 +16,7 @@ class IcsTokenTest extends TestCase
     }
 
     /**
-     * Test que la route est accessible sans header Sis-Id et retourne un tableau de liens groupé par SIS.
+     * Test que la route est accessible sans header Sis-Key et retourne un tableau de liens groupé par SIS.
      *
      * @return void
      * @throws Exception

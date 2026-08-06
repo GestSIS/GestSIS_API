@@ -40,7 +40,7 @@ class MaterielTypeTest extends TestCase
             'tuyau' => ['tuyau_diametre_id' => $diametre->id, 'longeur' => 20, 'separement' => true],
         ]);
 
-        $response = $this->json('POST', '/api/v2/materiel-types', $payload, ['Sis-Id' => 1]);
+        $response = $this->json('POST', '/api/v2/materiel-types', $payload, ['Sis-Key' => 1]);
 
         $response->assertStatus(200);
         $id = $response->json('data.id');
@@ -61,7 +61,7 @@ class MaterielTypeTest extends TestCase
             'batterie' => ['nombre' => 3, 'batterie_type_id' => $batterieType->id],
         ]);
 
-        $response = $this->json('POST', '/api/v2/materiel-types', $payload, ['Sis-Id' => 1]);
+        $response = $this->json('POST', '/api/v2/materiel-types', $payload, ['Sis-Key' => 1]);
 
         $response->assertStatus(200);
         $id = $response->json('data.id');
@@ -90,10 +90,10 @@ class MaterielTypeTest extends TestCase
             'batterie' => ['nombre' => 2, 'batterie_type_id' => $batterieType->id],
         ];
 
-        $this->json('PUT', "/api/v2/materiel-types/{$type->id}", $payload, ['Sis-Id' => 1])->assertStatus(200);
+        $this->json('PUT', "/api/v2/materiel-types/{$type->id}", $payload, ['Sis-Key' => 1])->assertStatus(200);
         $this->json('PUT', "/api/v2/materiel-types/{$type->id}", array_merge($payload, [
             'batterie' => ['nombre' => 5, 'batterie_type_id' => $batterieType->id],
-        ]), ['Sis-Id' => 1])->assertStatus(200);
+        ]), ['Sis-Key' => 1])->assertStatus(200);
 
         // updateOrCreate : une seule ligne, mise à jour (pas de doublon comme avec insert())
         $this->assertSame(1, MaterielType::find($type->id)->batterie()->count());

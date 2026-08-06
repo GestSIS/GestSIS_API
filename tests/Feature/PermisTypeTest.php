@@ -12,7 +12,7 @@ class PermisTypeTest extends TestCase
     public function testIndexPermisTypesReturnsListOfPermisTypes(): void
     {
         $response = $this->json('GET', '/api/v2/permis/', [], [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);

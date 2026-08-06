@@ -17,7 +17,7 @@ class TuyauDiametreTest extends TestCase
 
         $response = $this->json('POST', '/api/v2/tuyau-diametres', [
             'diametre' => $diametre->diametre,
-        ], ['Sis-Id' => 1]);
+        ], ['Sis-Key' => 1]);
 
         // L'app renvoie les erreurs de validation en 200 avec une clé "error"
         $response->assertOk();
@@ -34,7 +34,7 @@ class TuyauDiametreTest extends TestCase
 
         $response = $this->json('POST', '/api/v2/tuyau-diametres', [
             'diametre' => $value,
-        ], ['Sis-Id' => 1]);
+        ], ['Sis-Key' => 1]);
 
         $response->assertStatus(200);
         $this->assertDatabaseHas('tuyau_diametres', ['diametre' => $value]);
@@ -46,7 +46,7 @@ class TuyauDiametreTest extends TestCase
 
         $response = $this->json('PUT', "/api/v2/tuyau-diametres/{$diametre->id}", [
             'diametre' => $diametre->diametre,
-        ], ['Sis-Id' => 1]);
+        ], ['Sis-Key' => 1]);
 
         $response->assertStatus(200);
     }

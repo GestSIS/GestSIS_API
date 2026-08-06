@@ -25,7 +25,7 @@ class ArticleTest extends TestCase
                     'emplacement_id' => $emplacement->id,
                 ],
             ],
-        ], ['Sis-Id' => 1]);
+        ], ['Sis-Key' => 1]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure(['data' => ['*' => ['id', 'materiel_type_id', 'emplacement_id']]]);
@@ -56,7 +56,7 @@ class ArticleTest extends TestCase
                     'remarque' => 'apres',
                 ],
             ],
-        ], ['Sis-Id' => 1]);
+        ], ['Sis-Key' => 1]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure(['data' => ['*' => ['id', 'remarque']]]);
@@ -77,7 +77,7 @@ class ArticleTest extends TestCase
         $response = $this->json('POST', "/api/v2/emplacements/{$emplacement->id}/articles", [
             'date' => '2026-06-18',
             'articleIds' => [$article->id],
-        ], ['Sis-Id' => 1]);
+        ], ['Sis-Key' => 1]);
 
         $response->assertStatus(200);
         $this->assertDatabaseHas('articles', [

@@ -15,7 +15,7 @@ class GroupeTest extends TestCase
         Groupe::factory()->count(3)->create();
 
         $response = $this->json('GET', '/api/v2/groupes/', [], [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);
@@ -45,7 +45,7 @@ class GroupeTest extends TestCase
         ];
 
         $response = $this->json('POST', '/api/v2/groupes/', $groupeData, [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);
@@ -85,7 +85,7 @@ class GroupeTest extends TestCase
         ];
 
         $response = $this->json('PUT', '/api/v2/groupes/' . $groupe->id, $updateData, [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);
@@ -110,7 +110,7 @@ class GroupeTest extends TestCase
         ];
 
         $response = $this->json('PUT', '/api/v2/groupes/99999', $updateData, [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(404);
@@ -124,7 +124,7 @@ class GroupeTest extends TestCase
         ]);
 
         $response = $this->json('DELETE', '/api/v2/groupes/' . $groupe->id, [], [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);
@@ -138,7 +138,7 @@ class GroupeTest extends TestCase
     public function testDestroyGroupeReturnsErrorWhenGroupeNotFound(): void
     {
         $response = $this->json('DELETE', '/api/v2/groupes/99999', [], [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(404);

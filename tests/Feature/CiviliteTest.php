@@ -12,7 +12,7 @@ class CiviliteTest extends TestCase
     public function testIndexCivilitesReturnsListOfCivilites(): void
     {
         $response = $this->json('GET', '/api/v2/civilites/', [], [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);

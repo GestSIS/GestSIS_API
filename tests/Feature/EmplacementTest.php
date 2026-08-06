@@ -23,7 +23,7 @@ class EmplacementTest extends TestCase
             'couleur_id' => $couleur->id,
             'parent_id' => null,
             'statut' => true,
-        ], ['Sis-Id' => 1]);
+        ], ['Sis-Key' => 1]);
 
         $response->assertStatus(200);
         // tri doit être calculé sur la table emplacements (et non materiel_categories)

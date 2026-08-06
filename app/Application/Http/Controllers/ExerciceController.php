@@ -157,13 +157,13 @@ class ExerciceController extends Controller
 
     public function listeAppel(Request $request, $exerciceId)
     {
-        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
+        $sisKey = $request->header('Sis-Key', Null);
         return ExerciceBusiness::listeAppel($exerciceId, $sisKey);
     }
 
     public function listePresence(Request $request, $exerciceId)
     {
-        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
+        $sisKey = $request->header('Sis-Key', Null);
         return ExerciceBusiness::listePresence($exerciceId, $sisKey);
     }
 }

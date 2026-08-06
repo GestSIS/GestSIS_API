@@ -12,7 +12,7 @@ class JwtTokenValidatorAny
 {
     /**
      * Handle an incoming request.
-     * Check juste que le token JWT est valide, sans exiger de Sis-Id ni de rôle particulier.
+     * Check juste que le token JWT est valide, sans exiger de Sis-Key ni de rôle particulier.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */

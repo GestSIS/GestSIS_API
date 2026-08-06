@@ -209,7 +209,7 @@ class InterventionController extends Controller
             'appels' => 'boolean',
         ]);
 
-        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
+        $sisKey = $request->header('Sis-Key', Null);
         return InterventionBusiness::rapport($id, $params, $sisKey);
     }
 

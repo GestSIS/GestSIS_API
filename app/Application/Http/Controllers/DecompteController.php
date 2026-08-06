@@ -113,7 +113,7 @@ class DecompteController extends Controller
      */
     public function print(Request $request, $id)
     {
-        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
+        $sisKey = $request->header('Sis-Key', Null);
         return PaiementBusiness::impressionDecompte($id, $sisKey);
     }
 
@@ -122,7 +122,7 @@ class DecompteController extends Controller
      */
     public function printParSapeur(Request $request, $decompteId)
     {
-        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
+        $sisKey = $request->header('Sis-Key', Null);
         return PaiementBusiness::impressionDecompteParSapeur($decompteId, $sisKey);
     }
 
@@ -131,7 +131,7 @@ class DecompteController extends Controller
      */
     public function resumeParSapeur(Request $request, int $exerciceComptableId)
     {
-        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
+        $sisKey = $request->header('Sis-Key', Null);
         return PaiementBusiness::impressionResumeParSapeur($exerciceComptableId, $sisKey);
     }
 
@@ -140,7 +140,7 @@ class DecompteController extends Controller
      */
     public function resumePourSapeur(Request $request, int $exerciceComptableId, int $sapeurId)
     {
-        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
+        $sisKey = $request->header('Sis-Key', Null);
         return PaiementBusiness::impressionResumePourSapeur($exerciceComptableId, $sapeurId, $sisKey);
     }
 
@@ -149,7 +149,7 @@ class DecompteController extends Controller
      */
     public function printPourSapeur(Request $request, $decompteId, $sapeurId)
     {
-        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
+        $sisKey = $request->header('Sis-Key', Null);
         return PaiementBusiness::impressionDecompteSapeur($decompteId, $sapeurId, $sisKey);
     }
 

@@ -16,7 +16,7 @@ class MesProchainesConvocationsTest extends TestCase
     }
 
     /**
-     * Test que la route est accessible sans header Sis-Id et retourne un tableau de données groupé par SIS.
+     * Test que la route est accessible sans header Sis-Key et retourne un tableau de données groupé par SIS.
      *
      * @return void
      * @throws Exception

@@ -25,7 +25,7 @@ class SisLogoController extends Controller
         }
 
         $file = $request->file('logo');
-        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
+        $sisKey = $request->header('Sis-Key', Null);
         $justificatif = SisParamBusiness::updateLogo($sisKey, $file);
 
         return response()->json(['data' => $justificatif]);

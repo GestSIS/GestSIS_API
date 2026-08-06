@@ -29,7 +29,7 @@ class ConvocationController extends Controller
         }
         $sapeurIds = $sapeurIds['sapeurIds'] ?? [];
 
-        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
+        $sisKey = $request->header('Sis-Key', Null);
         return ExerciceBusiness::convoquer($exerciceComptableId, $sapeurIds, $sisKey);
     }
 }

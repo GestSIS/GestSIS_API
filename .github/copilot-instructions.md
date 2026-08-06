@@ -1,6 +1,7 @@
 # GestSIS API - Copilot Instructions
 
 ## Project Overview
+
 GestSIS API is a Laravel 12 (PHP 8.4) firefighter management system API server using **Hexagonal Architecture** (ports and adapters). It's part of a microservices ecosystem including GestSIS_Auth for authentication and uses multi-tenant database architecture.
 
 ## Hexagonal Architecture (Critical)
@@ -10,30 +11,34 @@ The codebase strictly follows hexagonal architecture with these layers:
 ### Layer Flow: Controller → Business
 
 **Application Layer** (`app/Application/`): HTTP entry points, middleware, auth
+
 - Controllers in `Http/Controllers/` call API Services
 - Example: `SapeurController` → `SapeurService`
 
 **Domain Layer** (`app/Domaine/`):
+
 - **Business** (`Domaine/Business/`): Core business logic and domain rules (e.g., `SapeurBusiness::isActif()` calculates firefighter active status)
 
 **Infrastructure Layer** (`app/`):
+
 - **Models** (`Infrastructure/Models/`): Eloquent models
 - **Collections** (`Infrastructure/Collections/`): Excel export implementations using Maatwebspace
 
 ### When Adding Features:
+
 1. Controller calls Business classes
 
 ## Multi-Tenant Database Architecture
 
 **CRITICAL**: This system manages multiple firefighter organizations (SIS), each with its own database.
 
-- Database selection via `DbSelector` middleware reads `Sis-Id` or `Sis-Key` header
+- Database selection via `DbSelector` middleware reads `Sis-Key` header
 - Runtime database switching: `Config::set('database.default', 'db_' . $sisKey)`
 - Database connections defined in `config/database.php` from `DB_LISTE` env variable
 - Special commands for multi-DB operations:
-  - `php artisan dbs:migrate` - Migrate all tenant databases
-  - `php artisan dbs:init` - Fresh migration + seed for all DBs
-  - `php artisan dbs:sapeurs-actif-status` - Batch job across all DBs (runs via cron)
+    - `php artisan dbs:migrate` - Migrate all tenant databases
+    - `php artisan dbs:init` - Fresh migration + seed for all DBs
+    - `php artisan dbs:sapeurs-actif-status` - Batch job across all DBs (runs via cron)
 
 **Testing**: Uses separate `testing` connection, middleware bypassed when `APP_ENV=testing`
 
@@ -47,23 +52,28 @@ The codebase strictly follows hexagonal architecture with these layers:
 ## Document Generation System
 
 ### Typst Integration
+
 Primary PDF generation using **Typst** (markup-based typesetting):
+
 - Templates in `resources/typst/*.typ` (e.g., `fiche-sapeur.typ`, `rapport-intervention.typ`)
 - `TypstToPdfGenerator::generateDocument()` workflow:
-  1. Creates temp directory
-  2. Copies template + `common.typ` + logo
-  3. Writes JSON data file
-  4. Runs: `typst compile <template>.typ --font-path=<TYPST_FONT_PATH>`
+    1. Creates temp directory
+    2. Copies template + `common.typ` + logo
+    3. Writes JSON data file
+    4. Runs: `typst compile <template>.typ --font-path=<TYPST_FONT_PATH>`
 - Configure via `TYPST_BIN_PATH` and `TYPST_FONT_PATH` env vars
 
 ### PDFTK for Form Filling
+
 Used for Swiss salary certificate forms:
+
 - `mikehaertl/php-pdftk` library
 - Configure via `PDFTK_BIN_PATH` and `PDFTK_LIB_FOLDER`
 
 ## Development Workflow
 
 ### Setup
+
 ```bash
 composer install
 cp .env.example .env
@@ -75,6 +85,7 @@ php artisan db:seed
 ```
 
 ### Running
+
 ```bash
 php artisan serve                    # Dev server
 php artisan serve --host=0.0.0.0    # VM/container access
@@ -82,26 +93,32 @@ yarn dev                             # Vite for assets
 ```
 
 ### Testing
+
 ```bash
 vendor/bin/phpunit                   # All tests
 vendor/bin/phpunit tests/Unit        # Unit tests
 vendor/bin/phpunit tests/Feature     # Feature tests
 ```
+
 - Feature tests use factories: `Sapeur::factory()->make()`
 - Tests inject services: `$this->app->make(SapeurService::class)`
 
 ## Key Conventions
 
 ### Naming
+
 - Business classes: `SapeurBusiness` (Business layer)
 
 ### Date Handling
+
 - Swiss date format common: `DD.MM.YYYY` (e.g., `"29.01.2019"`)
 - Use Carbon for date manipulation
 - Timestamps with `setTime(0, 0)` for date-only comparisons
 
 ### Constants
+
 Define domain constants in Business classes:
+
 ```php
 class SapeurBusiness {
     const TYPE_SAPEUR = 0;
@@ -110,6 +127,7 @@ class SapeurBusiness {
 ```
 
 ### Dependency Injection
+
 - Repositories bound automatically (Laravel auto-resolution)
 - Constructor injection preferred
 
@@ -124,7 +142,7 @@ class SapeurBusiness {
 ## Common Pitfalls
 
 1. **Never bypass Business layer** for write operations in API Services
-2. **Always set `Sis-Id`/`Sis-Key` header** when testing API endpoints
+2. **Always set `Sis-Key` header** when testing API endpoints
 3. **Repository pattern**: Implement SPI interface, don't use models directly in Business
 4. **Multi-DB aware**: Use `dbs:*` commands, not standard Laravel commands
 5. **Typst compilation**: Requires binary at `TYPST_BIN_PATH`, fonts at `TYPST_FONT_PATH`

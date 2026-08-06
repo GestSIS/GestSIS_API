@@ -55,13 +55,13 @@ class CompteController extends Controller
 
     public function justificatifIndividuel(Request $request, int $exerciceComptableId, int $compteId)
     {
-        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
+        $sisKey = $request->header('Sis-Key', Null);
         return ImputationBusiness::justificatifIndividuel($exerciceComptableId, $compteId, $sisKey);
     }
 
     public function justificatifComplet(Request $request, int $exerciceComptableId)
     {
-        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
+        $sisKey = $request->header('Sis-Key', Null);
         return ImputationBusiness::justificatifComplet($exerciceComptableId, $sisKey);
     }
 }

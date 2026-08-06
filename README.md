@@ -396,7 +396,6 @@ GestSIS_API gère plusieurs organisations de pompiers (SIS), chacune avec sa pro
 ### Fonctionnement
 
 1. **Sélection de la base** : Le middleware `DbSelector` lit le header HTTP :
-   - `Sis-Id` : Identifiant numérique du SIS
    - `Sis-Key` : Clé textuelle du SIS (ex: "sdis1")
 
 2. **Switching runtime** : 
@@ -404,7 +403,7 @@ GestSIS_API gère plusieurs organisations de pompiers (SIS), chacune avec sa pro
 Config::set('database.default', 'db_' . $sisKey);
 ```
 
-3. **Connexions multiples** : Définies dans `config/database.php` à partir de `DB_LISTE`
+1. **Connexions multiples** : Définies dans `config/database.php` à partir de `DB_LISTE`
 
 ### Commandes multi-tenant
 

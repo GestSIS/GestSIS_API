@@ -15,7 +15,7 @@ class FonctionTest extends TestCase
         Fonction::factory()->count(3)->create();
 
         $response = $this->json('GET', '/api/v2/fonctions/', [], [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);
@@ -45,7 +45,7 @@ class FonctionTest extends TestCase
         ];
 
         $response = $this->json('POST', '/api/v2/fonctions/', $fonctionData, [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);
@@ -86,7 +86,7 @@ class FonctionTest extends TestCase
         ];
 
         $response = $this->json('PUT', '/api/v2/fonctions/' . $fonction->id, $updateData, [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);
@@ -111,7 +111,7 @@ class FonctionTest extends TestCase
         ];
 
         $response = $this->json('PUT', '/api/v2/fonctions/99999', $updateData, [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(404);
@@ -125,7 +125,7 @@ class FonctionTest extends TestCase
         ]);
 
         $response = $this->json('DELETE', '/api/v2/fonctions/' . $fonction->id, [], [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);
@@ -138,7 +138,7 @@ class FonctionTest extends TestCase
     public function testDestroyFonctionReturnsErrorWhenFonctionNotFound(): void
     {
         $response = $this->json('DELETE', '/api/v2/fonctions/99999', [], [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(404);

@@ -12,7 +12,7 @@ class LocaliteTest extends TestCase
     public function testIndexLocalitesReturnsListOfLocalites(): void
     {
         $response = $this->json('GET', '/api/v2/localites/', [], [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);

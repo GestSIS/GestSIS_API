@@ -59,13 +59,13 @@ class SapeurController extends Controller
 
     public function trombinoscope(Request $request)
     {
-        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
+        $sisKey = $request->header('Sis-Key', Null);
         return SapeurBusiness::trombinoscope($sisKey);
     }
 
     public function fiche(Request $request, $sapeurId)
     {
-        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
+        $sisKey = $request->header('Sis-Key', Null);
         return SapeurBusiness::fiche($sapeurId, $sisKey);
     }
 

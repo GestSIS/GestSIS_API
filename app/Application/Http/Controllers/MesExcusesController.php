@@ -41,7 +41,7 @@ class MesExcusesController extends Controller
         }
 
         $file = $request->file('justificatif_file');
-        $sisKey = $request->header('Sis-Id', $request->header('Sis-Key', Null));
+        $sisKey = $request->header('Sis-Key', Null);
 
         $data = $this->exerciceBusiness->creerExcuse($sapeurId, $exerciceId, $data, $file, $sisKey);
         return response()->json(['data' => $data]);

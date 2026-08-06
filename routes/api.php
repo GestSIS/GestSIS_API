@@ -141,7 +141,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenVali
     Route::get('sis-params-tous', [AdminController::class, 'sisParams']);
 });
 
-// Routes sapeur, tous SIS confondus (pas de Sis-Id : le contrôleur boucle sur les SIS du sapeur connecté)
+// Routes sapeur, tous SIS confondus (pas de Sis-Key : le contrôleur boucle sur les SIS du sapeur connecté)
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, 'jwtTokenAny']], function () {
     Route::get('mes-prochaines-convocations', [MesProchainesConvocationsController::class, 'index'])->name('mes-prochaines-convocations');
     Route::get('ics-tokens', [IcsTokenController::class, 'index'])->name('ics-tokens.index');

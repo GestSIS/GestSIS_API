@@ -16,7 +16,7 @@ class GradeTest extends TestCase
         Grade::factory()->count(3)->create();
 
         $response = $this->json('GET', '/api/v2/grades/', [], [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);
@@ -44,7 +44,7 @@ class GradeTest extends TestCase
         ];
 
         $response = $this->json('POST', '/api/v2/grades/', $gradeData, [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);
@@ -82,7 +82,7 @@ class GradeTest extends TestCase
         ];
 
         $response = $this->json('PUT', '/api/v2/grades/' . $grade->id, $updateData, [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);
@@ -106,7 +106,7 @@ class GradeTest extends TestCase
         ];
 
         $response = $this->json('PUT', '/api/v2/grades/99999', $updateData, [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(404);
@@ -120,7 +120,7 @@ class GradeTest extends TestCase
         ]);
 
         $response = $this->json('DELETE', '/api/v2/grades/' . $grade->id, [], [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);
@@ -133,7 +133,7 @@ class GradeTest extends TestCase
     public function testDestroyGradeReturnsErrorWhenGradeNotFound(): void
     {
         $response = $this->json('DELETE', '/api/v2/grades/99999', [], [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(404);
@@ -146,7 +146,7 @@ class GradeTest extends TestCase
         Cours::factory()->create(['grade_id' => $grade->id]);
 
         $response = $this->json('DELETE', '/api/v2/grades/' . $grade->id, [], [
-            'Sis-Id' => 1,
+            'Sis-Key' => 1,
         ]);
 
         $response->assertStatus(200);
