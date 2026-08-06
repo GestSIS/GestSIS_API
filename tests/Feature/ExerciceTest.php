@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Exercice;
+use App\Models\ExerciceCategorie;
 use App\Models\Sapeur;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -226,5 +227,24 @@ class ExerciceTest extends TestCase
 
         // Returns 404 (probably from route model binding or middleware)
         $response->assertStatus(404);
+    }
+
+    /**
+     * Test que la relation categorie() résout bien exercice_categorie_id (et pas le nom de méthode
+     * "categorie_id" que belongsTo() devinerait par défaut).
+     */
+    public function testCategorieRelationResolvesCorrectForeignKey()
+    {
+        $categorie = ExerciceCategorie::create([
+            'designation' => 'Catégorie test',
+            'amendable' => false,
+            'duree_base' => 60,
+            'statut' => 1,
+            'tri' => 1,
+        ]);
+        $exercice = Exercice::factory()->create(['exercice_categorie_id' => $categorie->id]);
+
+        $this->assertSame($categorie->id, $exercice->categorie->id);
+        $this->assertSame('Catégorie test', $exercice->categorie->designation);
     }
 }

@@ -55,7 +55,7 @@ class Exercice extends Model
      */
     public function categorie()
     {
-        return $this->belongsTo(ExerciceCategorie::class);
+        return $this->belongsTo(ExerciceCategorie::class, 'exercice_categorie_id');
     }
 
     /**

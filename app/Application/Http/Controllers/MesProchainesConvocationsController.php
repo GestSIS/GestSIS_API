@@ -25,13 +25,13 @@ class MesProchainesConvocationsController extends Controller
                 ->whereHas('exercice', function ($query) {
                     $query->where('date', '>=', Carbon::now());
                 })
-                ->with('exercice')
+                ->with(['exercice', 'exercice.categorie'])
                 ->get()
                 ->sortBy('exercice.date')
                 ->values()
                 ->map(function (ExerciceSapeur $exerciceSapeur) {
                     $exercice = $exerciceSapeur->exercice;
-                    $exercice->convoque = (bool) $exerciceSapeur->convoque;
+                    $exercice->presence = $exerciceSapeur->toArray();
 
                     return $exercice;
                 });
