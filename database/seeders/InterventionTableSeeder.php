@@ -27,10 +27,14 @@ class InterventionTableSeeder extends Seeder
                 $fin = $debut->copy()->addHours(2);
             }
 
+            // Arrondit au quart d'heure suivant/précédent pour rester dans la plage de l'intervention
+            $debutQuart = $debut->copy()->addMinutes((15 - $debut->minute % 15) % 15)->second(0);
+            $finQuart = $fin->copy()->subMinutes($fin->minute % 15)->second(0);
+
             $assignedSapeurs = $sapeurs->shuffle()->take(fake()->numberBetween(3, 8));
             foreach ($assignedSapeurs as $sapeurId) {
-                $presenceDebut = $debut->copy()->addMinutes(fake()->numberBetween(0, 30));
-                $presenceFin = $fin->copy()->subMinutes(fake()->numberBetween(0, 30));
+                $presenceDebut = $debutQuart->copy()->addMinutes(15 * fake()->numberBetween(0, 2));
+                $presenceFin = $finQuart->copy()->subMinutes(15 * fake()->numberBetween(0, 2));
 
                 if ($presenceFin <= $presenceDebut) {
                     $presenceFin = $presenceDebut->copy()->addHour();
@@ -46,6 +50,8 @@ class InterventionTableSeeder extends Seeder
                     'updated_at' => now(),
                 ]);
             }
+
+            $intervention->update(['statut' => 1]);
         });
     }
 }
