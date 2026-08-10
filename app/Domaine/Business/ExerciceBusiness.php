@@ -281,12 +281,7 @@ class ExerciceBusiness
             throw new ArrayException([], "Délai d'excuse expiré, $param->delai_excuse jours");
         }
 
-        // Vérifier que le délai d'excuse n'est pas dépassé
-        if (!$exerciceSapeur->convoque) {
-            throw new ArrayException([], "Vous n'êtes pas convoqué à cet exercice");
-        }
-
-        // Vérifier que l'excuse n'a pas encore été traité
+        // Vérifier que le sapeur est convoqué à cet exercice
         if (!$exerciceSapeur->convoque) {
             throw new ArrayException([], "Vous n'êtes pas convoqué à cet exercice");
         }
