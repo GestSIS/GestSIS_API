@@ -18,7 +18,7 @@ class ExerciceFactory extends Factory
             'exercice_comptable_id' => ExerciceComptable::inRandomOrder()->first()?->id ?? 1,
             'exercice_categorie_id' => ExerciceCategorie::inRandomOrder()->first()?->id ?? 1,
             'designation' => $this->faker->randomElement(['Exercice section', 'Exercice Porteur', 'Séance', 'Etat-Major']),
-            'date' => $this->faker->dateTimeThisYear()->format('Y-m-d'),
+            'date' => $this->faker->dateTimeThisYear('last day of december this year')->format('Y-m-d'),
             'heure' => $this->faker->time('H:i'),
             'lieu' => $this->faker->address,
             'communications' => $this->faker->realText(),
