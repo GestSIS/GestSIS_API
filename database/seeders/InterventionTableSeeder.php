@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Intervention;
 use App\Models\Sapeur;
+use App\Domaine\Business\InterventionBusiness;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -51,7 +52,7 @@ class InterventionTableSeeder extends Seeder
                 ]);
             }
 
-            $intervention->update(['statut' => 1]);
+            $intervention->update(['statut' => InterventionBusiness::INTERVENTION_STATUT_SAISI]);
         });
     }
 }

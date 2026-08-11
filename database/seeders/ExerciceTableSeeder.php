@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Domaine\Business\ExerciceBusiness;
 use App\Models\Exercice;
+use App\Models\ExerciceComptable;
 use App\Models\ExerciceSapeur;
 use App\Models\Sapeur;
 use Illuminate\Database\Seeder;
@@ -12,8 +14,9 @@ class ExerciceTableSeeder extends Seeder
     public function run(): void
     {
         $sapeurs = Sapeur::pluck('id');
+        $exerciceComptableEnCoursId = ExerciceComptable::where('annee', now()->year)->value('id');
 
-        Exercice::factory(20)->create(['exercice_comptable_id' => 1])->each(function (Exercice $exercice) use ($sapeurs) {
+        Exercice::factory(20)->create(['exercice_comptable_id' => $exerciceComptableEnCoursId])->each(function (Exercice $exercice) use ($sapeurs) {
             if ($sapeurs->isEmpty()) {
                 return;
             }
@@ -30,6 +33,8 @@ class ExerciceTableSeeder extends Seeder
                     'absent' => !$present,
                 ]);
             }
+
+            ExerciceBusiness::updateStatut($exercice->id);
         });
     }
 }
