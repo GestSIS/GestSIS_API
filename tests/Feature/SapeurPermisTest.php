@@ -90,6 +90,42 @@ class SapeurPermisTest extends TestCase
     }
 
     /**
+     * Test add permis successfully for a recrue (pas encore un sapeur validé)
+     */
+    public function testAddPermisSuccessfullyForRecrue()
+    {
+        $recrue = Sapeur::factory()->create(['type' => 2]); // TYPE_RECRUE
+
+        $response = $this->json(
+            'POST',
+            "/api/v2/sapeurs/{$recrue->id}/permis",
+            ['permis_type_id' => 1, 'date' => '2020-01-01']
+        );
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure(['data' => ['id', 'permis_type_id', 'sapeur_id', 'date']]);
+    }
+
+    /**
+     * Test add permis returns error for a civil
+     */
+    public function testAddPermisReturnsErrorForCivil()
+    {
+        $civil = Sapeur::factory()->create(['type' => 1]); // TYPE_CIVIL
+
+        $response = $this->json(
+            'POST',
+            "/api/v2/sapeurs/{$civil->id}/permis",
+            ['permis_type_id' => 1, 'date' => '2020-01-01']
+        );
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure(['error']);
+    }
+
+    /**
      * Test add permis returns error when duplicated
      */
     public function testAddPermisReturnsErrorWhenDuplicated()

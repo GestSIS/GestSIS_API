@@ -105,6 +105,9 @@ use App\Application\Http\Controllers\PermisController;
 use App\Application\Http\Controllers\PhaseTypeController;
 use App\Application\Http\Controllers\PublipostageController;
 use App\Application\Http\Controllers\ReferenceRtaController;
+use App\Application\Http\Controllers\RecrueController;
+use App\Application\Http\Controllers\RecrutementController;
+use App\Application\Http\Controllers\RecrutementTokenController;
 use App\Application\Http\Controllers\SapeurControleMedicalController;
 use App\Application\Http\Controllers\SapeurController;
 use App\Application\Http\Controllers\SapeurCoursController;
@@ -151,6 +154,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, 'jwtTokenAny
 Route::group(['prefix' => 'v2'], function () {
     Route::apiResource('sis-logo', SisLogoController::class)->only(['show']);
     Route::get('ics/{sisKey}/{token}', [IcsController::class, 'show'])->name('ics.show');
+
+    // Formulaire public d'auto-inscription des recrues, protégé par jeton de recrutement (pas de JWT)
+    Route::get('recrutement/{sisKey}/{token}', [RecrutementController::class, 'show'])->name('recrutement.show');
+    Route::post('recrutement/{sisKey}/{token}', [RecrutementController::class, 'store'])->name('recrutement.store');
 });
 
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
@@ -287,6 +294,14 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('sapeurs/{id}/fin-fonctions', [SapeurFonctionController::class, 'fin']);
         Route::post('sapeurs/{id}/quitter-groupes', [SapeurGroupeController::class, 'quitter']);
         Route::post('sapeurs/{id}/supprimer-convocations', [ConvocationsController::class, 'supprimerConvocations']);
+
+        // Jeton de recrutement (formulaire public d'auto-inscription des recrues)
+        Route::get('recrutement/token', [RecrutementTokenController::class, 'show'])->name('api.v2.recrutement-token.show');
+        Route::post('recrutement/token', [RecrutementTokenController::class, 'store'])->name('api.v2.recrutement-token.store');
+        Route::delete('recrutement/token', [RecrutementTokenController::class, 'destroy'])->name('api.v2.recrutement-token.destroy');
+
+        // Validation d'une recrue (bascule en sapeur réel) ; le rejet réutilise le destroy sapeurs existant
+        Route::post('recrues/{id}/valider', [RecrueController::class, 'valider'])->name('api.v2.recrues.valider');
     });
 
     // Params Sapeur

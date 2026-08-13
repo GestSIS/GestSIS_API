@@ -28,6 +28,10 @@ class SapeurController extends Controller
     {
         $actif = $request->input('actif', false) === 'true';
         $actifOuAvecMateriel = $request->input('avec-materiel', false) === 'true';
+        $types = $request->validate([
+            'type' => 'array',
+            'type.*' => 'integer|min:0|max:2',
+        ])['type'] ?? null;
 
         $now = Carbon::now();
         $oneMonthFurther = Carbon::now()->addMonths(1);
@@ -41,6 +45,9 @@ class SapeurController extends Controller
             }
         ]);
 
+        if ($types !== null) {
+            $query = $query->whereIn('type', $types);
+        }
         if ($actif) {
             $query = $query->where('actif', '=', 1);
         }

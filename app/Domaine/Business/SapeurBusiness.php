@@ -29,6 +29,7 @@ class SapeurBusiness
 {
     public const TYPE_SAPEUR = 0;
     public const TYPE_CIVIL = 1;
+    public const TYPE_RECRUE = 2;
 
     private const ALLOWED_PHOTO_EXTENSIONS = ['jpg', 'jpeg', 'png'];
 
@@ -122,6 +123,11 @@ class SapeurBusiness
         return Sapeur::whereId($sapeurId)->where('type', self::TYPE_SAPEUR)->exists();
     }
 
+    private static function isSapeurOuRecrue($sapeurId)
+    {
+        return Sapeur::whereId($sapeurId)->whereIn('type', [self::TYPE_SAPEUR, self::TYPE_RECRUE])->exists();
+    }
+
     public static function createSapeur($data)
     {
         //TODO: Add iban statut système validation
@@ -156,6 +162,78 @@ class SapeurBusiness
         $sapeur = Sapeur::create($data);
 
         return $sapeur;
+    }
+
+    private static function normaliserAvs(string $noAvs): string
+    {
+        return preg_replace('/[^0-9]/', '', $noAvs);
+    }
+
+    /**
+     * Vérifie si un numéro AVS est déjà utilisé par un sapeur existant (tout type confondu),
+     * en comparant les numéros normalisés (chiffres uniquement).
+     */
+    public static function avsDejaUtilise(string $noAvs): bool
+    {
+        $normalise = self::normaliserAvs($noAvs);
+        if ($normalise === '') {
+            return false;
+        }
+
+        return Sapeur::pluck('no_avs')
+            ->contains(fn($avs) => self::normaliserAvs((string) $avs) === $normalise);
+    }
+
+    /**
+     * Création d'une recrue via le formulaire public d'auto-inscription.
+     * Statut non actif tant qu'elle n'a pas été validée par un fourrier.
+     */
+    public static function createRecrue($data)
+    {
+        if (self::avsDejaUtilise($data['no_avs'])) {
+            throw new ArrayException(['no_avs' => 'Une inscription existe déjà avec ce numéro AVS.']);
+        }
+
+        $data = self::normalizeNullableFields($data);
+        $data['iban_statut'] = 1;
+        $data['actif'] = false;
+        $data['porteur'] = false;
+        $data['type'] = self::TYPE_RECRUE;
+
+        $telephones = $data['telephones'] ?? [];
+        $permis = $data['permis'] ?? [];
+        unset($data['telephones'], $data['permis']);
+
+        $recrue = Sapeur::create($data);
+        foreach ($telephones as $telephone) {
+            self::addTelephone($recrue->id, $telephone);
+        }
+        foreach ($permis as $p) {
+            self::addPermis($recrue->id, $p);
+        }
+
+        return $recrue;
+    }
+
+    /**
+     * Validation d'une recrue par un fourrier : bascule en sapeur réel et crée sa première mutation.
+     */
+    public static function validateRecrue(int $sapeurId, string $incorporation): Sapeur
+    {
+        $recrue = Sapeur::where('type', self::TYPE_RECRUE)->findOrFail($sapeurId);
+
+        $recrue->type = self::TYPE_SAPEUR;
+        $recrue->actif = true;
+        $recrue->annee_incorporation = Carbon::parse($incorporation)->year;
+        $recrue->save();
+
+        self::addMutation($recrue->id, [
+            "localite_id" => $recrue->localite_id,
+            "incorporation" => $incorporation,
+            "motif" => "",
+        ]);
+
+        return $recrue;
     }
 
     public static function updateNonSapeurStatut($sapeurId, $data)
@@ -520,7 +598,7 @@ class SapeurBusiness
 
     public static function addPermis(int $sapeurId, $data)
     {
-        if (!self::isSapeur($sapeurId)) {
+        if (!self::isSapeurOuRecrue($sapeurId)) {
             throw new ArrayException([], "Impossible d'ajouter un permis à un civil.");
         }
         $permisId = $data['permis_type_id'];

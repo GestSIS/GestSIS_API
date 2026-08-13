@@ -2,8 +2,9 @@
 
 namespace App\Application\Http\Controllers;
 
+use App\Domaine\Business\SapeurBusiness;
+use App\Models\Sapeur;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class EmailController extends Controller
 {
@@ -11,19 +12,15 @@ class EmailController extends Controller
     {
         $email = $request->input('email');
 
-        $dbs = config('database.dbs');
         $res = [];
-        foreach ($dbs as $db) {
-            DB::reconnect('db_' . $db);
-            $sapeur = DB::connection('db_' . $db)
-                ->table('sapeurs')
-                ->where('email', '=', $email)
-                ->select('sapeurs.id')
-                ->first();
-            if (!is_null($sapeur)) {
+        foreach (config('database.dbs') as $db) {
+            $sapeur = Sapeur::on('db_' . $db)
+                ->whereIn('type', [SapeurBusiness::TYPE_SAPEUR, SapeurBusiness::TYPE_CIVIL])
+                ->where('email', $email)
+                ->first(['id']);
+            if ($sapeur !== null) {
                 $res[$db] = $sapeur->id;
             }
-            DB::disconnect('db_' . $db);
         }
 
         return response()->json(['data' => $res]);
