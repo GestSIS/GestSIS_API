@@ -25,4 +25,18 @@ class EmailController extends Controller
 
         return response()->json(['data' => $res]);
     }
+
+    public function listeSapeursActifs()
+    {
+        $res = [];
+        foreach (config('database.dbs') as $db) {
+            $res[$db] = Sapeur::on('db_' . $db)
+                ->whereIn('type', [SapeurBusiness::TYPE_SAPEUR, SapeurBusiness::TYPE_CIVIL])
+                ->where('actif', true)
+                ->pluck('id')
+                ->all();
+        }
+
+        return response()->json(['data' => $res]);
+    }
 }
