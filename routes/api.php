@@ -138,6 +138,7 @@ use App\Application\Http\Controllers\VehiculeController;
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenValidatorAuth::class]], function () {
     Route::get('email-validate', [EmailController::class, 'validateEmail']);
     Route::get('sapeurs-actifs', [EmailController::class, 'listeSapeursActifs']);
+    Route::get('sapeurs-emails', [EmailController::class, 'listeSapeursEmails']);
 
     Route::get('sis-contacts-tous', [AdminController::class, 'sisContacts']);
     Route::get('sis-localites-tous', [AdminController::class, 'sisLocalites']);
