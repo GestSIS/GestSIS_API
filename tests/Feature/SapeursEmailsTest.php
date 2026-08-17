@@ -31,7 +31,7 @@ class SapeursEmailsTest extends TestCase
         return $sapeur;
     }
 
-    public function testListeSapeursEmailsRegroupeParSisSansFiltreActif()
+    public function testListeSapeursEmailsRegroupeParSisEtFiltreActifEtType()
     {
         $actifHs = $this->createSapeur('db_hs', [
             'actif' => 1,
@@ -49,7 +49,7 @@ class SapeursEmailsTest extends TestCase
             'email' => 'recrue-test@example.com',
         ]);
         $civilTest = $this->createSapeur('db_test', [
-            'actif' => 0,
+            'actif' => 1,
             'type' => SapeurBusiness::TYPE_CIVIL,
             'email' => 'civil-test@example.com',
         ]);
@@ -61,9 +61,11 @@ class SapeursEmailsTest extends TestCase
         $hsEmails = $response->json('data.hs');
         $testEmails = $response->json('data.test');
 
-        // Pas de filtre `actif` : un sapeur inactif reste dans la liste.
+        // Même filtre `actif` que sapeurs-actifs : un sapeur inactif n'apparaît plus,
+        // pour éviter qu'un ancien enregistrement inactif entre en conflit avec un
+        // nouveau sapeur actif partageant le même email.
         $this->assertSame('actif-hs@example.com', $hsEmails[$actifHs->id]);
-        $this->assertSame('inactif-hs@example.com', $hsEmails[$inactifHs->id]);
+        $this->assertArrayNotHasKey($inactifHs->id, $hsEmails);
 
         // Filtre `type` identique à email-validate/sapeurs-actifs : les recrues sont exclues.
         $this->assertArrayNotHasKey($recrueTest->id, $testEmails);

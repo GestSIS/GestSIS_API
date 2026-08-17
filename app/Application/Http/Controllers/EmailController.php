@@ -38,6 +38,7 @@ class EmailController extends Controller
     {
         $res = Sis::each(function () {
             return Sapeur::whereIn('type', [SapeurBusiness::TYPE_SAPEUR, SapeurBusiness::TYPE_CIVIL])
+                ->where('actif', true)
                 ->whereNotNull('email')
                 ->where('email', '!=', '')
                 ->pluck('email', 'id')
