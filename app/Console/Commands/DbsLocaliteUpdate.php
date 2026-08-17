@@ -193,12 +193,11 @@ class DbsLocaliteUpdate extends Command
             ['id' => '151', 'commune_id' => NULL, 'npa' => '1642', 'designation' => 'Sorens FR'],
             ['id' => '152', 'commune_id' => NULL, 'npa' => '1473', 'designation' => 'Châtillon FR'],
         ];
-        $dbs = config('database.dbs');
-        foreach ($dbs as $db) {
-            printf("Fix db=db_" . $db . "\n");
+        Sis::each(function ($db) use ($localites) {
+            printf("Fix db=" . Sis::connection($db) . "\n");
 
             foreach ($localites as $localite) {
-                Localite::on(Sis::connection($db))->updateOrCreate(
+                Localite::updateOrCreate(
                     ['id' => $localite['id']],
                     [
                         'commune_id' => $localite['commune_id'],
@@ -209,7 +208,7 @@ class DbsLocaliteUpdate extends Command
             }
 
             printf("\n");
-        }
+        });
         printf("Migrating done\n");
         return 0;
     }

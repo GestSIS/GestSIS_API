@@ -39,14 +39,13 @@ class DbsInit extends Command
      */
     public function handle()
     {
-        $dbs = Sis::keys();
-        foreach ($dbs as $db) {
+        Sis::each(function ($db) {
             printf("DATABASE " . $db . "\n");
             printf("migrate:fresh with seed\n");
-            Artisan::call('migrate:fresh --seed --database=' . Sis::connection($db));
+            Artisan::call('migrate:fresh --seed');
             printf("migration done for " . $db . "\n");
             printf("\n");
-        }
+        });
         printf("Migrating done\n");
         return 0;
     }

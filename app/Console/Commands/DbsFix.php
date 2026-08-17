@@ -53,61 +53,58 @@ class DbsFix extends Command
      */
     public function handle()
     {
-        $dbs = config('database.dbs');
-        foreach ($dbs as $db) {
-            printf("Fix db=db_" . $db . "\n");
+        Sis::each(function ($db) {
+            printf("Fix db=" . Sis::connection($db) . "\n");
 
-            // $typesIds = MaterielEventType::on("db_" . $db)->find(1)?->materielTypeIds() ?? [];//->materielTypeIds;
-            // MaterielType::on("db_" . $db)->whereIn('id', $typesIds)->update(['est_lavable' => True, 'est_numerote' => True]);
+            // $typesIds = MaterielEventType::find(1)?->materielTypeIds() ?? [];//->materielTypeIds;
+            // MaterielType::whereIn('id', $typesIds)->update(['est_lavable' => True, 'est_numerote' => True]);
 
             // // Attribut est_taillee
-            // MaterielType::on("db_" . $db)
-            //     ->whereIn(
-            //         'id',
-            //         Article::on("db_" . $db)->where('taille', '!=', "")
-            //             ->where("taille", "!=", "-")
-            //             ->distinct('materiel_type_id')
-            //             ->pluck('materiel_type_id')
-            //     )->update(['est_taillee' => True]);
+            // MaterielType::whereIn(
+            //     'id',
+            //     Article::where('taille', '!=', "")
+            //         ->where("taille", "!=", "-")
+            //         ->distinct('materiel_type_id')
+            //         ->pluck('materiel_type_id')
+            // )->update(['est_taillee' => True]);
 
 
             // // Attribut est_numerotee
-            // MaterielType::on("db_" . $db)
-            //     ->whereIn(
-            //         'id',
-            //         Article::on("db_" . $db)->where('numero', '!=', "")
-            //             ->where("numero", "!=", "-")
-            //             ->distinct('materiel_type_id')
-            //             ->pluck('materiel_type_id')
-            //     )->update(['est_numerote' => True]);
+            // MaterielType::whereIn(
+            //     'id',
+            //     Article::where('numero', '!=', "")
+            //         ->where("numero", "!=", "-")
+            //         ->distinct('materiel_type_id')
+            //         ->pluck('materiel_type_id')
+            // )->update(['est_numerote' => True]);
 
-            // ConvocationParam::on("db_" . $db)->insert([
+            // ConvocationParam::insert([
             //     'titre' => 'convocation',
             //     'affichage_duree' => true,
             //     'affichage_pour_infor' => true,
             // ]);
 
-            // Localite::on("db_" . $db)->insert([
+            // Localite::insert([
             //     ['id' => 153, 'commune_id' => NULL, 'npa' => '2742', 'designation' => 'Perrefitte'],
             //     ['id' => 154, 'commune_id' => NULL, 'npa' => '2762', 'designation' => 'Roches BE'],
             // ]);
 
-            // Localite::on("db_" . $db)->where('commune_id', '=', 12)->update(['commune_id' => 9]);
-            // Localite::on("db_" . $db)->where('commune_id', '=', 13)->update(['commune_id' => 9]);
-            // Localite::on("db_" . $db)->where('commune_id', '=', 27)->update(['commune_id' => 26]);
+            // Localite::where('commune_id', '=', 12)->update(['commune_id' => 9]);
+            // Localite::where('commune_id', '=', 13)->update(['commune_id' => 9]);
+            // Localite::where('commune_id', '=', 27)->update(['commune_id' => 26]);
 
-            // Commune::on("db_" . $db)->whereIn('id', [12, 13, 27])->delete();
+            // Commune::whereIn('id', [12, 13, 27])->delete();
 
             // array('id' => '31', 'commune_id' => '26', 'npa' => '2933', 'designation' => 'Damphreux'),
             // // array('id' => '32', 'commune_id' => NULL, 'npa' => '2933', 'designation' => 'Damphreux-Lugnez'),
             // array('id' => '42', 'commune_id' => '66', 'npa' => '2953', 'designation' => 'Fregiécourt'),
             // // array('id' => '43', 'commune_id' => '66', 'npa' => '2953', 'designation' => 'Fregiécourt-Pleujouse'),
 
-            // LocaliteSis::on("db_" . $db)->whereIn('localite_id', [32, 43])->delete();
-            // Localite::on("db_" . $db)->whereIn('id', [32, 43])->delete();
+            // LocaliteSis::whereIn('localite_id', [32, 43])->delete();
+            // Localite::whereIn('id', [32, 43])->delete();
 
-            // Localite::on("db_" . $db)->whereId(110)->update(['designation' => 'La Chaux-de-Fonds']);
-            // Localite::on("db_" . $db)->whereId(46)->update(['commune_id' => 77]);
+            // Localite::whereId(110)->update(['designation' => 'La Chaux-de-Fonds']);
+            // Localite::whereId(46)->update(['commune_id' => 77]);
 
             // Fix 2026-07: avs_total/ac_total ne comptabilisaient que la part employé
             // de la charge AVS/AC (au lieu de la charge complète part employé +
@@ -121,9 +118,9 @@ class DbsFix extends Command
             // part) ; si ≈ 2×Σ Paiement.avs_ac, il l'a déjà été → on saute.
             $fixed = 0;
             $skipped = 0;
-            DB::connection(Sis::connection($db))->transaction(function () use ($db, &$fixed, &$skipped) {
+            DB::transaction(function () use (&$fixed, &$skipped) {
                 foreach (
-                    Decompte::on(Sis::connection($db))->where('deduction', true)
+                    Decompte::where('deduction', true)
                         ->with('paiements')->cursor() as $decompte
                 ) {
                     $sumAvsAc = (float) $decompte->paiements->sum('avs_ac');
@@ -145,7 +142,7 @@ class DbsFix extends Command
             printf("  %d décompte(s) corrigé(s), %d ignoré(s) (déjà corrects)\n", $fixed, $skipped);
 
             printf("\n");
-        }
+        });
         printf("Migrating done\n");
         return 0;
     }

@@ -41,26 +41,25 @@ class DbsSeed extends Command
      */
     public function handle()
     {
-        $dbs = config('database.dbs');
-        foreach ($dbs as $db) {
-            // Artisan::call('db:seed --database=db_' . $db);
-            // $grade = Grade::on('db_' . $db)->where('abreviation', '=', 'Adj')->first() ?? Grade::on('db_' . $db)->where('abreviation', '=', 'adj')->first();
+        Sis::each(function ($db) {
+            // Artisan::call('db:seed --database=' . Sis::connection($db));
+            // $grade = Grade::where('abreviation', '=', 'Adj')->first() ?? Grade::where('abreviation', '=', 'adj')->first();
             // if ($grade === null) {
             //     try {
-            //         Grade::on('db_' . $db)->insert(['id' => 12, 'designation' => 'Adjudant', 'abreviation' => 'Adj', 'groupe' => 2, 'tri' => 67]);
+            //         Grade::insert(['id' => 12, 'designation' => 'Adjudant', 'abreviation' => 'Adj', 'groupe' => 2, 'tri' => 67]);
             //     } catch (Exception $e) {
             //         printf("Unable to create grade for db : " . $db);
             //     }
             // }
 
-            // Cours::on('db_' . $db)->where('designation', '=', 'Chef d\'intervention 1')->update(['grade_id' => $grade?->id ?? 12]);
-            // Cours::on('db_' . $db)->where('designation', '=', 'Chef d\'intervention 2')->update(['grade_id' => 3]);
-            // Cours::on('db_' . $db)->where('designation', '=', 'Machiniste')->update(['grade_id' => 7]);
-            // Cours::on('db_' . $db)->where('designation', '=', 'Chef de groupe')->update(['grade_id' => 6]);
+            // Cours::where('designation', '=', 'Chef d\'intervention 1')->update(['grade_id' => $grade?->id ?? 12]);
+            // Cours::where('designation', '=', 'Chef d\'intervention 2')->update(['grade_id' => 3]);
+            // Cours::where('designation', '=', 'Machiniste')->update(['grade_id' => 7]);
+            // Cours::where('designation', '=', 'Chef de groupe')->update(['grade_id' => 6]);
             // TODO: if jsp dans $db
             if (str_contains($db, 'jsp')) {
-                printf("Seeding db=db_" . $db . "\n");
-                Cours::on(Sis::connection($db))->insert([
+                printf("Seeding SIS $db\n");
+                Cours::insert([
                     ['designation' => 'JSP Module 1', 'abreviation' => 'JSP 1', 'tri' => 1],
                     ['designation' => 'JSP Module 2', 'abreviation' => 'JSP 2', 'tri' => 2],
                     ['designation' => 'JSP Module 3', 'abreviation' => 'JSP 3', 'tri' => 3],
@@ -69,7 +68,7 @@ class DbsSeed extends Command
                 ]);
             }
             printf("\n");
-        }
+        });
         printf("Migrating done\n");
         return 0;
     }
