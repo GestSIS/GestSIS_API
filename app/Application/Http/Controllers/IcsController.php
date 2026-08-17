@@ -6,10 +6,10 @@ use App\Models\Exercice;
 use App\Models\IcsToken;
 use App\Models\ExerciceSapeur;
 use App\Models\SisParam;
+use App\Support\Sis;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Config;
 use Spatie\IcalendarGenerator\Components\Calendar;
 use Spatie\IcalendarGenerator\Components\Event;
 use Spatie\IcalendarGenerator\Enums\EventStatus;
@@ -24,11 +24,11 @@ class IcsController extends Controller
     public function show(Request $request, string $sisKey, string $token)
     {
         if (!App::environment('testing')) {
-            if (!in_array($sisKey, config('database.dbs'), true)) {
+            if (!Sis::isValid($sisKey)) {
                 abort(404);
             }
 
-            Config::set('database.default', 'db_' . $sisKey);
+            Sis::use($sisKey);
         }
 
         $icsToken = IcsToken::where('token', $token)->first();

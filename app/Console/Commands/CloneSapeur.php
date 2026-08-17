@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Support\Sis;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use App\Models\Sapeur;
 use App\Models\CoursSapeur;
@@ -41,12 +41,11 @@ class CloneSapeur extends Command
         $targetSis = $this->argument('target_sis');
 
         // Vérifier que les deux SIS existent dans la configuration
-        $dbs = config('database.dbs');
-        if (!in_array($sourceSis, $dbs)) {
+        if (!Sis::isValid($sourceSis)) {
             $this->error("La base source '{$sourceSis}' n'existe pas dans la configuration.");
             return 1;
         }
-        if (!in_array($targetSis, $dbs)) {
+        if (!Sis::isValid($targetSis)) {
             $this->error("La base cible '{$targetSis}' n'existe pas dans la configuration.");
             return 1;
         }
@@ -54,7 +53,7 @@ class CloneSapeur extends Command
         $this->info("Clonage du sapeur {$sapeurId} de {$sourceSis} vers {$targetSis}...");
 
         // Connexion à la base source
-        Config::set('database.default', 'db_' . $sourceSis);
+        Sis::use($sourceSis);
 
         // Récupérer le sapeur source avec toutes ses relations
         $sapeur = Sapeur::find($sapeurId);
@@ -80,7 +79,7 @@ class CloneSapeur extends Command
         $this->info("  - Téléphones: {$telephones->count()}");
 
         // Connexion à la base cible pour vérifier les IDs disponibles
-        Config::set('database.default', 'db_' . $targetSis);
+        Sis::use($targetSis);
 
         // Récupérer les IDs valides dans la base cible
         $validCoursIds = DB::table('cours')->pluck('id')->toArray();

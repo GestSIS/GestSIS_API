@@ -16,6 +16,7 @@ use App\Models\SmsNumero;
 use App\Models\ConvocationParam;
 use App\Models\MaterielEventType;
 use App\Models\MaterielType;
+use App\Support\Sis;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -120,9 +121,9 @@ class DbsFix extends Command
             // part) ; si ≈ 2×Σ Paiement.avs_ac, il l'a déjà été → on saute.
             $fixed = 0;
             $skipped = 0;
-            DB::connection("db_" . $db)->transaction(function () use ($db, &$fixed, &$skipped) {
+            DB::connection(Sis::connection($db))->transaction(function () use ($db, &$fixed, &$skipped) {
                 foreach (
-                    Decompte::on("db_" . $db)->where('deduction', true)
+                    Decompte::on(Sis::connection($db))->where('deduction', true)
                         ->with('paiements')->cursor() as $decompte
                 ) {
                     $sumAvsAc = (float) $decompte->paiements->sum('avs_ac');

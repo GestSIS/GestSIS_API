@@ -398,12 +398,13 @@ GestSIS_API gère plusieurs organisations de pompiers (SIS), chacune avec sa pro
 1. **Sélection de la base** : Le middleware `DbSelector` lit le header HTTP :
    - `Sis-Key` : Clé textuelle du SIS (ex: "sdis1")
 
-2. **Switching runtime** : 
+2. **Switching runtime** : Le helper `App\Support\Sis` centralise le préfixe de connexion (`db_`) et la bascule :
 ```php
-Config::set('database.default', 'db_' . $sisKey);
+Sis::use($sisKey); // équivaut à Config::set('database.default', Sis::connection($sisKey))
 ```
+Pour itérer sur tous les tenants (jobs batch, endpoints d'admin agrégeant plusieurs SIS), `Sis::each(callback)` bascule la connexion pour chaque SIS et restaure la connexion d'origine une fois terminé.
 
-1. **Connexions multiples** : Définies dans `config/database.php` à partir de `DB_LISTE`
+1. **Connexions multiples** : Définies dans `config/database.php` à partir de `DB_LISTE`, via `Sis::connection($db)`
 
 ### Commandes multi-tenant
 

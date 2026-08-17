@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\Sis;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
@@ -38,11 +39,11 @@ class DbsInit extends Command
      */
     public function handle()
     {
-        $dbs = config('database.dbs');
+        $dbs = Sis::keys();
         foreach ($dbs as $db) {
             printf("DATABASE " . $db . "\n");
             printf("migrate:fresh with seed\n");
-            Artisan::call('migrate:fresh --seed --database=db_' . $db);
+            Artisan::call('migrate:fresh --seed --database=' . Sis::connection($db));
             printf("migration done for " . $db . "\n");
             printf("\n");
         }

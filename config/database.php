@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\Sis;
 use Illuminate\Support\Str;
 
 $dbs = explode(",", env('DB_LISTE', true));
@@ -46,7 +47,7 @@ $connections['mysql'] = [
 ];
 
 foreach ($dbs as $db) {
-    $connections['db_' . $db] = [
+    $connections[Sis::connection($db)] = [
         'driver' => 'mysql',
         'host' => env('DB_HOST', 'db'),
         'port' => env('DB_PORT', '3306'),

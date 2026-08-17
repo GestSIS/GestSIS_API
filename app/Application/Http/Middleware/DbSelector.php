@@ -2,10 +2,10 @@
 
 namespace App\Application\Http\Middleware;
 
+use App\Support\Sis;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Config;
 
 class DbSelector
 {
@@ -27,11 +27,11 @@ class DbSelector
             return response()->json(["error" => "Sis non sélectionné"], 401);
         }
 
-        if (!in_array($sisKey, config('database.dbs'), true)) {
+        if (!Sis::isValid($sisKey)) {
             return response()->json(["error" => "Sis inconnu"], 401);
         }
 
-        Config::set('database.default', 'db_' . $sisKey);
+        Sis::use($sisKey);
         return $next($request);
     }
 }

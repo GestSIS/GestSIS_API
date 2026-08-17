@@ -4,9 +4,9 @@ namespace App\Application\Http\Controllers;
 
 use App\Models\ExerciceComptable;
 use App\Models\ExerciceSapeur;
+use App\Support\Sis;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
 
 class MesProchainesConvocationsController extends Controller
 {
@@ -21,13 +21,10 @@ class MesProchainesConvocationsController extends Controller
         $token = $request->attributes->get('jwtToken');
         $sapeurs = $token !== null ? (array) $token->data->sapeurs : [];
 
-        $res = [];
-        foreach ($sapeurs as $sisKey => $sapeurId) {
-            Config::set('database.default', 'db_' . $sisKey);
-
+        $res = Sis::each(function ($sisKey) use ($sapeurs) {
             $exerciceComptableIds = ExerciceComptable::where('fin', '>=', Carbon::now())->pluck('id');
 
-            $res[$sisKey] = ExerciceSapeur::where('sapeur_id', $sapeurId)
+            return ExerciceSapeur::where('sapeur_id', $sapeurs[$sisKey])
                 ->whereHas('exercice', function ($query) use ($exerciceComptableIds) {
                     $query->whereIn('exercice_comptable_id', $exerciceComptableIds);
                 })
@@ -41,7 +38,7 @@ class MesProchainesConvocationsController extends Controller
 
                     return $exercice;
                 });
-        }
+        }, array_keys($sapeurs));
 
         return response()->json(['data' => $res]);
     }

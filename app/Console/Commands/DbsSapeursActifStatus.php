@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Domaine\Business\SapeurBusiness;
+use App\Support\Sis;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Config;
 
 class DbsSapeursActifStatus extends Command
 {
@@ -39,16 +39,14 @@ class DbsSapeursActifStatus extends Command
      */
     public function handle()
     {
-        $dbs = config('database.dbs');
-        foreach ($dbs as $db) {
+        Sis::each(function ($db) {
             printf("Recompute for sis=" . $db . "\n");
-            Config::set('database.default', 'db_' . $db);
             SapeurBusiness::recomputeSapeurActifStatus();
             SapeurBusiness::recomputeSapeurFonctionPrincipale();
             SapeurBusiness::recomputeSapeurGradePrincipal();
 
             printf("\n");
-        }
+        });
         printf("Migrating done\n");
         return 0;
     }

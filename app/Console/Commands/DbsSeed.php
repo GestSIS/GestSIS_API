@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Cours;
 use App\Models\Grade;
+use App\Support\Sis;
 use Exception;
 use Illuminate\Console\Command;
 
@@ -59,7 +60,7 @@ class DbsSeed extends Command
             // TODO: if jsp dans $db
             if (str_contains($db, 'jsp')) {
                 printf("Seeding db=db_" . $db . "\n");
-                Cours::on('db_' . $db)->insert([
+                Cours::on(Sis::connection($db))->insert([
                     ['designation' => 'JSP Module 1', 'abreviation' => 'JSP 1', 'tri' => 1],
                     ['designation' => 'JSP Module 2', 'abreviation' => 'JSP 2', 'tri' => 2],
                     ['designation' => 'JSP Module 3', 'abreviation' => 'JSP 3', 'tri' => 3],

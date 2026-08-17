@@ -3,8 +3,8 @@
 namespace App\Application\Http\Controllers;
 
 use App\Models\IcsToken;
+use App\Support\Sis;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 
 class IcsTokenController extends Controller
@@ -18,22 +18,19 @@ class IcsTokenController extends Controller
         $token = $request->attributes->get('jwtToken');
         $sapeurs = $token !== null ? (array) $token->data->sapeurs : [];
 
-        $res = [];
-        foreach ($sapeurs as $sisKey => $sapeurId) {
-            Config::set('database.default', 'db_' . $sisKey);
-
+        $res = Sis::each(function ($sisKey) use ($sapeurs) {
             $icsToken = IcsToken::firstOrCreate(
-                ['sapeur_id' => $sapeurId],
+                ['sapeur_id' => $sapeurs[$sisKey]],
                 ['token' => Str::random(48)]
             );
 
-            $res[] = [
+            return [
                 'sis_key' => $sisKey,
                 'url' => route('ics.show', ['sisKey' => $sisKey, 'token' => $icsToken->token]),
             ];
-        }
+        }, array_keys($sapeurs));
 
-        return response()->json(['data' => $res]);
+        return response()->json(['data' => array_values($res)]);
     }
 
     /**
@@ -49,7 +46,7 @@ class IcsTokenController extends Controller
             return response()->json(['error' => 'Sis inconnu'], 403);
         }
 
-        Config::set('database.default', 'db_' . $sisKey);
+        Sis::use($sisKey);
 
         $icsToken = IcsToken::updateOrCreate(
             ['sapeur_id' => $sapeurs[$sisKey]],

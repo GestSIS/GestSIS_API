@@ -4,9 +4,9 @@ namespace App\Console\Commands;
 
 use App\Domaine\Business\ExerciceBusiness;
 use App\Models\Exercice;
+use App\Support\Sis;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Config;
 
 class DbsExercicesStatus extends Command
 {
@@ -41,17 +41,15 @@ class DbsExercicesStatus extends Command
      */
     public function handle()
     {
-        $dbs = config('database.dbs');
-        foreach ($dbs as $db) {
+        Sis::each(function ($db) {
             printf("Recompute for sis=" . $db . "\n");
-            Config::set('database.default', 'db_' . $db);
             $exercices = Exercice::where('date', '>', Carbon::create(2023, 1, 1));
             foreach ($exercices as $exercice) {
                 ExerciceBusiness::updateStatut($exercice->id);
             }
 
             printf("\n");
-        }
+        });
         printf("Migrating done\n");
         return 0;
     }

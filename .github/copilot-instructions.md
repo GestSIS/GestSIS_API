@@ -33,8 +33,9 @@ The codebase strictly follows hexagonal architecture with these layers:
 **CRITICAL**: This system manages multiple firefighter organizations (SIS), each with its own database.
 
 - Database selection via `DbSelector` middleware reads `Sis-Key` header
-- Runtime database switching: `Config::set('database.default', 'db_' . $sisKey)`
-- Database connections defined in `config/database.php` from `DB_LISTE` env variable
+- Runtime database switching: `App\Support\Sis::use($sisKey)` (wraps `Config::set('database.default', Sis::connection($sisKey))`)
+- Cross-tenant iteration: `Sis::each(fn ($db) => ...)` loops over all tenant DBs and restores the original default connection afterwards — used for admin endpoints and batch jobs aggregating data across SIS
+- Database connections defined in `config/database.php` from `DB_LISTE` env variable; connection keys are built via `Sis::connection($db)`, never hardcode the `db_` prefix directly
 - Special commands for multi-DB operations:
     - `php artisan dbs:migrate` - Migrate all tenant databases
     - `php artisan dbs:init` - Fresh migration + seed for all DBs

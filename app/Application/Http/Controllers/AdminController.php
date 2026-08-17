@@ -5,40 +5,22 @@ namespace App\Application\Http\Controllers;
 use App\Models\LocaliteSis;
 use App\Models\SisContact;
 use App\Models\SisParam;
-use Illuminate\Support\Facades\Config;
+use App\Support\Sis;
 
 class AdminController extends Controller
 {
     public function sisContacts()
     {
-        $dbs = config('database.dbs');
-        $res = [];
-        foreach ($dbs as $db) {
-            Config::set('database.default', 'db_' . $db);
-            $res[$db] = SisContact::all();
-        }
-        return response()->json(['data' => $res]);
+        return response()->json(['data' => Sis::each(fn () => SisContact::all())]);
     }
 
     public function sisParams()
     {
-        $dbs = config('database.dbs');
-        $res = [];
-        foreach ($dbs as $db) {
-            Config::set('database.default', 'db_' . $db);
-            $res[$db] = SisParam::with(['sapeur', 'localite'])->first();
-        }
-        return response()->json(['data' => $res]);
+        return response()->json(['data' => Sis::each(fn () => SisParam::with(['sapeur', 'localite'])->first())]);
     }
 
     public function sisLocalites()
     {
-        $dbs = config('database.dbs');
-        $res = [];
-        foreach ($dbs as $db) {
-            Config::set('database.default', 'db_' . $db);
-            $res[$db] = LocaliteSis::with('localite')->get();
-        }
-        return response()->json(['data' => $res]);
+        return response()->json(['data' => Sis::each(fn () => LocaliteSis::with('localite')->get())]);
     }
 }

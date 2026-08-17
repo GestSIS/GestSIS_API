@@ -9,9 +9,9 @@ use App\Models\Localite;
 use App\Models\PermisType;
 use App\Models\SisParam;
 use App\Models\TelephoneType;
+use App\Support\Sis;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Config;
 
 class RecrutementController extends Controller
 {
@@ -22,11 +22,11 @@ class RecrutementController extends Controller
     private function selectionnerBase(string $sisKey): void
     {
         if (!App::environment('testing')) {
-            if (!in_array($sisKey, config('database.dbs'), true)) {
+            if (!Sis::isValid($sisKey)) {
                 abort(404);
             }
 
-            Config::set('database.default', 'db_' . $sisKey);
+            Sis::use($sisKey);
         }
     }
 

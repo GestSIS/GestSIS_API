@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Localite;
+use App\Support\Sis;
 use Illuminate\Console\Command;
 
 class DbsLocaliteUpdate extends Command
@@ -197,7 +198,7 @@ class DbsLocaliteUpdate extends Command
             printf("Fix db=db_" . $db . "\n");
 
             foreach ($localites as $localite) {
-                Localite::on("db_" . $db)->updateOrCreate(
+                Localite::on(Sis::connection($db))->updateOrCreate(
                     ['id' => $localite['id']],
                     [
                         'commune_id' => $localite['commune_id'],
