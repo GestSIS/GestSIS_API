@@ -139,7 +139,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenVali
     Route::get('email-validate', [EmailController::class, 'validateEmail']);
     Route::get('sapeurs-actifs', [EmailController::class, 'listeSapeursActifs']);
     Route::get('sapeurs-emails', [EmailController::class, 'listeSapeursEmails']);
+});
 
+// Routes spéciales pour admin GestSIS
+Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenValidatorAdmin::class]], function () {
     Route::get('sis-contacts-tous', [AdminController::class, 'sisContacts']);
     Route::get('sis-localites-tous', [AdminController::class, 'sisLocalites']);
     Route::get('sis-communes-tous', [AdminController::class, 'sisCommunes']);

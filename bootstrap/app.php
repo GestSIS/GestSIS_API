@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'jwtTokenRole' => JwtTokenValidatorRole::class,
             'jwtTokenAuth' => JwtTokenValidatorAuth::class,
+            'jwtTokenadmin' => JwtTokenValidatorAdmin::class,
             'jwtTokenSapeur' => JwtTokenValidatorSapeur::class,
             'jwtTokenSapeurOrRole' => JwtTokenValidatorSapeurOrRole::class,
             'jwtTokenAny' => JwtTokenValidatorAny::class,
