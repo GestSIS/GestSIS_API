@@ -13,11 +13,9 @@ class EmailController extends Controller
     {
         $email = $request->input('email');
 
-        $res = array_filter(Sis::each(function () use ($email) {
-            return Sapeur::whereIn('type', [SapeurBusiness::TYPE_SAPEUR, SapeurBusiness::TYPE_CIVIL])
+        $res = array_filter(Sis::each(fn() => Sapeur::whereIn('type', [SapeurBusiness::TYPE_SAPEUR, SapeurBusiness::TYPE_CIVIL])
                 ->where('email', $email)
-                ->first(['id'])?->id;
-        }));
+                ->first(['id'])?->id));
 
         return response()->json(['data' => $res]);
     }

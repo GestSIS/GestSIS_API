@@ -136,9 +136,7 @@ class InterventionBusiness
         $phase->save();
 
         // Ajout des quittances
-        $quittances = array_map(function ($e) use ($newIntervention) {
-            return ['intervention_id' => $newIntervention->id, 'sapeur_id' => $e];
-        }, array_unique($quittances));
+        $quittances = array_map(fn($e) => ['intervention_id' => $newIntervention->id, 'sapeur_id' => $e], array_unique($quittances));
         Quittance::insert($quittances);
 
         // Ajout des sapeurs

@@ -78,14 +78,14 @@ class InterventionController extends Controller
         ]);
 
         $quittances = $request->validate(['quittances.*' => 'integer']);
-        $quittances = isset($quittances['quittances']) ? $quittances['quittances'] : [];
+        $quittances = $quittances['quittances'] ?? [];
         $sapeurs = $request->validate([
             'sapeurs.*.sapeur_id' => 'integer|required',
             'sapeurs.*.debut' => 'date_format:Y-m-d H:i|required',
             'sapeurs.*.fin' => 'date_format:Y-m-d H:i|required',
             'sapeurs.*.piquet' => 'boolean|required',
         ]);
-        $sapeurs = isset($sapeurs['sapeurs']) ? $sapeurs['sapeurs'] : [];
+        $sapeurs = $sapeurs['sapeurs'] ?? [];
         $missions = $request->validate([
             'missions.*.titre' => 'string|required',
             'missions.*.resume' => 'string|nullable',
@@ -94,26 +94,26 @@ class InterventionController extends Controller
             'missions.*.sapeur_id' => 'integer|exists:sapeurs,id|required_without:missions.*.sapeur',
             'missions.*.sapeur' => 'string|required_without:missions.*.sapeur_id',
         ]);
-        $missions = isset($missions['missions']) ? $missions['missions'] : [];
+        $missions = $missions['missions'] ?? [];
         $appels = $request->validate([
             'appels.*.date' => 'string|required',
             'appels.*.numero' => 'string|required',
             'appels.*.nom' => 'string|required',
             'appels.*.commentaire' => 'string|nullable',
         ]);
-        $appels = isset($appels['appels']) ? $appels['appels'] : [];
+        $appels = $appels['appels'] ?? [];
         $vehicules = $request->validate(['vehicules.*' => 'integer']);
-        $vehicules = isset($vehicules['vehicules']) ? $vehicules['vehicules'] : [];
+        $vehicules = $vehicules['vehicules'] ?? [];
         $groupes = $request->validate([
             'groupes.*.no' => 'nullable|max:10',
             'groupes.*.designation' => 'string|required',
         ]);
-        $groupes = isset($groupes['groupes']) ? $groupes['groupes'] : [];
+        $groupes = $groupes['groupes'] ?? [];
         $materiel = $request->validate([
             'materiel.*.materiel_id' => 'integer|required',
             'materiel.*.quantite' => 'numeric|required',
         ]);
-        $materiel = isset($materiel['materiel']) ? $materiel['materiel'] : [];
+        $materiel = $materiel['materiel'] ?? [];
 
         try {
             $intervention = InterventionBusiness::importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel, $quittances);

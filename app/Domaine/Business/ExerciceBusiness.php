@@ -501,9 +501,7 @@ class ExerciceBusiness
             return $sap['sapeur_id'];
         }, ExerciceSapeur::where('exercice_id', $exerciceId)->get()->toArray());
 
-        $sapeurFiltered = array_filter($sapeurs, function ($sap) use ($ids) {
-            return !in_array($sap['sapeur_id'], $ids);
-        });
+        $sapeurFiltered = array_filter($sapeurs, fn($sap) => !in_array($sap['sapeur_id'], $ids));
 
         foreach ($sapeurFiltered as $sapeur) {
             self::addSapeurToExercice($exerciceId, $sapeur);
@@ -1012,9 +1010,7 @@ class ExerciceBusiness
 
         $exercice['sapeurs'] = array_map(function ($s) use ($sapeurs) {
             $id = $s['sapeur_id'];
-            $sap = array_values(array_filter($sapeurs, function ($sapeur) use ($id) {
-                return $sapeur['id'] == $id;
-            }))[0];
+            $sap = array_values(array_filter($sapeurs, fn($sapeur) => $sapeur['id'] == $id))[0];
             $s['excuse_type_id'] = $s['excuse_type_id'] ?? -1;
             $s['display'] = $sap['nom_prenom'];
             $s['fonction_id'] = $sap['fonction_id'] ?? 0;
@@ -1083,9 +1079,7 @@ class ExerciceBusiness
 
         $exercice['sapeurs'] = array_map(function ($s) use ($sapeurs) {
             $id = $s['sapeur_id'];
-            $sap = array_values(array_filter($sapeurs, function ($sapeur) use ($id) {
-                return $sapeur['id'] == $id;
-            }))[0];
+            $sap = array_values(array_filter($sapeurs, fn($sapeur) => $sapeur['id'] == $id))[0];
             $s['excuse_type_id'] = $s['excuse_type_id'] ?? -1;
             $s['display'] = $sap['nom_prenom'];
             return $s;

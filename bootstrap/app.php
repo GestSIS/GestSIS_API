@@ -2,14 +2,15 @@
 
 use App\Application\Http\Middleware\DbSelector;
 use App\Application\Http\Middleware\JwtTokenValidatorAuth;
+use App\Application\Http\Middleware\JwtTokenValidatorAdmin;
 use App\Application\Http\Middleware\JwtTokenValidatorSapeurOrRole;
+use App\Application\Http\Middleware\JwtTokenValidatorAny;
+use App\Application\Http\Middleware\JwtTokenValidatorRole;
+use App\Application\Http\Middleware\JwtTokenValidatorSapeur;
 use App\Domaine\Exceptions\InvalidActionException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use App\Application\Http\Middleware\JwtTokenValidatorAny;
-use App\Application\Http\Middleware\JwtTokenValidatorRole;
-use App\Application\Http\Middleware\JwtTokenValidatorSapeur;
 use App\Domaine\Exceptions\ArrayException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;

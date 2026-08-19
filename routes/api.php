@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Route;
 use Spatie\HttpLogger\Middlewares\HttpLogger;
 use App\Application\Http\Middleware\DbSelector;
 use App\Application\Http\Middleware\JwtTokenValidatorAuth;
+use App\Application\Http\Middleware\JwtTokenValidatorAdmin;
 
 use App\Application\Http\Controllers\AlarmeController;
 use App\Application\Http\Controllers\AmendeController;
