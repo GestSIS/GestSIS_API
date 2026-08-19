@@ -459,7 +459,7 @@ class PaiementBusiness
                 Log::error("Certificat de salaire creation", [
                     "exception" => $merged->getError(),
                 ]);
-                throw new ArrayException(array("message" => "Erreur lors de la génération du pdf"));
+                throw new ArrayException(["message" => "Erreur lors de la génération du pdf"]);
             }
 
             $headers = [
@@ -554,7 +554,7 @@ class PaiementBusiness
         $localite = $sapeur->localite;
         $civilite = $sapeur->civilite;
 
-        $fields = array(
+        $fields = [
             "A" => "Ja",
             "C2" => $sapeur->no_avs,
             "D" => $exerciceComptable->annee,
@@ -578,7 +578,7 @@ class PaiementBusiness
             "Unterschrift12" => "$sisParam->rue $sisParam->numero",
             "Unterschrift13" => "{$sisParam->localite->npa} {$sisParam->localite->designation}",
             "Unterschrift14" => $sisParam->telephone,
-        );
+        ];
 
         if ($affichageFrais) {
             $fields["13-1-2-2"] = round($total['frais_effectif']);

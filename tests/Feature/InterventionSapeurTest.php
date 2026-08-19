@@ -52,26 +52,26 @@ class InterventionSapeurTest extends TestCase
      */
     public function testAddInterventionPresences()
     {
-        $sapeurs = array(
-            array(
+        $sapeurs = [
+            [
                 'sapeur_id' => 1,
                 'debut' => '2019-12-12 12:15',
                 'fin' => '2019-12-12 12:30',
                 'piquet' => 0
-            ),
-            array(
+            ],
+            [
                 'sapeur_id' => 2,
                 'debut' => '2019-12-12 12:15',
                 'fin' => '2019-12-12 12:30',
                 'piquet' => 0
-            ),
-            array(
+            ],
+            [
                 'sapeur_id' => 3,
                 'debut' => '2019-12-12 12:15',
                 'fin' => '2019-12-12 12:30',
                 'piquet' => 0
-            ),
-        );
+            ],
+        ];
 
         $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/sapeurs', ['sapeurs' => $sapeurs]);
 
@@ -90,26 +90,26 @@ class InterventionSapeurTest extends TestCase
      */
     public function testEditInterventionPresences()
     {
-        $sapeurs = array(
-            array(
+        $sapeurs = [
+            [
                 'sapeur_id' => 5,
                 'debut' => '2019-12-12 12:15',
                 'fin' => '2019-12-12 12:30',
                 'piquet' => 0
-            ),
-            array(
+            ],
+            [
                 'sapeur_id' => 6,
                 'debut' => '2019-12-12 12:15',
                 'fin' => '2019-12-12 12:30',
                 'piquet' => 0
-            ),
-            array(
+            ],
+            [
                 'sapeur_id' => 7,
                 'debut' => '2019-12-12 12:15',
                 'fin' => '2019-12-12 12:30',
                 'piquet' => 0
-            ),
-        );
+            ],
+        ];
 
         $res = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/sapeurs', ['sapeurs' => $sapeurs])
             ->json('data.sapeurs');
@@ -136,26 +136,26 @@ class InterventionSapeurTest extends TestCase
      */
     public function testRemoveInterventionPresences()
     {
-        $sapeurs = array(
-            array(
+        $sapeurs = [
+            [
                 'sapeur_id' => 7,
                 'debut' => '2019-12-12 12:15',
                 'fin' => '2019-12-12 12:30',
                 'piquet' => 0
-            ),
-            array(
+            ],
+            [
                 'sapeur_id' => 8,
                 'debut' => '2019-12-12 12:15',
                 'fin' => '2019-12-12 12:30',
                 'piquet' => 0
-            ),
-            array(
+            ],
+            [
                 'sapeur_id' => 9,
                 'debut' => '2019-12-12 12:15',
                 'fin' => '2019-12-12 12:30',
                 'piquet' => 0
-            ),
-        );
+            ],
+        ];
 
         $ids = array_column(
             $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/sapeurs', ['sapeurs' => $sapeurs])->json('data.sapeurs'),
@@ -181,7 +181,7 @@ class InterventionSapeurTest extends TestCase
     {
         $quittances = [1, 2, 3, 5];
 
-        $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/quittances', array('quittances' => $quittances));
+        $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/quittances', ['quittances' => $quittances]);
 
         $response
             ->assertStatus(200)
@@ -200,7 +200,7 @@ class InterventionSapeurTest extends TestCase
     {
         $quittances = [1, 5];
 
-        $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/quittances/', array("quittances" => $quittances));
+        $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/quittances/', ["quittances" => $quittances]);
 
         $response
             ->assertStatus(200)

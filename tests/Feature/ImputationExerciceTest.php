@@ -84,9 +84,9 @@ class ImputationExerciceTest extends TestCase
      */
     public function testImputationExerciceParPiece()
     {
-        $param = array(
+        $param = [
             "indemnite_exercice_type_id" => 1
-        );
+        ];
 
         $response = $this->json('POST', '/api/v2/imputation/exercice/' . $this->exerciceId, $param);
         $response->assertStatus(200);
@@ -101,9 +101,9 @@ class ImputationExerciceTest extends TestCase
      */
     public function testImputationExerciceParHeureEtFonction()
     {
-        $param = array(
+        $param = [
             "indemnite_exercice_type_id" => 10
-        );
+        ];
 
         $response = $this->json('POST', '/api/v2/imputation/exercice/' . $this->exerciceId, $param);
         $response->assertStatus(200);
@@ -118,9 +118,9 @@ class ImputationExerciceTest extends TestCase
      */
     public function testImputationExerciceParHeureEtSoldeMin()
     {
-        $param = array(
+        $param = [
             "indemnite_exercice_type_id" => 2
-        );
+        ];
 
         $response = $this->json('POST', '/api/v2/imputation/exercice/' . $this->exerciceId, $param);
         $response->assertStatus(200);

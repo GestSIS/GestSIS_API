@@ -54,7 +54,7 @@ class InterventionVehiculeTest extends TestCase
     {
         $vehicules = [1, 2, 3, 5];
 
-        $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/vehicules', array('vehicules' => $vehicules));
+        $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/vehicules', ['vehicules' => $vehicules]);
 
         $response
             ->assertStatus(200)
@@ -74,8 +74,8 @@ class InterventionVehiculeTest extends TestCase
     {
         $vehicules = [1, 2, 3, 5];
 
-        $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/vehicules', array('vehicules' => $vehicules));
-        $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/vehicules', array('vehicules' => $vehicules));
+        $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/vehicules', ['vehicules' => $vehicules]);
+        $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/vehicules', ['vehicules' => $vehicules]);
 
         $response
             ->assertStatus(200)
@@ -99,9 +99,9 @@ class InterventionVehiculeTest extends TestCase
         $vehiculesAdd = [1, 2, 3, 5];
         $vehiculesRemove = [1, 5];
 
-        $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/vehicules', array('vehicules' => $vehiculesAdd));
+        $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/vehicules', ['vehicules' => $vehiculesAdd]);
 
-        $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/vehicules/', array("vehicules" => $vehiculesRemove));
+        $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/vehicules/', ["vehicules" => $vehiculesRemove]);
 
         $response
             ->assertStatus(200)

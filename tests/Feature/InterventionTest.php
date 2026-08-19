@@ -107,26 +107,26 @@ class InterventionTest extends TestCase
     {
         $intervention = Intervention::factory()->create();
 
-        $sapeurs = array(
-            array(
+        $sapeurs = [
+            [
                 'sapeur_id' => 1,
                 'debut' => '2019-12-12 12:15',
                 'fin' => '2019-12-12 12:30',
                 'piquet' => 0
-            ),
-            array(
+            ],
+            [
                 'sapeur_id' => 2,
                 'debut' => '2019-12-12 12:15',
                 'fin' => '2019-12-12 12:30',
                 'piquet' => 0
-            ),
-            array(
+            ],
+            [
                 'sapeur_id' => 3,
                 'debut' => '2019-12-12 12:15',
                 'fin' => '2019-12-12 12:30',
                 'piquet' => 0
-            ),
-        );
+            ],
+        ];
 
         $this->json('POST', "/api/v2/interventions/{$intervention->id}/sapeurs", ['sapeurs' => $sapeurs]);
 

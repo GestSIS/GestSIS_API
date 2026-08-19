@@ -680,7 +680,7 @@ class ImputationBusiness
         $indemniteType = IndemniteInterventionType::with('fonctions')->find($data['indemnite_intervention_type_id']);
 
         if ($intervention->statut !== InterventionBusiness::INTERVENTION_STATUT_VALIDE) {
-            throw new ArrayException(array("message" => "Impossible d'imputer cette intervention"));
+            throw new ArrayException(["message" => "Impossible d'imputer cette intervention"]);
         }
 
         if ($indemniteType === null) {

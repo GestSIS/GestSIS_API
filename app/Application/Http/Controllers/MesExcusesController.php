@@ -74,12 +74,12 @@ class MesExcusesController extends Controller
         }
         $justificatif = ['path' => $presence->justificatif_path, 'filename' => $presence->justificatif_filename];
 
-        $headers = array(
+        $headers = [
             'Content-Type: application/pdf',
             'Cache-Control: no-cache private',
             'Content-Description: File Transfer',
             'Content-Transfer-Encoding: binary'
-        );
+        ];
         return Storage::download($justificatif['path'], $justificatif['filename'], $headers);
     }
 }

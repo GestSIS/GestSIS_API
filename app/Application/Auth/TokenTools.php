@@ -39,19 +39,19 @@ class TokenTools
         $notbefore_claim = $issuedat_claim + 0; //not before in seconds
         $expire_claim = $issuedat_claim + self::ACCESS_TOKEN_DURATION_IN_HOURS * 3600; // expire time in seconds
 
-        $token = array(
+        $token = [
             "iss" => self::ISSUER,
             "aud" => self::AUDIENCE,
             "iat" => $issuedat_claim,
             "nbf" => $notbefore_claim,
             "exp" => $expire_claim,
-            "data" => array(
+            "data" => [
                 "id" => $user->id,
                 "firstname" => $user->firstname,
                 "lastname" => $user->lastname,
                 "email" => $user->email
-            )
-        );
+            ]
+        ];
 
         return JWT::encode($token, $privateKey, 'RS256');
     }

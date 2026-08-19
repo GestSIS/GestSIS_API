@@ -141,11 +141,11 @@ class SapeurBusiness
         $sapeur = Sapeur::create($data);
 
         //add new sapeur mutation
-        self::addMutation($sapeur->id, array(
+        self::addMutation($sapeur->id, [
             "localite_id" => $sapeur->localite_id,
             "incorporation" => $data['incorporation'],
             "motif" => ""
-        ));
+        ]);
         return $sapeur;
     }
 
@@ -296,11 +296,11 @@ class SapeurBusiness
         if (isset($data['grade_id'])) {
             // Add grade if not already there
             if (!GradeSapeur::where('sapeur_id', $sapeurId)->where('grade_id', $data['grade_id'])->exists()) {
-                self::addGrade($sapeurId, array(
+                self::addGrade($sapeurId, [
                     'grade_id' => $data['grade_id'],
                     'date' => $data['date_grade'],
                     'remarque' => ''
-                ));
+                ]);
             }
         }
 
@@ -308,11 +308,11 @@ class SapeurBusiness
         if (isset($data['fonction_sapeur_id'])) {
             self::updateFonction(
                 $sapeurId,
-                array(
+                [
                     'id' => $data['fonction_sapeur_id'],
                     'fin' => $data['date_fonction'],
                     'remarque' => ''
-                )
+                ]
             );
         }
 
@@ -320,12 +320,12 @@ class SapeurBusiness
         if (isset($data['fonction_id'])) {
             self::addFonction(
                 $sapeurId,
-                array(
+                [
                     'fonction_id' => $data['fonction_id'],
                     'debut' => $data['date_fonction'],
                     'fin' => null,
                     'remarque' => null
-                )
+                ]
             );
         }
 
@@ -358,7 +358,7 @@ class SapeurBusiness
 
         //Check si déjà présent
         if (GradeSapeur::where('grade_id', $data['grade_id'])->where('sapeur_id', $sapeurId)->exists()) {
-            throw new ArrayException(array('id' => "Grade déjà existant"));
+            throw new ArrayException(['id' => "Grade déjà existant"]);
         }
 
         $data['sapeur_id'] = $sapeurId;
@@ -605,7 +605,7 @@ class SapeurBusiness
 
         //Check si sapeur as déjà ce permis
         if (Permis::where('sapeur_id', $sapeurId)->where('permis_type_id', $permisId)->exists()) {
-            throw new ArrayException(array('id' => "Unable to find permis"));
+            throw new ArrayException(['id' => "Unable to find permis"]);
         }
 
         $data['sapeur_id'] = $sapeurId;

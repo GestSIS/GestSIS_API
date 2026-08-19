@@ -48,9 +48,9 @@ class ExerciceSapeurTest extends TestCase
     {
         $exercice = Exercice::factory()->create();
 
-        $sapeurs = array(
-            'sapeurs' => array(
-                array(
+        $sapeurs = [
+            'sapeurs' => [
+                [
                     'sapeur_id' => 1,
                     'convoque' => 1,
                     'present' => 1,
@@ -59,8 +59,8 @@ class ExerciceSapeurTest extends TestCase
                     'amende' => 0,
                     'excuse_type_id' => null,
                     'excuse_statut' => 0,
-                ),
-                array(
+                ],
+                [
                     'sapeur_id' => 2,
                     'convoque' => 1,
                     'present' => 0,
@@ -69,8 +69,8 @@ class ExerciceSapeurTest extends TestCase
                     'amende' => 0,
                     'excuse_type_id' => 4,
                     'excuse_statut' => -2,
-                ),
-                array(
+                ],
+                [
                     'sapeur_id' => 3,
                     'convoque' => 1,
                     'present' => 0,
@@ -79,9 +79,9 @@ class ExerciceSapeurTest extends TestCase
                     'amende' => 0,
                     'excuse_type_id' => null,
                     'excuse_statut' => -1,
-                ),
-            )
-        );
+                ],
+            ]
+        ];
 
         $response = $this->json('POST', '/api/v2/exercices/' . $exercice->id . '/sapeurs', $sapeurs);
 
@@ -104,7 +104,7 @@ class ExerciceSapeurTest extends TestCase
         $exerciceId = $this->json('POST', '/api/v2/exercices', $exerciceData)->json('data.id');
 
         $sapeurs = [
-            array(
+            [
                 'sapeur_id' => 1,
                 'convoque' => 1,
                 'present' => 1,
@@ -113,8 +113,8 @@ class ExerciceSapeurTest extends TestCase
                 'amende' => 0,
                 'excuse_type_id' => null,
                 'excuse_statut' => 0,
-            ),
-            array(
+            ],
+            [
                 'sapeur_id' => 2,
                 'convoque' => 1,
                 'present' => 0,
@@ -123,8 +123,8 @@ class ExerciceSapeurTest extends TestCase
                 'amende' => 0,
                 'excuse_type_id' => 4,
                 'excuse_statut' => -2,
-            ),
-            array(
+            ],
+            [
                 'sapeur_id' => 3,
                 'convoque' => 1,
                 'present' => 0,
@@ -133,7 +133,7 @@ class ExerciceSapeurTest extends TestCase
                 'amende' => 0,
                 'excuse_type_id' => null,
                 'excuse_statut' => 0,
-            )
+            ]
         ];
 
         $addResponse = $this->json('POST', '/api/v2/exercices/' . $exerciceId . '/sapeurs', ['sapeurs' => $sapeurs]);
@@ -142,7 +142,7 @@ class ExerciceSapeurTest extends TestCase
         $sapeurs[1]['present'] = 0;
         $sapeurs[1]['excuse_type_id'] = 1;
 
-        $response = $this->json('POST', '/api/v2/exercices/presence/' . $sapeurs[1]['id'], array("sapeurs" => $sapeurs[1]));
+        $response = $this->json('POST', '/api/v2/exercices/presence/' . $sapeurs[1]['id'], ["sapeurs" => $sapeurs[1]]);
 
         $response
             ->assertStatus(200)
@@ -163,7 +163,7 @@ class ExerciceSapeurTest extends TestCase
         $exerciceId = $this->json('POST', '/api/v2/exercices', $exerciceData)->json('data.id');
 
         $sapeurs = [
-            array(
+            [
                 'sapeur_id' => 1,
                 'convoque' => 1,
                 'present' => 1,
@@ -172,8 +172,8 @@ class ExerciceSapeurTest extends TestCase
                 'amende' => 0,
                 'excuse_type_id' => null,
                 'excuse_statut' => 0,
-            ),
-            array(
+            ],
+            [
                 'sapeur_id' => 2,
                 'convoque' => 1,
                 'present' => 0,
@@ -182,8 +182,8 @@ class ExerciceSapeurTest extends TestCase
                 'amende' => 0,
                 'excuse_type_id' => 4,
                 'excuse_statut' => -2,
-            ),
-            array(
+            ],
+            [
                 'sapeur_id' => 3,
                 'convoque' => 1,
                 'present' => 0,
@@ -192,7 +192,7 @@ class ExerciceSapeurTest extends TestCase
                 'amende' => 0,
                 'excuse_type_id' => null,
                 'excuse_statut' => 0,
-            )
+            ]
         ];
 
         $addResponse = $this->json('POST', '/api/v2/exercices/' . $exerciceId . '/sapeurs', ['sapeurs' => $sapeurs]);
@@ -202,7 +202,7 @@ class ExerciceSapeurTest extends TestCase
             return $sap['id'];
         }, $sapeurs);
 
-        $response = $this->json('DELETE', '/api/v2/exercices/' . $exerciceId . '/sapeurs/', array("sapeurs" => $ids));
+        $response = $this->json('DELETE', '/api/v2/exercices/' . $exerciceId . '/sapeurs/', ["sapeurs" => $ids]);
         $response
             ->assertStatus(200)
             ->assertJson([

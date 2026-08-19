@@ -68,7 +68,7 @@ class ExerciceBusiness
             $statut = max($statut, self::EXERCICE_STATUT_SAISI);
         }
 
-        self::updateExerciceById($exerciceId, array("statut" => $statut));
+        self::updateExerciceById($exerciceId, ["statut" => $statut]);
 
         return $statut;
     }
@@ -118,7 +118,7 @@ class ExerciceBusiness
             return $statut;
         }
 
-        self::updateExerciceById($exerciceId, array("statut" => self::EXERCICE_STATUT_ANNULE));
+        self::updateExerciceById($exerciceId, ["statut" => self::EXERCICE_STATUT_ANNULE]);
         return self::EXERCICE_STATUT_ANNULE;
     }
 
@@ -129,7 +129,7 @@ class ExerciceBusiness
             return $statut;
         }
 
-        self::updateExerciceById($exerciceId, array("statut" => self::EXERCICE_STATUT_VIDE));
+        self::updateExerciceById($exerciceId, ["statut" => self::EXERCICE_STATUT_VIDE]);
         $statut = self::updateStatut($exerciceId);
         return $statut;
     }

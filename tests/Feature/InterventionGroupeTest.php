@@ -55,7 +55,7 @@ class InterventionGroupeTest extends TestCase
     {
         $groupes = [['designation' => 'g1', 'no' => "1"], ['designation' => 'g2', 'no' => "2"], ['designation' => 'g3', 'no' => "3"], ['designation' => 'g5', 'no' => "5"]];
 
-        $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/groupes', array('groupes' => $groupes));
+        $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/groupes', ['groupes' => $groupes]);
 
         $response
             ->assertStatus(200)
@@ -73,10 +73,10 @@ class InterventionGroupeTest extends TestCase
     public function testRemoveInterventionGroupe()
     {
         $groupes = [['designation' => 'g1', 'no' => "1"]];
-        $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/groupes', array('groupes' => $groupes));
+        $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/groupes', ['groupes' => $groupes]);
         $groupes = GroupeIntervention::where('intervention_id', '=', $this->interventionId)->pluck('id')->toArray();
 
-        $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/groupes/', array("groupes" => $groupes));
+        $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/groupes/', ["groupes" => $groupes]);
         $response
             ->assertStatus(200)
             ->assertJson([

@@ -114,26 +114,26 @@ class ImputationInterventionTest extends TestCase
 
         $this->interventionId = $this->json('POST', '/api/v2/interventions', $interventionData)->json('data.id');
 
-        $sapeurs = array(
-            array(
+        $sapeurs = [
+            [
                 'sapeur_id' => $this->sapeurOneId,
                 'debut' => '2019-01-01 20:00',
                 'fin' => '2019-01-02 12:15',
                 'piquet' => 0
-            ),
-            array(
+            ],
+            [
                 'sapeur_id' => $this->sapeurTwoId,
                 'debut' => '2019-01-01 12:00',
                 'fin' => '2019-01-01 12:30',
                 'piquet' => 0
-            ),
-            array(
+            ],
+            [
                 'sapeur_id' => $this->sapeurThreeId,
                 'debut' => '2019-01-01 12:15',
                 'fin' => '2019-01-01 15:30',
                 'piquet' => 0
-            ),
-        );
+            ],
+        ];
 
         $this->json('POST', "/api/v2/interventions/{$this->interventionId}/sapeurs", ['sapeurs' => $sapeurs]);
         $this->json('POST', "/api/v2/interventions/{$this->interventionId}/valider");
@@ -150,9 +150,9 @@ class ImputationInterventionTest extends TestCase
      */
     public function testImputationImputationTarifSimpleSansProRata()
     {
-        $param = array(
+        $param = [
             "indemnite_intervention_type_id" => $this->indemniteTypeSimpleId
-        );
+        ];
         $response = $this->json('POST', "/api/v2/imputation/intervention/$this->interventionId", $param);
 
         $response
@@ -243,9 +243,9 @@ class ImputationInterventionTest extends TestCase
      */
     public function testImputationImputationTarifComplex()
     {
-        $param = array(
+        $param = [
             "indemnite_intervention_type_id" => $this->indemniteTypeComplexId
-        );
+        ];
         $response = $this->json('POST', "/api/v2/imputation/intervention/$this->interventionId", $param);
 
         $response
