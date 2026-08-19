@@ -11,10 +11,9 @@ class TravailController extends Controller
     public function index(Request $request, $exerciceComptableId)
     {
         // Auteur
-        $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
-        $hasLectureOuValidationPermission = $admin || in_array('fiche_travail.validation', $perms) || in_array('fiche_travail.lecture', $perms);
-        $withEcritures = $admin || in_array('comptabilite.lecture', $perms);
+        $hasLectureOuValidationPermission = in_array('fiche_travail.validation', $perms) || in_array('fiche_travail.lecture', $perms);
+        $withEcritures = in_array('comptabilite.lecture', $perms);
 
         $sapeurId = $request->attributes->get('sapeurId');
         if (!$hasLectureOuValidationPermission && !$sapeurId) {
@@ -53,10 +52,9 @@ class TravailController extends Controller
         if (!$auteurId) {
             return response()->json(['error' => ['message' => 'Permissions insuffisantes']], 200);
         }
-        $admin = $request->attributes->get('admin', false);
         $perms = $request->attributes->get('permissions', []);
 
-        $hasSaisieCommunePermission = $admin || in_array('fiche_travail.saisie_commune', $perms);
+        $hasSaisieCommunePermission = in_array('fiche_travail.saisie_commune', $perms);
 
         $travail = TravauxBusiness::ajouter($data['travaux'], $auteurId, $hasSaisieCommunePermission);
         return response()->json(['data' => $travail]);

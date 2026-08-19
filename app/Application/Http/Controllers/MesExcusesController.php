@@ -57,9 +57,8 @@ class MesExcusesController extends Controller
             return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
         }
 
-        $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
-        $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
+        $hasValidationPermission = in_array('exercice.validation', $perms);
 
         $data = $this->exerciceBusiness->removeExcuse($sapeurId, $exerciceId, $hasValidationPermission);
         return response()->json(['data' => $data]);

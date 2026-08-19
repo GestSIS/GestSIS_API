@@ -30,11 +30,11 @@ class JwtTokenValidatorAuth
 
         // Check has role for provided sis
         $perms = (array) $token->data->permissions;
-        if ($token->data->admin !== True && !array_key_exists("_", $perms)) {
+        if (!array_key_exists("_", $perms)) {
             return response()->json(["error" => "Token invalide"], 401);
         }
 
-        if ($token->data->admin !== True && !in_array("admin", $perms["_"])) {
+        if (!in_array("admin", $perms["_"])) {
             return response()->json(["error" => "Permissions insuffisantes"], 401);
         }
 

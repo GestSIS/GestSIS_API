@@ -48,9 +48,8 @@ class ExcuseController extends Controller
 
         $file = $request->file('justificatif_file');
         $sisKey = $request->header('Sis-Key', Null);
-        $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
-        $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
+        $hasValidationPermission = in_array('exercice.validation', $perms);
 
         $statut = ExerciceBusiness::updateSapeurs($convocationId, $data, $hasValidationPermission);
         return response()->json([
@@ -63,9 +62,8 @@ class ExcuseController extends Controller
 
     public function destroy(Request $request, int $exerciceId, int $sapeurId)
     {
-        $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
-        $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
+        $hasValidationPermission = in_array('exercice.validation', $perms);
         $presence = ExerciceBusiness::removeExcuse($sapeurId, $exerciceId, $hasValidationPermission);
 
         return response()->json(['data' => $presence]);

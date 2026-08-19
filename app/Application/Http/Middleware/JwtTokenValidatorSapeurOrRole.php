@@ -36,7 +36,7 @@ class JwtTokenValidatorSapeurOrRole
         // Check is a valid sapeur for the provided sis, or has one of the required roles
         $sapeurs = (array) $token->data->sapeurs;
         $permissions = (array) $token->data->permissions;
-        if ($token->data->admin !== True && !array_key_exists($sisKey, $sapeurs)) {
+        if (!array_key_exists($sisKey, $sapeurs)) {
             if (!array_key_exists($sisKey, $permissions)) {
                 return response()->json(["error" => "Votre compte n'est pas lié à un sapeur de ce SIS"], 401);
             }
@@ -46,9 +46,6 @@ class JwtTokenValidatorSapeurOrRole
             }
         }
 
-        if ($token->data->admin === True) {
-            $request->attributes->add(['admin' => true]);
-        }
         $request->attributes->add(['permissions' => $permissions[$sisKey] ?? []]);
         $request->attributes->add(['sapeurId' => $sapeurs[$sisKey] ?? null]);
 

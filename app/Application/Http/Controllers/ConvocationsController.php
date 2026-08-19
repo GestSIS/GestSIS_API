@@ -14,9 +14,8 @@ class ConvocationsController extends Controller
 
     public function index(Request $request, $exerciceId)
     {
-        $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
-        $hasPresencePermission = $admin || in_array('exercice.presence', $perms);
+        $hasPresencePermission = in_array('exercice.presence', $perms);
         $sapeurs = ExerciceBusiness::listeSapeurOfExerciceById($exerciceId, $hasPresencePermission);
 
         return response()->json(['data' => $sapeurs]);
@@ -72,9 +71,8 @@ class ConvocationsController extends Controller
 
         $file = $request->file('justificatif_file');
         $sisKey = $request->header('Sis-Key', Null);
-        $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
-        $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
+        $hasValidationPermission = in_array('exercice.validation', $perms);
 
         $statut = ExerciceBusiness::updatePresence($id, $data, $file, $hasValidationPermission, $sisKey);
         $exerciceSapeur = \App\Models\ExerciceSapeur::with('exercice')->find($id);
@@ -129,9 +127,8 @@ class ConvocationsController extends Controller
             'heure_exercice_type_id' => 'nullable|integer',
         ]);
 
-        $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
-        $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
+        $hasValidationPermission = in_array('exercice.validation', $perms);
         $heure = ExerciceBusiness::createHeure($data, $hasValidationPermission);
 
         return response()->json(['data' => $heure]);
@@ -144,9 +141,8 @@ class ConvocationsController extends Controller
             'quantite' => 'nullable|numeric',
         ]);
 
-        $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
-        $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
+        $hasValidationPermission = in_array('exercice.validation', $perms);
         $heure = ExerciceBusiness::updateHeure($heureId, $data, $hasValidationPermission);
 
         return response()->json(['data' => $heure]);
@@ -154,9 +150,8 @@ class ConvocationsController extends Controller
 
     public function destroyHeure(Request $request, int $heureId)
     {
-        $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
-        $hasValidationPermission = $admin || in_array('exercice.validation', $perms);
+        $hasValidationPermission = in_array('exercice.validation', $perms);
         $statut = ExerciceBusiness::removeHeure($heureId, $hasValidationPermission);
 
         return response()->json(['data' => $statut]);

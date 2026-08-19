@@ -10,9 +10,8 @@ class TravailTypeController extends Controller
 {
     public function index(Request $request)
     {
-        $admin = $request->attributes->get('admin');
         $perms = $request->attributes->get('permissions', []);
-        $avecTarifs = $admin || in_array('fiche_travail.config', $perms) || in_array('comptabilite.lecture', $perms);
+        $avecTarifs = in_array('fiche_travail.config', $perms) || in_array('comptabilite.lecture', $perms);
 
         $type = $avecTarifs ? TravailType::with('fonctions')->get() : TravailType::all();
 
