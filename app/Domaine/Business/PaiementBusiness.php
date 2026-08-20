@@ -163,13 +163,15 @@ class PaiementBusiness
             // Calcul du taux d'imposition
             $tauxParitaireAvsAc = ($avsParam->taux_ac + $avsParam->taux_avs) / 2.0;
 
+            // Sapeurs ayant demandé de cotiser à l'AVS/AC même sous la franchise
+            $sapeursCotisationAvs = Sapeur::whereIn('id', array_keys($totaux))->pluck('cotisation_avs', 'id')->all();
+
             // Calcul des déductions AVS/AC sur la part imposable
             foreach ($totaux as $key => $total) {
                 $solde_imposable = max($total['solde_a_percevoir'] + $total['solde_percue'] - $avsParam->franchise_imposition, 0.0);
                 $total_imposable = $solde_imposable + $total['indemnite_a_percevoir'] + $total['indemnite_percue'];
 
-                // TODO: ou si sapeur en fait la demande
-                if ($total_imposable >= $avsParam->franchise_avs) {
+                if ($total_imposable >= $avsParam->franchise_avs || ($sapeursCotisationAvs[$key] ?? false)) {
                     $avs = ImputationBusiness::arrondi_5_centimes(
                         ImputationBusiness::arrondi_5_centimes($total_imposable * ($avsParam->taux_avs / 2.0))
                         - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_avs / 2.0))
@@ -178,7 +180,7 @@ class PaiementBusiness
                         ImputationBusiness::arrondi_5_centimes($total_imposable * ($avsParam->taux_ac / 2.0))
                         - (($total['avs_ac_cotise'] / $tauxParitaireAvsAc) * ($avsParam->taux_ac / 2.0))
                     );
-                    // Charge sociale complète (part employé + part employeur paritaire),
+                    // Côtisation sociale complète (part employé + part employeur paritaire),
                     // alors que $avs/$ac ne représentent qu'une part (utilisée telle
                     // quelle comme retenue sur la solde du sapeur ci-dessous)
                     $decompte->avs_total += $avs * 2;
@@ -289,7 +291,7 @@ class PaiementBusiness
         }
 
         // Génération écriture AVS/AC pour le décompte
-        // $ecritureAvsGlobale['total'] est la charge sociale complète (part employé,
+        // $ecritureAvsGlobale['total'] est la côtisation sociale complète (part employé,
         // déjà déduite dans total_final, + part employeur) : $decompte->total
         // représente le coût total réel pour le SIS, donc on ajoute le montant
         // complet ici, pas seulement la part employé (d'où pas de /2.0).

@@ -107,9 +107,9 @@ class DbsFix extends Command
             // Localite::whereId(46)->update(['commune_id' => 77]);
 
             // Fix 2026-07: avs_total/ac_total ne comptabilisaient que la part employé
-            // de la charge AVS/AC (au lieu de la charge complète part employé +
+            // de la côtisation AVS/AC (au lieu de la côtisation complète part employé +
             // employeur), et `total` ne rajoutait que cette même moitié (au lieu de la
-            // charge complète). Voir PaiementBusiness::creerDecompteInterne.
+            // côtisation complète). Voir PaiementBusiness::creerDecompteInterne.
             //
             // Idempotent sans migration ni colonne supplémentaire : Paiement.avs_ac
             // (part employé, avs+ac combinés) n'est touché ni par le bug ni par ce
@@ -127,7 +127,7 @@ class DbsFix extends Command
                     $currentCharge = (float) $decompte->avs_total + (float) $decompte->ac_total;
 
                     if ($sumAvsAc <= 0.0 || abs($currentCharge - $sumAvsAc) > 0.01) {
-                        // Pas de charge AVS/AC sur ce décompte, ou déjà à ~2x (corrigé)
+                        // Pas de côtisations AVS/AC sur ce décompte, ou déjà à ~2x (corrigé)
                         $skipped++;
                         continue;
                     }

@@ -7,6 +7,7 @@ use App\Domaine\Business\PaiementBusiness;
 use App\Domaine\Exceptions\ArrayException;
 use App\Models\AvsParam;
 use App\Models\Ecriture;
+use App\Models\Sapeur;
 use App\Models\SisParam;
 use Carbon\Carbon;
 use DB;
@@ -609,6 +610,77 @@ class DecompteTest extends TestCase
                             "autre" => "0.00",
                             "avs_ac" => "0.00",
                             "total" => "12.50",
+                        ],
+                    ],
+                ],
+            ]);
+    }
+
+    /**
+     * Un sapeur ayant demandé de cotiser à l'AVS/AC doit cotiser même si son montant
+     * imposable est sous la franchise AVS, contrairement à un sapeur ne l'ayant pas demandé
+     */
+    public function testDecompteDeductionCotisationAvsSurDemande()
+    {
+        Sapeur::whereKey(1)->update(['cotisation_avs' => true]);
+
+        Ecriture::insert([
+            [
+                "designation" => "test",
+                "total" => 1000,
+                "tarif" => 1000,
+                "type_unite_id" => ImputationBusiness::UNITE_PIECE,
+                "quantite" => 1,
+                "sapeur_id" => 1,
+                "compte_id" => 1,
+                "type" => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_INDEMNITE,
+                "module" => ImputationBusiness::ECRITURE_MODULE_DIVERS,
+                "exercice_comptable_id" => 2,
+                "ecriture_categorie_id" => 1,
+            ],
+            [
+                "designation" => "test",
+                "total" => 1000,
+                "tarif" => 1000,
+                "type_unite_id" => ImputationBusiness::UNITE_PIECE,
+                "quantite" => 1,
+                "sapeur_id" => 2,
+                "compte_id" => 1,
+                "type" => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_INDEMNITE,
+                "module" => ImputationBusiness::ECRITURE_MODULE_DIVERS,
+                "exercice_comptable_id" => 2,
+                "ecriture_categorie_id" => 1,
+            ],
+        ]);
+        $ecritures = Ecriture::where('exercice_comptable_id', 2)->get();
+
+        AvsParam::updateOrCreate([], [
+            'taux_avs' => "0.1055",
+            'taux_ac' => "0.24",
+            'franchise_avs' => 2300,
+            'franchise_imposition' => 5000,
+            'franchise_imposition_cantonale' => 8000,
+        ]);
+
+        $decompte = PaiementBusiness::creerDecompte($ecritures, 'test cotisation avs sur demande', 2, Carbon::today(), 1);
+        $response = $this->json('GET', "api/v2/decomptes/" . $decompte['id']);
+
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                "data" => [
+                    'paiements' => [
+                        [
+                            "sapeur_id" => 1,
+                            "indemnite" => "1000.00",
+                            "avs_ac" => "172.75",
+                            "total" => "827.25",
+                        ],
+                        [
+                            "sapeur_id" => 2,
+                            "indemnite" => "1000.00",
+                            "avs_ac" => "0.00",
+                            "total" => "1000.00",
                         ],
                     ],
                 ],
