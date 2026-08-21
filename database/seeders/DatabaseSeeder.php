@@ -56,5 +56,6 @@ class DatabaseSeeder extends Seeder
 
         $this->call(ExerciceTableSeeder::class);
         $this->call(InterventionTableSeeder::class);
+        $this->call(SmsTableSeeder::class);
     }
 }
