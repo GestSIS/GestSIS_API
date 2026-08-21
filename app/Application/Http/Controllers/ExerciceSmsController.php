@@ -8,7 +8,7 @@ class ExerciceSmsController extends Controller
 {
     public function index(int $exerciceId)
     {
-        $sms = Sms::with('smsNumeros')->where('exercice_id', '=', $exerciceId)->get();
+        $sms = Sms::with('smsNumeros.sapeur')->where('exercice_id', '=', $exerciceId)->get();
         return response()->json(['data' => $sms]);
     }
 }

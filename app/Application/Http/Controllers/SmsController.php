@@ -14,7 +14,7 @@ class SmsController extends Controller
             return response()->json(['data' => []]);
         }
 
-        $sms = Sms::with(['smsNumeros', 'exercice.categorie'])->where([
+        $sms = Sms::with(['smsNumeros.sapeur', 'exercice.categorie'])->where([
             ['date_programme', '>=', $exerciceComptable->debut],
             ['date_programme', '<=', $exerciceComptable->fin],
         ])->orWhereHas('exercice', function ($query) use ($exerciceComptableId) {

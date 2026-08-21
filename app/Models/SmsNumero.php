@@ -19,4 +19,9 @@ class SmsNumero extends Model
             'sms_id' => 'integer'
         ];
     }
+
+    public function sapeur()
+    {
+        return $this->belongsTo(Sapeur::class);
+    }
 }
