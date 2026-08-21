@@ -43,7 +43,6 @@ use App\Application\Http\Controllers\ComptabiliteStatistiqueController;
 use App\Application\Http\Controllers\CompteController;
 use App\Application\Http\Controllers\ControleMedicalController;
 use App\Application\Http\Controllers\ControleMedicalTypeController;
-use App\Application\Http\Controllers\ConvocationController;
 use App\Application\Http\Controllers\ConvocationParamController;
 use App\Application\Http\Controllers\ConvocationsController;
 use App\Application\Http\Controllers\CoursController;
@@ -432,7 +431,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         ]);
     });
     Route::group(['middleware' => 'jwtTokenRole:sms.envoie'], function () {
-        Route::apiResource('sms', SmsController::class)->only('index');
+        Route::get('sms/{exerciceComptableId}', [SmsController::class, 'index'])->name('sms.index');
         Route::apiResource('exercices.sms', ExerciceSmsController::class)->only('index');
     });
 
