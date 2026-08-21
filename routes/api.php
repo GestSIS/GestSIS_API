@@ -430,7 +430,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
             'store' => 'api.v2.aspsms.param.store',
         ]);
     });
-    Route::group(['middleware' => 'jwtTokenRole:sms.envoie'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:sms.lecture'], function () {
         Route::get('sms/{exerciceComptableId}', [SmsController::class, 'index'])->name('sms.index');
         Route::apiResource('exercices.sms', ExerciceSmsController::class)->only('index');
     });
