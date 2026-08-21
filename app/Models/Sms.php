@@ -30,4 +30,9 @@ class Sms extends Model
     {
         return $this->hasMany(SmsNumero::class);
     }
+
+    public function exercice()
+    {
+        return $this->belongsTo(Exercice::class);
+    }
 }

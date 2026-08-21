@@ -14,10 +14,12 @@ class SmsController extends Controller
             return response()->json(['data' => []]);
         }
 
-        $sms = Sms::with('smsNumeros')->where([
+        $sms = Sms::with(['smsNumeros', 'exercice.categorie'])->where([
             ['date_programme', '>=', $exerciceComptable->debut],
             ['date_programme', '<=', $exerciceComptable->fin],
-        ])->get();
+        ])->orWhereHas('exercice', function ($query) use ($exerciceComptableId) {
+            $query->where('exercice_comptable_id', $exerciceComptableId);
+        })->get();
 
         return response()->json(['data' => $sms]);
     }
