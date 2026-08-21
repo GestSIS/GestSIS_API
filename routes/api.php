@@ -98,6 +98,7 @@ use App\Application\Http\Controllers\IcsTokenController;
 use App\Application\Http\Controllers\MesInfosController;
 use App\Application\Http\Controllers\MesInterventionsController;
 use App\Application\Http\Controllers\MesProchainesConvocationsController;
+use App\Application\Http\Controllers\MonitoringTunnelController;
 use App\Application\Http\Controllers\MesTravauxController;
 use App\Application\Http\Controllers\MissionTypeController;
 use App\Application\Http\Controllers\MonMaterielController;
@@ -163,6 +164,10 @@ Route::group(['prefix' => 'v2'], function () {
     // Formulaire public d'auto-inscription des recrues, protégé par jeton de recrutement (pas de JWT)
     Route::get('recrutement/{sisKey}/{token}', [RecrutementController::class, 'show'])->name('recrutement.show');
     Route::post('recrutement/{sisKey}/{token}', [RecrutementController::class, 'store'])->name('recrutement.store');
+
+    // Relais Sentry/Bugsink pour GestSIS_APP (voir MonitoringTunnelController), appelé avant toute
+    // authentification possible (ex: erreur sur la page de login) donc pas de JWT non plus.
+    Route::post('monitoring-tunnel', [MonitoringTunnelController::class, 'store'])->name('monitoring-tunnel.store');
 });
 
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::class]], function () {
