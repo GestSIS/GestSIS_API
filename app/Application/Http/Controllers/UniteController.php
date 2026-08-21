@@ -13,9 +13,6 @@ class UniteController extends Controller
      */
     public function index()
     {
-        //TODO Change this to use an extra level of indirections for consistency ???
-        $unites = TypeUnite::all();
-
-        return response()->json(['data' => $unites]);
+        return response()->json(['data' => TypeUnite::all()]);
     }
 }

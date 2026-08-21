@@ -357,7 +357,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('exercices-absences/{exerciceComptableId}', [ExerciceController::class, 'absences']);
 
         // Convocations
-        Route::get('convocation/{id}', [ConvocationController::class, 'convoquer']);
+        Route::get('convocation/{id}', [ConvocationsController::class, 'convocationPdf']);
         Route::apiResource('convocation-param', ConvocationParamController::class)->only(['index', 'store']);
 
         // Statistiques
