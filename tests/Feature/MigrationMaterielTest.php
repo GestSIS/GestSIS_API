@@ -120,9 +120,13 @@ class MigrationMaterielTest extends TestCase
     {
         $type = $this->vehiculeType();
         $couleur = Couleur::factory()->create();
+        // Ancien emplacement de "stationnement" du véhicule, tel qu'existant avant
+        // cette fonctionnalité (le seeder d'origine mettait un emplacement_id sur
+        // chaque véhicule).
+        $ancienStationnement = Emplacement::factory()->create(['couleur_id' => $couleur->id]);
         $article = Article::factory()->create([
             'materiel_type_id' => $type->id,
-            'emplacement_id' => null,
+            'emplacement_id' => $ancienStationnement->id,
             'sapeur_id' => null,
             'designation' => 'Tonne-Pompe',
             'remarque' => 'Note véhicule',
@@ -142,6 +146,12 @@ class MigrationMaterielTest extends TestCase
             'article_id' => $article->id,
             'designation' => 'Tonne-Pompe',
             'remarque' => 'Note véhicule',
+        ]);
+        // L'ancien emplacement_id "de stationnement" doit être remis à null : un
+        // article est_emplacement ne range plus jamais son propre emplacement_id.
+        $this->assertDatabaseHas('articles', [
+            'id' => $article->id,
+            'emplacement_id' => null,
         ]);
     }
 

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Domaine\Business\ImputationBusiness;
+use App\Domaine\Business\Materiel\MaterielTypeBusiness;
 use App\Models\Article;
 use App\Models\AvsParam;
 use App\Models\Commune;
@@ -116,30 +117,39 @@ class DbsFix extends Command
             // correctif — c'est une référence stable. Si avs_total+ac_total du
             // décompte ≈ Σ Paiement.avs_ac, il n'a pas encore été corrigé (une seule
             // part) ; si ≈ 2×Σ Paiement.avs_ac, il l'a déjà été → on saute.
-            $fixed = 0;
-            $skipped = 0;
-            DB::transaction(function () use (&$fixed, &$skipped) {
-                foreach (
-                    Decompte::where('deduction', true)
-                        ->with('paiements')->cursor() as $decompte
-                ) {
-                    $sumAvsAc = (float) $decompte->paiements->sum('avs_ac');
-                    $currentCharge = (float) $decompte->avs_total + (float) $decompte->ac_total;
+            // $fixed = 0;
+            // $skipped = 0;
+            // DB::transaction(function () use (&$fixed, &$skipped) {
+            //     foreach (
+            //         Decompte::where('deduction', true)
+            //             ->with('paiements')->cursor() as $decompte
+            //     ) {
+            //         $sumAvsAc = (float) $decompte->paiements->sum('avs_ac');
+            //         $currentCharge = (float) $decompte->avs_total + (float) $decompte->ac_total;
 
-                    if ($sumAvsAc <= 0.0 || abs($currentCharge - $sumAvsAc) > 0.01) {
-                        // Pas de côtisations AVS/AC sur ce décompte, ou déjà à ~2x (corrigé)
-                        $skipped++;
-                        continue;
-                    }
+            //         if ($sumAvsAc <= 0.0 || abs($currentCharge - $sumAvsAc) > 0.01) {
+            //             // Pas de côtisations AVS/AC sur ce décompte, ou déjà à ~2x (corrigé)
+            //             $skipped++;
+            //             continue;
+            //         }
 
-                    $decompte->total += $decompte->avs_total + $decompte->ac_total;
-                    $decompte->avs_total *= 2;
-                    $decompte->ac_total *= 2;
-                    $decompte->save();
-                    $fixed++;
-                }
-            });
-            printf("  %d décompte(s) corrigé(s), %d ignoré(s) (déjà corrects)\n", $fixed, $skipped);
+            //         $decompte->total += $decompte->avs_total + $decompte->ac_total;
+            //         $decompte->avs_total *= 2;
+            //         $decompte->ac_total *= 2;
+            //         $decompte->save();
+            //         $fixed++;
+            //     }
+            // });
+            // printf("  %d décompte(s) corrigé(s), %d ignoré(s) (déjà corrects)\n", $fixed, $skipped);
+
+            // Fix 2026-08: est_emplacement n'est dérivé automatiquement de `type` que
+            // par MaterielTypeBusiness::createProduct/editProduct (nouveaux types ou
+            // types modifiés depuis l'ajout de la colonne) ; les materiel_types
+            // véhicule existants créés avant restent à false. Idempotent.
+            $typesVehiculeCorriges = MaterielType::where('type', MaterielTypeBusiness::TYPE_VEHICULE)
+                ->where('est_emplacement', false)
+                ->update(['est_emplacement' => true]);
+            printf("  %d materiel_type(s) véhicule corrigé(s) (est_emplacement)\n", $typesVehiculeCorriges);
 
             printf("\n");
         });

@@ -106,6 +106,12 @@ class MigrationMaterielController extends Controller
             'remarque' => $article->remarque,
         ]);
 
+        // Un article est_emplacement n'a pas son propre emplacement_id (sa position
+        // est portée par le parent_id de l'emplacement qu'il représente) ; un véhicule
+        // antérieur à cette fonctionnalité a encore l'ancien emplacement_id où il
+        // était "rangé".
+        $article->update(['emplacement_id' => null]);
+
         return response()->json(['data' => Article::with('emplacementRepresentee')->find($id)]);
     }
 }
