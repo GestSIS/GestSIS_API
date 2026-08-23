@@ -50,6 +50,10 @@ class MigrationMaterielController extends Controller
             'no_rue' => 'string|nullable',
             'localite_id' => 'integer|required',
         ]);
+        // Le middleware ConvertEmptyStringsToNull transforme les champs texte vides
+        // en null ; rue/no_rue sont NOT NULL (avec défaut '') en base.
+        $data['rue'] ??= '';
+        $data['no_rue'] ??= '';
 
         Hangar::create(['id' => $emplacement->id, ...$data]);
 

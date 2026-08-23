@@ -61,6 +61,30 @@ class MigrationMaterielTest extends TestCase
         ]);
     }
 
+    public function testTransformerEnHangarWithBlankRueDoesNotCrash(): void
+    {
+        // Régression : le middleware ConvertEmptyStringsToNull transforme une
+        // chaîne vide envoyée par le formulaire en null avant validation ; rue/no_rue
+        // sont NOT NULL en base (avec défaut '').
+        $couleur = Couleur::factory()->create();
+        $emplacement = Emplacement::factory()->create(['couleur_id' => $couleur->id]);
+        $localite = Localite::inRandomOrder()->first();
+
+        $response = $this->json('POST', "/api/v2/admin/migration/emplacements/{$emplacement->id}/hangar", [
+            'rue' => '',
+            'no_rue' => '',
+            'localite_id' => $localite->id,
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('hangars', [
+            'id' => $emplacement->id,
+            'rue' => '',
+            'no_rue' => '',
+            'localite_id' => $localite->id,
+        ]);
+    }
+
     public function testTransformerEnHangarRejectedWhenAlreadyHangar(): void
     {
         $couleur = Couleur::factory()->create();
