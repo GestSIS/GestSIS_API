@@ -52,4 +52,9 @@ class Article extends Model
     {
         return $this->hasMany(Lavage::class);
     }
+
+    public function emplacementRepresentee()
+    {
+        return $this->hasOne(Emplacement::class, 'article_id');
+    }
 }

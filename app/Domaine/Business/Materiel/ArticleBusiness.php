@@ -37,6 +37,14 @@ class ArticleBusiness
    */
   public static function retourArticles(int $emplacementId, string $date, array $articleIds): Collection
   {
+    $estEmplacement = Article::whereIn('articles.id', $articleIds)
+      ->join('materiel_types', 'materiel_types.id', '=', 'articles.materiel_type_id')
+      ->where('materiel_types.est_emplacement', true)
+      ->exists();
+    if ($estEmplacement) {
+      throw new ArrayException([], "Un véhicule ne peut pas être retourné dans un emplacement de cette manière");
+    }
+
     Article::whereIn('id', $articleIds)->update(['sapeur_id' => null, 'emplacement_id' => $emplacementId, 'retour' => $date]);
     return Article::whereIn('id', $articleIds)->get();
   }
@@ -80,15 +88,21 @@ class ArticleBusiness
     foreach ($articles as $article) {
       $article['sapeur_id'] ??= null;
       $article['emplacement_id'] ??= null;
+      $type = $indexedTypes[$article['materiel_type_id']];
 
+      // Un article qui est lui-même un emplacement (ex: véhicule) n'est ni attribué
+      // à un sapeur, ni rangé dans un emplacement classique : sa position est portée
+      // par le parent_id de l'emplacement qu'il représente.
       if (
-        ($article['sapeur_id'] === null && $article['emplacement_id'] === null) ||
-        ($article['sapeur_id'] !== null && $article['emplacement_id'] !== null)
+        !$type->est_emplacement &&
+        (
+          ($article['sapeur_id'] === null && $article['emplacement_id'] === null) ||
+          ($article['sapeur_id'] !== null && $article['emplacement_id'] !== null)
+        )
       ) {
         throw new ArrayException([], message: 'Certains articles sont à la fois assignés à un sapeur et à un emplacement');
       }
 
-      $type = $indexedTypes[$article['materiel_type_id']];
       if (!$type->est_attribuable && $article['sapeur_id'] !== null) {
         throw new ArrayException([], message: "Article de type '{$type->designation}' n'est pas attribuable");
       }
@@ -102,8 +116,8 @@ class ArticleBusiness
         'materiel_type_id' => $article['materiel_type_id'],
         'taille' => $type->est_taillee ? trim($article['taille'] ?? '') : '',
         'remarque' => $article['remarque'] ?? '',
-        'emplacement_id' => $article['emplacement_id'],
-        'sapeur_id' => $article['sapeur_id'] ?? null,
+        'emplacement_id' => $type->est_emplacement ? null : $article['emplacement_id'],
+        'sapeur_id' => $type->est_emplacement ? null : ($article['sapeur_id'] ?? null),
         'attribution' => ($article['sapeur_id'] ?? null) === null ? null : $article['attribution'],
         'retour' => null,
         'numero' => $type->est_numerote ? $article['numero'] : '',
@@ -115,10 +129,26 @@ class ArticleBusiness
         'chassis' => $article['chassis'] ?? '',
         'designation' => $article['designation'] ?? '',
         'immatriculation' => $article['immatriculation'] ?? '',
+        'emplacement' => $article['emplacement'] ?? null,
       ];
     })->flatMap(fn($article) => array_fill(0, $article['quantite'], $article))
       ->map(fn($article) => [...$article, 'uuid' => uniqid()])
-      ->map(fn($data) => Article::create($data))
+      ->map(function ($data) use ($indexedTypes) {
+        $emplacementData = $data['emplacement'];
+        unset($data['emplacement']);
+
+        $type = $indexedTypes[$data['materiel_type_id']];
+        if ($type->est_emplacement && ($emplacementData === null || ($emplacementData['couleur_id'] ?? null) === null)) {
+          throw new ArrayException([], "Une couleur est requise pour un article qui est aussi un emplacement");
+        }
+
+        $created = Article::create($data);
+        if ($type->est_emplacement) {
+          EmplacementBusiness::createEmplacementPourArticle($created, $emplacementData);
+        }
+
+        return $created->load('emplacementRepresentee');
+      })
       ->all();
   }
 
@@ -129,16 +159,42 @@ class ArticleBusiness
 
     // Controller qu'un article appartiennent soit à un sapeur soit à un emplacement
     $articles = collect($articles)->map(function ($article) use ($indexedTypes) {
+      $article['sapeur_id'] ??= null;
+      $article['emplacement_id'] ??= null;
+
+      $existant = Article::find($article['id']);
+      $oldType = $indexedTypes[$existant->materiel_type_id];
+
+      // Le type de matériel d'un article est verrouillé, sauf pour un article qui est
+      // lui-même un emplacement (ex: véhicule) : il peut alors changer pour un autre
+      // sous-type partageant le même discriminant (ex: un autre sous-type de véhicule).
+      if (isset($article['materiel_type_id']) && (int) $article['materiel_type_id'] !== $existant->materiel_type_id) {
+        if (!$oldType->est_emplacement) {
+          throw new ArrayException([], "Le type de matériel de cet article ne peut pas être modifié");
+        }
+        $newType = $indexedTypes[(int) $article['materiel_type_id']] ?? null;
+        if ($newType === null || $newType->type !== $oldType->type) {
+          throw new ArrayException([], "Le nouveau type doit être un autre sous-type de véhicule");
+        }
+        $article['materiel_type_id'] = (int) $article['materiel_type_id'];
+      } else {
+        $article['materiel_type_id'] = $existant->materiel_type_id;
+      }
+
+      $type = $indexedTypes[$article['materiel_type_id']];
+
+      // Un article qui est lui-même un emplacement (ex: véhicule) n'est ni attribué
+      // à un sapeur, ni rangé dans un emplacement classique.
       if (
-        ($article['sapeur_id'] === null && $article['emplacement_id'] === null) ||
-        ($article['sapeur_id'] !== null && $article['emplacement_id'] !== null)
+        !$type->est_emplacement &&
+        (
+          ($article['sapeur_id'] === null && $article['emplacement_id'] === null) ||
+          ($article['sapeur_id'] !== null && $article['emplacement_id'] !== null)
+        )
       ) {
         throw new ArrayException([], message: 'Certains articles sont à la fois assignés à un sapeur et à un emplacement');
       }
 
-      $existant = Article::find($article['id']);
-      $article['materiel_type_id'] = $existant->materiel_type_id;
-      $type = $indexedTypes[$existant->materiel_type_id];
       if (!$type->est_attribuable && $article['sapeur_id'] !== null) {
         throw new ArrayException([], message: "Article de type '{$type->designation}' n'est pas attribuable");
       }
@@ -150,10 +206,11 @@ class ArticleBusiness
       $type = $indexedTypes[$article['materiel_type_id']];
       return [
         'id' => $article['id'],
+        'materiel_type_id' => $article['materiel_type_id'],
         'taille' => $type->est_taillee ? trim($article['taille'] ?? '') : '',
         'remarque' => $article['remarque'] ?? '',
-        'emplacement_id' => $article['emplacement_id'],
-        'sapeur_id' => $article['sapeur_id'],
+        'emplacement_id' => $type->est_emplacement ? null : $article['emplacement_id'],
+        'sapeur_id' => $type->est_emplacement ? null : $article['sapeur_id'],
         'attribution' => $article['sapeur_id'] === null ? null : $article['attribution'],
         'retour' => null,
         'numero' => $type->est_numerote ? $article['numero'] : '',
@@ -165,17 +222,54 @@ class ArticleBusiness
         'designation' => $article['designation'] ?? '',
         'immatriculation' => $article['immatriculation'] ?? '',
         'statut' => $article['statut'] ?? true,
+        'emplacement' => $article['emplacement'] ?? null,
       ];
-    })->map(function ($article) {
-      Article::find($article['id'])->update($article);
+    })->map(function ($article) use ($indexedTypes) {
+      $emplacementData = $article['emplacement'];
+      unset($article['emplacement']);
+
+      $existing = Article::find($article['id']);
+      $type = $indexedTypes[$existing->materiel_type_id];
+      if ($type->est_emplacement && ($emplacementData === null || ($emplacementData['couleur_id'] ?? null) === null)) {
+        throw new ArrayException([], "Une couleur est requise pour un article qui est aussi un emplacement");
+      }
+      if ($type->est_emplacement && $existing->emplacementRepresentee === null) {
+        throw new ArrayException([], "Cet article n'a pas encore d'emplacement lié, utilisez l'outil de migration pour le créer");
+      }
+
+      $existing->update($article);
+
+      if ($type->est_emplacement) {
+        $existing->emplacementRepresentee->update([
+          'designation' => $existing->designation,
+          'remarque' => $existing->remarque,
+          'couleur_id' => $emplacementData['couleur_id'],
+          'parent_id' => $emplacementData['parent_id'] ?? null,
+          'est_etiquete' => $emplacementData['est_etiquete'] ?? false,
+          'est_compartimentable' => $emplacementData['est_compartimentable'] ?? false,
+        ]);
+      }
+      // TODO: synchroniser emplacementRepresentee->statut avec celui de l'article ?
+      // Laissé manuel pour le moment.
+
       return $article['id'];
     });
 
-    return Article::whereIn('id', $articles)->get();
+    return Article::whereIn('id', $articles)->with('emplacementRepresentee')->get();
   }
 
   public static function deleteArticles(array $articleIds): bool
   {
+    $emplacementsLies = Emplacement::whereIn('article_id', $articleIds)->get();
+    foreach ($emplacementsLies as $emplacement) {
+      if (Article::where('emplacement_id', $emplacement->id)->exists()) {
+        throw new ArrayException([], "Impossible de supprimer un véhicule tant que du matériel est rangé dans son emplacement");
+      }
+      if (Emplacement::where('parent_id', $emplacement->id)->exists()) {
+        throw new ArrayException([], "Impossible de supprimer un véhicule tant que son emplacement contient des sous-emplacements");
+      }
+    }
+    Emplacement::whereIn('id', $emplacementsLies->pluck('id'))->delete();
     return Article::whereIn('id', $articleIds)->delete();
   }
 
@@ -186,7 +280,7 @@ class ArticleBusiness
    */
   public static function getArticlesPourSapeur($sapeurId)
   {
-    return Article::where('sapeur_id', $sapeurId)->get();
+    return Article::where('sapeur_id', $sapeurId)->with(['emplacementRepresentee'])->get();
   }
 
   /**
@@ -198,6 +292,7 @@ class ArticleBusiness
     return Article::whereNull('sapeur_id')
       ->leftJoin('materiel_types', 'articles.materiel_type_id', '=', 'materiel_types.id')
       ->where('materiel_types.est_attribuable', true)
+      ->with(['emplacementRepresentee'])
       ->get(['articles.*']);
   }
 
@@ -209,6 +304,7 @@ class ArticleBusiness
   {
     return Article::leftJoin('materiel_types', 'articles.materiel_type_id', '=', 'materiel_types.id')
       ->where('materiel_types.est_lavable', true)
+      ->with(['emplacementRepresentee'])
       ->get(['articles.*']);
   }
 
@@ -218,7 +314,7 @@ class ArticleBusiness
    */
   public static function getAllArticles()
   {
-    return Article::all();
+    return Article::with(['emplacementRepresentee'])->get();
   }
 
   /**
@@ -228,7 +324,7 @@ class ArticleBusiness
    */
   public static function getArticlesParMaterielType($materielTypeId)
   {
-    return Article::where('materiel_type_id', $materielTypeId)->with(['lavages'])->get();
+    return Article::where('materiel_type_id', $materielTypeId)->with(['lavages', 'emplacementRepresentee'])->get();
   }
 
   /**

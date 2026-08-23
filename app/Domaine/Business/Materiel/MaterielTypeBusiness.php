@@ -55,6 +55,13 @@ class MaterielTypeBusiness // extends OrderModel
     $product['remarque'] ??= '';
     $product['prefix'] ??= '';
     $product['type'] = (int) $product['type'];
+    $product['est_emplacement'] = $product['type'] === self::TYPE_VEHICULE;
+    if ($product['est_emplacement']) {
+      // Un véhicule n'est ni attribuable à un sapeur, ni suivi en lavages, ni taillé.
+      $product['est_attribuable'] = false;
+      $product['est_lavable'] = false;
+      $product['est_taillee'] = false;
+    }
 
     $order = DB::table('materiel_types')->max('id');
 
@@ -91,6 +98,13 @@ class MaterielTypeBusiness // extends OrderModel
     $data['remarque'] ??= '';
     $data['prefix'] ??= '';
     $data['type'] = (int) $data['type'];
+    $data['est_emplacement'] = $data['type'] === self::TYPE_VEHICULE;
+    if ($data['est_emplacement']) {
+      // Un véhicule n'est ni attribuable à un sapeur, ni suivi en lavages, ni taillé.
+      $data['est_attribuable'] = false;
+      $data['est_lavable'] = false;
+      $data['est_taillee'] = false;
+    }
 
     $tuyau = $data['tuyau'] ?? null;
     unset($data['tuyau']);
@@ -100,7 +114,7 @@ class MaterielTypeBusiness // extends OrderModel
     $oldType = (int) MaterielType::find($id)->type;
     if (
       $oldType === self::TYPE_VEHICULE && $data['type'] !== self::TYPE_VEHICULE &&
-      InterventionVehicule::join('articles', 'articles.id', '=', 'intervention_vehicules.vehicule_id')
+      InterventionVehicule::join('articles', 'articles.id', '=', 'intervention_vehicule.vehicule_id')
         ->where('articles.materiel_type_id', $id)
         ->exists()
     ) {

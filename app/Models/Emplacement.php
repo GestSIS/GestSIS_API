@@ -18,6 +18,7 @@ class Emplacement extends Model
         'impression_inventaire',
         'couleur_id',
         'parent_id',
+        'article_id',
         'statut'
     ];
     protected function casts(): array
@@ -29,7 +30,18 @@ class Emplacement extends Model
             'est_etiquete' => 'boolean',
             'est_compartimentable' => 'boolean',
             'couleur_id' => 'integer',
-            'parent_id' => 'integer'
+            'parent_id' => 'integer',
+            'article_id' => 'integer'
         ];
+    }
+
+    public function article()
+    {
+        return $this->belongsTo(Article::class);
+    }
+
+    public function hangar()
+    {
+        return $this->belongsTo(Hangar::class, 'id');
     }
 }

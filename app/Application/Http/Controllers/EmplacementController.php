@@ -30,6 +30,9 @@ class EmplacementController extends Controller
             'couleur_id' => 'integer|min:1|required',
             'parent_id' => 'integer|nullable',
             'statut' => 'boolean|required',
+            'hangar.rue' => 'string|nullable',
+            'hangar.no_rue' => 'string|nullable',
+            'hangar.localite_id' => 'integer|required_with:hangar',
         ]);
 
         $emplacement = EmplacementBusiness::createEmplacement($data);
@@ -48,6 +51,9 @@ class EmplacementController extends Controller
             'couleur_id' => 'integer|min:1|required',
             'parent_id' => 'integer|nullable',
             'statut' => 'boolean|required',
+            'hangar.rue' => 'string|nullable',
+            'hangar.no_rue' => 'string|nullable',
+            'hangar.localite_id' => 'integer|required_with:hangar',
         ]);
 
         $emplacement = EmplacementBusiness::editEmplacement($id, $data);

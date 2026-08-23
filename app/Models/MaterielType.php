@@ -12,6 +12,8 @@ class MaterielType extends Model
     protected $fillable = [
         'designation',
         'materiel_categorie_id',
+        'type',
+        'est_emplacement',
         'est_numerote',
         'est_attribuable',
         'est_taillee',
@@ -30,6 +32,7 @@ class MaterielType extends Model
             'materiel_categorie_id' => 'integer',
             'fonction_id' => 'integer',
             'type' => 'integer',
+            'est_emplacement' => 'boolean',
             'est_numerote' => 'boolean',
             'est_attribuable' => 'boolean',
             'est_taillee' => 'boolean',

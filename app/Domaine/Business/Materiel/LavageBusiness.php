@@ -22,7 +22,7 @@ class LavageBusiness
    */
   public static function getAllLavages()
   {
-    return Lavage::with(['article', 'article.lavages'])
+    return Lavage::with(['article', 'article.lavages', 'article.emplacementRepresentee'])
       ->orderByDesc('date')
       ->get();
   }

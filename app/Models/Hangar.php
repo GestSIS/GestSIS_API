@@ -6,7 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Hangar extends Model
 {
+    public $incrementing = false;
+
     protected $fillable = [
+        'id',
         'rue',
         'no_rue',
         'localite_id'

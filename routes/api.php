@@ -14,6 +14,7 @@
 use App\Application\Http\Controllers\AbsenceController;
 use App\Application\Http\Controllers\AbsenceParamController;
 use App\Application\Http\Controllers\AdminController;
+use App\Application\Http\Controllers\Admin\MigrationMaterielController;
 use App\Application\Http\Controllers\ArticleController;
 use App\Application\Http\Controllers\ArticleEmplacementController;
 use App\Application\Http\Controllers\ArticleSapeurController;
@@ -716,6 +717,13 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::apiResource('materiel-types', MaterielTypeController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('batterie-types', BatterieTypeController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('tuyau-diametres', TuyauDiametreController::class)->only(['store', 'update', 'destroy']);
+
+        // TEMPORAIRE : routes de migration article-emplacement (véhicules/hangars).
+        // À supprimer une fois la migration des données existantes terminée.
+        Route::get('admin/migration/emplacements-sans-hangar', [MigrationMaterielController::class, 'emplacementsSansHangar']);
+        Route::post('admin/migration/emplacements/{id}/hangar', [MigrationMaterielController::class, 'transformerEnHangar']);
+        Route::get('admin/migration/vehicules-sans-emplacement', [MigrationMaterielController::class, 'vehiculesSansEmplacement']);
+        Route::post('admin/migration/articles/{id}/emplacement', [MigrationMaterielController::class, 'lierEmplacement']);
     });
 
     // TODO: Ajouter route type d'unité

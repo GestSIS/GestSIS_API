@@ -44,13 +44,17 @@ class ArticleController extends Controller
             'articles.*.numero' => 'string|nullable',
             'articles.*.est_etiquete' => 'boolean',
             'articles.*.achat' => 'string|nullable',
-            'articles.*.sapeur_id' => 'required_if:emplacement_id,null',
+            'articles.*.sapeur_id' => 'integer|nullable',
             'articles.*.attribution' => 'required_unless:sapeur_id,null',
-            'articles.*.emplacement_id' => 'required_if:sapeur_id,null',
+            'articles.*.emplacement_id' => 'integer|nullable',
             'articles.*.compartiment' => 'string|nullable',
             'articles.*.chassis' => 'string|nullable',
             'articles.*.designation' => 'string|nullable',
             'articles.*.immatriculation' => 'string|nullable',
+            'articles.*.emplacement.couleur_id' => 'integer|nullable',
+            'articles.*.emplacement.parent_id' => 'integer|nullable',
+            'articles.*.emplacement.est_etiquete' => 'boolean|nullable',
+            'articles.*.emplacement.est_compartimentable' => 'boolean|nullable',
         ]);
 
         $materiels = ArticleBusiness::creerArticles($data['articles']);
@@ -64,19 +68,24 @@ class ArticleController extends Controller
     {
         $data = $request->validate([
             'articles.*.id' => 'required|integer',
+            'articles.*.materiel_type_id' => 'integer|nullable',
             'articles.*.taille' => 'string|nullable',
             'articles.*.remarque' => 'string|nullable',
             'articles.*.numero' => 'string|nullable',
             'articles.*.est_etiquete' => 'boolean',
             'articles.*.achat' => 'string|nullable',
-            'articles.*.sapeur_id' => 'required_if:emplacement_id,null',
+            'articles.*.sapeur_id' => 'integer|nullable',
             'articles.*.attribution' => 'required_unless:sapeur_id,null',
-            'articles.*.emplacement_id' => 'required_if:sapeur_id,null',
+            'articles.*.emplacement_id' => 'integer|nullable',
             'articles.*.compartiment' => 'string|nullable',
             'articles.*.chassis' => 'string|nullable',
             'articles.*.designation' => 'string|nullable',
             'articles.*.immatriculation' => 'string|nullable',
             'articles.*.statut' => 'boolean|nullable',
+            'articles.*.emplacement.couleur_id' => 'integer|nullable',
+            'articles.*.emplacement.parent_id' => 'integer|nullable',
+            'articles.*.emplacement.est_etiquete' => 'boolean|nullable',
+            'articles.*.emplacement.est_compartimentable' => 'boolean|nullable',
         ]);
 
         $articles = ArticleBusiness::editArticles($data['articles']);
