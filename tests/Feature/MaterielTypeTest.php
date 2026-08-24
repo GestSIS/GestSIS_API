@@ -32,6 +32,7 @@ class MaterielTypeTest extends TestCase
             'est_attribuable' => false,
             'est_taillee' => false,
             'est_lavable' => false,
+            'a_batterie' => false,
         ], $extra);
     }
 
@@ -54,13 +55,16 @@ class MaterielTypeTest extends TestCase
         ]);
     }
 
-    public function testStoreCastsTypeSentAsStringSoBatterieBranchTriggers(): void
+    public function testStoreABatterieTrueCreatesBatterieRowRegardlessOfType(): void
     {
         $batterieType = BatterieType::firstOrCreate(['nom' => 'AA']);
 
-        // type envoyé en string "2" : sans cast la comparaison stricte === TYPE_BATTERY échouerait
-        $payload = $this->basePayload(MaterielTypeBusiness::TYPE_BATTERY, [
-            'type' => (string) MaterielTypeBusiness::TYPE_BATTERY,
+        // type envoyé en string "0" : sans cast, la comparaison stricte === TYPE_VEHICULE
+        // (pour est_emplacement) échouerait déjà ; ici on garde la même couverture du cast
+        // tout en vérifiant que la création de la ligne batterie dépend de a_batterie, pas de type.
+        $payload = $this->basePayload(MaterielTypeBusiness::TYPE_NONE, [
+            'type' => (string) MaterielTypeBusiness::TYPE_NONE,
+            'a_batterie' => true,
             'batterie' => ['nombre' => 3, 'batterie_type_id' => $batterieType->id],
         ]);
 
@@ -75,6 +79,31 @@ class MaterielTypeTest extends TestCase
         ]);
     }
 
+    public function testVehiculeTypeCanAlsoHaveABatterie(): void
+    {
+        $batterieType = BatterieType::firstOrCreate(['nom' => 'Demarrage']);
+
+        $payload = $this->basePayload(MaterielTypeBusiness::TYPE_VEHICULE, [
+            'a_batterie' => true,
+            'batterie' => ['nombre' => 1, 'batterie_type_id' => $batterieType->id],
+        ]);
+
+        $response = $this->json('POST', '/api/v2/materiel-types', $payload, ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $id = $response->json('data.id');
+        $this->assertDatabaseHas('materiel_types', [
+            'id' => $id,
+            'est_emplacement' => true,
+            'a_batterie' => true,
+        ]);
+        $this->assertDatabaseHas('materiel_type_batteries', [
+            'id' => $id,
+            'nombre' => 1,
+            'batterie_type_id' => $batterieType->id,
+        ]);
+    }
+
     public function testUpdateBatterieTypeTwiceDoesNotDuplicateRow(): void
     {
         $batterieType = BatterieType::firstOrCreate(['nom' => 'AAA']);
@@ -85,11 +114,12 @@ class MaterielTypeTest extends TestCase
         $payload = [
             'designation' => 'Lampe',
             'materiel_categorie_id' => $type->materiel_categorie_id,
-            'type' => MaterielTypeBusiness::TYPE_BATTERY,
+            'type' => MaterielTypeBusiness::TYPE_NONE,
             'est_numerote' => false,
             'est_attribuable' => false,
             'est_taillee' => false,
             'est_lavable' => false,
+            'a_batterie' => true,
             'batterie' => ['nombre' => 2, 'batterie_type_id' => $batterieType->id],
         ];
 
@@ -101,6 +131,34 @@ class MaterielTypeTest extends TestCase
         // updateOrCreate : une seule ligne, mise à jour (pas de doublon comme avec insert())
         $this->assertSame(1, MaterielType::find($type->id)->batterie()->count());
         $this->assertDatabaseHas('materiel_type_batteries', ['id' => $type->id, 'nombre' => 5]);
+    }
+
+    public function testDisablingABatterieDeletesBatterieRow(): void
+    {
+        $batterieType = BatterieType::firstOrCreate(['nom' => 'CR2032']);
+        $type = MaterielType::factory()->create([
+            'materiel_categorie_id' => MaterielCategorie::factory()->create()->id,
+        ]);
+
+        $payload = [
+            'designation' => $type->designation,
+            'materiel_categorie_id' => $type->materiel_categorie_id,
+            'type' => MaterielTypeBusiness::TYPE_NONE,
+            'est_numerote' => false,
+            'est_attribuable' => false,
+            'est_taillee' => false,
+            'est_lavable' => false,
+            'a_batterie' => true,
+            'batterie' => ['nombre' => 1, 'batterie_type_id' => $batterieType->id],
+        ];
+        $this->json('PUT', "/api/v2/materiel-types/{$type->id}", $payload, ['Sis-Key' => 1])->assertStatus(200);
+        $this->assertDatabaseHas('materiel_type_batteries', ['id' => $type->id]);
+
+        $this->json('PUT', "/api/v2/materiel-types/{$type->id}", array_merge($payload, [
+            'a_batterie' => false,
+        ]), ['Sis-Key' => 1])->assertStatus(200);
+
+        $this->assertDatabaseMissing('materiel_type_batteries', ['id' => $type->id]);
     }
 
     public function testStoreVehiculeTypePersistsTypeAndEstEmplacementImmediately(): void
@@ -156,6 +214,7 @@ class MaterielTypeTest extends TestCase
             'est_attribuable' => true,
             'est_taillee' => true,
             'est_lavable' => true,
+            'a_batterie' => false,
         ];
 
         $response = $this->json('PUT', "/api/v2/materiel-types/{$type->id}", $payload, ['Sis-Key' => 1]);
@@ -205,6 +264,7 @@ class MaterielTypeTest extends TestCase
             'est_attribuable' => false,
             'est_taillee' => false,
             'est_lavable' => false,
+            'a_batterie' => false,
         ];
 
         $response = $this->json('PUT', "/api/v2/materiel-types/{$type->id}", $payload, ['Sis-Key' => 1]);

@@ -29,7 +29,7 @@ class MaterielTypeBusiness // extends OrderModel
 
   const TYPE_NONE = 0;
   const TYPE_PIPE = 1;
-  const TYPE_BATTERY = 2;
+  // 2 = ancien TYPE_BATTERY, retiré (migré vers la propriété a_batterie), ne pas réutiliser
   const TYPE_VEHICULE = 3;
   const TYPE_HANGAR = 4;
 
@@ -78,7 +78,7 @@ class MaterielTypeBusiness // extends OrderModel
     if ($product['type'] === self::TYPE_PIPE && $tuyau) {
       MaterielTypeTuyau::create(['id' => $type->id, ...$tuyau]);
     }
-    if ($product['type'] === self::TYPE_BATTERY && $batterie) {
+    if (($product['a_batterie'] ?? false) && $batterie) {
       MaterielTypeBatterie::create(['id' => $type->id, ...$batterie]);
     }
 
@@ -130,7 +130,7 @@ class MaterielTypeBusiness // extends OrderModel
     } else {
       MaterielTypeTuyau::whereId($id)->delete();
     }
-    if ($data['type'] === self::TYPE_BATTERY && $batterie) {
+    if (($data['a_batterie'] ?? false) && $batterie) {
       MaterielTypeBatterie::updateOrCreate(['id' => $id], $batterie);
     } else {
       MaterielTypeBatterie::whereId($id)->delete();

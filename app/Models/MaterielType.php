@@ -18,6 +18,7 @@ class MaterielType extends Model
         'est_attribuable',
         'est_taillee',
         'est_lavable',
+        'a_batterie',
         'prix',
         'fournisseur',
         'reparateur',
@@ -37,6 +38,7 @@ class MaterielType extends Model
             'est_attribuable' => 'boolean',
             'est_taillee' => 'boolean',
             'est_lavable' => 'boolean',
+            'a_batterie' => 'boolean',
             'a_controller' => 'boolean',
         ];
     }
