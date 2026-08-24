@@ -50,6 +50,7 @@ class MaterielTypeBusiness // extends OrderModel
   public static function createProduct($product)
   {
     $product['fournisseur'] ??= '';
+    $product['numero_fournisseur'] ??= '';
     $product['prix'] ??= '';
     $product['reparateur'] ??= '';
     $product['remarque'] ??= '';
@@ -93,6 +94,7 @@ class MaterielTypeBusiness // extends OrderModel
   public static function editProduct($id, $data)
   {
     $data['fournisseur'] ??= '';
+    $data['numero_fournisseur'] ??= '';
     $data['prix'] ??= '';
     $data['reparateur'] ??= '';
     $data['remarque'] ??= '';

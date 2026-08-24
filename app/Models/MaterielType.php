@@ -21,6 +21,7 @@ class MaterielType extends Model
         'a_batterie',
         'prix',
         'fournisseur',
+        'numero_fournisseur',
         'reparateur',
         'a_controller',
         'remarque',
