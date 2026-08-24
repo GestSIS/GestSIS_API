@@ -724,6 +724,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('admin/migration/emplacements/{id}/hangar', [MigrationMaterielController::class, 'transformerEnHangar']);
         Route::get('admin/migration/vehicules-sans-emplacement', [MigrationMaterielController::class, 'vehiculesSansEmplacement']);
         Route::post('admin/migration/articles/{id}/emplacement', [MigrationMaterielController::class, 'lierEmplacement']);
+        Route::post('admin/migration/emplacements/{id}/vehicule', [MigrationMaterielController::class, 'convertirEnVehicule']);
     });
 
     // TODO: Ajouter route type d'unité

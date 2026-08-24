@@ -201,4 +201,87 @@ class MigrationMaterielTest extends TestCase
         $response->assertJsonStructure(['error']);
         $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'article_id' => null]);
     }
+
+    public function testConvertirEnVehiculeCreeUnNouvelArticle(): void
+    {
+        $type = $this->vehiculeType();
+        $couleur = Couleur::factory()->create();
+        $emplacement = Emplacement::factory()->create([
+            'couleur_id' => $couleur->id,
+            'designation' => 'Ancien Camion',
+            'remarque' => 'Note',
+        ]);
+
+        $response = $this->json('POST', "/api/v2/admin/migration/emplacements/{$emplacement->id}/vehicule", [
+            'materiel_type_id' => $type->id,
+            'immatriculation' => 'JU 12345',
+            'chassis' => 'CH123',
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $articleId = $response->json('data.article_id');
+        $this->assertNotNull($articleId);
+        $this->assertDatabaseHas('articles', [
+            'id' => $articleId,
+            'materiel_type_id' => $type->id,
+            'designation' => 'Ancien Camion',
+            'remarque' => 'Note',
+            'immatriculation' => 'JU 12345',
+            'chassis' => 'CH123',
+            'emplacement_id' => null,
+            'sapeur_id' => null,
+        ]);
+        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'article_id' => $articleId]);
+    }
+
+    public function testConvertirEnVehiculeWithBlankFieldsDoesNotCrash(): void
+    {
+        $type = $this->vehiculeType();
+        $couleur = Couleur::factory()->create();
+        $emplacement = Emplacement::factory()->create(['couleur_id' => $couleur->id]);
+
+        $response = $this->json('POST', "/api/v2/admin/migration/emplacements/{$emplacement->id}/vehicule", [
+            'materiel_type_id' => $type->id,
+            'immatriculation' => '',
+            'chassis' => '',
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $articleId = $response->json('data.article_id');
+        $this->assertDatabaseHas('articles', [
+            'id' => $articleId,
+            'immatriculation' => '',
+            'chassis' => '',
+        ]);
+    }
+
+    public function testConvertirEnVehiculeRejectedWhenEmplacementAlreadyLinked(): void
+    {
+        $type = $this->vehiculeType();
+        $couleur = Couleur::factory()->create();
+        $autreArticle = Article::factory()->create(['emplacement_id' => null, 'sapeur_id' => null]);
+        $emplacement = Emplacement::factory()->create(['couleur_id' => $couleur->id, 'article_id' => $autreArticle->id]);
+
+        $response = $this->json('POST', "/api/v2/admin/migration/emplacements/{$emplacement->id}/vehicule", [
+            'materiel_type_id' => $type->id,
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure(['error']);
+    }
+
+    public function testConvertirEnVehiculeRejectedWhenTypeIsNotEstEmplacement(): void
+    {
+        $typeStandard = MaterielType::factory()->create();
+        $couleur = Couleur::factory()->create();
+        $emplacement = Emplacement::factory()->create(['couleur_id' => $couleur->id]);
+
+        $response = $this->json('POST', "/api/v2/admin/migration/emplacements/{$emplacement->id}/vehicule", [
+            'materiel_type_id' => $typeStandard->id,
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure(['error']);
+        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'article_id' => null]);
+    }
 }

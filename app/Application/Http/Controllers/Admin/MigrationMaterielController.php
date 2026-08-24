@@ -114,4 +114,48 @@ class MigrationMaterielController extends Controller
 
         return response()->json(['data' => Article::with('emplacementRepresentee')->find($id)]);
     }
+
+    /**
+     * Crée un nouvel article véhicule à partir d'un emplacement existant sans
+     * article (ex: un véhicule dont seul l'emplacement a été historiquement suivi,
+     * sans fiche article correspondante).
+     */
+    public function convertirEnVehicule(Request $request, $id)
+    {
+        $emplacement = Emplacement::findOrFail($id);
+        if ($emplacement->article_id !== null) {
+            throw new ArrayException([], "Cet emplacement est déjà lié à un article");
+        }
+
+        $data = $request->validate([
+            'materiel_type_id' => 'integer|required',
+            'immatriculation' => 'string|nullable',
+            'chassis' => 'string|nullable',
+        ]);
+        // Le middleware ConvertEmptyStringsToNull transforme les champs texte vides
+        // en null ; immatriculation/chassis sont NOT NULL (avec défaut '') en base.
+        $data['immatriculation'] ??= '';
+        $data['chassis'] ??= '';
+
+        $type = MaterielType::findOrFail($data['materiel_type_id']);
+        if (!$type->est_emplacement) {
+            throw new ArrayException([], "Ce type de matériel ne représente pas un emplacement");
+        }
+
+        $article = Article::create([
+            'materiel_type_id' => $type->id,
+            'uuid' => uniqid(),
+            'designation' => $emplacement->designation,
+            'remarque' => $emplacement->remarque,
+            'immatriculation' => $data['immatriculation'],
+            'chassis' => $data['chassis'],
+            'emplacement_id' => null,
+            'sapeur_id' => null,
+            'statut' => true,
+        ]);
+
+        $emplacement->update(['article_id' => $article->id]);
+
+        return response()->json(['data' => Emplacement::with(['article', 'hangar'])->find($id)]);
+    }
 }
