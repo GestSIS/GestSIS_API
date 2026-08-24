@@ -370,4 +370,42 @@ class ArticleTest extends TestCase
         $response->assertJsonStructure(['error']);
         $this->assertDatabaseHas('articles', ['id' => $article->id, 'emplacement_id' => null]);
     }
+
+    public function testGetArticlesParEmplacementIncludesSousEmplacements(): void
+    {
+        $parent = Emplacement::factory()->create();
+        $enfant = Emplacement::factory()->create(['parent_id' => $parent->id]);
+        $petitEnfant = Emplacement::factory()->create(['parent_id' => $enfant->id]);
+        $autre = Emplacement::factory()->create();
+
+        $articleDirect = Article::factory()->create(['emplacement_id' => $parent->id, 'sapeur_id' => null]);
+        $articleEnfant = Article::factory()->create(['emplacement_id' => $enfant->id, 'sapeur_id' => null]);
+        $articlePetitEnfant = Article::factory()->create(['emplacement_id' => $petitEnfant->id, 'sapeur_id' => null]);
+        $articleAutre = Article::factory()->create(['emplacement_id' => $autre->id, 'sapeur_id' => null]);
+
+        $response = $this->json('GET', "/api/v2/emplacements/{$parent->id}/articles", [], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $ids = collect($response->json('data'))->pluck('id');
+        $this->assertTrue($ids->contains($articleDirect->id));
+        $this->assertTrue($ids->contains($articleEnfant->id));
+        $this->assertTrue($ids->contains($articlePetitEnfant->id));
+        $this->assertFalse($ids->contains($articleAutre->id));
+    }
+
+    public function testGetArticlesParEmplacementForLeafEmplacementReturnsOnlyItsOwn(): void
+    {
+        $parent = Emplacement::factory()->create();
+        $enfant = Emplacement::factory()->create(['parent_id' => $parent->id]);
+
+        $articleParent = Article::factory()->create(['emplacement_id' => $parent->id, 'sapeur_id' => null]);
+        $articleEnfant = Article::factory()->create(['emplacement_id' => $enfant->id, 'sapeur_id' => null]);
+
+        $response = $this->json('GET', "/api/v2/emplacements/{$enfant->id}/articles", [], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $ids = collect($response->json('data'))->pluck('id');
+        $this->assertTrue($ids->contains($articleEnfant->id));
+        $this->assertFalse($ids->contains($articleParent->id));
+    }
 }

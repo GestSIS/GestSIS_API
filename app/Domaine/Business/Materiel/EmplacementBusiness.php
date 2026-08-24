@@ -91,6 +91,27 @@ class EmplacementBusiness
   }
 
   /**
+   * Ids de l'emplacement $id et de tous ses descendants (récursif via parent_id).
+   * @return int[]
+   */
+  public static function descendantIds(int $id): array
+  {
+    $childrenByParent = Emplacement::all(['id', 'parent_id'])->groupBy('parent_id');
+
+    $ids = [$id];
+    $queue = [$id];
+    while (!empty($queue)) {
+      $currentId = array_shift($queue);
+      foreach ($childrenByParent->get($currentId, collect()) as $child) {
+        $ids[] = $child->id;
+        $queue[] = $child->id;
+      }
+    }
+
+    return $ids;
+  }
+
+  /**
    * Vérifie qu'attribuer $newParentId comme parent de l'emplacement $id ne créerait
    * pas de cycle dans la hiérarchie (un emplacement ne peut pas être son propre
    * ancêtre, directement ou via une chaîne de parent_id).

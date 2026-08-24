@@ -337,12 +337,7 @@ class ArticleBusiness
    */
   public static function getArticlesParEmplacement($locationId)
   {
-    // TODO: Améliorer pour afficher également tout les sous emplacements.
-    Emplacement::all();
-    // TODO: Index emplacements O(n)
-
-    $emplacementIds = [$locationId];
-    // Iterate over emplacements O(n)
+    $emplacementIds = EmplacementBusiness::descendantIds((int) $locationId);
 
     return Article::whereIn('emplacement_id', $emplacementIds)->with(['lavages'])->get();
   }
