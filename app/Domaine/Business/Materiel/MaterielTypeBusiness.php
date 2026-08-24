@@ -136,15 +136,6 @@ class MaterielTypeBusiness // extends OrderModel
       MaterielTypeBatterie::whereId($id)->delete();
     }
 
-    // Gestion du changement de type en cas de véhicule
-
-    // TODO: Avant release
-    // if ($data['type'] === self::TYPE_VEHICULE) {
-    //   MaterielTypeBatterie::insert(['id' => $id, ...$batterie]);
-    // } else {
-    //   MaterielTypeBatterie::whereId($id)->delete();
-    // }
-
     return MaterielType::with(['tuyau', 'batterie'])->find($id);
   }
 
