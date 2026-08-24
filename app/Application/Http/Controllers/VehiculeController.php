@@ -11,6 +11,7 @@ class VehiculeController extends Controller
     {
         $vehicules = Article::join('materiel_types', 'articles.materiel_type_id', '=', 'materiel_types.id')
             ->where('materiel_types.type', '=', MaterielTypeBusiness::TYPE_VEHICULE)
+            ->with('emplacementRepresentee')
             ->get(['articles.*']);
 
         return response()->json(['data' => $vehicules]);
