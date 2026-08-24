@@ -192,6 +192,35 @@ class ArticleTest extends TestCase
         ]);
     }
 
+    public function testEditVehiculeArticleCannotSetOwnEmplacementAsItsOwnParent(): void
+    {
+        $type = $this->vehiculeType();
+        $couleur = Couleur::factory()->create();
+        $article = Article::factory()->create([
+            'materiel_type_id' => $type->id,
+            'emplacement_id' => null,
+            'sapeur_id' => null,
+        ]);
+        $emplacement = Emplacement::factory()->create([
+            'article_id' => $article->id,
+            'couleur_id' => $couleur->id,
+        ]);
+
+        $response = $this->json('PUT', '/api/v2/articles', [
+            'articles' => [[
+                'id' => $article->id,
+                'emplacement' => [
+                    'couleur_id' => $couleur->id,
+                    'parent_id' => $emplacement->id,
+                ],
+            ]],
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure(['error']);
+        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'parent_id' => null]);
+    }
+
     public function testChangeVehiculeArticleTypeToAnotherVehiculeSousTypeIsAllowed(): void
     {
         $type = $this->vehiculeType();

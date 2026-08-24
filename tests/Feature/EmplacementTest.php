@@ -148,6 +148,49 @@ class EmplacementTest extends TestCase
         ]);
     }
 
+    public function testStoreEmplacementWithBlankHangarRueDoesNotCrash(): void
+    {
+        // Régression : le middleware ConvertEmptyStringsToNull transforme une
+        // chaîne vide envoyée par le formulaire en null avant validation ; rue/no_rue
+        // sont NOT NULL en base (avec défaut '').
+        $localite = Localite::inRandomOrder()->first();
+
+        $payload = $this->basePayload([
+            'hangar' => ['rue' => '', 'no_rue' => '', 'localite_id' => $localite->id],
+        ]);
+
+        $response = $this->json('POST', '/api/v2/emplacements', $payload, ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('hangars', [
+            'id' => $response->json('data.id'),
+            'rue' => '',
+            'no_rue' => '',
+            'localite_id' => $localite->id,
+        ]);
+    }
+
+    public function testUpdateEmplacementWithBlankHangarRueDoesNotCrash(): void
+    {
+        $couleur = Couleur::factory()->create();
+        $emplacement = Emplacement::factory()->create(['couleur_id' => $couleur->id]);
+        $localite = Localite::inRandomOrder()->first();
+
+        $payload = $this->basePayload([
+            'couleur_id' => $couleur->id,
+            'hangar' => ['rue' => '', 'no_rue' => '', 'localite_id' => $localite->id],
+        ]);
+
+        $response = $this->json('PUT', "/api/v2/emplacements/{$emplacement->id}", $payload, ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('hangars', [
+            'id' => $emplacement->id,
+            'rue' => '',
+            'no_rue' => '',
+        ]);
+    }
+
     public function testUpdateEmplacementWithoutHangarKeyDoesNotEraseExistingHangar(): void
     {
         $couleur = Couleur::factory()->create();
@@ -162,6 +205,36 @@ class EmplacementTest extends TestCase
 
         $response->assertStatus(200);
         $this->assertDatabaseHas('hangars', ['id' => $emplacement->id, 'rue' => 'Rue existante']);
+    }
+
+    public function testCannotSetEmplacementAsItsOwnParent(): void
+    {
+        $couleur = Couleur::factory()->create();
+        $emplacement = Emplacement::factory()->create(['couleur_id' => $couleur->id]);
+
+        $payload = $this->basePayload(['couleur_id' => $couleur->id, 'parent_id' => $emplacement->id]);
+
+        $response = $this->json('PUT', "/api/v2/emplacements/{$emplacement->id}", $payload, ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure(['error']);
+        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'parent_id' => null]);
+    }
+
+    public function testCannotCreateIndirectCycleInEmplacementHierarchy(): void
+    {
+        $couleur = Couleur::factory()->create();
+        // A est parent de B ; tenter de mettre A sous B créerait un cycle A -> B -> A.
+        $a = Emplacement::factory()->create(['couleur_id' => $couleur->id]);
+        $b = Emplacement::factory()->create(['couleur_id' => $couleur->id, 'parent_id' => $a->id]);
+
+        $payload = $this->basePayload(['couleur_id' => $couleur->id, 'parent_id' => $b->id]);
+
+        $response = $this->json('PUT', "/api/v2/emplacements/{$a->id}", $payload, ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure(['error']);
+        $this->assertDatabaseHas('emplacements', ['id' => $a->id, 'parent_id' => null]);
     }
 
     public function testDeleteEmplacementCascadesToHangarRow(): void

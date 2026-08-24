@@ -240,11 +240,14 @@ class ArticleBusiness
       $existing->update($article);
 
       if ($type->est_emplacement) {
-        $existing->emplacementRepresentee->update([
+        $emplacementRepresentee = $existing->emplacementRepresentee;
+        $nouveauParentId = $emplacementData['parent_id'] ?? null;
+        EmplacementBusiness::assertNoCycle($emplacementRepresentee->id, $nouveauParentId);
+        $emplacementRepresentee->update([
           'designation' => $existing->designation,
           'remarque' => $existing->remarque,
           'couleur_id' => $emplacementData['couleur_id'],
-          'parent_id' => $emplacementData['parent_id'] ?? null,
+          'parent_id' => $nouveauParentId,
           'est_etiquete' => $emplacementData['est_etiquete'] ?? false,
           'est_compartimentable' => $emplacementData['est_compartimentable'] ?? false,
         ]);

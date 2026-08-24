@@ -59,6 +59,10 @@ class EmplacementBusiness
     $created = Emplacement::create($emplacement);
 
     if ($hangar !== null) {
+      // Le middleware ConvertEmptyStringsToNull transforme les champs texte vides
+      // en null ; rue/no_rue sont NOT NULL (avec défaut '') en base.
+      $hangar['rue'] ??= '';
+      $hangar['no_rue'] ??= '';
       Hangar::create(['id' => $created->id, ...$hangar]);
     }
 
@@ -87,6 +91,22 @@ class EmplacementBusiness
   }
 
   /**
+   * Vérifie qu'attribuer $newParentId comme parent de l'emplacement $id ne créerait
+   * pas de cycle dans la hiérarchie (un emplacement ne peut pas être son propre
+   * ancêtre, directement ou via une chaîne de parent_id).
+   */
+  public static function assertNoCycle(int $id, ?int $newParentId): void
+  {
+    $currentId = $newParentId;
+    while ($currentId !== null) {
+      if ($currentId === $id) {
+        throw new ArrayException([], "Un emplacement ne peut pas être son propre ancêtre");
+      }
+      $currentId = Emplacement::find($currentId)?->parent_id;
+    }
+  }
+
+  /**
    * Edit an existing emplacement
    * @param integer $id ID of the emplacement to edit
    * @param array $data #emplacement_new Properties of the emplacement to modify
@@ -95,6 +115,9 @@ class EmplacementBusiness
   {
     if (Emplacement::find($id)->article_id !== null) {
       throw new ArrayException([], "Cet emplacement est géré depuis la fiche du véhicule lié");
+    }
+    if (array_key_exists('parent_id', $data)) {
+      self::assertNoCycle((int) $id, $data['parent_id'] !== null ? (int) $data['parent_id'] : null);
     }
     $data['remarque'] ??= '';
 
@@ -108,6 +131,10 @@ class EmplacementBusiness
       ->update($data);
 
     if ($hangar !== null) {
+      // Le middleware ConvertEmptyStringsToNull transforme les champs texte vides
+      // en null ; rue/no_rue sont NOT NULL (avec défaut '') en base.
+      $hangar['rue'] ??= '';
+      $hangar['no_rue'] ??= '';
       Hangar::updateOrCreate(['id' => $id], $hangar);
     }
 
