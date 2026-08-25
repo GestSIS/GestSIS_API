@@ -102,6 +102,12 @@ class InterventionController extends Controller
             'appels.*.commentaire' => 'string|nullable',
         ]);
         $appels = $appels['appels'] ?? [];
+        $jalons = $request->validate([
+            'jalons.*.titre' => 'string|required',
+            'jalons.*.date_time' => 'string|required',
+            'jalons.*.description' => 'string|nullable',
+        ]);
+        $jalons = $jalons['jalons'] ?? [];
         $vehicules = $request->validate(['vehicules.*' => 'integer']);
         $vehicules = $vehicules['vehicules'] ?? [];
         $groupes = $request->validate([
@@ -116,13 +122,14 @@ class InterventionController extends Controller
         $materiel = $materiel['materiel'] ?? [];
 
         try {
-            $intervention = InterventionBusiness::importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel, $quittances);
+            $intervention = InterventionBusiness::importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $jalons, $vehicules, $materiel, $quittances);
         } catch (Exception $e) {
             Log::error("Intervention Export", [
                 "intervention" => $intervention,
                 "sapeurs" => $sapeurs,
                 "missions" => $missions,
                 "appels" => $appels,
+                "jalons" => $jalons,
                 "vehicules" => $vehicules,
                 "groupes" => $groupes,
                 "materiel" => $materiel,

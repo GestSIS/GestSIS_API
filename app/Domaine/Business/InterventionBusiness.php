@@ -84,7 +84,7 @@ class InterventionBusiness
      * @return InterventionBusiness
      * @throws ArrayException
      */
-    public static function importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $vehicules, $materiel, $quittances)
+    public static function importIntervention($intervention, $sapeurs, $groupes, $missions, $appels, $jalons, $vehicules, $materiel, $quittances)
     {
         $phaseTypeIntervention = 1;
         $intervention['statut'] = self::INTERVENTION_STATUT_SAISI;
@@ -172,6 +172,14 @@ class InterventionBusiness
             return $e;
         }, $appels);
         $newIntervention->appels()->insert($appels);
+
+        // Ajout des jalons
+        $jalons = array_map(function ($e) use ($newIntervention) {
+            $e['description'] ??= '';
+            $e['intervention_id'] = $newIntervention->id;
+            return $e;
+        }, $jalons);
+        $newIntervention->jalons()->insert($jalons);
 
         // Ajout des vehicules
         $newIntervention->vehiculesInter()->attach($vehicules);
