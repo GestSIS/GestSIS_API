@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Intervention;
 use App\Models\Jalon;
+use App\Models\Sapeur;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -87,6 +88,47 @@ class InterventionJalonTest extends TestCase
             ->assertJson([
                 'data' => true
             ]);
+    }
+
+    /**
+     * Test add jalon with a sapeur_id (sapeur of this SIS)
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testAddInterventionJalonWithSapeurId()
+    {
+        $sapeur = Sapeur::factory()->create();
+        $jalon = Jalon::factory()->make(['sapeur_id' => $sapeur->id, 'sapeur' => null])->toArray();
+
+        $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/jalons', ['jalons' => [$jalon]]);
+
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'data' => true
+            ]);
+        $this->assertEquals($sapeur->id, $response->json('data.0.sapeur_id'));
+    }
+
+    /**
+     * Test add jalon with a free-text sapeur (sapeur external au SIS)
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testAddInterventionJalonWithSapeurExterne()
+    {
+        $jalon = Jalon::factory()->make(['sapeur_id' => null, 'sapeur' => 'Jean Dupont'])->toArray();
+
+        $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/jalons', ['jalons' => [$jalon]]);
+
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'data' => true
+            ]);
+        $this->assertEquals('Jean Dupont', $response->json('data.0.sapeur'));
     }
 
     /**
