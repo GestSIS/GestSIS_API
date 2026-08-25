@@ -188,18 +188,25 @@
 
   table(
     stroke: none,
-    columns: (auto, auto, 1fr),
+    columns: (auto, auto, 1fr, auto),
     ..if intervention.jalons.len() > 0 {
       (
         table.header(
           [*Date*],
           [*Titre*],
           [*Description*],
+          [*Responsable*],
         ),
         intervention.jalons.map(jalon => (
           [#jalon.date_time],
           [#jalon.titre],
           [#jalon.description],
+          {
+            if jalon.sapeur_id != none {
+              let sapeur = jalon.sapeur_object
+              [#sapeur.nom #sapeur.prenom]
+            } else [#jalon.sapeur]
+          },
         )),
       ).flatten()
     } else { ([Aucun jalon],) }

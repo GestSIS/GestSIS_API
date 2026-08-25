@@ -18,7 +18,9 @@ class InterventionJalonsController extends Controller
         $data = $request->validate([
             'jalons.*.titre' => 'required|string',
             'jalons.*.description' => 'string|nullable',
-            'jalons.*.date_time' => 'required|date_format:Y-m-d H:i'
+            'jalons.*.date_time' => 'required|date_format:Y-m-d H:i',
+            'jalons.*.sapeur_id' => 'nullable|integer|exists:sapeurs,id',
+            'jalons.*.sapeur' => 'nullable|string'
         ]);
 
         InterventionBusiness::addJalons($intervention_id, $data['jalons']);
@@ -31,7 +33,9 @@ class InterventionJalonsController extends Controller
             'jalons.*.id' => 'required|integer|exists:jalons,id',
             'jalons.*.titre' => 'required|string',
             'jalons.*.description' => 'string|nullable',
-            'jalons.*.date_time' => 'required|date_format:Y-m-d H:i'
+            'jalons.*.date_time' => 'required|date_format:Y-m-d H:i',
+            'jalons.*.sapeur_id' => 'nullable|integer|exists:sapeurs,id',
+            'jalons.*.sapeur' => 'nullable|string'
         ]);
 
         InterventionBusiness::updateJalons($intervention_id, $data['jalons']);

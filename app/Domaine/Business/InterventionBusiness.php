@@ -176,6 +176,8 @@ class InterventionBusiness
         // Ajout des jalons
         $jalons = array_map(function ($e) use ($newIntervention) {
             $e['description'] ??= '';
+            $e['sapeur_id'] ??= null;
+            $e['sapeur'] ??= null;
             $e['intervention_id'] = $newIntervention->id;
             return $e;
         }, $jalons);
@@ -726,7 +728,7 @@ class InterventionBusiness
             'materiel' => 'materiels',
             'missions' => 'missions.sapeurObject',
             'appels' => 'appels',
-            'jalons' => 'jalons',
+            'jalons' => 'jalons.sapeurObject',
         ];
 
         foreach ($params as $param => $value) {

@@ -106,6 +106,8 @@ class InterventionController extends Controller
             'jalons.*.titre' => 'string|required',
             'jalons.*.date_time' => 'string|required',
             'jalons.*.description' => 'string|nullable',
+            'jalons.*.sapeur_id' => 'integer|nullable|exists:sapeurs,id',
+            'jalons.*.sapeur' => 'string|nullable',
         ]);
         $jalons = $jalons['jalons'] ?? [];
         $vehicules = $request->validate(['vehicules.*' => 'integer']);
