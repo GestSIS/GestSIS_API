@@ -74,6 +74,7 @@ use App\Application\Http\Controllers\IndemniteInterventionTypeController;
 use App\Application\Http\Controllers\InterventionAppelsController;
 use App\Application\Http\Controllers\InterventionController;
 use App\Application\Http\Controllers\InterventionGroupesController;
+use App\Application\Http\Controllers\InterventionJalonsController;
 use App\Application\Http\Controllers\InterventionMaterielsController;
 use App\Application\Http\Controllers\InterventionMissionsController;
 use App\Application\Http\Controllers\InterventionPhasesController;
@@ -476,6 +477,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::apiResource('interventions.quittances', InterventionQuittancesController::class)->only(['index']);
         Route::apiResource('interventions.groupes', InterventionGroupesController::class)->only(['index']);
         Route::apiResource('interventions.phases', InterventionPhasesController::class)->only(['index']);
+        Route::apiResource('interventions.jalons', InterventionJalonsController::class)->only(['index']);
 
         // Impressions interventions
         Route::get('interventions/{id}/rapport', [InterventionController::class, 'rapport'])->name('api.v2.interventions.rapport');
@@ -519,6 +521,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('interventions/{id}/phases', [InterventionPhasesController::class, 'store'])->name('api.v2.interventions.phases.store');
         Route::put('interventions/{id}/phases', [InterventionPhasesController::class, 'update'])->name('api.v2.interventions.phases.update');
         Route::delete('interventions/{id}/phases', [InterventionPhasesController::class, 'destroy'])->name('api.v2.interventions.phases.delete');
+
+        Route::post('interventions/{id}/jalons', [InterventionJalonsController::class, 'store'])->name('api.v2.interventions.jalons.store');
+        Route::put('interventions/{id}/jalons', [InterventionJalonsController::class, 'update'])->name('api.v2.interventions.jalons.update');
+        Route::delete('interventions/{id}/jalons', [InterventionJalonsController::class, 'destroy'])->name('api.v2.interventions.jalons.delete');
     });
     Route::group(['middleware' => 'jwtTokenRole:intervention.validation'], function () {
         Route::post('interventions/{id}/valider', [InterventionController::class, 'valider'])->name('api.v2.interventions.valider');

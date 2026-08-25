@@ -14,6 +14,7 @@ use App\Models\Groupe;
 use App\Models\GroupeIntervention;
 use App\Models\Intervention;
 use App\Models\InterventionMateriel;
+use App\Models\Jalon;
 use App\Models\InterventionSapeur;
 use App\Models\InterventionVehicule;
 use App\Models\Materiel;
@@ -240,6 +241,7 @@ class InterventionBusiness
         Mission::where('intervention_id', '=', $interventionId)->delete();
         Appel::where('intervention_id', '=', $interventionId)->delete();
         Phase::where('intervention_id', '=', $interventionId)->delete();
+        Jalon::where('intervention_id', '=', $interventionId)->delete();
         Intervention::destroy($interventionId);
         return true;
     }
@@ -363,6 +365,61 @@ class InterventionBusiness
         self::checkIsNotImpute($interventionId);
 
         Appel::where('intervention_id', $interventionId)
+            ->whereIn('id', $ids)
+            ->delete();
+    }
+
+    /**
+     * Ajout de jalons d'un intervention
+     *
+     * @param $data
+     * @return Collection
+     * @throws ArrayException(
+     */
+    public static function addJalons($interventionId, $jalons)
+    {
+        self::checkIsNotImpute($interventionId);
+
+        foreach ($jalons as $jalon) {
+            $jalon['description'] ??= '';
+
+            $jal = new Jalon();
+            $jal->fill($jalon);
+            $jal->intervention_id = $interventionId;
+            $jal->save();
+        }
+    }
+
+    /**
+     * Modification de jalons d'un intervention
+     *
+     * @param $data
+     * @return Collection
+     * @throws ArrayException(
+     */
+    public static function updateJalons($interventionId, $jalons)
+    {
+        self::checkIsNotImpute($interventionId);
+
+        foreach ($jalons as $jalon) {
+            $jalon['description'] ??= '';
+
+            Jalon::where('intervention_id', $interventionId)
+                ->whereId($jalon['id'])
+                ->update($jalon);
+        }
+    }
+
+    /**
+     * Suppression de jalons d'une intervention
+     *
+     * @param $data
+     */
+    public static function removeJalons($interventionId, $ids)
+    {
+        self::checkIsNotImpute($interventionId);
+
+        Jalon::where('intervention_id', $interventionId)
             ->whereIn('id', $ids)
             ->delete();
     }
@@ -661,6 +718,7 @@ class InterventionBusiness
             'materiel' => 'materiels',
             'missions' => 'missions.sapeurObject',
             'appels' => 'appels',
+            'jalons' => 'jalons',
         ];
 
         foreach ($params as $param => $value) {

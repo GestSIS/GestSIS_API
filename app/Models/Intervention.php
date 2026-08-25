@@ -158,6 +158,14 @@ class Intervention extends Model
     }
 
     /**
+     * The jalons that belong to the intervention.
+     */
+    public function jalons()
+    {
+        return $this->hasMany(Jalon::class);
+    }
+
+    /**
      * The phase that belong to the sapeur.
      */
     public function phases()

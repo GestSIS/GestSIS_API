@@ -182,6 +182,30 @@
   )
 }
 
+#if params.jalons {
+  v(0.3cm)
+  [== Jalons]
+
+  table(
+    stroke: none,
+    columns: (auto, auto, 1fr),
+    ..if intervention.jalons.len() > 0 {
+      (
+        table.header(
+          [*Date*],
+          [*Titre*],
+          [*Description*],
+        ),
+        intervention.jalons.map(jalon => (
+          [#jalon.date_time],
+          [#jalon.titre],
+          [#jalon.description],
+        )),
+      ).flatten()
+    } else { ([Aucun jalon],) }
+  )
+}
+
 #if params.groupes {
   v(0.3cm)
   [== Groupes alarmés]

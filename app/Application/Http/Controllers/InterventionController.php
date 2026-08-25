@@ -192,6 +192,7 @@ class InterventionController extends Controller
             'statut' => $request->input('statut') == 'true',
             'missions' => $request->input('missions') == 'true',
             'appels' => $request->input('appels') == 'true',
+            'jalons' => $request->input('jalons') == 'true',
         ]);
 
         $params = $request->validate([
@@ -207,6 +208,7 @@ class InterventionController extends Controller
             'statut' => 'boolean',
             'missions' => 'boolean',
             'appels' => 'boolean',
+            'jalons' => 'boolean',
         ]);
 
         $sisKey = $request->header('Sis-Key', Null);
