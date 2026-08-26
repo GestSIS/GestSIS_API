@@ -1,4 +1,4 @@
-#import "common.typ": formatDate, formatDateTime, formatTime
+#import "common.typ": formatDate, formatDateTime, formatDuration, formatTime, parseDateTime, presenceDuration
 #set text(font: "DM Sans", weight: "extralight")
 
 #set page(
@@ -233,12 +233,16 @@
 
   show table.cell.where(y: 0): strong
 
+  let totalDuration = intervention.presences.fold(duration(seconds: 0), (acc, el) => {
+    acc + presenceDuration(el)
+  })
+
   if params.presences {
     table(
       stroke: none,
-      columns: (auto, auto, 1fr, auto),
-      align: (auto, center, auto, end),
-      table.header([Sapeur], [Quittance], [Presence], if params.montants [Montant]),
+      columns: (auto, auto, 1fr, auto, auto),
+      align: (auto, center, auto, center, end),
+      table.header([Sapeur], [Quittance], [Presence], [Durée], if params.montants [Montant]),
       ..if intervention.presences.len() > 0 {
         (
           ..presences
@@ -247,6 +251,7 @@
               [#sapeur.nom #sapeur.prenom],
               { if quittances.len() > 0 and quittances.at(str(sapeur.id), default: none) != none [☑] else [☐] },
               [#formatDateTime(sapeur.presences.first().debut) - #formatDateTime(sapeur.presences.first().fin)],
+              [#formatDuration(presenceDuration(sapeur.presences.first()))],
               if params.montants and ecritures.at(str(sapeur.id), default: none) != none {
                 let ecriture = ecritures.at(str(sapeur.id))
                 [#ecriture]
@@ -257,14 +262,18 @@
                   .slice(1)
                   .map(presence => (
                     table.cell(colspan: 2, []),
-                    table.cell(colspan: 2, [#formatDateTime(presence.debut) - #formatDateTime(presence.fin)]),
+                    [#formatDateTime(presence.debut) - #formatDateTime(presence.fin)],
+                    [#formatDuration(presenceDuration(presence))],
+                    [],
                   ))
                   .flatten()
               },
             )),
-          if params.montants {
-            table.footer(table.cell(colspan: 3)[], [*#ecritures.at("total")*])
-          },
+          table.footer(
+            table.cell(colspan: 3)[*Total: #presences.values().len() sapeur(s)*],
+            [*#formatDuration(totalDuration)*],
+            if params.montants [*#ecritures.at("total")*] else [],
+          ),
         )
           .filter(el => el != none)
           .flatten()
@@ -282,6 +291,8 @@
       Quittances: #quittances.len()
 
       Nombre sapeurs: #resumeParSapeurs.len()
+
+      Heures d'intervention total: #formatDuration(totalDuration)
     ]
   }
 }
