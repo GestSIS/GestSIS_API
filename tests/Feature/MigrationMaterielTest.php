@@ -7,6 +7,8 @@ use App\Models\Article;
 use App\Models\Couleur;
 use App\Models\Emplacement;
 use App\Models\Hangar;
+use App\Models\Intervention;
+use App\Models\InterventionVehicule;
 use App\Models\Localite;
 use App\Models\MaterielType;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -283,5 +285,119 @@ class MigrationMaterielTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonStructure(['error']);
         $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'article_id' => null]);
+    }
+
+    private function vehiculeAvecEmplacement(array $extra = []): Article
+    {
+        $type = $this->vehiculeType();
+        $couleur = Couleur::factory()->create();
+        $article = Article::factory()->create(array_merge([
+            'materiel_type_id' => $type->id,
+            'emplacement_id' => null,
+            'sapeur_id' => null,
+        ], $extra));
+        Emplacement::factory()->create(['couleur_id' => $couleur->id, 'article_id' => $article->id]);
+
+        return $article->load('emplacementRepresentee');
+    }
+
+    public function testFusionnerVehiculesDeplaceSousEmplacementsEtArticles(): void
+    {
+        $conserve = $this->vehiculeAvecEmplacement();
+        $supprime = $this->vehiculeAvecEmplacement();
+        $couleur = Couleur::factory()->create();
+        $sousEmplacement = Emplacement::factory()->create([
+            'couleur_id' => $couleur->id,
+            'parent_id' => $supprime->emplacementRepresentee->id,
+        ]);
+        $articleRange = Article::factory()->create([
+            'emplacement_id' => $supprime->emplacementRepresentee->id,
+            'sapeur_id' => null,
+        ]);
+
+        $response = $this->json('POST', '/api/v2/admin/migration/vehicules/fusionner', [
+            'vehicule_conserve_id' => $conserve->id,
+            'vehicule_supprime_id' => $supprime->id,
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('emplacements', [
+            'id' => $sousEmplacement->id,
+            'parent_id' => $conserve->emplacementRepresentee->id,
+        ]);
+        $this->assertDatabaseHas('articles', [
+            'id' => $articleRange->id,
+            'emplacement_id' => $conserve->emplacementRepresentee->id,
+        ]);
+        $this->assertDatabaseMissing('emplacements', ['id' => $supprime->emplacementRepresentee->id]);
+        $this->assertDatabaseMissing('articles', ['id' => $supprime->id]);
+    }
+
+    public function testFusionnerVehiculesReporteRattachementsInterventionSansDoublon(): void
+    {
+        $conserve = $this->vehiculeAvecEmplacement();
+        $supprime = $this->vehiculeAvecEmplacement();
+        $interventionUniqueASupprime = Intervention::factory()->create();
+        $interventionCommune = Intervention::factory()->create();
+        InterventionVehicule::create(['intervention_id' => $interventionUniqueASupprime->id, 'vehicule_id' => $supprime->id]);
+        InterventionVehicule::create(['intervention_id' => $interventionCommune->id, 'vehicule_id' => $supprime->id]);
+        InterventionVehicule::create(['intervention_id' => $interventionCommune->id, 'vehicule_id' => $conserve->id]);
+
+        $response = $this->json('POST', '/api/v2/admin/migration/vehicules/fusionner', [
+            'vehicule_conserve_id' => $conserve->id,
+            'vehicule_supprime_id' => $supprime->id,
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        // Rattachement propre au véhicule supprimé : reporté sur celui conservé.
+        $this->assertDatabaseHas('intervention_vehicule', [
+            'intervention_id' => $interventionUniqueASupprime->id,
+            'vehicule_id' => $conserve->id,
+        ]);
+        // Rattachement déjà présent sur les deux : pas de doublon, une seule ligne reste.
+        $this->assertSame(
+            1,
+            InterventionVehicule::where('intervention_id', $interventionCommune->id)->count(),
+        );
+        $this->assertDatabaseHas('intervention_vehicule', [
+            'intervention_id' => $interventionCommune->id,
+            'vehicule_id' => $conserve->id,
+        ]);
+        $this->assertDatabaseMissing('intervention_vehicule', ['vehicule_id' => $supprime->id]);
+    }
+
+    public function testFusionnerVehiculesRejectedWhenMissingEmplacementRepresentee(): void
+    {
+        $type = $this->vehiculeType();
+        $conserve = $this->vehiculeAvecEmplacement();
+        $supprimeSansEmplacement = Article::factory()->create([
+            'materiel_type_id' => $type->id,
+            'emplacement_id' => null,
+            'sapeur_id' => null,
+        ]);
+
+        $response = $this->json('POST', '/api/v2/admin/migration/vehicules/fusionner', [
+            'vehicule_conserve_id' => $conserve->id,
+            'vehicule_supprime_id' => $supprimeSansEmplacement->id,
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure(['error']);
+        $this->assertDatabaseHas('articles', ['id' => $supprimeSansEmplacement->id]);
+    }
+
+    public function testFusionnerVehiculesRejectedWhenNotEstEmplacementType(): void
+    {
+        $conserve = $this->vehiculeAvecEmplacement();
+        $articleStandard = Article::factory()->create(['emplacement_id' => null, 'sapeur_id' => null]);
+
+        $response = $this->json('POST', '/api/v2/admin/migration/vehicules/fusionner', [
+            'vehicule_conserve_id' => $conserve->id,
+            'vehicule_supprime_id' => $articleStandard->id,
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure(['error']);
+        $this->assertDatabaseHas('articles', ['id' => $articleStandard->id]);
     }
 }

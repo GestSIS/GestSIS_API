@@ -8,8 +8,10 @@ use App\Domaine\Exceptions\ArrayException;
 use App\Models\Article;
 use App\Models\Emplacement;
 use App\Models\Hangar;
+use App\Models\InterventionVehicule;
 use App\Models\MaterielType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * TEMPORAIRE : contrôleur de migration pour la fonctionnalité article-emplacement
@@ -157,5 +159,62 @@ class MigrationMaterielController extends Controller
         $emplacement->update(['article_id' => $article->id]);
 
         return response()->json(['data' => Emplacement::with(['article', 'hangar'])->find($id)]);
+    }
+
+    /**
+     * Fusionne 2 véhicules dupliqués (ex: créés séparément avant cette
+     * fonctionnalité) : le véhicule "supprimé" est retiré, ses sous-emplacements
+     * et articles rangés sont déplacés sous le véhicule "conservé", et ses
+     * éventuels rattachements à des interventions sont reportés sur celui-ci
+     * (sans créer de doublon si l'intervention était déjà liée aux deux).
+     */
+    public function fusionnerVehicules(Request $request)
+    {
+        $data = $request->validate([
+            'vehicule_conserve_id' => 'integer|required',
+            'vehicule_supprime_id' => 'integer|required|different:vehicule_conserve_id',
+        ]);
+
+        $conserve = Article::with('emplacementRepresentee')->findOrFail($data['vehicule_conserve_id']);
+        $supprime = Article::with('emplacementRepresentee')->findOrFail($data['vehicule_supprime_id']);
+
+        $typesEstEmplacement = MaterielType::where('est_emplacement', true)->pluck('id');
+        if (
+            !$typesEstEmplacement->contains($conserve->materiel_type_id) ||
+            !$typesEstEmplacement->contains($supprime->materiel_type_id)
+        ) {
+            throw new ArrayException([], "Les deux articles doivent être d'un type qui représente un emplacement");
+        }
+        if ($conserve->emplacementRepresentee === null || $supprime->emplacementRepresentee === null) {
+            throw new ArrayException([], "Les deux véhicules doivent avoir un emplacement lié, utilisez l'outil de migration pour le créer");
+        }
+
+        $emplacementConserveId = $conserve->emplacementRepresentee->id;
+        $emplacementSupprimeId = $supprime->emplacementRepresentee->id;
+
+        DB::transaction(function () use ($conserve, $supprime, $emplacementConserveId, $emplacementSupprimeId) {
+            // Reporte les rattachements aux interventions du véhicule supprimé sur
+            // celui conservé, sauf si l'intervention est déjà liée aux deux (la
+            // contrainte unique ['vehicule_id', 'intervention_id'] interdirait le
+            // doublon) : ceux-là sont simplement supprimés.
+            $interventionIdsDejaLiees = InterventionVehicule::where('vehicule_id', $conserve->id)
+                ->pluck('intervention_id');
+            InterventionVehicule::where('vehicule_id', $supprime->id)
+                ->whereNotIn('intervention_id', $interventionIdsDejaLiees)
+                ->update(['vehicule_id' => $conserve->id]);
+            InterventionVehicule::where('vehicule_id', $supprime->id)->delete();
+
+            Emplacement::where('parent_id', $emplacementSupprimeId)
+                ->update(['parent_id' => $emplacementConserveId]);
+            Article::where('emplacement_id', $emplacementSupprimeId)
+                ->update(['emplacement_id' => $emplacementConserveId]);
+
+            // L'emplacement supprimé doit être retiré avant l'article : sa colonne
+            // article_id référence articles.id.
+            Emplacement::destroy($emplacementSupprimeId);
+            Article::destroy($supprime->id);
+        });
+
+        return response()->json(['data' => Article::with('emplacementRepresentee')->find($conserve->id)]);
     }
 }
