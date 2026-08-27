@@ -27,9 +27,9 @@ class AlarmesBusiness
             $tmp = [];
             $missing = [];
 
-            foreach ($alarme->firefighters as $f) {
+            foreach ($alarme->firefighters ?? [] as $f) {
                 // Method 1 en utilisant les numéros de téléphones
-                $phones = explode(",", $f->phone);
+                $phones = explode(",", $f->phone ?? "");
                 $resolved = false;
                 foreach ($phones as $phone) {
                     $numero = self::normaliserTelephone($phone);
@@ -46,8 +46,8 @@ class AlarmesBusiness
                 }
 
                 // Method 2 en utilisant le nom & prénom
-                $nomPrenom = strtolower($f->fullname);
-                if (array_key_exists($nomPrenom, $indexedSapeursByNomPrenom)) {
+                $nomPrenom = strtolower($f->fullname ?? "");
+                if ($nomPrenom !== "" && array_key_exists($nomPrenom, $indexedSapeursByNomPrenom)) {
                     $f->id = $indexedSapeursByNomPrenom[$nomPrenom]->id;
                     $tmp[] = $f;
                 } else {

@@ -41,7 +41,8 @@ class AlarmeController extends Controller
             $interventions = AlarmesBusiness::resoudreAlarmes($alarmes, $sapeurs);
             return response()->json(['data' => $interventions]);
         } catch (Exception $e) {
-            throw new ArrayException([], "Une erreur est survenue lors de la récupération des alarmes");
+            report($e);
+            throw new ArrayException([], "Une erreur est survenue lors de la récupération des alarmes", 0, $e);
         }
     }
 }
