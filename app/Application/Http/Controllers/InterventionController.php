@@ -5,6 +5,7 @@ namespace App\Application\Http\Controllers;
 use App\Domaine\Business\InterventionBusiness;
 use App\Domaine\Exceptions\ArrayException;
 use App\Models\Intervention;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -79,6 +80,20 @@ class InterventionController extends Controller
 
         $quittances = $request->validate(['quittances.*' => 'integer']);
         $quittances = $quittances['quittances'] ?? [];
+
+        // Correctif temporaire : d'anciennes versions de l'app mobile pouvaient
+        // envoyer un "debut" vide pour un sapeur ajouté en lot (bug corrigé côté
+        // app). On déduit une valeur par défaut à partir du début de
+        // l'intervention pour laisser passer l'export au lieu de le rejeter.
+        $sapeursInput = $request->input('sapeurs', []);
+        $defautDebut = $this->defautSapeurDebut($intervention);
+        foreach ($sapeursInput as $index => $sapeur) {
+            if (($sapeur['debut'] ?? null) === null) {
+                $sapeursInput[$index]['debut'] = $defautDebut;
+            }
+        }
+        $request->merge(['sapeurs' => $sapeursInput]);
+
         $sapeurs = $request->validate([
             'sapeurs.*.sapeur_id' => 'integer|required',
             'sapeurs.*.debut' => 'date_format:Y-m-d H:i|required',
@@ -141,6 +156,17 @@ class InterventionController extends Controller
         }
 
         return response()->json(['data' => $intervention]);
+    }
+
+    /**
+     * @param array<string, mixed> $intervention Données déjà validées de l'intervention
+     */
+    private function defautSapeurDebut(array $intervention): string
+    {
+        $debut = Carbon::parse($intervention['date_debut'])->setTimeFromTimeString($intervention['heure_debut']);
+        $debut->minute($debut->minute - ($debut->minute % 15))->second(0);
+
+        return $debut->format('Y-m-d H:i');
     }
 
     public function show($id)

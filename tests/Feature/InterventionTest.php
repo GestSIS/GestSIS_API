@@ -322,4 +322,63 @@ class InterventionTest extends TestCase
 
         $this->assertDatabaseMissing('groupe_intervention', ['no' => '12345678901']);
     }
+
+    /**
+     * Test import complet intervention defaults a null sapeur "debut" to the
+     * intervention's start (date_debut + heure_debut), rounded down to the
+     * nearest quarter hour, instead of rejecting the export.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testImportInterventionCompletDefaultsNullSapeurDebutToRoundedInterventionStart()
+    {
+        $year = now()->year;
+
+        $payload = [
+            'date_debut' => "$year-06-15",
+            'heure_debut' => '10:07',
+            'date_fin' => "$year-06-15",
+            'heure_fin' => '12:00',
+            'objet' => 'Test sapeur debut null',
+            'lieu' => 'Test lieu',
+            'degre' => 2,
+            'stat_nb' => 1,
+            'sauve_personne' => 0,
+            'sauve_animaux' => 0,
+            'rapport_police' => false,
+            'localite_id' => 1,
+            'stat_federal_id' => 1,
+            'sapeur_id' => 1,
+            'type_intervention_id' => 1,
+            'sapeurs' => [
+                [
+                    'sapeur_id' => 1,
+                    'debut' => null,
+                    'fin' => "$year-06-15 11:00",
+                    'piquet' => false,
+                ],
+            ],
+            'missions' => [],
+            'appels' => [],
+            'vehicules' => [],
+            'groupes' => [],
+            'quittances' => [],
+            'materiel' => [],
+        ];
+
+        $response = $this->json('POST', '/api/v2/interventions-complet', $payload);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure(['data' => ['id']]);
+
+        $interventionId = $response->json('data.id');
+
+        $this->assertDatabaseHas('intervention_sapeur', [
+            'intervention_id' => $interventionId,
+            'sapeur_id' => 1,
+            'debut' => "$year-06-15 10:00:00",
+        ]);
+    }
 }
