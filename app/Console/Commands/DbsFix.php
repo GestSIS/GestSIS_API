@@ -146,10 +146,19 @@ class DbsFix extends Command
             // par MaterielTypeBusiness::createProduct/editProduct (nouveaux types ou
             // types modifiés depuis l'ajout de la colonne) ; les materiel_types
             // véhicule existants créés avant restent à false. Idempotent.
-            $typesVehiculeCorriges = MaterielType::where('type', MaterielTypeBusiness::TYPE_VEHICULE)
-                ->where('est_emplacement', false)
-                ->update(['est_emplacement' => true]);
-            printf("  %d materiel_type(s) véhicule corrigé(s) (est_emplacement)\n", $typesVehiculeCorriges);
+            // $typesVehiculeCorriges = MaterielType::where('type', MaterielTypeBusiness::TYPE_VEHICULE)
+            //     ->where('est_emplacement', false)
+            //     ->update(['est_emplacement' => true]);
+            // printf("  %d materiel_type(s) véhicule corrigé(s) (est_emplacement)\n", $typesVehiculeCorriges);
+
+            // Fix 2026-08: ajout de la civilité "Non-binaire" (idempotent via insertOrIgnore,
+            // id fixe pour rester cohérent avec le seeder CiviliteTableSeeder).
+            DB::table('civilites')->insertOrIgnore([
+                'id' => 3,
+                'designation' => 'Non-binaire',
+                'forme_politesse' => '',
+            ]);
+            printf("  civilité 'Non-binaire' vérifiée/ajoutée\n");
 
             printf("\n");
         });
