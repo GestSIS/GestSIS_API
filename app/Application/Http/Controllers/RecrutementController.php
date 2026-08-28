@@ -81,7 +81,7 @@ class RecrutementController extends Controller
             'telephones.*.telephone_type_id' => 'required|integer|exists:telephone_types,id',
             'telephones.*.priorite' => 'required|integer',
             'permis' => 'array',
-            'permis.*.permis_type_id' => 'required|integer|exists:permis_types,id',
+            'permis.*.permis_type_id' => 'required|integer|exists:permis_types,id|distinct',
             'permis.*.date' => 'required|date',
         ]);
 

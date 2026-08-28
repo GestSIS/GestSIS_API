@@ -23,6 +23,7 @@ use App\Models\Sapeur;
 use App\Models\SapeurTelephone;
 use App\Models\Travail;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class SapeurBusiness
@@ -204,13 +205,18 @@ class SapeurBusiness
         $permis = $data['permis'] ?? [];
         unset($data['telephones'], $data['permis']);
 
-        $recrue = Sapeur::create($data);
-        foreach ($telephones as $telephone) {
-            self::addTelephone($recrue->id, $telephone);
-        }
-        foreach ($permis as $p) {
-            self::addPermis($recrue->id, $p);
-        }
+        // Transaction : si un téléphone ou un permis en double fait échouer une des étapes,
+        // on ne veut pas laisser une recrue orpheline en base.
+        $recrue = DB::transaction(function () use ($data, $telephones, $permis) {
+            $recrue = Sapeur::create($data);
+            foreach ($telephones as $telephone) {
+                self::addTelephone($recrue->id, $telephone);
+            }
+            foreach ($permis as $p) {
+                self::addPermis($recrue->id, $p);
+            }
+            return $recrue;
+        });
 
         return $recrue;
     }

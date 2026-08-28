@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Domaine\Business\RecrutementTokenBusiness;
 use App\Domaine\Business\SapeurBusiness;
+use App\Domaine\Exceptions\ArrayException;
 use App\Models\Civilite;
 use App\Models\Localite;
 use App\Models\Permis;
@@ -181,6 +182,45 @@ class RecrutementTest extends TestCase
         $permis = Permis::where('sapeur_id', $recrueId)->get();
         $this->assertCount(1, $permis);
         $this->assertEquals($this->permisTypeId, $permis->first()->permis_type_id);
+    }
+
+    public function testStorePublicBloqueUnPermisEnDouble()
+    {
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+
+        $response = $this->json(
+            'POST',
+            "/api/v2/recrutement/test/{$tokenEnClair}",
+            $this->formulaireRecrue([
+                'permis' => [
+                    ['permis_type_id' => $this->permisTypeId, 'date' => '2018-06-01'],
+                    ['permis_type_id' => $this->permisTypeId, 'date' => '2020-01-01'],
+                ],
+            ]),
+        );
+
+        // Convention du projet : les erreurs de validation Laravel sont réécrites en 200 + clé "error"
+        $response->assertStatus(200)->assertJsonStructure(['error']);
+        $this->assertCount(0, Sapeur::where('no_avs', '756.1234.5678.97')->get());
+    }
+
+    public function testCreateRecrueNeLaissePasDeRecrueOrphelineSiUnPermisEstEnDouble()
+    {
+        // Contourne la validation HTTP (distinct) pour vérifier que la transaction protège aussi
+        // au niveau métier : si SapeurBusiness::addPermis() refuse le second permis, la recrue
+        // elle-même (et son premier permis) ne doivent pas rester en base.
+        $this->expectException(ArrayException::class);
+
+        try {
+            SapeurBusiness::createRecrue($this->formulaireRecrue([
+                'permis' => [
+                    ['permis_type_id' => $this->permisTypeId, 'date' => '2018-06-01'],
+                    ['permis_type_id' => $this->permisTypeId, 'date' => '2020-01-01'],
+                ],
+            ]));
+        } finally {
+            $this->assertCount(0, Sapeur::where('no_avs', '756.1234.5678.97')->get());
+        }
     }
 
     public function testStorePublicFonctionneSansPermis()
