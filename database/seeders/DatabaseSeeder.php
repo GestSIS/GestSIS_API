@@ -31,9 +31,6 @@ class DatabaseSeeder extends Seeder
         $this->call(AvsParamTableSeeder::class);
 
         // Paramètres de configuration
-        $this->call(AbsenceParamTableSeeder::class);
-        $this->call(ConvocationParamTableSeeder::class);
-        $this->call(ExcuseParamTableSeeder::class);
         $this->call(SisContactTableSeeder::class);
 
         // Matériel de référence
@@ -49,9 +46,10 @@ class DatabaseSeeder extends Seeder
         // Exercices comptables et données de dev
         $this->call(ExerciceComptableTableSeeder::class);
 
+        // Sapeurs
         $this->call(SapeursTableSeeder::class);
 
-        // SisParam référence sapeur_id=1, doit être après SapeursTableSeeder
+        // SisParam
         $this->call(SisParamTableSeeder::class);
 
         $this->call(ExerciceTableSeeder::class);

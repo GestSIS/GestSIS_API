@@ -24,8 +24,13 @@ class NewSisDatabaseSeeder extends Seeder
         $this->call(TypeUniteTableSeeder::class);
         $this->call(PhaseTypeTableSeeder::class);
 
-        // Exercices types
+        // Paramês généraux
         $this->call(ExcuseTypeTableSeeder::class);
+        $this->call(AbsenceParamTableSeeder::class);
+        $this->call(ConvocationParamTableSeeder::class);
+
+        // Exercices types
+        $this->call(ExcuseParamTableSeeder::class);
         $this->call(ExerciceCategorieTableSeeder::class);
         $this->call(FonctionTableSeeder::class);
         $this->call(CoursTableSeeder::class);
