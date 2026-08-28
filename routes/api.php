@@ -208,7 +208,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Paramètres accessible pour tout droit config
-    Route::group(['middleware' => 'jwtTokenRole:utilisateur.config,sis.config,sapeur.config,organisation.modification,exercice.config,intervention.config,comptabilite.config,controle_medical.config'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:utilisateur.config,sis.config,sapeur.config,organisation.modification,exercice.config,intervention.config,comptabilite.config,controle_medical.config,materiel.config,fiche_travail.config,absence.config,rta.config'], function () {
         Route::apiResource('sis-param', SisParamController::class)->only(['index']);
         Route::apiResource('sis-contacts', SisContactController::class)->only(['index']);
     });
