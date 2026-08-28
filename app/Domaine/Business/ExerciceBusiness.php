@@ -734,7 +734,7 @@ class ExerciceBusiness
         $exerciceSapeur->remarque = '';
         $exerciceSapeur->justification = '';
         $exerciceSapeur->save();
-        return $exerciceSapeur;
+        return self::sapeurOfExerciceById($exerciceId, $sapeurId);
     }
 
     /**
