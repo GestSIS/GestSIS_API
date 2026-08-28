@@ -11,10 +11,6 @@
         {
             "type": "vcs",
             "url": "git@github.com:sdespont/swiss-payment.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@github.com:SpartnerNL/Laravel-Excel.git"
         }
     ],
     "require": {
@@ -25,7 +21,7 @@
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
         "laravel/ui": "^4.0",
-        "maatwebsite/excel": "4.x-dev as 4.0.0",
+        "maatwebsite/excel": "4.0.2",
         "mikehaertl/php-pdftk": "^0.14",
         "php-ds/php-ds": "^2.0",
         "sentry/sentry-laravel": "^4.13",
