@@ -19,6 +19,7 @@ use App\Models\Intervention;
 use App\Models\InterventionSapeur;
 use App\Models\Mutation;
 use App\Models\Permis;
+use App\Models\Quittance;
 use App\Models\Sapeur;
 use App\Models\SapeurTelephone;
 use App\Models\Travail;
@@ -283,6 +284,7 @@ class SapeurBusiness
         ExerciceSapeur::where('sapeur_id', $sapeurId)->delete();
         HeureExercice::where('sapeur_id', $sapeurId)->delete();
         InterventionSapeur::where('sapeur_id', $sapeurId)->delete();
+        Quittance::where('sapeur_id', $sapeurId)->delete();
         GroupeSapeur::where('sapeur_id', $sapeurId)->delete();
         ControleMedical::where('sapeur_id', $sapeurId)->delete();
         Mutation::where('sapeur_id', $sapeurId)->delete();
