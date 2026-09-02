@@ -17,7 +17,7 @@
         "php": "^8.5",
         "ch2877/swiss-payment": "^3.0.1",
         "firebase/php-jwt": "^7.0",
-        "guzzlehttp/guzzle": "^7.0.1",
+        "guzzlehttp/guzzle": "^8.1.0",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
         "laravel/ui": "^4.0",
