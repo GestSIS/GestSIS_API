@@ -117,6 +117,7 @@ use App\Application\Http\Controllers\SapeurExerciceController;
 use App\Application\Http\Controllers\SapeurFonctionController;
 use App\Application\Http\Controllers\SapeurGradeController;
 use App\Application\Http\Controllers\SapeurGroupeController;
+use App\Application\Http\Controllers\SapeurInterventionController;
 use App\Application\Http\Controllers\SapeurMutationController;
 use App\Application\Http\Controllers\SapeurPermisController;
 use App\Application\Http\Controllers\SapeurPhotoController;
@@ -286,6 +287,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('publipostage', [PublipostageController::class, 'index'])->name('publipostage');
 
         Route::get('sapeurs/{id}/exercices/{exerciceComptableId}', [SapeurExerciceController::class, 'index']);
+        Route::get('sapeurs/{id}/interventions/{exerciceComptableId}', [SapeurInterventionController::class, 'index']);
     });
     // Sapeurs
     Route::group(['middleware' => 'jwtTokenRole:sapeur.modification'], function () {

@@ -16,4 +16,14 @@ class InterventionSapeur extends Model
             'sapeur_id' => 'integer'
         ];
     }
+
+    public function intervention()
+    {
+        return $this->belongsTo(Intervention::class);
+    }
+
+    public function sapeur()
+    {
+        return $this->belongsTo(Sapeur::class);
+    }
 }
