@@ -17,6 +17,7 @@ use App\Models\SmsNumero;
 use App\Models\ConvocationParam;
 use App\Models\MaterielEventType;
 use App\Models\MaterielType;
+use App\Models\TuyauDiametre;
 use App\Support\Sis;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -153,12 +154,19 @@ class DbsFix extends Command
 
             // Fix 2026-08: ajout de la civilité "Non-binaire" (idempotent via insertOrIgnore,
             // id fixe pour rester cohérent avec le seeder CiviliteTableSeeder).
-            DB::table('civilites')->insertOrIgnore([
-                'id' => 3,
-                'designation' => 'Non-binaire',
-                'forme_politesse' => '',
-            ]);
-            printf("  civilité 'Non-binaire' vérifiée/ajoutée\n");
+            // DB::table('civilites')->insertOrIgnore([
+            //     'id' => 3,
+            //     'designation' => 'Non-binaire',
+            //     'forme_politesse' => '',
+            // ]);
+            // printf("  civilité 'Non-binaire' vérifiée/ajoutée\n");
+
+            // Fix 2026-09: certains SIS n'ont pas les diamètres de tuyau standards
+            // (40, 55, 75mm). Idempotent via firstOrCreate (diametre est unique).
+            foreach ([40, 55, 75] as $diametre) {
+                TuyauDiametre::firstOrCreate(['diametre' => $diametre]);
+            }
+            printf("  diamètres de tuyau 40/55/75 vérifiés/ajoutés\n");
 
             printf("\n");
         });
