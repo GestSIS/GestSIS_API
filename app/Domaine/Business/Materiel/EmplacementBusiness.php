@@ -128,17 +128,39 @@ class EmplacementBusiness
   }
 
   /**
+   * Vérifie qu'un emplacement peut passer à `statut = false` : il ne doit contenir
+   * ni matériel rangé directement (Article.emplacement_id), ni sous-emplacement
+   * (Emplacement.parent_id). Utilisé pour la désactivation d'un emplacement
+   * classique (editEmplacement) comme de celui représenté par un véhicule
+   * (ArticleBusiness::editArticles).
+   */
+  public static function assertCanBeDeactivated(int $id): void
+  {
+    if (Article::where('emplacement_id', $id)->exists()) {
+      throw new ArrayException([], "Impossible de désactiver cet emplacement tant que du matériel y est rangé");
+    }
+    if (Emplacement::where('parent_id', $id)->exists()) {
+      throw new ArrayException([], "Impossible de désactiver cet emplacement tant qu'il contient des sous-emplacements");
+    }
+  }
+
+  /**
    * Edit an existing emplacement
    * @param integer $id ID of the emplacement to edit
    * @param array $data #emplacement_new Properties of the emplacement to modify
    */
   public static function editEmplacement($id, $data)
   {
-    if (Emplacement::find($id)->article_id !== null) {
+    $emplacement = Emplacement::find($id);
+    if ($emplacement->article_id !== null) {
       throw new ArrayException([], "Cet emplacement est géré depuis la fiche du véhicule lié");
     }
     if (array_key_exists('parent_id', $data)) {
       self::assertNoCycle((int) $id, $data['parent_id'] !== null ? (int) $data['parent_id'] : null);
+    }
+    $statutVoulu = array_key_exists('statut', $data) ? (bool) $data['statut'] : true;
+    if (!$statutVoulu && $emplacement->statut === true) {
+      self::assertCanBeDeactivated((int) $id);
     }
     $data['remarque'] ??= '';
 

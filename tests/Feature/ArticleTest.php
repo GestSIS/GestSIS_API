@@ -192,6 +192,100 @@ class ArticleTest extends TestCase
         ]);
     }
 
+    public function testEditVehiculeArticleStatutIsIndependentFromEmplacementStatut(): void
+    {
+        // On peut désactiver le véhicule (retiré des interventions) sans désactiver
+        // son emplacement (reste visible/rangeable dans l'inventaire), et inversement.
+        $type = $this->vehiculeType();
+        $couleur = Couleur::factory()->create();
+        $article = Article::factory()->create([
+            'materiel_type_id' => $type->id,
+            'emplacement_id' => null,
+            'sapeur_id' => null,
+            'statut' => true,
+        ]);
+        $emplacement = Emplacement::factory()->create([
+            'article_id' => $article->id,
+            'couleur_id' => $couleur->id,
+            'statut' => true,
+        ]);
+
+        $response = $this->json('PUT', '/api/v2/articles', [
+            'articles' => [[
+                'id' => $article->id,
+                'statut' => false,
+                'emplacement' => [
+                    'couleur_id' => $couleur->id,
+                    'statut' => true,
+                ],
+            ]],
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('articles', ['id' => $article->id, 'statut' => false]);
+        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'statut' => true]);
+    }
+
+    public function testEditVehiculeArticleCannotDeactivateEmplacementContainingMateriel(): void
+    {
+        $type = $this->vehiculeType();
+        $couleur = Couleur::factory()->create();
+        $article = Article::factory()->create([
+            'materiel_type_id' => $type->id,
+            'emplacement_id' => null,
+            'sapeur_id' => null,
+        ]);
+        $emplacement = Emplacement::factory()->create([
+            'article_id' => $article->id,
+            'couleur_id' => $couleur->id,
+            'statut' => true,
+        ]);
+        Article::factory()->create(['emplacement_id' => $emplacement->id, 'sapeur_id' => null]);
+
+        $response = $this->json('PUT', '/api/v2/articles', [
+            'articles' => [[
+                'id' => $article->id,
+                'emplacement' => [
+                    'couleur_id' => $couleur->id,
+                    'statut' => false,
+                ],
+            ]],
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure(['error']);
+        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'statut' => true]);
+    }
+
+    public function testEditVehiculeArticleCanDeactivateEmptyEmplacement(): void
+    {
+        $type = $this->vehiculeType();
+        $couleur = Couleur::factory()->create();
+        $article = Article::factory()->create([
+            'materiel_type_id' => $type->id,
+            'emplacement_id' => null,
+            'sapeur_id' => null,
+        ]);
+        $emplacement = Emplacement::factory()->create([
+            'article_id' => $article->id,
+            'couleur_id' => $couleur->id,
+            'statut' => true,
+        ]);
+
+        $response = $this->json('PUT', '/api/v2/articles', [
+            'articles' => [[
+                'id' => $article->id,
+                'emplacement' => [
+                    'couleur_id' => $couleur->id,
+                    'statut' => false,
+                ],
+            ]],
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'statut' => false]);
+    }
+
     public function testEditVehiculeArticleCannotSetOwnEmplacementAsItsOwnParent(): void
     {
         $type = $this->vehiculeType();

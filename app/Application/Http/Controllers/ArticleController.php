@@ -55,6 +55,7 @@ class ArticleController extends Controller
             'articles.*.emplacement.parent_id' => 'integer|nullable',
             'articles.*.emplacement.est_etiquete' => 'boolean|nullable',
             'articles.*.emplacement.est_compartimentable' => 'boolean|nullable',
+            'articles.*.emplacement.statut' => 'boolean|nullable',
         ]);
 
         $materiels = ArticleBusiness::creerArticles($data['articles']);
@@ -86,6 +87,7 @@ class ArticleController extends Controller
             'articles.*.emplacement.parent_id' => 'integer|nullable',
             'articles.*.emplacement.est_etiquete' => 'boolean|nullable',
             'articles.*.emplacement.est_compartimentable' => 'boolean|nullable',
+            'articles.*.emplacement.statut' => 'boolean|nullable',
         ]);
 
         $articles = ArticleBusiness::editArticles($data['articles']);

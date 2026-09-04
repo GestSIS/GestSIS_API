@@ -243,6 +243,18 @@ class ArticleBusiness
         $emplacementRepresentee = $existing->emplacementRepresentee;
         $nouveauParentId = $emplacementData['parent_id'] ?? null;
         EmplacementBusiness::assertNoCycle($emplacementRepresentee->id, $nouveauParentId);
+
+        // Le statut de l'article (utilisable en intervention) et celui de son
+        // emplacement (visible/rangeable dans l'inventaire) sont volontairement
+        // indépendants : on peut désactiver un véhicule pour l'écarter des
+        // interventions tout en le laissant dans l'inventaire, ou inversement.
+        // On ne peut par contre pas désactiver l'emplacement tant qu'il contient
+        // du matériel ou des sous-emplacements.
+        $statutEmplacementVoulu = array_key_exists('statut', $emplacementData) ? (bool) $emplacementData['statut'] : true;
+        if (!$statutEmplacementVoulu && $emplacementRepresentee->statut === true) {
+          EmplacementBusiness::assertCanBeDeactivated($emplacementRepresentee->id);
+        }
+
         $emplacementRepresentee->update([
           'designation' => $existing->designation,
           'remarque' => $existing->remarque,
@@ -250,10 +262,9 @@ class ArticleBusiness
           'parent_id' => $nouveauParentId,
           'est_etiquete' => $emplacementData['est_etiquete'] ?? false,
           'est_compartimentable' => $emplacementData['est_compartimentable'] ?? false,
+          'statut' => $statutEmplacementVoulu,
         ]);
       }
-      // TODO: synchroniser emplacementRepresentee->statut avec celui de l'article ?
-      // Laissé manuel pour le moment.
 
       return $article['id'];
     });

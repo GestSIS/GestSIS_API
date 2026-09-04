@@ -237,6 +237,67 @@ class EmplacementTest extends TestCase
         $this->assertDatabaseHas('emplacements', ['id' => $a->id, 'parent_id' => null]);
     }
 
+    public function testCannotDeactivateEmplacementContainingMateriel(): void
+    {
+        $couleur = Couleur::factory()->create();
+        $emplacement = Emplacement::factory()->create(['couleur_id' => $couleur->id, 'statut' => true]);
+        Article::factory()->create(['emplacement_id' => $emplacement->id, 'sapeur_id' => null]);
+
+        $payload = $this->basePayload(['couleur_id' => $couleur->id, 'statut' => false]);
+        $response = $this->json('PUT', "/api/v2/emplacements/{$emplacement->id}", $payload, ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure(['error']);
+        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'statut' => true]);
+    }
+
+    public function testCannotDeactivateEmplacementWithSousEmplacements(): void
+    {
+        $couleur = Couleur::factory()->create();
+        $parent = Emplacement::factory()->create(['couleur_id' => $couleur->id, 'statut' => true]);
+        Emplacement::factory()->create(['parent_id' => $parent->id]);
+
+        $payload = $this->basePayload(['couleur_id' => $couleur->id, 'statut' => false]);
+        $response = $this->json('PUT', "/api/v2/emplacements/{$parent->id}", $payload, ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure(['error']);
+        $this->assertDatabaseHas('emplacements', ['id' => $parent->id, 'statut' => true]);
+    }
+
+    public function testCanDeactivateEmptyEmplacement(): void
+    {
+        $couleur = Couleur::factory()->create();
+        $emplacement = Emplacement::factory()->create(['couleur_id' => $couleur->id, 'statut' => true]);
+
+        $payload = $this->basePayload(['couleur_id' => $couleur->id, 'statut' => false]);
+        $response = $this->json('PUT', "/api/v2/emplacements/{$emplacement->id}", $payload, ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'statut' => false]);
+    }
+
+    public function testCanResaveAlreadyInactiveEmplacementStillContainingMateriel(): void
+    {
+        // Régression : le garde-fou ne doit bloquer que la transition actif -> inactif,
+        // pas la simple ré-édition d'un emplacement déjà inactif (ex: changer sa
+        // désignation) alors qu'il contient encore du matériel historique.
+        $couleur = Couleur::factory()->create();
+        $emplacement = Emplacement::factory()->create(['couleur_id' => $couleur->id, 'statut' => false]);
+        Article::factory()->create(['emplacement_id' => $emplacement->id, 'sapeur_id' => null]);
+
+        $payload = $this->basePayload([
+            'couleur_id' => $couleur->id,
+            'designation' => 'Nouveau nom',
+            'statut' => false,
+        ]);
+        $response = $this->json('PUT', "/api/v2/emplacements/{$emplacement->id}", $payload, ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $response->assertJsonMissing(['error']);
+        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'designation' => 'Nouveau nom', 'statut' => false]);
+    }
+
     public function testDeleteEmplacementCascadesToHangarRow(): void
     {
         $couleur = Couleur::factory()->create();
