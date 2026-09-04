@@ -264,15 +264,16 @@ class ArticleBusiness
   public static function deleteArticles(array $articleIds): bool
   {
     $emplacementsLies = Emplacement::whereIn('article_id', $articleIds)->get();
-    foreach ($emplacementsLies as $emplacement) {
-      if (Article::where('emplacement_id', $emplacement->id)->exists()) {
-        throw new ArrayException([], "Impossible de supprimer un véhicule tant que du matériel est rangé dans son emplacement");
-      }
-      if (Emplacement::where('parent_id', $emplacement->id)->exists()) {
-        throw new ArrayException([], "Impossible de supprimer un véhicule tant que son emplacement contient des sous-emplacements");
-      }
+    $emplacementIds = $emplacementsLies->pluck('id');
+
+    if (Article::whereIn('emplacement_id', $emplacementIds)->exists()) {
+      throw new ArrayException([], "Impossible de supprimer un véhicule tant que du matériel est rangé dans son emplacement");
     }
-    Emplacement::whereIn('id', $emplacementsLies->pluck('id'))->delete();
+    if (Emplacement::whereIn('parent_id', $emplacementIds)->exists()) {
+      throw new ArrayException([], "Impossible de supprimer un véhicule tant que son emplacement contient des sous-emplacements");
+    }
+
+    Emplacement::whereIn('id', $emplacementIds)->delete();
     return Article::whereIn('id', $articleIds)->delete();
   }
 
