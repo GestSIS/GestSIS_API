@@ -408,4 +408,37 @@ class ArticleTest extends TestCase
         $this->assertTrue($ids->contains($articleEnfant->id));
         $this->assertFalse($ids->contains($articleParent->id));
     }
+
+    public function testGetArticlesParEmplacementIncludesVehiculeNestedAsSousEmplacement(): void
+    {
+        // Un véhicule ne range pas ses articles via `emplacement_id` : il possède son
+        // propre emplacement (via Emplacement.article_id). Ce sous-emplacement doit
+        // quand même faire apparaître le véhicule quand on consulte le hangar parent.
+        $hangar = Emplacement::factory()->create();
+        $vehicule = Article::factory()->create(['emplacement_id' => null, 'sapeur_id' => null]);
+        Emplacement::factory()->create(['parent_id' => $hangar->id, 'article_id' => $vehicule->id]);
+
+        $articleRange = Article::factory()->create(['emplacement_id' => $hangar->id, 'sapeur_id' => null]);
+
+        $response = $this->json('GET', "/api/v2/emplacements/{$hangar->id}/articles", [], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $ids = collect($response->json('data'))->pluck('id');
+        $this->assertTrue($ids->contains($vehicule->id));
+        $this->assertTrue($ids->contains($articleRange->id));
+    }
+
+    public function testGetArticlesParEmplacementForVehiculeOwnEmplacementExcludesItself(): void
+    {
+        $vehicule = Article::factory()->create(['emplacement_id' => null, 'sapeur_id' => null]);
+        $emplacementVehicule = Emplacement::factory()->create(['article_id' => $vehicule->id]);
+        $articleRange = Article::factory()->create(['emplacement_id' => $emplacementVehicule->id, 'sapeur_id' => null]);
+
+        $response = $this->json('GET', "/api/v2/emplacements/{$emplacementVehicule->id}/articles", [], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $ids = collect($response->json('data'))->pluck('id');
+        $this->assertTrue($ids->contains($articleRange->id));
+        $this->assertFalse($ids->contains($vehicule->id));
+    }
 }

@@ -340,6 +340,18 @@ class ArticleBusiness
   {
     $emplacementIds = EmplacementBusiness::descendantIds((int) $locationId);
 
-    return Article::whereIn('emplacement_id', $emplacementIds)->with(['lavages'])->get();
+    // Les sous-emplacements qui représentent eux-mêmes un véhicule (article
+    // possédant un emplacement) doivent apparaître dans la liste, en plus du
+    // matériel directement rangé. On exclut $locationId lui-même : si on
+    // consulte l'emplacement d'un véhicule, ce véhicule ne doit pas
+    // apparaître comme un article rangé dans son propre emplacement.
+    $vehiculeArticleIds = Emplacement::whereIn('id', array_diff($emplacementIds, [(int) $locationId]))
+      ->whereNotNull('article_id')
+      ->pluck('article_id');
+
+    return Article::where(function ($query) use ($emplacementIds, $vehiculeArticleIds) {
+      $query->whereIn('emplacement_id', $emplacementIds)
+        ->orWhereIn('id', $vehiculeArticleIds);
+    })->with(['lavages'])->get();
   }
 }
