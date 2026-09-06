@@ -451,12 +451,13 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
             Route::get('demandes', [ReferenceRtaController::class, 'demandes'])->name('api.v2.rta.demandes');
             Route::apiResource('fichiers', RtaFichierController::class)->only(['index', 'show']);
-            Route::apiResource('agriculteurs', RtaAgriculteurController::class);
-            Route::put('agriculteurs/{agriculteurId}/tri', [RtaAgriculteurController::class, 'tri'])->name('api.v2.rta.agriculteurs.tri');
+            Route::apiResource('agriculteurs', RtaAgriculteurController::class)->only(['index', 'show']);
         });
 
         Route::group(['middleware' => 'jwtTokenRole:rta.modification'], function () {
             Route::post('reference', [ReferenceRtaController::class, 'setReference'])->name('api.v2.rta.set');
+            Route::apiResource('agriculteurs', RtaAgriculteurController::class)->only(['store', 'update', 'destroy']);
+            Route::put('agriculteurs/{agriculteurId}/tri', [RtaAgriculteurController::class, 'tri'])->name('api.v2.rta.agriculteurs.tri');
         });
 
         Route::group(['middleware' => 'jwtTokenRole:rta.config'], function () {
