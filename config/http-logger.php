@@ -12,7 +12,7 @@ return [
      * The log writer used to write the request to a log.
      * It should implement `LogWriter`.
      */
-    'log_writer' => \Spatie\HttpLogger\DefaultLogWriter::class,
+    'log_writer' => \App\Application\Http\Logging\RedactingHttpLogWriter::class,
 
     /*
      * The log channel used to write the request.
@@ -30,6 +30,14 @@ return [
     'except' => [
         'password',
         'password_confirmation',
+        // Secrets tiers (RTA bearer token, identifiant ASPSMS) : chiffrés en base,
+        // ils ne doivent pas se retrouver en clair dans laravel.log.
+        'token',
+        'username',
+        // Données personnelles sensibles des sapeurs / recrues.
+        'no_avs',
+        'iban',
+        'date_naissance',
     ],
 
     /*

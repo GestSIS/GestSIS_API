@@ -25,7 +25,7 @@ class JwtTokenValidatorSapeurOrRole
         try {
             $token = TokenTools::validateToken($request->bearerToken());
         } catch (Exception $e) {
-            return response()->json(["error" => "Accès refusé", "test" => $e->__toString()], 401);
+            return response()->json(["error" => "Accès refusé"], 401);
         }
 
         $sisKey = $request->header('Sis-Key', Null);
