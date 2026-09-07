@@ -303,6 +303,7 @@ class ExerciceBusiness
 
         $exerciceSapeur['excuse_type_id'] = $excuse['excuse_type_id'];
         $exerciceSapeur['remarque'] = $excuse['remarque'] ?? '';
+        $exerciceSapeur['date_excuse'] = Carbon::now();
 
         // Créer excuse
         $exerciceSapeur->save();
@@ -400,7 +401,10 @@ class ExerciceBusiness
                 $presence['excuse_statut'] = ExerciceBusiness::EXCUSE_STATUT_A_TRAITER;
             }
 
-            // Permission: Saisie présence 
+            $nouvelExcuseTypeId = $presence['excuse_type_id'] == 0 ? null : $presence['excuse_type_id'];
+            $estNouvelleExcuse = $exerciceSapeur->excuse_type_id === null && $nouvelExcuseTypeId !== null;
+
+            // Permission: Saisie présence
             ExerciceSapeur
                 ::where('exercice_id', $exerciceId)
                 ->whereId($presenceId)
@@ -411,13 +415,14 @@ class ExerciceBusiness
                     'remplace' => $presence['remplace'],
 
                     ...($hasValidationPermission ? [
-                        'excuse_type_id' => $presence['excuse_type_id'] == 0 ? null : $presence['excuse_type_id'],
+                        'excuse_type_id' => $nouvelExcuseTypeId,
                         'excuse_statut' => $presence['excuse_statut'],
 
                         'remarque' => $presence['remarque'] ?? '',
                         'justificatif_path' => $presence['justificatif_path'],
                         'justificatif_filename' => $presence['justificatif_filename'],
                         'justification' => $presence['justification'] ?? '',
+                        ...($estNouvelleExcuse ? ['date_excuse' => Carbon::now()] : []),
                     ] : [])
                 ]);
         }
@@ -646,7 +651,15 @@ class ExerciceBusiness
             }
         }
 
+        $anciensExcuseTypeIds = ExerciceSapeur::where('exercice_id', $exerciceId)
+            ->whereIn('id', array_column($sapeurs, 'id'))
+            ->pluck('excuse_type_id', 'id');
+
         foreach ($sapeurs as $sapeur) {
+            $ancienExcuseTypeId = $anciensExcuseTypeIds[$sapeur['id']] ?? null;
+            $estNouvelleExcuse = ($ancienExcuseTypeId === null || $ancienExcuseTypeId === 0)
+                && $sapeur['excuse_type_id'] !== null && $sapeur['excuse_type_id'] !== 0;
+
             ExerciceSapeur
                 ::where('exercice_id', $exerciceId)
                 ->whereId($sapeur['id'])
@@ -656,7 +669,8 @@ class ExerciceBusiness
                     'absent' => $sapeur['absent'],
                     'remplace' => $sapeur['remplace'],
                     'excuse_type_id' => $sapeur['excuse_type_id'],
-                    ...(array_key_exists('excuse_statut', $sapeur) ? ['excuse_statut' => $sapeur['excuse_statut']] : [])
+                    ...(array_key_exists('excuse_statut', $sapeur) ? ['excuse_statut' => $sapeur['excuse_statut']] : []),
+                    ...($estNouvelleExcuse ? ['date_excuse' => Carbon::now()] : [])
                 ]);
 
             $heures = array_filter(
@@ -731,6 +745,7 @@ class ExerciceBusiness
         $exerciceSapeur->justificatif_filename = '';
         $exerciceSapeur->excuse_type_id = null;
         $exerciceSapeur->date_validation = null;
+        $exerciceSapeur->date_excuse = null;
         $exerciceSapeur->remarque = '';
         $exerciceSapeur->justification = '';
         $exerciceSapeur->save();
@@ -855,7 +870,7 @@ class ExerciceBusiness
             'remplace',
             'absent',
             'excuse_statut',
-            'date_demande',
+            'date_excuse',
             'justificatif_path',
             'date_validation',
         ];

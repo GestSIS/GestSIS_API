@@ -17,7 +17,7 @@ class ExerciceSapeur extends Model
         'remplace',
         'excuse_type_id',
         'excuse_statut',
-        'date_demande',
+        'date_excuse',
         'date_validation',
         'justificatif_path',
         'justificatif_filename',
@@ -34,7 +34,8 @@ class ExerciceSapeur extends Model
             'convoque' => 'integer',
             'remplace' => 'integer',
             'excuse_type_id' => 'integer',
-            'excuse_statut' => 'integer'
+            'excuse_statut' => 'integer',
+            'date_excuse' => 'datetime'
         ];
     }
 

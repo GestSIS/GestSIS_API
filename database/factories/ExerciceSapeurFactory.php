@@ -23,7 +23,7 @@ class ExerciceSapeurFactory extends Factory
             'remplace' => false,
             'absent' => !$present,
             'excuse_statut' => null,
-            'date_demande' => null,
+            'date_excuse' => null,
             'remarque' => null,
             'justificatif_path' => null,
             'justificatif_filename' => null,
