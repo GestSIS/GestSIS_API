@@ -316,12 +316,12 @@ class InterventionBusiness
             ->whereIn('id', $ids)
             ->delete();
 
+        $intervention = Intervention::findOrFail($interventionId);
         $presences = InterventionSapeur::where('intervention_id', $interventionId)->get();
         if ($presences->isEmpty()) {
-            $intervention = Intervention::findOrFail($interventionId);
             $intervention->update(['statut' => self::INTERVENTION_STATUT_EMPTY]);
         }
-        return true;
+        return $intervention->statut;
     }
 
     /**

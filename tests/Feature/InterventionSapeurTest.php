@@ -166,7 +166,44 @@ class InterventionSapeurTest extends TestCase
         $response
             ->assertStatus(200)
             ->assertJson([
-                'data' => true
+                'data' => 0
+            ]);
+    }
+
+    /**
+     * Removing some (but not all) presences must keep the intervention's
+     * current statut, not silently reset it.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testRemoveInterventionPresencesPartialKeepsStatut()
+    {
+        $sapeurs = [
+            [
+                'sapeur_id' => 7,
+                'debut' => '2019-12-12 12:15',
+                'fin' => '2019-12-12 12:30',
+                'piquet' => 0
+            ],
+            [
+                'sapeur_id' => 8,
+                'debut' => '2019-12-12 12:15',
+                'fin' => '2019-12-12 12:30',
+                'piquet' => 0
+            ],
+        ];
+
+        $ids = array_column(
+            $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/sapeurs', ['sapeurs' => $sapeurs])->json('data.sapeurs'),
+            'id'
+        );
+        $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/sapeurs', ['sapeurs' => [$ids[0]]]);
+
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'data' => 1
             ]);
     }
 
