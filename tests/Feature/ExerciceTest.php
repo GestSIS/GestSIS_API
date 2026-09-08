@@ -198,6 +198,42 @@ class ExerciceTest extends TestCase
     }
 
     /**
+     * Test dévalider (retour à Saisi) un exercice validé
+     */
+    public function testDevaliderExerciceSuccessfully()
+    {
+        $exercice = Exercice::factory()->create(['statut' => 3]); // Validé
+
+        $response = $this->json('POST', "/api/v2/exercices/{$exercice->id}/devalider");
+
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'data' => true
+            ]);
+
+        $this->assertEquals(2, $exercice->fresh()->statut);
+    }
+
+    /**
+     * Test dévalider un exercice qui n'est pas encore validé échoue
+     */
+    public function testDevaliderExerciceFailsWhenNotValide()
+    {
+        $exercice = Exercice::factory()->create(['statut' => 2]); // Saisi, pas encore validé
+
+        $response = $this->json('POST', "/api/v2/exercices/{$exercice->id}/devalider");
+
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'error' => true
+            ]);
+
+        $this->assertEquals(2, $exercice->fresh()->statut);
+    }
+
+    /**
 
      * Test delete exercice successfully
      */

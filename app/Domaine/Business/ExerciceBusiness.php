@@ -178,6 +178,25 @@ class ExerciceBusiness
     }
 
     /**
+     * Annule la validation d'un exercice (retour à Saisi), pour permettre à
+     * un titulaire de la permission de validation de corriger une erreur
+     * sans devoir passer par l'annulation complète de l'exercice. Seul un
+     * exercice fraîchement validé (pas encore imputé) peut être dévalidé.
+     *
+     * @throws ArrayException
+     */
+    public static function devaliderExerciceById($exerciceId)
+    {
+        $statut = Exercice::findOrFail($exerciceId)->statut;
+        if ($statut !== self::EXERCICE_STATUT_VALIDE) {
+            throw new ArrayException(["message" => "Impossible d'annuler la validation de l'exercice."]);
+        }
+
+        self::updateExerciceById($exerciceId, ["statut" => self::EXERCICE_STATUT_SAISI]);
+        return self::EXERCICE_STATUT_SAISI;
+    }
+
+    /**
      * Update presences à partir d'une liste complète saisie
      *
      * @param $data
@@ -761,7 +780,7 @@ class ExerciceBusiness
     {
         // Check pas déjà imputé
         $statut = Exercice::findOrFail($exerciceId)->statut;
-        if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_SAISI) {
+        if ($statut == self::EXERCICE_STATUT_ANNULE || $statut > self::EXERCICE_STATUT_VALIDE) {
             throw new ArrayException([], 'Impossible de modifier un exercice déjà imputé');
         }
 
@@ -787,7 +806,7 @@ class ExerciceBusiness
             ->whereHas("exercice", function ($q) {
                 // Check pour chaque exercice s'il est possible de supprimer la convocation et donc que l'exercice n'est pas déjà imputé
                 $q->where('statut', '>', self::EXERCICE_STATUT_ANNULE)
-                    ->where('statut', '<=', self::EXERCICE_STATUT_SAISI);
+                    ->where('statut', '<=', self::EXERCICE_STATUT_VALIDE);
             })
             ->delete();
         return true;

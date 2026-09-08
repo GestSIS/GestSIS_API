@@ -397,6 +397,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenRole:exercice.validation'], function () {
         Route::apiResource('exercices', ExerciceController::class)->only(['destroy']);
         Route::post('exercices/{id}/valider', [ExerciceController::class, 'valider'])->name('api.v2.exercices.valider');
+        Route::post('exercices/{id}/devalider', [ExerciceController::class, 'devalider'])->name('api.v2.exercices.devalider');
         Route::post('exercices/{id}/annuler', [ExerciceController::class, 'annuler'])->name('api.v2.exercices.annuler');
         Route::post('exercices/{id}/reactiver', [ExerciceController::class, 'reactiver'])->name('api.v2.exercices.reactiver');
     });

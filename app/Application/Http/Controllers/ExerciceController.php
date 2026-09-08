@@ -155,6 +155,12 @@ class ExerciceController extends Controller
         return response()->json(['data' => $exercice]);
     }
 
+    public function devalider($id)
+    {
+        $statut = ExerciceBusiness::devaliderExerciceById($id);
+        return response()->json(['data' => ['statut' => $statut]]);
+    }
+
     public function listeAppel(Request $request, $exerciceId)
     {
         $sisKey = $request->header('Sis-Key', Null);
