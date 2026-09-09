@@ -40,7 +40,7 @@ class MaterielTypeTest extends TestCase
     {
         $diametre = TuyauDiametre::firstOrCreate(['diametre' => 55]);
 
-        $payload = $this->basePayload(MaterielTypeBusiness::TYPE_PIPE, [
+        $payload = $this->basePayload(MaterielTypeBusiness::TYPE_TUYAU, [
             'tuyau' => ['tuyau_diametre_id' => $diametre->id, 'longeur' => 20, 'separement' => true],
         ]);
 

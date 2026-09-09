@@ -287,9 +287,9 @@ class ArticleBusiness
   }
 
   /**
-   * Get list of items of a given sapeur
-   * @param integer $sapeurId ID of the sapeur for which to get items
-   * @return Collection of #item_existing_details
+   * Get list of articles of a given sapeur
+   * @param integer $sapeurId ID of the sapeur for which to get articles
+   * @return Collection<int, Article>
    */
   public static function getArticlesPourSapeur($sapeurId)
   {
@@ -297,8 +297,8 @@ class ArticleBusiness
   }
 
   /**
-   * Get list of items that can be attributed
-   * @return Collection of #item_existing_details
+   * Get list of articles that can be attributed
+   * @return Collection<int, Article>
    */
   public static function getArticlesAttribuable()
   {
@@ -310,8 +310,8 @@ class ArticleBusiness
   }
 
   /**
-   * Get list of items that can be attributed
-   * @return Collection of #item_existing_details
+   * Get list of articles that can be washed (lavable)
+   * @return Collection<int, Article>
    */
   public static function getArticlesLavable()
   {
@@ -322,8 +322,8 @@ class ArticleBusiness
   }
 
   /**
-   * Get list of all items
-   * @return Collection of #item_existing_details
+   * Get list of all articles
+   * @return Collection<int, Article>
    */
   public static function getAllArticles()
   {
@@ -331,9 +331,9 @@ class ArticleBusiness
   }
 
   /**
-   * Get list of items of a given product
-   * @param integer $materielTypeId ID of the product for which to get items
-   * @return Collection of #item_existing_details
+   * Get list of articles of a given materiel type
+   * @param integer $materielTypeId ID of the materiel type for which to get articles
+   * @return Collection<int, Article>
    */
   public static function getArticlesParMaterielType($materielTypeId)
   {
@@ -341,9 +341,9 @@ class ArticleBusiness
   }
 
   /**
-   * Get list of items hierarchized by categorie, product and sublocation
-   * @param integer $locationId ID of the main location to consider (incl. children)
-   * @return Collection field "categories" of #location_existing_full
+   * Get list of articles rangés dans un emplacement et ses descendants
+   * @param integer $locationId ID de l'emplacement racine à considérer (avec ses descendants)
+   * @return Collection<int, Article>
    */
   public static function getArticlesParEmplacement($locationId)
   {

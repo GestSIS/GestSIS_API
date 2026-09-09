@@ -9,8 +9,8 @@ class LavageBusiness
 {
 
   /**
-   * Get a single lavage
-   * @return
+   * Get list of all lavages
+   * @return \Illuminate\Database\Eloquent\Collection<int, Lavage>
    */
   public static function getAllLavages()
   {
@@ -20,8 +20,9 @@ class LavageBusiness
   }
 
   /**
-   * Get derniers lavages
-   * @return
+   * Get list of lavages since a given date
+   * @param string $depuis Date à partir de laquelle récupérer les lavages
+   * @return \Illuminate\Database\Eloquent\Collection<int, Lavage>
    */
   public static function getLavagesDepuis($depuis)
   {
@@ -32,9 +33,9 @@ class LavageBusiness
   }
 
   /**
-   * Create a new lavage
-   * @param array $lavage #lavage Properties of the new lavage
-   * @return # obj ID of the created lavage
+   * Create new lavages
+   * @param array $lavages Properties of each new lavage to create
+   * @return Lavage[]
    */
   public static function createLavages($lavages)
   {

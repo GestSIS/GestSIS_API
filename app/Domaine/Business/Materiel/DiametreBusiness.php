@@ -10,8 +10,8 @@ class DiametreBusiness
 
   /**
    * Create a new diametre
-   * @param array $diametre #diametre_new Properties of the new diametre
-   * @return #idobj ID of the created diametre
+   * @param array $diametre Properties of the new diametre
+   * @return \App\Models\TuyauDiametre
    */
   public static function createDiametre($diametre)
   {
@@ -21,7 +21,7 @@ class DiametreBusiness
   /**
    * Edit an existing diametre
    * @param integer $id ID of the diametre to edit
-   * @param array $data #diametre_new Properties of the diametre to modify
+   * @param array $data Properties of the diametre to modify
    */
   public static function editDiametre($id, $data)
   {

@@ -8,8 +8,8 @@ class BatterieBusiness
 {
   /**
    * Create a new batterie
-   * @param array $batterie #batterietype_new Properties of the new batterie
-   * @return #idobj ID of the created batterie
+   * @param array $batterie Properties of the new batterie
+   * @return \App\Models\BatterieType
    */
   public static function createBatterie($batterie)
   {
@@ -20,7 +20,7 @@ class BatterieBusiness
   /**
    * Edit an existing batterie
    * @param integer $id ID of the batterie to edit
-   * @param array $data #batterietype_new Properties of the batterie to modify
+   * @param array $data Properties of the batterie to modify
    */
   public static function editBatterie($id, $data)
   {

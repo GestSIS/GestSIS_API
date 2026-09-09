@@ -6,20 +6,11 @@ use App\Models\Couleur;
 
 class CouleurBusiness
 {
-  /**
-   * Get a single couleur
-   * @param integer $id ID of the couleur to get
-   * @return #couleur_existing
-   */
-  public static function getCouleur($id)
-  {
-    return Couleur::find($id);
-  }
 
   /**
    * Create a new couleur
-   * @param array $couleur #couleur_new Properties of the new couleur
-   * @return #idobj ID of the created couleur
+   * @param array $couleur Properties of the new couleur
+   * @return \App\Models\Couleur
    */
   public static function createCouleur($couleur)
   {
@@ -29,7 +20,7 @@ class CouleurBusiness
   /**
    * Edit an existing couleur
    * @param integer $id ID of the couleur to edit
-   * @param array $data #couleur_new Properties of the couleur to modify
+   * @param array $data Properties of the couleur to modify
    */
   public static function editCouleur($id, $data)
   {

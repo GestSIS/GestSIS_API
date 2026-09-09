@@ -14,15 +14,15 @@ class MaterielTypeBusiness
 {
 
   const TYPE_NONE = 0;
-  const TYPE_PIPE = 1;
+  const TYPE_TUYAU = 1;
   // 2 = ancien TYPE_BATTERY, retiré (migré vers la propriété a_batterie), ne pas réutiliser
   const TYPE_VEHICULE = 3;
   const TYPE_HANGAR = 4;
 
   /**
    * Create a new product
-   * @param #product_new $product Properties of the new product
-   * @return #idobj ID of the created product
+   * @param array $product Properties of the new product
+   * @return \App\Models\MaterielType
    */
   public static function createProduct($product)
   {
@@ -53,7 +53,7 @@ class MaterielTypeBusiness
       'tri' => ($order ?? 0) + 1,
     ]);
 
-    if ($product['type'] === self::TYPE_PIPE && $tuyau) {
+    if ($product['type'] === self::TYPE_TUYAU && $tuyau) {
       MaterielTypeTuyau::create(['id' => $type->id, ...$tuyau]);
     }
     if (($product['a_batterie'] ?? false) && $batterie) {
@@ -66,7 +66,7 @@ class MaterielTypeBusiness
   /**
    * Edit a product
    * @param integer $id ID of the product to edit
-   * @param #product_edit_minimal | #product_edit_full $data Properties of the product to modify
+   * @param array $data Properties of the product to modify
    */
   public static function editProduct($id, $data)
   {
@@ -104,7 +104,7 @@ class MaterielTypeBusiness
       ->limit(1)
       ->update($data);
 
-    if ($data['type'] === self::TYPE_PIPE && $tuyau) {
+    if ($data['type'] === self::TYPE_TUYAU && $tuyau) {
       MaterielTypeTuyau::updateOrCreate(['id' => $id], $tuyau);
     } else {
       MaterielTypeTuyau::whereId($id)->delete();
@@ -136,7 +136,7 @@ class MaterielTypeBusiness
   /**
    * Reorder an existing product
    * @param integer $id ID of the product to reorder
-   * @param #reorder $reorder Infos about the reordering
+   * @param array $reorder Infos about the reordering
    */
   public static function reorderProduct($id, $reorder)
   {

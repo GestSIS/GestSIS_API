@@ -14,7 +14,7 @@ class EmplacementBusiness
   /**
    * Get a single emplacement
    * @param integer $id ID of the emplacement to get
-   * @return #emplacement_existing
+   * @return \App\Models\Emplacement|null
    */
   public static function getEmplacement($id)
   {
@@ -23,10 +23,10 @@ class EmplacementBusiness
 
   /**
    * Create a new emplacement
-   * @param array $emplacement #emplacement_new Properties of the new emplacement, avec
+   * @param array $emplacement Properties of the new emplacement, avec
    * éventuellement un sous-objet hangar (rue, no_rue, localite_id) si cet emplacement
    * représente un hangar (bâtiment)
-   * @return #idobj ID of the created emplacement
+   * @return \App\Models\Emplacement
    */
   public static function createEmplacement($emplacement)
   {
@@ -128,7 +128,7 @@ class EmplacementBusiness
   /**
    * Edit an existing emplacement
    * @param integer $id ID of the emplacement to edit
-   * @param array $data #emplacement_new Properties of the emplacement to modify
+   * @param array $data Properties of the emplacement to modify
    */
   public static function editEmplacement($id, $data)
   {

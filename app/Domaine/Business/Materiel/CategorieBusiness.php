@@ -12,8 +12,8 @@ class CategorieBusiness
 
   /**
    * Create a new categorie
-   * @param array $categorie #categorie_new Properties of the new categorie
-   * @return #idobj ID of the created categorie
+   * @param array $categorie Properties of the new categorie
+   * @return \App\Models\MaterielCategorie
    */
   public static function createCategorie($categorie)
   {
@@ -29,7 +29,7 @@ class CategorieBusiness
   /**
    * Edit basic informations of an existing categorie
    * @param integer $id ID of the categorie to edit
-   * @param array $data #categorie_new Properties of the categorie to modify
+   * @param array $data Properties of the categorie to modify
    */
   public static function editCategorie($id, $data)
   {
@@ -79,7 +79,7 @@ class CategorieBusiness
   /**
    * Reorder an existing categorie
    * @param integer $id ID of the categorie to reorder
-   * @param array $reorder #reorder Infos about the reordering
+   * @param array $reorder Infos about the reordering
    */
   public static function reorderCategorie($id, $reorder)
   {
