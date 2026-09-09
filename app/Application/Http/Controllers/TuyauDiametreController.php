@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\Business\Materiel\DiameterBusiness;
+use App\Domaine\Business\Materiel\DiametreBusiness;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -16,7 +16,7 @@ class TuyauDiametreController extends Controller
      */
     public function index()
     {
-        $diametres = DiameterBusiness::listDiameters();
+        $diametres = DiametreBusiness::listeDiametres();
         return response()->json(['data' => $diametres]);
     }
 
@@ -26,7 +26,7 @@ class TuyauDiametreController extends Controller
             'diametre' => 'integer|min:1|required|unique:tuyau_diametres,diametre',
         ]);
 
-        $diametre = DiameterBusiness::createDiameter($data);
+        $diametre = DiametreBusiness::createDiametre($data);
         return response()->json(['data' => $diametre]);
     }
 
@@ -39,13 +39,13 @@ class TuyauDiametreController extends Controller
             ],
         ]);
 
-        $diametre = DiameterBusiness::editDiameter($id, $data);
+        $diametre = DiametreBusiness::editDiametre($id, $data);
         return response()->json(['data' => $diametre]);
     }
 
     public function destroy($id)
     {
-        $diametre = DiameterBusiness::deleteDiameter($id);
+        $diametre = DiametreBusiness::deleteDiametre($id);
         return response()->json(['data' => $diametre]);
     }
 }

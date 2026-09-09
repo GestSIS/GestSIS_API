@@ -5,14 +5,6 @@ namespace App\Domaine\Business\Materiel;
 use App\Models\Lavage;
 use Date;
 
-/**
- * Model for manipulating 'lavagetype' database table
- * Available public methods
- * @static getlavage($id)
- * @static createLavage($lavage)
- * @static editLavage($id, $data)
- * @static deleteLavage($id)
- */
 class LavageBusiness
 {
 

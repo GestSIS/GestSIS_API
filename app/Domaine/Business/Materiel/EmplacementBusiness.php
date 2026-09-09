@@ -9,15 +9,6 @@ use DB;
 use \Illuminate\Database\Eloquent\Collection;
 use App\Models\Emplacement;
 
-/**
- * Model for manipulating 'emplacement' database table
- * Available public methods
- * @static listEmplacements()
- * @static getEmplacement($id)
- * @static createEmplacement($emplacement)
- * @static editEmplacement($id, $data)
- * @static deleteEmplacement($id)
- */
 class EmplacementBusiness
 {
 

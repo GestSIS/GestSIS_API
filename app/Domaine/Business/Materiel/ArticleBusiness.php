@@ -13,10 +13,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Nette\Utils\Arrays;
 
-/**
- * Model for manipulating 'item' database table
- * Available public methods
- */
 class ArticleBusiness
 {
   // const EVENT_STATUS_NONE = "NONE";
@@ -345,7 +341,7 @@ class ArticleBusiness
   }
 
   /**
-   * Get list of items hierarchized by category, product and sublocation
+   * Get list of items hierarchized by categorie, product and sublocation
    * @param integer $locationId ID of the main location to consider (incl. children)
    * @return Collection field "categories" of #location_existing_full
    */

@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\Business\Materiel\BatteryBusiness;
+use App\Domaine\Business\Materiel\BatterieBusiness;
 use Illuminate\Http\Request;
 
 class BatterieTypeController extends Controller
@@ -15,7 +15,7 @@ class BatterieTypeController extends Controller
      */
     public function index()
     {
-        $batteries = BatteryBusiness::listBatteries();
+        $batteries = BatterieBusiness::listeBatteries();
         return response()->json(['data' => $batteries]);
     }
 
@@ -25,7 +25,7 @@ class BatterieTypeController extends Controller
             'nom' => 'string|min:1|required',
         ]);
 
-        $batterie = BatteryBusiness::createBattery($data);
+        $batterie = BatterieBusiness::createBatterie($data);
         return response()->json(['data' => $batterie]);
     }
 
@@ -35,13 +35,13 @@ class BatterieTypeController extends Controller
             'nom' => 'string|min:1|required',
         ]);
 
-        $batterie = BatteryBusiness::editBattery($id, $data);
+        $batterie = BatterieBusiness::editBatterie($id, $data);
         return response()->json(['data' => $batterie]);
     }
 
     public function destroy($id)
     {
-        $batterie = BatteryBusiness::deleteBattery($id);
+        $batterie = BatterieBusiness::deleteBatterie($id);
         return response()->json(['data' => $batterie]);
     }
 }

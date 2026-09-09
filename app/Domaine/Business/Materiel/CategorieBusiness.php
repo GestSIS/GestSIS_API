@@ -7,12 +7,12 @@ use App\Models\MaterielCategorie;
 use App\Models\MaterielType;
 use DB;
 
-class CategoryBusiness // extends OrderModel
+class CategorieBusiness
 {
 
   /**
    * Get list of categories with contained products
-   * @return \Illuminate\Database\Eloquent\Collection of #category_existing_withproducts
+   * @return \Illuminate\Database\Eloquent\Collection of #categorie_existing_withproducts
    */
   public static function listCategories()
   {
@@ -20,27 +20,27 @@ class CategoryBusiness // extends OrderModel
   }
 
   /**
-   * Create a new category
-   * @param array $category #category_new Properties of the new category
-   * @return #idobj ID of the created category
+   * Create a new categorie
+   * @param array $categorie #categorie_new Properties of the new categorie
+   * @return #idobj ID of the created categorie
    */
-  public static function createCategory($category)
+  public static function createCategorie($categorie)
   {
     $order = DB::table('materiel_categories')->max('id');
     return MaterielCategorie::create([
-      'designation' => $category['designation'] ?? '',
-      'parent_id' => $category['parent_id'] ?? null,
-      'couleur_id' => $category['couleur_id'],
+      'designation' => $categorie['designation'] ?? '',
+      'parent_id' => $categorie['parent_id'] ?? null,
+      'couleur_id' => $categorie['couleur_id'],
       'tri' => ($order ?? 0) + 1,
     ]);
   }
 
   /**
-   * Edit basic informations of an existing category
-   * @param integer $id ID of the category to edit
-   * @param array $data #category_new Properties of the category to modify
+   * Edit basic informations of an existing categorie
+   * @param integer $id ID of the categorie to edit
+   * @param array $data #categorie_new Properties of the categorie to modify
    */
-  public static function editCategory($id, $data)
+  public static function editCategorie($id, $data)
   {
     self::assertNoCycle((int) $id, isset($data['parent_id']) ? (int) $data['parent_id'] : null);
 
@@ -70,11 +70,11 @@ class CategoryBusiness // extends OrderModel
   }
 
   /**
-   * Delete an existing category
-   * @param integer $id ID of the category to delete
+   * Delete an existing categorie
+   * @param integer $id ID of the categorie to delete
    * @return boolean true if deleted successfully
    */
-  public static function deleteCategory($id)
+  public static function deleteCategorie($id)
   {
     if (
       MaterielCategorie::where('parent_id', $id)->exists() ||
@@ -86,13 +86,13 @@ class CategoryBusiness // extends OrderModel
   }
 
   /**
-   * Reorder an existing category
-   * @param integer $id ID of the category to reorder
+   * Reorder an existing categorie
+   * @param integer $id ID of the categorie to reorder
    * @param array $reorder #reorder Infos about the reordering
    */
-  public static function reorderCategory($id, $reorder)
+  public static function reorderCategorie($id, $reorder)
   {
     // TODO: a réimplémenter
-    // self::reorder("category", $id, $reorder);
+    // self::reorder("categorie", $id, $reorder);
   }
 }

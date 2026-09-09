@@ -10,7 +10,7 @@ class MaterielCategorieTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function testEditCategoryRejectsDirectSelfParenting(): void
+    public function testEditCategorieRejectsDirectSelfParenting(): void
     {
         $categorie = MaterielCategorie::factory()->create();
 
@@ -24,7 +24,7 @@ class MaterielCategorieTest extends TestCase
         $this->assertNull($categorie->fresh()->parent_id);
     }
 
-    public function testEditCategoryRejectsMultiLevelCycle(): void
+    public function testEditCategorieRejectsMultiLevelCycle(): void
     {
         // Hiérarchie : a (racine) -> b -> c. On tente de faire de "a" un enfant de "c",
         // ce qui créerait un cycle a -> b -> c -> a sans jamais réutiliser directement l'id de "a".
@@ -42,7 +42,7 @@ class MaterielCategorieTest extends TestCase
         $this->assertNull($a->fresh()->parent_id);
     }
 
-    public function testEditCategorySucceedsWithValidParentChange(): void
+    public function testEditCategorieSucceedsWithValidParentChange(): void
     {
         $ancienParent = MaterielCategorie::factory()->create();
         $nouveauParent = MaterielCategorie::factory()->create();

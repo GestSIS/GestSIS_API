@@ -15,7 +15,7 @@ class MaterielTypeController extends Controller
      */
     public function index()
     {
-        $types = MaterielTypeBusiness::listProductsBasicByCategory();
+        $types = MaterielTypeBusiness::listProductsBasicByCategorie();
         return response()->json(['data' => $types]);
     }
 

@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domaine\Business\Materiel\ColorBusiness;
+use App\Domaine\Business\Materiel\CouleurBusiness;
 use Illuminate\Http\Request;
 
 class CouleurController extends Controller
@@ -15,7 +15,7 @@ class CouleurController extends Controller
      */
     public function index()
     {
-        $couleurs = ColorBusiness::listColors();
+        $couleurs = CouleurBusiness::listeCouleurs();
         return response()->json(['data' => $couleurs]);
     }
 
@@ -27,7 +27,7 @@ class CouleurController extends Controller
             'fond' => 'string|required',
         ]);
 
-        $couleur = ColorBusiness::createCouleur($data);
+        $couleur = CouleurBusiness::createCouleur($data);
         return response()->json(['data' => $couleur]);
     }
 
@@ -39,13 +39,13 @@ class CouleurController extends Controller
             'fond' => 'string|required',
         ]);
 
-        $couleur = ColorBusiness::editCouleur($id, $data);
+        $couleur = CouleurBusiness::editCouleur($id, $data);
         return response()->json(['data' => $couleur]);
     }
 
     public function destroy($id)
     {
-        $couleur = ColorBusiness::deleteCouleur($id);
+        $couleur = CouleurBusiness::deleteCouleur($id);
         return response()->json(['data' => $couleur]);
     }
 }

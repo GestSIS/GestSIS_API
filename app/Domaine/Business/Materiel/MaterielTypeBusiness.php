@@ -11,20 +11,7 @@ use App\Models\MaterielTypeTuyau;
 use DB;
 use Illuminate\Database\Eloquent\Collection;
 
-/**
- * Model for manipulating 'product' database table
- * Available public methods
- * @static listProductsBasicByCategory()
- * @static listProductsAlertsByCategory()
- * @static getProductForEditMinimal($id)
- * @static getProductForEditComplete($id)
- * @static getProductFull($id)
- * @static createProduct($product)
- * @static editProduct($id, $data)
- * @static deleteProduct($id)
- * @static reorderProduct($id, $reorder)
- */
-class MaterielTypeBusiness // extends OrderModel
+class MaterielTypeBusiness
 {
 
   const TYPE_NONE = 0;
@@ -34,10 +21,10 @@ class MaterielTypeBusiness // extends OrderModel
   const TYPE_HANGAR = 4;
 
   /**
-   * Get list of products with only basic informations, grouped by category
-   * @return Collection of categoryId => [ #product_existing_basic ]
+   * Get list of products with only basic informations, grouped by categorie
+   * @return Collection of categorieId => [ #product_existing_basic ]
    */
-  public static function listProductsBasicByCategory(): Collection
+  public static function listProductsBasicByCategorie(): Collection
   {
     return MaterielType::with(['tuyau', 'batterie'])->orderBy('tri', 'asc')->get();
   }
@@ -164,6 +151,6 @@ class MaterielTypeBusiness // extends OrderModel
   public static function reorderProduct($id, $reorder)
   {
     // TODO: a implémenter
-    // self::reorder("product", $id, $reorder, "category_id");
+    // self::reorder("product", $id, $reorder, "categorie_id");
   }
 }
