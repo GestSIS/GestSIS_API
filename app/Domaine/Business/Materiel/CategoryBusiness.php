@@ -42,11 +42,8 @@ class CategoryBusiness // extends OrderModel
    */
   public static function editCategory($id, $data)
   {
-    if ($data['parent_id'] === $id) {
-      throw new ArrayException([], "Récursivité illégale détectée");
-    }
+    self::assertNoCycle((int) $id, isset($data['parent_id']) ? (int) $data['parent_id'] : null);
 
-    // TODO: Controller récursivity du parent multi-niveau
     MaterielCategorie::whereId($id)->limit(1)->update([
       'designation' => $data['designation'],
       'parent_id' => $data['parent_id'],
@@ -54,6 +51,22 @@ class CategoryBusiness // extends OrderModel
     ]);
 
     return MaterielCategorie::find($id);
+  }
+
+  /**
+   * Vérifie qu'attribuer $newParentId comme parent de la catégorie $id ne créerait
+   * pas de cycle dans la hiérarchie (une catégorie ne peut pas être son propre
+   * ancêtre, directement ou via une chaîne de parent_id).
+   */
+  public static function assertNoCycle(int $id, ?int $newParentId): void
+  {
+    $currentId = $newParentId;
+    while ($currentId !== null) {
+      if ($currentId === $id) {
+        throw new ArrayException([], "Récursivité illégale détectée");
+      }
+      $currentId = MaterielCategorie::find($currentId)?->parent_id;
+    }
   }
 
   /**
