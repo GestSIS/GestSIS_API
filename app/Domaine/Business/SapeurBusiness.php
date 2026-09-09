@@ -133,7 +133,9 @@ class SapeurBusiness
     public static function createSapeur($data)
     {
         //TODO: Add iban statut système validation
-        //TODO: Add no_avs validation
+        if (!self::estAvsValide($data['no_avs'] ?? null)) {
+            throw new ArrayException(['no_avs' => 'Numéro AVS invalide.']);
+        }
         $data = self::normalizeNullableFields($data);
         $data['iban_statut'] = 1;
         $data['actif'] = true;
@@ -154,7 +156,9 @@ class SapeurBusiness
     public static function createCivil($data)
     {
         //TODO: Add iban statut système validation
-        //TODO: Add no_avs validation
+        if (!self::estAvsValide($data['no_avs'] ?? null)) {
+            throw new ArrayException(['no_avs' => 'Numéro AVS invalide.']);
+        }
         $data = self::normalizeNullableFields($data);
         $data['iban_statut'] = 1;
         $data['actif'] = true;
@@ -169,6 +173,31 @@ class SapeurBusiness
     private static function normaliserAvs(string $noAvs): string
     {
         return preg_replace('/[^0-9]/', '', $noAvs);
+    }
+
+    /**
+     * Valide le format et la clé de contrôle d'un numéro AVS suisse : préfixe 756 + 9 chiffres
+     * + 1 chiffre de contrôle, calculé selon l'algorithme EAN-13 (somme pondérée 1/3, mod 10).
+     * Un numéro vide est considéré valide (le champ est optionnel pour un sapeur/civil).
+     */
+    public static function estAvsValide(?string $noAvs): bool
+    {
+        $chiffres = self::normaliserAvs((string) $noAvs);
+        if ($chiffres === '') {
+            return true;
+        }
+
+        if (!preg_match('/^756\d{10}$/', $chiffres)) {
+            return false;
+        }
+
+        $somme = 0;
+        for ($i = 0; $i < 12; $i++) {
+            $somme += (int) $chiffres[$i] * ($i % 2 === 0 ? 1 : 3);
+        }
+        $cleControle = (10 - ($somme % 10)) % 10;
+
+        return $cleControle === (int) $chiffres[12];
     }
 
     /**
@@ -192,6 +221,10 @@ class SapeurBusiness
      */
     public static function createRecrue($data)
     {
+        if (!self::estAvsValide($data['no_avs'])) {
+            throw new ArrayException(['no_avs' => 'Numéro AVS invalide.']);
+        }
+
         if (self::avsDejaUtilise($data['no_avs'])) {
             throw new ArrayException(['no_avs' => 'Une inscription existe déjà avec ce numéro AVS.']);
         }

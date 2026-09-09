@@ -240,6 +240,20 @@ class RecrutementTest extends TestCase
         $response->assertStatus(404);
     }
 
+    public function testStorePublicBloqueUnAvsAuFormatInvalide()
+    {
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+
+        $response = $this->json(
+            'POST',
+            "/api/v2/recrutement/test/{$tokenEnClair}",
+            $this->formulaireRecrue(['no_avs' => '756.1234.5678.98']), // clé de contrôle erronée
+        );
+
+        $response->assertStatus(200)->assertJsonStructure(['error']);
+        $this->assertCount(0, Sapeur::where('no_avs', '756.1234.5678.98')->get());
+    }
+
     public function testStorePublicBloqueUnAvsDejaExistant()
     {
         Sapeur::factory()->create([

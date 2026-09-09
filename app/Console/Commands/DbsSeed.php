@@ -56,17 +56,17 @@ class DbsSeed extends Command
             // Cours::where('designation', '=', 'Chef d\'intervention 2')->update(['grade_id' => 3]);
             // Cours::where('designation', '=', 'Machiniste')->update(['grade_id' => 7]);
             // Cours::where('designation', '=', 'Chef de groupe')->update(['grade_id' => 6]);
-            // TODO: if jsp dans $db
-            if (str_contains($db, 'jsp')) {
-                printf("Seeding SIS $db\n");
-                Cours::insert([
-                    ['designation' => 'JSP Module 1', 'abreviation' => 'JSP 1', 'tri' => 1],
-                    ['designation' => 'JSP Module 2', 'abreviation' => 'JSP 2', 'tri' => 2],
-                    ['designation' => 'JSP Module 3', 'abreviation' => 'JSP 3', 'tri' => 3],
-                    ['designation' => 'JSP Module 4', 'abreviation' => 'JSP 4', 'tri' => 4],
-                    ['designation' => 'JSP Module 5', 'abreviation' => 'JSP 5', 'tri' => 5],
-                ]);
-            }
+            // if jsp dans $db
+            // if (str_contains($db, 'jsp')) {
+            //     printf("Seeding SIS $db\n");
+            //     Cours::insert([
+            //         ['designation' => 'JSP Module 1', 'abreviation' => 'JSP 1', 'tri' => 1],
+            //         ['designation' => 'JSP Module 2', 'abreviation' => 'JSP 2', 'tri' => 2],
+            //         ['designation' => 'JSP Module 3', 'abreviation' => 'JSP 3', 'tri' => 3],
+            //         ['designation' => 'JSP Module 4', 'abreviation' => 'JSP 4', 'tri' => 4],
+            //         ['designation' => 'JSP Module 5', 'abreviation' => 'JSP 5', 'tri' => 5],
+            //     ]);
+            // }
             printf("\n");
         });
         printf("Migrating done\n");
