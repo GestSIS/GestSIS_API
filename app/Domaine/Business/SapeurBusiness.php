@@ -831,6 +831,7 @@ class SapeurBusiness
                 "cours" => CoursSapeur::with(['localite', 'cours'])->where('sapeur_id', $sapeurId)->orderBy('date')->get(),
                 "telephones" => SapeurTelephone::with(['telephoneType'])->where('sapeur_id', $sapeurId)->orderBy('priorite')->get(),
                 "permis" => Permis::with(['permisType'])->where('sapeur_id', $sapeurId)->orderBy('date')->get(),
+                "materiel" => Article::with(['materielType'])->where('sapeur_id', $sapeurId)->orderBy('attribution')->get(),
             ],
             $logoPath
         );

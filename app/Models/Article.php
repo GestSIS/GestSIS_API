@@ -48,6 +48,11 @@ class Article extends Model
         return $this->belongsTo(Sapeur::class);
     }
 
+    public function materielType()
+    {
+        return $this->belongsTo(MaterielType::class, 'materiel_type_id');
+    }
+
     public function lavages()
     {
         return $this->hasMany(Lavage::class);

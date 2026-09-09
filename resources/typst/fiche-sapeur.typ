@@ -10,7 +10,7 @@
 }, numbering: "1 / 1")
 
 #let (
-  sapeur, fonctions, grades, mutations, cours, telephones, permis
+  sapeur, fonctions, grades, mutations, cours, telephones, permis, materiel
 ) = json("fiche-sapeur.json")
 
 #set table(
@@ -222,6 +222,24 @@
   }.flatten()
 )
 
-// == Matériel
+== Matériel
 
-// TODO: future
+#table(
+  stroke: none,
+  columns: (auto, 1fr, auto, 1fr, 1fr),
+  table.header(
+    [N°], [Type], [Taille], [Remarque], [Attribué]
+  ),
+  table.hline(),
+  ..if materiel.len() == 0 {
+    (table.cell(colspan: 5)[Aucun matériel],)
+  } else {
+    materiel.map(materiel => (
+      [#materiel.numero],
+      [#materiel.materiel_type.designation],
+      [#materiel.taille],
+      [#materiel.remarque],
+      [#formatDate(materiel.attribution)],
+    ))
+  }.flatten()
+)
