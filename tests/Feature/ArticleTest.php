@@ -133,6 +133,36 @@ class ArticleTest extends TestCase
         ]);
     }
 
+    public function testCreateArticlesRollsBackWholeBatchWhenOneArticleIsInvalid(): void
+    {
+        // Un lot contient un article valide (serait créé en premier) puis un véhicule sans
+        // couleur (rejeté) : la transaction doit empêcher le premier de rester en base.
+        $typeStandard = MaterielType::factory()->create(['est_numerote' => false]);
+        $emplacement = Emplacement::factory()->create();
+        $typeVehicule = $this->vehiculeType();
+
+        $response = $this->json('POST', '/api/v2/articles', [
+            'articles' => [
+                [
+                    'materiel_type_id' => $typeStandard->id,
+                    'quantite' => 1,
+                    'emplacement_id' => $emplacement->id,
+                    'designation' => 'Article valide du lot',
+                ],
+                [
+                    'materiel_type_id' => $typeVehicule->id,
+                    'quantite' => 1,
+                    'designation' => 'Camion sans couleur',
+                ],
+            ],
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure(['error']);
+        $this->assertDatabaseMissing('articles', ['designation' => 'Article valide du lot']);
+        $this->assertDatabaseMissing('articles', ['designation' => 'Camion sans couleur']);
+    }
+
     public function testCreateVehiculeArticleWithoutCouleurIsRejectedAndNotPersisted(): void
     {
         $type = $this->vehiculeType();

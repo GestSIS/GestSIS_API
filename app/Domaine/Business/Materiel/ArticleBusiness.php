@@ -10,6 +10,7 @@ use App\Models\BatterieType;
 use App\Models\Emplacement;
 use App\Models\MaterielType;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use Nette\Utils\Arrays;
 
 /**
@@ -80,7 +81,6 @@ class ArticleBusiness
 
   public static function creerArticles(array $articles): array
   {
-    //TODO: Fail safe
     // fetch types equivalents
     $indexedTypes = MaterielType::all()->keyBy('id');
 
@@ -109,7 +109,9 @@ class ArticleBusiness
     }
 
     // Controller numérotation correcte
-    return collect($articles)->map(function ($article) use ($indexedTypes) {
+    // Transaction : si un article du lot est invalide (ex: couleur manquante pour un
+    // emplacement), aucun des articles déjà créés dans ce même lot ne doit rester en base.
+    return DB::transaction(fn() => collect($articles)->map(function ($article) use ($indexedTypes) {
       $type = $indexedTypes[$article['materiel_type_id']];
       return [
         'quantite' => $type->est_numerote ? 1 : $article['quantite'],
@@ -149,7 +151,7 @@ class ArticleBusiness
 
         return $created->load('emplacementRepresentee');
       })
-      ->all();
+      ->all());
   }
 
   public static function editArticles(array $articles): Collection
