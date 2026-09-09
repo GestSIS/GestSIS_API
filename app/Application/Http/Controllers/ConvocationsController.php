@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 
 /**
  * Controller pour la convocation de sapeurs à des exercices
- * TODO: Fusionner avec ConvocationController
  */
 class ConvocationsController extends Controller
 {

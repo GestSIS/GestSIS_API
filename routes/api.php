@@ -534,7 +534,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('interventions/{id}/valider', [InterventionController::class, 'valider'])->name('api.v2.interventions.valider');
     });
     Route::group(['middleware' => 'jwtTokenRole:intervention.lecture,intervention.modification,comptabilite.lecture'], function () {
-        // TODO: see to add the correct right for the following routes : 'store', 'update']);
         Route::apiResource('phase-types', PhaseTypeController::class)->only(['index']);
         Route::apiResource('stat-federal', StatFederalController::class)->only(['index']);
         Route::apiResource('stat-intervention', StatInterventionController::class)->only(['index']);
