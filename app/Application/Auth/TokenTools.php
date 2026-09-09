@@ -82,6 +82,10 @@ class TokenTools
     public static function validateToken($token)
     {
         //        Log::debug("VALIDATE TOKEN");
+        if (!is_string($token) || $token === '') {
+            throw new \UnexpectedValueException('Token manquant ou invalide');
+        }
+
         $publicKey = Storage::disk('keys')->get(self::PUBLIC_KEY_FILE);
 
         $decoded = JWT::decode($token, new Key($publicKey, 'RS256'));
