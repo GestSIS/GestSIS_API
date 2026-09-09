@@ -214,6 +214,21 @@ class SapeurTest extends TestCase
         $this->assertEquals('Atelier', $sapeur->lieu_de_travail);
     }
 
+    public function testUpdateSapeurRefuseUnAvsAuFormatInvalide()
+    {
+        $sapeur = Sapeur::factory()->create([
+            'localite_id' => $this->localiteId,
+            'no_avs' => '756.1234.5678.97',
+        ]);
+
+        $response = $this->json('PUT', '/api/v2/sapeurs/' . $sapeur->id, [
+            'no_avs' => '756.1234.5678.98', // clé de contrôle erronée
+        ]);
+
+        $response->assertStatus(200)->assertJsonStructure(['error']);
+        $this->assertEquals('756.1234.5678.97', $sapeur->fresh()->no_avs);
+    }
+
     public function testUpdateSapeurReturnsErrorWhenNotFound()
     {
         $data = Sapeur::factory()->make()->toArray();

@@ -289,6 +289,10 @@ class SapeurBusiness
 
     public static function updateSapeurById(int $sapeurId, $data)
     {
+        if (array_key_exists('no_avs', $data) && !self::estAvsValide($data['no_avs'])) {
+            throw new ArrayException(['no_avs' => 'Numéro AVS invalide.']);
+        }
+
         $data = self::normalizeNullableFields($data);
         $sapeur = Sapeur::findOrFail($sapeurId);
         $sapeur->update($data);
