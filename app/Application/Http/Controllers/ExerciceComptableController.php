@@ -43,11 +43,6 @@ class ExerciceComptableController extends Controller
         return response()->json(['data' => $exercice]);
     }
 
-    public function destroy($id)
-    {
-        $exercice = ExerciceComptableBusiness::supprimerExerciceComptable($id);
-        return response()->json(['data' => $exercice]);
-    }
 
     public function cloturer($id)
     {

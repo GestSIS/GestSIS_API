@@ -652,7 +652,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     Route::group(['middleware' => 'jwtTokenRole:comptabilite.config'], function () {
-        //TODO: Suppression d'exercices comptable ???
         Route::apiResource('exercices-comptable', ExerciceComptableController::class)->only(['store', 'update']);
         //TODO: Regarder que faire avec cloturer, déjà modifiable via la route update pour le moment
         // Route::post('exercice-comptable/{id}/cloturer', [ExerciceComptableController::class, 'cloturer']);

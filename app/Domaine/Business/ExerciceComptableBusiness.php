@@ -23,11 +23,6 @@ class ExerciceComptableBusiness
         return ExerciceComptable::find($id);
     }
 
-    public static function supprimerExerciceComptable($id): void
-    {
-        //TODO: Not implemented now
-    }
-
     public static function cloturerExerciceComptable($id): ?ExerciceComptable
     {
         ExerciceComptable::whereId($id)->limit(1)->update(['boucle' => true]);
