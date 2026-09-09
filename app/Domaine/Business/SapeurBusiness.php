@@ -341,6 +341,13 @@ class SapeurBusiness
         return ['cours' => $cours, 'main_fonction_id' => $sapeur->fonction_id, 'main_grade_id' => $sapeur->grade_id];
     }
 
+    public static function addCoursMultiple(array $sapeurIds, array $data): array
+    {
+        return DB::transaction(fn() => collect($sapeurIds)
+            ->map(fn(int $sapeurId) => self::addCours($sapeurId, $data))
+            ->all());
+    }
+
     public static function updateCours(int $sapeurId, $data)
     {
         $cours = CoursSapeur::where('sapeur_id', $sapeurId)->findOrFail($data['id']);

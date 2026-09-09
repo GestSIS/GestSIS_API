@@ -298,6 +298,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::apiResource('sapeurs.grades', SapeurGradeController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('sapeurs.mutations', SapeurMutationController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('sapeurs.cours', SapeurCoursController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('cours-sapeurs', CoursSapeurController::class)->only(['store']);
         Route::apiResource('sapeurs.photo', SapeurPhotoController::class)->only(['store', 'delete']);
         Route::delete('sapeurs/{sapeurId}/photo', [SapeurPhotoController::class, 'destroy'])->name('api.v2.sapeur.photo-destroy');
 

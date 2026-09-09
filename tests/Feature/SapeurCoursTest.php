@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Domaine\Business\SapeurBusiness;
 use App\Models\CoursSapeur;
 use App\Models\FonctionSapeur;
 use App\Models\Sapeur;
@@ -249,5 +250,108 @@ class SapeurCoursTest extends TestCase
         // Assert
         $response->assertStatus(404)
             ->assertJson(['error' => 'Cours non trouvé']);
+    }
+
+    public function testAddCoursMultipleSuccessfully(): void
+    {
+        // Arrange
+        $sapeur1 = Sapeur::factory()->create();
+        $sapeur2 = Sapeur::factory()->create();
+        $data = [
+            'sapeur_ids' => [$sapeur1->id, $sapeur2->id],
+            'date' => '1958-02-07',
+            'duree' => 1,
+            'localite_id' => 1,
+            'cours_id' => 2,
+        ];
+
+        // Act
+        $response = $this->json('POST', '/api/v2/cours-sapeurs', $data);
+
+        // Assert
+        $response->assertStatus(200)
+            ->assertJsonCount(2, 'data');
+        $this->assertDatabaseHas('cours_sapeur', ['sapeur_id' => $sapeur1->id, 'cours_id' => 2]);
+        $this->assertDatabaseHas('cours_sapeur', ['sapeur_id' => $sapeur2->id, 'cours_id' => 2]);
+    }
+
+    public function testAddCoursMultipleWithGradeAndFonctionCreatesAssociatedRecordsForEachSapeur(): void
+    {
+        // Arrange
+        $sapeur1 = Sapeur::factory()->create();
+        $sapeur2 = Sapeur::factory()->create();
+        $data = [
+            'sapeur_ids' => [$sapeur1->id, $sapeur2->id],
+            'date' => '1958-02-07',
+            'duree' => 1,
+            'date_fonction' => '1960-06-05',
+            'date_grade' => '1965-12-29',
+            'localite_id' => 1,
+            'cours_id' => 2,
+            'grade_id' => 5,
+            'fonction_id' => 14,
+        ];
+
+        // Act
+        $response = $this->json('POST', '/api/v2/cours-sapeurs', $data);
+
+        // Assert
+        $response->assertStatus(200);
+        foreach ([$sapeur1, $sapeur2] as $sapeur) {
+            $this->assertDatabaseHas('grade_sapeur', [
+                'sapeur_id' => $sapeur->id,
+                'grade_id' => 5,
+                'date' => '1965-12-29',
+            ]);
+            $this->assertDatabaseHas('fonction_sapeur', [
+                'sapeur_id' => $sapeur->id,
+                'fonction_id' => 14,
+                'debut' => '1960-06-05',
+            ]);
+        }
+    }
+
+    public function testAddCoursMultipleReturnsValidationErrorWhenSapeurIdIsUnknown(): void
+    {
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        $data = [
+            'sapeur_ids' => [$sapeur->id, 99999],
+            'date' => '1958-02-07',
+            'duree' => 1,
+            'localite_id' => 1,
+            'cours_id' => 2,
+        ];
+
+        // Act
+        $response = $this->json('POST', '/api/v2/cours-sapeurs', $data);
+
+        // Assert
+        $response->assertStatus(200)
+            ->assertJsonStructure(['error']);
+        $this->assertDatabaseMissing('cours_sapeur', ['sapeur_id' => $sapeur->id, 'cours_id' => 2]);
+    }
+
+    public function testAddCoursMultipleRollsBackAllWhenOneSapeurIsCivil(): void
+    {
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        $civil = Sapeur::factory()->create(['type' => SapeurBusiness::TYPE_CIVIL]);
+        $data = [
+            'sapeur_ids' => [$sapeur->id, $civil->id],
+            'date' => '1958-02-07',
+            'duree' => 1,
+            'localite_id' => 1,
+            'cours_id' => 2,
+        ];
+
+        // Act
+        $response = $this->json('POST', '/api/v2/cours-sapeurs', $data);
+
+        // Assert
+        $response->assertStatus(200)
+            ->assertJson(['error' => ['message' => "Impossible d'ajouter un cours à un civil."]]);
+        $this->assertDatabaseMissing('cours_sapeur', ['sapeur_id' => $sapeur->id, 'cours_id' => 2]);
+        $this->assertDatabaseMissing('cours_sapeur', ['sapeur_id' => $civil->id, 'cours_id' => 2]);
     }
 }
