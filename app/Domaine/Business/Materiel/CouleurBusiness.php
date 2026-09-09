@@ -5,15 +5,7 @@ namespace App\Domaine\Business\Materiel;
 use App\Models\Couleur;
 
 class CouleurBusiness
-{  /**
-   * Get list of couleurs
-   * @return \Illuminate\Database\Eloquent\Collection of #couleur_existing
-   */
-  public static function listeCouleurs()
-  {
-    return Couleur::orderBy('nom')->get();
-  }
-
+{
   /**
    * Get a single couleur
    * @param integer $id ID of the couleur to get

@@ -11,15 +11,6 @@ class CategorieBusiness
 {
 
   /**
-   * Get list of categories with contained products
-   * @return \Illuminate\Database\Eloquent\Collection of #categorie_existing_withproducts
-   */
-  public static function listCategories()
-  {
-    return MaterielCategorie::all();
-  }
-
-  /**
    * Create a new categorie
    * @param array $categorie #categorie_new Properties of the new categorie
    * @return #idobj ID of the created categorie

@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\Materiel\CouleurBusiness;
+use App\Models\Couleur;
 use Illuminate\Http\Request;
 
 class CouleurController extends Controller
@@ -15,7 +16,7 @@ class CouleurController extends Controller
      */
     public function index()
     {
-        $couleurs = CouleurBusiness::listeCouleurs();
+        $couleurs = Couleur::orderBy('nom')->get();
         return response()->json(['data' => $couleurs]);
     }
 

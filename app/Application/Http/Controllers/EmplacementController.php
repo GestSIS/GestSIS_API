@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\Materiel\EmplacementBusiness;
+use App\Models\Emplacement;
 use Illuminate\Http\Request;
 
 class EmplacementController extends Controller
@@ -14,7 +15,7 @@ class EmplacementController extends Controller
      */
     public function index()
     {
-        $emplacements = EmplacementBusiness::listEmplacements();
+        $emplacements = Emplacement::with(['article', 'hangar'])->get();
         return response()->json(['data' => $emplacements]);
     }
 

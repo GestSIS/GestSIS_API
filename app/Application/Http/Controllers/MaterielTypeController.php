@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\Materiel\MaterielTypeBusiness;
+use App\Models\MaterielType;
 use Illuminate\Http\Request;
 
 class MaterielTypeController extends Controller
@@ -15,7 +16,7 @@ class MaterielTypeController extends Controller
      */
     public function index()
     {
-        $types = MaterielTypeBusiness::listProductsBasicByCategorie();
+        $types = MaterielType::with(['tuyau', 'batterie'])->orderBy('tri', 'asc')->get();
         return response()->json(['data' => $types]);
     }
 

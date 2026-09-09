@@ -6,20 +6,10 @@ use App\Domaine\Exceptions\ArrayException;
 use App\Models\Article;
 use App\Models\Hangar;
 use DB;
-use \Illuminate\Database\Eloquent\Collection;
 use App\Models\Emplacement;
 
 class EmplacementBusiness
 {
-
-  /**
-   * Get list of batteries
-   * @return Collection of #emplacement_existing
-   */
-  public static function listEmplacements()
-  {
-    return Emplacement::with(['article', 'hangar'])->get();
-  }
 
   /**
    * Get a single emplacement

@@ -9,7 +9,6 @@ use App\Models\MaterielType;
 use App\Models\MaterielTypeBatterie;
 use App\Models\MaterielTypeTuyau;
 use DB;
-use Illuminate\Database\Eloquent\Collection;
 
 class MaterielTypeBusiness
 {
@@ -19,15 +18,6 @@ class MaterielTypeBusiness
   // 2 = ancien TYPE_BATTERY, retiré (migré vers la propriété a_batterie), ne pas réutiliser
   const TYPE_VEHICULE = 3;
   const TYPE_HANGAR = 4;
-
-  /**
-   * Get list of products with only basic informations, grouped by categorie
-   * @return Collection of categorieId => [ #product_existing_basic ]
-   */
-  public static function listProductsBasicByCategorie(): Collection
-  {
-    return MaterielType::with(['tuyau', 'batterie'])->orderBy('tri', 'asc')->get();
-  }
 
   /**
    * Create a new product

@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\Materiel\BatterieBusiness;
+use App\Models\BatterieType;
 use Illuminate\Http\Request;
 
 class BatterieTypeController extends Controller
@@ -15,7 +16,7 @@ class BatterieTypeController extends Controller
      */
     public function index()
     {
-        $batteries = BatterieBusiness::listeBatteries();
+        $batteries = BatterieType::orderBy('nom')->get();
         return response()->json(['data' => $batteries]);
     }
 

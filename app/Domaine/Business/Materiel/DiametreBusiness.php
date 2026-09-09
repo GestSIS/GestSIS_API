@@ -7,24 +7,6 @@ use App\Models\TuyauDiametre;
 
 class DiametreBusiness
 {
-  /**
-   * Get list of diametres
-   * @return \Illuminate\Database\Eloquent\Collection of #diametre_existing
-   */
-  public static function listeDiametres()
-  {
-    return TuyauDiametre::orderBy('diametre')->get();
-  }
-
-  /**
-   * Get a single diametre
-   * @param integer $id ID of the diametre to get
-   * @return #diametre_existing
-   */
-  public static function getDiametre($id)
-  {
-    return TuyauDiametre::find($id);
-  }
 
   /**
    * Create a new diametre

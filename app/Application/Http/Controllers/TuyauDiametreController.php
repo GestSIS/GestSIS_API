@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\Materiel\DiametreBusiness;
+use App\Models\TuyauDiametre;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -16,7 +17,7 @@ class TuyauDiametreController extends Controller
      */
     public function index()
     {
-        $diametres = DiametreBusiness::listeDiametres();
+        $diametres = TuyauDiametre::orderBy('diametre')->get();
         return response()->json(['data' => $diametres]);
     }
 
