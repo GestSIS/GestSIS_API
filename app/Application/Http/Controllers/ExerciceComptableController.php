@@ -43,7 +43,6 @@ class ExerciceComptableController extends Controller
         return response()->json(['data' => $exercice]);
     }
 
-
     public function cloturer($id)
     {
         $exercice = ExerciceComptableBusiness::cloturerExerciceComptable($id);
