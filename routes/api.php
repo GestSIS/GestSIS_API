@@ -281,7 +281,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::apiResource('sapeurs.cours', SapeurCoursController::class)->only(['index']);
         Route::apiResource('sapeurs.photo', SapeurPhotoController::class)->only(['index']);
         Route::apiResource('sapeurs.groupes', SapeurGroupeController::class)->only(['index']);
-        Route::apiResource('sapeurs.articles', ArticleSapeurController::class)->only(['index']);
 
         // Publipostage
         Route::post('publipostage', [PublipostageController::class, 'index'])->name('publipostage');
@@ -289,6 +288,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('sapeurs/{id}/exercices/{exerciceComptableId}', [SapeurExerciceController::class, 'index']);
         Route::get('sapeurs/{id}/interventions/{exerciceComptableId}', [SapeurInterventionController::class, 'index']);
     });
+
+    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,materiel.lecture'], function () {
+        Route::apiResource('sapeurs.articles', ArticleSapeurController::class)->only(['index']);
+    });
+
     // Sapeurs
     Route::group(['middleware' => 'jwtTokenRole:sapeur.modification'], function () {
         Route::apiResource('sapeurs', SapeurController::class)->only(['store', 'update', 'destroy']);
