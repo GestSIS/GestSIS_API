@@ -20,6 +20,11 @@ class MaterielTypeController extends Controller
         return response()->json(['data' => $types]);
     }
 
+    public function statuts()
+    {
+        return response()->json(['data' => MaterielTypeBusiness::calculerStatutsPeremption()]);
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -38,6 +43,8 @@ class MaterielTypeController extends Controller
             // 'a_controller' => 'string',
             'remarque' => 'string|nullable',
             'prefix' => 'string|nullable',
+            'est_perimable' => 'boolean|nullable',
+            'duree_peremption' => 'integer|min:1|nullable|required_if:est_perimable,true',
             'batterie.nombre' => 'integer|nullable',
             'batterie.batterie_type_id' => 'integer|nullable',
             'tuyau.tuyau_diametre_id' => 'integer|nullable',
@@ -67,6 +74,8 @@ class MaterielTypeController extends Controller
             // 'a_controller' => 'string',
             'remarque' => 'string|nullable',
             'prefix' => 'string|nullable',
+            'est_perimable' => 'boolean|nullable',
+            'duree_peremption' => 'integer|min:1|nullable|required_if:est_perimable,true',
             'batterie.nombre' => 'integer|nullable',
             'batterie.batterie_type_id' => 'integer|nullable',
             'tuyau.tuyau_diametre_id' => 'integer|nullable',

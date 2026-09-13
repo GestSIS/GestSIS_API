@@ -32,11 +32,11 @@ class MaterielTypeTableSeeder extends Seeder
             ['id' => 15, 'tri' => 15, 'materiel_categorie_id' => 6, 'type' => 0, 'est_emplacement' => false, 'designation' => 'Kaba', 'est_lavable' => false, 'est_numerote' => true, 'est_attribuable' => true, 'est_taillee' => false],
             ['id' => 16, 'tri' => 16, 'materiel_categorie_id' => 7, 'type' => 0, 'est_emplacement' => false, 'designation' => 'Gants de travail', 'est_lavable' => false, 'est_numerote' => false, 'est_attribuable' => true, 'est_taillee' => true],
             ['id' => 17, 'tri' => 17, 'materiel_categorie_id' => 7, 'type' => 0, 'est_emplacement' => false, 'designation' => 'Gants feu', 'est_lavable' => false, 'est_numerote' => false, 'est_attribuable' => true, 'est_taillee' => true],
-            ['id' => 18, 'tri' => 18, 'materiel_categorie_id' => 5, 'type' => 3, 'est_emplacement' => true, 'designation' => 'Tonne-Pompe', 'est_lavable' => false, 'est_numerote' => false, 'est_attribuable' => false, 'est_taillee' => false],
-            ['id' => 19, 'tri' => 19, 'materiel_categorie_id' => 5, 'type' => 3, 'est_emplacement' => true, 'designation' => 'Véhicule module', 'est_lavable' => false, 'est_numerote' => false, 'est_attribuable' => false, 'est_taillee' => false],
-            ['id' => 20, 'tri' => 20, 'materiel_categorie_id' => 5, 'type' => 3, 'est_emplacement' => true, 'designation' => 'Véhicule transport', 'est_lavable' => false, 'est_numerote' => false, 'est_attribuable' => false, 'est_taillee' => false],
-            ['id' => 21, 'tri' => 21, 'materiel_categorie_id' => 5, 'type' => 3, 'est_emplacement' => true, 'designation' => 'Véhicule première intervention', 'est_lavable' => false, 'est_numerote' => false, 'est_attribuable' => false, 'est_taillee' => false],
-            ['id' => 22, 'tri' => 22, 'materiel_categorie_id' => 5, 'type' => 3, 'est_emplacement' => true, 'designation' => 'Véhicule pionnier', 'est_lavable' => false, 'est_numerote' => false, 'est_attribuable' => false, 'est_taillee' => false],
+            ['id' => 18, 'tri' => 18, 'materiel_categorie_id' => 32, 'type' => 3, 'est_emplacement' => true, 'designation' => 'Tonne-Pompe', 'est_lavable' => false, 'est_numerote' => false, 'est_attribuable' => false, 'est_taillee' => false],
+            ['id' => 19, 'tri' => 19, 'materiel_categorie_id' => 32, 'type' => 3, 'est_emplacement' => true, 'designation' => 'Véhicule module', 'est_lavable' => false, 'est_numerote' => false, 'est_attribuable' => false, 'est_taillee' => false],
+            ['id' => 20, 'tri' => 20, 'materiel_categorie_id' => 32, 'type' => 3, 'est_emplacement' => true, 'designation' => 'Véhicule transport', 'est_lavable' => false, 'est_numerote' => false, 'est_attribuable' => false, 'est_taillee' => false],
+            ['id' => 21, 'tri' => 21, 'materiel_categorie_id' => 32, 'type' => 3, 'est_emplacement' => true, 'designation' => 'Véhicule première intervention', 'est_lavable' => false, 'est_numerote' => false, 'est_attribuable' => false, 'est_taillee' => false],
+            ['id' => 22, 'tri' => 22, 'materiel_categorie_id' => 32, 'type' => 3, 'est_emplacement' => true, 'designation' => 'Véhicule pionnier', 'est_lavable' => false, 'est_numerote' => false, 'est_attribuable' => false, 'est_taillee' => false],
         ]);
     }
 }

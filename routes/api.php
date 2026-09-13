@@ -692,6 +692,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Matériel
     Route::group(['middleware' => 'jwtTokenSapeurOrRole:materiel.lecture'], function () {
+        Route::get('materiel-types/statuts', [MaterielTypeController::class, 'statuts']);
         Route::apiResource('materiel-types', MaterielTypeController::class)->only(['index']);
         Route::apiResource('materiel-types.articles', MaterielTypeArticleController::class)->only(['index']);
         Route::apiResource('materiel-categories', MaterielCategorieController::class)->only(['index']);
@@ -729,6 +730,27 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::apiResource('materiel-types', MaterielTypeController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('batterie-types', BatterieTypeController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('tuyau-diametres', TuyauDiametreController::class)->only(['store', 'update', 'destroy']);
+    });
+
+    // Contrôles & Inspections
+    Route::group(['middleware' => 'jwtTokenSapeurOrRole:materiel.lecture'], function () {
+        Route::get('controles/statuts', [\App\Application\Http\Controllers\ControleController::class, 'statuts']);
+        Route::apiResource('controles', \App\Application\Http\Controllers\ControleController::class)->only(['index', 'show']);
+        Route::apiResource('controles.taches', \App\Application\Http\Controllers\ControleTacheController::class)->only(['index'])->parameters(['taches' => 'tache']);
+        Route::apiResource('controles.materiel-types', \App\Application\Http\Controllers\ControleMaterielTypeController::class)->only(['index']);
+        Route::get('articles/{article}/controle-execs', [\App\Application\Http\Controllers\ControleExecController::class, 'indexForArticle']);
+        Route::get('controles/{controle}/dernieres-executions', [\App\Application\Http\Controllers\ControleExecController::class, 'dernieresExecutionsParArticle']);
+    });
+
+    Route::group(['middleware' => 'jwtTokenRole:materiel.modification'], function () {
+        // Exécution d'un contrôle par article (trigger_type dans le body : PERIODIQUE, NON_PERIODIQUE, APRES_USAGE)
+        Route::post('controles/{controle}/articles/{article}/execs', [\App\Application\Http\Controllers\ControleExecController::class, 'store']);
+    });
+
+    Route::group(['middleware' => 'jwtTokenRole:materiel.config'], function () {
+        Route::apiResource('controles', \App\Application\Http\Controllers\ControleController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('controles.taches', \App\Application\Http\Controllers\ControleTacheController::class)->only(['store', 'update', 'destroy'])->parameters(['taches' => 'tache']);
+        Route::apiResource('controles.materiel-types', \App\Application\Http\Controllers\ControleMaterielTypeController::class)->only(['store', 'update', 'destroy']);
     });
 
     // TODO: Ajouter route type d'unité

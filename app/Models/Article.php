@@ -26,7 +26,8 @@ class Article extends Model
         'designation',
         'immatriculation',
         'chassis',
-        'statut'
+        'statut',
+        'date_fabrication'
     ];
 
     protected function casts(): array
@@ -40,6 +41,7 @@ class Article extends Model
             'est_etiquete' => 'boolean',
             'est_unique' => 'boolean',
             'statut' => 'boolean',
+            'date_fabrication' => 'date',
         ];
     }
 

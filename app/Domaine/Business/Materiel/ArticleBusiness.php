@@ -102,6 +102,10 @@ class ArticleBusiness
       if (!$type->est_attribuable && $article['sapeur_id'] !== null) {
         throw new ArrayException([], message: "Article de type '{$type->designation}' n'est pas attribuable");
       }
+
+      if ($type->est_perimable && ($article['date_fabrication'] ?? null) === null) {
+        throw new ArrayException([], message: "Article de type '{$type->designation}' nécessite une date de fabrication (périmable)");
+      }
     }
 
     // Controller numérotation correcte
@@ -127,6 +131,7 @@ class ArticleBusiness
         'chassis' => $article['chassis'] ?? '',
         'designation' => $article['designation'] ?? '',
         'immatriculation' => $article['immatriculation'] ?? '',
+        'date_fabrication' => $type->est_perimable ? ($article['date_fabrication'] ?? null) : null,
         'emplacement' => $article['emplacement'] ?? null,
       ];
     })->flatMap(fn($article) => array_fill(0, $article['quantite'], $article))
@@ -196,6 +201,10 @@ class ArticleBusiness
       if (!$type->est_attribuable && $article['sapeur_id'] !== null) {
         throw new ArrayException([], message: "Article de type '{$type->designation}' n'est pas attribuable");
       }
+
+      if ($type->est_perimable && ($article['date_fabrication'] ?? null) === null) {
+        throw new ArrayException([], message: "Article de type '{$type->designation}' nécessite une date de fabrication (périmable)");
+      }
       return $article;
     })->all();
 
@@ -219,6 +228,7 @@ class ArticleBusiness
         'chassis' => $article['chassis'] ?? '',
         'designation' => $article['designation'] ?? '',
         'immatriculation' => $article['immatriculation'] ?? '',
+        'date_fabrication' => $type->est_perimable ? ($article['date_fabrication'] ?? null) : null,
         'statut' => $article['statut'] ?? true,
         'emplacement' => $article['emplacement'] ?? null,
       ];

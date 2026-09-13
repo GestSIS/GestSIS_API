@@ -8,6 +8,7 @@ use App\Models\InterventionVehicule;
 use App\Models\MaterielType;
 use App\Models\MaterielTypeBatterie;
 use App\Models\MaterielTypeTuyau;
+use Illuminate\Support\Carbon;
 use DB;
 
 class MaterielTypeBusiness
@@ -32,6 +33,10 @@ class MaterielTypeBusiness
     $product['reparateur'] ??= '';
     $product['remarque'] ??= '';
     $product['prefix'] ??= '';
+    $product['est_perimable'] ??= false;
+    if (!$product['est_perimable']) {
+      $product['duree_peremption'] = null;
+    }
     $product['type'] = (int) $product['type'];
     $product['est_emplacement'] = $product['type'] === self::TYPE_VEHICULE;
     if ($product['est_emplacement']) {
@@ -76,6 +81,10 @@ class MaterielTypeBusiness
     $data['reparateur'] ??= '';
     $data['remarque'] ??= '';
     $data['prefix'] ??= '';
+    $data['est_perimable'] ??= false;
+    if (!$data['est_perimable']) {
+      $data['duree_peremption'] = null;
+    }
     $data['type'] = (int) $data['type'];
     $data['est_emplacement'] = $data['type'] === self::TYPE_VEHICULE;
     if ($data['est_emplacement']) {
@@ -142,5 +151,43 @@ class MaterielTypeBusiness
   {
     // TODO: a implémenter
     // self::reorder("product", $id, $reorder, "categorie_id");
+  }
+
+  /**
+   * Pour chaque type de matériel périmable, compte les articles actifs
+   * déjà périmés (date de fabrication + durée de péremption dépassée).
+   * Calculé à la demande en quelques requêtes agrégées.
+   *
+   * @return array<int, array{materiel_type_id: int, nb_perimes: int}>
+   */
+  public static function calculerStatutsPeremption(): array
+  {
+    $types = MaterielType::where('est_perimable', true)->get();
+
+    if ($types->isEmpty()) {
+      return [];
+    }
+
+    $articlesParType = Article::whereIn('materiel_type_id', $types->pluck('id'))
+      ->where('statut', true)
+      ->whereNotNull('date_fabrication')
+      ->get(['id', 'materiel_type_id', 'date_fabrication'])
+      ->groupBy('materiel_type_id');
+
+    $maintenant = Carbon::now();
+
+    return $types->map(function (MaterielType $type) use ($articlesParType, $maintenant): array {
+      $nbPerimes = $articlesParType->get($type->id, collect())
+        ->filter(function (Article $article) use ($type, $maintenant): bool {
+          $peremption = Carbon::parse($article->date_fabrication)->addMonths($type->duree_peremption);
+          return $maintenant->greaterThanOrEqualTo($peremption);
+        })
+        ->count();
+
+      return [
+        'materiel_type_id' => $type->id,
+        'nb_perimes'       => $nbPerimes,
+      ];
+    })->values()->all();
   }
 }
