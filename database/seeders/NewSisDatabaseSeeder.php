@@ -56,6 +56,5 @@ class NewSisDatabaseSeeder extends Seeder
         $this->call(TuyauDiametreTableSeeder::class);
         $this->call(MaterielCategorieTableSeeder::class);
         $this->call(MaterielTypeTableSeeder::class);
-        $this->call(MaintenanceTypeTableSeeder::class);
     }
 }

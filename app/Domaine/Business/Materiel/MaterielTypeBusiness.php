@@ -8,6 +8,8 @@ use App\Models\InterventionVehicule;
 use App\Models\MaterielType;
 use App\Models\MaterielTypeBatterie;
 use App\Models\MaterielTypeTuyau;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 use DB;
 
 class MaterielTypeBusiness
@@ -32,6 +34,7 @@ class MaterielTypeBusiness
     $product['reparateur'] ??= '';
     $product['remarque'] ??= '';
     $product['prefix'] ??= '';
+    $product['est_perimable'] ??= false;
     $product['type'] = (int) $product['type'];
     $product['est_emplacement'] = $product['type'] === self::TYPE_VEHICULE;
     if ($product['est_emplacement']) {
@@ -76,6 +79,7 @@ class MaterielTypeBusiness
     $data['reparateur'] ??= '';
     $data['remarque'] ??= '';
     $data['prefix'] ??= '';
+    $data['est_perimable'] ??= false;
     $data['type'] = (int) $data['type'];
     $data['est_emplacement'] = $data['type'] === self::TYPE_VEHICULE;
     if ($data['est_emplacement']) {
@@ -142,5 +146,86 @@ class MaterielTypeBusiness
   {
     // TODO: a implémenter
     // self::reorder("product", $id, $reorder, "categorie_id");
+  }
+
+  /**
+   * Pour chaque type de matériel périmable, compte les articles actifs déjà
+   * périmés (date de péremption atteinte). Les types sans article périmé
+   * renvoient un compteur à zéro.
+   *
+   * @return array<int, array{materiel_type_id: int, nb_perimes: int}>
+   */
+  public static function calculerStatutsPeremption(): array
+  {
+    $typeIds = MaterielType::where('est_perimable', true)->pluck('id');
+
+    if ($typeIds->isEmpty()) {
+      return [];
+    }
+
+    $nbParType = self::articlesPerimesQuery($typeIds)
+      ->selectRaw('materiel_type_id, COUNT(*) as nb_perimes')
+      ->groupBy('materiel_type_id')
+      ->pluck('nb_perimes', 'materiel_type_id');
+
+    return $typeIds->map(fn (int $typeId): array => [
+      'materiel_type_id' => $typeId,
+      'nb_perimes'       => (int) $nbParType->get($typeId, 0),
+    ])->values()->all();
+  }
+
+  /**
+   * Détail des articles actifs déjà périmés, groupés par type de matériel périmable.
+   * Ne renvoie que les types ayant au moins un article périmé.
+   *
+   * @return array<int, array{materiel_type_id: int, designation: string, articles: array<int, array>}>
+   */
+  public static function getArticlesPerimes(): array
+  {
+    $types = MaterielType::where('est_perimable', true)->get();
+
+    if ($types->isEmpty()) {
+      return [];
+    }
+
+    $articlesParType = self::articlesPerimesQuery($types->pluck('id'))
+      ->with(['sapeur', 'emplacement'])
+      ->get()
+      ->groupBy('materiel_type_id');
+
+    return $types->map(function (MaterielType $type) use ($articlesParType): ?array {
+      $articles = $articlesParType->get($type->id);
+
+      if ($articles === null || $articles->isEmpty()) {
+        return null;
+      }
+
+      return [
+        'materiel_type_id' => $type->id,
+        'designation'      => $type->designation,
+        'articles'         => $articles->map(fn (Article $article): array => [
+          'id'              => $article->id,
+          'numero'          => $article->numero,
+          'designation'     => $article->designation,
+          'date_peremption' => $article->date_peremption->toDateString(),
+          'sapeur'          => $article->sapeur ? "{$article->sapeur->nom} {$article->sapeur->prenom}" : null,
+          'emplacement'     => $article->emplacement?->designation,
+        ])->values()->all(),
+      ];
+    })->filter()->values()->all();
+  }
+
+  /**
+   * Articles actifs, rattachés à l'un des types donnés, dont la date de
+   * péremption est atteinte.
+   *
+   * @param \Illuminate\Support\Collection<int, int> $typeIds
+   */
+  private static function articlesPerimesQuery($typeIds): Builder
+  {
+    return Article::whereIn('materiel_type_id', $typeIds)
+      ->where('statut', true)
+      ->whereNotNull('date_peremption')
+      ->whereDate('date_peremption', '<=', Carbon::now()->toDateString());
   }
 }
