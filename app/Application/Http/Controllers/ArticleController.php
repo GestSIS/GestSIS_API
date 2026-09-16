@@ -27,6 +27,11 @@ class ArticleController extends Controller
         return response()->json(['data' => $articles]);
     }
 
+    public function aRecuperer()
+    {
+        return response()->json(['data' => ArticleBusiness::getArticlesARecuperer()]);
+    }
+
     /**
      * Créer un ou des articles
      * 
@@ -51,6 +56,7 @@ class ArticleController extends Controller
             'articles.*.chassis' => 'string|nullable',
             'articles.*.designation' => 'string|nullable',
             'articles.*.immatriculation' => 'string|nullable',
+            'articles.*.date_peremption' => 'date_format:Y-m-d|nullable',
             'articles.*.emplacement.couleur_id' => 'integer|nullable',
             'articles.*.emplacement.parent_id' => 'integer|nullable',
             'articles.*.emplacement.est_etiquete' => 'boolean|nullable',
@@ -82,6 +88,7 @@ class ArticleController extends Controller
             'articles.*.chassis' => 'string|nullable',
             'articles.*.designation' => 'string|nullable',
             'articles.*.immatriculation' => 'string|nullable',
+            'articles.*.date_peremption' => 'date_format:Y-m-d|nullable',
             'articles.*.statut' => 'boolean|nullable',
             'articles.*.emplacement.couleur_id' => 'integer|nullable',
             'articles.*.emplacement.parent_id' => 'integer|nullable',

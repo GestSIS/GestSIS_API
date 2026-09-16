@@ -26,7 +26,8 @@ class Article extends Model
         'designation',
         'immatriculation',
         'chassis',
-        'statut'
+        'statut',
+        'date_peremption'
     ];
 
     protected function casts(): array
@@ -40,12 +41,18 @@ class Article extends Model
             'est_etiquete' => 'boolean',
             'est_unique' => 'boolean',
             'statut' => 'boolean',
+            'date_peremption' => 'date',
         ];
     }
 
     public function sapeur()
     {
         return $this->belongsTo(Sapeur::class);
+    }
+
+    public function emplacement()
+    {
+        return $this->belongsTo(Emplacement::class);
     }
 
     public function materielType()

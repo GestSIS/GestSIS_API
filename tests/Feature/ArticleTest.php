@@ -7,6 +7,7 @@ use App\Models\Article;
 use App\Models\Couleur;
 use App\Models\Emplacement;
 use App\Models\MaterielType;
+use App\Models\Sapeur;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
@@ -564,5 +565,39 @@ class ArticleTest extends TestCase
         $ids = collect($response->json('data'))->pluck('id');
         $this->assertTrue($ids->contains($articleRange->id));
         $this->assertFalse($ids->contains($vehicule->id));
+    }
+
+    public function testArticlesARecupererReturnsOnlyActiveArticlesOfInactiveSapeurs(): void
+    {
+        $type = MaterielType::factory()->create();
+        $sapeurInactif = Sapeur::factory()->create(['actif' => false]);
+        $sapeurActif = Sapeur::factory()->create(['actif' => true]);
+
+        $articleARecuperer = Article::factory()->create([
+            'materiel_type_id' => $type->id,
+            'sapeur_id' => $sapeurInactif->id,
+            'emplacement_id' => null,
+            'statut' => true,
+        ]);
+        Article::factory()->create([
+            'materiel_type_id' => $type->id,
+            'sapeur_id' => $sapeurActif->id,
+            'emplacement_id' => null,
+            'statut' => true,
+        ]);
+        Article::factory()->create([
+            'materiel_type_id' => $type->id,
+            'sapeur_id' => $sapeurInactif->id,
+            'emplacement_id' => null,
+            'statut' => false,
+        ]);
+
+        $response = $this->json('GET', '/api/v2/articles/a-recuperer', [], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $ids = collect($response->json('data'))->pluck('id');
+        $this->assertSame([$articleARecuperer->id], $ids->all());
+        $this->assertSame($sapeurInactif->id, $response->json('data.0.sapeur.id'));
+        $this->assertSame($type->designation, $response->json('data.0.materiel_type.designation'));
     }
 }

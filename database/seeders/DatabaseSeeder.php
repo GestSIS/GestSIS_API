@@ -49,6 +49,9 @@ class DatabaseSeeder extends Seeder
         // Sapeurs
         $this->call(SapeursTableSeeder::class);
 
+        // Contrôles matériel
+        $this->call(ControleTableSeeder::class);
+
         // SisParam
         $this->call(SisParamTableSeeder::class);
 

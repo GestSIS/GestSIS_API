@@ -102,6 +102,10 @@ class ArticleBusiness
       if (!$type->est_attribuable && $article['sapeur_id'] !== null) {
         throw new ArrayException([], message: "Article de type '{$type->designation}' n'est pas attribuable");
       }
+
+      if ($type->est_perimable && ($article['date_peremption'] ?? null) === null) {
+        throw new ArrayException([], message: "Article de type '{$type->designation}' nécessite une date de péremption");
+      }
     }
 
     // Controller numérotation correcte
@@ -127,6 +131,7 @@ class ArticleBusiness
         'chassis' => $article['chassis'] ?? '',
         'designation' => $article['designation'] ?? '',
         'immatriculation' => $article['immatriculation'] ?? '',
+        'date_peremption' => $type->est_perimable ? ($article['date_peremption'] ?? null) : null,
         'emplacement' => $article['emplacement'] ?? null,
       ];
     })->flatMap(fn($article) => array_fill(0, $article['quantite'], $article))
@@ -196,6 +201,10 @@ class ArticleBusiness
       if (!$type->est_attribuable && $article['sapeur_id'] !== null) {
         throw new ArrayException([], message: "Article de type '{$type->designation}' n'est pas attribuable");
       }
+
+      if ($type->est_perimable && ($article['date_peremption'] ?? null) === null) {
+        throw new ArrayException([], message: "Article de type '{$type->designation}' nécessite une date de péremption");
+      }
       return $article;
     })->all();
 
@@ -219,6 +228,7 @@ class ArticleBusiness
         'chassis' => $article['chassis'] ?? '',
         'designation' => $article['designation'] ?? '',
         'immatriculation' => $article['immatriculation'] ?? '',
+        'date_peremption' => $type->est_perimable ? ($article['date_peremption'] ?? null) : null,
         'statut' => $article['statut'] ?? true,
         'emplacement' => $article['emplacement'] ?? null,
       ];
@@ -338,6 +348,21 @@ class ArticleBusiness
   public static function getArticlesParMaterielType($materielTypeId)
   {
     return Article::where('materiel_type_id', $materielTypeId)->with(['lavages', 'emplacementRepresentee'])->get();
+  }
+
+  /**
+   * Articles actifs encore attribués à des sapeurs inactifs (matériel à récupérer).
+   * Le regroupement par sapeur est fait côté frontend.
+   *
+   * @return Collection<int, Article>
+   */
+  public static function getArticlesARecuperer()
+  {
+    return Article::where('statut', true)
+      ->whereNotNull('sapeur_id')
+      ->whereHas('sapeur', fn ($q) => $q->where('actif', false))
+      ->with(['sapeur', 'materielType'])
+      ->get();
   }
 
   /**

@@ -27,6 +27,7 @@ class MaterielType extends Model
         'remarque',
         'tri',
         'prefix',
+        'est_perimable',
     ];
     protected function casts(): array
     {
@@ -41,6 +42,7 @@ class MaterielType extends Model
             'est_lavable' => 'boolean',
             'a_batterie' => 'boolean',
             'a_controller' => 'boolean',
+            'est_perimable' => 'boolean',
         ];
     }
 
