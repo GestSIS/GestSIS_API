@@ -8,6 +8,7 @@ use App\Models\Controle;
 use App\Models\ControleTache;
 use App\Models\ControleExec;
 use App\Models\ControleExecTache;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -21,6 +22,7 @@ class ControleExecBusiness
      *   executed_at: string,
      *   trigger_type: string,
      *   remarque_globale: ?string,
+     *   date_echeance: ?string,
      *   taches: ?array<int, array{tache_id: int, statut: ?string, value_measured: ?float, remarque: ?string}>
      * } $data
      */
@@ -37,11 +39,14 @@ class ControleExecBusiness
 
         self::validateAllTachesPresent($tachesById, $tachesData);
 
-        return DB::transaction(function () use ($controleId, $articleId, $data, $sapeurId, $tachesById, $tachesData): ControleExec {
+        $dateEcheance = self::resolveDateEcheance($controle, $data['date_echeance'] ?? null);
+
+        return DB::transaction(function () use ($controleId, $articleId, $data, $sapeurId, $dateEcheance, $tachesById, $tachesData): ControleExec {
             $exec = ControleExec::create([
                 'controle_id'      => $controleId,
                 'article_id'       => $articleId,
                 'executed_at'      => $data['executed_at'],
+                'date_echeance'    => $dateEcheance,
                 'executed_by'      => $sapeurId,
                 'trigger_type'     => $data['trigger_type'],
                 'remarque_globale' => $data['remarque_globale'] ?? null,
@@ -58,7 +63,7 @@ class ControleExecBusiness
      * d'exécution partagée par toutes) — tout ou rien : si un seul article
      * échoue la validation, aucune exécution n'est enregistrée.
      *
-     * @param array<int, array{article_id: int, taches: ?array<int, array{tache_id: int, statut: ?string, value_measured: ?float, remarque: ?string}>}> $executions
+     * @param array<int, array{article_id: int, date_echeance: ?string, taches: ?array<int, array{tache_id: int, statut: ?string, value_measured: ?float, remarque: ?string}>}> $executions
      * @return ControleExec[]
      */
     public static function createExecsMultiple(int $controleId, string $executedAt, string $triggerType, ?string $remarqueGlobale, array $executions, int $sapeurId): array
@@ -69,6 +74,7 @@ class ControleExecBusiness
                     'executed_at'      => $executedAt,
                     'trigger_type'     => $triggerType,
                     'remarque_globale' => $remarqueGlobale,
+                    'date_echeance'    => $execution['date_echeance'] ?? null,
                     'taches'           => $execution['taches'] ?? [],
                 ], $sapeurId),
                 $executions,
@@ -83,6 +89,7 @@ class ControleExecBusiness
      * @param array{
      *   executed_at: string,
      *   remarque_globale: ?string,
+     *   date_echeance: ?string,
      *   taches: ?array<int, array{tache_id: int, statut: ?string, value_measured: ?float, remarque: ?string}>
      * } $data
      */
@@ -95,9 +102,12 @@ class ControleExecBusiness
 
         self::validateAllTachesPresent($tachesById, $tachesData);
 
-        return DB::transaction(function () use ($exec, $data, $tachesById, $tachesData): ControleExec {
+        $dateEcheance = self::resolveDateEcheance($exec->controle, $data['date_echeance'] ?? null);
+
+        return DB::transaction(function () use ($exec, $data, $dateEcheance, $tachesById, $tachesData): ControleExec {
             $exec->update([
                 'executed_at'      => $data['executed_at'],
+                'date_echeance'    => $dateEcheance,
                 'remarque_globale' => $data['remarque_globale'] ?? null,
             ]);
 
@@ -106,6 +116,28 @@ class ControleExecBusiness
 
             return $exec->load(['controle', 'execTaches.tache', 'executeur']);
         });
+    }
+
+    /**
+     * Échéance du prochain contrôle pour cette exécution : obligatoire pour un
+     * contrôle PERIODIQUE (le front la pré-remplit à partir de la récurrence
+     * du contrôle — cf. addMonthsIso côté APP — mais laisse l'utilisateur la
+     * modifier, ex : un premier service véhicule à 5 ans puis tous les 2 ans),
+     * sans objet pour un contrôle NON_PERIODIQUE (suivi par nombre
+     * d'exécutions, pas par date), auquel cas toute valeur soumise est
+     * ignorée.
+     */
+    private static function resolveDateEcheance(Controle $controle, ?string $submitted): ?string
+    {
+        if ($controle->recurrence_type !== 'PERIODIQUE') {
+            return null;
+        }
+
+        if ($submitted === null) {
+            throw new ArrayException([], "La date d'échéance du prochain contrôle est obligatoire pour un contrôle PERIODIQUE");
+        }
+
+        return $submitted;
     }
 
     /**
@@ -197,23 +229,38 @@ class ControleExecBusiness
 
     /**
      * Pour chaque article ayant déjà été contrôlé pour ce contrôle : date et
-     * nombre d'exécutions (au frontend de comparer ce nombre aux seuils
-     * max/préavis du contrôle pour l'affichage), plus si l'article doit être
-     * considéré en échec : dernière exécution non conforme (tâche KO ou
-     * valeur hors plage) OU nombre d'exécutions maximum atteint — ce dernier
-     * cas s'applique même à un contrôle sans tâche.
+     * nombre d'exécutions, échéance enregistrée sur la dernière exécution
+     * (contrôle PERIODIQUE uniquement) et statut qui en découle — même calcul
+     * que ControleBusiness::statutArticlePourControle, réutilisé ici pour ne
+     * pas le réimplémenter — plus si l'article doit être considéré en échec :
+     * dernière exécution non conforme (tâche KO ou valeur hors plage) OU
+     * nombre d'exécutions maximum atteint — ce dernier cas s'applique même à
+     * un contrôle sans tâche.
      *
-     * @return Collection<int, object{article_id: int, derniere_execution: string, nb_executions: int, dernier_controle_echec: bool}>
+     * Un article jamais contrôlé n'apparaît pas dans le résultat : à la charge
+     * de l'appelant, qui connaît l'ensemble des articles éligibles au
+     * contrôle, de lui attribuer le statut par défaut ("warning" pour un
+     * contrôle PERIODIQUE, sinon aucun).
+     *
+     * @return Collection<int, object{article_id: int, derniere_execution: string, date_echeance: ?string, nb_executions: int, statut: ?string, dernier_controle_echec: bool}>
      */
     public static function getDernieresExecutionsParArticle(int $controleId): Collection
     {
         $controle = Controle::findOrFail($controleId);
 
         $agregats = ControleExec::where('controle_id', $controleId)
-            ->selectRaw('article_id, MAX(executed_at) as derniere_execution, COUNT(*) as nb_executions')
+            ->get(['article_id', 'executed_at', 'date_echeance'])
             ->groupBy('article_id')
-            ->get()
-            ->keyBy('article_id');
+            ->map(function (Collection $execs) {
+                $derniere = $execs->sortByDesc('executed_at')->first();
+
+                return (object) [
+                    'article_id'         => $derniere->article_id,
+                    'derniere_execution' => $derniere->executed_at->toDateTimeString(),
+                    'date_echeance'      => $derniere->date_echeance?->toDateString(),
+                    'nb_executions'      => $execs->count(),
+                ];
+            });
 
         $dernierExecParArticle = ControleExec::where('controle_id', $controleId)
             ->with('execTaches')
@@ -221,12 +268,15 @@ class ControleExecBusiness
             ->groupBy('article_id')
             ->map(fn (Collection $execs) => $execs->sortByDesc('executed_at')->first());
 
-        return $agregats->map(function ($ligne) use ($dernierExecParArticle, $controle) {
+        $maintenant = Carbon::now();
+
+        return $agregats->map(function ($ligne) use ($dernierExecParArticle, $controle, $maintenant) {
             $dernierExec = $dernierExecParArticle->get($ligne->article_id);
             $echecTache = $dernierExec !== null && !$dernierExec->isConforme();
             $nbExecutionMaxAtteint = $controle->nb_execution_max !== null
                 && $ligne->nb_executions >= $controle->nb_execution_max;
 
+            $ligne->statut = ControleBusiness::statutArticlePourControle($controle, $ligne, $maintenant);
             $ligne->dernier_controle_echec = $echecTache || $nbExecutionMaxAtteint;
 
             return $ligne;

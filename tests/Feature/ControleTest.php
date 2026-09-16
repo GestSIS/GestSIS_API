@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Domaine\Business\Materiel\ControleBusiness;
+use App\Domaine\Business\Materiel\ControleExecBusiness;
 use App\Domaine\Exceptions\ArrayException;
 use App\Models\Article;
 use App\Models\Controle;
@@ -146,13 +147,19 @@ class ControleTest extends TestCase
         $article = Article::factory()->create(['materiel_type_id' => $type->id, 'statut' => true]);
         $sapeur = Sapeur::factory()->create();
 
-        ControleExec::create([
-            'controle_id' => $controle->id,
-            'article_id' => $article->id,
-            'executed_at' => now()->subMonths(2),
-            'executed_by' => $sapeur->id,
+        // Passe par la couche métier (plutôt que ControleExec::create direct) pour
+        // que date_echeance soit calculée, comme le ferait l'API : c'est cette
+        // valeur stockée, et non plus un recalcul depuis executed_at, qui détermine
+        // désormais le statut du contrôle.
+        ControleExecBusiness::createExec($controle->id, $article->id, [
+            'executed_at' => now()->subMonths(2)->toDateString(),
             'trigger_type' => 'PERIODIQUE',
-        ]);
+            'remarque_globale' => null,
+            // Recurrence 1 mois : équivaut à l'ancien calcul par défaut
+            // (executed_at + recurrence_value), désormais obligatoire à la saisie.
+            'date_echeance' => now()->subMonth()->toDateString(),
+            'taches' => [],
+        ], $sapeur->id);
 
         $articles = collect(ControleBusiness::getArticlesAControler())->firstWhere('controle_id', $controle->id);
         $this->assertSame('danger', collect($articles['articles'])->keyBy('id')[$article->id]['statut']);

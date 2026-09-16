@@ -12,6 +12,7 @@ class ControleExec extends Model
         'controle_id',
         'article_id',
         'executed_at',
+        'date_echeance',
         'executed_by',
         'trigger_type',
         'remarque_globale',
@@ -24,6 +25,7 @@ class ControleExec extends Model
             'article_id'  => 'integer',
             'executed_by' => 'integer',
             'executed_at' => 'datetime',
+            'date_echeance' => 'date',
         ];
     }
 

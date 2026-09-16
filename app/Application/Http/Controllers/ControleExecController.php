@@ -33,6 +33,7 @@ class ControleExecController extends Controller
             'executed_at'             => 'required|date',
             'trigger_type'            => 'required|string|in:PERIODIQUE,NON_PERIODIQUE',
             'remarque_globale'        => 'nullable|string',
+            'date_echeance'           => 'nullable|required_if:trigger_type,PERIODIQUE|date_format:Y-m-d',
             'taches'                  => 'nullable|array',
             'taches.*.tache_id'       => 'required|integer',
             'taches.*.statut'         => 'nullable|string|in:OK,KO,NA',
@@ -51,6 +52,7 @@ class ControleExecController extends Controller
             'remarque_globale'                       => 'nullable|string',
             'executions'                             => 'required|array|min:1',
             'executions.*.article_id'                => 'required|integer',
+            'executions.*.date_echeance'             => 'nullable|required_if:trigger_type,PERIODIQUE|date_format:Y-m-d',
             'executions.*.taches'                    => 'nullable|array',
             'executions.*.taches.*.tache_id'         => 'required|integer',
             'executions.*.taches.*.statut'           => 'nullable|string|in:OK,KO,NA',
@@ -75,6 +77,11 @@ class ControleExecController extends Controller
         $data = $request->validate([
             'executed_at'             => 'required|date',
             'remarque_globale'        => 'nullable|string',
+            // Pas de trigger_type ici (fixé à la création, non modifiable) pour
+            // conditionner un required_if comme sur store() : le contrôle de
+            // présence pour un contrôle PERIODIQUE est fait par la couche métier
+            // (ControleExecBusiness::resolveDateEcheance), qui connaît le contrôle.
+            'date_echeance'           => 'nullable|date_format:Y-m-d',
             'taches'                  => 'nullable|array',
             'taches.*.tache_id'       => 'required|integer',
             'taches.*.statut'         => 'nullable|string|in:OK,KO,NA',

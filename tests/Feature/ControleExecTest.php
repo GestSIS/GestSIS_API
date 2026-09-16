@@ -69,6 +69,7 @@ class ControleExecTest extends TestCase
             'executed_at' => now()->toDateString(),
             'trigger_type' => 'PERIODIQUE',
             'remarque_globale' => null,
+            'date_echeance' => now()->addYear()->toDateString(),
             'taches' => [
                 ['tache_id' => $controle->taches->first()->id, 'statut' => 'KO', 'remarque' => null],
             ],
@@ -92,6 +93,7 @@ class ControleExecTest extends TestCase
             'executed_at' => now()->toDateString(),
             'trigger_type' => 'PERIODIQUE',
             'remarque_globale' => null,
+            'date_echeance' => now()->addYear()->toDateString(),
             'taches' => [
                 ['tache_id' => $controle->taches->first()->id, 'value_measured' => 50, 'remarque' => null],
             ],
@@ -115,6 +117,7 @@ class ControleExecTest extends TestCase
             'executed_at' => now()->toDateString(),
             'trigger_type' => 'PERIODIQUE',
             'remarque_globale' => null,
+            'date_echeance' => now()->addYear()->toDateString(),
             'taches' => [
                 ['tache_id' => $controle->taches->first()->id, 'statut' => 'OK', 'remarque' => null],
             ],
@@ -133,6 +136,7 @@ class ControleExecTest extends TestCase
             'executed_at' => '2026-01-01',
             'trigger_type' => 'PERIODIQUE',
             'remarque_globale' => 'avant',
+            'date_echeance' => '2027-01-01',
             'taches' => [
                 ['tache_id' => $controle->taches->first()->id, 'statut' => 'KO', 'remarque' => null],
             ],
@@ -141,6 +145,7 @@ class ControleExecTest extends TestCase
         $exec = ControleExecBusiness::updateExec($exec->id, [
             'executed_at' => '2026-02-01',
             'remarque_globale' => 'après',
+            'date_echeance' => '2027-02-01',
             'taches' => [
                 ['tache_id' => $controle->taches->first()->id, 'statut' => 'OK', 'remarque' => null],
             ],
@@ -207,8 +212,8 @@ class ControleExecTest extends TestCase
             'PERIODIQUE',
             'Contrôle groupé',
             [
-                ['article_id' => $articleA->id, 'taches' => [['tache_id' => $tacheId, 'statut' => 'OK', 'remarque' => null]]],
-                ['article_id' => $articleB->id, 'taches' => [['tache_id' => $tacheId, 'statut' => 'KO', 'remarque' => null]]],
+                ['article_id' => $articleA->id, 'date_echeance' => '2028-03-01', 'taches' => [['tache_id' => $tacheId, 'statut' => 'OK', 'remarque' => null]]],
+                ['article_id' => $articleB->id, 'date_echeance' => '2028-03-01', 'taches' => [['tache_id' => $tacheId, 'statut' => 'KO', 'remarque' => null]]],
             ],
             $sapeur->id,
         );
@@ -243,9 +248,9 @@ class ControleExecTest extends TestCase
                 'PERIODIQUE',
                 null,
                 [
-                    ['article_id' => $articleValide->id, 'taches' => [['tache_id' => $tacheId, 'statut' => 'OK', 'remarque' => null]]],
+                    ['article_id' => $articleValide->id, 'date_echeance' => '2028-03-01', 'taches' => [['tache_id' => $tacheId, 'statut' => 'OK', 'remarque' => null]]],
                     // Statut invalide pour cet article : doit faire échouer tout le lot.
-                    ['article_id' => $articleInvalide->id, 'taches' => [['tache_id' => $tacheId, 'statut' => 'INVALIDE', 'remarque' => null]]],
+                    ['article_id' => $articleInvalide->id, 'date_echeance' => '2028-03-01', 'taches' => [['tache_id' => $tacheId, 'statut' => 'INVALIDE', 'remarque' => null]]],
                 ],
                 $sapeur->id,
             );

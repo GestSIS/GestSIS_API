@@ -224,26 +224,35 @@ class ControleBusiness
 
     /**
      * Statut d'un article pour un contrôle donné, à partir de l'agrégat de ses
-     * exécutions (date de la dernière, nombre total) : "danger" (échéance ou
-     * nombre d'exécutions dépassé), "warning" (préavis, ou jamais contrôlé
-     * pour un contrôle PERIODIQUE) ou null (rien à signaler).
+     * exécutions : "danger" (échéance ou nombre d'exécutions dépassé),
+     * "warning" (préavis, ou jamais contrôlé pour un contrôle PERIODIQUE) ou
+     * null (rien à signaler).
+     *
+     * Pour un contrôle PERIODIQUE, l'échéance est celle enregistrée sur la
+     * dernière exécution (voir ControleExecBusiness::resolveDateEcheance) —
+     * pas recalculée ici — ce qui permet à un contrôle de récurrence variable
+     * (ex : premier service véhicule à 5 ans, puis tous les 2 ans) d'avoir une
+     * échéance différente de la récurrence par défaut du contrôle.
+     *
+     * Publique : réutilisée par ControleExecBusiness::getDernieresExecutionsParArticle
+     * pour ne pas dupliquer ce calcul.
      */
-    private static function statutArticlePourControle(Controle $controle, ?object $execArticle, Carbon $maintenant): ?string
+    public static function statutArticlePourControle(Controle $controle, ?object $execArticle, Carbon $maintenant): ?string
     {
         if ($controle->recurrence_type === 'PERIODIQUE') {
-            $derniereExecution = $execArticle?->derniere_execution;
+            $dateEcheance = $execArticle?->date_echeance;
 
-            if ($derniereExecution === null) {
+            if ($dateEcheance === null) {
                 return 'warning';
             }
 
-            $prochaine = self::prochaineExecution($controle, $derniereExecution);
-            if ($maintenant->greaterThanOrEqualTo($prochaine)) {
+            $echeance = Carbon::parse($dateEcheance);
+            if ($maintenant->greaterThanOrEqualTo($echeance)) {
                 return 'danger';
             }
             if (
                 $controle->duree_preavis !== null &&
-                $maintenant->greaterThanOrEqualTo($prochaine->copy()->subMonths($controle->duree_preavis))
+                $maintenant->greaterThanOrEqualTo($echeance->copy()->subMonths($controle->duree_preavis))
             ) {
                 return 'warning';
             }
@@ -265,9 +274,31 @@ class ControleBusiness
         return null;
     }
 
-    private static function prochaineExecution(Controle $controle, string $derniereExecution): Carbon
+    /**
+     * Dernière exécution par (contrôle, article) parmi les contrôles donnés :
+     * date, nombre total d'exécutions, et échéance enregistrée sur cette
+     * dernière exécution (renseignée uniquement pour un contrôle PERIODIQUE).
+     *
+     * @param \Illuminate\Support\Collection<int, int> $controleIds
+     * @return \Illuminate\Support\Collection<int, \Illuminate\Support\Collection<int, object{article_id: int, derniere_execution: string, date_echeance: ?string, nb_executions: int}>> indexé par controle_id puis article_id
+     */
+    private static function dernieresExecutionsParControle($controleIds)
     {
-        return Carbon::parse($derniereExecution)->addMonths($controle->recurrence_value);
+        return ControleExec::whereIn('controle_id', $controleIds)
+            ->get(['controle_id', 'article_id', 'executed_at', 'date_echeance'])
+            ->groupBy('controle_id')
+            ->map(fn ($execs) => $execs
+                ->groupBy('article_id')
+                ->map(function ($execsArticle) {
+                    $derniere = $execsArticle->sortByDesc('executed_at')->first();
+
+                    return (object) [
+                        'article_id'         => $derniere->article_id,
+                        'derniere_execution' => $derniere->executed_at->toDateTimeString(),
+                        'date_echeance'      => $derniere->date_echeance?->toDateString(),
+                        'nb_executions'      => $execsArticle->count(),
+                    ];
+                }));
     }
 
     /**
@@ -295,11 +326,7 @@ class ControleBusiness
             ->get(['id', 'materiel_type_id'])
             ->groupBy('materiel_type_id');
 
-        $execsParControle = ControleExec::whereIn('controle_id', $controles->pluck('id'))
-            ->selectRaw('controle_id, article_id, MAX(executed_at) as derniere_execution, COUNT(*) as nb_executions')
-            ->groupBy('controle_id', 'article_id')
-            ->get()
-            ->groupBy('controle_id');
+        $execsParControle = self::dernieresExecutionsParControle($controles->pluck('id'));
 
         $maintenant = Carbon::now();
 
@@ -382,11 +409,7 @@ class ControleBusiness
             ->get()
             ->groupBy('materiel_type_id');
 
-        $execsParControle = ControleExec::whereIn('controle_id', $controles->pluck('id'))
-            ->selectRaw('controle_id, article_id, MAX(executed_at) as derniere_execution, COUNT(*) as nb_executions')
-            ->groupBy('controle_id', 'article_id')
-            ->get()
-            ->groupBy('controle_id');
+        $execsParControle = self::dernieresExecutionsParControle($controles->pluck('id'));
 
         $maintenant = Carbon::now();
 
@@ -405,11 +428,6 @@ class ControleBusiness
                     return null;
                 }
 
-                $derniereExecution = $execArticle?->derniere_execution ?? null;
-                $prochaine = $controle->recurrence_type === 'PERIODIQUE' && $derniereExecution !== null
-                    ? self::prochaineExecution($controle, $derniereExecution)
-                    : null;
-
                 return [
                     'id'                   => $article->id,
                     'materiel_type_id'     => $article->materiel_type_id,
@@ -418,8 +436,8 @@ class ControleBusiness
                     'type_designation'     => $article->materielType->designation,
                     'sapeur'               => $article->sapeur ? "{$article->sapeur->nom} {$article->sapeur->prenom}" : null,
                     'emplacement'          => $article->emplacement?->designation,
-                    'derniere_execution'   => $derniereExecution,
-                    'prochaine_execution'  => $prochaine?->toDateString(),
+                    'derniere_execution'   => $execArticle?->derniere_execution ?? null,
+                    'prochaine_execution'  => $execArticle?->date_echeance ?? null,
                     'nb_executions'        => $execArticle?->nb_executions ?? 0,
                     'nb_execution_max'     => $controle->nb_execution_max,
                     'statut'               => $statut,
