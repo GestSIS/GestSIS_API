@@ -49,17 +49,14 @@ class ControleTableSeeder extends Seeder
             ['controle_id' => 5, 'materiel_type_id' => 11, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        // Historique d'exécutions, avec des dates choisies pour peupler le tableau de
-        // bord de façon réaliste : en retard, en préavis, à jour et jamais contrôlé
-        // (le casque F1, contrôle 2, n'a volontairement aucune exécution).
         DB::table('controle_execs')->insert([
-            ['id' => 1, 'controle_id' => 1, 'article_id' => 9, 'executed_at' => now()->subMonths(13), 'executed_by' => $sapeurId, 'trigger_type' => 'PERIODIQUE', 'remarque_globale' => null, 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 2, 'controle_id' => 1, 'article_id' => 11, 'executed_at' => now()->subMonths(11)->subDays(20), 'executed_by' => $sapeurId, 'trigger_type' => 'PERIODIQUE', 'remarque_globale' => null, 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 3, 'controle_id' => 3, 'article_id' => 1, 'executed_at' => now()->subMonths(7), 'executed_by' => $sapeurId, 'trigger_type' => 'PERIODIQUE', 'remarque_globale' => null, 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 4, 'controle_id' => 3, 'article_id' => 2, 'executed_at' => now()->subMonths(5)->subDays(20), 'executed_by' => $sapeurId, 'trigger_type' => 'PERIODIQUE', 'remarque_globale' => null, 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 5, 'controle_id' => 3, 'article_id' => 3, 'executed_at' => now()->subMonths(2), 'executed_by' => $sapeurId, 'trigger_type' => 'PERIODIQUE', 'remarque_globale' => null, 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 6, 'controle_id' => 4, 'article_id' => 20, 'executed_at' => now()->subMonths(3), 'executed_by' => $sapeurId, 'trigger_type' => 'NON_PERIODIQUE', 'remarque_globale' => null, 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 7, 'controle_id' => 5, 'article_id' => 19, 'executed_at' => now()->subMonths(4), 'executed_by' => $sapeurId, 'trigger_type' => 'NON_PERIODIQUE', 'remarque_globale' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 1, 'controle_id' => 1, 'article_id' => 9, 'executed_at' => now()->subMonths(13), 'date_echeance' => now()->subMonths(13)->addMonths(12), 'executed_by' => $sapeurId, 'trigger_type' => 'PERIODIQUE', 'remarque_globale' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 2, 'controle_id' => 1, 'article_id' => 11, 'executed_at' => now()->subMonths(11)->subDays(20), 'date_echeance' => now()->subMonths(11)->subDays(20)->addMonths(12), 'executed_by' => $sapeurId, 'trigger_type' => 'PERIODIQUE', 'remarque_globale' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 3, 'controle_id' => 3, 'article_id' => 1, 'executed_at' => now()->subMonths(7), 'date_echeance' => now()->subMonths(7)->addMonths(6), 'executed_by' => $sapeurId, 'trigger_type' => 'PERIODIQUE', 'remarque_globale' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 4, 'controle_id' => 3, 'article_id' => 2, 'executed_at' => now()->subMonths(5)->subDays(20), 'date_echeance' => now()->subMonths(5)->subDays(20)->addMonths(6), 'executed_by' => $sapeurId, 'trigger_type' => 'PERIODIQUE', 'remarque_globale' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 5, 'controle_id' => 3, 'article_id' => 3, 'executed_at' => now()->subMonths(2), 'date_echeance' => now()->subMonths(2)->addMonths(6), 'executed_by' => $sapeurId, 'trigger_type' => 'PERIODIQUE', 'remarque_globale' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 6, 'controle_id' => 4, 'article_id' => 20, 'executed_at' => now()->subMonths(3), 'date_echeance' => null, 'executed_by' => $sapeurId, 'trigger_type' => 'NON_PERIODIQUE', 'remarque_globale' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 7, 'controle_id' => 5, 'article_id' => 19, 'executed_at' => now()->subMonths(4), 'date_echeance' => null, 'executed_by' => $sapeurId, 'trigger_type' => 'NON_PERIODIQUE', 'remarque_globale' => null, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         DB::table('controle_exec_taches')->insert([
