@@ -123,7 +123,7 @@ class CoursTest extends TestCase
         ]);
 
         $response->assertStatus(404);
-        $response->assertJson(['error' => 'Cours not found']);
+        $response->assertJson(['message' => 'Cours not found']);
     }
 
     public function testDestroyCoursSuccessfully(): void
@@ -150,6 +150,6 @@ class CoursTest extends TestCase
         ]);
 
         $response->assertStatus(404);
-        $response->assertJson(['error' => 'Cours not found']);
+        $response->assertJson(['message' => 'Cours not found']);
     }
 }

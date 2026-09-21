@@ -13,7 +13,7 @@ class SapeurGradeController extends Controller
     public function index(int $sapeurId)
     {
         if (!Sapeur::whereId($sapeurId)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
         return response()->json(['data' => GradeSapeur::where('sapeur_id', $sapeurId)->get()]);
     }
@@ -21,7 +21,7 @@ class SapeurGradeController extends Controller
     public function store(Request $request, int $sapeurId)
     {
         if (!Sapeur::whereId($sapeurId)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
 
         $data = $request->validate([
@@ -37,13 +37,13 @@ class SapeurGradeController extends Controller
     public function update(Request $request, int $sapeurId, int $gradeId)
     {
         if (!Sapeur::whereId($sapeurId)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
         if (!GradeSapeur::where(['id' => $gradeId, 'sapeur_id' => $sapeurId])->exists()) {
-            return response()->json(['error' => 'Grade non trouvé'], 404);
+            return response()->json(['message' => 'Grade non trouvé'], 404);
         }
         if ($gradeId !== $request->input('id')) {
-            return response()->json(['error' => 'invalid grade id']);
+            return response()->json(['message' => 'invalid grade id'], 422);
         }
 
         $data = $request->validate([
@@ -60,10 +60,10 @@ class SapeurGradeController extends Controller
     public function destroy(int $sapeurId, int $gradeId)
     {
         if (!Sapeur::whereId($sapeurId)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
         if (!GradeSapeur::where(['id' => $gradeId, 'sapeur_id' => $sapeurId])->exists()) {
-            return response()->json(['error' => 'Grade non trouvé'], 404);
+            return response()->json(['message' => 'Grade non trouvé'], 404);
         }
 
         $res = SapeurBusiness::removeGrade($sapeurId, $gradeId);

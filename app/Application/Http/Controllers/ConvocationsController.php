@@ -87,7 +87,7 @@ class ConvocationsController extends Controller
         ]);
 
         if ($request->hasFile('justificatif_file') && !$request->file('justificatif_file')->isValid()) {
-            return response()->json(['error' => 'Fichier justificatif_file invalide']);
+            return response()->json(['message' => 'Fichier justificatif_file invalide'], 422);
         }
 
         $file = $request->file('justificatif_file');

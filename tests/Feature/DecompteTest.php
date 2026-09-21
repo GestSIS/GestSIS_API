@@ -812,8 +812,8 @@ class DecompteTest extends TestCase
         $response = $this->json('GET', "api/v2/exercices-comptable/99999/certificat-salaire");
 
         $response
-            ->assertStatus(200)
-            ->assertJsonStructure(['error' => ['message']]);
+            ->assertStatus(422)
+            ->assertJsonStructure(['message']);
     }
 
     /**
@@ -840,6 +840,9 @@ class DecompteTest extends TestCase
         ]);
 
         $response = $this->json('GET', "api/v2/decomptes/{$decompteId}/iso20022");
-        $response->assertStatus(200);
+        // Décompte sans aucun montant positif à verser : rejeté (déjà le cas avant,
+        // simplement masqué par la convention "tout en 200" désormais abandonnée).
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
     }
 }

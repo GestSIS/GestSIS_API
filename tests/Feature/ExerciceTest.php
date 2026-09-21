@@ -160,10 +160,8 @@ class ExerciceTest extends TestCase
         $response = $this->json('POST', "/api/v2/exercices/{$exercice->id}/valider");
 
         $response
-            ->assertStatus(200)
-            ->assertJson([
-                'error' => true
-            ]);
+            ->assertStatus(422)
+            ->assertJsonStructure(['message']);
     }
 
     /**
@@ -225,10 +223,8 @@ class ExerciceTest extends TestCase
         $response = $this->json('POST', "/api/v2/exercices/{$exercice->id}/devalider");
 
         $response
-            ->assertStatus(200)
-            ->assertJson([
-                'error' => true
-            ]);
+            ->assertStatus(422)
+            ->assertJsonStructure(['message']);
 
         $this->assertEquals(2, $exercice->fresh()->statut);
     }

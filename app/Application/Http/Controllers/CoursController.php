@@ -36,7 +36,7 @@ class CoursController extends Controller
     public function update(Request $request, $id)
     {
         if (!Cours::whereId($id)->exists()) {
-            return response()->json(['error' => 'Cours not found'], 404);
+            return response()->json(['message' => 'Cours not found'], 404);
         }
 
         $data = $request->validate([
@@ -58,7 +58,7 @@ class CoursController extends Controller
     public function destroy($id)
     {
         if (!Cours::whereId($id)->exists()) {
-            return response()->json(['error' => 'Cours not found'], 404);
+            return response()->json(['message' => 'Cours not found'], 404);
         }
 
         $cours = SapeurParamBusiness::supprimerCours($id);

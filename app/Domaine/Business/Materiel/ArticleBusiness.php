@@ -106,6 +106,10 @@ class ArticleBusiness
       if ($type->est_perimable && ($article['date_peremption'] ?? null) === null) {
         throw new ArrayException([], message: "Article de type '{$type->designation}' nécessite une date de péremption");
       }
+
+      if ($type->est_numerote && trim($article['numero'] ?? '') === '') {
+        throw new ArrayException([], message: "Article de type '{$type->designation}' nécessite un numéro");
+      }
     }
 
     // Controller numérotation correcte
@@ -204,6 +208,10 @@ class ArticleBusiness
 
       if ($type->est_perimable && ($article['date_peremption'] ?? null) === null) {
         throw new ArrayException([], message: "Article de type '{$type->designation}' nécessite une date de péremption");
+      }
+
+      if ($type->est_numerote && trim($article['numero'] ?? '') === '') {
+        throw new ArrayException([], message: "Article de type '{$type->designation}' nécessite un numéro");
       }
       return $article;
     })->all();

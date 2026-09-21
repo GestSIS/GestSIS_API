@@ -37,17 +37,13 @@ class DecompteController extends Controller
             'ecrituresIntervention' => 'required|boolean',
         ]);
 
-        try {
-            $decompte = PaiementBusiness::creerDecompteAnnuel(
-                $data['exercice_comptable_id'],
-                $data['date'],
-                $data['designation'],
-                $selection,
-                $data['sapeurIds'] ?? []
-            );
-        } catch (ArrayException $e) {
-            return response()->json(['error' => $e->getErrors()]);
-        }
+        $decompte = PaiementBusiness::creerDecompteAnnuel(
+            $data['exercice_comptable_id'],
+            $data['date'],
+            $data['designation'],
+            $selection,
+            $data['sapeurIds'] ?? []
+        );
         return response()->json(['data' => $decompte]);
     }
 

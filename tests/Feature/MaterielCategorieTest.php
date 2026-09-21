@@ -20,7 +20,7 @@ class MaterielCategorieTest extends TestCase
             'couleur_id' => $categorie->couleur_id,
         ]);
 
-        $response->assertStatus(200)->assertJsonStructure(['error']);
+        $response->assertStatus(422)->assertJsonStructure(['message']);
         $this->assertNull($categorie->fresh()->parent_id);
     }
 
@@ -38,7 +38,7 @@ class MaterielCategorieTest extends TestCase
             'couleur_id' => $a->couleur_id,
         ]);
 
-        $response->assertStatus(200)->assertJsonStructure(['error']);
+        $response->assertStatus(422)->assertJsonStructure(['message']);
         $this->assertNull($a->fresh()->parent_id);
     }
 

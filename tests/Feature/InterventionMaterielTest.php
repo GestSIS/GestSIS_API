@@ -84,8 +84,8 @@ class InterventionMaterielTest extends TestCase
         );
 
         $response
-            ->assertStatus(200)
-            ->assertJsonPath('error.materiel_id', 'Matériel déjà présent');
+            ->assertStatus(422)
+            ->assertJsonPath('errors.materiel_id', 'Matériel déjà présent');
 
         // La quantité d'origine n'a pas été écrasée et il n'y a qu'une seule ligne
         $lignes = InterventionMateriel::where('intervention_id', $this->interventionId)

@@ -162,7 +162,7 @@ class SapeurController extends Controller
             default:
         }
 
-        return response()->json(['error' => ['message' => 'Type invalid']]);
+        return response()->json(['message' => 'Type invalid'], 422);
     }
 
     public function autreStatut(Request $request, $sapeurId)
@@ -176,7 +176,7 @@ class SapeurController extends Controller
     public function show(int $id)
     {
         if (!$sapeur = Sapeur::find($id)) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
         return response()->json(['data' => $this->serializeSapeur($sapeur)]);
     }
@@ -205,7 +205,7 @@ class SapeurController extends Controller
         ]);
 
         if (!Sapeur::whereId($id)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
         $sapeur = SapeurBusiness::updateSapeurById($id, $data);
         return response()->json(['data' => $this->serializeSapeur($sapeur)]);
@@ -214,7 +214,7 @@ class SapeurController extends Controller
     public function destroy(int $id)
     {
         if (!Sapeur::whereId($id)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
         SapeurBusiness::deleteSapeurById($id);
         return response()->json(['data' => "success"]);

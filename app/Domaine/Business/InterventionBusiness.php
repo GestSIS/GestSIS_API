@@ -110,9 +110,9 @@ class InterventionBusiness
 
         // Check pas déjà cloturé
         if ($exerciceComptable === null) {
-            throw new ArrayException(["message" => "Exercice comptable inexistant"]);
+            throw new ArrayException([], "Exercice comptable inexistant");
         } elseif ($exerciceComptable->boucle) {
-            throw new ArrayException(["message" => "Exercice comptable déjà bouclé"]);
+            throw new ArrayException([], "Exercice comptable déjà bouclé");
         }
 
         $intervention['exercice_comptable_id'] = $exerciceComptable->id;
@@ -208,7 +208,7 @@ class InterventionBusiness
             $intervention->update(['statut' => self::INTERVENTION_STATUT_VALIDE]);
             return $intervention->statut;
         }
-        throw new ArrayException(["message" => "Impossible de valider l'exercice."]);
+        throw new ArrayException([], "Impossible de valider l'exercice.");
     }
 
     /**

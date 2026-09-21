@@ -17,7 +17,7 @@ class TravailController extends Controller
 
         $sapeurId = $request->attributes->get('sapeurId');
         if (!$hasLectureOuValidationPermission && !$sapeurId) {
-            return response()->json(['error' => ['message' => 'Permissions insuffisantes']], 200);
+            return response()->json(['message' => 'Permissions insuffisantes'], 403);
         }
 
         $query = Travail::where('exercice_comptable_id', '=', $exerciceComptableId);
@@ -50,7 +50,7 @@ class TravailController extends Controller
         // Auteur
         $auteurId = $request->attributes->get('sapeurId');
         if (!$auteurId) {
-            return response()->json(['error' => ['message' => 'Permissions insuffisantes']], 200);
+            return response()->json(['message' => 'Permissions insuffisantes'], 403);
         }
         $perms = $request->attributes->get('permissions', []);
 
@@ -98,7 +98,7 @@ class TravailController extends Controller
     {
         $sapeurId = $request->attributes->get('sapeurId', []);
         if (!$sapeurId) {
-            return response()->json(['error' => ['message' => 'Permissions insuffisantes']], 200);
+            return response()->json(['message' => 'Permissions insuffisantes'], 403);
         }
 
         $travail = TravauxBusiness::supprimer($id, $sapeurId);

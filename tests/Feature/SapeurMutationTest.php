@@ -68,7 +68,7 @@ class SapeurMutationTest extends TestCase
 
         $response
             ->assertStatus(404)
-            ->assertJsonStructure(['error']);
+            ->assertJsonStructure(['message']);
     }
 
     public function testAddMutationSuccessfully()
@@ -126,8 +126,8 @@ class SapeurMutationTest extends TestCase
         ]);
 
         $response
-            ->assertStatus(200)
-            ->assertJsonPath('error.incorporation', 'Deux mutations en conflits');
+            ->assertStatus(422)
+            ->assertJsonPath('errors.incorporation', 'Deux mutations en conflits');
     }
 
     public function testEditMutationSuccessfully()
@@ -190,7 +190,7 @@ class SapeurMutationTest extends TestCase
 
         $response
             ->assertStatus(404)
-            ->assertJsonStructure(['error']);
+            ->assertJsonStructure(['message']);
     }
 
     public function testRemoveMutationSuccessfully()
@@ -226,6 +226,6 @@ class SapeurMutationTest extends TestCase
 
         $response
             ->assertStatus(404)
-            ->assertJsonStructure(['error']);
+            ->assertJsonStructure(['message']);
     }
 }

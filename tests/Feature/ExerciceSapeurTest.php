@@ -275,8 +275,8 @@ class ExerciceSapeurTest extends TestCase
         $response = $this->json('DELETE', '/api/v2/exercices/' . $exerciceId . '/sapeurs/', ['sapeurs' => $ids]);
 
         $response
-            ->assertStatus(200)
-            ->assertJsonPath('error.message', 'Impossible de modifier un exercice déjà imputé');
+            ->assertStatus(422)
+            ->assertJsonPath('message', 'Impossible de modifier un exercice déjà imputé');
     }
 
     /**

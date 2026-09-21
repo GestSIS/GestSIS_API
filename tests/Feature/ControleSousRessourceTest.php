@@ -102,9 +102,8 @@ class ControleSousRessourceTest extends TestCase
             'materiel_type_id' => $type->id,
         ], ['Sis-Key' => 1]);
 
-        // Les erreurs métier sont renvoyées en 200 avec une clé "error".
-        $response->assertOk();
-        $response->assertJsonStructure(['error' => ['message']]);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
         $this->assertSame(1, ControleMaterielType::where('controle_id', $controle->id)->count());
     }
 

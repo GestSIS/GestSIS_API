@@ -34,7 +34,7 @@ class SapeurGradeTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     public function testAddGradeSuccessfully(): void
@@ -75,7 +75,7 @@ class SapeurGradeTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     public function testEditGradeSuccessfully(): void
@@ -122,7 +122,7 @@ class SapeurGradeTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     public function testEditGradeReturnsErrorWhenGradeNotFound(): void
@@ -140,7 +140,7 @@ class SapeurGradeTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Grade non trouvé']);
+            ->assertJson(['message' => 'Grade non trouvé']);
     }
 
     public function testRemoveGradeSuccessfully(): void
@@ -168,7 +168,7 @@ class SapeurGradeTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     public function testRemoveGradeReturnsErrorWhenGradeNotFound(): void
@@ -181,6 +181,6 @@ class SapeurGradeTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Grade non trouvé']);
+            ->assertJson(['message' => 'Grade non trouvé']);
     }
 }

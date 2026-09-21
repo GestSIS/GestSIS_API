@@ -20,7 +20,7 @@ class MesInfosController extends Controller
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
-            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+            return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
         $data = Sapeur::with(['telephones'])->find($sapeurId);
@@ -31,7 +31,7 @@ class MesInfosController extends Controller
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
-            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+            return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
         $data = FonctionSapeur::where('sapeur_id', $sapeurId)->get();
@@ -42,7 +42,7 @@ class MesInfosController extends Controller
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
-            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+            return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
         $data = Mutation::where('sapeur_id', $sapeurId)->get();
@@ -53,7 +53,7 @@ class MesInfosController extends Controller
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
-            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+            return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
         $data = GradeSapeur::where('sapeur_id', $sapeurId)->get();
@@ -64,7 +64,7 @@ class MesInfosController extends Controller
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
-            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+            return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
         $data = CoursSapeur::where('sapeur_id', $sapeurId)->get();
@@ -75,7 +75,7 @@ class MesInfosController extends Controller
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
-            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+            return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
         $data = Sapeur::find($sapeurId)->permis()->get();
@@ -86,7 +86,7 @@ class MesInfosController extends Controller
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
-            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+            return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
         $data = GroupeSapeur::where('sapeur_id', $sapeurId)->get();

@@ -13,7 +13,7 @@ class SapeurMutationController extends Controller
     public function index(int $sapeurId)
     {
         if (!Sapeur::whereId($sapeurId)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
         return response()->json(['data' => Mutation::where('sapeur_id', $sapeurId)->get()]);
     }
@@ -21,7 +21,7 @@ class SapeurMutationController extends Controller
     public function store(Request $request, int $sapeurId)
     {
         if (!Sapeur::whereId($sapeurId)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
 
         $data = $request->validate([
@@ -38,7 +38,7 @@ class SapeurMutationController extends Controller
     public function update(Request $request, int $sapeurId, int $mutationId)
     {
         if (!Sapeur::whereId($sapeurId)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
 
         $data = $request->validate([
@@ -50,11 +50,11 @@ class SapeurMutationController extends Controller
         ]);
 
         if ($mutationId !== $request->input('id')) {
-            return response()->json(['error' => 'invalid mutation id'], 400);
+            return response()->json(['message' => 'invalid mutation id'], 400);
         }
 
         if (!Mutation::where('sapeur_id', $sapeurId)->whereId($mutationId)->exists()) {
-            return response()->json(['error' => 'Mutation non trouvée'], 404);
+            return response()->json(['message' => 'Mutation non trouvée'], 404);
         }
 
         $mutation = SapeurBusiness::updateMutation($sapeurId, $data);
@@ -64,11 +64,11 @@ class SapeurMutationController extends Controller
     public function destroy(int $sapeurId, int $mutationId)
     {
         if (!Sapeur::whereId($sapeurId)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
 
         if (!Mutation::where('sapeur_id', $sapeurId)->whereId($mutationId)->exists()) {
-            return response()->json(['error' => 'Mutation non trouvée'], 404);
+            return response()->json(['message' => 'Mutation non trouvée'], 404);
         }
 
         $data = SapeurBusiness::removeMutation($sapeurId, $mutationId);

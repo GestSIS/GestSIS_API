@@ -69,7 +69,7 @@ class PaiementBusiness
     {
         $avsParam = AvsParam::first();
         if ($avsParam === null) {
-            throw new ArrayException(["message" => "Paramètres AVS non configurés"]);
+            throw new ArrayException([], "Paramètres AVS non configurés");
         }
 
         $indexedCompte = Compte::all()->keyBy('id')->all();
@@ -461,7 +461,7 @@ class PaiementBusiness
                 Log::error("Certificat de salaire creation", [
                     "exception" => $merged->getError(),
                 ]);
-                throw new ArrayException(["message" => "Erreur lors de la génération du pdf"]);
+                throw new ArrayException([], "Erreur lors de la génération du pdf");
             }
 
             $headers = [

@@ -17,7 +17,7 @@ class MesAbsencesController extends Controller
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
-            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+            return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
@@ -38,7 +38,7 @@ class MesAbsencesController extends Controller
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
-            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+            return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
         $data = $request->validate([
@@ -58,7 +58,7 @@ class MesAbsencesController extends Controller
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
-            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+            return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
         $data = $request->validate([
@@ -82,7 +82,7 @@ class MesAbsencesController extends Controller
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
-            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+            return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
         $absence = Absence::find($absenceId);

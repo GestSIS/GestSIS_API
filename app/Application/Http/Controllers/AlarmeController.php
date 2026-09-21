@@ -19,7 +19,7 @@ class AlarmeController extends Controller
         try {
             $token = $request->bearerToken();
         } catch (Exception $e) {
-            return response()->json(["error" => "Accès refusé"], 401);
+            return response()->json(["message" => "Accès refusé"], 401);
         }
         $sisKey = $request->header('Sis-Key', Null);
 

@@ -67,6 +67,51 @@ class ArticleTest extends TestCase
         $this->assertDatabaseHas('articles', ['id' => $article->id, 'remarque' => 'apres']);
     }
 
+    public function testCreateNumeroteArticleWithoutNumeroIsRejectedGracefully(): void
+    {
+        $type = MaterielType::factory()->create(['est_numerote' => true]);
+        $emplacement = Emplacement::factory()->create();
+
+        $response = $this->json('POST', '/api/v2/articles', [
+            'articles' => [
+                [
+                    'materiel_type_id' => $type->id,
+                    'quantite' => 1,
+                    'emplacement_id' => $emplacement->id,
+                ],
+            ],
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
+        $this->assertDatabaseMissing('articles', ['materiel_type_id' => $type->id]);
+    }
+
+    public function testEditNumeroteArticleWithoutNumeroIsRejectedGracefully(): void
+    {
+        $type = MaterielType::factory()->create(['est_numerote' => true]);
+        $emplacement = Emplacement::factory()->create();
+        $article = Article::factory()->create([
+            'materiel_type_id' => $type->id,
+            'emplacement_id' => $emplacement->id,
+            'numero' => 'ABC123',
+        ]);
+
+        $response = $this->json('PUT', '/api/v2/articles', [
+            'articles' => [
+                [
+                    'id' => $article->id,
+                    'emplacement_id' => $emplacement->id,
+                    'numero' => null,
+                ],
+            ],
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
+        $this->assertDatabaseHas('articles', ['id' => $article->id, 'numero' => 'ABC123']);
+    }
+
     public function testStoreEmplacementArticlesRetournesLeMateriel(): void
     {
         $type = MaterielType::factory()->create();
@@ -158,8 +203,8 @@ class ArticleTest extends TestCase
             ],
         ], ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['error']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
         $this->assertDatabaseMissing('articles', ['designation' => 'Article valide du lot']);
         $this->assertDatabaseMissing('articles', ['designation' => 'Camion sans couleur']);
     }
@@ -176,8 +221,8 @@ class ArticleTest extends TestCase
             ]],
         ], ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['error']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
         $this->assertDatabaseMissing('articles', ['designation' => 'Camion sans couleur']);
     }
 
@@ -283,8 +328,8 @@ class ArticleTest extends TestCase
             ]],
         ], ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['error']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
         $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'statut' => true]);
     }
 
@@ -341,8 +386,8 @@ class ArticleTest extends TestCase
             ]],
         ], ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['error']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
         $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'parent_id' => null]);
     }
 
@@ -382,8 +427,8 @@ class ArticleTest extends TestCase
             ]],
         ], ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['error']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
         $this->assertDatabaseHas('articles', ['id' => $article->id, 'materiel_type_id' => $type->id]);
     }
 
@@ -402,8 +447,8 @@ class ArticleTest extends TestCase
             ]],
         ], ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['error']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
         $this->assertDatabaseHas('articles', ['id' => $article->id, 'materiel_type_id' => $typeA->id]);
     }
 
@@ -419,8 +464,8 @@ class ArticleTest extends TestCase
             'articleIds' => [$article->id],
         ], ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['error']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
         $this->assertDatabaseHas('articles', ['id' => $article->id]);
         $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id]);
     }
@@ -437,8 +482,8 @@ class ArticleTest extends TestCase
             'articleIds' => [$article->id],
         ], ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['error']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
         $this->assertDatabaseHas('articles', ['id' => $article->id]);
         $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id]);
     }
@@ -474,8 +519,8 @@ class ArticleTest extends TestCase
             ]],
         ], ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['error']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
     }
 
     public function testRetourArticlesRejectedForVehiculeArticle(): void
@@ -491,8 +536,8 @@ class ArticleTest extends TestCase
             'articleIds' => [$article->id],
         ], ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['error']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
         $this->assertDatabaseHas('articles', ['id' => $article->id, 'emplacement_id' => null]);
     }
 

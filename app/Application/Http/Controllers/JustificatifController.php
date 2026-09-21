@@ -24,7 +24,7 @@ class JustificatifController extends Controller
     public function store(Request $request, int $id)
     {
         if (!$request->hasFile('justificatif') || !$request->file('justificatif')->isValid()) {
-            return response()->json(['error' => 'Fichier justificatif manquant']);
+            return response()->json(['message' => 'Fichier justificatif manquant'], 422);
         }
 
         $file = $request->file('justificatif');

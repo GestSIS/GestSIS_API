@@ -25,7 +25,7 @@ class JwtTokenValidatorAny
         try {
             $token = TokenTools::validateToken($request->bearerToken());
         } catch (Exception $e) {
-            return response()->json(["error" => "Accès refusé"], 401);
+            return response()->json(["message" => "Accès refusé"], 401);
         }
 
         $request->attributes->add(['jwtToken' => $token]);

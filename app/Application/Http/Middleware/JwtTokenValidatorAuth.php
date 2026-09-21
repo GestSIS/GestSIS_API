@@ -25,17 +25,17 @@ class JwtTokenValidatorAuth
         try {
             $token = TokenTools::validateToken($request->bearerToken());
         } catch (Exception $e) {
-            return response()->json(["error" => "Accès refusé --"], 401);
+            return response()->json(["message" => "Accès refusé --"], 401);
         }
 
         // Check has role for provided sis
         $perms = (array) $token->data->permissions;
         if (!array_key_exists("_", $perms)) {
-            return response()->json(["error" => "Token invalide"], 401);
+            return response()->json(["message" => "Token invalide"], 401);
         }
 
         if (!in_array("admin", $perms["_"])) {
-            return response()->json(["error" => "Permissions insuffisantes"], 401);
+            return response()->json(["message" => "Permissions insuffisantes"], 401);
         }
 
         return $next($request);

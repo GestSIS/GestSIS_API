@@ -13,7 +13,6 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Domaine\Exceptions\ArrayException;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use Sentry\Laravel\Integration;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -39,12 +38,20 @@ return Application::configure(basePath: dirname(__DIR__))
         Integration::handles($exceptions);
         $exceptions
             ->render(function (ArrayException $e, Request $request) {
-                return response()->json(['error' => $e->getErrors()], 200);
+                $payload = ['message' => $e->getMessage()];
+                if ($e->getErrors() !== []) {
+                    $payload['errors'] = $e->getErrors();
+                }
+                return response()->json($payload, $e->getStatus());
             })
             ->render(function (InvalidActionException $e, Request $request) {
-                return response()->json(['error' => $e->getErrors()], 200);
-            })
-            ->render(function (ValidationException $e, Request $request) {
-                return response()->json(['error' => $e->errors()], 200);
+                $payload = ['message' => $e->getMessage()];
+                if ($e->getErrors() !== []) {
+                    $payload['errors'] = $e->getErrors();
+                }
+                return response()->json($payload, $e->getStatus());
             });
+        // ValidationException est rendue nativement par Laravel en
+        // {"message": "...", "errors": {champ: [...]}} @ 422 — même forme,
+        // pas besoin de handler custom.
     })->create();

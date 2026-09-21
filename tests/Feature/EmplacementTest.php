@@ -53,8 +53,8 @@ class EmplacementTest extends TestCase
             'statut' => true,
         ], ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['error']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
         $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'designation' => $emplacement->designation]);
     }
 
@@ -65,8 +65,8 @@ class EmplacementTest extends TestCase
 
         $response = $this->json('DELETE', "/api/v2/emplacements/{$emplacement->id}", [], ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['error']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
         $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id]);
     }
 
@@ -77,8 +77,8 @@ class EmplacementTest extends TestCase
 
         $response = $this->json('DELETE', "/api/v2/emplacements/{$parent->id}", [], ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['error']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
         $this->assertDatabaseHas('emplacements', ['id' => $parent->id]);
     }
 
@@ -216,8 +216,8 @@ class EmplacementTest extends TestCase
 
         $response = $this->json('PUT', "/api/v2/emplacements/{$emplacement->id}", $payload, ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['error']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
         $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'parent_id' => null]);
     }
 
@@ -232,8 +232,8 @@ class EmplacementTest extends TestCase
 
         $response = $this->json('PUT', "/api/v2/emplacements/{$a->id}", $payload, ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['error']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
         $this->assertDatabaseHas('emplacements', ['id' => $a->id, 'parent_id' => null]);
     }
 
@@ -246,8 +246,8 @@ class EmplacementTest extends TestCase
         $payload = $this->basePayload(['couleur_id' => $couleur->id, 'statut' => false]);
         $response = $this->json('PUT', "/api/v2/emplacements/{$emplacement->id}", $payload, ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['error']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
         $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'statut' => true]);
     }
 
@@ -260,8 +260,8 @@ class EmplacementTest extends TestCase
         $payload = $this->basePayload(['couleur_id' => $couleur->id, 'statut' => false]);
         $response = $this->json('PUT', "/api/v2/emplacements/{$parent->id}", $payload, ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['error']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
         $this->assertDatabaseHas('emplacements', ['id' => $parent->id, 'statut' => true]);
     }
 

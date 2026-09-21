@@ -41,7 +41,7 @@ class SapeurTelephoneTest extends TestCase
         $response = $this->json('GET', "/api/v2/sapeurs/99999/telephones");
 
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     /**
@@ -93,7 +93,7 @@ class SapeurTelephoneTest extends TestCase
         $response = $this->json('POST', "/api/v2/sapeurs/99999/telephones", $data);
 
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     /**
@@ -168,7 +168,7 @@ class SapeurTelephoneTest extends TestCase
         );
 
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Téléphone non trouvé']);
+            ->assertJson(['message' => 'Téléphone non trouvé']);
     }
 
     /**
@@ -191,7 +191,7 @@ class SapeurTelephoneTest extends TestCase
         );
 
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     /**
@@ -230,7 +230,7 @@ class SapeurTelephoneTest extends TestCase
         $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/telephones/99999");
 
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Téléphone non trouvé']);
+            ->assertJson(['message' => 'Téléphone non trouvé']);
     }
 
     /**
@@ -241,6 +241,6 @@ class SapeurTelephoneTest extends TestCase
         $response = $this->json('DELETE', "/api/v2/sapeurs/99999/telephones/1");
 
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 }

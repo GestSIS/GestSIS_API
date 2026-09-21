@@ -57,8 +57,8 @@ class EcritureTest extends TestCase
         $response = $this->json('PUT', "api/v2/ecritures/{$ecritureId}", $this->payloadDivers());
 
         $response
-            ->assertStatus(200)
-            ->assertJsonPath('error.message', 'Seules les écritures du module divers peuvent être modifiées');
+            ->assertStatus(422)
+            ->assertJsonPath('message', 'Seules les écritures du module divers peuvent être modifiées');
 
         $this->assertDatabaseHas('ecritures', ['id' => $ecritureId, 'designation' => 'test ecriture']);
     }
@@ -73,8 +73,8 @@ class EcritureTest extends TestCase
         $response = $this->json('DELETE', "api/v2/ecritures/{$ecritureId}");
 
         $response
-            ->assertStatus(200)
-            ->assertJsonPath('error.message', 'Seules les écritures du module divers peuvent être supprimées');
+            ->assertStatus(422)
+            ->assertJsonPath('message', 'Seules les écritures du module divers peuvent être supprimées');
 
         $this->assertDatabaseHas('ecritures', ['id' => $ecritureId]);
     }
@@ -100,8 +100,8 @@ class EcritureTest extends TestCase
         );
 
         $response
-            ->assertStatus(200)
-            ->assertJsonPath('error.message', "Exercice comptable clôturé, impossible d'effectuer cette action");
+            ->assertStatus(422)
+            ->assertJsonPath('message', "Exercice comptable clôturé, impossible d'effectuer cette action");
 
         $this->assertDatabaseHas('ecritures', ['id' => $ecritureId, 'exercice_comptable_id' => 2]);
     }

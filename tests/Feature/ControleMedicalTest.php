@@ -247,8 +247,8 @@ class ControleMedicalTest extends TestCase
         $response = $this->json('POST', '/api/v2/controles-medicaux/' . $controle->id . '/justificatif', []);
 
         $response
-            ->assertStatus(200)
-            ->assertJson(['error' => 'Fichier justificatif manquant']);
+            ->assertStatus(422)
+            ->assertJson(['message' => 'Fichier justificatif manquant']);
     }
 
     public function testGetJustificatif()

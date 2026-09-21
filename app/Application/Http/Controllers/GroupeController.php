@@ -37,7 +37,7 @@ class GroupeController extends Controller
     public function update(Request $request, $id)
     {
         if (!Groupe::whereId($id)->exists()) {
-            return response()->json(['error' => 'Groupe not found'], 404);
+            return response()->json(['message' => 'Groupe not found'], 404);
         }
 
         $data = $request->validate([
@@ -55,7 +55,7 @@ class GroupeController extends Controller
     public function destroy($id)
     {
         if (!Groupe::whereId($id)->exists()) {
-            return response()->json(['error' => 'Groupe not found'], 404);
+            return response()->json(['message' => 'Groupe not found'], 404);
         }
 
         OrganisationBusiness::supprimerGroupe($id);

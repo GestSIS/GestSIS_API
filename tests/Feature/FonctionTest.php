@@ -115,7 +115,7 @@ class FonctionTest extends TestCase
         ]);
 
         $response->assertStatus(404);
-        $response->assertJson(['error' => 'Fonction not found']);
+        $response->assertJson(['message' => 'Fonction not found']);
     }
 
     public function testDestroyFonctionSuccessfully(): void
@@ -142,6 +142,6 @@ class FonctionTest extends TestCase
         ]);
 
         $response->assertStatus(404);
-        $response->assertJson(['error' => 'Fonction not found']);
+        $response->assertJson(['message' => 'Fonction not found']);
     }
 }

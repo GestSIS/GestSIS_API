@@ -36,7 +36,7 @@ class SapeurCoursTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     public function testAddCoursSuccessfully(): void
@@ -141,7 +141,7 @@ class SapeurCoursTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     public function testEditCoursSuccessfully(): void
@@ -190,7 +190,7 @@ class SapeurCoursTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     public function testEditCoursReturnsErrorWhenCoursNotFound(): void
@@ -208,7 +208,7 @@ class SapeurCoursTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Cours non trouvé']);
+            ->assertJson(['message' => 'Cours non trouvé']);
     }
 
     public function testRemoveCoursSuccessfully(): void
@@ -236,7 +236,7 @@ class SapeurCoursTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     public function testRemoveCoursReturnsErrorWhenCoursNotFound(): void
@@ -249,7 +249,7 @@ class SapeurCoursTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Cours non trouvé']);
+            ->assertJson(['message' => 'Cours non trouvé']);
     }
 
     public function testAddCoursMultipleSuccessfully(): void
@@ -327,8 +327,8 @@ class SapeurCoursTest extends TestCase
         $response = $this->json('POST', '/api/v2/cours-sapeurs', $data);
 
         // Assert
-        $response->assertStatus(200)
-            ->assertJsonStructure(['error']);
+        $response->assertStatus(422)
+            ->assertJsonStructure(['message', 'errors']);
         $this->assertDatabaseMissing('cours_sapeur', ['sapeur_id' => $sapeur->id, 'cours_id' => 2]);
     }
 
@@ -349,8 +349,8 @@ class SapeurCoursTest extends TestCase
         $response = $this->json('POST', '/api/v2/cours-sapeurs', $data);
 
         // Assert
-        $response->assertStatus(200)
-            ->assertJson(['error' => ['message' => "Impossible d'ajouter un cours à un civil."]]);
+        $response->assertStatus(422)
+            ->assertJson(['message' => "Impossible d'ajouter un cours à un civil."]);
         $this->assertDatabaseMissing('cours_sapeur', ['sapeur_id' => $sapeur->id, 'cours_id' => 2]);
         $this->assertDatabaseMissing('cours_sapeur', ['sapeur_id' => $civil->id, 'cours_id' => 2]);
     }

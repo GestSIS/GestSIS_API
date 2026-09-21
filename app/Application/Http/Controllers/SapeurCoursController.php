@@ -13,7 +13,7 @@ class SapeurCoursController extends Controller
     public function index($sapeurId)
     {
         if (!Sapeur::whereId($sapeurId)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
         return response()->json(['data' => CoursSapeur::where('sapeur_id', $sapeurId)->get()]);
     }
@@ -21,7 +21,7 @@ class SapeurCoursController extends Controller
     public function store(Request $request, int $sapeurId)
     {
         if (!Sapeur::whereId($sapeurId)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
 
         $data = $request->validate([
@@ -43,13 +43,13 @@ class SapeurCoursController extends Controller
     public function update(Request $request, int $sapeurId, int $coursId)
     {
         if (!Sapeur::whereId($sapeurId)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
         if (!CoursSapeur::where(['id' => $coursId, 'sapeur_id' => $sapeurId])->exists()) {
-            return response()->json(['error' => 'Cours non trouvé'], 404);
+            return response()->json(['message' => 'Cours non trouvé'], 404);
         }
         if ($coursId !== $request->input('id')) {
-            return response()->json(['error' => 'invalid cours id']);
+            return response()->json(['message' => 'invalid cours id'], 422);
         }
 
         $data = $request->validate([
@@ -66,10 +66,10 @@ class SapeurCoursController extends Controller
     public function destroy(int $sapeurId, int $coursId)
     {
         if (!Sapeur::whereId($sapeurId)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
         if (!CoursSapeur::where(['id' => $coursId, 'sapeur_id' => $sapeurId])->exists()) {
-            return response()->json(['error' => 'Cours non trouvé'], 404);
+            return response()->json(['message' => 'Cours non trouvé'], 404);
         }
 
         SapeurBusiness::removeCours($sapeurId, $coursId);

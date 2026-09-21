@@ -24,11 +24,11 @@ class DbSelector
 
         $sisKey = $request->header('Sis-Key', Null);
         if (is_null($sisKey)) {
-            return response()->json(["error" => "Sis non sélectionné"], 401);
+            return response()->json(["message" => "Sis non sélectionné"], 401);
         }
 
         if (!Sis::isValid($sisKey)) {
-            return response()->json(["error" => "Sis inconnu"], 401);
+            return response()->json(["message" => "Sis inconnu"], 401);
         }
 
         Sis::use($sisKey);

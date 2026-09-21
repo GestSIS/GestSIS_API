@@ -103,7 +103,7 @@ class SapeurTest extends TestCase
 
         $response
             ->assertStatus(404)
-            ->assertJsonStructure(['error']);
+            ->assertJsonStructure(['message']);
     }
 
     public function testCreateSapeurSuccessfully()
@@ -225,7 +225,7 @@ class SapeurTest extends TestCase
             'no_avs' => '756.1234.5678.98', // clé de contrôle erronée
         ]);
 
-        $response->assertStatus(200)->assertJsonStructure(['error']);
+        $response->assertStatus(422)->assertJsonStructure(['message']);
         $this->assertEquals('756.1234.5678.97', $sapeur->fresh()->no_avs);
     }
 
@@ -237,7 +237,7 @@ class SapeurTest extends TestCase
 
         $response
             ->assertStatus(404)
-            ->assertJsonStructure(['error']);
+            ->assertJsonStructure(['message']);
     }
 
     public function testDestroySapeurSuccessfully()
@@ -263,7 +263,7 @@ class SapeurTest extends TestCase
 
         $response
             ->assertStatus(404)
-            ->assertJsonStructure(['error']);
+            ->assertJsonStructure(['message']);
     }
 
     public function testEffectifReturnsActiveFirefighters()

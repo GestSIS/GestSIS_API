@@ -24,7 +24,7 @@ class MesExcusesController extends Controller
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
-            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+            return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
         $request->merge([
@@ -37,7 +37,7 @@ class MesExcusesController extends Controller
         ]);
 
         if ($request->hasFile('justificatif_file') && !$request->file('justificatif_file')->isValid()) {
-            return response()->json(['error' => 'Fichier justificatif invalide']);
+            return response()->json(['message' => 'Fichier justificatif invalide'], 422);
         }
 
         $file = $request->file('justificatif_file');
@@ -54,7 +54,7 @@ class MesExcusesController extends Controller
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
-            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+            return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
         $perms = $request->attributes->get('permissions', []);

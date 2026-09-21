@@ -31,7 +31,7 @@ class GradeController extends Controller
     public function update(Request $request, $id)
     {
         if (!Grade::whereId($id)->exists()) {
-            return response()->json(['error' => 'Grade not found'], 404);
+            return response()->json(['message' => 'Grade not found'], 404);
         }
 
         $data = $request->validate([
@@ -48,7 +48,7 @@ class GradeController extends Controller
     public function destroy($id)
     {
         if (!Grade::whereId($id)->exists()) {
-            return response()->json(['error' => 'Grade not found'], 404);
+            return response()->json(['message' => 'Grade not found'], 404);
         }
 
         $grade = SapeurParamBusiness::supprimerGrade($id);

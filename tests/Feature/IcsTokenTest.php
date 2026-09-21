@@ -45,7 +45,7 @@ class IcsTokenTest extends TestCase
         $response
             ->assertStatus(403)
             ->assertJson([
-                'error' => 'Sis inconnu',
+                'message' => 'Sis inconnu',
             ]);
     }
 }

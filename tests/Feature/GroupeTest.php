@@ -114,7 +114,7 @@ class GroupeTest extends TestCase
         ]);
 
         $response->assertStatus(404);
-        $response->assertJson(['error' => 'Groupe not found']);
+        $response->assertJson(['message' => 'Groupe not found']);
     }
 
     public function testDestroyGroupeSuccessfully(): void
@@ -142,7 +142,7 @@ class GroupeTest extends TestCase
         ]);
 
         $response->assertStatus(404);
-        $response->assertJson(['error' => 'Groupe not found']);
+        $response->assertJson(['message' => 'Groupe not found']);
     }
 }
 

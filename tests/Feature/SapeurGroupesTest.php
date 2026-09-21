@@ -34,7 +34,7 @@ class SapeurGroupesTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     public function testQuitterGroupesSuccessfully(): void
@@ -67,6 +67,6 @@ class SapeurGroupesTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 }

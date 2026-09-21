@@ -152,7 +152,7 @@ class ExerciceBusiness
     {
         $statut = Exercice::findOrFail($exerciceId)->statut;
         if ($statut !== self::EXERCICE_STATUT_SAISI) {
-            throw new ArrayException(["message" => "Impossible de valider l'exercice."]);
+            throw new ArrayException([], "Impossible de valider l'exercice.");
         }
 
         // Check saisi des présences sont saisies
@@ -167,7 +167,7 @@ class ExerciceBusiness
                 && !($p['excuse_type_id'] ?? null);
         });
         if (count($presenceIncompletes)) {
-            throw new ArrayException(["message" => "Certains sapeurs convoqué sont incomplet"]);
+            throw new ArrayException([], "Certains sapeurs convoqué sont incomplet");
         }
 
         // TODO: Valider les absences amendées ?? Non
@@ -189,7 +189,7 @@ class ExerciceBusiness
     {
         $statut = Exercice::findOrFail($exerciceId)->statut;
         if ($statut !== self::EXERCICE_STATUT_VALIDE) {
-            throw new ArrayException(["message" => "Impossible d'annuler la validation de l'exercice."]);
+            throw new ArrayException([], "Impossible d'annuler la validation de l'exercice.");
         }
 
         self::updateExerciceById($exerciceId, ["statut" => self::EXERCICE_STATUT_SAISI]);

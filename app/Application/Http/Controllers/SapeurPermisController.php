@@ -13,7 +13,7 @@ class SapeurPermisController extends Controller
     public function index(int $sapeur_id)
     {
         if (!Sapeur::whereId($sapeur_id)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
         return response()->json(['data' => Sapeur::find($sapeur_id)->permis()->get()]);
     }
@@ -21,7 +21,7 @@ class SapeurPermisController extends Controller
     public function store(Request $request, int $id)
     {
         if (!Sapeur::whereId($id)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
 
         $data = $request->validate([
@@ -36,7 +36,7 @@ class SapeurPermisController extends Controller
     public function update(Request $request, int $id, int $permisId)
     {
         if (!Sapeur::whereId($id)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
 
         $data = $request->validate([
@@ -45,10 +45,10 @@ class SapeurPermisController extends Controller
         ]);
 
         if ($permisId !== $request->input('id')) {
-            return response()->json(['error' => 'invalid permis id'], 400);
+            return response()->json(['message' => 'invalid permis id'], 400);
         }
         if (!Permis::where(['id' => $permisId, 'sapeur_id' => $id])->exists()) {
-            return response()->json(['error' => 'Permis non trouvé'], 404);
+            return response()->json(['message' => 'Permis non trouvé'], 404);
         }
 
         $permis = SapeurBusiness::updatePermis($id, $data);
@@ -58,10 +58,10 @@ class SapeurPermisController extends Controller
     public function destroy(int $id, int $permisId)
     {
         if (!Sapeur::whereId($id)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
         if (!Permis::where(['id' => $permisId, 'sapeur_id' => $id])->exists()) {
-            return response()->json(['error' => 'Permis non trouvé'], 404);
+            return response()->json(['message' => 'Permis non trouvé'], 404);
         }
 
         SapeurBusiness::removePermis($id, $permisId);

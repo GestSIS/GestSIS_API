@@ -2,6 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
+use App\Domaine\Exceptions\ArrayException;
 use App\Models\Exercice;
 use App\Models\IcsToken;
 use App\Models\ExerciceSapeur;
@@ -25,7 +26,7 @@ class IcsController extends Controller
     {
         if (!App::environment('testing')) {
             if (!Sis::isValid($sisKey)) {
-                abort(404);
+                throw new ArrayException([], "Page introuvable", status: 404);
             }
 
             Sis::use($sisKey);
@@ -33,7 +34,7 @@ class IcsController extends Controller
 
         $icsToken = IcsToken::where('token', $token)->first();
         if ($icsToken === null) {
-            abort(404);
+            throw new ArrayException([], "Page introuvable", status: 404);
         }
 
         $convoqueParExerciceId = ExerciceSapeur::where('sapeur_id', $icsToken->sapeur_id)

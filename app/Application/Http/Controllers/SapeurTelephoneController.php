@@ -13,7 +13,7 @@ class SapeurTelephoneController extends Controller
     public function index(int $sapeurId)
     {
         if (!Sapeur::whereId($sapeurId)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
         return response()->json(['data' => SapeurTelephone::where('sapeur_id', $sapeurId)->get()]);
     }
@@ -21,7 +21,7 @@ class SapeurTelephoneController extends Controller
     public function store(Request $request, int $sapeurId)
     {
         if (!Sapeur::whereId($sapeurId)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
 
         $data = $request->validate([
@@ -38,7 +38,7 @@ class SapeurTelephoneController extends Controller
     public function update(Request $request, int $sapeurId, int $telephoneId)
     {
         if (!Sapeur::whereId($sapeurId)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
 
         $data = $request->validate([
@@ -50,10 +50,10 @@ class SapeurTelephoneController extends Controller
         ]);
 
         if ($telephoneId !== $request->input('id')) {
-            return response()->json(['error' => 'invalid telephone id'], 400);
+            return response()->json(['message' => 'invalid telephone id'], 400);
         }
         if (!SapeurTelephone::where(['id' => $telephoneId, 'sapeur_id' => $sapeurId])->exists()) {
-            return response()->json(['error' => 'Téléphone non trouvé'], 404);
+            return response()->json(['message' => 'Téléphone non trouvé'], 404);
         }
 
         $telephone = SapeurBusiness::updateTelephone($sapeurId, $data);
@@ -63,10 +63,10 @@ class SapeurTelephoneController extends Controller
     public function destroy(int $sapeurId, int $telephoneId)
     {
         if (!Sapeur::whereId($sapeurId)->exists()) {
-            return response()->json(['error' => 'Sapeur non trouvé'], 404);
+            return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
         if (!SapeurTelephone::where(['id' => $telephoneId, 'sapeur_id' => $sapeurId])->exists()) {
-            return response()->json(['error' => 'Téléphone non trouvé'], 404);
+            return response()->json(['message' => 'Téléphone non trouvé'], 404);
         }
 
         SapeurBusiness::removeTelephone($sapeurId, $telephoneId);

@@ -20,7 +20,7 @@ class RecrueController extends Controller
         ]);
 
         if (!Sapeur::where('type', SapeurBusiness::TYPE_RECRUE)->where('id', $id)->exists()) {
-            return response()->json(['error' => 'Recrue non trouvée'], 404);
+            return response()->json(['message' => 'Recrue non trouvée'], 404);
         }
 
         $sapeur = SapeurBusiness::validateRecrue($id, $data['incorporation']);

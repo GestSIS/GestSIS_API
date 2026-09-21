@@ -23,7 +23,7 @@ class RtaBusiness
                 'Authorization' => "Bearer $bearerToken",
             ])->get($url);
         } catch (\Exception $e) {
-            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+            throw new ArrayException([], 'Erreur de communication avec RTA');
         }
         if ($response->failed()) {
             throw new ArrayException(["api_res" => $response->body()], "Erreur lors de la récupération des agriculteurs RTA");
@@ -43,7 +43,7 @@ class RtaBusiness
                 'Authorization' => "Bearer $bearerToken",
             ])->get($url);
         } catch (\Exception $e) {
-            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+            throw new ArrayException([], 'Erreur de communication avec RTA');
         }
         if ($response->status() === 404) {
             return null;
@@ -66,7 +66,7 @@ class RtaBusiness
                 'Authorization' => "Bearer $bearerToken",
             ])->post($url, $data);
         } catch (\Exception $e) {
-            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+            throw new ArrayException([], 'Erreur de communication avec RTA');
         }
         if ($response->failed()) {
             return null;
@@ -86,7 +86,7 @@ class RtaBusiness
                 'Authorization' => "Bearer $bearerToken",
             ])->put($url, $data);
         } catch (\Exception $e) {
-            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+            throw new ArrayException([], 'Erreur de communication avec RTA');
         }
         if ($response->status() === 404) {
             return null;
@@ -109,7 +109,7 @@ class RtaBusiness
                 'Authorization' => "Bearer $bearerToken",
             ])->put($url, $data);
         } catch (\Exception $e) {
-            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+            throw new ArrayException([], 'Erreur de communication avec RTA');
         }
         if ($response->status() === 404) {
             return null;
@@ -132,7 +132,7 @@ class RtaBusiness
                 'Authorization' => "Bearer $bearerToken",
             ])->delete($url);
         } catch (\Exception $e) {
-            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+            throw new ArrayException([], 'Erreur de communication avec RTA');
         }
         if ($response->status() === 404) {
             return false;
@@ -178,7 +178,7 @@ class RtaBusiness
                 'Authorization' => "Bearer $bearerToken",
             ])->get($url);
         } catch (\Exception $e) {
-            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+            throw new ArrayException([], 'Erreur de communication avec RTA');
         }
         if ($response->failed()) {
             throw new ArrayException(["api_res" => $response->body()], "Erreur lors de la récupération RTA");
@@ -198,7 +198,7 @@ class RtaBusiness
                 'Authorization' => "Bearer $bearerToken",
             ])->get($url);
         } catch (\Exception $e) {
-            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+            throw new ArrayException([], 'Erreur de communication avec RTA');
         }
         if ($response->failed()) {
             throw new ArrayException(["api_res" => $response->body()], "Erreur lors de la récupération RTA");
@@ -218,7 +218,7 @@ class RtaBusiness
                 'Authorization' => "Bearer $bearerToken",
             ])->get($url);
         } catch (\Exception $e) {
-            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+            throw new ArrayException([], 'Erreur de communication avec RTA');
         }
         if ($response->failed()) {
             throw new ArrayException(["api_res" => $response->body()], "Erreur lors de la récupération RTA");
@@ -244,7 +244,7 @@ class RtaBusiness
                 'Authorization' => "Bearer $bearerToken",
             ])->get($url);
         } catch (\Exception $e) {
-            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+            throw new ArrayException([], 'Erreur de communication avec RTA');
         }
         if ($response->failed()) {
             throw new ArrayException(["api_res" => $response->body()], "Erreur lors de la récupération RTA");
@@ -259,7 +259,7 @@ class RtaBusiness
                 'Authorization' => "Bearer $bearerToken",
             ])->get($url);
         } catch (\Exception $e) {
-            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+            throw new ArrayException([], 'Erreur de communication avec RTA');
         }
         if ($response->failed()) {
             throw new ArrayException(["api_res" => $response->body()], "Erreur lors de la récupération RTA");
@@ -311,7 +311,7 @@ class RtaBusiness
                     'message' => 'Mise à jour de la référence RTA depuis GestSIS',
                 ]);
         } catch (\Exception $e) {
-            throw new ArrayException(['message' => 'Erreur de communication avec RTA'], 'Erreur de communication avec RTA');
+            throw new ArrayException([], 'Erreur de communication avec RTA');
         }
 
         if ($response->failed()) {
@@ -328,12 +328,12 @@ class RtaBusiness
     {
         $params = RtaParam::first();
         if (!$params) {
-            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
+            throw new ArrayException([], 'Paramètres RTA invalides');
         }
         try {
             return [Crypt::decryptString($params->token)];
         } catch (DecryptException $e) {
-            throw new ArrayException(['message' => 'Paramètres RTA invalides'], 'Paramètres RTA invalides');
+            throw new ArrayException([], 'Paramètres RTA invalides');
         }
     }
 }

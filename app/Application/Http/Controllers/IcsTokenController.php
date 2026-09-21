@@ -43,7 +43,7 @@ class IcsTokenController extends Controller
         $sapeurs = $token !== null ? (array) $token->data->sapeurs : [];
 
         if (!array_key_exists($sisKey, $sapeurs)) {
-            return response()->json(['error' => 'Sis inconnu'], 403);
+            return response()->json(['message' => 'Sis inconnu'], 403);
         }
 
         Sis::use($sisKey);

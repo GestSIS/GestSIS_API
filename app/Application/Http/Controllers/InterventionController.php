@@ -152,7 +152,7 @@ class InterventionController extends Controller
                 "materiel" => $materiel,
                 "exception" => $e,
             ]);
-            return response()->json(['error' => 'Une erreur est survenue lors de l\'export de votre intervention, contacter l\'administrateur'], 500);
+            return response()->json(['message' => 'Une erreur est survenue lors de l\'export de votre intervention, contacter l\'administrateur'], 500);
         }
 
         return response()->json(['data' => $intervention]);

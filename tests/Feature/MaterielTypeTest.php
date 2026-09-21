@@ -271,8 +271,8 @@ class MaterielTypeTest extends TestCase
 
         // Doit être une erreur métier propre (jointure sur le bon nom de table),
         // pas une erreur SQL sur "intervention_vehicules" (qui n'existe pas).
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['error']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
         $this->assertDatabaseHas('materiel_types', ['id' => $type->id, 'type' => MaterielTypeBusiness::TYPE_VEHICULE]);
     }
 }

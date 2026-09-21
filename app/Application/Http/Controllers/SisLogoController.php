@@ -21,7 +21,7 @@ class SisLogoController extends Controller
     public function store(Request $request)
     {
         if (!$request->hasFile('logo') || !$request->file('logo')->isValid()) {
-            return response()->json(['error' => 'Logo manquant']);
+            return response()->json(['message' => 'Logo manquant'], 422);
         }
 
         $file = $request->file('logo');

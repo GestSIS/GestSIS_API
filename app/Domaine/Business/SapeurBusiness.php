@@ -538,7 +538,7 @@ class SapeurBusiness
                 throw new ArrayException([
                     "sortie" => "Deux mutations en conflits",
                     "incorporation" => "Deux mutations en conflits",
-                ]);
+                ], "Deux mutations en conflits");
             }
         }
     }

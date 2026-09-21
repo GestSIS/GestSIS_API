@@ -110,7 +110,7 @@ class GradeTest extends TestCase
         ]);
 
         $response->assertStatus(404);
-        $response->assertJson(['error' => 'Grade not found']);
+        $response->assertJson(['message' => 'Grade not found']);
     }
 
     public function testDestroyGradeSuccessfully(): void
@@ -137,7 +137,7 @@ class GradeTest extends TestCase
         ]);
 
         $response->assertStatus(404);
-        $response->assertJson(['error' => 'Grade not found']);
+        $response->assertJson(['message' => 'Grade not found']);
     }
 
     public function testDestroyGradeReturnsErrorWhenLinkedToCours(): void
@@ -149,11 +149,9 @@ class GradeTest extends TestCase
             'Sis-Key' => 1,
         ]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(422);
         $response->assertJson([
-            'error' => [
-                'message' => 'Impossible de supprimer ce grade, celui-ci est lié à un cours.',
-            ],
+            'message' => 'Impossible de supprimer ce grade, celui-ci est lié à un cours.',
         ]);
 
         $this->assertDatabaseHas('grades', [

@@ -209,8 +209,8 @@ class ControleDateEcheanceTest extends TestCase
             ['Sis-Key' => 1],
         );
 
-        $response->assertOk();
-        $response->assertJsonStructure(['error' => ['date_echeance']]);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message', 'errors' => ['date_echeance']]);
         $this->assertDatabaseMissing('controle_execs', ['controle_id' => $controle->id, 'article_id' => $article->id]);
     }
 }

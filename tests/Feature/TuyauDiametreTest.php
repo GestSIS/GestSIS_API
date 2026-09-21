@@ -19,9 +19,8 @@ class TuyauDiametreTest extends TestCase
             'diametre' => $diametre->diametre,
         ], ['Sis-Key' => 1]);
 
-        // L'app renvoie les erreurs de validation en 200 avec une clé "error"
-        $response->assertOk();
-        $response->assertJsonStructure(['error' => ['diametre']]);
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message', 'errors' => ['diametre']]);
         // pas de doublon inséré (plus de 500 sur contrainte unique)
         $this->assertSame($countBefore, TuyauDiametre::where('diametre', 75)->count());
     }

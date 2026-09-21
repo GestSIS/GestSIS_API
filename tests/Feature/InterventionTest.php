@@ -91,10 +91,8 @@ class InterventionTest extends TestCase
         $response = $this->json('POST', "/api/v2/interventions/$intervention->id/valider");
 
         $response
-            ->assertStatus(200)
-            ->assertJson([
-                'error' => true
-            ]);
+            ->assertStatus(422)
+            ->assertJsonStructure(['message']);
     }
 
     /**
@@ -314,11 +312,9 @@ class InterventionTest extends TestCase
 
         $response = $this->json('POST', '/api/v2/interventions-complet', $payload);
 
-        // This API returns validation errors as HTTP 200 with an "error" payload
-        // (see bootstrap/app.php withExceptions), not the default 422.
         $response
-            ->assertStatus(200)
-            ->assertJsonStructure(['error' => ['groupes.0.no']]);
+            ->assertStatus(422)
+            ->assertJsonStructure(['message', 'errors' => ['groupes.0.no']]);
 
         $this->assertDatabaseMissing('groupe_intervention', ['no' => '12345678901']);
     }

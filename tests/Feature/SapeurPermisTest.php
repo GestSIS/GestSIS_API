@@ -41,7 +41,7 @@ class SapeurPermisTest extends TestCase
         $response = $this->json('GET', "/api/v2/sapeurs/99999/permis");
 
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     /**
@@ -86,7 +86,7 @@ class SapeurPermisTest extends TestCase
         );
 
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     /**
@@ -121,8 +121,8 @@ class SapeurPermisTest extends TestCase
         );
 
         $response
-            ->assertStatus(200)
-            ->assertJsonStructure(['error']);
+            ->assertStatus(422)
+            ->assertJsonStructure(['message']);
     }
 
     /**
@@ -149,8 +149,8 @@ class SapeurPermisTest extends TestCase
         );
 
         $response
-            ->assertStatus(200)
-            ->assertJsonStructure(['error']);
+            ->assertStatus(422)
+            ->assertJsonStructure(['message']);
     }
 
     /**
@@ -207,7 +207,7 @@ class SapeurPermisTest extends TestCase
         );
 
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Permis non trouvé']);
+            ->assertJson(['message' => 'Permis non trouvé']);
     }
 
     /**
@@ -222,7 +222,7 @@ class SapeurPermisTest extends TestCase
         );
 
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     /**
@@ -265,7 +265,7 @@ class SapeurPermisTest extends TestCase
         $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/permis/99999");
 
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Permis non trouvé']);
+            ->assertJson(['message' => 'Permis non trouvé']);
     }
 
     /**
@@ -276,6 +276,6 @@ class SapeurPermisTest extends TestCase
         $response = $this->json('DELETE', "/api/v2/sapeurs/99999/permis/1");
 
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 }

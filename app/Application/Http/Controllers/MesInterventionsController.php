@@ -14,7 +14,7 @@ class MesInterventionsController extends Controller
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
-            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+            return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
         $data = InterventionSapeur::where('intervention_sapeur.sapeur_id', '=', $sapeurId)

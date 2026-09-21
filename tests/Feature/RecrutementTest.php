@@ -89,7 +89,7 @@ class RecrutementTest extends TestCase
         $response = $this->json('POST', '/api/v2/recrutement/token', ['duree_heures' => 25]);
 
         // Convention du projet : les erreurs de validation Laravel sont réécrites en 200 + clé "error"
-        $response->assertStatus(200)->assertJsonStructure(['error']);
+        $response->assertStatus(422)->assertJsonStructure(['message']);
         $this->assertCount(0, RecrutementToken::all());
     }
 
@@ -200,7 +200,7 @@ class RecrutementTest extends TestCase
         );
 
         // Convention du projet : les erreurs de validation Laravel sont réécrites en 200 + clé "error"
-        $response->assertStatus(200)->assertJsonStructure(['error']);
+        $response->assertStatus(422)->assertJsonStructure(['message']);
         $this->assertCount(0, Sapeur::where('no_avs', '756.1234.5678.97')->get());
     }
 
@@ -250,7 +250,7 @@ class RecrutementTest extends TestCase
             $this->formulaireRecrue(['no_avs' => '756.1234.5678.98']), // clé de contrôle erronée
         );
 
-        $response->assertStatus(200)->assertJsonStructure(['error']);
+        $response->assertStatus(422)->assertJsonStructure(['message']);
         $this->assertCount(0, Sapeur::where('no_avs', '756.1234.5678.98')->get());
     }
 
@@ -264,7 +264,7 @@ class RecrutementTest extends TestCase
 
         $response = $this->json('POST', "/api/v2/recrutement/test/{$tokenEnClair}", $this->formulaireRecrue());
 
-        $response->assertStatus(200)->assertJsonStructure(['error']);
+        $response->assertStatus(422)->assertJsonStructure(['message']);
         $this->assertCount(1, Sapeur::where('no_avs', '756.1234.5678.97')->get());
     }
 
@@ -278,7 +278,7 @@ class RecrutementTest extends TestCase
 
         $response = $this->json('POST', "/api/v2/recrutement/test/{$tokenEnClair}", $this->formulaireRecrue());
 
-        $response->assertStatus(200)->assertJsonStructure(['error']);
+        $response->assertStatus(422)->assertJsonStructure(['message']);
     }
 
     // --- Validation / rejet (fourrier) ---

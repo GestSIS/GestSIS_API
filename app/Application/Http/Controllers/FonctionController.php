@@ -32,7 +32,7 @@ class FonctionController extends Controller
     public function update(Request $request, $id)
     {
         if (!Fonction::whereId($id)->exists()) {
-            return response()->json(['error' => 'Fonction not found'], 404);
+            return response()->json(['message' => 'Fonction not found'], 404);
         }
 
         $data = $request->validate([
@@ -50,7 +50,7 @@ class FonctionController extends Controller
     public function destroy($id)
     {
         if (!Fonction::whereId($id)->exists()) {
-            return response()->json(['error' => 'Fonction not found'], 404);
+            return response()->json(['message' => 'Fonction not found'], 404);
         }
 
         SapeurParamBusiness::supprimerFonction($id);

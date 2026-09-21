@@ -23,7 +23,7 @@ class MesDecomptesController extends Controller
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
-            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+            return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
         $paiements = Paiement::where('sapeur_id', '=', $sapeurId)
@@ -44,7 +44,7 @@ class MesDecomptesController extends Controller
         $sisKey = $request->header('Sis-Key', Null);
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
-            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+            return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
         return PaiementBusiness::impressionResumePourSapeur($exerciceComptableId, $sapeurId, $sisKey);
@@ -58,7 +58,7 @@ class MesDecomptesController extends Controller
         $sisKey = $request->header('Sis-Key', Null);
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
-            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+            return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
         return PaiementBusiness::impressionDecompteSapeur($decompteId, $sapeurId, $sisKey);
@@ -71,7 +71,7 @@ class MesDecomptesController extends Controller
     {
         $sapeurId = $request->attributes->get('sapeurId');
         if ($sapeurId === null || intval($sapeurId) <= 0) {
-            return response()->json(['error' => 'Votre compte n\'est pas lié à un sapeur']);
+            return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
         return $this->paiementBusiness->certificatSalaireSapeur($exerciceComptableId, $sapeurId);

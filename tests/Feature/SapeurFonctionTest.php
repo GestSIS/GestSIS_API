@@ -34,7 +34,7 @@ class SapeurFonctionTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     public function testAddFonctionSuccessfully(): void
@@ -77,7 +77,7 @@ class SapeurFonctionTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     public function testEditFonctionSuccessfully(): void
@@ -127,7 +127,7 @@ class SapeurFonctionTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     public function testEditFonctionReturnsErrorWhenFonctionNotFound(): void
@@ -146,7 +146,7 @@ class SapeurFonctionTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Fonction non trouvée']);
+            ->assertJson(['message' => 'Fonction non trouvée']);
     }
 
     public function testRemoveFonctionSuccessfully(): void
@@ -174,7 +174,7 @@ class SapeurFonctionTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 
     public function testRemoveFonctionReturnsErrorWhenFonctionNotFound(): void
@@ -187,7 +187,7 @@ class SapeurFonctionTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Fonction non trouvée']);
+            ->assertJson(['message' => 'Fonction non trouvée']);
     }
 
     public function testFinFonctionsSuccessfully(): void
@@ -242,6 +242,6 @@ class SapeurFonctionTest extends TestCase
 
         // Assert
         $response->assertStatus(404)
-            ->assertJson(['error' => 'Sapeur non trouvé']);
+            ->assertJson(['message' => 'Sapeur non trouvé']);
     }
 }
