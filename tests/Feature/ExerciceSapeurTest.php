@@ -86,7 +86,7 @@ class ExerciceSapeurTest extends TestCase
         $response = $this->json('POST', '/api/v2/exercices/' . $exercice->id . '/sapeurs', $sapeurs);
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJson([
                 'data' => true
             ]);
@@ -203,11 +203,7 @@ class ExerciceSapeurTest extends TestCase
         }, $sapeurs);
 
         $response = $this->json('DELETE', '/api/v2/exercices/' . $exerciceId . '/sapeurs/', ["sapeurs" => $ids]);
-        $response
-            ->assertStatus(200)
-            ->assertJson([
-                'data' => true
-            ]);
+        $response->assertStatus(204);
     }
 
     /**
@@ -242,7 +238,7 @@ class ExerciceSapeurTest extends TestCase
 
         $response = $this->json('DELETE', '/api/v2/exercices/' . $exerciceId . '/sapeurs/', ['sapeurs' => $ids]);
 
-        $response->assertStatus(200)->assertJsonMissingPath('error');
+        $response->assertStatus(204);
     }
 
     /**

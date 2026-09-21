@@ -19,6 +19,6 @@ class AbsenceParamController extends Controller
             'actif' => 'required|boolean',
         ]);
 
-        return response()->json(['data' => AbsenceParamBusiness::updateParams($data)]);
+        return response()->json(['data' => AbsenceParamBusiness::updateParams($data)], 201);
     }
 }

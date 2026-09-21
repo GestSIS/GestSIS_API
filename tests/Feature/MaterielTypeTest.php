@@ -46,7 +46,7 @@ class MaterielTypeTest extends TestCase
 
         $response = $this->json('POST', '/api/v2/materiel-types', $payload, ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         $id = $response->json('data.id');
         $this->assertDatabaseHas('materiel_type_tuyaux', [
             'id' => $id,
@@ -70,7 +70,7 @@ class MaterielTypeTest extends TestCase
 
         $response = $this->json('POST', '/api/v2/materiel-types', $payload, ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         $id = $response->json('data.id');
         $this->assertDatabaseHas('materiel_type_batteries', [
             'id' => $id,
@@ -90,7 +90,7 @@ class MaterielTypeTest extends TestCase
 
         $response = $this->json('POST', '/api/v2/materiel-types', $payload, ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         $id = $response->json('data.id');
         $this->assertDatabaseHas('materiel_types', [
             'id' => $id,
@@ -167,7 +167,7 @@ class MaterielTypeTest extends TestCase
 
         $response = $this->json('POST', '/api/v2/materiel-types', $payload, ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         $id = $response->json('data.id');
         // Régression du bug $fillable : sans 'type' dans le fillable, cette colonne
         // restait à 0 après la création (seul editProduct() fonctionnait).
@@ -188,7 +188,7 @@ class MaterielTypeTest extends TestCase
 
         $response = $this->json('POST', '/api/v2/materiel-types', $payload, ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         $this->assertDatabaseHas('materiel_types', [
             'id' => $response->json('data.id'),
             'est_attribuable' => false,
@@ -234,7 +234,7 @@ class MaterielTypeTest extends TestCase
 
         $response = $this->json('POST', '/api/v2/materiel-types', $payload, ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         $this->assertDatabaseHas('materiel_types', [
             'id' => $response->json('data.id'),
             'est_emplacement' => false,

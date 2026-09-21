@@ -14,7 +14,7 @@ class EcritureController extends Controller
     {
         $data = $this->validateEcriture($request);
         $ecriture = ImputationBusiness::ajouterEcriture($data);
-        return response()->json(['data' => $ecriture]);
+        return response()->json(['data' => $ecriture], 201);
     }
 
     public function update(Request $request, $id)
@@ -62,7 +62,7 @@ class EcritureController extends Controller
                 break;
 
             default:
-                throw new ArrayException([], 'Type d\'écriture non-supporté');
+                return response()->json(['message' => 'Type d\'écriture non-supporté'], 422);
         }
         return $data;
     }
@@ -70,7 +70,7 @@ class EcritureController extends Controller
     public function destroy($id)
     {
         $ecriture = ImputationBusiness::supprimerEcriture($id);
-        return response()->json(['data' => $ecriture]);
+        return response()->json(null, 204);
     }
 
     public function all(int $exerciceComptableId)

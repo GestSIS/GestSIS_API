@@ -36,7 +36,7 @@ class MesControlesMedicauxController extends Controller
 
         $controle = ControleMedical::find($controleMedicalId);
         if (!$controle || $sapeurId !== $controle->sapeur_id) {
-            throw new ArrayException([], 'Accès refusé');
+            return response()->json(['message' => 'Accès refusé'], 422);
         }
         $justificatif = ControleMedicalBusiness::getJustificatif($controleMedicalId);
 

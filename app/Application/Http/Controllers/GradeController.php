@@ -25,7 +25,7 @@ class GradeController extends Controller
         ]);
 
         $grade = SapeurParamBusiness::ajouterGrade($data);
-        return response()->json(['data' => $grade]);
+        return response()->json(['data' => $grade], 201);
     }
 
     public function update(Request $request, $id)
@@ -52,6 +52,6 @@ class GradeController extends Controller
         }
 
         $grade = SapeurParamBusiness::supprimerGrade($id);
-        return response()->json(['data' => $grade]);
+        return response()->json(null, 204);
     }
 }

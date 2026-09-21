@@ -37,7 +37,7 @@ class EmplacementController extends Controller
         ]);
 
         $emplacement = EmplacementBusiness::createEmplacement($data);
-        return response()->json(['data' => $emplacement]);
+        return response()->json(['data' => $emplacement], 201);
     }
 
     public function update(Request $request, $id)
@@ -64,6 +64,6 @@ class EmplacementController extends Controller
     public function destroy($id)
     {
         $emplacement = EmplacementBusiness::deleteEmplacement($id);
-        return response()->json(['data' => $emplacement]);
+        return response()->json(null, 204);
     }
 }

@@ -27,7 +27,7 @@ class SapeurPhotoController extends Controller
 
                 $sisKey = $request->header('Sis-Key', Null);
                 $res = SapeurBusiness::uploadPhotoSapeur($validated['image'], $sapeurId, $sisKey);
-                return response()->json(['data' => $res]);
+                return response()->json(['data' => $res], 201);
             }
             return response()->json(['data' => ['message' => 'Image invalide']], 500);
         }
@@ -38,6 +38,6 @@ class SapeurPhotoController extends Controller
     {
         $sisKey = $request->header('Sis-Key', Null);
         SapeurBusiness::deletePhotoSapeur($id, $sisKey);
-        return response()->json(['data' => "success"]);
+        return response()->json(null, 204);
     }
 }

@@ -52,7 +52,7 @@ class SapeurFonctionTest extends TestCase
         $response = $this->json('POST', "/api/v2/sapeurs/{$sapeur->id}/fonctions", $data);
 
         // Assert
-        $response->assertStatus(200)
+        $response->assertStatus(201)
             ->assertJsonStructure([
                 'data' => ['fonction' => ['id', 'fonction_id', 'sapeur_id', 'debut', 'fin']]
             ]);
@@ -162,8 +162,7 @@ class SapeurFonctionTest extends TestCase
         $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/fonctions/{$fonction->id}");
 
         // Assert
-        $response->assertStatus(200)
-            ->assertJsonStructure(['data']);
+        $response->assertStatus(204);
         $this->assertDatabaseMissing('fonction_sapeur', ['id' => $fonction->id]);
     }
 

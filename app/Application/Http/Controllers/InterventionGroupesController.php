@@ -21,13 +21,13 @@ class InterventionGroupesController extends Controller
         ]);
 
         InterventionBusiness::addGroupes($interventionId, $data['groupes']);
-        return response()->json(['data' => GroupeIntervention::where('intervention_id', $interventionId)->get()]);
+        return response()->json(['data' => GroupeIntervention::where('intervention_id', $interventionId)->get()], 201);
     }
 
     public function destroy(Request $request, int $interventionId)
     {
         $data = $request->validate(['groupes.*' => 'required|integer']);
         InterventionBusiness::removeGroupes($interventionId, $data['groupes']);
-        return response()->json(['data' => 'success']);
+        return response()->json(null, 204);
     }
 }

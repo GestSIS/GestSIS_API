@@ -21,7 +21,7 @@ class InterventionPhasesController extends Controller
         ]);
 
         InterventionBusiness::addPhases($interventionId, $data['phases']);
-        return response()->json(['data' => Phase::where('intervention_id', $interventionId)->get()]);
+        return response()->json(['data' => Phase::where('intervention_id', $interventionId)->get()], 201);
     }
 
     public function update(Request $request, int $intervention_id)
@@ -40,6 +40,6 @@ class InterventionPhasesController extends Controller
     {
         $data = $request->validate(['phases.*' => 'integer']);
         InterventionBusiness::removePhases($intervention_id, $data['phases']);
-        return response()->json(['data' => 'success']);
+        return response()->json(null, 204);
     }
 }

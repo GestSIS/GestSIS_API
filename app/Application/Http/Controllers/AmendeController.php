@@ -22,6 +22,6 @@ class AmendeController extends Controller
         ]);
         $amendes = ComptabiliteParamBusiness::updateAmendes($data);
 
-        return response()->json(['data' => $amendes]);
+        return response()->json(['data' => $amendes], 201);
     }
 }

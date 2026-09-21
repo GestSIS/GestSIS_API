@@ -57,7 +57,7 @@ class InterventionAppelTest extends TestCase
         $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/appels', ['appels' => $appels]);
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJson([
                 'data' => true
             ]);
@@ -105,10 +105,6 @@ class InterventionAppelTest extends TestCase
         );
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/appels', ['appels' => $ids]);
 
-        $response
-            ->assertStatus(200)
-            ->assertJson([
-                'data' => true
-            ]);
+        $response->assertStatus(204);
     }
 }

@@ -35,6 +35,6 @@ class ArticleEmplacementController extends Controller
 
         $articles = ArticleBusiness::retourArticles($emplacementId, $data['date'], $data['articleIds']);
 
-        return response()->json(['data' => $articles]);
+        return response()->json(['data' => $articles], 201);
     }
 }

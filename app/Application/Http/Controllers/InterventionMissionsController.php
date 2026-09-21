@@ -26,7 +26,7 @@ class InterventionMissionsController extends Controller
         ]);
 
         InterventionBusiness::addMissions($intervention_id, $data['missions']);
-        return response()->json(['data' => Mission::where('intervention_id', $intervention_id)->get()]);
+        return response()->json(['data' => Mission::where('intervention_id', $intervention_id)->get()], 201);
     }
 
     public function update(Request $request, int $intervention_id)
@@ -49,6 +49,6 @@ class InterventionMissionsController extends Controller
     {
         $data = $request->validate(['missions.*' => 'integer|exists:missions,id']);
         InterventionBusiness::removeMissions($intervention_id, $data['missions']);
-        return response()->json(['data' => 'success']);
+        return response()->json(null, 204);
     }
 }

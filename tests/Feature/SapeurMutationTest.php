@@ -84,7 +84,7 @@ class SapeurMutationTest extends TestCase
         $response = $this->json('POST', "/api/v2/sapeurs/{$this->sapeurId}/mutations", $data);
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJsonStructure([
                 'data' => [
                     'mutation' => ['id', 'incorporation', 'sapeur_id', 'sortie', 'motif'],
@@ -115,7 +115,7 @@ class SapeurMutationTest extends TestCase
             'sortie' => "2008-12-31",
             'motif' => 'Première période',
             'localite_id' => $this->localiteId
-        ])->assertStatus(200)->assertJsonMissingPath('error');
+        ])->assertStatus(201)->assertJsonMissingPath('error');
 
         // Mutation englobant complètement la première → conflit
         $response = $this->json('POST', "/api/v2/sapeurs/{$this->sapeurId}/mutations", [
@@ -210,9 +210,7 @@ class SapeurMutationTest extends TestCase
         // Delete it
         $response = $this->json('DELETE', "/api/v2/sapeurs/{$this->sapeurId}/mutations/{$mutationId}");
 
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure(['data']);
+        $response->assertStatus(204);
 
         // Verify it's deleted via GET
         $getResponse = $this->json('GET', "/api/v2/sapeurs/{$this->sapeurId}/mutations");

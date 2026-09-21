@@ -27,7 +27,7 @@ class BatterieTypeTest extends TestCase
             'nom' => 'CR123A',
         ]);
 
-        $response->assertStatus(200)->assertJsonStructure(['data' => ['id', 'nom']]);
+        $response->assertStatus(201)->assertJsonStructure(['data' => ['id', 'nom']]);
         $this->assertDatabaseHas('batterie_types', ['nom' => 'CR123A']);
     }
 
@@ -49,7 +49,7 @@ class BatterieTypeTest extends TestCase
 
         $response = $this->json('DELETE', "/api/v2/batterie-types/{$batterieType->id}");
 
-        $response->assertStatus(200);
+        $response->assertStatus(204);
         $this->assertDatabaseMissing('batterie_types', ['id' => $batterieType->id]);
     }
 }

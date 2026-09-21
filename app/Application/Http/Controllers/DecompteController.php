@@ -88,7 +88,7 @@ class DecompteController extends Controller
     public function destroy($decompteId)
     {
         $res = PaiementBusiness::supprimerDecompte($decompteId);
-        return response()->json(['data' => $res]);
+        return response()->json(null, 204);
     }
 
     /**

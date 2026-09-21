@@ -57,7 +57,7 @@ class ExcuseController extends Controller
                 'statut' => $statut,
                 'sapeurs' => ExerciceBusiness::listeSapeurOfExerciceById($convocationId),
             ]
-        ]);
+        ], 201);
     }
 
     public function destroy(Request $request, int $exerciceId, int $sapeurId)
@@ -66,6 +66,6 @@ class ExcuseController extends Controller
         $hasValidationPermission = in_array('exercice.validation', $perms);
         $presence = ExerciceBusiness::removeExcuse($sapeurId, $exerciceId, $hasValidationPermission);
 
-        return response()->json(['data' => $presence]);
+        return response()->json(null, 204);
     }
 }

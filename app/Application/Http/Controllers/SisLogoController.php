@@ -28,6 +28,6 @@ class SisLogoController extends Controller
         $sisKey = $request->header('Sis-Key', Null);
         $justificatif = SisParamBusiness::updateLogo($sisKey, $file);
 
-        return response()->json(['data' => $justificatif]);
+        return response()->json(['data' => $justificatif], 201);
     }
 }

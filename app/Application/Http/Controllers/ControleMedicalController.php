@@ -33,7 +33,7 @@ class ControleMedicalController extends Controller
 
         $controle = ControleMedicalBusiness::createControleMedical($data);
 
-        return response()->json(['data' => $controle]);
+        return response()->json(['data' => $controle], 201);
     }
 
     public function update(Request $request, int $id)
@@ -57,6 +57,6 @@ class ControleMedicalController extends Controller
     {
         ControleMedicalBusiness::removeControleMedical($id);
 
-        return response()->json(['data' => "success"]);
+        return response()->json(null, 204);
     }
 }

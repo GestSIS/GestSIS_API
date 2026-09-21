@@ -23,7 +23,7 @@ class InterventionTraitementController extends Controller
         ]);
 
         $traitement = InterventionParamBusiness::ajouterTraitement($data);
-        return response()->json(['data' => $traitement]);
+        return response()->json(['data' => $traitement], 201);
     }
 
     public function update(Request $request, $id)
@@ -40,6 +40,6 @@ class InterventionTraitementController extends Controller
     public function destroy($id)
     {
         InterventionParamBusiness::supprimerTraitement($id);
-        return response()->json(['data' => 'ok']);
+        return response()->json(null, 204);
     }
 }

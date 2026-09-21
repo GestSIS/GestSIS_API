@@ -72,7 +72,7 @@ class InterventionTest extends TestCase
 
         // dd($intervention);
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJson([
                 'data' => true
             ]);

@@ -31,13 +31,13 @@ class JustificatifController extends Controller
         $sisKey = $request->header('Sis-Key', Null);
         $justificatif = ControleMedicalBusiness::addJustificatif($id, $file, $sisKey);
 
-        return response()->json(['data' => $justificatif]);
+        return response()->json(['data' => $justificatif], 201);
     }
 
     public function destroy(int $controleId)
     {
         ControleMedicalBusiness::removeJustificatif($controleId);
 
-        return response()->json(['data' => "success"]);
+        return response()->json(null, 204);
     }
 }

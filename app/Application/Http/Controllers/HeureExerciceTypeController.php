@@ -25,7 +25,7 @@ class HeureExerciceTypeController extends Controller
         ]);
         $type = ExerciceParamBusiness::ajouterHeureExerciceType($data);
 
-        return response()->json(['data' => $type]);
+        return response()->json(['data' => $type], 201);
     }
 
     public function update(Request $request, $id)
@@ -46,6 +46,6 @@ class HeureExerciceTypeController extends Controller
     public function destroy($id)
     {
         ExerciceParamBusiness::supprimerHeureExerciceType($id);
-        return response()->json(['data' => 'ok']);
+        return response()->json(null, 204);
     }
 }

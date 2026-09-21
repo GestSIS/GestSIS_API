@@ -23,7 +23,7 @@ class StatInterventionController extends Controller
         ]);
 
         $stat = InterventionParamBusiness::ajouterStat($data);
-        return response()->json(['data' => $stat]);
+        return response()->json(['data' => $stat], 201);
     }
 
     public function update(Request $request, $id)
@@ -40,6 +40,6 @@ class StatInterventionController extends Controller
     public function destroy($id)
     {
         InterventionParamBusiness::supprimerStat($id);
-        return response()->json(['data' => 'ok']);
+        return response()->json(null, 204);
     }
 }

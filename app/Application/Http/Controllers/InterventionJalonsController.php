@@ -24,7 +24,7 @@ class InterventionJalonsController extends Controller
         ]);
 
         InterventionBusiness::addJalons($intervention_id, $data['jalons']);
-        return response()->json(['data' => Jalon::where('intervention_id', $intervention_id)->get()]);
+        return response()->json(['data' => Jalon::where('intervention_id', $intervention_id)->get()], 201);
     }
 
     public function update(Request $request, int $intervention_id)
@@ -46,6 +46,6 @@ class InterventionJalonsController extends Controller
     {
         $data = $request->validate(['jalons.*' => 'integer']);
         InterventionBusiness::removeJalons($intervention_id, $data['jalons']);
-        return response()->json(['data' => 'success']);
+        return response()->json(null, 204);
     }
 }

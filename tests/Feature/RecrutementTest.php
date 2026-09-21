@@ -79,7 +79,7 @@ class RecrutementTest extends TestCase
     {
         $response = $this->json('POST', '/api/v2/recrutement/token', ['duree_heures' => 12]);
 
-        $response->assertStatus(200)->assertJsonStructure(['data' => ['token', 'expire_at']]);
+        $response->assertStatus(201)->assertJsonStructure(['data' => ['token', 'expire_at']]);
         $this->assertNotEmpty($response->json('data.token'));
         $this->assertCount(1, RecrutementToken::all());
     }
@@ -117,7 +117,7 @@ class RecrutementTest extends TestCase
     public function testDestroyInvalideLeJetonActif()
     {
         $this->json('POST', '/api/v2/recrutement/token', ['duree_heures' => 12]);
-        $this->json('DELETE', '/api/v2/recrutement/token')->assertStatus(200);
+        $this->json('DELETE', '/api/v2/recrutement/token')->assertStatus(204);
 
         $this->assertCount(0, RecrutementToken::all());
     }
@@ -153,7 +153,7 @@ class RecrutementTest extends TestCase
 
         $response = $this->json('POST', "/api/v2/recrutement/test/{$tokenEnClair}", $this->formulaireRecrue());
 
-        $response->assertStatus(200)->assertJsonStructure(['data' => ['id']]);
+        $response->assertStatus(201)->assertJsonStructure(['data' => ['id']]);
 
         $recrue = Sapeur::find($response->json('data.id'));
         $this->assertNotNull($recrue);
@@ -176,7 +176,7 @@ class RecrutementTest extends TestCase
             ]),
         );
 
-        $response->assertStatus(200)->assertJsonStructure(['data' => ['id']]);
+        $response->assertStatus(201)->assertJsonStructure(['data' => ['id']]);
 
         $recrueId = $response->json('data.id');
         $permis = Permis::where('sapeur_id', $recrueId)->get();
@@ -229,7 +229,7 @@ class RecrutementTest extends TestCase
 
         $response = $this->json('POST', "/api/v2/recrutement/test/{$tokenEnClair}", $this->formulaireRecrue());
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         $this->assertCount(0, Permis::where('sapeur_id', $response->json('data.id'))->get());
     }
 
@@ -320,7 +320,7 @@ class RecrutementTest extends TestCase
 
         $response = $this->json('DELETE', "/api/v2/sapeurs/{$recrue->id}");
 
-        $response->assertStatus(200);
+        $response->assertStatus(204);
         $this->assertNull(Sapeur::find($recrue->id));
         $this->assertCount(0, SapeurTelephone::where('sapeur_id', $recrue->id)->get());
     }

@@ -140,7 +140,7 @@ class SapeurController extends Controller
                     'localite_id' => 'integer|min:1',
                     'civilite_id' => 'integer|min:1'
                 ]);
-                return response()->json(['data' => $this->serializeSapeur(SapeurBusiness::createSapeur($data))]);
+                return response()->json(['data' => $this->serializeSapeur(SapeurBusiness::createSapeur($data))], 201);
 
             case SapeurBusiness::TYPE_CIVIL:
                 $data = $request->validate([
@@ -157,7 +157,7 @@ class SapeurController extends Controller
                     'localite_id' => 'required|integer|min:1',
                     'civilite_id' => 'required|integer|min:1'
                 ]);
-                return response()->json(['data' => $this->serializeSapeur(SapeurBusiness::createCivil($data))]);
+                return response()->json(['data' => $this->serializeSapeur(SapeurBusiness::createCivil($data))], 201);
 
             default:
         }
@@ -217,6 +217,6 @@ class SapeurController extends Controller
             return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
         SapeurBusiness::deleteSapeurById($id);
-        return response()->json(['data' => "success"]);
+        return response()->json(null, 204);
     }
 }

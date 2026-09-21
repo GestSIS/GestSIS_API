@@ -27,7 +27,7 @@ class BatterieTypeController extends Controller
         ]);
 
         $batterie = BatterieBusiness::createBatterie($data);
-        return response()->json(['data' => $batterie]);
+        return response()->json(['data' => $batterie], 201);
     }
 
     public function update(Request $request, $id)
@@ -43,6 +43,6 @@ class BatterieTypeController extends Controller
     public function destroy($id)
     {
         $batterie = BatterieBusiness::deleteBatterie($id);
-        return response()->json(['data' => $batterie]);
+        return response()->json(null, 204);
     }
 }

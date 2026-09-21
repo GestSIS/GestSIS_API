@@ -93,7 +93,7 @@ class ControleMedicalTest extends TestCase
         $response = $this->json('POST', '/api/v2/controles-medicaux', $data);
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJsonStructure([
                 'data' => [
                     'id',
@@ -128,7 +128,7 @@ class ControleMedicalTest extends TestCase
 
         $response = $this->json('POST', '/api/v2/controles-medicaux', $data);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         $controle = $response->getData()->data;
         $this->assertEquals('', $controle->designation);
     }
@@ -192,9 +192,7 @@ class ControleMedicalTest extends TestCase
         // TEST
         $response = $this->json('DELETE', '/api/v2/controles-medicaux/' . $controle->id);
 
-        $response
-            ->assertStatus(200)
-            ->assertJson(['data' => 'success']);
+        $response->assertStatus(204);
 
         // Vérifier que le contrôle a été supprimé
         $this->assertDatabaseMissing('controles_medicaux', [
@@ -222,7 +220,7 @@ class ControleMedicalTest extends TestCase
         ]);
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJsonStructure([
                 'data' => ['id', 'designation']
             ]);
@@ -298,9 +296,7 @@ class ControleMedicalTest extends TestCase
         // TEST - Remove justificatif
         $response = $this->json('DELETE', '/api/v2/controles-medicaux/' . $controle->id . '/justificatif');
 
-        $response
-            ->assertStatus(200)
-            ->assertJson(['data' => 'success']);
+        $response->assertStatus(204);
     }
 
     public function testValiditeDateAfterConsultation()
@@ -323,6 +319,6 @@ class ControleMedicalTest extends TestCase
 
         $response = $this->json('POST', '/api/v2/controles-medicaux', $data);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
     }
 }

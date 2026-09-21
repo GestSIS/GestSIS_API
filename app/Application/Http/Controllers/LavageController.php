@@ -63,6 +63,6 @@ class LavageController extends Controller
         ]);
 
         $lavages = LavageBusiness::deleteLavages($data['lavageIds']);
-        return response()->json(['data' => $lavages]);
+        return response()->json(null, 204);
     }
 }

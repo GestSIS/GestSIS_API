@@ -31,7 +31,7 @@ class GroupeController extends Controller
         ]);
 
         $groupe = OrganisationBusiness::ajouterGroupe($data);
-        return response()->json(['data' => $groupe]);
+        return response()->json(['data' => $groupe], 201);
     }
 
     public function update(Request $request, $id)
@@ -59,6 +59,6 @@ class GroupeController extends Controller
         }
 
         OrganisationBusiness::supprimerGroupe($id);
-        return response()->json(['data' => 'ok']);
+        return response()->json(null, 204);
     }
 }

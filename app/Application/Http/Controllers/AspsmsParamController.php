@@ -24,6 +24,6 @@ class AspsmsParamController extends Controller
 
         $params = AspsmsBusiness::updateParams($data);
 
-        return response()->json(['data' => $params]);
+        return response()->json(['data' => $params], 201);
     }
 }

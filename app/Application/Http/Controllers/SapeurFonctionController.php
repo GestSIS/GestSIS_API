@@ -32,7 +32,7 @@ class SapeurFonctionController extends Controller
         ]);
 
         $fonction = SapeurBusiness::addFonction($sapeurId, $data);
-        return response()->json(['data' => $fonction]);
+        return response()->json(['data' => $fonction], 201);
     }
 
     public function update(Request $request, int $sapeurId, int $fonctionId)
@@ -68,7 +68,7 @@ class SapeurFonctionController extends Controller
         }
 
         $res = SapeurBusiness::removeFonction($sapeurId, $fonctionId);
-        return response()->json(['data' => $res]);
+        return response()->json(null, 204);
     }
 
     public function fin(Request $request, int $sapeurId)

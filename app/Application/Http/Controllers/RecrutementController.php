@@ -88,6 +88,6 @@ class RecrutementController extends Controller
 
         $recrue = SapeurBusiness::createRecrue($data);
 
-        return response()->json(['data' => ['id' => $recrue->id]]);
+        return response()->json(['data' => ['id' => $recrue->id]], 201);
     }
 }

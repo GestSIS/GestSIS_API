@@ -30,7 +30,7 @@ class AbsenceController extends Controller
         ]);
 
         $absence = AbsenceBusiness::ajouterAbsence($data);
-        return response()->json(['data' => $absence]);
+        return response()->json(['data' => $absence], 201);
     }
 
     public function update(Request $request, $id)
@@ -48,6 +48,6 @@ class AbsenceController extends Controller
     public function destroy($id)
     {
         AbsenceBusiness::supprimerAbsence($id);
-        return response()->json(['data' => 'ok']);
+        return response()->json(null, 204);
     }
 }

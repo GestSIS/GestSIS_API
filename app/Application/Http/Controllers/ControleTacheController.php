@@ -37,7 +37,7 @@ class ControleTacheController extends Controller
 
         $tache = ControleTache::create(array_merge($data, ['controle_id' => $controleId]));
 
-        return response()->json(['data' => $tache]);
+        return response()->json(['data' => $tache], 201);
     }
 
     public function update(Request $request, int $controleId, int $id): JsonResponse
@@ -67,7 +67,7 @@ class ControleTacheController extends Controller
 
         $tache->delete();
 
-        return response()->json(['data' => true]);
+        return response()->json(null, 204);
     }
 
     /** @param array<string, mixed> $data */

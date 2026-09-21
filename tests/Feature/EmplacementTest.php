@@ -28,7 +28,7 @@ class EmplacementTest extends TestCase
             'statut' => true,
         ], ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         // tri doit être calculé sur la table emplacements (et non materiel_categories)
         $this->assertSame($maxBefore + 1, $response->json('data.tri'));
         $this->assertDatabaseHas('emplacements', [
@@ -107,7 +107,7 @@ class EmplacementTest extends TestCase
 
         $response = $this->json('POST', '/api/v2/emplacements', $payload, ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         $id = $response->json('data.id');
         $this->assertDatabaseHas('hangars', [
             'id' => $id,
@@ -123,7 +123,7 @@ class EmplacementTest extends TestCase
 
         $response = $this->json('POST', '/api/v2/emplacements', $payload, ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         $this->assertDatabaseMissing('hangars', ['id' => $response->json('data.id')]);
     }
 
@@ -161,7 +161,7 @@ class EmplacementTest extends TestCase
 
         $response = $this->json('POST', '/api/v2/emplacements', $payload, ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         $this->assertDatabaseHas('hangars', [
             'id' => $response->json('data.id'),
             'rue' => '',
@@ -307,7 +307,7 @@ class EmplacementTest extends TestCase
 
         $response = $this->json('DELETE', "/api/v2/emplacements/{$emplacement->id}", [], ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(204);
         $this->assertDatabaseMissing('hangars', ['id' => $emplacement->id]);
     }
 }

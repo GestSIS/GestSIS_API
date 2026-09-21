@@ -29,7 +29,7 @@ class IndemniteCoursTypeController extends Controller
         ]);
 
         $indemnite = ComptabiliteParamBusiness::ajouterIndemniteCoursType($data);
-        return response()->json(['data' => $indemnite]);
+        return response()->json(['data' => $indemnite], 201);
     }
 
     public function update(Request $request, $id)
@@ -56,6 +56,6 @@ class IndemniteCoursTypeController extends Controller
     public function destroy($id)
     {
         ComptabiliteParamBusiness::supprimerIndemniteCoursType($id);
-        return response()->json(['data' => 'ok']);
+        return response()->json(null, 204);
     }
 }

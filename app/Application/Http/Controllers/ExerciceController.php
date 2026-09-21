@@ -104,7 +104,7 @@ class ExerciceController extends Controller
         ]);
 
         $exercice = ExerciceBusiness::createExercice($data);
-        return response()->json(['data' => $exercice]);
+        return response()->json(['data' => $exercice], 201);
     }
 
     public function show(int $id)
@@ -134,7 +134,7 @@ class ExerciceController extends Controller
     public function destroy($id)
     {
         ExerciceBusiness::deleteExerciceById($id);
-        return response()->json(['data' => 'success']);
+        return response()->json(null, 204);
     }
 
     public function annuler($id)

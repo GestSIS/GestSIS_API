@@ -100,7 +100,7 @@ class ExerciceTest extends TestCase
         $response = $this->json('POST', '/api/v2/exercices', $exerciceData);
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJson([
                 'data' => true
             ]);
@@ -239,11 +239,7 @@ class ExerciceTest extends TestCase
 
         $response = $this->json('DELETE', "/api/v2/exercices/{$exercice->id}");
 
-        $response
-            ->assertStatus(200)
-            ->assertJson([
-                'data' => 'success'
-            ]);
+        $response->assertStatus(204);
 
         $this->assertDatabaseMissing('exercices', [
             'id' => $exercice->id

@@ -24,7 +24,7 @@ class FraisIndemniteAnnuelTypeController extends Controller
         ]);
 
         $indemnite = ComptabiliteParamBusiness::ajouterFraisIndemniteAnnuelType($data);
-        return response()->json(['data' => $indemnite]);
+        return response()->json(['data' => $indemnite], 201);
     }
 
     public function update(Request $request, $id)
@@ -44,6 +44,6 @@ class FraisIndemniteAnnuelTypeController extends Controller
     public function destroy($id)
     {
         $indemnite = ComptabiliteParamBusiness::supprimerFraisIndemniteAnnuelType($id);
-        return response()->json(['data' => $indemnite]);
+        return response()->json(null, 204);
     }
 }

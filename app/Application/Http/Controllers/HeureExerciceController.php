@@ -23,7 +23,7 @@ class HeureExerciceController extends Controller
             'heure_exercice_type_id' => 'integer|exists:heure_exercice_types,id',
         ]);
         $heure = ExerciceBusiness::ajouterHeureExercice($exerciceId, $data);
-        return response()->json(['data' => $heure]);
+        return response()->json(['data' => $heure], 201);
     }
 
     public function update(Request $request, $exerciceId, $id)
@@ -38,6 +38,6 @@ class HeureExerciceController extends Controller
     public function destroy($exerciceId, $id)
     {
         $heure = ExerciceBusiness::supprimerHeureExercice($exerciceId, $id);
-        return response()->json(['data' => $heure]);
+        return response()->json(null, 204);
     }
 }

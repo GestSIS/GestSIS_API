@@ -31,7 +31,7 @@ class MaterielTypeArticleController extends Controller
         ]);
 
         $type = MaterielTypeBusiness::createProduct($data);
-        return response()->json(['data' => $type]);
+        return response()->json(['data' => $type], 201);
     }
 
     public function update(Request $request, $id)
@@ -51,6 +51,6 @@ class MaterielTypeArticleController extends Controller
     public function destroy($id)
     {
         $type = MaterielTypeBusiness::deleteProduct($id);
-        return response()->json(['data' => $type]);
+        return response()->json(null, 204);
     }
 }

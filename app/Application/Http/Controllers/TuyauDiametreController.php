@@ -28,7 +28,7 @@ class TuyauDiametreController extends Controller
         ]);
 
         $diametre = DiametreBusiness::createDiametre($data);
-        return response()->json(['data' => $diametre]);
+        return response()->json(['data' => $diametre], 201);
     }
 
     public function update(Request $request, $id)
@@ -47,6 +47,6 @@ class TuyauDiametreController extends Controller
     public function destroy($id)
     {
         $diametre = DiametreBusiness::deleteDiametre($id);
-        return response()->json(['data' => $diametre]);
+        return response()->json(null, 204);
     }
 }

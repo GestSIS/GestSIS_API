@@ -26,7 +26,7 @@ class ExerciceComptableController extends Controller
         ]);
 
         $exercice = ExerciceComptableBusiness::creerExerciceComptable($data);
-        return response()->json(['data' => $exercice]);
+        return response()->json(['data' => $exercice], 201);
     }
 
     public function update(Request $request, $id)

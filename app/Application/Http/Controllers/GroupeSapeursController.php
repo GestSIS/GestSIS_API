@@ -15,6 +15,6 @@ class GroupeSapeursController extends Controller
         ]);
 
         $groupe = OrganisationBusiness::modifierGroupeSapeurs($groupeId, $data);
-        return response()->json(['data' => $groupe]);
+        return response()->json(['data' => $groupe], 201);
     }
 }

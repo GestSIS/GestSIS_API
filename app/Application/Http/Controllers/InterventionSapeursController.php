@@ -30,7 +30,7 @@ class InterventionSapeursController extends Controller
                 "statut" => $statut,
                 "sapeurs" => InterventionSapeur::where('intervention_id', $interventionId)->get(),
             ]
-        ]);
+        ], 201);
     }
 
     public function update(Request $request, int $interventionId)
@@ -56,7 +56,7 @@ class InterventionSapeursController extends Controller
         ]);
 
         $statut = InterventionBusiness::removePresences($interventionId, $data['sapeurs']);
-        return response()->json(['data' => $statut]);
+        return response()->json(null, 204);
     }
 
     public function stat(int $exerciceComptableId)

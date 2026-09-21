@@ -59,7 +59,7 @@ class SapeurPermisTest extends TestCase
         );
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJsonStructure([
                 'data' => [
                     'id',
@@ -103,7 +103,7 @@ class SapeurPermisTest extends TestCase
         );
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJsonStructure(['data' => ['id', 'permis_type_id', 'sapeur_id', 'date']]);
     }
 
@@ -244,9 +244,7 @@ class SapeurPermisTest extends TestCase
         // Delete permis
         $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/permis/{$permis->id}");
 
-        $response
-            ->assertStatus(200)
-            ->assertJson(['data' => 'success']);
+        $response->assertStatus(204);
 
         // Verify it's deleted
         $indexResponse = $this->json('GET', "/api/v2/sapeurs/{$sapeur->id}/permis");

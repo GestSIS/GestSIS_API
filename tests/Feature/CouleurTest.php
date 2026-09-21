@@ -30,7 +30,7 @@ class CouleurTest extends TestCase
             'fond' => '#ff0000',
         ]);
 
-        $response->assertStatus(200)->assertJsonStructure(['data' => ['id', 'nom', 'texte', 'fond']]);
+        $response->assertStatus(201)->assertJsonStructure(['data' => ['id', 'nom', 'texte', 'fond']]);
         $this->assertDatabaseHas('couleurs', ['nom' => 'Rouge intervention']);
     }
 
@@ -54,7 +54,7 @@ class CouleurTest extends TestCase
 
         $response = $this->json('DELETE', "/api/v2/couleurs/{$couleur->id}");
 
-        $response->assertStatus(200);
+        $response->assertStatus(204);
         $this->assertDatabaseMissing('couleurs', ['id' => $couleur->id]);
     }
 }

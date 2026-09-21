@@ -29,6 +29,6 @@ class AvsParamController extends Controller
 
         $params = AvsParamBusiness::updateParams($data);
 
-        return response()->json(['data' => $params]);
+        return response()->json(['data' => $params], 201);
     }
 }

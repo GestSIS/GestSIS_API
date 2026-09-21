@@ -32,7 +32,7 @@ class SapeurTelephoneController extends Controller
         ]);
 
         $telephone = SapeurBusiness::addTelephone($sapeurId, $data);
-        return response()->json(['data' => $telephone]);
+        return response()->json(['data' => $telephone], 201);
     }
 
     public function update(Request $request, int $sapeurId, int $telephoneId)
@@ -70,6 +70,6 @@ class SapeurTelephoneController extends Controller
         }
 
         SapeurBusiness::removeTelephone($sapeurId, $telephoneId);
-        return response()->json(['data' => 'success']);
+        return response()->json(null, 204);
     }
 }

@@ -24,7 +24,7 @@ class CompteController extends Controller
         ]);
 
         $compte = ComptabiliteParamBusiness::ajouterCompte($data);
-        return response()->json(['data' => $compte]);
+        return response()->json(['data' => $compte], 201);
     }
 
     public function update(Request $request, $id)
@@ -42,7 +42,7 @@ class CompteController extends Controller
     public function destroy($id)
     {
         ComptabiliteParamBusiness::supprimerCompte($id);
-        return response()->json(['data' => 'ok']);
+        return response()->json(null, 204);
     }
 
     public function ecritures(int $id, int $exerciceComptableId)

@@ -127,7 +127,7 @@ class ArticleTest extends TestCase
             'articleIds' => [$article->id],
         ], ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         $this->assertDatabaseHas('articles', [
             'id' => $article->id,
             'emplacement_id' => $emplacement->id,
@@ -499,7 +499,7 @@ class ArticleTest extends TestCase
             'articleIds' => [$article->id],
         ], ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(204);
         $this->assertDatabaseMissing('articles', ['id' => $article->id]);
         $this->assertDatabaseMissing('emplacements', ['id' => $emplacement->id]);
     }

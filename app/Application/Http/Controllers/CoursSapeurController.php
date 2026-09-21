@@ -48,6 +48,6 @@ class CoursSapeurController extends Controller
         unset($data['sapeur_ids']);
 
         $cours = SapeurBusiness::addCoursMultiple($sapeurIds, $data);
-        return response()->json(['data' => $cours]);
+        return response()->json(['data' => $cours], 201);
     }
 }

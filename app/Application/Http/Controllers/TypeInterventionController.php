@@ -24,7 +24,7 @@ class TypeInterventionController extends Controller
         ]);
 
         $type = InterventionParamBusiness::ajouterType($data);
-        return response()->json(['data' => $type]);
+        return response()->json(['data' => $type], 201);
     }
 
     public function update(Request $request, $id)
@@ -42,6 +42,6 @@ class TypeInterventionController extends Controller
     public function destroy($id)
     {
         InterventionParamBusiness::supprimerType($id);
-        return response()->json(['data' => 'ok']);
+        return response()->json(null, 204);
     }
 }

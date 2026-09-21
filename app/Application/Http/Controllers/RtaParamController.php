@@ -23,6 +23,6 @@ class RtaParamController extends Controller
 
         $params = RtaParamBusiness::updateParams($data);
 
-        return response()->json(['data' => $params]);
+        return response()->json(['data' => $params], 201);
     }
 }

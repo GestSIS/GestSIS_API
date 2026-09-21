@@ -26,7 +26,7 @@ class ExcuseTypeController extends Controller
         ]);
 
         $excuseType = ExerciceParamBusiness::ajouterExcuseType($data);
-        return response()->json(['data' => $excuseType]);
+        return response()->json(['data' => $excuseType], 201);
     }
 
     public function update(Request $request, $id)
@@ -46,6 +46,6 @@ class ExcuseTypeController extends Controller
     public function destroy($id)
     {
         ExerciceParamBusiness::supprimerExcuseType($id);
-        return response()->json(['data' => 'ok']);
+        return response()->json(null, 204);
     }
 }

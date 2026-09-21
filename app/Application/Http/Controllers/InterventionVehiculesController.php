@@ -17,13 +17,13 @@ class InterventionVehiculesController extends Controller
     {
         $data = $request->validate(['vehicules.*' => 'required|integer']);
         InterventionBusiness::addVehicules($interventionId, $data['vehicules']);
-        return response()->json(['data' => InterventionVehicule::where('intervention_id', $interventionId)->get()]);
+        return response()->json(['data' => InterventionVehicule::where('intervention_id', $interventionId)->get()], 201);
     }
 
     public function destroy(Request $request, int $interventionId)
     {
         $data = $request->validate(['vehicules.*' => 'required|integer']);
         InterventionBusiness::removeVehicules($interventionId, $data['vehicules']);
-        return response()->json(['data' => 'success']);
+        return response()->json(null, 204);
     }
 }

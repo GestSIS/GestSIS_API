@@ -60,7 +60,7 @@ class ConvocationsController extends Controller
                 "statut" => $statut,
                 "sapeurs" => ExerciceBusiness::listeSapeurOfExerciceById($exerciceId),
             ]
-        ]);
+        ], 201);
     }
 
     public function updatePresence(Request $request, $id)
@@ -136,7 +136,7 @@ class ConvocationsController extends Controller
         ]);
 
         $statut = ExerciceBusiness::removeSapeurs($exerciceId, $data['sapeurs']);
-        return response()->json(['data' => $statut]);
+        return response()->json(null, 204);
     }
 
     public function createHeure(Request $request)

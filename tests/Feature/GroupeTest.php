@@ -48,7 +48,7 @@ class GroupeTest extends TestCase
             'Sis-Key' => 1,
         ]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         $response->assertJsonStructure([
             'data' => [
                 'id',
@@ -127,8 +127,7 @@ class GroupeTest extends TestCase
             'Sis-Key' => 1,
         ]);
 
-        $response->assertStatus(200);
-        $response->assertJson(['data' => 'ok']);
+        $response->assertStatus(204);
 
         $this->assertDatabaseMissing('groupes', [
             'id' => $groupe->id,

@@ -58,7 +58,7 @@ class InterventionJalonTest extends TestCase
         $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/jalons', ['jalons' => $jalons]);
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJson([
                 'data' => true
             ]);
@@ -104,7 +104,7 @@ class InterventionJalonTest extends TestCase
         $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/jalons', ['jalons' => [$jalon]]);
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJson([
                 'data' => true
             ]);
@@ -124,7 +124,7 @@ class InterventionJalonTest extends TestCase
         $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/jalons', ['jalons' => [$jalon]]);
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJson([
                 'data' => true
             ]);
@@ -147,10 +147,6 @@ class InterventionJalonTest extends TestCase
         );
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/jalons', ['jalons' => $ids]);
 
-        $response
-            ->assertStatus(200)
-            ->assertJson([
-                'data' => true
-            ]);
+        $response->assertStatus(204);
     }
 }

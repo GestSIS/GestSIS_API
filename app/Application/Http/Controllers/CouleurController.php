@@ -29,7 +29,7 @@ class CouleurController extends Controller
         ]);
 
         $couleur = CouleurBusiness::createCouleur($data);
-        return response()->json(['data' => $couleur]);
+        return response()->json(['data' => $couleur], 201);
     }
 
     public function update(Request $request, $id)
@@ -47,6 +47,6 @@ class CouleurController extends Controller
     public function destroy($id)
     {
         $couleur = CouleurBusiness::deleteCouleur($id);
-        return response()->json(['data' => $couleur]);
+        return response()->json(null, 204);
     }
 }

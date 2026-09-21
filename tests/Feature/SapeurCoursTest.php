@@ -57,7 +57,7 @@ class SapeurCoursTest extends TestCase
         $response = $this->json('POST', "/api/v2/sapeurs/{$sapeur->id}/cours", $data);
 
         // Assert
-        $response->assertStatus(200)
+        $response->assertStatus(201)
             ->assertJsonStructure([
                 'data' => ['cours' => ['id', 'sapeur_id', 'cours_id', 'date', 'localite_id']]
             ]);
@@ -94,7 +94,7 @@ class SapeurCoursTest extends TestCase
         $response = $this->json('POST', "/api/v2/sapeurs/{$sapeur->id}/cours", $data);
 
         // Assert
-        $response->assertStatus(200)
+        $response->assertStatus(201)
             ->assertJsonStructure([
                 'data' => ['cours' => ['id', 'sapeur_id', 'cours_id', 'date', 'localite_id']]
             ]);
@@ -224,8 +224,7 @@ class SapeurCoursTest extends TestCase
         $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/cours/{$cours->id}");
 
         // Assert
-        $response->assertStatus(200)
-            ->assertJsonStructure(['data']);
+        $response->assertStatus(204);
         $this->assertDatabaseMissing('cours_sapeur', ['id' => $cours->id]);
     }
 
@@ -269,7 +268,7 @@ class SapeurCoursTest extends TestCase
         $response = $this->json('POST', '/api/v2/cours-sapeurs', $data);
 
         // Assert
-        $response->assertStatus(200)
+        $response->assertStatus(201)
             ->assertJsonCount(2, 'data');
         $this->assertDatabaseHas('cours_sapeur', ['sapeur_id' => $sapeur1->id, 'cours_id' => 2]);
         $this->assertDatabaseHas('cours_sapeur', ['sapeur_id' => $sapeur2->id, 'cours_id' => 2]);
@@ -296,7 +295,7 @@ class SapeurCoursTest extends TestCase
         $response = $this->json('POST', '/api/v2/cours-sapeurs', $data);
 
         // Assert
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         foreach ([$sapeur1, $sapeur2] as $sapeur) {
             $this->assertDatabaseHas('grade_sapeur', [
                 'sapeur_id' => $sapeur->id,

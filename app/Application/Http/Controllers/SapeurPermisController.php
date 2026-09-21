@@ -30,7 +30,7 @@ class SapeurPermisController extends Controller
         ]);
 
         $permis = SapeurBusiness::addPermis($id, $data);
-        return response()->json(['data' => $permis]);
+        return response()->json(['data' => $permis], 201);
     }
 
     public function update(Request $request, int $id, int $permisId)
@@ -65,6 +65,6 @@ class SapeurPermisController extends Controller
         }
 
         SapeurBusiness::removePermis($id, $permisId);
-        return response()->json(['data' => 'success']);
+        return response()->json(null, 204);
     }
 }

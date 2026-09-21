@@ -119,9 +119,7 @@ class EcritureTest extends TestCase
             ->assertJson(['data' => ['designation' => 'ecriture modifiee']]);
 
         $response = $this->json('DELETE', "api/v2/ecritures/{$ecritureId}");
-        $response
-            ->assertStatus(200)
-            ->assertJson(['data' => 'ok']);
+        $response->assertStatus(204);
 
         $this->assertDatabaseMissing('ecritures', ['id' => $ecritureId]);
     }

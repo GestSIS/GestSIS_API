@@ -37,7 +37,7 @@ class SapeurCoursController extends Controller
         ]);
 
         $cours = SapeurBusiness::addCours($sapeurId, $data);
-        return response()->json(['data' => $cours]);
+        return response()->json(['data' => $cours], 201);
     }
 
     public function update(Request $request, int $sapeurId, int $coursId)
@@ -73,6 +73,6 @@ class SapeurCoursController extends Controller
         }
 
         SapeurBusiness::removeCours($sapeurId, $coursId);
-        return response()->json(['data' => 'success']);
+        return response()->json(null, 204);
     }
 }

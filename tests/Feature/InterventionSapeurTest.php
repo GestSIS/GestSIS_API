@@ -76,7 +76,7 @@ class InterventionSapeurTest extends TestCase
         $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/sapeurs', ['sapeurs' => $sapeurs]);
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJson([
                 'data' => true
             ]);
@@ -163,11 +163,7 @@ class InterventionSapeurTest extends TestCase
         );
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/sapeurs', ['sapeurs' => $ids]);
 
-        $response
-            ->assertStatus(200)
-            ->assertJson([
-                'data' => 0
-            ]);
+        $response->assertStatus(204);
     }
 
     /**
@@ -200,11 +196,7 @@ class InterventionSapeurTest extends TestCase
         );
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/sapeurs', ['sapeurs' => [$ids[0]]]);
 
-        $response
-            ->assertStatus(200)
-            ->assertJson([
-                'data' => 1
-            ]);
+        $response->assertStatus(204);
     }
 
 
@@ -221,7 +213,7 @@ class InterventionSapeurTest extends TestCase
         $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/quittances', ['quittances' => $quittances]);
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJson([
                 'data' => true
             ]);
@@ -239,10 +231,6 @@ class InterventionSapeurTest extends TestCase
 
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/quittances/', ["quittances" => $quittances]);
 
-        $response
-            ->assertStatus(200)
-            ->assertJson([
-                'data' => true
-            ]);
+        $response->assertStatus(204);
     }
 }

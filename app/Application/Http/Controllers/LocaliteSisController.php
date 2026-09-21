@@ -22,7 +22,7 @@ class LocaliteSisController extends Controller
         ]);
 
         $localites = SisParamBusiness::ajouterLocalitesSis($data);
-        return response()->json(['data' => $localites]);
+        return response()->json(['data' => $localites], 201);
     }
 
     public function destroy(Request $request)
@@ -32,6 +32,6 @@ class LocaliteSisController extends Controller
         ]);
 
         $localites = SisParamBusiness::supprimerLocalitesSis($data);
-        return response()->json(['data' => $localites]);
+        return response()->json(null, 204);
     }
 }

@@ -57,7 +57,7 @@ class InterventionMaterielTest extends TestCase
         $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/materiels', ['materiels' => $materiels]);
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJson([
                 'data' => true
             ]);
@@ -74,7 +74,7 @@ class InterventionMaterielTest extends TestCase
         $materiel = InterventionMateriel::factory()->make()->toArray();
 
         $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/materiels', ['materiels' => [$materiel]])
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJsonMissingPath('error');
 
         $response = $this->json(
@@ -136,10 +136,6 @@ class InterventionMaterielTest extends TestCase
         );
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/materiels', ['materiels' => $ids]);
 
-        $response
-            ->assertStatus(200)
-            ->assertJson([
-                'data' => true
-            ]);
+        $response->assertStatus(204);
     }
 }

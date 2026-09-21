@@ -22,7 +22,7 @@ class InterventionMaterielsController extends Controller
         ]);
 
         InterventionBusiness::addMateriels($intervention_id, $data['materiels']);
-        return response()->json(['data' => InterventionMateriel::where('intervention_id', $intervention_id)->get()]);
+        return response()->json(['data' => InterventionMateriel::where('intervention_id', $intervention_id)->get()], 201);
     }
 
     public function update(Request $request, int $intervention_id)
@@ -40,6 +40,6 @@ class InterventionMaterielsController extends Controller
     {
         $data = $request->validate(['materiels.*' => 'required|exists:intervention_materiel,id']);
         InterventionBusiness::removeMateriels($intervention_id, $data['materiels']);
-        return response()->json(['data' => 'success']);
+        return response()->json(null, 204);
     }
 }

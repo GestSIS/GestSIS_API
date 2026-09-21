@@ -32,7 +32,7 @@ class SapeurMutationController extends Controller
         ]);
 
         $mutation = SapeurBusiness::addMutation($sapeurId, $data);
-        return response()->json(['data' => $mutation]);
+        return response()->json(['data' => $mutation], 201);
     }
 
     public function update(Request $request, int $sapeurId, int $mutationId)
@@ -72,6 +72,6 @@ class SapeurMutationController extends Controller
         }
 
         $data = SapeurBusiness::removeMutation($sapeurId, $mutationId);
-        return response()->json(['data' => $data]);
+        return response()->json(null, 204);
     }
 }

@@ -37,7 +37,7 @@ class IndemniteInterventionTypeController extends Controller
         ]);
 
         $indemnite = ComptabiliteParamBusiness::ajouterIndemniteIntervention($data);
-        return response()->json(['data' => $indemnite]);
+        return response()->json(['data' => $indemnite], 201);
     }
 
     public function update(Request $request, $id)
@@ -71,6 +71,6 @@ class IndemniteInterventionTypeController extends Controller
     public function destroy($id)
     {
         $indemnite = ComptabiliteParamBusiness::supprimerIndemniteIntervention($id);
-        return response()->json(['data' => $indemnite]);
+        return response()->json(null, 204);
     }
 }

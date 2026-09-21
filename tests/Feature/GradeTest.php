@@ -47,7 +47,7 @@ class GradeTest extends TestCase
             'Sis-Key' => 1,
         ]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         $response->assertJsonStructure([
             'data' => [
                 'id',
@@ -123,7 +123,7 @@ class GradeTest extends TestCase
             'Sis-Key' => 1,
         ]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(204);
 
         $this->assertDatabaseMissing('grades', [
             'id' => $grade->id,

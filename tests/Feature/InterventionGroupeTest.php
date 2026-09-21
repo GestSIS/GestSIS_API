@@ -58,7 +58,7 @@ class InterventionGroupeTest extends TestCase
         $response = $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/groupes', ['groupes' => $groupes]);
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJson([
                 'data' => true
             ]);
@@ -77,10 +77,6 @@ class InterventionGroupeTest extends TestCase
         $groupes = GroupeIntervention::where('intervention_id', '=', $this->interventionId)->pluck('id')->toArray();
 
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/groupes/', ["groupes" => $groupes]);
-        $response
-            ->assertStatus(200)
-            ->assertJson([
-                'data' => true
-            ]);
+        $response->assertStatus(204);
     }
 }

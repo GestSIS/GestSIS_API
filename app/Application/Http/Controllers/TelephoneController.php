@@ -24,7 +24,7 @@ class TelephoneController extends Controller
         ]);
 
         $materiel = InterventionParamBusiness::ajouterTelephone($data);
-        return response()->json(['data' => $materiel]);
+        return response()->json(['data' => $materiel], 201);
     }
 
     public function update(Request $request, $id)
@@ -42,6 +42,6 @@ class TelephoneController extends Controller
     public function destroy($id)
     {
         InterventionParamBusiness::supprimerTelephone($id);
-        return response()->json(['data' => 'ok']);
+        return response()->json(null, 204);
     }
 }

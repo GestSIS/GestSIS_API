@@ -24,12 +24,12 @@ class SisContactController extends Controller
 
         $contact = SisParamBusiness::ajouterContactSis($data);
 
-        return response()->json(['data' => $contact]);
+        return response()->json(['data' => $contact], 201);
     }
 
     public function destroy(int $contactId)
     {
         SisParamBusiness::supprimerContactSis($contactId);
-        return response()->json(['data' => 'ok']);
+        return response()->json(null, 204);
     }
 }

@@ -23,7 +23,7 @@ class InterventionAppelsController extends Controller
         ]);
 
         InterventionBusiness::addAppels($intervention_id, $data['appels']);
-        return response()->json(['data' => Appel::where('intervention_id', $intervention_id)->get()]);
+        return response()->json(['data' => Appel::where('intervention_id', $intervention_id)->get()], 201);
     }
 
     public function update(Request $request, int $intervention_id)
@@ -44,6 +44,6 @@ class InterventionAppelsController extends Controller
     {
         $data = $request->validate(['appels.*' => 'integer']);
         InterventionBusiness::removeAppels($intervention_id, $data['appels']);
-        return response()->json(['data' => 'success']);
+        return response()->json(null, 204);
     }
 }

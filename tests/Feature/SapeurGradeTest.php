@@ -51,7 +51,7 @@ class SapeurGradeTest extends TestCase
         $response = $this->json('POST', "/api/v2/sapeurs/{$sapeur->id}/grades", $data);
 
         // Assert
-        $response->assertStatus(200)
+        $response->assertStatus(201)
             ->assertJsonStructure([
                 'data' => ['grade' => ['id', 'grade_id', 'sapeur_id', 'date']]
             ]);
@@ -156,8 +156,7 @@ class SapeurGradeTest extends TestCase
         $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/grades/{$grade->id}");
 
         // Assert
-        $response->assertStatus(200)
-            ->assertJsonStructure(['data']);
+        $response->assertStatus(204);
         $this->assertDatabaseMissing('grade_sapeur', ['id' => $grade->id]);
     }
 

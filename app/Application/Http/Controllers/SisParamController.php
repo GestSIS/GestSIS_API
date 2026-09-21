@@ -33,6 +33,6 @@ class SisParamController extends Controller
 
         $params = SisParamBusiness::updateParams($data);
 
-        return response()->json(['data' => $params]);
+        return response()->json(['data' => $params], 201);
     }
 }

@@ -112,6 +112,6 @@ class ArticleController extends Controller
         ]);
 
         $articles = ArticleBusiness::deleteArticles($data['articleIds']);
-        return response()->json(['data' => $articles]);
+        return response()->json(null, 204);
     }
 }

@@ -22,7 +22,7 @@ class MissionTypeController extends Controller
         ]);
 
         $mission = InterventionParamBusiness::ajouterMission($data);
-        return response()->json(['data' => $mission]);
+        return response()->json(['data' => $mission], 201);
     }
 
     public function update(Request $request, $id)
@@ -38,6 +38,6 @@ class MissionTypeController extends Controller
     public function destroy($id)
     {
         InterventionParamBusiness::supprimerMission($id);
-        return response()->json(['data' => 'ok']);
+        return response()->json(null, 204);
     }
 }

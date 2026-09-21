@@ -60,7 +60,7 @@ class SapeurTelephoneTest extends TestCase
         $response = $this->json('POST', "/api/v2/sapeurs/{$sapeur->id}/telephones", $data);
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJsonStructure([
                 'data' => [
                     'id',
@@ -209,9 +209,7 @@ class SapeurTelephoneTest extends TestCase
 
         $response = $this->json('DELETE', "/api/v2/sapeurs/{$sapeur->id}/telephones/{$telephone->id}");
 
-        $response
-            ->assertStatus(200)
-            ->assertJson(['data' => 'success']);
+        $response->assertStatus(204);
 
         // Verify it's deleted
         $this->assertDatabaseMissing('sapeur_telephone', [

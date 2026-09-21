@@ -35,7 +35,7 @@ class TuyauDiametreTest extends TestCase
             'diametre' => $value,
         ], ['Sis-Key' => 1]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         $this->assertDatabaseHas('tuyau_diametres', ['diametre' => $value]);
     }
 

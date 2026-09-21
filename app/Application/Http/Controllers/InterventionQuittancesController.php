@@ -17,13 +17,13 @@ class InterventionQuittancesController extends Controller
     {
         $data = $request->validate(['quittances.*' => 'required|integer|min:1']);
         InterventionBusiness::addQuittances($intervention_id, $data['quittances']);
-        return response()->json(['data' => Quittance::where('intervention_id', $intervention_id)->get()]);
+        return response()->json(['data' => Quittance::where('intervention_id', $intervention_id)->get()], 201);
     }
 
     public function destroy(Request $request, int $intervention_id)
     {
         $data = $request->validate(['quittances.*' => 'required|integer|min:1']);
         InterventionBusiness::removeQuittances($intervention_id, $data['quittances']);
-        return response()->json(['data' => 'success']);
+        return response()->json(null, 204);
     }
 }

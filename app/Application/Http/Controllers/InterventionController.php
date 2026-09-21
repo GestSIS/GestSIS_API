@@ -49,7 +49,7 @@ class InterventionController extends Controller
         ]);
 
         $intervention = InterventionBusiness::createIntervention($data);
-        return response()->json(['data' => $intervention]);
+        return response()->json(['data' => $intervention], 201);
     }
 
     public function complet(Request $request)
@@ -253,6 +253,6 @@ class InterventionController extends Controller
     public function destroy($id)
     {
         $statut = InterventionBusiness::deleteInterventionById($id);
-        return response()->json(['data' => $statut]);
+        return response()->json(null, 204);
     }
 }

@@ -44,7 +44,7 @@ class MesExcusesController extends Controller
         $sisKey = $request->header('Sis-Key', Null);
 
         $data = $this->exerciceBusiness->creerExcuse($sapeurId, $exerciceId, $data, $file, $sisKey);
-        return response()->json(['data' => $data]);
+        return response()->json(['data' => $data], 201);
     }
 
     /**

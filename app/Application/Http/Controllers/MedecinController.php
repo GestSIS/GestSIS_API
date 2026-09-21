@@ -23,7 +23,7 @@ class MedecinController extends Controller
         ]);
 
         $medecin = ControleMedicalBusiness::ajouterMedecin($data);
-        return response()->json(['data' => $medecin]);
+        return response()->json(['data' => $medecin], 201);
     }
 
     public function update(Request $request, $id)
@@ -42,6 +42,6 @@ class MedecinController extends Controller
     public function destroy($id)
     {
         $medecin = ControleMedicalBusiness::supprimerMedecin($id);
-        return response()->json(['data' => $medecin]);
+        return response()->json(null, 204);
     }
 }

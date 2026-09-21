@@ -57,7 +57,7 @@ class TravailController extends Controller
         $hasSaisieCommunePermission = in_array('fiche_travail.saisie_commune', $perms);
 
         $travail = TravauxBusiness::ajouter($data['travaux'], $auteurId, $hasSaisieCommunePermission);
-        return response()->json(['data' => $travail]);
+        return response()->json(['data' => $travail], 201);
     }
 
     public function update(Request $request, $travailId)
@@ -102,6 +102,6 @@ class TravailController extends Controller
         }
 
         $travail = TravauxBusiness::supprimer($id, $sapeurId);
-        return response()->json(['data' => $travail]);
+        return response()->json(null, 204);
     }
 }

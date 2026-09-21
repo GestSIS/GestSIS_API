@@ -35,7 +35,7 @@ class ArticleSapeurController extends Controller
 
         $articles = ArticleBusiness::attribuerArticles($sapeurId, $data['date'], $data['articleIds']);
 
-        return response()->json(['data' => $articles]);
+        return response()->json(['data' => $articles], 201);
     }
 
     /**
@@ -54,7 +54,7 @@ class ArticleSapeurController extends Controller
 
         $articles = ArticleBusiness::retourArticles($data['emplacementId'], $data['date'], $data['articleIds']);
 
-        return response()->json(['data' => $articles]);
+        return response()->json(null, 204);
     }
 
 }

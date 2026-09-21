@@ -115,7 +115,7 @@ class SapeurTest extends TestCase
         $response = $this->json('POST', '/api/v2/sapeurs', $data);
 
         $response
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJsonStructure([
                 'data' => [
                     'id',
@@ -248,9 +248,7 @@ class SapeurTest extends TestCase
 
         $response = $this->json('DELETE', '/api/v2/sapeurs/' . $sapeur->id);
 
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure(['data']);
+        $response->assertStatus(204);
 
         // Verify the sapeur was actually deleted
         $getResponse = $this->json('GET', '/api/v2/sapeurs/' . $sapeur->id);

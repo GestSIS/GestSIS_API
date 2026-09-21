@@ -31,7 +31,7 @@ class ControleMaterielTypeController extends Controller
 
         $association = ControleMaterielType::create(array_merge($data, ['controle_id' => $controleId]));
 
-        return response()->json(['data' => $association->load('materielType')]);
+        return response()->json(['data' => $association->load('materielType')], 201);
     }
 
     public function update(Request $request, int $controleId, int $id): JsonResponse
@@ -55,7 +55,7 @@ class ControleMaterielTypeController extends Controller
 
         $association->delete();
 
-        return response()->json(['data' => true]);
+        return response()->json(null, 204);
     }
 
     /**

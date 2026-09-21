@@ -25,7 +25,7 @@ class MaterielCategorieController extends Controller
         ]);
 
         $categorie = CategorieBusiness::createCategorie($data);
-        return response()->json(['data' => $categorie]);
+        return response()->json(['data' => $categorie], 201);
     }
 
     public function update(Request $request, $id)
@@ -43,6 +43,6 @@ class MaterielCategorieController extends Controller
     public function destroy($id)
     {
         $categorie = CategorieBusiness::deleteCategorie($id);
-        return response()->json(['data' => $categorie]);
+        return response()->json(null, 204);
     }
 }

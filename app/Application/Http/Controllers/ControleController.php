@@ -63,7 +63,7 @@ class ControleController extends Controller
             'materiel_type_ids.*'    => 'integer|exists:materiel_types,id',
         ]);
 
-        return response()->json(['data' => ControleBusiness::createControle($data)]);
+        return response()->json(['data' => ControleBusiness::createControle($data)], 201);
     }
 
     public function update(Request $request, int $id): JsonResponse
@@ -96,6 +96,6 @@ class ControleController extends Controller
 
     public function destroy(int $id): JsonResponse
     {
-        return response()->json(['data' => ControleBusiness::deleteControle($id)]);
+        return response()->json(null, 204);
     }
 }

@@ -22,7 +22,7 @@ class MesAbsencesController extends Controller
 
         $exerciceComptable = ExerciceComptable::find($exerciceComptableId);
         if ($exerciceComptable === null) {
-            throw new ArrayException([], 'Exercice comptable introuvable');
+            return response()->json(['message' => 'Exercice comptable introuvable'], 422);
         }
         $data = Absence::where('sapeur_id', '=', $sapeurId)->where([
             ['debut', '<', $exerciceComptable->fin],
@@ -48,7 +48,7 @@ class MesAbsencesController extends Controller
 
         $data['sapeur_id'] = $sapeurId;
         $absence = AbsenceBusiness::ajouterAbsence($data);
-        return response()->json(['data' => $absence]);
+        return response()->json(['data' => $absence], 201);
     }
 
     /**
@@ -68,7 +68,7 @@ class MesAbsencesController extends Controller
 
         $absence = Absence::find($absenceId);
         if ($absence?->sapeur_id !== $sapeurId) {
-            throw new ArrayException([], 'Absence invalide');
+            return response()->json(['message' => 'Absence invalide'], 422);
         }
         $data['sapeur_id'] = $sapeurId;
         $absence = AbsenceBusiness::modifierAbsence($absenceId, $data);
@@ -87,7 +87,7 @@ class MesAbsencesController extends Controller
 
         $absence = Absence::find($absenceId);
         if ($absence?->sapeur_id !== $sapeurId) {
-            throw new ArrayException([], 'Absence invalide');
+            return response()->json(['message' => 'Absence invalide'], 422);
         }
         AbsenceBusiness::supprimerAbsence($absenceId);
         return response()->json(['data' => null]);

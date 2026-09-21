@@ -21,7 +21,7 @@ class EcritureCategorieController extends Controller
         ]);
 
         $categorie = ComptabiliteParamBusiness::ajouterCategorie($data);
-        return response()->json(['data' => $categorie]);
+        return response()->json(['data' => $categorie], 201);
     }
 
     public function update(Request $request, $id)
@@ -38,6 +38,6 @@ class EcritureCategorieController extends Controller
     public function destroy($id)
     {
         ComptabiliteParamBusiness::supprimerCategorie($id);
-        return response()->json(['data' => 'ok']);
+        return response()->json(null, 204);
     }
 }

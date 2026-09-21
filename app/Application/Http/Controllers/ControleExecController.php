@@ -41,7 +41,7 @@ class ControleExecController extends Controller
             'taches.*.remarque'       => 'nullable|string',
         ]);
 
-        return response()->json(['data' => ControleExecBusiness::createExec($controleId, $articleId, $data, $request->attributes->get('sapeurId'))]);
+        return response()->json(['data' => ControleExecBusiness::createExec($controleId, $articleId, $data, $request->attributes->get('sapeurId'))], 201);
     }
 
     public function storeMultiple(Request $request, int $controleId): JsonResponse
@@ -94,6 +94,6 @@ class ControleExecController extends Controller
 
     public function destroy(int $id): JsonResponse
     {
-        return response()->json(['data' => ControleExecBusiness::deleteExec($id)]);
+        return response()->json(null, 204);
     }
 }

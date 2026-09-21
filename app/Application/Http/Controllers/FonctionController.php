@@ -26,7 +26,7 @@ class FonctionController extends Controller
         ]);
 
         $fonction = SapeurParamBusiness::ajouterFonction($data);
-        return response()->json(['data' => $fonction]);
+        return response()->json(['data' => $fonction], 201);
     }
 
     public function update(Request $request, $id)
@@ -54,6 +54,6 @@ class FonctionController extends Controller
         }
 
         SapeurParamBusiness::supprimerFonction($id);
-        return response()->json(['data' => 'ok']);
+        return response()->json(null, 204);
     }
 }

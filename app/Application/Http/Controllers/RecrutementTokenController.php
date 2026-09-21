@@ -35,7 +35,7 @@ class RecrutementTokenController extends Controller
         return response()->json(['data' => [
             'token' => $tokenEnClair,
             'expire_at' => $token->expire_at,
-        ]]);
+        ]], 201);
     }
 
     /**
@@ -44,6 +44,6 @@ class RecrutementTokenController extends Controller
     public function destroy()
     {
         RecrutementToken::query()->delete();
-        return response()->json(['data' => 'success']);
+        return response()->json(null, 204);
     }
 }

@@ -26,7 +26,7 @@ class ExerciceCategorieController extends Controller
         ]);
 
         $categorie = ExerciceParamBusiness::ajouterCategorie($data);
-        return response()->json(['data' => $categorie]);
+        return response()->json(['data' => $categorie], 201);
     }
 
     public function update(Request $request, $id)
@@ -46,6 +46,6 @@ class ExerciceCategorieController extends Controller
     public function destroy($id)
     {
         ExerciceParamBusiness::supprimerCategorie($id);
-        return response()->json(['data' => 'ok']);
+        return response()->json(null, 204);
     }
 }

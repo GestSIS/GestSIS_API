@@ -41,20 +41,6 @@ class ExcuseControllerTest extends TestCase
 
         $response = $this->json('DELETE', '/api/v2/exercices/' . $exerciceId . '/excuses/1');
 
-        $response
-            ->assertStatus(200)
-            ->assertJsonStructure([
-                'data' => [
-                    'sapeur_id',
-                    'exercice_id',
-                    'excuse_type_id',
-                    'heures',
-                ],
-            ])
-            ->assertJson([
-                'data' => [
-                    'excuse_type_id' => null,
-                ],
-            ]);
+        $response->assertStatus(204);
     }
 }

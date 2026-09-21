@@ -27,7 +27,7 @@ class MaterielController extends Controller
         ]);
 
         $materiel = InterventionParamBusiness::ajouterMateriel($data);
-        return response()->json(['data' => $materiel]);
+        return response()->json(['data' => $materiel], 201);
     }
 
     public function update(Request $request, $id)
@@ -48,6 +48,6 @@ class MaterielController extends Controller
     public function destroy($id)
     {
         InterventionParamBusiness::supprimerMateriel($id);
-        return response()->json(['data' => 'ok']);
+        return response()->json(null, 204);
     }
 }

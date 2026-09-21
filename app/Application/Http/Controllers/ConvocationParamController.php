@@ -28,6 +28,6 @@ class ConvocationParamController extends Controller
 
         $params = ConvocationParamBusiness::updateParams($data);
 
-        return response()->json(['data' => $params]);
+        return response()->json(['data' => $params], 201);
     }
 }
