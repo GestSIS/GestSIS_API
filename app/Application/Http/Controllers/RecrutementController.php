@@ -4,7 +4,7 @@ namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\RecrutementTokenBusiness;
 use App\Domaine\Business\SapeurBusiness;
-use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\Exceptions\NotReportableException;
 use App\Models\Civilite;
 use App\Models\Localite;
 use App\Models\PermisType;
@@ -24,7 +24,7 @@ class RecrutementController extends Controller
     {
         if (!App::environment('testing')) {
             if (!Sis::isValid($sisKey)) {
-                throw new ArrayException([], "Page introuvable", status: 404);
+                throw new NotReportableException([], 'Page introuvable', status: 404);
             }
 
             Sis::use($sisKey);
@@ -59,7 +59,7 @@ class RecrutementController extends Controller
         $this->selectionnerBase($sisKey);
 
         if (!RecrutementTokenBusiness::verifierToken($token)) {
-            throw new ArrayException([], "Page introuvable", status: 404);
+            throw new NotReportableException([], 'Page introuvable', status: 404);
         }
 
         $data = $request->validate([
