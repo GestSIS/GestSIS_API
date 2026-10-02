@@ -11,6 +11,9 @@ RUN apt-get update \
     # pdftk
     && apt-get install -y --no-install-recommends default-jre-headless \
     libcommons-lang3-java libbcprov-java pdftk-java \
+    # redis
+    && pecl install --onlyreqdeps --force redis \
+    && docker-php-ext-enable redis \
     # pdo_mysql
     && docker-php-ext-install gd gmp pdo_mysql zip \
     # clean up
