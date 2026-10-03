@@ -341,6 +341,7 @@ class SapeurBusiness
         if (!self::isSapeur($sapeurId)) {
             throw new ArrayException([], "Impossible d'ajouter un cours à un civil.");
         }
+        self::controlerCoursDuplique($sapeurId, $data['cours_id'], $data['date']);
         $data['sapeur_id'] = $sapeurId;
         $cours = CoursSapeur::create($data);
 
@@ -417,8 +418,28 @@ class SapeurBusiness
     public static function updateCours(int $sapeurId, $data)
     {
         $cours = CoursSapeur::where('sapeur_id', $sapeurId)->findOrFail($data['id']);
+        if (isset($data['date'])) {
+            self::controlerCoursDuplique($sapeurId, $cours->cours_id, $data['date'], $cours->id);
+        }
         $cours->update($data);
         return $cours;
+    }
+
+    /**
+     * Contrôle que le sapeur n'a pas déjà ce cours à cette date
+     */
+    private static function controlerCoursDuplique(int $sapeurId, int $coursId, $date, ?int $ignoreId = null): void
+    {
+        $existe = CoursSapeur::where('sapeur_id', $sapeurId)
+            ->where('cours_id', $coursId)
+            ->whereDate('date', $date)
+            ->when($ignoreId !== null, fn($query) => $query->where('id', '!=', $ignoreId))
+            ->exists();
+
+        if ($existe) {
+            $message = "Ce cours a déjà été ajouté à ce sapeur à cette date";
+            throw new ArrayException(['cours_id' => $message, 'date' => $message], $message);
+        }
     }
 
     public static function removeCours(int $sapeurId, int $coursSapeurId)

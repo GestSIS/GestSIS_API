@@ -374,6 +374,89 @@ class SapeurCoursTest extends TestCase
         $this->assertDatabaseMissing('cours_sapeur', ['sapeur_id' => $libre->id, 'cours_id' => 2]);
     }
 
+    public function testAddCoursReturnsErrorWhenSameCoursAlreadyAddedAtSameDate(): void
+    {
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        CoursSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'cours_id' => 2, 'date' => '1958-02-07']);
+        $data = [
+            'date' => '1958-02-07',
+            'duree' => 1,
+            'localite_id' => 1,
+            'cours_id' => 2,
+        ];
+
+        // Act
+        $response = $this->json('POST', "/api/v2/sapeurs/{$sapeur->id}/cours", $data);
+
+        // Assert
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['cours_id', 'date']);
+        $this->assertSame(1, CoursSapeur::where('sapeur_id', $sapeur->id)->where('cours_id', 2)->count());
+    }
+
+    public function testAddCoursAllowsSameCoursAtAnotherDate(): void
+    {
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        CoursSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'cours_id' => 2, 'date' => '1958-02-07']);
+        $data = [
+            'date' => '1959-02-07',
+            'duree' => 1,
+            'localite_id' => 1,
+            'cours_id' => 2,
+        ];
+
+        // Act
+        $response = $this->json('POST', "/api/v2/sapeurs/{$sapeur->id}/cours", $data);
+
+        // Assert
+        $response->assertStatus(201);
+    }
+
+    public function testEditCoursReturnsErrorWhenDateCollidesWithSameCours(): void
+    {
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        CoursSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'cours_id' => 2, 'date' => '1958-02-07']);
+        $cours = CoursSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'cours_id' => 2, 'date' => '1959-02-07']);
+
+        // Act
+        $response = $this->json('PUT', "/api/v2/sapeurs/{$sapeur->id}/cours/{$cours->id}", [
+            'id' => $cours->id,
+            'date' => '1958-02-07',
+        ]);
+
+        // Assert
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['date']);
+        $this->assertDatabaseHas('cours_sapeur', ['id' => $cours->id, 'date' => '1959-02-07']);
+    }
+
+    public function testAddCoursMultipleReportsSapeurAlreadyHavingSameCours(): void
+    {
+        // Arrange
+        $libre = Sapeur::factory()->create();
+        $dejaCours = Sapeur::factory()->create();
+        CoursSapeur::factory()->create(['sapeur_id' => $dejaCours->id, 'cours_id' => 2, 'date' => '1958-02-07']);
+        $data = [
+            'sapeur_ids' => [$libre->id, $dejaCours->id],
+            'date' => '1958-02-07',
+            'duree' => 1,
+            'localite_id' => 1,
+            'cours_id' => 2,
+        ];
+
+        // Act
+        $response = $this->json('POST', '/api/v2/cours-sapeurs', $data);
+
+        // Assert
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['sapeur_ids.1'])
+            ->assertJsonMissingValidationErrors(['sapeur_ids.0']);
+        $this->assertDatabaseMissing('cours_sapeur', ['sapeur_id' => $libre->id, 'cours_id' => 2]);
+    }
+
     public function testAddCoursMultipleReturnsValidationErrorWhenSapeurIdIsUnknown(): void
     {
         // Arrange
