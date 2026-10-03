@@ -10,6 +10,7 @@ use App\Models\Article;
 use App\Models\ControleMedical;
 use App\Models\CoursSapeur;
 use App\Models\Ecriture;
+use App\Models\Fonction;
 use App\Models\ExerciceSapeur;
 use App\Models\FonctionSapeur;
 use App\Models\GradeSapeur;
@@ -331,6 +332,12 @@ class SapeurBusiness
 
     public static function addCours(int $sapeurId, $data)
     {
+        // Transaction : un échec sur le grade / la fonction ne doit pas laisser un cours orphelin
+        return DB::transaction(fn() => self::creerCours($sapeurId, $data));
+    }
+
+    private static function creerCours(int $sapeurId, $data)
+    {
         if (!self::isSapeur($sapeurId)) {
             throw new ArrayException([], "Impossible d'ajouter un cours à un civil.");
         }
@@ -363,15 +370,21 @@ class SapeurBusiness
 
         // Add Fonction
         if (isset($data['fonction_id'])) {
-            self::addFonction(
-                $sapeurId,
-                [
-                    'fonction_id' => $data['fonction_id'],
-                    'debut' => $data['date_fonction'],
-                    'fin' => null,
-                    'remarque' => null
-                ]
-            );
+            try {
+                self::addFonction(
+                    $sapeurId,
+                    [
+                        'fonction_id' => $data['fonction_id'],
+                        'debut' => $data['date_fonction'],
+                        'fin' => null,
+                        'remarque' => null
+                    ]
+                );
+            } catch (ArrayException $e) {
+                $fonction = Fonction::find($data['fonction_id']);
+                $message = "La fonction « {$fonction?->nom} » est déjà attribuée à ce sapeur à cette date";
+                throw new ArrayException(['fonction_id' => $message, 'date_fonction' => $message], $message);
+            }
         }
 
         $sapeur = Sapeur::whereId($sapeurId)->first(['fonction_id', 'grade_id']);
@@ -380,9 +393,25 @@ class SapeurBusiness
 
     public static function addCoursMultiple(array $sapeurIds, array $data): array
     {
-        return DB::transaction(fn() => collect($sapeurIds)
-            ->map(fn(int $sapeurId) => self::addCours($sapeurId, $data))
-            ->all());
+        return DB::transaction(function () use ($sapeurIds, $data) {
+            // Collecte les erreurs de tous les sapeurs pour les signaler en une fois
+            $cours = [];
+            $erreurs = [];
+            foreach ($sapeurIds as $index => $sapeurId) {
+                try {
+                    $cours[] = self::addCours($sapeurId, $data);
+                } catch (ArrayException $e) {
+                    $sapeur = Sapeur::find($sapeurId, ['nom', 'prenom']);
+                    $erreurs["sapeur_ids.$index"] = "{$sapeur->nom} {$sapeur->prenom} : {$e->getMessage()}";
+                }
+            }
+
+            if ($erreurs !== []) {
+                throw new ArrayException($erreurs, implode("\n", $erreurs));
+            }
+
+            return $cours;
+        });
     }
 
     public static function updateCours(int $sapeurId, $data)
@@ -447,8 +476,7 @@ class SapeurBusiness
                 throw new ArrayException([
                     "debut" => "Duplicated period",
                     "fin" => "Duplicated period",
-                    "message" => "Fonction dupliquée durant une même période"
-                ]);
+                ], "Fonction déjà attribuée durant cette période");
             }
         }
     }

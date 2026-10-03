@@ -310,6 +310,70 @@ class SapeurCoursTest extends TestCase
         }
     }
 
+    public function testAddCoursRollsBackWhenFonctionAlreadyAttributed(): void
+    {
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        FonctionSapeur::factory()->create([
+            'sapeur_id' => $sapeur->id,
+            'fonction_id' => 14,
+            'debut' => '1950-01-01',
+            'fin' => null,
+        ]);
+        $data = [
+            'date' => '1958-02-07',
+            'duree' => 1,
+            'localite_id' => 1,
+            'cours_id' => 2,
+            'fonction_id' => 14,
+            'date_fonction' => '1960-06-05',
+        ];
+
+        // Act
+        $response = $this->json('POST', "/api/v2/sapeurs/{$sapeur->id}/cours", $data);
+
+        // Assert
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['fonction_id', 'date_fonction']);
+        $this->assertStringContainsString('déjà attribuée', $response->json('message'));
+        $this->assertDatabaseMissing('cours_sapeur', ['sapeur_id' => $sapeur->id, 'cours_id' => 2]);
+    }
+
+    public function testAddCoursMultipleReportsEverySapeurWithFonctionAlreadyAttributed(): void
+    {
+        // Arrange
+        $libre = Sapeur::factory()->create();
+        $dejaFonction1 = Sapeur::factory()->create();
+        $dejaFonction2 = Sapeur::factory()->create();
+        foreach ([$dejaFonction1, $dejaFonction2] as $sapeur) {
+            FonctionSapeur::factory()->create([
+                'sapeur_id' => $sapeur->id,
+                'fonction_id' => 14,
+                'debut' => '1950-01-01',
+                'fin' => null,
+            ]);
+        }
+        $data = [
+            'sapeur_ids' => [$libre->id, $dejaFonction1->id, $dejaFonction2->id],
+            'date' => '1958-02-07',
+            'duree' => 1,
+            'localite_id' => 1,
+            'cours_id' => 2,
+            'fonction_id' => 14,
+            'date_fonction' => '1960-06-05',
+        ];
+
+        // Act
+        $response = $this->json('POST', '/api/v2/cours-sapeurs', $data);
+
+        // Assert
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['sapeur_ids.1', 'sapeur_ids.2'])
+            ->assertJsonMissingValidationErrors(['sapeur_ids.0']);
+        $this->assertStringContainsString($dejaFonction1->nom, $response->json('errors')['sapeur_ids.1']);
+        $this->assertDatabaseMissing('cours_sapeur', ['sapeur_id' => $libre->id, 'cours_id' => 2]);
+    }
+
     public function testAddCoursMultipleReturnsValidationErrorWhenSapeurIdIsUnknown(): void
     {
         // Arrange
@@ -349,7 +413,8 @@ class SapeurCoursTest extends TestCase
 
         // Assert
         $response->assertStatus(422)
-            ->assertJson(['message' => "Impossible d'ajouter un cours à un civil."]);
+            ->assertJsonValidationErrors(['sapeur_ids.1']);
+        $this->assertStringContainsString("Impossible d'ajouter un cours à un civil.", $response->json('message'));
         $this->assertDatabaseMissing('cours_sapeur', ['sapeur_id' => $sapeur->id, 'cours_id' => 2]);
         $this->assertDatabaseMissing('cours_sapeur', ['sapeur_id' => $civil->id, 'cours_id' => 2]);
     }
