@@ -6,6 +6,7 @@ namespace App\Domaine\Business;
 use App\Application\Typst\TypstTemplate;
 use App\Application\Typst\TypstToPdfGenerator;
 use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\Exceptions\NotReportableException;
 use App\Models\Article;
 use App\Models\ControleMedical;
 use App\Models\CoursSapeur;
@@ -135,7 +136,7 @@ class SapeurBusiness
     {
         //TODO: Add iban statut système validation
         if (!self::estAvsValide($data['no_avs'] ?? null)) {
-            throw new ArrayException(['no_avs' => 'Numéro AVS invalide.']);
+            throw new NotReportableException(['no_avs' => 'Numéro AVS invalide.']);
         }
         $data = self::normalizeNullableFields($data);
         $data['iban_statut'] = 1;
@@ -158,7 +159,7 @@ class SapeurBusiness
     {
         //TODO: Add iban statut système validation
         if (!self::estAvsValide($data['no_avs'] ?? null)) {
-            throw new ArrayException(['no_avs' => 'Numéro AVS invalide.']);
+            throw new NotReportableException(['no_avs' => 'Numéro AVS invalide.']);
         }
         $data = self::normalizeNullableFields($data);
         $data['iban_statut'] = 1;
@@ -223,11 +224,11 @@ class SapeurBusiness
     public static function createRecrue($data)
     {
         if (!self::estAvsValide($data['no_avs'])) {
-            throw new ArrayException(['no_avs' => 'Numéro AVS invalide.']);
+            throw new NotReportableException(['no_avs' => 'Numéro AVS invalide.']);
         }
 
         if (self::avsDejaUtilise($data['no_avs'])) {
-            throw new ArrayException(['no_avs' => 'Une inscription existe déjà avec ce numéro AVS.']);
+            throw new NotReportableException(['no_avs' => 'Une inscription existe déjà avec ce numéro AVS.']);
         }
 
         $data = self::normalizeNullableFields($data);
@@ -291,7 +292,7 @@ class SapeurBusiness
     public static function updateSapeurById(int $sapeurId, $data)
     {
         if (array_key_exists('no_avs', $data) && !self::estAvsValide($data['no_avs'])) {
-            throw new ArrayException(['no_avs' => 'Numéro AVS invalide.']);
+            throw new NotReportableException(['no_avs' => 'Numéro AVS invalide.']);
         }
 
         $data = self::normalizeNullableFields($data);
@@ -303,15 +304,15 @@ class SapeurBusiness
     public static function deleteSapeurById(int $sapeurId)
     {
         if (Ecriture::where('sapeur_id', $sapeurId)->exists()) {
-            throw new ArrayException([], "Impossible de supprimer un sapeur lié à une écriture comptable");
+            throw new NotReportableException([], "Impossible de supprimer un sapeur lié à une écriture comptable");
         }
 
         if (Article::where('sapeur_id', $sapeurId)->whereNull('retour')->exists()) {
-            throw new ArrayException([], "Impossible de supprimer un sapeur possédant du matériel personnel non rendu");
+            throw new NotReportableException([], "Impossible de supprimer un sapeur possédant du matériel personnel non rendu");
         }
 
         if (Intervention::where('sapeur_id', $sapeurId)->exists()) {
-            throw new ArrayException([], "Impossible de supprimer un sapeur ayant été chef d'intervention");
+            throw new NotReportableException([], "Impossible de supprimer un sapeur ayant été chef d'intervention");
         }
 
         CoursSapeur::where('sapeur_id', $sapeurId)->delete();
@@ -339,7 +340,7 @@ class SapeurBusiness
     private static function creerCours(int $sapeurId, $data)
     {
         if (!self::isSapeur($sapeurId)) {
-            throw new ArrayException([], "Impossible d'ajouter un cours à un civil.");
+            throw new NotReportableException([], "Impossible d'ajouter un cours à un civil.");
         }
         self::controlerCoursDuplique($sapeurId, $data['cours_id'], $data['date']);
         $data['sapeur_id'] = $sapeurId;
@@ -384,7 +385,7 @@ class SapeurBusiness
             } catch (ArrayException $e) {
                 $fonction = Fonction::find($data['fonction_id']);
                 $message = "La fonction « {$fonction?->nom} » est déjà attribuée à ce sapeur à cette date";
-                throw new ArrayException(['fonction_id' => $message, 'date_fonction' => $message], $message);
+                throw new NotReportableException(['fonction_id' => $message, 'date_fonction' => $message], $message);
             }
         }
 
@@ -408,7 +409,7 @@ class SapeurBusiness
             }
 
             if ($erreurs !== []) {
-                throw new ArrayException($erreurs, implode("\n", $erreurs));
+                throw new NotReportableException($erreurs, implode("\n", $erreurs));
             }
 
             return $cours;
@@ -438,7 +439,7 @@ class SapeurBusiness
 
         if ($existe) {
             $message = "Ce cours a déjà été ajouté à ce sapeur à cette date";
-            throw new ArrayException(['cours_id' => $message, 'date' => $message], $message);
+            throw new NotReportableException(['cours_id' => $message, 'date' => $message], $message);
         }
     }
 
@@ -446,7 +447,7 @@ class SapeurBusiness
     {
         // Check que le cours n'est pas lié à une écriture
         if (Ecriture::where('cours_sapeur_id', $coursSapeurId)->exists()) {
-            throw new ArrayException([], 'Impossible de supprimer un cours facturé');
+            throw new NotReportableException([], 'Impossible de supprimer un cours facturé');
         }
         CoursSapeur::where('sapeur_id', $sapeurId)->findOrFail($coursSapeurId)->delete();
     }
