@@ -107,6 +107,24 @@ class SapeurMutationTest extends TestCase
         $this->assertContains($mutationId, array_column($mutations, 'id'));
     }
 
+    public function testAddMutationWithoutMotif()
+    {
+        // Le motif est facultatif : absent ou null, il est enregistré vide
+        foreach ([['2001-01-01', '2001-12-31', []], ['2003-01-01', '2003-12-31', ['motif' => null]]] as [$incorporation, $sortie, $motif]) {
+            $data = [
+                'incorporation' => $incorporation,
+                'sortie' => $sortie,
+                'localite_id' => $this->localiteId,
+                ...$motif,
+            ];
+
+            $response = $this->json('POST', "/api/v2/sapeurs/{$this->sapeurId}/mutations", $data);
+
+            $response->assertStatus(201)
+                ->assertJsonPath('data.mutation.motif', '');
+        }
+    }
+
     public function testAddMutationEnglobanteRefusee()
     {
         // Mutation existante 2005-2008

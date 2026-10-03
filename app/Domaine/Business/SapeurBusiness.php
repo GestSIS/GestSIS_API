@@ -616,6 +616,7 @@ class SapeurBusiness
         self::verifyMutationPeriode($data, $mutations);
 
         $data['sapeur_id'] = $sapeurId;
+        $data['motif'] ??= '';
         $mutation = Mutation::create($data);
 
         // Update actif statut depending of end of all mutation
