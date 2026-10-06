@@ -357,7 +357,9 @@ class InterventionBusiness
         self::checkIsNotImpute($interventionId);
 
         foreach ($appels as $appel) {
-            $appel['commentaire'] ??= '';
+            if (\array_key_exists('commentaire', $appel)) {
+                $appel['commentaire'] ??= '';
+            }
 
             Appel::where('intervention_id', $interventionId)
                 ->whereId($appel['id'])
@@ -412,7 +414,9 @@ class InterventionBusiness
         self::checkIsNotImpute($interventionId);
 
         foreach ($jalons as $jalon) {
-            $jalon['description'] ??= '';
+            if (\array_key_exists('description', $jalon)) {
+                $jalon['description'] ??= '';
+            }
 
             Jalon::where('intervention_id', $interventionId)
                 ->whereId($jalon['id'])
@@ -467,7 +471,9 @@ class InterventionBusiness
         self::checkIsNotImpute($interventionId);
 
         foreach ($missions as $mission) {
-            $mission['resume'] ??= '';
+            if (\array_key_exists('resume', $mission)) {
+                $mission['resume'] ??= '';
+            }
 
             Mission::where('intervention_id', $interventionId)
                 ->whereId($mission['id'])

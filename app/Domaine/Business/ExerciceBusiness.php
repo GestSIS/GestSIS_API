@@ -97,8 +97,12 @@ class ExerciceBusiness
 
     private static function updateExerciceById($exerciceId, $data)
     {
-        $data['lieu'] ??= '';
-        $data['communications'] ??= '';
+        // Ne remplace que les valeurs null explicites : une mise à jour partielle (ex. statut) ne doit pas effacer ces champs
+        foreach (['lieu', 'communications'] as $champ) {
+            if (array_key_exists($champ, $data) && $data[$champ] === null) {
+                $data[$champ] = '';
+            }
+        }
 
         $exercice = Exercice::findOrFail($exerciceId);
         $exercice->update($data);

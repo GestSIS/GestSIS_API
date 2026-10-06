@@ -53,7 +53,9 @@ class SapeurBusiness
      */
     private static function normalizeRemarque($data)
     {
-        $data['remarque'] ??= '';
+        if (array_key_exists('remarque', $data)) {
+            $data['remarque'] ??= '';
+        }
         return $data;
     }
 
@@ -633,7 +635,9 @@ class SapeurBusiness
         self::verifyMutationPeriode($data, $mutations);
 
         $mutation = Mutation::where('sapeur_id', $sapeurId)->findOrFail($data['id']);
-        $data['motif'] ??= '';
+        if (array_key_exists('motif', $data)) {
+            $data['motif'] ??= '';
+        }
         $mutation->update($data);
 
         // Update actif statut depending of end of all mutation

@@ -152,6 +152,43 @@ class ExerciceSapeurTest extends TestCase
     }
 
     /**
+     * Modifier une présence ne doit pas effacer le lieu ni les communications de l'exercice
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testUpdatePresenceConserveLieuEtCommunications()
+    {
+        $exercice = Exercice::factory()->create([
+            'lieu' => 'Caserne principale',
+            'communications' => 'Tenue de feu',
+        ]);
+
+        $addResponse = $this->json('POST', '/api/v2/exercices/' . $exercice->id . '/sapeurs', ['sapeurs' => [[
+            'sapeur_id' => 1,
+            'convoque' => 1,
+            'present' => 0,
+            'absent' => 0,
+            'remplace' => 0,
+            'amende' => 0,
+            'excuse_type_id' => null,
+            'excuse_statut' => 0,
+        ]]]);
+        $presence = $addResponse->json('data.sapeurs.0');
+
+        $this->json('POST', '/api/v2/exercices/presence/' . $presence['id'], [
+            'convoque' => 1,
+            'present' => 1,
+            'absent' => 0,
+            'remplace' => 0,
+        ])->assertStatus(200);
+
+        $exercice->refresh();
+        $this->assertSame('Caserne principale', $exercice->lieu);
+        $this->assertSame('Tenue de feu', $exercice->communications);
+    }
+
+    /**
      * Test remove grade
      *
      * @return void
