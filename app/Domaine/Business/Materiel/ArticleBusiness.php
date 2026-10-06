@@ -7,7 +7,10 @@ use App\Exceptions\InternalException;
 use App\Exceptions\BadRequestException;
 use App\Models\Article;
 use App\Models\BatterieType;
+use App\Models\ControleExec;
 use App\Models\Emplacement;
+use App\Models\InterventionVehicule;
+use App\Models\Lavage;
 use App\Models\MaterielType;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -300,8 +303,18 @@ class ArticleBusiness
       throw new ArrayException([], "Impossible de supprimer un véhicule tant que son emplacement contient des sous-emplacements");
     }
 
-    Emplacement::whereIn('id', $emplacementIds)->delete();
-    return Article::whereIn('id', $articleIds)->delete();
+    if (InterventionVehicule::whereIn('vehicule_id', $articleIds)->exists()) {
+      throw new ArrayException([], "Impossible de supprimer un véhicule engagé dans une intervention, désactivez-le plutôt");
+    }
+    if (ControleExec::whereIn('article_id', $articleIds)->exists()) {
+      throw new ArrayException([], "Impossible de supprimer un article ayant des contrôles enregistrés, désactivez-le plutôt");
+    }
+
+    return DB::transaction(function () use ($articleIds, $emplacementIds) {
+      Lavage::whereIn('article_id', $articleIds)->delete();
+      Emplacement::whereIn('id', $emplacementIds)->delete();
+      return Article::whereIn('id', $articleIds)->delete() > 0;
+    });
   }
 
   /**

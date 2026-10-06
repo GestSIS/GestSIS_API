@@ -4,8 +4,11 @@ namespace Tests\Feature;
 
 use App\Domaine\Business\Materiel\MaterielTypeBusiness;
 use App\Models\Article;
+use App\Models\Controle;
+use App\Models\ControleExec;
 use App\Models\Couleur;
 use App\Models\Emplacement;
+use App\Models\Lavage;
 use App\Models\MaterielType;
 use App\Models\Sapeur;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -502,6 +505,44 @@ class ArticleTest extends TestCase
         $response->assertStatus(204);
         $this->assertDatabaseMissing('articles', ['id' => $article->id]);
         $this->assertDatabaseMissing('emplacements', ['id' => $emplacement->id]);
+    }
+
+    public function testDeleteArticleAlsoDeletesItsLavages(): void
+    {
+        $article = Article::factory()->create();
+        $lavage = Lavage::create(['article_id' => $article->id, 'date' => now()]);
+
+        $response = $this->json('DELETE', '/api/v2/articles', [
+            'articleIds' => [$article->id],
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(204);
+        $this->assertDatabaseMissing('articles', ['id' => $article->id]);
+        $this->assertDatabaseMissing('lavages', ['id' => $lavage->id]);
+    }
+
+    public function testDeleteArticleRejectedWhileItHasControles(): void
+    {
+        $article = Article::factory()->create();
+        $controle = Controle::create([
+            'nom' => 'Contrôle test',
+            'recurrence_type' => 'NON_PERIODIQUE',
+        ]);
+        ControleExec::create([
+            'controle_id' => $controle->id,
+            'article_id' => $article->id,
+            'executed_at' => now(),
+            'executed_by' => Sapeur::factory()->create()->id,
+            'trigger_type' => 'NON_PERIODIQUE',
+        ]);
+
+        $response = $this->json('DELETE', '/api/v2/articles', [
+            'articleIds' => [$article->id],
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message']);
+        $this->assertDatabaseHas('articles', ['id' => $article->id]);
     }
 
     public function testEditVehiculeArticleWithoutLinkedEmplacementIsRejectedGracefully(): void
