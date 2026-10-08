@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Domaine\Business\SapeurBusiness;
 use App\Support\Sis;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -86,6 +87,18 @@ class CloneSapeur extends Command
         $validFonctionIds = DB::table('fonctions')->pluck('id')->toArray();
         $validGradeIds = DB::table('grades')->pluck('id')->toArray();
         $validPermisTypeIds = DB::table('permis_types')->pluck('id')->toArray();
+        $validLocaliteIds = DB::table('localites')->pluck('id')->toArray();
+
+        // civilite_id et localite_id sont obligatoires sur le sapeur : impossible de
+        // cloner si la valeur source n'existe pas dans la cible.
+        if (!DB::table('civilites')->where('id', $sapeur->civilite_id)->exists()) {
+            $this->error("La civilité {$sapeur->civilite_id} du sapeur n'existe pas dans la base {$targetSis}.");
+            return 1;
+        }
+        if (!in_array($sapeur->localite_id, $validLocaliteIds)) {
+            $this->error("La localité {$sapeur->localite_id} du sapeur n'existe pas dans la base {$targetSis}.");
+            return 1;
+        }
 
         DB::beginTransaction();
         try {
@@ -93,6 +106,10 @@ class CloneSapeur extends Command
             $newSapeur = new Sapeur();
             $newSapeur->fill($sapeur->getAttributes());
             unset($newSapeur->id); // Laisser auto-increment générer un nouvel ID
+            // Fonction et grade principaux : recalculés après le clonage des fonctions
+            // et grades, les ids source pouvant ne pas exister dans la cible.
+            $newSapeur->fonction_id = null;
+            $newSapeur->grade_id = null;
             $newSapeur->save();
 
             $newSapeurId = $newSapeur->id;
@@ -102,7 +119,7 @@ class CloneSapeur extends Command
             $coursCloned = 0;
             $coursSkipped = 0;
             foreach ($cours as $c) {
-                if (in_array($c->cours_id, $validCoursIds)) {
+                if (in_array($c->cours_id, $validCoursIds) && in_array($c->localite_id, $validLocaliteIds)) {
                     $newCours = new CoursSapeur();
                     $newCours->fill($c->getAttributes());
                     $newCours->sapeur_id = $newSapeurId;
@@ -114,7 +131,7 @@ class CloneSapeur extends Command
                     $coursSkipped++;
                 }
             }
-            $this->info("  ✓ {$coursCloned} cours clonés" . ($coursSkipped > 0 ? " ({$coursSkipped} ignorés car inexistants dans la cible)" : ""));
+            $this->info("  ✓ {$coursCloned} cours clonés" . ($coursSkipped > 0 ? " ({$coursSkipped} ignorés car cours ou localité inexistants dans la cible)" : ""));
 
             // Cloner les fonctions (uniquement si la fonction existe dans la base cible)
             $fonctionsCloned = 0;
@@ -169,6 +186,9 @@ class CloneSapeur extends Command
                 }
             }
             $this->info("  ✓ {$permisCloned} permis clonés" . ($permisSkipped > 0 ? " ({$permisSkipped} ignorés car type inexistant dans la cible)" : ""));
+
+            SapeurBusiness::updateFonctionPrincipale($newSapeurId);
+            SapeurBusiness::updateMainGrade($newSapeurId);
 
             // Cloner les téléphones
             foreach ($telephones as $t) {

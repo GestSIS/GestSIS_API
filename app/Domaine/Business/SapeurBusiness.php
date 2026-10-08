@@ -755,7 +755,7 @@ class SapeurBusiness
             $end1 !== null && $end2 !== null && !($end1 < $start2 || $end2 < $start1));
     }
 
-    private static function updateFonctionPrincipale($sapeurId)
+    public static function updateFonctionPrincipale($sapeurId)
     {
         // Recupérer avec fonctions pour le tri
         $now = Carbon::now();
@@ -774,7 +774,7 @@ class SapeurBusiness
         return $maxId;
     }
 
-    private static function updateMainGrade($sapeurId)
+    public static function updateMainGrade($sapeurId)
     {
         // Recupérer avec grades pour le tri
         $now = Carbon::now();
