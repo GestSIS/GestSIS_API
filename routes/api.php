@@ -715,6 +715,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     Route::group(['middleware' => 'jwtTokenRole:materiel.modification'], function () {
         Route::apiResource('emplacements', EmplacementController::class)->only(['store', 'update', 'destroy']);
+        Route::post('emplacements/{emplacement}/dupliquer-enfants', [EmplacementController::class, 'dupliquerEnfants']);
 
         // Attribution et retour de matériel
         Route::apiResource('sapeurs.articles', ArticleSapeurController::class)->only(['store']);

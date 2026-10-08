@@ -61,6 +61,20 @@ class EmplacementController extends Controller
         return response()->json(['data' => $emplacement]);
     }
 
+    /**
+     * Duplique les sous-emplacements de l'emplacement $id sous l'emplacement cible.
+     */
+    public function dupliquerEnfants(Request $request, int $id)
+    {
+        $data = $request->validate([
+            'cible_id' => 'integer|required|exists:emplacements,id',
+        ]);
+
+        Emplacement::findOrFail($id);
+        $emplacements = EmplacementBusiness::dupliquerEnfants($id, $data['cible_id']);
+        return response()->json(['data' => $emplacements], 201);
+    }
+
     public function destroy($id)
     {
         $emplacement = EmplacementBusiness::deleteEmplacement($id);

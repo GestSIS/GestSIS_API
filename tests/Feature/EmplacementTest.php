@@ -310,4 +310,128 @@ class EmplacementTest extends TestCase
         $response->assertStatus(204);
         $this->assertDatabaseMissing('hangars', ['id' => $emplacement->id]);
     }
+
+    private function dupliquerEnfants(int $sourceId, array $payload): \Illuminate\Testing\TestResponse
+    {
+        return $this->json('POST', "/api/v2/emplacements/{$sourceId}/dupliquer-enfants", $payload, ['Sis-Key' => 1]);
+    }
+
+    public function testDupliquerEnfantsCopiesActiveSubtreeUnderCible(): void
+    {
+        $source = Emplacement::factory()->create();
+        $casierA = Emplacement::factory()->create(['parent_id' => $source->id, 'designation' => 'Casier A', 'tri' => 1, 'est_etiquete' => true]);
+        Emplacement::factory()->create(['parent_id' => $casierA->id, 'designation' => 'Tiroir A1']);
+        Emplacement::factory()->create(['parent_id' => $source->id, 'designation' => 'Casier B', 'tri' => 2]);
+        Emplacement::factory()->create(['parent_id' => $source->id, 'designation' => 'Casier inactif', 'statut' => false]);
+        $cible = Emplacement::factory()->create();
+
+        $response = $this->dupliquerEnfants($source->id, ['cible_id' => $cible->id]);
+
+        $response->assertStatus(201);
+        $response->assertJsonCount(3, 'data');
+        $copieA = Emplacement::where('parent_id', $cible->id)->where('designation', 'Casier A')->first();
+        $this->assertNotNull($copieA);
+        $this->assertTrue($copieA->est_etiquete);
+        $this->assertSame($casierA->couleur_id, $copieA->couleur_id);
+        $this->assertDatabaseHas('emplacements', ['parent_id' => $copieA->id, 'designation' => 'Tiroir A1']);
+        $this->assertDatabaseHas('emplacements', ['parent_id' => $cible->id, 'designation' => 'Casier B']);
+        $this->assertDatabaseMissing('emplacements', ['parent_id' => $cible->id, 'designation' => 'Casier inactif']);
+        // La source est inchangée
+        $this->assertSame(3, Emplacement::where('parent_id', $source->id)->count());
+    }
+
+    public function testDupliquerEnfantsIgnoresVehiculeEmplacementsAndTheirChildren(): void
+    {
+        $source = Emplacement::factory()->create();
+        Emplacement::factory()->create(['parent_id' => $source->id, 'designation' => 'Casier']);
+        $article = Article::factory()->create(['emplacement_id' => null, 'sapeur_id' => null]);
+        $vehicule = Emplacement::factory()->create(['parent_id' => $source->id, 'article_id' => $article->id]);
+        Emplacement::factory()->create(['parent_id' => $vehicule->id, 'designation' => 'Coffre véhicule']);
+        $cible = Emplacement::factory()->create();
+
+        $response = $this->dupliquerEnfants($source->id, ['cible_id' => $cible->id]);
+
+        $response->assertStatus(201);
+        $response->assertJsonCount(1, 'data');
+        $this->assertSame(1, Emplacement::where('article_id', $article->id)->count());
+        $this->assertSame(1, Emplacement::where('designation', 'Coffre véhicule')->count());
+    }
+
+    public function testDupliquerEnfantsCopiesHangarAddress(): void
+    {
+        $localite = Localite::inRandomOrder()->first();
+        $source = Emplacement::factory()->create();
+        $hangar = Emplacement::factory()->create(['parent_id' => $source->id, 'designation' => 'Hangar annexe']);
+        Hangar::create(['id' => $hangar->id, 'rue' => 'Rue du Stand', 'no_rue' => '3', 'localite_id' => $localite->id]);
+        $cible = Emplacement::factory()->create();
+
+        $response = $this->dupliquerEnfants($source->id, ['cible_id' => $cible->id]);
+
+        $response->assertStatus(201);
+        $copieId = Emplacement::where('parent_id', $cible->id)->value('id');
+        $this->assertDatabaseHas('hangars', [
+            'id' => $copieId,
+            'rue' => 'Rue du Stand',
+            'no_rue' => '3',
+            'localite_id' => $localite->id,
+        ]);
+    }
+
+    public function testDupliquerEnfantsRejectsCibleWithSousEmplacements(): void
+    {
+        $source = Emplacement::factory()->create();
+        Emplacement::factory()->create(['parent_id' => $source->id]);
+        $cible = Emplacement::factory()->create();
+        Emplacement::factory()->create(['parent_id' => $cible->id]);
+
+        $response = $this->dupliquerEnfants($source->id, ['cible_id' => $cible->id]);
+
+        $response->assertStatus(422);
+        $this->assertSame(1, Emplacement::where('parent_id', $cible->id)->count());
+    }
+
+    public function testDupliquerEnfantsRejectsInactiveCible(): void
+    {
+        $source = Emplacement::factory()->create();
+        Emplacement::factory()->create(['parent_id' => $source->id]);
+        $cible = Emplacement::factory()->create(['statut' => false]);
+
+        $response = $this->dupliquerEnfants($source->id, ['cible_id' => $cible->id]);
+
+        $response->assertStatus(422);
+        $this->assertDatabaseMissing('emplacements', ['parent_id' => $cible->id]);
+    }
+
+    public function testDupliquerEnfantsRejectsCibleInsideSourceSubtree(): void
+    {
+        $source = Emplacement::factory()->create();
+        $enfant = Emplacement::factory()->create(['parent_id' => $source->id]);
+
+        $response = $this->dupliquerEnfants($source->id, ['cible_id' => $enfant->id]);
+
+        $response->assertStatus(422);
+        $this->assertDatabaseMissing('emplacements', ['parent_id' => $enfant->id]);
+    }
+
+    public function testDupliquerEnfantsRejectsSourceWithoutCopyableChildren(): void
+    {
+        $source = Emplacement::factory()->create();
+        Emplacement::factory()->create(['parent_id' => $source->id, 'statut' => false]);
+        $cible = Emplacement::factory()->create();
+
+        $response = $this->dupliquerEnfants($source->id, ['cible_id' => $cible->id]);
+
+        $response->assertStatus(422);
+        $this->assertDatabaseMissing('emplacements', ['parent_id' => $cible->id]);
+    }
+
+    public function testDupliquerEnfantsValidatesPayloadAndSource(): void
+    {
+        $source = Emplacement::factory()->create();
+        $cible = Emplacement::factory()->create();
+
+        $this->dupliquerEnfants($source->id, [])->assertStatus(422)->assertJsonValidationErrors('cible_id');
+        $this->dupliquerEnfants($source->id, ['cible_id' => 999999999])->assertStatus(422)->assertJsonValidationErrors('cible_id');
+        $this->dupliquerEnfants(999999999, ['cible_id' => $cible->id])->assertStatus(404);
+    }
 }

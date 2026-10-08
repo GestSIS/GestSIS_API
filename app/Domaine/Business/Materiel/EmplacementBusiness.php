@@ -166,6 +166,62 @@ class EmplacementBusiness
   }
 
   /**
+   * Duplique le sous-arbre des sous-emplacements de $sourceId sous $cibleId.
+   * Seuls les sous-emplacements actifs sont copiés ; ceux qui représentent un
+   * véhicule (article_id) sont ignorés avec leurs propres sous-emplacements, un
+   * véhicule ne pouvant être représenté que par un seul emplacement. Le matériel
+   * rangé n'est pas copié. La cible doit être active et sans sous-emplacement.
+   * @return Emplacement[] Les emplacements créés
+   */
+  public static function dupliquerEnfants(int $sourceId, int $cibleId): array
+  {
+    $cible = Emplacement::findOrFail($cibleId);
+    if (!$cible->statut) {
+      throw new ArrayException([], "L'emplacement cible doit être actif");
+    }
+    if (Emplacement::where('parent_id', $cibleId)->exists()) {
+      throw new ArrayException([], "L'emplacement cible ne doit pas contenir de sous-emplacement");
+    }
+    if (in_array($cibleId, self::descendantIds($sourceId), true)) {
+      throw new ArrayException([], "L'emplacement cible ne peut pas être un sous-emplacement de l'emplacement copié");
+    }
+
+    $childrenByParent = Emplacement::with('hangar')
+      ->where('statut', true)
+      ->whereNull('article_id')
+      ->orderBy('tri')
+      ->get()
+      ->groupBy('parent_id');
+
+    if ($childrenByParent->get($sourceId, collect())->isEmpty()) {
+      throw new ArrayException([], "Cet emplacement n'a aucun sous-emplacement à dupliquer");
+    }
+
+    return DB::transaction(function () use ($childrenByParent, $sourceId, $cibleId) {
+      $created = [];
+      $copier = function (int $fromParentId, int $toParentId) use (&$copier, &$created, $childrenByParent) {
+        foreach ($childrenByParent->get($fromParentId, collect()) as $enfant) {
+          $copie = self::createEmplacement([
+            'designation' => $enfant->designation,
+            'remarque' => $enfant->remarque,
+            'est_etiquete' => $enfant->est_etiquete,
+            'est_compartimentable' => $enfant->est_compartimentable,
+            'couleur_id' => $enfant->couleur_id,
+            'parent_id' => $toParentId,
+            'statut' => true,
+            ...($enfant->hangar !== null ? ['hangar' => $enfant->hangar->only(['rue', 'no_rue', 'localite_id'])] : []),
+          ]);
+          $created[] = $copie;
+          $copier($enfant->id, $copie->id);
+        }
+      };
+      $copier($sourceId, $cibleId);
+
+      return $created;
+    });
+  }
+
+  /**
    * Delete an existing emplacement
    * @param integer $id ID of the emplacement to delete
    * @return boolean true if deleted successfully
