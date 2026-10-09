@@ -94,6 +94,8 @@ class ControleExecController extends Controller
 
     public function destroy(int $id): JsonResponse
     {
+        ControleExecBusiness::deleteExec($id);
+
         return response()->json(null, 204);
     }
 }

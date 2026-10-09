@@ -96,6 +96,8 @@ class ControleController extends Controller
 
     public function destroy(int $id): JsonResponse
     {
+        ControleBusiness::deleteControle($id);
+
         return response()->json(null, 204);
     }
 }
