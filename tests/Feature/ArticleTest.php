@@ -8,7 +8,6 @@ use App\Models\Controle;
 use App\Models\ControleExec;
 use App\Models\Couleur;
 use App\Models\Emplacement;
-use App\Models\Lavage;
 use App\Models\MaterielType;
 use App\Models\Sapeur;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -505,20 +504,6 @@ class ArticleTest extends TestCase
         $response->assertStatus(204);
         $this->assertDatabaseMissing('articles', ['id' => $article->id]);
         $this->assertDatabaseMissing('emplacements', ['id' => $emplacement->id]);
-    }
-
-    public function testDeleteArticleAlsoDeletesItsLavages(): void
-    {
-        $article = Article::factory()->create();
-        $lavage = Lavage::create(['article_id' => $article->id, 'date' => now()]);
-
-        $response = $this->json('DELETE', '/api/v2/articles', [
-            'articleIds' => [$article->id],
-        ], ['Sis-Key' => 1]);
-
-        $response->assertStatus(204);
-        $this->assertDatabaseMissing('articles', ['id' => $article->id]);
-        $this->assertDatabaseMissing('lavages', ['id' => $lavage->id]);
     }
 
     public function testDeleteArticleRejectedWhileItHasControles(): void

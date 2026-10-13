@@ -24,7 +24,6 @@ class MaterielTypeFactory extends Factory
             'est_numerote' => false,
             'est_attribuable' => false,
             'est_taillee' => false,
-            'est_lavable' => false,
         ];
     }
 }

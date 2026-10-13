@@ -58,8 +58,6 @@ class DbsFix extends Command
         Sis::each(function ($db) {
             printf("Fix db=" . Sis::connection($db) . "\n");
 
-            // $typesIds = MaterielEventType::find(1)?->materielTypeIds() ?? [];//->materielTypeIds;
-            // MaterielType::whereIn('id', $typesIds)->update(['est_lavable' => True, 'est_numerote' => True]);
 
             // // Attribut est_taillee
             // MaterielType::whereIn(

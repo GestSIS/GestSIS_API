@@ -11,7 +11,6 @@ use App\Models\Controle;
 use App\Models\ControleExec;
 use App\Models\Emplacement;
 use App\Models\InterventionVehicule;
-use App\Models\Lavage;
 use App\Models\MaterielType;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -312,7 +311,6 @@ class ArticleBusiness
     }
 
     return DB::transaction(function () use ($articleIds, $emplacementIds) {
-      Lavage::whereIn('article_id', $articleIds)->delete();
       Emplacement::whereIn('id', $emplacementIds)->delete();
       return Article::whereIn('id', $articleIds)->delete() > 0;
     });

@@ -60,11 +60,6 @@ class Article extends Model
         return $this->belongsTo(MaterielType::class, 'materiel_type_id');
     }
 
-    public function lavages()
-    {
-        return $this->hasMany(Lavage::class);
-    }
-
     public function emplacementRepresentee()
     {
         return $this->hasOne(Emplacement::class, 'article_id');
