@@ -166,6 +166,22 @@ class DbsFix extends Command
             }
             printf("  diamètres de tuyau 40/55/75 vérifiés/ajoutés\n");
 
+            // Fix 2026-10: seul un type numéroté peut être contrôlé, les véhicules sont
+            // donc toujours numérotés (imposé par MaterielTypeBusiness pour les types
+            // créés/modifiés depuis). Les véhicules existants sans numéro reçoivent leur
+            // immatriculation, à défaut leur désignation, sinon toute modification
+            // échouerait (numéro obligatoire). Idempotent.
+            $typesVehiculeNumerotes = MaterielType::where('type', MaterielTypeBusiness::TYPE_VEHICULE)
+                ->where('est_numerote', false)
+                ->update(['est_numerote' => true]);
+            $vehiculesNumerotes = Article::whereIn(
+                'materiel_type_id',
+                MaterielType::where('type', MaterielTypeBusiness::TYPE_VEHICULE)->select('id')
+            )
+                ->whereRaw("TRIM(numero) = ''")
+                ->update(['numero' => DB::raw("COALESCE(NULLIF(TRIM(immatriculation), ''), designation)")]);
+            printf("  %d type(s) véhicule numéroté(s), %d véhicule(s) numéroté(s)\n", $typesVehiculeNumerotes, $vehiculesNumerotes);
+
             printf("\n");
         });
         printf("Migrating done\n");

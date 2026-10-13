@@ -26,4 +26,12 @@ class MaterielTypeFactory extends Factory
             'est_taillee' => false,
         ];
     }
+
+    /**
+     * Type numéroté : seul un type numéroté peut être rattaché à un contrôle.
+     */
+    public function numerote(): static
+    {
+        return $this->state(['est_numerote' => true]);
+    }
 }

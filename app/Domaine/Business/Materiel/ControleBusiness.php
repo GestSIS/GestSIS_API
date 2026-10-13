@@ -8,6 +8,7 @@ use App\Models\Controle;
 use App\Models\ControleMaterielType;
 use App\Models\ControleTache;
 use App\Models\ControleExec;
+use App\Models\MaterielType;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -33,6 +34,7 @@ class ControleBusiness
         self::validateRecurrence($data['recurrence_type'], $data['recurrence_value'] ?? null);
         self::validateDureePreavis($data['recurrence_type'], $data['duree_preavis'] ?? null);
         self::validateNbExecutionMax($data['recurrence_type'], $data['nb_execution_max'] ?? null, $data['nb_execution_preavis'] ?? null);
+        self::validateTypesNumerotes($data['materiel_type_ids'] ?? []);
 
         return DB::transaction(function () use ($data): Controle {
             $controle = Controle::create([
@@ -74,6 +76,7 @@ class ControleBusiness
         self::validateRecurrence($data['recurrence_type'], $data['recurrence_value'] ?? null);
         self::validateDureePreavis($data['recurrence_type'], $data['duree_preavis'] ?? null);
         self::validateNbExecutionMax($data['recurrence_type'], $data['nb_execution_max'] ?? null, $data['nb_execution_preavis'] ?? null);
+        self::validateTypesNumerotes($data['materiel_type_ids'] ?? []);
 
         return DB::transaction(function () use ($id, $data): Controle {
             $controle = Controle::findOrFail($id);
@@ -139,6 +142,24 @@ class ControleBusiness
             } else {
                 ControleTache::create($payload);
             }
+        }
+    }
+
+    /**
+     * Seul un type numéroté peut être contrôlé : sans numéro, rien ne permet de
+     * distinguer les articles d'un même type (et un article non numéroté peut
+     * représenter plusieurs pièces via sa quantité).
+     *
+     * Publique : réutilisée par ControleMaterielTypeController.
+     *
+     * @param int[] $typeIds
+     */
+    public static function validateTypesNumerotes(array $typeIds): void
+    {
+        $nonNumerote = MaterielType::whereIn('id', $typeIds)->where('est_numerote', false)->first();
+
+        if ($nonNumerote !== null) {
+            throw new ArrayException([], "Le type « {$nonNumerote->designation} » doit être numéroté pour être contrôlé");
         }
     }
 

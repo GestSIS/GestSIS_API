@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Domaine\Business\Materiel\MaterielTypeBusiness;
 use App\Models\Article;
 use App\Models\BatterieType;
+use App\Models\Controle;
+use App\Models\ControleMaterielType;
 use App\Models\Intervention;
 use App\Models\InterventionVehicule;
 use App\Models\MaterielCategorie;
@@ -219,6 +221,57 @@ class MaterielTypeTest extends TestCase
             'est_attribuable' => false,
             'est_taillee' => false,
         ]);
+    }
+
+    public function testStoreVehiculeTypeForcesEstNumeroteToTrue(): void
+    {
+        $payload = $this->basePayload(MaterielTypeBusiness::TYPE_VEHICULE, ['est_numerote' => false]);
+
+        $response = $this->json('POST', '/api/v2/materiel-types', $payload, ['Sis-Key' => 1]);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('materiel_types', ['id' => $response->json('data.id'), 'est_numerote' => true]);
+    }
+
+    public function testUpdateVehiculeTypeForcesEstNumeroteToTrue(): void
+    {
+        $payload = $this->basePayload(MaterielTypeBusiness::TYPE_VEHICULE, ['est_numerote' => false]);
+        $type = MaterielType::factory()->create([
+            'materiel_categorie_id' => $payload['materiel_categorie_id'],
+            'type' => MaterielTypeBusiness::TYPE_VEHICULE,
+            'est_emplacement' => true,
+            'est_numerote' => true,
+        ]);
+
+        $response = $this->json('PUT', "/api/v2/materiel-types/{$type->id}", $payload, ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('materiel_types', ['id' => $type->id, 'est_numerote' => true]);
+    }
+
+    public function testRetirerLaNumerotationDunTypeControleEstRefuse(): void
+    {
+        $payload = $this->basePayload(MaterielTypeBusiness::TYPE_NONE, ['est_numerote' => false]);
+        $type = MaterielType::factory()->numerote()->create(['materiel_categorie_id' => $payload['materiel_categorie_id']]);
+        $controle = Controle::create(['nom' => 'Contrôle test', 'recurrence_type' => 'NON_PERIODIQUE']);
+        ControleMaterielType::create(['controle_id' => $controle->id, 'materiel_type_id' => $type->id]);
+
+        $response = $this->json('PUT', "/api/v2/materiel-types/{$type->id}", $payload, ['Sis-Key' => 1]);
+
+        $response->assertStatus(422);
+        $this->assertStringContainsString('Contrôle test', $response->json('message'));
+        $this->assertDatabaseHas('materiel_types', ['id' => $type->id, 'est_numerote' => true]);
+    }
+
+    public function testRetirerLaNumerotationDunTypeNonControleEstAccepte(): void
+    {
+        $payload = $this->basePayload(MaterielTypeBusiness::TYPE_NONE, ['est_numerote' => false]);
+        $type = MaterielType::factory()->numerote()->create(['materiel_categorie_id' => $payload['materiel_categorie_id']]);
+
+        $response = $this->json('PUT', "/api/v2/materiel-types/{$type->id}", $payload, ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('materiel_types', ['id' => $type->id, 'est_numerote' => false]);
     }
 
     public function testStoreStandardTypeEstEmplacementIsFalse(): void

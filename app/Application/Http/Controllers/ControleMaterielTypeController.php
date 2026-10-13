@@ -2,6 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
+use App\Domaine\Business\Materiel\ControleBusiness;
 use App\Domaine\Exceptions\ArrayException;
 use App\Models\Controle;
 use App\Models\ControleMaterielType;
@@ -28,6 +29,7 @@ class ControleMaterielTypeController extends Controller
         ]);
 
         $this->validateTypeNonDejaAssocie($controleId, $data['materiel_type_id']);
+        ControleBusiness::validateTypesNumerotes([$data['materiel_type_id']]);
 
         $association = ControleMaterielType::create(array_merge($data, ['controle_id' => $controleId]));
 
@@ -43,6 +45,7 @@ class ControleMaterielTypeController extends Controller
         $association = ControleMaterielType::where('controle_id', $controleId)->findOrFail($id);
 
         $this->validateTypeNonDejaAssocie($controleId, $data['materiel_type_id'], $id);
+        ControleBusiness::validateTypesNumerotes([$data['materiel_type_id']]);
 
         $association->update($data);
 

@@ -88,10 +88,42 @@ class ControleSousRessourceTest extends TestCase
         $this->assertSame('Après', $response->json('data.nom'));
     }
 
+    public function testRattacherUnTypeNonNumeroteEstRefuse(): void
+    {
+        $controle = $this->creerControle();
+        $type = MaterielType::factory()->create(['est_numerote' => false]);
+
+        $response = $this->json('POST', "/api/v2/controles/{$controle->id}/materiel-types", [
+            'materiel_type_id' => $type->id,
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(422);
+        $this->assertStringContainsString('doit être numéroté', $response->json('message'));
+        $this->assertSame(0, ControleMaterielType::where('controle_id', $controle->id)->count());
+    }
+
+    public function testModifierUneAssociationVersUnTypeNonNumeroteEstRefuse(): void
+    {
+        $controle = $this->creerControle();
+        $typeNumerote = MaterielType::factory()->numerote()->create();
+        $typeNonNumerote = MaterielType::factory()->create(['est_numerote' => false]);
+        $association = ControleMaterielType::create([
+            'controle_id' => $controle->id,
+            'materiel_type_id' => $typeNumerote->id,
+        ]);
+
+        $response = $this->json('PUT', "/api/v2/controles/{$controle->id}/materiel-types/{$association->id}", [
+            'materiel_type_id' => $typeNonNumerote->id,
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(422);
+        $this->assertSame($typeNumerote->id, $association->fresh()->materiel_type_id);
+    }
+
     public function testRattacherDeuxFoisLeMemeTypeEstRefuse(): void
     {
         $controle = $this->creerControle();
-        $type = MaterielType::factory()->create();
+        $type = MaterielType::factory()->numerote()->create();
 
         ControleMaterielType::create([
             'controle_id' => $controle->id,

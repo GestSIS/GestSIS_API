@@ -4,6 +4,7 @@ namespace App\Domaine\Business\Materiel;
 
 use App\Domaine\Exceptions\ArrayException;
 use App\Models\Article;
+use App\Models\Controle;
 use App\Models\InterventionVehicule;
 use App\Models\MaterielType;
 use App\Models\MaterielTypeBatterie;
@@ -38,9 +39,11 @@ class MaterielTypeBusiness
     $product['type'] = (int) $product['type'];
     $product['est_emplacement'] = $product['type'] === self::TYPE_VEHICULE;
     if ($product['est_emplacement']) {
-      // Un véhicule n'est ni attribuable à un sapeur, ni taillé.
+      // Un véhicule n'est ni attribuable à un sapeur, ni taillé, mais toujours
+      // numéroté (plaque, numéro de véhicule…) pour pouvoir être contrôlé.
       $product['est_attribuable'] = false;
       $product['est_taillee'] = false;
+      $product['est_numerote'] = true;
     }
 
     $order = DB::table('materiel_types')->max('id');
@@ -82,9 +85,19 @@ class MaterielTypeBusiness
     $data['type'] = (int) $data['type'];
     $data['est_emplacement'] = $data['type'] === self::TYPE_VEHICULE;
     if ($data['est_emplacement']) {
-      // Un véhicule n'est ni attribuable à un sapeur, ni taillé.
+      // Un véhicule n'est ni attribuable à un sapeur, ni taillé, mais toujours
+      // numéroté (plaque, numéro de véhicule…) pour pouvoir être contrôlé.
       $data['est_attribuable'] = false;
       $data['est_taillee'] = false;
+      $data['est_numerote'] = true;
+    }
+
+    if (!$data['est_numerote']) {
+      $controles = Controle::whereHas('materielTypes', fn (Builder $query) => $query->where('materiel_type_id', $id))
+        ->pluck('nom');
+      if ($controles->isNotEmpty()) {
+        throw new ArrayException([], "Impossible de retirer la numérotation : ce type est contrôlé ({$controles->join(', ')})");
+      }
     }
 
     $tuyau = $data['tuyau'] ?? null;

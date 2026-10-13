@@ -76,9 +76,40 @@ class ControleTest extends TestCase
         $this->assertSame(8, $controle->nb_execution_preavis);
     }
 
+    public function testCreerControleAvecTypeNonNumeroteEstRefuse(): void
+    {
+        $type = MaterielType::factory()->create(['est_numerote' => false]);
+
+        try {
+            ControleBusiness::createControle($this->basePayload(['materiel_type_ids' => [$type->id]]));
+            $this->fail('Une ArrayException était attendue');
+        } catch (ArrayException $e) {
+            $this->assertStringContainsString('doit être numéroté', $e->getMessage());
+        }
+
+        $this->assertDatabaseMissing('controles', ['nom' => 'Contrôle test']);
+    }
+
+    public function testModifierControleAvecTypeNonNumeroteEstRefuse(): void
+    {
+        $typeNumerote = MaterielType::factory()->numerote()->create();
+        $typeNonNumerote = MaterielType::factory()->create(['est_numerote' => false]);
+        $controle = ControleBusiness::createControle($this->basePayload(['materiel_type_ids' => [$typeNumerote->id]]));
+
+        try {
+            ControleBusiness::editControle($controle->id, $this->basePayload([
+                'materiel_type_ids' => [$typeNumerote->id, $typeNonNumerote->id],
+            ]));
+            $this->fail('Une ArrayException était attendue');
+        } catch (ArrayException) {
+        }
+
+        $this->assertSame([$typeNumerote->id], $controle->materielTypes()->pluck('materiel_type_id')->all());
+    }
+
     public function testCalculerStatutsCompteLesArticlesAyantDepasseLeMax(): void
     {
-        $type = MaterielType::factory()->create();
+        $type = MaterielType::factory()->numerote()->create();
         $controle = ControleBusiness::createControle($this->basePayload([
             'nb_execution_max' => 3,
             'nb_execution_preavis' => 2,
@@ -138,7 +169,7 @@ class ControleTest extends TestCase
 
     public function testControlePeriodiqueEnRetardNApparaitPasDansLimiteExecutions(): void
     {
-        $type = MaterielType::factory()->create();
+        $type = MaterielType::factory()->numerote()->create();
         $controle = ControleBusiness::createControle($this->basePayload([
             'recurrence_type' => 'PERIODIQUE',
             'recurrence_value' => 1,
