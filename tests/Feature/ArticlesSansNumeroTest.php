@@ -45,13 +45,30 @@ class ArticlesSansNumeroTest extends TestCase
         $resultat = $this->articlesSansNumeroParType();
 
         $this->assertSame('Veste test', $resultat[$type->id]['designation']);
+        $this->assertFalse($resultat[$type->id]['est_taillee']);
+        $this->assertFalse($resultat[$type->id]['est_emplacement']);
         $articles = collect($resultat[$type->id]['articles'])->keyBy('id');
         $this->assertEqualsCanonicalizing([$sansNumero->id, $espaces->id], $articles->keys()->all());
-        $this->assertSame('Hangar test', $articles[$sansNumero->id]['localisation']);
-        $this->assertSame('Dupont Jean', $articles[$espaces->id]['localisation']);
-        // Article complet, pour pouvoir l'ouvrir dans la modale de modification.
+        // Article complet : ouvert dans la modale de modification, et l'app en
+        // déduit l'emplacement ou le sapeur à afficher.
         $this->assertSame($type->id, $articles[$sansNumero->id]['materiel_type_id']);
+        $this->assertSame($emplacement->id, $articles[$sansNumero->id]['emplacement_id']);
+        $this->assertSame($sapeur->id, $articles[$espaces->id]['sapeur_id']);
         $this->assertArrayHasKey('emplacement_representee', $articles[$sansNumero->id]);
+    }
+
+    public function testIndiqueSiLeTypeEstTailleOuUnVehicule(): void
+    {
+        $taille = MaterielType::factory()->numerote()->create(['est_taillee' => true]);
+        Article::factory()->create(['materiel_type_id' => $taille->id, 'numero' => '', 'statut' => true]);
+        $vehicule = MaterielType::factory()->numerote()->create(['type' => 3, 'est_emplacement' => true]);
+        Article::factory()->create(['materiel_type_id' => $vehicule->id, 'numero' => '', 'statut' => true]);
+
+        $resultat = $this->articlesSansNumeroParType();
+
+        $this->assertTrue($resultat[$taille->id]['est_taillee']);
+        $this->assertFalse($resultat[$taille->id]['est_emplacement']);
+        $this->assertTrue($resultat[$vehicule->id]['est_emplacement']);
     }
 
     public function testZeroEtTiretComptentCommeNumeroManquant(): void

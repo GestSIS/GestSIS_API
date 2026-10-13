@@ -243,8 +243,7 @@ class MaterielTypeBusiness
   /**
    * Articles actifs d'un type numéroté dont le numéro n'est pas renseigné
    * (vide, « 0 » ou « - »), groupés par type. Ne renvoie que les types ayant au moins un tel article.
-   * Chaque article est complet (pour être ouvert dans la modale de modification),
-   * avec en plus `localisation` : le sapeur à qui il est attribué, sinon son emplacement.
+   * Chaque article est complet (pour être ouvert dans la modale de modification).
    *
    * @return array<int, array{materiel_type_id: int, designation: string, articles: array<int, array>}>
    */
@@ -253,19 +252,19 @@ class MaterielTypeBusiness
     $articlesParType = Article::whereIn('materiel_type_id', MaterielType::where('est_numerote', true)->select('id'))
       ->where('statut', true)
       ->whereIn(DB::raw('TRIM(numero)'), self::NUMEROS_ABSENTS)
-      ->with(['materielType', 'sapeur', 'emplacement', 'emplacementRepresentee'])
+      ->with(['materielType', 'emplacementRepresentee'])
       ->get()
       ->groupBy('materiel_type_id');
 
     return $articlesParType->map(fn ($articles, int $typeId): array => [
       'materiel_type_id' => $typeId,
       'designation'      => $articles->first()->materielType->designation,
-      'articles'         => $articles->map(fn (Article $article): array => [
-        ...Arr::except($article->toArray(), ['materiel_type', 'sapeur', 'emplacement']),
-        'localisation' => $article->sapeur
-          ? "{$article->sapeur->nom} {$article->sapeur->prenom}"
-          : $article->emplacement?->designation,
-      ])->values()->all(),
+      // Pour choisir les colonnes du détail : taille d'un type taillé, désignation d'un véhicule.
+      'est_taillee'      => $articles->first()->materielType->est_taillee,
+      'est_emplacement'  => $articles->first()->materielType->est_emplacement,
+      'articles'         => $articles
+        ->map(fn (Article $article): array => Arr::except($article->toArray(), ['materiel_type']))
+        ->values()->all(),
     ])->sortBy('designation')->values()->all();
   }
 
