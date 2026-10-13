@@ -37,6 +37,12 @@ class ControleTableSeeder extends Seeder
             ['id' => 7, 'controle_id' => 5, 'order' => 1, 'nom' => 'Semelle intacte', 'description' => null, 'type' => 'BOOLEAN', 'unit' => null, 'value_min' => null, 'value_max' => null, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
+        // Seul un type numéroté peut être contrôlé (les véhicules 18-22 le sont déjà) :
+        // les EPI contrôlés de la démo le deviennent ici, plutôt que dans
+        // MaterielTypeTableSeeder qui fixe aussi les types d'un nouveau SIS.
+        // ArticleTableSeeder donne un numéro à leurs articles.
+        DB::table('materiel_types')->whereIn('id', [1, 3, 10, 11, 12])->update(['est_numerote' => true]);
+
         DB::table('controle_materiel_types')->insert([
             ['controle_id' => 1, 'materiel_type_id' => 1, 'created_at' => now(), 'updated_at' => now()],
             ['controle_id' => 1, 'materiel_type_id' => 3, 'created_at' => now(), 'updated_at' => now()],
