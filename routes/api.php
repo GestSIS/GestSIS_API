@@ -697,6 +697,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenSapeurOrRole:materiel.lecture'], function () {
         Route::get('materiel-types/statuts', [MaterielTypeController::class, 'statuts']);
         Route::get('materiel-types/articles-perimes', [MaterielTypeController::class, 'articlesPerimes']);
+        Route::get('materiel-types/articles-sans-numero', [MaterielTypeController::class, 'articlesSansNumero']);
         Route::apiResource('materiel-types', MaterielTypeController::class)->only(['index']);
         Route::apiResource('materiel-types.articles', MaterielTypeArticleController::class)->only(['index']);
         Route::apiResource('materiel-categories', MaterielCategorieController::class)->only(['index']);

@@ -30,6 +30,11 @@ class MaterielTypeController extends Controller
         return response()->json(['data' => MaterielTypeBusiness::getArticlesPerimes()]);
     }
 
+    public function articlesSansNumero()
+    {
+        return response()->json(['data' => MaterielTypeBusiness::getArticlesSansNumero()]);
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([

@@ -10,6 +10,7 @@ use App\Models\MaterielType;
 use App\Models\MaterielTypeBatterie;
 use App\Models\MaterielTypeTuyau;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use DB;
 
@@ -75,6 +76,9 @@ class MaterielTypeBusiness
    */
   public static function editProduct($id, $data)
   {
+    // Type supprimé entre-temps (autre onglet, autre utilisateur) : 404 plutôt qu'une 500.
+    $oldType = (int) MaterielType::findOrFail($id)->type;
+
     $data['fournisseur'] ??= '';
     $data['numero_fournisseur'] ??= '';
     $data['prix'] ??= '';
@@ -105,7 +109,6 @@ class MaterielTypeBusiness
     $batterie = $data['batterie'] ?? null;
     unset($data['batterie']);
 
-    $oldType = (int) MaterielType::find($id)->type;
     if (
       $oldType === self::TYPE_VEHICULE && $data['type'] !== self::TYPE_VEHICULE &&
       InterventionVehicule::join('articles', 'articles.id', '=', 'intervention_vehicule.vehicule_id')
@@ -232,6 +235,40 @@ class MaterielTypeBusiness
    *
    * @param \Illuminate\Support\Collection<int, int> $typeIds
    */
+  /**
+   * Valeurs saisies à la place d'un numéro absent (en plus de la chaîne vide).
+   */
+  private const NUMEROS_ABSENTS = ['', '0', '-'];
+
+  /**
+   * Articles actifs d'un type numéroté dont le numéro n'est pas renseigné
+   * (vide, « 0 » ou « - »), groupés par type. Ne renvoie que les types ayant au moins un tel article.
+   * Chaque article est complet (pour être ouvert dans la modale de modification),
+   * avec en plus `localisation` : le sapeur à qui il est attribué, sinon son emplacement.
+   *
+   * @return array<int, array{materiel_type_id: int, designation: string, articles: array<int, array>}>
+   */
+  public static function getArticlesSansNumero(): array
+  {
+    $articlesParType = Article::whereIn('materiel_type_id', MaterielType::where('est_numerote', true)->select('id'))
+      ->where('statut', true)
+      ->whereIn(DB::raw('TRIM(numero)'), self::NUMEROS_ABSENTS)
+      ->with(['materielType', 'sapeur', 'emplacement', 'emplacementRepresentee'])
+      ->get()
+      ->groupBy('materiel_type_id');
+
+    return $articlesParType->map(fn ($articles, int $typeId): array => [
+      'materiel_type_id' => $typeId,
+      'designation'      => $articles->first()->materielType->designation,
+      'articles'         => $articles->map(fn (Article $article): array => [
+        ...Arr::except($article->toArray(), ['materiel_type', 'sapeur', 'emplacement']),
+        'localisation' => $article->sapeur
+          ? "{$article->sapeur->nom} {$article->sapeur->prenom}"
+          : $article->emplacement?->designation,
+      ])->values()->all(),
+    ])->sortBy('designation')->values()->all();
+  }
+
   private static function articlesPerimesQuery($typeIds): Builder
   {
     return Article::whereIn('materiel_type_id', $typeIds)

@@ -223,6 +223,16 @@ class MaterielTypeTest extends TestCase
         ]);
     }
 
+    public function testUpdateTypeInexistantRenvoieUne404(): void
+    {
+        $payload = $this->basePayload(MaterielTypeBusiness::TYPE_NONE);
+        $idInexistant = (MaterielType::max('id') ?? 0) + 1000;
+
+        $response = $this->json('PUT', "/api/v2/materiel-types/{$idInexistant}", $payload, ['Sis-Key' => 1]);
+
+        $response->assertStatus(404);
+    }
+
     public function testStoreVehiculeTypeForcesEstNumeroteToTrue(): void
     {
         $payload = $this->basePayload(MaterielTypeBusiness::TYPE_VEHICULE, ['est_numerote' => false]);
