@@ -15,11 +15,8 @@ class ArticleController extends Controller
     public function index(Request $request)
     {
         $attribuable = $request->input('attribuable', false);
-        $lavable = $request->input('lavable', false);
         if ($attribuable) {
             $articles = ArticleBusiness::getArticlesAttribuable();
-        } else if ($lavable) {
-            $articles = ArticleBusiness::getArticlesLavable();
         } else {
             $articles = ArticleBusiness::getAllArticles();
         }

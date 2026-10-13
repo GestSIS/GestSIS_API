@@ -342,18 +342,6 @@ class ArticleBusiness
   }
 
   /**
-   * Get list of articles that can be washed (lavable)
-   * @return Collection<int, Article>
-   */
-  public static function getArticlesLavable()
-  {
-    return Article::leftJoin('materiel_types', 'articles.materiel_type_id', '=', 'materiel_types.id')
-      ->where('materiel_types.est_lavable', true)
-      ->with(['emplacementRepresentee'])
-      ->get(['articles.*']);
-  }
-
-  /**
    * Get list of all articles
    * @return Collection<int, Article>
    */

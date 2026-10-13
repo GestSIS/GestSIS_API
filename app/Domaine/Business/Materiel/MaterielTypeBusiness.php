@@ -38,9 +38,8 @@ class MaterielTypeBusiness
     $product['type'] = (int) $product['type'];
     $product['est_emplacement'] = $product['type'] === self::TYPE_VEHICULE;
     if ($product['est_emplacement']) {
-      // Un véhicule n'est ni attribuable à un sapeur, ni suivi en lavages, ni taillé.
+      // Un véhicule n'est ni attribuable à un sapeur, ni taillé.
       $product['est_attribuable'] = false;
-      $product['est_lavable'] = false;
       $product['est_taillee'] = false;
     }
 
@@ -83,9 +82,8 @@ class MaterielTypeBusiness
     $data['type'] = (int) $data['type'];
     $data['est_emplacement'] = $data['type'] === self::TYPE_VEHICULE;
     if ($data['est_emplacement']) {
-      // Un véhicule n'est ni attribuable à un sapeur, ni suivi en lavages, ni taillé.
+      // Un véhicule n'est ni attribuable à un sapeur, ni taillé.
       $data['est_attribuable'] = false;
-      $data['est_lavable'] = false;
       $data['est_taillee'] = false;
     }
 

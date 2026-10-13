@@ -31,7 +31,6 @@ class MaterielTypeTest extends TestCase
             'est_numerote' => false,
             'est_attribuable' => false,
             'est_taillee' => false,
-            'est_lavable' => false,
             'a_batterie' => false,
         ], $extra);
     }
@@ -118,7 +117,6 @@ class MaterielTypeTest extends TestCase
             'est_numerote' => false,
             'est_attribuable' => false,
             'est_taillee' => false,
-            'est_lavable' => false,
             'a_batterie' => true,
             'batterie' => ['nombre' => 2, 'batterie_type_id' => $batterieType->id],
         ];
@@ -147,7 +145,6 @@ class MaterielTypeTest extends TestCase
             'est_numerote' => false,
             'est_attribuable' => false,
             'est_taillee' => false,
-            'est_lavable' => false,
             'a_batterie' => true,
             'batterie' => ['nombre' => 1, 'batterie_type_id' => $batterieType->id],
         ];
@@ -178,11 +175,10 @@ class MaterielTypeTest extends TestCase
         ]);
     }
 
-    public function testStoreVehiculeTypeForcesEstAttribuableEstLavableEtEstTailleeToFalse(): void
+    public function testStoreVehiculeTypeForcesEstAttribuableEtEstTailleeToFalse(): void
     {
         $payload = $this->basePayload(MaterielTypeBusiness::TYPE_VEHICULE, [
             'est_attribuable' => true,
-            'est_lavable' => true,
             'est_taillee' => true,
         ]);
 
@@ -192,12 +188,11 @@ class MaterielTypeTest extends TestCase
         $this->assertDatabaseHas('materiel_types', [
             'id' => $response->json('data.id'),
             'est_attribuable' => false,
-            'est_lavable' => false,
             'est_taillee' => false,
         ]);
     }
 
-    public function testUpdateVehiculeTypeForcesEstAttribuableEstLavableEtEstTailleeToFalse(): void
+    public function testUpdateVehiculeTypeForcesEstAttribuableEtEstTailleeToFalse(): void
     {
         $categorie = MaterielCategorie::factory()->create();
         $type = MaterielType::factory()->create([
@@ -213,7 +208,6 @@ class MaterielTypeTest extends TestCase
             'est_numerote' => false,
             'est_attribuable' => true,
             'est_taillee' => true,
-            'est_lavable' => true,
             'a_batterie' => false,
         ];
 
@@ -223,7 +217,6 @@ class MaterielTypeTest extends TestCase
         $this->assertDatabaseHas('materiel_types', [
             'id' => $type->id,
             'est_attribuable' => false,
-            'est_lavable' => false,
             'est_taillee' => false,
         ]);
     }
@@ -263,7 +256,6 @@ class MaterielTypeTest extends TestCase
             'est_numerote' => false,
             'est_attribuable' => false,
             'est_taillee' => false,
-            'est_lavable' => false,
             'a_batterie' => false,
         ];
 
@@ -274,5 +266,12 @@ class MaterielTypeTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonStructure(['message']);
         $this->assertDatabaseHas('materiel_types', ['id' => $type->id, 'type' => MaterielTypeBusiness::TYPE_VEHICULE]);
+    }
+
+    public function testRoutesLavagesSupprimees(): void
+    {
+        $this->json('GET', '/api/v2/lavages', [], ['Sis-Key' => 1])->assertStatus(404);
+        $this->json('POST', '/api/v2/lavages', [], ['Sis-Key' => 1])->assertStatus(404);
+        $this->json('DELETE', '/api/v2/lavages', [], ['Sis-Key' => 1])->assertStatus(404);
     }
 }
