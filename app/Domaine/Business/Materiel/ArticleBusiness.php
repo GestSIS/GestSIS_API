@@ -7,6 +7,7 @@ use App\Exceptions\InternalException;
 use App\Exceptions\BadRequestException;
 use App\Models\Article;
 use App\Models\BatterieType;
+use App\Models\Controle;
 use App\Models\ControleExec;
 use App\Models\Emplacement;
 use App\Models\InterventionVehicule;
@@ -368,7 +369,37 @@ class ArticleBusiness
    */
   public static function getArticlesParMaterielType($materielTypeId)
   {
-    return Article::where('materiel_type_id', $materielTypeId)->with(['lavages', 'emplacementRepresentee'])->get();
+    $articles = Article::where('materiel_type_id', $materielTypeId)->with(['emplacementRepresentee'])->get();
+
+    return self::avecUsages($articles);
+  }
+
+  /**
+   * Pose sur chaque article l'attribut `usages` : nombre d'exécutions par
+   * contrôle à usage limité (nb_execution_max non null), indexé par id de
+   * contrôle. Sérialisé en objet JSON (`{}` si vide).
+   *
+   * @param Collection<int, Article> $articles
+   * @return Collection<int, Article>
+   */
+  public static function avecUsages(Collection $articles): Collection
+  {
+    $lignes = ControleExec::whereIn('article_id', $articles->modelKeys())
+      ->whereIn('controle_id', Controle::whereNotNull('nb_execution_max')->select('id'))
+      ->groupBy('article_id', 'controle_id')
+      ->selectRaw('article_id, controle_id, count(*) as nb')
+      ->get()
+      ->groupBy('article_id');
+
+    foreach ($articles as $article) {
+      $usages = [];
+      foreach ($lignes->get($article->id, []) as $ligne) {
+        $usages[$ligne->controle_id] = (int) $ligne->nb;
+      }
+      $article->setAttribute('usages', (object) $usages);
+    }
+
+    return $articles;
   }
 
   /**
@@ -404,9 +435,11 @@ class ArticleBusiness
       ->whereNotNull('article_id')
       ->pluck('article_id');
 
-    return Article::where(function ($query) use ($emplacementIds, $vehiculeArticleIds) {
+    $articles = Article::where(function ($query) use ($emplacementIds, $vehiculeArticleIds) {
       $query->whereIn('emplacement_id', $emplacementIds)
         ->orWhereIn('id', $vehiculeArticleIds);
-    })->with(['lavages'])->get();
+    })->get();
+
+    return self::avecUsages($articles);
   }
 }
