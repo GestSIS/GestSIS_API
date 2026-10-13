@@ -17,6 +17,8 @@ class DbsMigrateLavages extends Command
 {
     private const TAILLE_PAQUET = 500;
 
+    private const DESCRIPTION_CONTROLE = "Créé automatiquement depuis l'ancien suivi des lavages";
+
     protected $signature = 'dbs:migrate-lavages {--sis=* : SIS à traiter (tous par défaut)}';
 
     protected $description = "Reprend l'ancien suivi des lavages sous forme d'exécutions d'un contrôle « Lavage », SIS par SIS";
@@ -44,9 +46,13 @@ class DbsMigrateLavages extends Command
         return self::SUCCESS;
     }
 
-    private function migrerSis(string $sis): void
+    /**
+     * Vrai si une exécution reprend déjà un lavage (même article, même jour, même created_at).
+     * MySQL promeut la DATE lavages.date à minuit pour la comparer au DATETIME executed_at.
+     */
+    private function empreinteDejaMigree(): bool
     {
-        $dejaMigre = Lavage::query()
+        return Lavage::query()
             ->whereExists(function ($query): void {
                 $query->select(DB::raw(1))
                     ->from('controle_execs')
@@ -55,6 +61,16 @@ class DbsMigrateLavages extends Command
                     ->whereRaw('controle_execs.created_at <=> lavages.created_at');
             })
             ->exists();
+    }
+
+    private function migrerSis(string $sis): void
+    {
+        $nbLavages = Lavage::count();
+
+        // Sans lavage, aucune empreinte n'est comparable : on se fie à la description du contrôle créé.
+        $dejaMigre = $nbLavages === 0
+            ? Controle::where('description', self::DESCRIPTION_CONTROLE)->exists()
+            : $this->empreinteDejaMigree();
 
         if ($dejaMigre) {
             $this->info("SIS {$sis} : déjà migré");
@@ -62,7 +78,6 @@ class DbsMigrateLavages extends Command
             return;
         }
 
-        $nbLavages = Lavage::count();
         $typesLavables = MaterielType::where('est_lavable', true)->pluck('id');
         if ($nbLavages === 0 && $typesLavables->isEmpty()) {
             $this->info("SIS {$sis} : rien à migrer");
@@ -87,15 +102,20 @@ class DbsMigrateLavages extends Command
         }
 
         $sapeur = null;
-        while ($sapeur === null) {
-            $reponse = trim((string) $this->ask('Sapeur à qui attribuer les lavages repris (sapeur_id)'));
-            $sapeur = ctype_digit($reponse) ? Sapeur::find((int) $reponse) : null;
-            if ($sapeur === null) {
-                $this->error("Sapeur introuvable : {$reponse}");
+        if ($nbLavages === 0) {
+            $confirme = $this->confirm('Créer le contrôle « Lavage » (aucun lavage à reprendre) ?');
+        } else {
+            while ($sapeur === null) {
+                $reponse = trim((string) $this->ask('Sapeur à qui attribuer les lavages repris (sapeur_id)'));
+                $sapeur = ctype_digit($reponse) ? Sapeur::find((int) $reponse) : null;
+                if ($sapeur === null) {
+                    $this->error("Sapeur introuvable : {$reponse}");
+                }
             }
+            $confirme = $this->confirm("Attribuer les lavages à {$sapeur->prenom} {$sapeur->nom} (#{$sapeur->id}) et lancer la migration ?");
         }
 
-        if (! $this->confirm("Attribuer les lavages à {$sapeur->prenom} {$sapeur->nom} (#{$sapeur->id}) et lancer la migration ?")) {
+        if (! $confirme) {
             $this->info("SIS {$sis} : migration annulée");
 
             return;
@@ -106,7 +126,7 @@ class DbsMigrateLavages extends Command
         DB::transaction(function () use ($sapeur, $typeIds, &$controle, &$nbExecutions): void {
             $controle = Controle::create([
                 'nom' => 'Lavage',
-                'description' => "Créé automatiquement depuis l'ancien suivi des lavages",
+                'description' => self::DESCRIPTION_CONTROLE,
                 'recurrence_type' => 'NON_PERIODIQUE',
                 'recurrence_value' => null,
                 'nb_execution_max' => 50,
@@ -129,7 +149,7 @@ class DbsMigrateLavages extends Command
                         'controle_id' => $controle->id,
                         'article_id' => $lavage->article_id,
                         'executed_at' => $lavage->date . ' 00:00:00',
-                        'executed_by' => $sapeur->id,
+                        'executed_by' => $sapeur?->id,
                         'trigger_type' => 'NON_PERIODIQUE',
                         'date_echeance' => null,
                         'remarque_globale' => null,

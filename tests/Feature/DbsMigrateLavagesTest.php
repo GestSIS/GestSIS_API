@@ -21,6 +21,10 @@ class DbsMigrateLavagesTest extends TestCase
 
     private const SIS = 'test';
 
+    private const DESCRIPTION = "Créé automatiquement depuis l'ancien suivi des lavages";
+
+    private const CONFIRMATION_SANS_LAVAGE = 'Créer le contrôle « Lavage » (aucun lavage à reprendre) ?';
+
     private const QUESTION = 'Sapeur à qui attribuer les lavages repris (sapeur_id)';
 
     protected $connectionsToTransact = ['testing', 'db_' . self::SIS];
@@ -194,6 +198,37 @@ class DbsMigrateLavagesTest extends TestCase
             ->assertExitCode(0);
 
         $this->assertSame($controles, Controle::count());
+    }
+
+    public function testRelanceSansLavageAvecTypeLavable(): void
+    {
+        MaterielType::factory()->create(['est_lavable' => true]);
+
+        $this->artisan('dbs:migrate-lavages', ['--sis' => [self::SIS]])
+            ->expectsConfirmation(self::CONFIRMATION_SANS_LAVAGE, 'yes')
+            ->assertExitCode(0);
+        $this->assertSame(1, Controle::where('description', self::DESCRIPTION)->count());
+        $execs = ControleExec::count();
+
+        $this->artisan('dbs:migrate-lavages', ['--sis' => [self::SIS]])
+            ->expectsOutputToContain('déjà migré')
+            ->assertExitCode(0);
+
+        $this->assertSame(1, Controle::where('description', self::DESCRIPTION)->count());
+        $this->assertSame($execs, ControleExec::count());
+    }
+
+    public function testSansLavageNeDemandePasDeSapeur(): void
+    {
+        $type = MaterielType::factory()->create(['est_lavable' => true]);
+
+        $this->artisan('dbs:migrate-lavages', ['--sis' => [self::SIS]])
+            ->expectsConfirmation(self::CONFIRMATION_SANS_LAVAGE, 'yes')
+            ->assertExitCode(0);
+
+        $controle = Controle::where('description', self::DESCRIPTION)->firstOrFail();
+        $this->assertSame(0, ControleExec::where('controle_id', $controle->id)->count());
+        $this->assertSame([$type->id], ControleMaterielType::where('controle_id', $controle->id)->pluck('materiel_type_id')->all());
     }
 
     public function testNonInteractifEchoue(): void
