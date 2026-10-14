@@ -1,4 +1,6 @@
 *
 !public/
+!icon/
 !icon/user.svg
+!icon/logo-vide.png
 !.gitignore

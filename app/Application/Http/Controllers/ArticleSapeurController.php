@@ -57,4 +57,9 @@ class ArticleSapeurController extends Controller
         return response()->json(null, 204);
     }
 
+    public function pdf(Request $request, int $sapeurId)
+    {
+        $sisKey = $request->header('Sis-Key');
+        return ArticleBusiness::pdfArticlePourSapeur($sapeurId, $sisKey);
+    }
 }

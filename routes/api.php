@@ -294,6 +294,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,materiel.lecture'], function () {
         Route::apiResource('sapeurs.articles', ArticleSapeurController::class)->only(['index']);
+        Route::get('sapeurs/{sapeurId}/liste-articles', [ArticleSapeurController::class, 'pdf']);
     });
 
     // Sapeurs

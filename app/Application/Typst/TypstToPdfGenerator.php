@@ -23,11 +23,12 @@ enum TypstTemplate: string
     case ListePresence = 'liste-presence';
     case RapportIntervention = 'rapport-intervention';
     case Trombinoscope = 'trombinoscope';
+    case ArticlesPourSapeur = 'articles-pour-sapeur';
 }
 
 class TypstToPdfGenerator
 {
-    public static function generateDocument(TypstTemplate $template, array $data, string $logoPath, array $extraStorageFiles = [])
+    public static function generateDocument(TypstTemplate $template, array $data, ?string $logoPath, array $extraStorageFiles = [])
     {
         $directory = (new TemporaryDirectory())->create();
 
@@ -41,7 +42,7 @@ class TypstToPdfGenerator
         File::copy($commonPath, $commonFile);
         File::copy($templatePath, $typstFile);
         File::put($jsonFile, json_encode($data));
-        File::put($logoFile, Storage::get($logoPath));
+        File::put($logoFile, Storage::get($logoPath ?? 'icon/logo-vide.png'));
 
         foreach ($extraStorageFiles as $file) {
             File::put($directory->path($file), Storage::get($file));

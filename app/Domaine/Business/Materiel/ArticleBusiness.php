@@ -2,9 +2,12 @@
 
 namespace App\Domaine\Business\Materiel;
 
+use App\Application\Typst\TypstTemplate;
+use App\Application\Typst\TypstToPdfGenerator;
 use App\Domaine\Exceptions\ArrayException;
 use App\Exceptions\InternalException;
 use App\Exceptions\BadRequestException;
+use App\Models\Sapeur;
 use App\Models\Article;
 use App\Models\BatterieType;
 use App\Models\Controle;
@@ -12,6 +15,7 @@ use App\Models\ControleExec;
 use App\Models\Emplacement;
 use App\Models\InterventionVehicule;
 use App\Models\MaterielType;
+use App\Domaine\Business\SisParamBusiness;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Nette\Utils\Arrays;
@@ -73,7 +77,8 @@ class ArticleBusiness
     Article::whereIn('id', $articleIds)->update([
       'sapeur_id' => $sapeurId,
       'emplacement_id' => null,
-      'attribution' => $date
+      'attribution' => $date,
+      'retour' => null,
     ]);
     return Article::whereIn('id', $articleIds)->get();
   }
@@ -427,5 +432,31 @@ class ArticleBusiness
     })->get();
 
     return self::avecUsages($articles);
+  }
+
+  public static function pdfArticlePourSapeur(int $sapeurId, $sisKey)
+  {
+    $sapeur = Sapeur::findOrFail($sapeurId);
+
+    $articles = Article::where('sapeur_id', '=', $sapeurId)
+      ->with('materielType')
+      ->get()
+      ->sortBy('materielType.designation')
+      ->values();
+    $logoPath = SisParamBusiness::getLogo($sisKey);
+    $content = TypstToPdfGenerator::generateDocument(
+        TypstTemplate::ArticlesPourSapeur,
+        [
+            "sapeur" => $sapeur,
+            "articles" => $articles,
+        ],
+        $logoPath
+    );
+    return response()->streamDownload(
+        function () use ($content) {
+            echo $content;
+        },
+        'liste-articles.pdf'
+    );
   }
 }

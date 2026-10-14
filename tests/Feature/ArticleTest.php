@@ -11,6 +11,8 @@ use App\Models\Emplacement;
 use App\Models\MaterielType;
 use App\Models\Sapeur;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ArticleTest extends TestCase
@@ -670,5 +672,69 @@ class ArticleTest extends TestCase
         $this->assertSame([$articleARecuperer->id], $ids->all());
         $this->assertSame($sapeurInactif->id, $response->json('data.0.sapeur.id'));
         $this->assertSame($type->designation, $response->json('data.0.materiel_type.designation'));
+    }
+
+    public function testListeArticlesPdfPourSapeurAvecLogo(): void
+    {
+        $sapeur = $this->creerSapeurAvecArticle();
+        Storage::fake();
+        config(['database.dbs' => ['test']]);
+        Storage::put('documents/test/logo/logo.png', UploadedFile::fake()->image('logo.png')->getContent());
+
+        $response = $this->get('/api/v2/sapeurs/' . $sapeur->id . '/liste-articles', ['Sis-Key' => 'test']);
+
+        $response->assertStatus(200);
+        $response->assertDownload('liste-articles.pdf');
+        $this->assertStringStartsWith('%PDF', $response->streamedContent());
+    }
+
+    public function testListeArticlesPdfPourSapeurSansLogo(): void
+    {
+        $sapeur = $this->creerSapeurAvecArticle();
+        // Vrai disque (le logo de remplacement y est versionné), SIS sans dossier logo
+        config(['database.dbs' => ['sis_sans_logo']]);
+
+        $response = $this->get('/api/v2/sapeurs/' . $sapeur->id . '/liste-articles', ['Sis-Key' => 'sis_sans_logo']);
+
+        $response->assertStatus(200);
+        $response->assertDownload('liste-articles.pdf');
+        $this->assertStringStartsWith('%PDF', $response->streamedContent());
+    }
+
+    private function creerSapeurAvecArticle(): Sapeur
+    {
+        $sapeur = Sapeur::factory()->create();
+        Article::factory()->create([
+            'materiel_type_id' => MaterielType::factory()->create()->id,
+            'sapeur_id' => $sapeur->id,
+            'emplacement_id' => null,
+            'attribution' => '2026-01-10',
+        ]);
+
+        return $sapeur;
+    }
+
+    public function testAttribuerArticleRemetRetourANull(): void
+    {
+        $sapeur = Sapeur::factory()->create();
+        $type = MaterielType::factory()->create(['est_attribuable' => true]);
+        $emplacement = Emplacement::factory()->create();
+        $article = Article::factory()->create([
+            'materiel_type_id' => $type->id,
+            'sapeur_id' => null,
+            'emplacement_id' => $emplacement->id,
+            'attribution' => '2025-06-01',
+            'retour' => '2025-12-01',
+        ]);
+
+        $response = $this->json('POST', '/api/v2/sapeurs/' . $sapeur->id . '/articles', [
+            'date' => '2026-01-10',
+            'articleIds' => [$article->id],
+        ], ['Sis-Key' => 1]);
+
+        $response->assertStatus(201);
+        $article->refresh();
+        $this->assertSame($sapeur->id, $article->sapeur_id);
+        $this->assertNull($article->retour);
     }
 }
