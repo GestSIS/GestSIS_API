@@ -679,14 +679,18 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Controles médicaux
-    Route::group(['middleware' => 'jwtTokenRole:controle_medical.tout'], function () {
-        Route::apiResource('controles-medicaux', ControleMedicalController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
+    Route::group(['middleware' => 'jwtTokenRole:controle_medical.lecture'], function () {
+        Route::apiResource('controles-medicaux', ControleMedicalController::class)->only(['index', 'show']);
         Route::get('controles-medicaux/{id}/justificatif', [JustificatifController::class, 'show']);
-        Route::post('controles-medicaux/{id}/justificatif', [JustificatifController::class, 'store']);
-        Route::delete('controles-medicaux/{id}/justificatif', [JustificatifController::class, 'destroy']);
 
         // Controles médicaux pour sapeur
         Route::apiResource('sapeurs.controles-medicaux', SapeurControleMedicalController::class)->only(['index']);
+    });
+
+    Route::group(['middleware' => 'jwtTokenRole:controle_medical.modification'], function () {
+        Route::apiResource('controles-medicaux', ControleMedicalController::class)->only(['store', 'update', 'destroy']);
+        Route::post('controles-medicaux/{id}/justificatif', [JustificatifController::class, 'store']);
+        Route::delete('controles-medicaux/{id}/justificatif', [JustificatifController::class, 'destroy']);
     });
 
     Route::group(['middleware' => 'jwtTokenRole:controle_medical.config'], function () {
