@@ -20,25 +20,11 @@ class EmailController extends Controller
         return response()->json(['data' => $res]);
     }
 
-    public function listeSapeursActifs()
+    public function listeIdentitesActives()
     {
         $res = Sis::each(function () {
             return Sapeur::whereIn('type', [SapeurBusiness::TYPE_SAPEUR, SapeurBusiness::TYPE_CIVIL])
                 ->where('actif', true)
-                ->pluck('id')
-                ->all();
-        });
-
-        return response()->json(['data' => $res]);
-    }
-
-    public function listeSapeursEmails()
-    {
-        $res = Sis::each(function () {
-            return Sapeur::whereIn('type', [SapeurBusiness::TYPE_SAPEUR, SapeurBusiness::TYPE_CIVIL])
-                ->where('actif', true)
-                ->whereNotNull('email')
-                ->where('email', '!=', '')
                 ->pluck('email', 'id')
                 ->all();
         });

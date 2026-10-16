@@ -143,8 +143,7 @@ use App\Application\Http\Controllers\VehiculeController;
 // Routes spéciales pour le serveur d'authentification
 Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, JwtTokenValidatorAuth::class]], function () {
     Route::get('email-validate', [EmailController::class, 'validateEmail']);
-    Route::get('sapeurs-actifs', [EmailController::class, 'listeSapeursActifs']);
-    Route::get('sapeurs-emails', [EmailController::class, 'listeSapeursEmails']);
+    Route::get('identites-actives', [EmailController::class, 'listeIdentitesActives']);
 });
 
 // Routes spéciales pour admin GestSIS
