@@ -1,25 +1,9 @@
-#import "common.typ": formatDate, formatTime
-#set text(font: "DM Sans", weight: "extralight")
-
-#set page(
-  "a4",
-  margin: (top: 3cm, left: 1.5cm, right: 1.5cm, rest: 2cm),
-  header: {
-    grid(
-      columns: (1fr, 1fr, 1fr),
-      align: (left + horizon, center + horizon, right + horizon),
-      image("logo", height: 1.5cm),
-    )
-  },
-  numbering: "1",
-  flipped: true,
+#import "common.typ": formatDate, formatTime, indexBy, template
+#show: body => template(
+  portrait: false,
+  background: none, //TODO: idée pour provisoire : rotate(-40deg)[#text(fill: red, size: 100pt)[Provisoire]],
+  body,
 )
-
-#show heading.where(level: 1): it => {
-  pagebreak(weak: true)
-  counter(page).update(1)
-  it
-}
 
 #let (decomptes, sapeurs, ecritures, comptes) = json("resume-par-sapeur.json")
 
@@ -42,21 +26,6 @@
       e => if comptes.at(str(e.compte_id)).produit { -decimal(e.total) } else { decimal(e.total) },
     )
     .sum()
-}
-
-#show table.cell.where(y: 0): strong
-#set table(
-  fill: (_, y) => if calc.odd(y) { rgb(0, 0, 0, 5%) },
-)
-
-#let indexBy(ts, by: x => str(x.id)) = {
-  ts.fold((:), (acc, el) => {
-    let key = by(el)
-    let elements = acc.at(key, default: ())
-    elements.push(el)
-    acc.insert(key, elements)
-    acc
-  })
 }
 
 #for (sapeurId, ecrituresParSapeur) in indexBy(ecritures, by: el => str(el.sapeur_id)) {

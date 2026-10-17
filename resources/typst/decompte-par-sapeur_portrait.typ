@@ -1,66 +1,41 @@
-#import "common.typ": formatDate, formatTime
-#set text(font: "DM Sans", weight: "extralight")
-
-#set page("a4", margin: (top: 3cm, left: 1.5cm, right: 1cm, rest: 2cm), header: {
-    grid(
-        columns: (1fr, 1fr, 1fr),
-        align: (left + horizon, center + horizon, right + horizon),
-        image("logo", height: 1.5cm)
-    )
-}, numbering: "1")
-
-#show heading.where(level: 1): it => {
-  pagebreak(weak: true)
-  counter(page).update(1)
-  it
-}
+#import "common.typ": formatDate, formatTime, indexBy, template
+#show: template
 
 #let (decompte, decomptes, sapeurs, ecritures) = json("decompte-par-sapeur.json")
 
 #let formatTarif(ecriture) = {
-  let tarifMin = if ecriture.tarif_min == none [] else [#ecriture.tarif_min CHF/#ecriture.tarif_min_pour h puis ];
-  let tauxSpecial = if ecriture.taux == none [] else [\* #str(float(ecriture.taux) * 100)% \(taux #ecriture.taux_description\)] ;
-  return [#tarifMin #ecriture.tarif CHF/#ecriture.unite #tauxSpecial];
-}
-
-#show table.cell.where(y: 0): strong
-#set table(
-  fill: (_, y) => if calc.odd(y) { rgb(0, 0, 0, 5%) },
-)
-
-#let indexBy(ts, by: x => str(x.id)) = {
-  ts.fold((:), (acc, el) => {
-    let key = by(el)
-    let elements = acc.at(key, default: ())
-    elements.push(el)
-    acc.insert(key, elements)
-    acc
-  })
+  let tarifMin = if ecriture.tarif_min == none [] else [#ecriture.tarif_min CHF/#ecriture.tarif_min_pour h puis ]
+  let tauxSpecial = if (
+    ecriture.taux == none
+  ) [] else [\* #str(decimal(ecriture.taux) * 100)% \(taux #ecriture.taux_description\)]
+  return [#tarifMin #ecriture.tarif CHF/#ecriture.unite #tauxSpecial]
 }
 
 #for (_, ecrituresParSapeur) in indexBy(ecritures, by: el => str(el.sapeur_id)) {
   let ecriture = ecrituresParSapeur.first()
-  
+
   // Page header
   [= Décompte de frais]
   h(0.5cm)
   table(
     columns: (auto, auto, 1fr),
-    fill: rgb(0,0,0,15%),
+    fill: rgb(0, 0, 0, 15%),
     stroke: none,
-    [#ecriture.civilite], [#ecriture.sapeur], table.cell(
+    [#ecriture.civilite],
+    [#ecriture.sapeur],
+    table.cell(
       align: end,
-      [Versement sur #ecriture.iban]
-    )
+      [Versement sur #ecriture.iban],
+    ),
   )
 
   // Page content
   for (_, subEcritures) in indexBy(ecrituresParSapeur, by: el => str(el.ecriture_categorie_id)) {
     [== #subEcritures.first().categorie]
 
-    let ecritureIdentifier = (ecriture) => {
+    let ecritureIdentifier = ecriture => {
       if ecriture.intervention_id != none {
-        "inter"+str(ecriture.intervention_id)
+        "inter" + str(ecriture.intervention_id)
       } else {
         str(ecriture.id)
       }
@@ -69,37 +44,39 @@
       stroke: none,
       columns: (auto, auto, 1fr, auto, auto, auto, auto),
       align: (start, start, start, start, start, start, end),
-      table.header(
-        [Date], [Heure], [Service], [Tarif], [Qté], [Payé le], [Total]
-      ),
+      table.header([Date], [Heure], [Service], [Tarif], [Qté], [Payé le], [Total]),
       ..indexBy(subEcritures, by: ecritureIdentifier)
         .values()
         .map(ecritures => {
           let ecriture = ecritures.first()
           if ecritures.len() > 10 and ecritures.first().intervention_id != none {
             (
-              [#if ecriture.date != none { formatDate(ecriture.date) }],[#formatTime(ecriture.heure)],table.cell(colspan: 5,[#ecriture.designation]),
-              ..ecritures.map((ecriture) => {
-              (
-                table.cell(colspan: 3, []),
-                [#formatTarif(ecriture)],
-                [#ecriture.quantite],
-                [#formatDate(decomptes.at(str(ecriture.decompte_id)).date)],
-                [#ecriture.total]
-              )
-            })).flatten()
-          }
-          else{
-            (if ecriture.date != none { formatDate(ecriture.date) } else [],
+              [#if ecriture.date != none { formatDate(ecriture.date) }],
+              [#formatTime(ecriture.heure)],
+              table.cell(colspan: 5, [#ecriture.designation]),
+              ..ecritures.map(ecriture => {
+                (
+                  table.cell(colspan: 3, []),
+                  [#formatTarif(ecriture)],
+                  [#ecriture.quantite],
+                  [#formatDate(decomptes.at(str(ecriture.decompte_id)).date)],
+                  [#ecriture.total],
+                )
+              }),
+            ).flatten()
+          } else {
+            (
+              if ecriture.date != none { formatDate(ecriture.date) } else [],
               [#formatTime(ecriture.heure)],
               [#ecriture.designation],
               [#formatTarif(ecriture)],
               [#ecriture.quantite],
               [#formatDate(decomptes.at(str(ecriture.decompte_id)).date)],
-              [#ecriture.total]).flatten()
+              [#ecriture.total],
+            ).flatten()
           }
-        }
-      ).flatten()
+        })
+        .flatten(),
     )
   }
 }

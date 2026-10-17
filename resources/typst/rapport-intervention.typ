@@ -1,18 +1,5 @@
-#import "common.typ": formatDate, formatDateTime, formatDuration, formatTime, parseDateTime, presenceDuration
-#set text(font: "DM Sans", weight: "extralight")
-
-#set page(
-  "a4",
-  margin: (top: 3cm, left: 1.5cm, right: 1cm, rest: 2cm),
-  header: {
-    grid(
-      columns: (1fr, 1fr, 1fr),
-      align: (left + horizon, center + horizon, right + horizon),
-      image("logo", height: 1.5cm),
-    )
-  },
-  numbering: "1",
-)
+#import "common.typ": formatDate, formatDateTime, formatDuration, formatTime, parseDateTime, presenceDuration, template
+#show: template
 
 #let (
   intervention,
@@ -25,11 +12,6 @@
   presences,
   ecritures,
 ) = json("rapport-intervention.json")
-
-#set table(
-  fill: (_, y) => if calc.even(y) { rgb(0, 0, 0, 5%) },
-)
-
 
 = Rapport d'intervention
 
@@ -230,8 +212,6 @@
 #if params.presences or params.presencesResume {
   v(0.3cm)
   [== Présences]
-
-  show table.cell.where(y: 0): strong
 
   let totalDuration = intervention.presences.fold(duration(seconds: 0), (acc, el) => {
     acc + presenceDuration(el)

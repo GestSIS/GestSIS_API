@@ -1,28 +1,10 @@
-#import "common.typ": formatDate, formatDateTime, formatTime
-#set text(font: "DM Sans", weight: "extralight")
-
-#set page(
-  "a4",
-  margin: (top: 3cm, left: 2cm, right: 1cm, rest: 2cm),
-  header: {
-    grid(
-      columns: (1fr, 1fr, 1fr),
-      align: (left + horizon, center + horizon, right + horizon),
-      image("logo", height: 1.5cm),
-    )
-  },
-  numbering: "1 / 1",
-)
+#import "common.typ": formatDate, formatDateTime, formatTime, template
+#show: template
 
 #let (
   sapeur,
   articles,
 ) = json("articles-pour-sapeur.json")
-
-#set table(
-  fill: (_, y) => if calc.even(y) { rgb(0, 0, 0, 5%) },
-)
-
 
 = Liste articles #emph[#sapeur.prenom #sapeur.nom]
 
