@@ -6,13 +6,16 @@ use App\Domaine\Business\SapeurBusiness;
 use App\Support\Sis;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * Pour chaque SIS et au global : nombre de sapeurs par genre (civilité) et âge
  * moyen d'incorporation par genre. L'âge d'incorporation est calculé à la
  * première mutation du sapeur ; les sapeurs sans mutation ou dont la date
  * d'incorporation précède la date de naissance sont exclus de la moyenne.
- * La moyenne globale est pondérée par le nombre de sapeurs. Lecture seule.
+ * La moyenne globale est pondérée par le nombre de sapeurs.
+ * Sont exclus : les SIS dont le nom contient « jsp » ou « test », et les
+ * sapeurs ayant (ou ayant eu) un grade de jeunes sapeurs-pompiers. Lecture seule.
  */
 class DbsStatistiquesGenre extends Command
 {
@@ -31,6 +34,11 @@ class DbsStatistiquesGenre extends Command
         3 => 'Non-binaire',
     ];
 
+    /**
+     * @var array<int, string>
+     */
+    private const SIS_EXCLUS = ['jsp', 'test'];
+
     public function handle(): int
     {
         $sisDemandes = $this->option('sis');
@@ -42,10 +50,20 @@ class DbsStatistiquesGenre extends Command
             }
         }
 
+        $sisRetenus = array_values(array_filter(
+            $sisDemandes === [] ? Sis::keys() : $sisDemandes,
+            fn (string $sis): bool => !Str::contains($sis, self::SIS_EXCLUS, ignoreCase: true)
+        ));
+        if ($sisRetenus === []) {
+            $this->warn('Aucun SIS à analyser (les SIS contenant « jsp » ou « test » sont exclus)');
+
+            return self::SUCCESS;
+        }
+
         $inclureInactifs = (bool) $this->option('tous');
         $statistiquesParSis = Sis::each(
             fn (): array => $this->statistiques($inclureInactifs),
-            $sisDemandes === [] ? null : $sisDemandes
+            $sisRetenus
         );
 
         $lignes = [];
@@ -81,6 +99,13 @@ class DbsStatistiquesGenre extends Command
                 ) as age ON age.sapeur_id = s.id
                 WHERE s.type = ?
                 AND (? OR s.actif = 1)
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM grades as g
+                    LEFT JOIN grade_sapeur as gs ON gs.grade_id = g.id AND gs.sapeur_id = s.id
+                    WHERE (g.designation LIKE '%jeune%sapeur%pompier%' OR g.abreviation = 'JSP')
+                    AND (gs.id IS NOT NULL OR g.id = s.grade_id)
+                )
                 GROUP BY s.civilite_id
             ", [SapeurBusiness::TYPE_SAPEUR, $inclureInactifs]);
 
@@ -145,10 +170,15 @@ class DbsStatistiquesGenre extends Command
      */
     private function ligne(string $libelle, array $statistiques): array
     {
+        $total = array_sum(array_column($statistiques, 'nombre'));
+
         return [
             $libelle,
-            ...array_values(array_column($statistiques, 'nombre')),
-            array_sum(array_column($statistiques, 'nombre')),
+            ...array_values(array_map(
+                fn (array $genre): string => $this->nombreEtPourcentage($genre['nombre'], $total),
+                $statistiques
+            )),
+            $total,
             ...array_values(array_map(
                 fn (array $genre): string => $this->moyenne($genre['somme_ages'], $genre['nombre_avec_age']),
                 $statistiques
@@ -158,6 +188,13 @@ class DbsStatistiquesGenre extends Command
                 array_sum(array_column($statistiques, 'nombre_avec_age'))
             ),
         ];
+    }
+
+    private function nombreEtPourcentage(int $nombre, int $total): string
+    {
+        $pourcentage = $total > 0 ? number_format($nombre / $total * 100, 1, '.', '') : '0.0';
+
+        return "{$nombre} ({$pourcentage} %)";
     }
 
     private function moyenne(float $somme, int $nombre): string
