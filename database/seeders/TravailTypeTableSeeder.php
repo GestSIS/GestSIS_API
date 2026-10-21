@@ -21,7 +21,8 @@ class TravailTypeTableSeeder extends Seeder
 
         DB::table('travail_type_fonctions')->insert([
             ['travail_type_id' => 1, 'type' => 1, 'tarif' => 25, 'compte_id' => 8, 'fonction_id' => null],
-            ['travail_type_id' => 2, 'type' => 1, 'tarif' => 25, 'compte_id' => 2, 'fonction_id' => null],
+            ['travail_type_id' => 2, 'type' => 2, 'tarif' => 25, 'compte_id' => 6, 'fonction_id' => null],
+            ['travail_type_id' => 3, 'type' => 1, 'tarif' => 25, 'compte_id' => 2, 'fonction_id' => null],
         ]);
     }
 }
