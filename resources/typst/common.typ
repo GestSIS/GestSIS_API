@@ -1,5 +1,5 @@
 #let template(body, portrait: true, background: none) = {
-  set text(font: "DM Sans", weight: "extralight")
+  set text(font: "DM Sans 9pt", weight: "light")
 
   set page(
     "a4",

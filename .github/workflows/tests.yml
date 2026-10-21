@@ -51,9 +51,8 @@ jobs:
           mv typst-x86_64-unknown-linux-musl/* typst
           rm -rf typst-x86_64-unknown-linux-musl*
           cd typst/fonts
-          for f in Bold BoldItalic Italic Medium MediumItalic Regular; do
-            wget -q "https://github.com/googlefonts/dm-fonts/raw/refs/heads/main/Sans/fonts/ttf/DMSans-$f.ttf"
-          done
+          wget -q -O DMSans.ttf "https://github.com/googlefonts/dm-fonts/raw/refs/heads/main/Sans/fonts/variable/DMSans%5Bopsz,wght%5D.ttf"
+          wget -q -O DMSans-Italic.ttf "https://github.com/googlefonts/dm-fonts/raw/refs/heads/main/Sans/fonts/variable/DMSans-Italic%5Bopsz,wght%5D.ttf"
 
       - name: Wait for MySQL
         run: |

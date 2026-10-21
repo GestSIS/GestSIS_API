@@ -31,27 +31,21 @@ SHELL ["/bin/bash", "--login", "-c"]
 # install composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# install typst
-RUN set -e ; \
-    wget https://github.com/typst/typst/releases/download/v0.15.1/typst-x86_64-unknown-linux-musl.tar.xz ; \
-    tar xf typst-x86_64-unknown-linux-musl.tar.xz ; \
-    mkdir typst ; \
-    mv typst-x86_64-unknown-linux-musl/* typst ; \
-    echo "*" > typst/.gitignore ; \
-    rm -rf typst-x86_64-unknown-linux-musl* \
-    ;
-
 WORKDIR /app
 
-# Installs fonts for typst to use
-RUN mkdir typst/fonts && \
-    cd typst/fonts && \
-    wget https://github.com/googlefonts/dm-fonts/raw/refs/heads/main/Sans/fonts/ttf/DMSans-Bold.ttf \
-    https://github.com/googlefonts/dm-fonts/raw/refs/heads/main/Sans/fonts/ttf/DMSans-BoldItalic.ttf \
-    https://github.com/googlefonts/dm-fonts/raw/refs/heads/main/Sans/fonts/ttf/DMSans-Italic.ttf \
-    https://github.com/googlefonts/dm-fonts/raw/refs/heads/main/Sans/fonts/ttf/DMSans-Medium.ttf \
-    https://github.com/googlefonts/dm-fonts/raw/refs/heads/main/Sans/fonts/ttf/DMSans-MediumItalic.ttf \
-    https://github.com/googlefonts/dm-fonts/raw/refs/heads/main/Sans/fonts/ttf/DMSans-Regular.ttf \
+RUN git config --global --add safe.directory /app
+
+# install typst
+RUN set -e ; \
+    mkdir -p typst/fonts ; \
+    cd typst ; \
+    wget https://github.com/typst/typst/releases/download/v0.15.1/typst-x86_64-unknown-linux-musl.tar.xz ; \
+    tar xf typst-x86_64-unknown-linux-musl.tar.xz --strip-components=1 ; \
+    rm typst-x86_64-unknown-linux-musl.tar.xz ; \
+    echo "*" > .gitignore ; \
+    cd fonts ; \
+    wget -O DMSans.ttf https://github.com/googlefonts/dm-fonts/raw/refs/heads/main/Sans/fonts/variable/DMSans%5Bopsz,wght%5D.ttf ; \
+    wget -O DMSans-Italic.ttf https://github.com/googlefonts/dm-fonts/raw/refs/heads/main/Sans/fonts/variable/DMSans-Italic%5Bopsz,wght%5D.ttf \
     ;
 
 RUN composer global require laravel/installer
