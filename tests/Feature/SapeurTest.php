@@ -328,15 +328,13 @@ class SapeurTest extends TestCase
 
     public function testTrombinoscopeReturnsResponse()
     {
-        $this->markTestSkipped('Fiche requires Sis-Key header and Trombinoscope requires Typst PDF generation');
-
         // Create some sapeurs for the trombinoscope
         Sapeur::factory()->count(3)->create([
             'localite_id' => $this->localiteId,
             'actif' => 1,
         ]);
 
-        $response = $this->json('GET', '/api/v2/trombinoscope');
+        $response = $this->json('GET', '/api/v2/trombinoscope', [], ['Sis-Key' => 1]);
 
         // Should return a response (PDF or error structure)
         $response->assertStatus(200);
@@ -344,13 +342,11 @@ class SapeurTest extends TestCase
 
     public function testFicheReturnsResponseForSapeur()
     {
-        $this->markTestSkipped('Fiche requires Sis-Key header and Typst PDF generation');
-
         $sapeur = Sapeur::factory()->create([
             'localite_id' => $this->localiteId,
         ]);
 
-        $response = $this->json('GET', '/api/v2/sapeurs/' . $sapeur->id . '/fiche');
+        $response = $this->json('GET', '/api/v2/sapeurs/' . $sapeur->id . '/fiche', [], ['Sis-Key' => 1]);
 
         // Should return a response (PDF or error structure)
         $response->assertStatus(200);

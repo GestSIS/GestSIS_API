@@ -42,6 +42,19 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
+      - name: Install Typst and fonts
+        run: |
+          set -euo pipefail
+          wget -q https://github.com/typst/typst/releases/download/v0.15.1/typst-x86_64-unknown-linux-musl.tar.xz
+          tar xf typst-x86_64-unknown-linux-musl.tar.xz
+          mkdir -p typst/fonts
+          mv typst-x86_64-unknown-linux-musl/* typst
+          rm -rf typst-x86_64-unknown-linux-musl*
+          cd typst/fonts
+          for f in Bold BoldItalic Italic Medium MediumItalic Regular; do
+            wget -q "https://github.com/googlefonts/dm-fonts/raw/refs/heads/main/Sans/fonts/ttf/DMSans-$f.ttf"
+          done
+
       - name: Wait for MySQL
         run: |
           until mysqladmin ping -h 127.0.0.1 -P 3306 -u gestsis -ppwd --silent; do
@@ -57,3 +70,5 @@ jobs:
         run: php artisan test --compact
         env:
           DB_HOST: 127.0.0.1
+          TYPST_BIN_PATH: ${{ github.workspace }}/typst/typst
+          TYPST_FONT_PATH: ${{ github.workspace }}/typst/fonts

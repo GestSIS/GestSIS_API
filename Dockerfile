@@ -33,7 +33,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # install typst
 RUN set -e ; \
-    wget https://github.com/typst/typst/releases/download/v0.13.1/typst-x86_64-unknown-linux-musl.tar.xz ; \
+    wget https://github.com/typst/typst/releases/download/v0.15.1/typst-x86_64-unknown-linux-musl.tar.xz ; \
     tar xf typst-x86_64-unknown-linux-musl.tar.xz ; \
     mkdir typst ; \
     mv typst-x86_64-unknown-linux-musl/* typst ; \
