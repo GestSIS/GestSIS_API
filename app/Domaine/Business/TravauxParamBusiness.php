@@ -11,7 +11,7 @@ class TravauxParamBusiness
 {
     public static function ajouterType($data)
     {
-        $type = TravailType::create($data);
+        $type = TravailType::create($data)->refresh();
         $data['fonctions'] ??= [];
         $type->fonctions()->createMany($data['fonctions']);
         $type->fonctions;

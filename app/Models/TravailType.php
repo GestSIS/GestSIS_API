@@ -9,10 +9,10 @@ class TravailType extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['designation', 'actif', 'ecriture_categorie_id', 'type_unite_id'];
+    protected $fillable = ['designation', 'actif', 'ecriture_categorie_id', 'type_unite_id', 'lien_exercice', 'lien_intervention', 'lien_obligatoire'];
     protected function casts(): array
     {
-        return ['actif' => 'boolean', 'ecriture_categorie_id' => 'integer', 'type_unite_id' => 'integer'];
+        return ['actif' => 'boolean', 'ecriture_categorie_id' => 'integer', 'type_unite_id' => 'integer', 'lien_exercice' => 'boolean', 'lien_intervention' => 'boolean', 'lien_obligatoire' => 'boolean'];
     }
 
     public function fonctions()
