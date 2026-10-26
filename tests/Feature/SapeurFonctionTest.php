@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Domaine\Business\SapeurBusiness;
+use App\Domaine\Exceptions\NotReportableException;
 use App\Models\FonctionSapeur;
 use App\Models\Sapeur;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -187,6 +189,36 @@ class SapeurFonctionTest extends TestCase
         // Assert
         $response->assertStatus(404)
             ->assertJson(['message' => 'Fonction non trouvée']);
+    }
+
+    public function testRemoveFonctionBusinessThrowsNotFoundWhenFonctionAlreadyDeleted(): void
+    {
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        $fonction = FonctionSapeur::factory()->create(['sapeur_id' => $sapeur->id, 'fonction_id' => 1]);
+        $fonction->delete();
+
+        // Assert
+        $this->expectException(NotReportableException::class);
+        $this->expectExceptionMessage('Fonction non trouvée');
+
+        // Act
+        SapeurBusiness::removeFonction($sapeur->id, $fonction->id);
+    }
+
+    public function testUpdateFonctionBusinessThrowsNotFoundWhenFonctionBelongsToAnotherSapeur(): void
+    {
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        $autreSapeur = Sapeur::factory()->create();
+        $fonction = FonctionSapeur::factory()->create(['sapeur_id' => $autreSapeur->id, 'fonction_id' => 1]);
+
+        // Assert
+        $this->expectException(NotReportableException::class);
+        $this->expectExceptionMessage('Fonction non trouvée');
+
+        // Act
+        SapeurBusiness::updateFonction($sapeur->id, ['id' => $fonction->id, 'remarque' => 'test']);
     }
 
     public function testFinFonctionsSuccessfully(): void

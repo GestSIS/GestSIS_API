@@ -523,7 +523,10 @@ class SapeurBusiness
 
     public static function updateFonction(int $sapeurId, $data)
     {
-        $fonction = FonctionSapeur::where('sapeur_id', $sapeurId)->findOrFail($data['id']);
+        $fonction = FonctionSapeur::where('sapeur_id', $sapeurId)->find($data['id']);
+        if ($fonction === null) {
+            throw new NotReportableException([], 'Fonction non trouvée', status: 404);
+        }
 
         //Check duplicated fonction during period of time, sur les autres périodes de la même fonction
         $periodes = FonctionSapeur::where('sapeur_id', $sapeurId)
@@ -542,7 +545,11 @@ class SapeurBusiness
 
     public static function removeFonction(int $sapeurId, int $fonctionSapeurId)
     {
-        FonctionSapeur::where('sapeur_id', $sapeurId)->findOrFail($fonctionSapeurId)->delete();
+        $fonction = FonctionSapeur::where('sapeur_id', $sapeurId)->find($fonctionSapeurId);
+        if ($fonction === null) {
+            throw new NotReportableException([], 'Fonction non trouvée', status: 404);
+        }
+        $fonction->delete();
         $mainFonctionId = self::updateFonctionPrincipale($sapeurId);
         return ['main_fonction_id' => $mainFonctionId];
     }

@@ -126,6 +126,41 @@ class SapeurCoursTest extends TestCase
         ]);
     }
 
+    public function testAddCoursReturnsErrorWhenFonctionRemplaceeNotOwnedBySapeur(): void
+    {
+        // Arrange
+        $sapeur = Sapeur::factory()->create();
+        $autreSapeur = Sapeur::factory()->create();
+        $fonctionAutreSapeur = FonctionSapeur::factory()->create([
+            'sapeur_id' => $autreSapeur->id,
+            'fonction_id' => 2,
+            'debut' => '1958-01-01',
+            'fin' => null
+        ]);
+
+        $data = [
+            'date' => '1958-02-07',
+            'duree' => 1,
+            'date_fonction' => '1960-06-05',
+            'localite_id' => 1,
+            'cours_id' => 2,
+            'fonction_id' => 14,
+            'fonction_sapeur_id' => $fonctionAutreSapeur->id,
+        ];
+
+        // Act
+        $response = $this->json('POST', "/api/v2/sapeurs/{$sapeur->id}/cours", $data);
+
+        // Assert
+        $response->assertStatus(404)
+            ->assertJson(['message' => 'Fonction non trouvée']);
+
+        // Transaction : ni cours ni fonction créés, fonction de l'autre sapeur intacte
+        $this->assertDatabaseMissing('cours_sapeur', ['sapeur_id' => $sapeur->id]);
+        $this->assertDatabaseMissing('fonction_sapeur', ['sapeur_id' => $sapeur->id]);
+        $this->assertDatabaseHas('fonction_sapeur', ['id' => $fonctionAutreSapeur->id, 'fin' => null]);
+    }
+
     public function testAddCoursReturnsErrorWhenSapeurNotFound(): void
     {
         // Arrange
