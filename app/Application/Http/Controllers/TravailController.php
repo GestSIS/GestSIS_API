@@ -45,6 +45,8 @@ class TravailController extends Controller
             'travaux.*.sapeur_id' => 'required|integer|exists:sapeurs,id',
             'travaux.*.travail_type_id' => 'required|integer|exists:travail_types,id',
             'travaux.*.exercice_comptable_id' => 'required|integer|exists:exercice_comptables,id',
+            'travaux.*.exercice_id' => 'nullable|integer|exists:exercices,id',
+            'travaux.*.intervention_id' => 'nullable|integer|exists:interventions,id',
         ]);
 
         // Auteur
@@ -56,7 +58,13 @@ class TravailController extends Controller
 
         $hasSaisieCommunePermission = in_array('fiche_travail.saisie_commune', $perms);
 
-        $travail = TravauxBusiness::ajouter($data['travaux'], $auteurId, $hasSaisieCommunePermission);
+        $travail = TravauxBusiness::ajouter(
+            $data['travaux'],
+            $auteurId,
+            $hasSaisieCommunePermission,
+            in_array('exercice.validation', $perms),
+            in_array('intervention.validation', $perms)
+        );
         return response()->json(['data' => $travail], 201);
     }
 
@@ -68,11 +76,20 @@ class TravailController extends Controller
             'quantite' => 'required|numeric',
             'sapeur_id' => 'required|integer|exists:sapeurs,id',
             'travail_type_id' => 'required|integer|exists:travail_types,id',
+            'exercice_id' => 'nullable|integer|exists:exercices,id',
+            'intervention_id' => 'nullable|integer|exists:interventions,id',
         ]);
 
-        $sapeurId = $request->attributes->get('sapeurId', []);
+        $sapeurId = $request->attributes->get('sapeurId');
+        $perms = $request->attributes->get('permissions', []);
 
-        $travail = TravauxBusiness::modifier($travailId, $data, $sapeurId);
+        $travail = TravauxBusiness::modifier(
+            $travailId,
+            $data,
+            $sapeurId,
+            in_array('exercice.validation', $perms),
+            in_array('intervention.validation', $perms)
+        );
         return response()->json(['data' => $travail]);
     }
 
@@ -96,12 +113,18 @@ class TravailController extends Controller
 
     public function destroy(Request $request, $id)
     {
-        $sapeurId = $request->attributes->get('sapeurId', []);
+        $sapeurId = $request->attributes->get('sapeurId');
         if (!$sapeurId) {
             return response()->json(['message' => 'Permissions insuffisantes'], 403);
         }
 
-        $travail = TravauxBusiness::supprimer($id, $sapeurId);
+        $perms = $request->attributes->get('permissions', []);
+        $travail = TravauxBusiness::supprimer(
+            $id,
+            $sapeurId,
+            in_array('exercice.validation', $perms),
+            in_array('intervention.validation', $perms)
+        );
         return response()->json(null, 204);
     }
 }
