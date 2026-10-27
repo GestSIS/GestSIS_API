@@ -16,6 +16,11 @@ class Travail extends Model
         return ['statut' => 'integer', 'sapeur_id' => 'integer', 'auteur_id' => 'integer', 'travail_type_id' => 'integer', 'quantite' => 'decimal:2', 'exercice_comptable_id' => 'integer', 'exercice_id' => 'integer', 'intervention_id' => 'integer'];
     }
 
+    public function travailType()
+    {
+        return $this->belongsTo(TravailType::class);
+    }
+
     public function exercice()
     {
         return $this->belongsTo(Exercice::class);

@@ -18,6 +18,28 @@ class TravauxBusiness
     public const TRAVAIL_STATUT_INVALIDE = -1;
 
     /**
+     * Un événement ne peut être validé tant qu'une de ses fiches liées est en attente
+     * (les fiches refusées ne bloquent pas).
+     *
+     * @param string $colonne 'exercice_id' ou 'intervention_id'
+     * @throws ArrayException
+     */
+    public static function controlerAucuneEnAttente(string $colonne, int $evenementId): void
+    {
+        if (Travail::where($colonne, $evenementId)->where('statut', self::TRAVAIL_STATUT_SAISI)->exists()) {
+            throw new ArrayException([], 'Certaines fiches de travail liées doivent être validées au préalable');
+        }
+    }
+
+    /**
+     * @param string $colonne 'exercice_id' ou 'intervention_id'
+     */
+    public static function supprimerLies(string $colonne, int $evenementId): void
+    {
+        Travail::where($colonne, $evenementId)->delete();
+    }
+
+    /**
      * @param array<int, array<string, mixed>> $travaux
      * @return array<int, Travail>
      */
@@ -59,7 +81,13 @@ class TravauxBusiness
 
         // Le nouvel événement lié doit lui aussi accepter la fiche
         $data = self::controlerLien($data, TravailType::findOrFail($data['travail_type_id']));
-        self::statutEvenement($data['exercice_id'], $data['intervention_id'], $hasValidationExercice, $hasValidationIntervention);
+        $nouvelEvenementValide = self::statutEvenement($data['exercice_id'], $data['intervention_id'], $hasValidationExercice, $hasValidationIntervention);
+
+        // Changer de lien aligne la fiche sur son nouvel événement, comme à la création
+        $lienChange = $data['exercice_id'] !== $travail->exercice_id || $data['intervention_id'] !== $travail->intervention_id;
+        if ($lienChange) {
+            $data['statut'] = $nouvelEvenementValide === true ? self::TRAVAIL_STATUT_VALIDE : self::TRAVAIL_STATUT_SAISI;
+        }
 
         $travail->fill($data);
         $travail->save();
@@ -77,6 +105,49 @@ class TravauxBusiness
 
         Travail::whereId($travailId)->delete();
         return 'ok';
+    }
+
+    /**
+     * Une fiche liée est validée ou refusée par le validateur des fiches de travail ou par
+     * celui de son événement ; une fiche sans lien par le validateur des fiches de travail.
+     */
+    private static function controlerDroitReview(Travail $travail, bool $hasValidationFicheTravail, bool $hasValidationExercice, bool $hasValidationIntervention): void
+    {
+        $hasDroit = match (true) {
+            $travail->exercice_id !== null => $hasValidationFicheTravail || $hasValidationExercice,
+            $travail->intervention_id !== null => $hasValidationFicheTravail || $hasValidationIntervention,
+            default => $hasValidationFicheTravail,
+        };
+
+        if (!$hasDroit) {
+            throw new ArrayException([], 'Permissions insuffisantes');
+        }
+    }
+
+    /**
+     * Refuse l'examen d'une fiche dont l'événement est imputé ou annulé.
+     *
+     * @return bool true si l'événement lié est validé
+     * @throws ArrayException
+     */
+    private static function evenementValide(Travail $travail): bool
+    {
+        if ($travail->exercice_id !== null) {
+            $statut = Exercice::findOrFail($travail->exercice_id)->statut;
+            if ($statut === ExerciceBusiness::EXERCICE_STATUT_ANNULE) {
+                throw new ArrayException([], 'Impossible de modifier les fiches d\'un exercice annulé');
+            }
+            self::controlerStatut($statut === ExerciceBusiness::EXERCICE_STATUT_IMPUTE, false, true);
+            return $statut === ExerciceBusiness::EXERCICE_STATUT_VALIDE;
+        }
+
+        if ($travail->intervention_id !== null) {
+            $statut = Intervention::findOrFail($travail->intervention_id)->statut;
+            self::controlerStatut($statut === InterventionBusiness::INTERVENTION_STATUT_IMPUTE, false, true);
+            return $statut === InterventionBusiness::INTERVENTION_STATUT_VALIDE;
+        }
+
+        return false;
     }
 
     /**
@@ -180,12 +251,15 @@ class TravauxBusiness
         return $estValide;
     }
 
-    public static function review($travailId, $accepte, $justification, $quantite)
+    public static function review(int $travailId, bool $accepte, string $justification, ?float $quantite, bool $hasValidationFicheTravail, bool $hasValidationExercice, bool $hasValidationIntervention): Travail
     {
         $travail = Travail::find($travailId);
         if ($travail === null) {
             throw new ArrayException([], 'Travail introuvable');
         }
+
+        self::controlerDroitReview($travail, $hasValidationFicheTravail, $hasValidationExercice, $hasValidationIntervention);
+        self::evenementValide($travail);
 
         if ($travail->statut === self::TRAVAIL_STATUT_IMPUTE) {
             throw new ArrayException([], 'Travail déjà imputé');
@@ -200,11 +274,18 @@ class TravauxBusiness
         return $travail;
     }
 
-    public static function cancelReview($travailId)
+    public static function cancelReview(int $travailId, bool $hasValidationFicheTravail, bool $hasValidationExercice, bool $hasValidationIntervention): Travail
     {
         $travail = Travail::find($travailId);
         if ($travail === null) {
             throw new ArrayException([], 'Travail introuvable');
+        }
+
+        self::controlerDroitReview($travail, $hasValidationFicheTravail, $hasValidationExercice, $hasValidationIntervention);
+
+        // Sur un événement validé, une fiche en saisie ne serait plus jamais imputée
+        if (self::evenementValide($travail)) {
+            throw new ArrayException([], 'Impossible de remettre en saisie une fiche d\'un événement validé');
         }
 
         if ($travail->statut === self::TRAVAIL_STATUT_IMPUTE) {

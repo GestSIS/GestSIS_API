@@ -17,7 +17,7 @@ class MesTravauxController extends Controller
             return response()->json(['message' => 'Votre compte n\'est pas lié à un sapeur'], 422);
         }
 
-        $data = Travail::where([
+        $data = Travail::with('intervention:id,date_debut,objet,statut')->where([
             ['sapeur_id', '=', $sapeurId],
             ['exercice_comptable_id', '=', $exerciceComptableId]
         ])->get();

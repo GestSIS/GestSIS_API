@@ -368,6 +368,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         Route::get('exercices/{id}/liste-presence', [ExerciceController::class, 'listePresence']);
         Route::get('exercices/{id}/liste-appel', [ExerciceController::class, 'listeAppel']);
+        Route::get('exercices/{id}/travaux', [TravailController::class, 'parExercice'])->name('api.v2.exercices.travaux');
 
         Route::get('exercices-absences/{exerciceComptableId}', [ExerciceController::class, 'absences']);
 
@@ -417,7 +418,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Fiche de travail
-    Route::group(['middleware' => 'jwtTokenRole:fiche_travail.validation'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:fiche_travail.validation,exercice.validation,intervention.validation'], function () {
         Route::post('travaux/{id}/review', [TravailController::class, 'review'])->name('api.v2.travaux.review');
         Route::delete('travaux/{id}/review', [TravailController::class, 'cancelReview'])->name('api.v2.travaux.cancel-review');
     });
@@ -492,6 +493,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         // Impressions interventions
         Route::get('interventions/{id}/rapport', [InterventionController::class, 'rapport'])->name('api.v2.interventions.rapport');
+        Route::get('interventions/{id}/travaux', [TravailController::class, 'parIntervention'])->name('api.v2.interventions.travaux');
 
         // Statistiques véhicule et matériel
         Route::get('statistiques/{id}/materiel', [InterventionStatistiqueController::class, 'materiel']);

@@ -205,6 +205,7 @@ class InterventionBusiness
     {
         $intervention = Intervention::findOrFail($interventionId);
         if ($intervention->statut === self::INTERVENTION_STATUT_SAISI) {
+            TravauxBusiness::controlerAucuneEnAttente('intervention_id', $intervention->id);
             $intervention->update(['statut' => self::INTERVENTION_STATUT_VALIDE]);
             return $intervention->statut;
         }
@@ -252,6 +253,7 @@ class InterventionBusiness
         Appel::where('intervention_id', '=', $interventionId)->delete();
         Phase::where('intervention_id', '=', $interventionId)->delete();
         Jalon::where('intervention_id', '=', $interventionId)->delete();
+        TravauxBusiness::supprimerLies('intervention_id', $interventionId);
         Intervention::destroy($interventionId);
         return true;
     }

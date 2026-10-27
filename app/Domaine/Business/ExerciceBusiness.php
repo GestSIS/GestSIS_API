@@ -148,6 +148,7 @@ class ExerciceBusiness
 
         ExerciceSapeur::where('exercice_id', '=', $exerciceId)->delete();
         HeureExercice::where('exercice_id', '=', $exerciceId)->delete();
+        TravauxBusiness::supprimerLies('exercice_id', $exerciceId);
         Sms::where('exercice_id', '=', $exerciceId)->delete();
         Exercice::whereId($exerciceId)->delete();
     }
@@ -175,6 +176,8 @@ class ExerciceBusiness
         }
 
         // TODO: Valider les absences amendées ?? Non
+
+        TravauxBusiness::controlerAucuneEnAttente('exercice_id', $exerciceId);
 
         return self::updateExerciceById($exerciceId, [
             "statut" => self::EXERCICE_STATUT_VALIDE

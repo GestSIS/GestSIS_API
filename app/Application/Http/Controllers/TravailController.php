@@ -20,7 +20,7 @@ class TravailController extends Controller
             return response()->json(['message' => 'Permissions insuffisantes'], 403);
         }
 
-        $query = Travail::where('exercice_comptable_id', '=', $exerciceComptableId);
+        $query = Travail::with('intervention:id,date_debut,objet,statut')->where('exercice_comptable_id', '=', $exerciceComptableId);
         if ($withEcritures) {
             $query = $query->with('ecritures');
         }
@@ -32,6 +32,24 @@ class TravailController extends Controller
         }
         $travaux = $query->get();
 
+        return response()->json(['data' => $travaux]);
+    }
+
+    /**
+     * Fiches de travail liées à un exercice.
+     */
+    public function parExercice(int $id)
+    {
+        $travaux = Travail::with('travailType')->where('exercice_id', $id)->get();
+        return response()->json(['data' => $travaux]);
+    }
+
+    /**
+     * Fiches de travail liées à une intervention.
+     */
+    public function parIntervention(int $id)
+    {
+        $travaux = Travail::with('travailType')->where('intervention_id', $id)->get();
         return response()->json(['data' => $travaux]);
     }
 
@@ -101,13 +119,28 @@ class TravailController extends Controller
             'quantite' => 'numeric|required',
         ]);
 
-        $travail = TravauxBusiness::review($travailId, $data['accepte'], $data['justification'] ?? '', $data['quantite']);
+        $perms = $request->attributes->get('permissions', []);
+        $travail = TravauxBusiness::review(
+            $travailId,
+            $data['accepte'],
+            $data['justification'] ?? '',
+            $data['quantite'],
+            in_array('fiche_travail.validation', $perms),
+            in_array('exercice.validation', $perms),
+            in_array('intervention.validation', $perms)
+        );
         return response()->json(['data' => $travail]);
     }
 
     public function cancelReview(Request $request, $travailId)
     {
-        $travail = TravauxBusiness::cancelReview($travailId);
+        $perms = $request->attributes->get('permissions', []);
+        $travail = TravauxBusiness::cancelReview(
+            $travailId,
+            in_array('fiche_travail.validation', $perms),
+            in_array('exercice.validation', $perms),
+            in_array('intervention.validation', $perms)
+        );
         return response()->json(['data' => $travail]);
     }
 

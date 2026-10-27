@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Application\Http\Controllers\MesTravauxController;
+use App\Application\Http\Controllers\TravailController;
 use App\Domaine\Business\ExerciceBusiness;
 use App\Domaine\Business\InterventionBusiness;
 use App\Domaine\Business\TravauxBusiness;
@@ -13,6 +15,7 @@ use App\Models\Intervention;
 use App\Models\Sapeur;
 use App\Models\Travail;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
 class TravailLienTest extends TestCase
@@ -230,6 +233,209 @@ class TravailLienTest extends TestCase
         TravauxBusiness::supprimer($travail->id, $this->autreSapeurId, true);
 
         $this->assertNull(Travail::find($travail->id));
+    }
+
+    public function testReviewFicheLieeAvecDroitFicheAccepte()
+    {
+        $travail = $this->ajouter(['exercice_id' => $this->exercice->id]);
+
+        TravauxBusiness::review($travail->id, true, '', 2, true, false, false);
+
+        $this->assertSame(TravauxBusiness::TRAVAIL_STATUT_VALIDE, $travail->fresh()->statut);
+    }
+
+    public function testReviewFicheLieeSansAucunDroitRefuse()
+    {
+        $travail = $this->ajouter(['exercice_id' => $this->exercice->id]);
+
+        $this->expectException(ArrayException::class);
+        TravauxBusiness::review($travail->id, true, '', 2, false, false, true);
+    }
+
+    public function testReviewSurEvenementValideAvecDroitFicheAccepte()
+    {
+        $travail = $this->ajouter(['exercice_id' => $this->exercice->id]);
+        TravauxBusiness::review($travail->id, false, 'Doublon', 2, true, false, false);
+        $this->exercice->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_VALIDE]);
+
+        TravauxBusiness::review($travail->id, true, '', 2, true, false, false);
+
+        $this->assertSame(TravauxBusiness::TRAVAIL_STATUT_VALIDE, $travail->fresh()->statut);
+    }
+
+    public function testReviewFicheLieeAvecDroitEvenementAccepte()
+    {
+        $travail = $this->ajouter(['intervention_id' => $this->intervention->id]);
+
+        TravauxBusiness::review($travail->id, false, 'Doublon', 2, false, false, true);
+
+        $this->assertSame(TravauxBusiness::TRAVAIL_STATUT_INVALIDE, $travail->fresh()->statut);
+        $this->assertSame('Doublon', $travail->fresh()->justification);
+    }
+
+    public function testReviewFicheLibreAvecDroitFicheAccepte()
+    {
+        $travail = $this->ajouter(['travail_type_id' => $this->typeLibreId]);
+
+        TravauxBusiness::review($travail->id, true, '', 2, true, false, false);
+
+        $this->assertSame(TravauxBusiness::TRAVAIL_STATUT_VALIDE, $travail->fresh()->statut);
+    }
+
+    public function testReviewFicheLibreSansDroitFicheRefuse()
+    {
+        $travail = $this->ajouter(['travail_type_id' => $this->typeLibreId]);
+
+        $this->expectException(ArrayException::class);
+        TravauxBusiness::review($travail->id, true, '', 2, false, true, true);
+    }
+
+    public function testCancelReviewFicheLieeAvecDroitEvenement()
+    {
+        $travail = $this->ajouter(['exercice_id' => $this->exercice->id]);
+        TravauxBusiness::review($travail->id, true, '', 2, false, true, false);
+
+        TravauxBusiness::cancelReview($travail->id, false, true, false);
+
+        $this->assertSame(TravauxBusiness::TRAVAIL_STATUT_SAISI, $travail->fresh()->statut);
+    }
+
+    public function testCancelReviewFicheLieeAvecDroitFicheAccepte()
+    {
+        $travail = $this->ajouter(['exercice_id' => $this->exercice->id]);
+        TravauxBusiness::review($travail->id, true, '', 2, false, true, false);
+
+        TravauxBusiness::cancelReview($travail->id, true, false, false);
+
+        $this->assertSame(TravauxBusiness::TRAVAIL_STATUT_SAISI, $travail->fresh()->statut);
+    }
+
+    public function testCancelReviewFicheLieeSansAucunDroitRefuse()
+    {
+        $travail = $this->ajouter(['exercice_id' => $this->exercice->id]);
+        TravauxBusiness::review($travail->id, true, '', 2, false, true, false);
+
+        $this->expectException(ArrayException::class);
+        TravauxBusiness::cancelReview($travail->id, false, false, true);
+    }
+
+    public function testModifierDeplacementVersEvenementValideValideLaFiche()
+    {
+        $travail = $this->ajouter(['exercice_id' => $this->exercice->id]);
+        $this->intervention->update(['statut' => InterventionBusiness::INTERVENTION_STATUT_VALIDE]);
+
+        TravauxBusiness::modifier($travail->id, $this->travail(['intervention_id' => $this->intervention->id]), $this->sapeurId, false, true);
+
+        $this->assertSame(TravauxBusiness::TRAVAIL_STATUT_VALIDE, $travail->fresh()->statut);
+    }
+
+    public function testModifierDeplacementVersEvenementSaisiRemetEnSaisie()
+    {
+        $this->exercice->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_VALIDE]);
+        $travail = $this->ajouter(['exercice_id' => $this->exercice->id], true);
+
+        TravauxBusiness::modifier($travail->id, $this->travail(['intervention_id' => $this->intervention->id]), $this->sapeurId, true);
+
+        $this->assertSame(TravauxBusiness::TRAVAIL_STATUT_SAISI, $travail->fresh()->statut);
+    }
+
+    public function testModifierDetacherFicheValideeRemetEnSaisie()
+    {
+        $this->exercice->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_VALIDE]);
+        $travail = $this->ajouter(['travail_type_id' => $this->typeExerciceId, 'exercice_id' => $this->exercice->id], true);
+
+        TravauxBusiness::modifier($travail->id, $this->travail(['travail_type_id' => $this->typeExerciceId]), $this->sapeurId, true);
+
+        $this->assertNull($travail->fresh()->exercice_id);
+        $this->assertSame(TravauxBusiness::TRAVAIL_STATUT_SAISI, $travail->fresh()->statut);
+    }
+
+    public function testModifierSansChangerLienGardeLeStatut()
+    {
+        $this->exercice->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_VALIDE]);
+        $travail = $this->ajouter(['exercice_id' => $this->exercice->id], true);
+
+        TravauxBusiness::modifier($travail->id, $this->travail(['exercice_id' => $this->exercice->id, 'quantite' => 4]), $this->sapeurId, true);
+
+        $this->assertSame(TravauxBusiness::TRAVAIL_STATUT_VALIDE, $travail->fresh()->statut);
+    }
+
+    public function testReviewFicheLieeEvenementImputeRefuse()
+    {
+        $travail = $this->ajouter(['exercice_id' => $this->exercice->id]);
+        $this->exercice->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_IMPUTE]);
+
+        $this->expectException(ArrayException::class);
+        TravauxBusiness::review($travail->id, true, '', 2, false, true, false);
+    }
+
+    public function testReviewFicheLieeExerciceAnnuleRefuse()
+    {
+        $travail = $this->ajouter(['exercice_id' => $this->exercice->id]);
+        $this->exercice->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_ANNULE]);
+
+        $this->expectException(ArrayException::class);
+        TravauxBusiness::review($travail->id, true, '', 2, false, true, false);
+    }
+
+    public function testCancelReviewSurEvenementValideRefuse()
+    {
+        $this->exercice->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_VALIDE]);
+        $travail = $this->ajouter(['exercice_id' => $this->exercice->id], true);
+
+        $this->expectException(ArrayException::class);
+        TravauxBusiness::cancelReview($travail->id, false, true, false);
+    }
+
+    public function testListeFichesExercice()
+    {
+        $liee = $this->ajouter(['exercice_id' => $this->exercice->id]);
+        $this->ajouter(['intervention_id' => $this->intervention->id]);
+        $this->ajouter(['travail_type_id' => $this->typeLibreId]);
+
+        $response = $this->json('GET', "/api/v2/exercices/{$this->exercice->id}/travaux");
+
+        $response->assertStatus(200);
+        $this->assertSame([$liee->id], $response->collect('data')->pluck('id')->all());
+        $this->assertSame('Type test', $response->json('data.0.travail_type.designation'));
+    }
+
+    public function testListeFichesIntervention()
+    {
+        $this->ajouter(['exercice_id' => $this->exercice->id]);
+        $liee = $this->ajouter(['intervention_id' => $this->intervention->id]);
+
+        $response = $this->json('GET', "/api/v2/interventions/{$this->intervention->id}/travaux");
+
+        $response->assertStatus(200);
+        $this->assertSame([$liee->id], $response->collect('data')->pluck('id')->all());
+        $this->assertSame('Type test', $response->json('data.0.travail_type.designation'));
+    }
+
+    public function testIndexChargeLInterventionLiee()
+    {
+        $liee = $this->ajouter(['intervention_id' => $this->intervention->id]);
+        $request = Request::create('/api/v2/travaux');
+        $request->attributes->set('permissions', ['fiche_travail.lecture']);
+
+        $response = app(TravailController::class)->index($request, $this->intervention->exercice_comptable_id);
+
+        $travail = collect($response->getData(true)['data'])->firstWhere('id', $liee->id);
+        $this->assertSame($this->intervention->objet, $travail['intervention']['objet']);
+        $this->assertArrayHasKey('date_debut', $travail['intervention']);
+        $this->assertSame(InterventionBusiness::INTERVENTION_STATUT_SAISI, $travail['intervention']['statut']);
+    }
+
+    public function testMesTravauxChargeLInterventionLiee()
+    {
+        $liee = $this->ajouter(['intervention_id' => $this->intervention->id]);
+        $request = Request::create('/api/v2/mes-travaux');
+        $request->attributes->set('sapeurId', $this->sapeurId);
+
+        $response = app(MesTravauxController::class)->index($request, $this->intervention->exercice_comptable_id);
+
+        $travail = collect($response->getData(true)['data'])->firstWhere('id', $liee->id);
+        $this->assertSame($this->intervention->objet, $travail['intervention']['objet']);
     }
 
     public function testFicheSansLienInchangee()

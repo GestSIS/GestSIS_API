@@ -28,6 +28,7 @@ use App\Models\Intervention;
 use App\Models\Sapeur;
 use App\Models\Travail;
 use App\Models\TravailType;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class ImputationBusiness
@@ -607,6 +608,7 @@ class ImputationBusiness
             // Suppression des écritures
             Ecriture::where('exercice_id', $exerciceId)
                 ->delete();
+            self::annulerImputationTravauxLies('exercice_id', $exerciceId);
 
             // Modification du statut de l'exercice
             Exercice::whereId($exerciceId)->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_VALIDE]);
@@ -635,6 +637,7 @@ class ImputationBusiness
             // Suppression des écritures
             Ecriture::where('intervention_id', $interventionId)
                 ->delete();
+            self::annulerImputationTravauxLies('intervention_id', $interventionId);
 
             // Modification du statut de l'intervention
             Intervention::whereId($interventionId)->update(['statut' => InterventionBusiness::INTERVENTION_STATUT_VALIDE]);
@@ -696,6 +699,7 @@ class ImputationBusiness
 
         DB::transaction(function () use ($interventionId, $ecritures) {
             self::insererEcritures($ecritures);
+            self::imputerTravauxLies('intervention_id', $interventionId);
             Intervention::whereId($interventionId)->update(['statut' => InterventionBusiness::INTERVENTION_STATUT_IMPUTE]);
         });
         return InterventionBusiness::INTERVENTION_STATUT_IMPUTE;
@@ -1137,6 +1141,8 @@ class ImputationBusiness
             $heures = HeureExercice::where('exercice_id', $exerciceId)->get();
             self::imputerExerciceHeureSup($exercice, $heures, $designation);
 
+            self::imputerTravauxLies('exercice_id', $exerciceId);
+
             // Changer le statut de l'exercice
             Exercice::whereId($exerciceId)->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_IMPUTE]);
         });
@@ -1408,8 +1414,11 @@ class ImputationBusiness
      */
     public static function imputerTravaux($ids)
     {
+        // Les fiches liées à un événement s'imputent uniquement avec celui-ci
         $travaux = Travail::whereIn('id', $ids)
             ->where('statut', TravauxBusiness::TRAVAIL_STATUT_VALIDE)
+            ->whereNull('exercice_id')
+            ->whereNull('intervention_id')
             ->get();
 
         if ($travaux->isEmpty()) {
@@ -1422,12 +1431,32 @@ class ImputationBusiness
             self::controlerStatusExerciceComptable($exerciceComptableId);
         }
 
+        $ecritures = self::ecrituresTravaux($travaux);
+
+        DB::transaction(function () use ($travaux, $ecritures) {
+            self::insererEcritures($ecritures);
+
+            Travail::whereIn('id', $travaux->pluck('id'))
+                ->update(['statut' => TravauxBusiness::TRAVAIL_STATUT_IMPUTE]);
+        });
+
+        return $ecritures;
+    }
+
+    /**
+     * Écritures d'une liste de fiches : une par ligne du type de travail (lignes cumulées).
+     *
+     * @param array<string, int> $lienEvenement colonne de l'événement à renseigner sur chaque écriture, ex. ['exercice_id' => 12]
+     * @return array<int, array<string, mixed>>
+     */
+    private static function ecrituresTravaux(Collection $travaux, array $lienEvenement = []): array
+    {
         // Chargement des types de travaux - charger uniquement les types nécessaires
         $travailTypeIds = $travaux->pluck('travail_type_id')->unique();
-        $types = TravailType::with(['fonctions'])
+        $indexedTypes = TravailType::with(['fonctions'])
             ->whereIn('id', $travailTypeIds)
-            ->get();
-        $indexedTypes = $types->keyBy('id');
+            ->get()
+            ->keyBy('id');
 
         $ecritures = [];
 
@@ -1454,19 +1483,42 @@ class ImputationBusiness
                     'heure' => '00:00:00',
                     'module' => self::ECRITURE_MODULE_FICHE_TRAVAIL,
                     'type' => $fonction->type,
+                    ...$lienEvenement,
                 ];
             }
         }
 
-        DB::transaction(function () use ($ids, $ecritures) {
-            self::insererEcritures($ecritures);
-
-            Travail::whereIn('id', $ids)
-                ->where('statut', TravauxBusiness::TRAVAIL_STATUT_VALIDE)
-                ->update(['statut' => TravauxBusiness::TRAVAIL_STATUT_IMPUTE]);
-        });
-
         return $ecritures;
+    }
+
+    /**
+     * Imputation en cascade des fiches validées d'un événement, dans la transaction de l'événement.
+     *
+     * @param string $colonne 'exercice_id' ou 'intervention_id'
+     */
+    private static function imputerTravauxLies(string $colonne, int $evenementId): void
+    {
+        $travaux = Travail::where($colonne, $evenementId)
+            ->where('statut', TravauxBusiness::TRAVAIL_STATUT_VALIDE)
+            ->get();
+
+        if ($travaux->isEmpty()) {
+            return;
+        }
+
+        self::insererEcritures(self::ecrituresTravaux($travaux, [$colonne => $evenementId]));
+        Travail::whereIn('id', $travaux->pluck('id'))
+            ->update(['statut' => TravauxBusiness::TRAVAIL_STATUT_IMPUTE]);
+    }
+
+    /**
+     * @param string $colonne 'exercice_id' ou 'intervention_id'
+     */
+    private static function annulerImputationTravauxLies(string $colonne, int $evenementId): void
+    {
+        Travail::where($colonne, $evenementId)
+            ->where('statut', TravauxBusiness::TRAVAIL_STATUT_IMPUTE)
+            ->update(['statut' => TravauxBusiness::TRAVAIL_STATUT_VALIDE]);
     }
 
     public static function annulerImputationTravail($travailId)
@@ -1475,6 +1527,10 @@ class ImputationBusiness
 
         if (!$travail) {
             throw new ArrayException([], 'Travail introuvable');
+        }
+
+        if ($travail->exercice_id !== null || $travail->intervention_id !== null) {
+            throw new ArrayException([], "Fiche imputée avec son événement, annulez l'imputation de l'événement");
         }
 
         self::controlerStatusExerciceComptable($travail->exercice_comptable_id);
