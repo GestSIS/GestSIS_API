@@ -213,6 +213,24 @@ class InterventionBusiness
     }
 
     /**
+     * Annule la validation d'une intervention (retour à Saisi), pour corriger une erreur.
+     * Seule une intervention validée et pas encore imputée peut être dévalidée ; ses fiches
+     * de travail liées ne sont pas modifiées.
+     *
+     * @throws ArrayException
+     */
+    public static function devaliderInterventionById(int $interventionId): int
+    {
+        $intervention = Intervention::findOrFail($interventionId);
+        if ($intervention->statut !== self::INTERVENTION_STATUT_VALIDE) {
+            throw new ArrayException([], "Impossible d'annuler la validation de l'intervention.");
+        }
+
+        $intervention->update(['statut' => self::INTERVENTION_STATUT_SAISI]);
+        return self::INTERVENTION_STATUT_SAISI;
+    }
+
+    /**
      * Updates a intervention.
      *
      * @param int

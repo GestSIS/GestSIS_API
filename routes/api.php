@@ -542,6 +542,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
     Route::group(['middleware' => 'jwtTokenRole:intervention.validation'], function () {
         Route::post('interventions/{id}/valider', [InterventionController::class, 'valider'])->name('api.v2.interventions.valider');
+        Route::post('interventions/{id}/devalider', [InterventionController::class, 'devalider'])->name('api.v2.interventions.devalider');
     });
     Route::group(['middleware' => 'jwtTokenRole:intervention.lecture,intervention.modification,comptabilite.lecture'], function () {
         Route::apiResource('phase-types', PhaseTypeController::class)->only(['index']);

@@ -212,6 +212,12 @@ class InterventionController extends Controller
         return response()->json(['data' => $statut]);
     }
 
+    public function devalider(int $id)
+    {
+        $statut = InterventionBusiness::devaliderInterventionById($id);
+        return response()->json(['data' => $statut]);
+    }
+
     public function rapport(Request $request, $id)
     {
         $request->merge([
