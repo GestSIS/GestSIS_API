@@ -78,3 +78,10 @@
     acc
   })
 }
+
+// Libellé d'une écriture : désignation, suivie du complément s'il est renseigné
+// (nature du travail d'une fiche liée, type d'excuse d'une amende)
+#let formatService(ecriture) = {
+  let complement = ecriture.at("complement", default: none)
+  if complement == none or complement == "" [#ecriture.designation] else [#ecriture.designation — #complement]
+}

@@ -1,4 +1,4 @@
-#import "common.typ": formatDate, formatTime, indexBy, template
+#import "common.typ": formatDate, formatService, formatTime, indexBy, template
 #show: template
 
 #let (decompte, decomptes, sapeurs, ecritures) = json("decompte-par-sapeur.json")
@@ -53,7 +53,7 @@
             (
               [#if ecriture.date != none { formatDate(ecriture.date) }],
               [#formatTime(ecriture.heure)],
-              table.cell(colspan: 5, [#ecriture.designation]),
+              table.cell(colspan: 5, formatService(ecriture)),
               ..ecritures.map(ecriture => {
                 (
                   table.cell(colspan: 3, []),
@@ -68,7 +68,7 @@
             (
               if ecriture.date != none { formatDate(ecriture.date) } else [],
               [#formatTime(ecriture.heure)],
-              [#ecriture.designation],
+              formatService(ecriture),
               [#formatTarif(ecriture)],
               [#ecriture.quantite],
               [#formatDate(decomptes.at(str(ecriture.decompte_id)).date)],

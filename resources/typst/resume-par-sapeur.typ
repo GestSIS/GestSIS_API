@@ -1,4 +1,4 @@
-#import "common.typ": formatDate, formatTime, indexBy, template
+#import "common.typ": formatDate, formatService, formatTime, indexBy, template
 #show: body => template(
   portrait: false,
   background: none, //TODO: idée pour provisoire : rotate(-40deg)[#text(fill: red, size: 100pt)[Provisoire]],
@@ -68,7 +68,7 @@
           (
             if ecriture.date != none { formatDate(ecriture.date) },
             formatTime(ecriture.heure),
-            ecriture.designation,
+            formatService(ecriture),
             formatTarif(ecriture),
             ecriture.quantite,
             formatDate(decomptes.at(str(ecriture.decompte_id)).date),
