@@ -11,7 +11,9 @@ use App\Domaine\Business\TravauxParamBusiness;
 use App\Domaine\Exceptions\ArrayException;
 use App\Models\Exercice;
 use App\Models\ExerciceComptable;
+use App\Models\ExerciceSapeur;
 use App\Models\Intervention;
+use App\Models\InterventionSapeur;
 use App\Models\Sapeur;
 use App\Models\Travail;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -436,6 +438,69 @@ class TravailLienTest extends TestCase
 
         $travail = collect($response->getData(true)['data'])->firstWhere('id', $liee->id);
         $this->assertSame($this->intervention->objet, $travail['intervention']['objet']);
+    }
+
+    /**
+     * @param array<int, string> $permissions
+     * @return array{interventions: array<int, array<string, mixed>>, exercices: array<int, array<string, mixed>>}
+     */
+    private function evenements(array $permissions, ?int $sapeurId, int $exerciceComptableId): array
+    {
+        $request = Request::create('/api/v2/travaux/evenements');
+        $request->attributes->set('permissions', $permissions);
+        $request->attributes->set('sapeurId', $sapeurId);
+
+        return app(TravailController::class)->evenements($request, $exerciceComptableId)->getData(true)['data'];
+    }
+
+    public function testEvenementsAvecDroitsLectureRenvoieTousLesEvenementsOuverts()
+    {
+        $exerciceComptableId = ExerciceComptable::create([
+            'annee' => 2095, 'designation' => 'ec evenements', 'debut' => '2095-01-01', 'fin' => '2095-12-31', 'boucle' => false,
+        ])->id;
+        $saisi = Intervention::factory()->create(['statut' => InterventionBusiness::INTERVENTION_STATUT_SAISI, 'exercice_comptable_id' => $exerciceComptableId]);
+        $validee = Intervention::factory()->create(['statut' => InterventionBusiness::INTERVENTION_STATUT_VALIDE, 'exercice_comptable_id' => $exerciceComptableId]);
+        Intervention::factory()->create(['statut' => InterventionBusiness::INTERVENTION_STATUT_IMPUTE, 'exercice_comptable_id' => $exerciceComptableId]);
+        $exercice = Exercice::factory()->create(['statut' => ExerciceBusiness::EXERCICE_STATUT_VALIDE, 'exercice_comptable_id' => $exerciceComptableId]);
+        Exercice::factory()->create(['statut' => ExerciceBusiness::EXERCICE_STATUT_ANNULE, 'exercice_comptable_id' => $exerciceComptableId]);
+        Exercice::factory()->create(['statut' => ExerciceBusiness::EXERCICE_STATUT_IMPUTE, 'exercice_comptable_id' => $exerciceComptableId]);
+
+        $data = $this->evenements(['intervention.lecture', 'exercice.lecture'], null, $exerciceComptableId);
+
+        $this->assertEqualsCanonicalizing([$saisi->id, $validee->id], array_column($data['interventions'], 'id'));
+        $this->assertSame([$exercice->id], array_column($data['exercices'], 'id'));
+        $this->assertSame(InterventionBusiness::INTERVENTION_STATUT_VALIDE, collect($data['interventions'])->firstWhere('id', $validee->id)['statut']);
+        $this->assertArrayHasKey('objet', $data['interventions'][0]);
+        $this->assertArrayHasKey('designation', $data['exercices'][0]);
+    }
+
+    public function testEvenementsSansDroitLectureRenvoieSeulementCeuxDuSapeur()
+    {
+        $exerciceComptableId = ExerciceComptable::create([
+            'annee' => 2094, 'designation' => 'ec evenements sapeur', 'debut' => '2094-01-01', 'fin' => '2094-12-31', 'boucle' => false,
+        ])->id;
+        $presente = Intervention::factory()->create(['statut' => InterventionBusiness::INTERVENTION_STATUT_SAISI, 'exercice_comptable_id' => $exerciceComptableId]);
+        Intervention::factory()->create(['statut' => InterventionBusiness::INTERVENTION_STATUT_SAISI, 'exercice_comptable_id' => $exerciceComptableId]);
+        $presence = new InterventionSapeur(['piquet' => false, 'debut' => '2094-03-01 18:00:00', 'fin' => '2094-03-01 20:00:00']);
+        $presence->intervention_id = $presente->id;
+        $presence->sapeur_id = $this->sapeurId;
+        $presence->save();
+        $convoque = Exercice::factory()->create(['statut' => ExerciceBusiness::EXERCICE_STATUT_SAISI, 'exercice_comptable_id' => $exerciceComptableId]);
+        Exercice::factory()->create(['statut' => ExerciceBusiness::EXERCICE_STATUT_SAISI, 'exercice_comptable_id' => $exerciceComptableId]);
+        ExerciceSapeur::create(['exercice_id' => $convoque->id, 'sapeur_id' => $this->sapeurId, 'convoque' => true, 'present' => false, 'absent' => false, 'remplace' => false, 'amende' => false]);
+
+        $data = $this->evenements(['fiche_travail.saisie_perso'], $this->sapeurId, $exerciceComptableId);
+
+        $this->assertSame([$presente->id], array_column($data['interventions'], 'id'));
+        $this->assertSame([$convoque->id], array_column($data['exercices'], 'id'));
+    }
+
+    public function testEvenementsSansDroitNiSapeurRenvoieRien()
+    {
+        $data = $this->evenements(['fiche_travail.saisie_commune'], null, $this->intervention->exercice_comptable_id);
+
+        $this->assertSame([], $data['interventions']);
+        $this->assertSame([], $data['exercices']);
     }
 
     public function testFicheSansLienInchangee()

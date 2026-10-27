@@ -431,6 +431,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
     Route::group(['middleware' => 'jwtTokenRole:fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation'], function () {
         Route::apiResource('travaux', TravailController::class)->only(['store', 'update', 'destroy']);
+        Route::get('travaux/evenements/{exerciceComptableId}', [TravailController::class, 'evenements'])->name('api.v2.travaux.evenements');
     });
     Route::group(['middleware' => 'jwtTokenRole:fiche_travail.config'], function () {
         Route::apiResource('travail-types', TravailTypeController::class)->only(['store', 'update', 'destroy']);

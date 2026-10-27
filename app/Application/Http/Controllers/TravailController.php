@@ -2,7 +2,13 @@
 
 namespace App\Application\Http\Controllers;
 
+use App\Domaine\Business\ExerciceBusiness;
+use App\Domaine\Business\InterventionBusiness;
 use App\Domaine\Business\TravauxBusiness;
+use App\Models\Exercice;
+use App\Models\ExerciceSapeur;
+use App\Models\Intervention;
+use App\Models\InterventionSapeur;
 use App\Models\Travail;
 use Illuminate\Http\Request;
 
@@ -51,6 +57,33 @@ class TravailController extends Controller
     {
         $travaux = Travail::with('travailType')->where('intervention_id', $id)->get();
         return response()->json(['data' => $travaux]);
+    }
+
+    /**
+     * Exercices et interventions ouverts (ni imputés, ni annulés) auxquels l'utilisateur peut lier une fiche :
+     * tous avec le droit de lecture du module, sinon ceux où il figure (convocation ou présence).
+     */
+    public function evenements(Request $request, int $exerciceComptableId)
+    {
+        $perms = $request->attributes->get('permissions', []);
+        $sapeurId = $request->attributes->get('sapeurId');
+
+        $interventions = Intervention::where('exercice_comptable_id', $exerciceComptableId)
+            ->where('statut', '!=', InterventionBusiness::INTERVENTION_STATUT_IMPUTE);
+        if (!in_array('intervention.lecture', $perms)) {
+            $interventions->whereIn('id', InterventionSapeur::where('sapeur_id', $sapeurId)->select('intervention_id'));
+        }
+
+        $exercices = Exercice::where('exercice_comptable_id', $exerciceComptableId)
+            ->whereNotIn('statut', [ExerciceBusiness::EXERCICE_STATUT_ANNULE, ExerciceBusiness::EXERCICE_STATUT_IMPUTE]);
+        if (!in_array('exercice.lecture', $perms)) {
+            $exercices->whereIn('id', ExerciceSapeur::where('sapeur_id', $sapeurId)->select('exercice_id'));
+        }
+
+        return response()->json(['data' => [
+            'interventions' => $interventions->orderByDesc('date_debut')->get(['id', 'date_debut', 'objet', 'statut']),
+            'exercices' => $exercices->orderByDesc('date')->get(['id', 'date', 'designation', 'statut']),
+        ]]);
     }
 
     public function store(Request $request)
