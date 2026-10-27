@@ -428,6 +428,32 @@ class TravailLienTest extends TestCase
         $this->assertSame(InterventionBusiness::INTERVENTION_STATUT_SAISI, $travail['intervention']['statut']);
     }
 
+    public function testIndexChargeLExerciceLie()
+    {
+        $liee = $this->ajouter(['exercice_id' => $this->exercice->id]);
+        $request = Request::create('/api/v2/travaux');
+        $request->attributes->set('permissions', ['fiche_travail.lecture']);
+
+        $response = app(TravailController::class)->index($request, $this->exercice->exercice_comptable_id);
+
+        $travail = collect($response->getData(true)['data'])->firstWhere('id', $liee->id);
+        $this->assertSame($this->exercice->designation, $travail['exercice']['designation']);
+        $this->assertArrayHasKey('date', $travail['exercice']);
+        $this->assertSame(ExerciceBusiness::EXERCICE_STATUT_SAISI, $travail['exercice']['statut']);
+    }
+
+    public function testMesTravauxChargeLExerciceLie()
+    {
+        $liee = $this->ajouter(['exercice_id' => $this->exercice->id]);
+        $request = Request::create('/api/v2/mes-travaux');
+        $request->attributes->set('sapeurId', $this->sapeurId);
+
+        $response = app(MesTravauxController::class)->index($request, $this->exercice->exercice_comptable_id);
+
+        $travail = collect($response->getData(true)['data'])->firstWhere('id', $liee->id);
+        $this->assertSame($this->exercice->designation, $travail['exercice']['designation']);
+    }
+
     public function testMesTravauxChargeLInterventionLiee()
     {
         $liee = $this->ajouter(['intervention_id' => $this->intervention->id]);

@@ -26,7 +26,7 @@ class TravailController extends Controller
             return response()->json(['message' => 'Permissions insuffisantes'], 403);
         }
 
-        $query = Travail::with('intervention:id,date_debut,objet,statut')->where('exercice_comptable_id', '=', $exerciceComptableId);
+        $query = Travail::with(['intervention:id,date_debut,objet,statut', 'exercice:id,date,designation,statut'])->where('exercice_comptable_id', '=', $exerciceComptableId);
         if ($withEcritures) {
             $query = $query->with('ecritures');
         }
