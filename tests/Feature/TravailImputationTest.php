@@ -181,6 +181,44 @@ class TravailImputationTest extends TestCase
         $this->assertSame(0, Ecriture::where('travail_id', $fiche->id)->count());
     }
 
+    public function testFicheLieeExerciceReprendLaDesignationDeLExercice()
+    {
+        $fiche = $this->fiche(['exercice_id' => $this->exercice->id], TravauxBusiness::TRAVAIL_STATUT_VALIDE);
+        $this->imputerExercice();
+
+        $exercice = $this->exercice->fresh(['localite']);
+        $designationExercice = "{$exercice->localite->designation} ({$exercice->lieu}) {$exercice->designation}";
+        $ecritures = Ecriture::where('travail_id', $fiche->id)->get();
+        $this->assertCount(2, $ecritures);
+        foreach ($ecritures as $ecriture) {
+            $this->assertSame($designationExercice, $ecriture->designation);
+            $this->assertSame('Rédition - Nettoyage tuyaux', $ecriture->complement);
+        }
+    }
+
+    public function testFicheLieeInterventionReprendLaDesignationDeLIntervention()
+    {
+        $fiche = $this->fiche(['intervention_id' => $this->intervention->id], TravauxBusiness::TRAVAIL_STATUT_VALIDE);
+        $this->imputerIntervention();
+
+        $intervention = $this->intervention->fresh(['localite', 'typeIntervention']);
+        $designationIntervention = "{$intervention->localite->designation} ({$intervention->typeIntervention->designation}) {$intervention->lieu}";
+        $ecriture = Ecriture::where('travail_id', $fiche->id)->first();
+        $this->assertSame($designationIntervention, $ecriture->designation);
+        $this->assertSame('Rédition - Nettoyage tuyaux', $ecriture->complement);
+    }
+
+    public function testFicheLibreGardeSaDesignationSansComplement()
+    {
+        $libre = $this->fiche([], TravauxBusiness::TRAVAIL_STATUT_VALIDE);
+
+        ImputationBusiness::imputerTravaux([$libre->id]);
+
+        $ecriture = Ecriture::where('travail_id', $libre->id)->first();
+        $this->assertSame('Rédition - Nettoyage tuyaux', $ecriture->designation);
+        $this->assertNull($ecriture->complement);
+    }
+
     public function testImputerTravauxIgnoreFicheLiee()
     {
         $liee = $this->fiche(['exercice_id' => $this->exercice->id], TravauxBusiness::TRAVAIL_STATUT_VALIDE);

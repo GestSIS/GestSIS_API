@@ -697,9 +697,10 @@ class ImputationBusiness
             $ecritures = self::imputerInterventionTarifMin($intervention, $indemniteType);
         }
 
-        DB::transaction(function () use ($interventionId, $ecritures) {
+        $designation = self::designationIntervention($intervention);
+        DB::transaction(function () use ($interventionId, $ecritures, $designation) {
             self::insererEcritures($ecritures);
-            self::imputerTravauxLies('intervention_id', $interventionId);
+            self::imputerTravauxLies('intervention_id', $interventionId, $designation);
             Intervention::whereId($interventionId)->update(['statut' => InterventionBusiness::INTERVENTION_STATUT_IMPUTE]);
         });
         return InterventionBusiness::INTERVENTION_STATUT_IMPUTE;
@@ -773,7 +774,7 @@ class ImputationBusiness
         $tarif = floatval($indemniteType->tarif);
         $tarifMin = floatval($indemniteType->tarif_min ?? $indemniteType->tarif);
         $tarifMinPour = floatval($indemniteType->tarif_min_pour ?? 1.0);
-        $designation = "{$intervention->localite->designation} ({$intervention->typeIntervention->designation}) $intervention->lieu";
+        $designation = self::designationIntervention($intervention);
 
         $ecritures = [];
         foreach ($dureeTarifMin as $sapeurId => $dureeTarifMinSapeur) {
@@ -868,7 +869,7 @@ class ImputationBusiness
      */
     private static function imputerInterventionTaux($intervention, $indemniteType): array
     {
-        $designation = "{$intervention->localite->designation} ({$intervention->typeIntervention->designation}) {$intervention->lieu}";
+        $designation = self::designationIntervention($intervention);
 
         // Grouper les présences par sapeurs
         $sapeurs = $intervention->presences->groupBy('sapeur_id')->all();
@@ -1125,7 +1126,7 @@ class ImputationBusiness
         }
 
         $unite = $indemniteType->type_unite_id;
-        $designation = "{$exercice->localite->designation} ({$exercice->lieu}) {$exercice->designation}";
+        $designation = self::designationExercice($exercice);
         $sapeurs = collect($exercice->sapeurs)->filter(fn($sap) => $sap->present)->values()->all();
 
         DB::transaction(function () use ($exercice, $exerciceId, $sapeurs, $indemniteType, $designation, $unite) {
@@ -1141,7 +1142,7 @@ class ImputationBusiness
             $heures = HeureExercice::where('exercice_id', $exerciceId)->get();
             self::imputerExerciceHeureSup($exercice, $heures, $designation);
 
-            self::imputerTravauxLies('exercice_id', $exerciceId);
+            self::imputerTravauxLies('exercice_id', $exerciceId, $designation);
 
             // Changer le statut de l'exercice
             Exercice::whereId($exerciceId)->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_IMPUTE]);
@@ -1446,10 +1447,12 @@ class ImputationBusiness
     /**
      * Écritures d'une liste de fiches : une par ligne du type de travail (lignes cumulées).
      *
+     * Une fiche liée reprend la désignation de son événement, la nature du travail allant en complément.
+     *
      * @param array<string, int> $lienEvenement colonne de l'événement à renseigner sur chaque écriture, ex. ['exercice_id' => 12]
      * @return array<int, array<string, mixed>>
      */
-    private static function ecrituresTravaux(Collection $travaux, array $lienEvenement = []): array
+    private static function ecrituresTravaux(Collection $travaux, array $lienEvenement = [], ?string $designationEvenement = null): array
     {
         // Chargement des types de travaux - charger uniquement les types nécessaires
         $travailTypeIds = $travaux->pluck('travail_type_id')->unique();
@@ -1467,13 +1470,15 @@ class ImputationBusiness
                 throw new ArrayException([], "Type de travail introuvable pour le travail ID {$travail->id}");
             }
 
+            $nature = $type->designation . " - " . $travail->designation;
             foreach ($type->fonctions as $fonction) {
                 $ecritures[] = [
                     'tarif' => $fonction->tarif,
                     'quantite' => $travail->quantite,
                     'total' => self::arrondi_5_centimes($travail->quantite * $fonction->tarif),
                     'compte_id' => $fonction->compte_id,
-                    'designation' => $type->designation . " - " . $travail->designation,
+                    'designation' => $designationEvenement ?? $nature,
+                    'complement' => $designationEvenement === null ? null : $nature,
                     'type_unite_id' => $type->type_unite_id,
                     'sapeur_id' => $travail->sapeur_id,
                     'travail_id' => $travail->id,
@@ -1492,11 +1497,27 @@ class ImputationBusiness
     }
 
     /**
+     * Désignation des écritures d'une intervention (présences et fiches liées).
+     */
+    private static function designationIntervention(Intervention $intervention): string
+    {
+        return "{$intervention->localite->designation} ({$intervention->typeIntervention->designation}) {$intervention->lieu}";
+    }
+
+    /**
+     * Désignation des écritures d'un exercice (présences, heures supplémentaires et fiches liées).
+     */
+    private static function designationExercice(Exercice $exercice): string
+    {
+        return "{$exercice->localite->designation} ({$exercice->lieu}) {$exercice->designation}";
+    }
+
+    /**
      * Imputation en cascade des fiches validées d'un événement, dans la transaction de l'événement.
      *
      * @param string $colonne 'exercice_id' ou 'intervention_id'
      */
-    private static function imputerTravauxLies(string $colonne, int $evenementId): void
+    private static function imputerTravauxLies(string $colonne, int $evenementId, string $designationEvenement): void
     {
         $travaux = Travail::where($colonne, $evenementId)
             ->where('statut', TravauxBusiness::TRAVAIL_STATUT_VALIDE)
@@ -1506,7 +1527,7 @@ class ImputationBusiness
             return;
         }
 
-        self::insererEcritures(self::ecrituresTravaux($travaux, [$colonne => $evenementId]));
+        self::insererEcritures(self::ecrituresTravaux($travaux, [$colonne => $evenementId], $designationEvenement));
         Travail::whereIn('id', $travaux->pluck('id'))
             ->update(['statut' => TravauxBusiness::TRAVAIL_STATUT_IMPUTE]);
     }
