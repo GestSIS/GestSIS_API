@@ -16,7 +16,6 @@ use App\Models\ExerciceSapeur;
 use App\Models\FonctionSapeur;
 use App\Models\GradeSapeur;
 use App\Models\GroupeSapeur;
-use App\Models\HeureExercice;
 use App\Models\Intervention;
 use App\Models\InterventionSapeur;
 use App\Models\Mutation;
@@ -323,7 +322,6 @@ class SapeurBusiness
         FonctionSapeur::where('sapeur_id', $sapeurId)->delete();
         SapeurTelephone::where('sapeur_id', $sapeurId)->delete();
         ExerciceSapeur::where('sapeur_id', $sapeurId)->delete();
-        HeureExercice::where('sapeur_id', $sapeurId)->delete();
         InterventionSapeur::where('sapeur_id', $sapeurId)->delete();
         Quittance::where('sapeur_id', $sapeurId)->delete();
         GroupeSapeur::where('sapeur_id', $sapeurId)->delete();

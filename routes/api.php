@@ -68,7 +68,6 @@ use App\Application\Http\Controllers\FraisIndemniteTypeController;
 use App\Application\Http\Controllers\GradeController;
 use App\Application\Http\Controllers\GroupeController;
 use App\Application\Http\Controllers\GroupeSapeursController;
-use App\Application\Http\Controllers\HeureExerciceTypeController;
 use App\Application\Http\Controllers\ImputationController;
 use App\Application\Http\Controllers\IndemniteCoursTypeController;
 use App\Application\Http\Controllers\IndemniteExerciceTypeController;
@@ -257,8 +256,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::apiResource('medecins', MedecinController::class)->only(['index']);
         Route::apiResource('controles-medicaux-types', ControleMedicalTypeController::class)->only(['index']);
 
-        // Heures supp
-        Route::apiResource('heure-exercice-types', HeureExerciceTypeController::class)->only(['index']);
+        // Heures supp remplacées par les fiches de travail : liste vide pour l'appli mobile
+        Route::get('heure-exercice-types', [ExerciceController::class, 'heureExerciceTypes'])->name('api.v2.heure-exercice-types.index');
     });
 
     // Sapeurs
@@ -388,9 +387,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('exercices/presence/{presenceId}', [ConvocationsController::class, 'updatePresence'])->name('api.v2.exercices.presence.update');
 
         // Heures supp
-        Route::post('exercices/heures', [ConvocationsController::class, 'createHeure'])->name('api.v2.exercices.heures.create');
-        Route::put('exercices/heures/{heureId}', [ConvocationsController::class, 'updateHeure'])->name('api.v2.exercices.heures.update');
-        Route::delete('exercices/heures/{heureId}', [ConvocationsController::class, 'destroyHeure'])->name('api.v2.exercices.heures.remove');
 
         // Mobile
         Route::post('exercices/{id}/presences', [ConvocationsController::class, 'updatePresences'])->name('api.v2.exercices.presences');
@@ -676,7 +672,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::apiResource('ecriture-categories', EcritureCategorieController::class)->only(['store', 'update', 'destroy']);
 
         Route::apiResource('amendes', AmendeController::class)->only(['store']);
-        Route::apiResource('heure-exercice-types', HeureExerciceTypeController::class)->only(['store', 'update', 'destroy']);
 
         Route::apiResource('indemnites-cours-types', IndemniteCoursTypeController::class)->only(['store', 'update', 'destroy']);
     });

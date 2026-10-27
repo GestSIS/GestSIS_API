@@ -12,14 +12,14 @@ class ExcuseControllerTest extends TestCase
     use DatabaseTransactions;
 
     /**
-     * La suppression d'une excuse doit retourner le sapeur avec ses heures,
-     * au même format que les autres endpoints de présence, sinon le front
-     * (ExerciceTabSapeurs.vue) plante sur `sap.heures.find(...)`.
+     * La suppression d'une excuse doit réussir pour un sapeur convoqué et excusé
+     * (le sapeur est renvoyé au même format que les autres endpoints de présence,
+     * avec ses fiches de travail liées dans `travaux`).
      *
      * @return void
      * @throws Exception
      */
-    public function testRemoveExcuseReturnsSapeurWithHeures()
+    public function testRemoveExcuseReturnsSapeurWithTravaux()
     {
         $exerciceData = Exercice::factory()->make()->toArray();
         $exerciceId = $this->json('POST', '/api/v2/exercices', $exerciceData)->json('data.id');

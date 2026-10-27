@@ -10,7 +10,8 @@ use App\Models\Ecriture;
 use App\Models\EcritureCategorie;
 use App\Models\FraisIndemniteAnnuel;
 use App\Models\FraisIndemniteAnnuelType;
-use App\Models\HeureExerciceType;
+use App\Models\TravailType;
+use App\Models\TravailTypeFonction;
 use App\Models\IndemniteCoursFonction;
 use App\Models\IndemniteCoursType;
 use App\Models\IndemniteExerciceFonction;
@@ -64,8 +65,8 @@ class ComptabiliteParamBusiness
         if (FraisIndemniteAnnuelType::where('ecriture_categorie_id', $id)->exists()) {
             throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié à type d'indemnité annuel");
         }
-        if (HeureExerciceType::where('ecriture_categorie_id', $id)->exists()) {
-            throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié à type d'heure supplémentaires");
+        if (TravailType::where('ecriture_categorie_id', $id)->exists()) {
+            throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié à un type de fiche de travail");
         }
         if (AvsParam::where('ecriture_categorie_id', $id)->exists()) {
             throw new InvalidActionException(message: "Impossible de supprimer une catégorie lié aux paramètres d'imputation AVS/AC");
@@ -239,8 +240,8 @@ class ComptabiliteParamBusiness
         if (FraisIndemniteAnnuelType::where('compte_id', $id)->exists()) {
             throw new InvalidActionException(message: "Impossible de supprimer un compte lié à type d'indemnité annuel");
         }
-        if (HeureExerciceType::where('compte_id', $id)->exists()) {
-            throw new InvalidActionException(message: "Impossible de supprimer un compte lié à type d'heure supplémentaires");
+        if (TravailTypeFonction::where('compte_id', $id)->exists()) {
+            throw new InvalidActionException(message: "Impossible de supprimer un compte lié à un type de fiche de travail");
         }
         if (AvsParam::where('compte_id', $id)->exists()) {
             throw new InvalidActionException(message: "Impossible de supprimer un compte lié aux paramètres d'imputation AVS/AC");

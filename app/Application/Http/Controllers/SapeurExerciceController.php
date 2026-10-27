@@ -4,7 +4,7 @@ namespace App\Application\Http\Controllers;
 
 use App\Models\Exercice;
 use App\Models\ExerciceSapeur;
-use App\Models\HeureExercice;
+use App\Models\Travail;
 use Illuminate\Support\Facades\DB;
 
 class SapeurExerciceController extends Controller
@@ -12,18 +12,21 @@ class SapeurExerciceController extends Controller
 
     public function index($sapeurId, $exerciceComptableId)
     {
-        $heures = HeureExercice::where('sapeur_id', '=', $sapeurId)->get()->toArray();
+        // Fiches de travail du sapeur liées à un exercice (remplacent les heures supplémentaires)
+        $travaux = Travail::where('sapeur_id', '=', $sapeurId)->whereNotNull('exercice_id')->get()->toArray();
         $sapeurs = ExerciceSapeur::where('sapeur_id', '=', $sapeurId)->get()->toArray();
 
         $exercices = Exercice::where('exercice_comptable_id', '=', $exerciceComptableId)
             ->whereIn('id', array_merge(
-                array_map(fn($h) => $h['exercice_id'], $heures),
+                array_map(fn($t) => $t['exercice_id'], $travaux),
                 array_map(fn($h) => $h['exercice_id'], $sapeurs),
             ))->get()->toArray();
 
         $dictionary = [];
         foreach ($exercices as $exercice) {
             $dictionary[$exercice['id']] = $exercice;
+            $dictionary[$exercice['id']]['travaux'] = [];
+            // Compatibilité : l'appli mobile (versions antérieures aux fiches de travail) lit encore `heures`
             $dictionary[$exercice['id']]['heures'] = [];
             $dictionary[$exercice['id']]['presence'] = null;
         }
@@ -33,9 +36,9 @@ class SapeurExerciceController extends Controller
                 $dictionary[$sapeur['exercice_id']]['presence'] = $sapeur;
             }
         }
-        foreach ($heures as $heure) {
-            if (array_key_exists($heure['exercice_id'], $dictionary)) {
-                $dictionary[$heure['exercice_id']]['heures'][] = $heure;
+        foreach ($travaux as $travail) {
+            if (array_key_exists($travail['exercice_id'], $dictionary)) {
+                $dictionary[$travail['exercice_id']]['travaux'][] = $travail;
             }
         }
 

@@ -14,11 +14,10 @@ use App\Models\Exercice;
 use App\Models\ExerciceCategorie;
 use App\Models\ExerciceSapeur;
 use App\Models\Fonction;
-use App\Models\HeureExercice;
-use App\Models\HeureExerciceType;
 use App\Models\Localite;
 use App\Models\Sapeur;
 use App\Models\Sms;
+use App\Models\Travail;
 use Carbon\Carbon;
 use Ds\Set;
 use Illuminate\Database\Eloquent\Collection;
@@ -147,7 +146,6 @@ class ExerciceBusiness
         }
 
         ExerciceSapeur::where('exercice_id', '=', $exerciceId)->delete();
-        HeureExercice::where('exercice_id', '=', $exerciceId)->delete();
         TravauxBusiness::supprimerLies('exercice_id', $exerciceId);
         Sms::where('exercice_id', '=', $exerciceId)->delete();
         Exercice::whereId($exerciceId)->delete();
@@ -364,7 +362,6 @@ class ExerciceBusiness
             return $e['sapeur_id'];
         }, $exercice->sapeurs->toArray()));
 
-        // Sapeurs non présent mais avec des heures pas pris en compte ?
         $sapeursAjoutes = array_filter($presences, fn($e) => !$sapeursIdsActuel->contains($e['sapeur_id']));
         self::addSapeurs($exerciceId, $sapeursAjoutes);
 
@@ -405,7 +402,7 @@ class ExerciceBusiness
 
         // Check si pas déjà imputé
         if ($exercice->statut >= self::EXERCICE_STATUT_IMPUTE) {
-            self::checkValiditeChangementsSiImpute($presenceId, $exerciceId, $sapeurId, $presence);
+            self::checkValiditeChangementsSiImpute($presenceId, $presence);
         }
 
         // Check si justificatif
@@ -456,59 +453,15 @@ class ExerciceBusiness
         return self::updateStatut($exerciceId);
     }
 
-    private static function checkValiditeChangementsSiImpute($exerciceSapeurId, $exerciceId, $sapeurId, $presenceEffective)
+    private static function checkValiditeChangementsSiImpute($exerciceSapeurId, $presenceEffective)
     {
         // check que les modifications n'ont lieu que sur l'excuse type, remplacé ou amende
         $presenceReference = ExerciceSapeur
             ::find($exerciceSapeurId);
-        $heuresReferences = HeureExercice
-            ::where('exercice_id', $exerciceId)
-            ->where('sapeur_id', $sapeurId)
-            ->get()->toArray();
 
         // Check si d'autres modifications sont proposées
         if ($presenceEffective['present'] != $presenceReference['present']) {
             throw new ArrayException([], 'Permissions insuffisantes pour modifier les présences.');
-        }
-
-        if (array_key_exists('heures', $presenceEffective)) {
-            $heuresEffectives = array_filter(
-                $presenceEffective['heures'],
-                fn($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
-            );
-            $heuresEffectivesId = array_filter(array_map(fn($h) => array_key_exists('id', $h) ? $h['id'] : null, $heuresEffectives), fn($h) => !is_null($h));
-
-            // Heures supprimées
-            $heuresSupprimeesIds = array_map(
-                fn($h) => $h['id'],
-                array_filter($heuresReferences, fn($h) => !in_array($h['id'], $heuresEffectivesId))
-            );
-            if (count($heuresSupprimeesIds) > 0) {
-                throw new ArrayException([], 'Permissions insuffisantes pour supprimer des heures.');
-            }
-
-            // Heures ajoutées
-            $heuresAjoutees = array_filter($heuresEffectives, fn($heure) => !isset($heure['id']) || !$heure['id']);
-            foreach ($heuresAjoutees as $heure) {
-                throw new ArrayException([], 'Permissions insuffisantes pour ajouter des heures.');
-            }
-
-            // Heures modifiées
-            $heuresModifiees = array_filter(
-                $heuresEffectives,
-                fn($heure) => isset($heure['id']) && $heure['id'] && !in_array($heure['id'], $heuresSupprimeesIds)
-            );
-            foreach ($heuresModifiees as $heure) {
-                $heureReference = array_filter(
-                    $heuresReferences,
-                    fn($h) => $h['id'] == $heure['id']
-                );
-
-                // Check qu'aucune heure n'a été modifiée
-                if (!$heureReference || $heureReference['quantite'] != $heure['quantite']) {
-                    throw new ArrayException([], 'Permissions insuffisantes pour modifier une heure.');
-                }
-            }
         }
     }
 
@@ -536,21 +489,6 @@ class ExerciceBusiness
 
         foreach ($sapeurFiltered as $sapeur) {
             self::addSapeurToExercice($exerciceId, $sapeur);
-
-            // Ajout heures sup if any
-            $heures = array_filter(
-                array_key_exists('heures', $sapeur) ? $sapeur['heures'] : [],
-                fn($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
-            );
-            foreach ($heures as $heure) {
-                if (!HeureExerciceType::whereId($heure['heure_exercice_type_id'])->exists()) {
-                    // On ignore le type d'heure n'existant plus
-                    throw new ArrayException(["Message" => "Unknown heure type"]);
-                    continue;
-                }
-                $heure['sapeur_id'] = $sapeur['sapeur_id'];
-                self::ajouterHeureExercice($exerciceId, $heure);
-            }
         }
 
         return self::updateStatut($exerciceId);
@@ -564,19 +502,6 @@ class ExerciceBusiness
         $sapeur->sapeur_id = $data['sapeur_id'];
         $sapeur->save();
         return $sapeur->toArray();
-    }
-
-    public static function ajouterHeureExercice($exerciceId, $heure)
-    {
-        $type = HeureExerciceType::find($heure['heure_exercice_type_id']);
-
-        $heureExercice = new HeureExercice();
-        $heureExercice->fill($type->toArray());
-        $heureExercice->fill($heure);
-        $heureExercice->exercice_id = $exerciceId;
-        $heureExercice->save();
-
-        return $heureExercice;
     }
 
     /**
@@ -596,83 +521,17 @@ class ExerciceBusiness
             throw new ArrayException([$statut], 'Permissions insuffisantes pour modifier les présences.');
         }
 
-        $cachedHeures = HeureExercice
-            ::where('exercice_id', $exerciceId)
-            ->get()->toArray();
-        $indexedHeures = [];
-        foreach ($cachedHeures as $heure) {
-            $indexedHeures[$heure['id']] = $heure;
-        }
-
-        // Check si pas déjà imputé
+        // Exercice imputé : seuls l'excuse, le remplacement et l'amende restent modifiables
         if ($statut >= self::EXERCICE_STATUT_IMPUTE) {
-            // check que les modifications n'ont lieu que sur l'excuse type, remplacé ou amende
-            $heures = HeureExercice
+            $presencesActuelles = ExerciceSapeur
                 ::where('exercice_id', $exerciceId)
-                ->get()->toArray();
-            $exerciceSapeurs = ExerciceSapeur
-                ::where('exercice_id', $exerciceId)
-                ->get()->toArray();
+                ->get()
+                ->keyBy('sapeur_id');
 
-            $dictionary = [];
-            foreach ($exerciceSapeurs as $sapeur) {
-                $dictionary[$sapeur['sapeur_id']] = $sapeur;
-                $dictionary[$sapeur['sapeur_id']]['heures'] = [];
-            }
-            foreach ($heures as $heure) {
-                if (!array_key_exists($heure['sapeur_id'], $dictionary)) {
-                    $dictionary[$heure['sapeur_id']] = [
-                        'convoque' => False,
-                        'present' => False,
-                        'absent' => False,
-                        'remplace' => False,
-                        'excuse_type_id' => null,
-                        'heures' => [],
-                    ];
-                }
-                $dictionary[$heure['sapeur_id']]['heures'][] = $heure;
-            }
-
-            $presencesEffectives = $dictionary;
-
-            // Check si d'autres modifications sont proposées
             foreach ($sapeurs as $sapeur) {
-                $presenceEffective = $presencesEffectives[$sapeur['sapeur_id']];
-                if ($presenceEffective['present'] != $sapeur['present']) {
+                $presenceActuelle = $presencesActuelles->get($sapeur['sapeur_id']);
+                if ($presenceActuelle === null || $presenceActuelle->present != $sapeur['present']) {
                     throw new ArrayException([], 'Permissions insuffisantes pour modifier les présences.');
-                }
-
-                $heures = array_filter(
-                    array_key_exists('heures', $sapeur) ? $sapeur['heures'] : [],
-                    fn($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
-                );
-                $heuresId = array_filter(array_map(fn($h) => array_key_exists('id', $h) ? $h['id'] : null, $heures), fn($h) => !is_null($h));
-
-                // Heures supprimées
-                $heuresSupprimeesId = array_map(fn($h) => $h['id'], array_filter($cachedHeures, fn($h) => $h['sapeur_id'] == $sapeur['sapeur_id'] && !in_array($h['id'], $heuresId)));
-                if (count($heuresSupprimeesId) > 0) {
-                    throw new ArrayException([], 'Permissions insuffisantes pour modifier les présences.');
-                }
-
-                // Heures ajoutées
-                $heuresAjoutees = array_filter($heures, fn($heure) => !isset($heure['id']) || !$heure['id']);
-                foreach ($heuresAjoutees as $heure) {
-                    if (!array_key_exists('heure_exercice_type_id', $heure)) {
-                        // On ignore l'heure invalide
-                        continue;
-                    }
-                    throw new ArrayException([], 'Permissions insuffisantes pour modifier les présences.');
-                }
-
-                // Heures modifiées
-                $heuresModifiees = array_filter($heures, fn($heure) => isset($heure['id']) && $heure['id'] && !in_array($heure['id'], $heuresSupprimeesId));
-                foreach ($heuresModifiees as $heure) {
-                    $heureActuelle = $indexedHeures[$heure['id']];
-
-                    // Check qu'aucune heure n'a été modifiée
-                    if ($heureActuelle['quantite'] != $heure['quantite']) {
-                        throw new ArrayException([], 'Permissions insuffisantes pour modifier les présences.');
-                    }
                 }
             }
         }
@@ -699,39 +558,6 @@ class ExerciceBusiness
                     ...($estNouvelleExcuse ? ['date_excuse' => Carbon::now()] : [])
                 ]);
 
-            $heures = array_filter(
-                array_key_exists('heures', $sapeur) ? $sapeur['heures'] : [],
-                fn($h) => array_key_exists('quantite', $h) && !is_null($h['quantite']) && $h['quantite'] > 0
-            );
-            $heuresId = array_filter(array_map(fn($h) => array_key_exists('id', $h) ? $h['id'] : null, $heures), fn($h) => !is_null($h));
-
-            // Heures supprimées
-            $heuresSupprimeesId = array_map(fn($h) => $h['id'], array_filter($cachedHeures, fn($h) => $h['sapeur_id'] == $sapeur['sapeur_id'] && !in_array($h['id'], $heuresId)));
-            HeureExercice::where('exercice_id', $exerciceId)
-                ->where('sapeur_id', $sapeur['sapeur_id'])
-                ->whereIn('id', $heuresSupprimeesId)
-                ->delete();
-
-            // Heures ajoutées
-            $heuresAjoutees = array_filter($heures, fn($heure) => !isset($heure['id']) || !$heure['id']);
-            foreach ($heuresAjoutees as $heure) {
-                if (!array_key_exists('heure_exercice_type_id', $heure)) {
-                    // On ignore l'heure invalide
-                    continue;
-                }
-                $heure['sapeur_id'] = $sapeur['sapeur_id'];
-                self::ajouterHeureExercice($exerciceId, $heure);
-            }
-
-            // Heures modifiées
-            $heuresModifiees = array_filter($heures, fn($heure) => isset($heure['id']) && $heure['id'] && !in_array($heure['id'], $heuresSupprimeesId));
-            foreach ($heuresModifiees as $heure) {
-                HeureExercice::where('exercice_id', $exerciceId)
-                    ->where('sapeur_id', $sapeur['sapeur_id'])
-                    ->whereId($heure['id'])
-                    ->update(['quantite' => $heure['quantite']]);
-            }
-            // throw new ArrayException(['ajoutes' => $heuresAjoutees, 'modifies' => $heuresModifiees, 'supprimes' => $heuresSupprimeesId]);
         }
 
         return self::updateStatut($exerciceId);
@@ -796,9 +622,6 @@ class ExerciceBusiness
         ExerciceSapeur::where('exercice_id', $exerciceId)
             ->whereIn('sapeur_id', $ids)
             ->delete();
-        HeureExercice::where('exercice_id', $exerciceId)
-            ->whereIn('sapeur_id', $ids)
-            ->delete();
 
         return self::updateStatut($exerciceId);
     }
@@ -808,78 +631,7 @@ class ExerciceBusiness
         ExerciceSapeur::where('sapeur_id', $sapeurId)
             ->whereIn('exercice_id', $exercicesIds)
             ->delete();
-        HeureExercice::whereIn('exercice_id', $exercicesIds)
-            ->where('sapeur_id', $sapeurId)
-            ->whereHas("exercice", function ($q) {
-                // Check pour chaque exercice s'il est possible de supprimer la convocation et donc que l'exercice n'est pas déjà imputé
-                $q->where('statut', '>', self::EXERCICE_STATUT_ANNULE)
-                    ->where('statut', '<=', self::EXERCICE_STATUT_VALIDE);
-            })
-            ->delete();
         return true;
-    }
-
-    public static function createHeure($data, $hasValidationPermission)
-    {
-        $statut = Exercice::findOrFail($data['exercice_id'])->statut;
-        if ($statut == self::EXERCICE_STATUT_ANNULE) {
-            throw new ArrayException([], "Impossible de modifier un exercice annulé");
-        }
-        if ($statut > self::EXERCICE_STATUT_VALIDE) {
-            throw new ArrayException([], "Impossible de modifier un exercice déjà imputé");
-        }
-        if ($statut == self::EXERCICE_STATUT_VALIDE && !$hasValidationPermission) {
-            throw new ArrayException([], "Permissions insuffisantes");
-        }
-
-        $type = HeureExerciceType::find($data['heure_exercice_type_id']);
-
-        $heure = new HeureExercice();
-        $heure->fill($type->toArray());
-        $heure->fill($data);
-        $heure->save();
-        return $heure;
-    }
-
-    public static function updateHeure($heureId, $data, $hasValidationPermission)
-    {
-        $heure = HeureExercice::find($heureId);
-        if ($heure == NULL) {
-            throw new ArrayException([], "Heure inexistante");
-        }
-        $statut = Exercice::findOrFail($heure->exercice_id)->statut;
-        if ($statut == self::EXERCICE_STATUT_ANNULE) {
-            throw new ArrayException([], "Impossible de modifier un exercice annulé");
-        }
-        if ($statut > self::EXERCICE_STATUT_VALIDE) {
-            throw new ArrayException([], "Impossible de modifier un exercice déjà imputé");
-        }
-        if ($statut == self::EXERCICE_STATUT_VALIDE && !$hasValidationPermission) {
-            throw new ArrayException([], "Permissions insuffisantes");
-        }
-
-        HeureExercice::whereId($heureId)->limit(1)->update($data);
-        return HeureExercice::find($heureId);
-    }
-
-    public static function removeHeure($heureId, $hasValidationPermission)
-    {
-        $heure = HeureExercice::find($heureId);
-        if ($heure == NULL) {
-            throw new ArrayException([], "Heure inexistante");
-        }
-        $statut = Exercice::findOrFail($heure->exercice_id)->statut;
-        if ($statut == self::EXERCICE_STATUT_ANNULE) {
-            throw new ArrayException([], "Impossible de modifier un exercice annulé");
-        }
-        if ($statut > self::EXERCICE_STATUT_VALIDE) {
-            throw new ArrayException([], "Impossible de modifier un exercice déjà imputé");
-        }
-        if ($statut == self::EXERCICE_STATUT_VALIDE && !$hasValidationPermission) {
-            throw new ArrayException([], "Permissions insuffisantes");
-        }
-
-        HeureExercice::whereId($heureId)->limit(1)->delete();
     }
 
     public static function listeSapeurOfExerciceById($exerciceId, $hasPresencePermission = false)
@@ -900,34 +652,39 @@ class ExerciceBusiness
             'justificatif_path',
             'date_validation',
         ];
-        $heures = HeureExercice::where('exercice_id', $exerciceId)->get()->toArray();
+        // Fiches de travail liées à l'exercice, par sapeur (remplacent les heures supplémentaires)
+        $travaux = Travail::where('exercice_id', $exerciceId)->get()->toArray();
         $sapeurs = ExerciceSapeur::where('exercice_id', $exerciceId)
             ->get($hasPresencePermission ? '*' : $champs)->toArray();
 
         $dictionary = [];
         foreach ($sapeurs as $sapeur) {
             $dictionary[$sapeur['sapeur_id']] = $sapeur;
+            $dictionary[$sapeur['sapeur_id']]['travaux'] = [];
+            // Compatibilité : l'appli mobile (versions antérieures aux fiches de travail) lit encore `heures`
             $dictionary[$sapeur['sapeur_id']]['heures'] = [];
         }
-        foreach ($heures as $heure) {
-            if (!array_key_exists($heure['sapeur_id'], $dictionary)) {
-                $dictionary[$heure['sapeur_id']] = [
+        foreach ($travaux as $travail) {
+            if (!array_key_exists($travail['sapeur_id'], $dictionary)) {
+                $dictionary[$travail['sapeur_id']] = [
+                    'sapeur_id' => $travail['sapeur_id'],
                     'convoque' => False,
                     'present' => False,
                     'absent' => False,
                     'remplace' => False,
                     'excuse_type_id' => null,
+                    'travaux' => [],
                     'heures' => [],
                 ];
             }
-            $dictionary[$heure['sapeur_id']]['heures'][] = $heure;
+            $dictionary[$travail['sapeur_id']]['travaux'][] = $travail;
         }
         return array_values($dictionary);
     }
 
     public static function sapeurOfExerciceById($exerciceId, $sapeurId)
     {
-        $heures = HeureExercice::where('exercice_id', $exerciceId)
+        $travaux = Travail::where('exercice_id', $exerciceId)
             ->where('sapeur_id', $sapeurId)
             ->get()->toArray();
         $sapeur = ExerciceSapeur::where('exercice_id', $exerciceId)
@@ -941,12 +698,13 @@ class ExerciceBusiness
                 'absent' => False,
                 'remplace' => False,
                 'excuse_type_id' => null,
-                'heures' => [],
             ];
         } else {
             $sapeur = $sapeur->toArray();
         }
-        $sapeur['heures'] = $heures;
+        $sapeur['travaux'] = $travaux;
+        // Compatibilité : l'appli mobile (versions antérieures aux fiches de travail) lit encore `heures`
+        $sapeur['heures'] = [];
 
         return $sapeur;
     }

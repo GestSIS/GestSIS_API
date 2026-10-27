@@ -115,9 +115,6 @@ class ConvocationsController extends Controller
             'sapeurs.*.absent' => 'required|boolean',
             'sapeurs.*.remplace' => 'required|boolean',
             'sapeurs.*.excuse_type_id' => 'nullable|integer|exists:excuse_types,id',
-            'sapeurs.*.heures.*.id' => 'nullable|integer',
-            'sapeurs.*.heures.*.quantite' => 'nullable|numeric',
-            'sapeurs.*.heures.*.heure_exercice_type_id' => 'nullable|integer',
         ]);
 
         $statut = ExerciceBusiness::updatePresences($exerciceId, $data['sapeurs']);
@@ -137,45 +134,6 @@ class ConvocationsController extends Controller
 
         $statut = ExerciceBusiness::removeSapeurs($exerciceId, $data['sapeurs']);
         return response()->json(null, 204);
-    }
-
-    public function createHeure(Request $request)
-    {
-        $data = $request->validate([
-            'exercice_id' => 'integer|required',
-            'sapeur_id' => 'integer|required',
-            'quantite' => 'nullable|numeric',
-            'heure_exercice_type_id' => 'nullable|integer',
-        ]);
-
-        $perms = $request->attributes->get('permissions', []);
-        $hasValidationPermission = in_array('exercice.validation', $perms);
-        $heure = ExerciceBusiness::createHeure($data, $hasValidationPermission);
-
-        return response()->json(['data' => $heure]);
-    }
-
-    public function updateHeure(Request $request, int $heureId)
-    {
-        $data = $request->validate([
-            'id' => 'integer|required',
-            'quantite' => 'nullable|numeric',
-        ]);
-
-        $perms = $request->attributes->get('permissions', []);
-        $hasValidationPermission = in_array('exercice.validation', $perms);
-        $heure = ExerciceBusiness::updateHeure($heureId, $data, $hasValidationPermission);
-
-        return response()->json(['data' => $heure]);
-    }
-
-    public function destroyHeure(Request $request, int $heureId)
-    {
-        $perms = $request->attributes->get('permissions', []);
-        $hasValidationPermission = in_array('exercice.validation', $perms);
-        $statut = ExerciceBusiness::removeHeure($heureId, $hasValidationPermission);
-
-        return response()->json(['data' => $statut]);
     }
 
     public function supprimerConvocations(Request $request, int $sapeurId)

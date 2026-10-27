@@ -8,7 +8,6 @@ use App\Models\ExerciceCategorie;
 use App\Models\ExcuseType;
 use App\Models\Exercice;
 use App\Models\ExerciceSapeur;
-use App\Models\HeureExerciceType;
 
 class ExerciceParamBusiness
 {
@@ -56,22 +55,4 @@ class ExerciceParamBusiness
         ExcuseType::whereId($id)->delete();
     }
 
-    public static function ajouterHeureExerciceType($data)
-    {
-        $type = new HeureExerciceType();
-        $type->fill($data);
-        $type->save();
-        return $type;
-    }
-
-    public static function modifierHeureExerciceType($id, $data)
-    {
-        HeureExerciceType::whereId($id)->limit(1)->update($data);
-        return HeureExerciceType::find($id);
-    }
-
-    public static function supprimerHeureExerciceType($id)
-    {
-        HeureExerciceType::whereId($id)->limit(1)->delete();
-    }
 }

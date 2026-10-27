@@ -5,7 +5,7 @@ namespace App\Application\Http\Controllers;
 use App\Domaine\Business\ExerciceBusiness;
 use App\Models\Exercice;
 use App\Models\ExerciceSapeur;
-use App\Models\HeureExercice;
+use App\Models\Travail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -54,30 +54,35 @@ class ExerciceController extends Controller
         $exercices = Exercice::with(['sapeurs'])->where('date', '>=', $threshold)->get()->toArray();
 
         $exerciceIds = array_map(fn($e) => $e['id'], $exercices);
-        $heures = HeureExercice::whereIn('exercice_id', $exerciceIds)->get()->toArray();
+        // Fiches de travail liées, par sapeur (remplacent les heures supplémentaires)
+        $travaux = Travail::whereIn('exercice_id', $exerciceIds)->get()->toArray();
 
         $indexedExercice = [];
         foreach ($exercices as $exercice) {
             $exercice['indexedSapeurs'] = [];
             foreach ($exercice['sapeurs'] as $sapeur) {
                 $exercice['indexedSapeurs'][$sapeur['sapeur_id']] = $sapeur;
+                $exercice['indexedSapeurs'][$sapeur['sapeur_id']]['travaux'] = [];
+                // Compatibilité : l'appli mobile (versions antérieures aux fiches de travail) lit encore `heures`
                 $exercice['indexedSapeurs'][$sapeur['sapeur_id']]['heures'] = [];
             }
             $indexedExercice[$exercice['id']] = $exercice;
         }
 
-        foreach ($heures as $heure) {
-            if (!array_key_exists($heure['sapeur_id'], $indexedExercice[$heure['exercice_id']]['indexedSapeurs'])) {
-                $indexedExercice[$heure['exercice_id']]['indexedSapeurs'][$heure['sapeur_id']] = [
+        foreach ($travaux as $travail) {
+            if (!array_key_exists($travail['sapeur_id'], $indexedExercice[$travail['exercice_id']]['indexedSapeurs'])) {
+                $indexedExercice[$travail['exercice_id']]['indexedSapeurs'][$travail['sapeur_id']] = [
+                    'sapeur_id' => $travail['sapeur_id'],
                     'convoque' => False,
                     'present' => False,
                     'absent' => False,
                     'remplace' => False,
                     'excuse_type_id' => null,
+                    'travaux' => [],
                     'heures' => [],
                 ];
             }
-            $indexedExercice[$heure['exercice_id']]['indexedSapeurs'][$heure['sapeur_id']]['heures'][] = $heure;
+            $indexedExercice[$travail['exercice_id']]['indexedSapeurs'][$travail['sapeur_id']]['travaux'][] = $travail;
         }
 
         return response()->json([
@@ -87,6 +92,15 @@ class ExerciceController extends Controller
                 return $e;
             }, array_values($indexedExercice))
         ]);
+    }
+
+    /**
+     * Les heures supplémentaires sont remplacées par les fiches de travail : la liste reste
+     * disponible, vide, pour l'appli mobile (versions antérieures aux fiches de travail).
+     */
+    public function heureExerciceTypes()
+    {
+        return response()->json(['data' => []]);
     }
 
     public function store(Request $request)

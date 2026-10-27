@@ -19,8 +19,6 @@ use App\Application\Typst\TypstToPdfGenerator;
 use App\Models\Compte;
 use App\Models\Decompte;
 use App\Models\FraisIndemniteAnnuelType;
-use App\Models\HeureExercice;
-use App\Models\HeureExerciceType;
 use App\Models\IndemniteCoursType;
 use App\Models\IndemniteExerciceType;
 use App\Models\IndemniteInterventionType;
@@ -1138,65 +1136,12 @@ class ImputationBusiness
                 throw new ArrayException([], "Unité non supportée");
             }
 
-            // Imputation heure supp
-            $heures = HeureExercice::where('exercice_id', $exerciceId)->get();
-            self::imputerExerciceHeureSup($exercice, $heures, $designation);
-
             self::imputerTravauxLies('exercice_id', $exerciceId, $designation);
 
             // Changer le statut de l'exercice
             Exercice::whereId($exerciceId)->update(['statut' => ExerciceBusiness::EXERCICE_STATUT_IMPUTE]);
         });
         return ExerciceBusiness::EXERCICE_STATUT_IMPUTE;
-    }
-
-    private static function imputerExerciceHeureSup($exercice, $heures, $designation)
-    {
-        if ($heures->isEmpty()) {
-            return;
-        }
-
-        // Charger uniquement les types nécessaires
-        $typeIds = $heures->pluck('heure_exercice_type_id')->unique();
-        $heureTypes = HeureExerciceType::whereIn('id', $typeIds)->get();
-        $indexedTypes = $heureTypes->keyBy('id');
-
-        // Construire le tableau pour l'insertion par lot
-        $ecritures = [];
-        foreach ($heures as $heure) {
-            $tarifType = $indexedTypes->get($heure->heure_exercice_type_id);
-
-            if (!$tarifType) {
-                throw new ArrayException([], "Type d'heure exercice introuvable");
-            }
-
-            $designationSapeur = $designation . " - " . $heure->designation;
-            $total = self::arrondi_5_centimes($heure->quantite * $tarifType->montant);
-
-            // Par heure -> calcul de la durée
-            $ecritures[] = [
-                'tarif' => $tarifType->montant,
-                'quantite' => $heure->quantite,
-                'tarif_min' => null,
-                'tarif_min_pour' => null,
-                'total' => $total,
-
-                'designation' => $designationSapeur,
-                'type_unite_id' => $tarifType->type_unite_id,
-                'sapeur_id' => $heure->sapeur_id,
-                'compte_id' => $tarifType->compte_id,
-                'exercice_comptable_id' => $exercice->exercice_comptable_id,
-                'exercice_id' => $exercice->id,
-                'ecriture_categorie_id' => $tarifType->ecriture_categorie_id,
-                'date' => $exercice->date,
-                'heure' => $exercice->heure,
-
-                'module' => self::ECRITURE_MODULE_EXERCICE,
-                'type' => $tarifType->type,
-            ];
-        }
-
-        self::insererEcritures($ecritures);
     }
 
     private static function imputerExerciceParPiece($exercice, $sapeurs, $indemniteType, $designation)
@@ -1505,7 +1450,7 @@ class ImputationBusiness
     }
 
     /**
-     * Désignation des écritures d'un exercice (présences, heures supplémentaires et fiches liées).
+     * Désignation des écritures d'un exercice (présences et fiches liées).
      */
     private static function designationExercice(Exercice $exercice): string
     {
