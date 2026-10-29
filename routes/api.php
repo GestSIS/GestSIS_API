@@ -698,20 +698,25 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Matériel
     Route::group(['middleware' => 'jwtTokenSapeurOrRole:materiel.lecture'], function () {
+        Route::apiResource('materiel-types', MaterielTypeController::class)->only(['index']);
+    });
+
+    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,materiel.lecture'], function () {
+        Route::apiResource('materiel-categories', MaterielCategorieController::class)->only(['index']);
+        Route::apiResource('couleurs', CouleurController::class)->only(['index']);
+    });
+
+    Route::group(['middleware' => 'jwtTokenRole:materiel.lecture'], function () {
+        Route::apiResource('materiel-types.articles', MaterielTypeArticleController::class)->only(['index']);
+        Route::apiResource('batterie-types', BatterieTypeController::class)->only(['index']);
+        Route::apiResource('tuyau-diametres', TuyauDiametreController::class)->only(['index']);
         Route::get('materiel-types/statuts', [MaterielTypeController::class, 'statuts']);
         Route::get('materiel-types/articles-perimes', [MaterielTypeController::class, 'articlesPerimes']);
         Route::get('materiel-types/articles-sans-numero', [MaterielTypeController::class, 'articlesSansNumero']);
-        Route::apiResource('materiel-types', MaterielTypeController::class)->only(['index']);
-        Route::apiResource('materiel-types.articles', MaterielTypeArticleController::class)->only(['index']);
-        Route::apiResource('materiel-categories', MaterielCategorieController::class)->only(['index']);
-        Route::apiResource('couleurs', CouleurController::class)->only(['index']);
-        Route::apiResource('batterie-types', BatterieTypeController::class)->only(['index']);
-        Route::apiResource('tuyau-diametres', TuyauDiametreController::class)->only(['index']);
-
-        Route::apiResource('emplacements', EmplacementController::class)->only(['index']);
         Route::get('articles/a-recuperer', [ArticleController::class, 'aRecuperer']);
         Route::apiResource('articles', ArticleController::class)->only(['index']);
 
+        Route::apiResource('emplacements', EmplacementController::class)->only(['index']);
         Route::apiResource('emplacements.articles', ArticleEmplacementController::class)->only(['index']);
     });
 
@@ -738,15 +743,21 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Contrôles & Inspections
-    Route::group(['middleware' => 'jwtTokenSapeurOrRole:materiel.lecture'], function () {
+    // Déclarées avant controles/{controle} (show) pour ne pas être capturées par celle-ci.
+    Route::group(['middleware' => 'jwtTokenRole:materiel.lecture'], function () {
         Route::get('controles/statuts', [ControleController::class, 'statuts']);
         Route::get('controles/articles-a-controler', [ControleController::class, 'articlesAControler']);
         Route::get('controles/articles-limite-executions', [ControleController::class, 'articlesLimiteExecutions']);
-        Route::apiResource('controles', ControleController::class)->only(['index', 'show']);
         Route::apiResource('controles.taches', ControleTacheController::class)->only(['index'])->parameters(['taches' => 'tache']);
         Route::apiResource('controles.materiel-types', ControleMaterielTypeController::class)->only(['index']);
-        Route::get('articles/{article}/controle-execs', [ControleExecController::class, 'indexForArticle']);
         Route::get('controles/{controle}/dernieres-executions', [ControleExecController::class, 'dernieresExecutionsParArticle']);
+    });
+
+    // Historique des contrôles d'un article, affiché dans ModalArticleInfo
+    // (aussi ouverte depuis la fiche d'un sapeur, avec sapeur.lecture).
+    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,materiel.lecture'], function () {
+        Route::apiResource('controles', ControleController::class)->only(['index', 'show']);
+        Route::get('articles/{article}/controle-execs', [ControleExecController::class, 'indexForArticle']);
     });
 
     Route::group(['middleware' => 'jwtTokenRole:materiel.modification'], function () {

@@ -5,7 +5,6 @@ namespace App\Domaine\Business\Materiel;
 use App\Domaine\Exceptions\ArrayException;
 use App\Models\Article;
 use App\Models\Controle;
-use App\Models\InterventionVehicule;
 use App\Models\MaterielType;
 use App\Models\MaterielTypeBatterie;
 use App\Models\MaterielTypeTuyau;
@@ -77,7 +76,9 @@ class MaterielTypeBusiness
   public static function editProduct($id, $data)
   {
     // Type supprimé entre-temps (autre onglet, autre utilisateur) : 404 plutôt qu'une 500.
-    $oldType = (int) MaterielType::findOrFail($id)->type;
+    $existant = MaterielType::findOrFail($id);
+    $oldType = (int) $existant->type;
+    $oldEstAttribuable = (bool) $existant->est_attribuable;
 
     $data['fournisseur'] ??= '';
     $data['numero_fournisseur'] ??= '';
@@ -109,13 +110,20 @@ class MaterielTypeBusiness
     $batterie = $data['batterie'] ?? null;
     unset($data['batterie']);
 
+    // Passer un type vers ou depuis le type véhicule change la nature de ses
+    // articles (emplacement lié ou non) : refusé tant que des articles existent.
     if (
-      $oldType === self::TYPE_VEHICULE && $data['type'] !== self::TYPE_VEHICULE &&
-      InterventionVehicule::join('articles', 'articles.id', '=', 'intervention_vehicule.vehicule_id')
-        ->where('articles.materiel_type_id', $id)
-        ->exists()
+      ($oldType === self::TYPE_VEHICULE) !== ($data['type'] === self::TYPE_VEHICULE) &&
+      Article::where('materiel_type_id', $id)->exists()
     ) {
-      throw new ArrayException([], "Impossible d'enlever le type véhicule, des véhicules sont lié à ce type et utilisé pour des rapports d'intervention");
+      throw new ArrayException([], "Impossible de changer le type véhicule de ce type de matériel tant que des articles y sont associés");
+    }
+
+    if (
+      !$data['est_attribuable'] && $oldEstAttribuable &&
+      Article::where('materiel_type_id', $id)->whereNotNull('sapeur_id')->exists()
+    ) {
+      throw new ArrayException([], "Impossible de rendre ce type non attribuable : des articles de ce type sont attribués à des sapeurs");
     }
 
     MaterielType::whereId($id)

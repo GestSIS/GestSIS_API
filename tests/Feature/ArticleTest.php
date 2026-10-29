@@ -58,6 +58,7 @@ class ArticleTest extends TestCase
             'articles' => [
                 [
                     'id' => $article->id,
+                    'statut' => true,
                     'emplacement_id' => $emplacement->id,
                     'sapeur_id' => null,
                     'remarque' => 'apres',
@@ -105,6 +106,7 @@ class ArticleTest extends TestCase
             'articles' => [
                 [
                     'id' => $article->id,
+                    'statut' => true,
                     'emplacement_id' => $emplacement->id,
                     'numero' => null,
                 ],
@@ -253,6 +255,7 @@ class ArticleTest extends TestCase
         $response = $this->json('PUT', '/api/v2/articles', [
             'articles' => [[
                 'id' => $article->id,
+                'statut' => true,
                 'designation' => 'Apres',
                 'remarque' => 'Apres',
                 'emplacement' => [
@@ -355,6 +358,7 @@ class ArticleTest extends TestCase
         $response = $this->json('PUT', '/api/v2/articles', [
             'articles' => [[
                 'id' => $article->id,
+                'statut' => true,
                 'emplacement' => [
                     'couleur_id' => $couleur->id,
                     'statut' => false,
@@ -383,6 +387,7 @@ class ArticleTest extends TestCase
         $response = $this->json('PUT', '/api/v2/articles', [
             'articles' => [[
                 'id' => $article->id,
+                'statut' => true,
                 'emplacement' => [
                     'couleur_id' => $couleur->id,
                     'parent_id' => $emplacement->id,
@@ -406,6 +411,7 @@ class ArticleTest extends TestCase
         $response = $this->json('PUT', '/api/v2/articles', [
             'articles' => [[
                 'id' => $article->id,
+                'statut' => true,
                 'materiel_type_id' => $autreTypeVehicule->id,
                 'emplacement' => ['couleur_id' => $couleur->id],
             ]],
@@ -426,6 +432,7 @@ class ArticleTest extends TestCase
         $response = $this->json('PUT', '/api/v2/articles', [
             'articles' => [[
                 'id' => $article->id,
+                'statut' => true,
                 'materiel_type_id' => $typeStandard->id,
                 'emplacement' => ['couleur_id' => $couleur->id],
             ]],
@@ -446,6 +453,7 @@ class ArticleTest extends TestCase
         $response = $this->json('PUT', '/api/v2/articles', [
             'articles' => [[
                 'id' => $article->id,
+                'statut' => true,
                 'materiel_type_id' => $typeB->id,
                 'emplacement_id' => $emplacement->id,
             ]],
@@ -542,6 +550,7 @@ class ArticleTest extends TestCase
         $response = $this->json('PUT', '/api/v2/articles', [
             'articles' => [[
                 'id' => $article->id,
+                'statut' => true,
                 'designation' => 'Apres',
                 'emplacement' => ['couleur_id' => $couleur->id],
             ]],
@@ -736,5 +745,179 @@ class ArticleTest extends TestCase
         $article->refresh();
         $this->assertSame($sapeur->id, $article->sapeur_id);
         $this->assertNull($article->retour);
+    }
+
+
+    public function testCreateArticleAttribueSansAttributionEstRefuse(): void
+    {
+        $type = MaterielType::factory()->create(['est_attribuable' => true]);
+
+        $this->json('POST', '/api/v2/articles', ['articles' => [[
+            'materiel_type_id' => $type->id,
+            'quantite' => 1,
+            'sapeur_id' => Sapeur::factory()->create()->id,
+        ]]], ['Sis-Key' => 1])->assertStatus(422)->assertJsonValidationErrors(['articles.0.attribution']);
+    }
+
+    public function testCreateArticleAttribueSansCleEmplacementIdFonctionne(): void
+    {
+        $type = MaterielType::factory()->create(['est_attribuable' => true]);
+        $sapeur = Sapeur::factory()->create();
+
+        $this->json('POST', '/api/v2/articles', ['articles' => [[
+            'materiel_type_id' => $type->id,
+            'quantite' => 1,
+            'sapeur_id' => $sapeur->id,
+            'attribution' => '2026-10-29',
+        ]]], ['Sis-Key' => 1])->assertStatus(200);
+
+        $this->assertDatabaseHas('articles', ['materiel_type_id' => $type->id, 'sapeur_id' => $sapeur->id, 'emplacement_id' => null]);
+    }
+
+    public function testCreateArticleDeTypeInconnuEstRefuse(): void
+    {
+        $this->json('POST', '/api/v2/articles', ['articles' => [[
+            'materiel_type_id' => 999999,
+            'quantite' => 1,
+            'emplacement_id' => Emplacement::factory()->create()->id,
+        ]]], ['Sis-Key' => 1])->assertStatus(422)->assertJsonValidationErrors(['articles.0.materiel_type_id']);
+    }
+
+    public function testCreateArticlesSansListeEstRefuse(): void
+    {
+        $this->json('POST', '/api/v2/articles', [], ['Sis-Key' => 1])
+            ->assertStatus(422)->assertJsonValidationErrors(['articles']);
+    }
+
+    public function testCreateArticlesQuantiteLimiteeA50(): void
+    {
+        $type = MaterielType::factory()->create(['est_numerote' => false]);
+        $emplacement = Emplacement::factory()->create();
+        $ligne = ['materiel_type_id' => $type->id, 'emplacement_id' => $emplacement->id];
+
+        $this->json('POST', '/api/v2/articles', ['articles' => [[...$ligne, 'quantite' => 51]]], ['Sis-Key' => 1])
+            ->assertStatus(422)->assertJsonValidationErrors(['articles.0.quantite']);
+
+        $this->json('POST', '/api/v2/articles', ['articles' => [[...$ligne, 'quantite' => 50]]], ['Sis-Key' => 1])
+            ->assertStatus(200);
+        $this->assertSame(50, Article::where('materiel_type_id', $type->id)->count());
+    }
+
+    public function testUpdateArticlesSansStatutEstRefuse(): void
+    {
+        $emplacement = Emplacement::factory()->create();
+        $article = Article::factory()->create(['emplacement_id' => $emplacement->id, 'sapeur_id' => null, 'statut' => false]);
+
+        $this->json('PUT', '/api/v2/articles', ['articles' => [[
+            'id' => $article->id,
+            'emplacement_id' => $emplacement->id,
+        ]]], ['Sis-Key' => 1])->assertStatus(422)->assertJsonValidationErrors(['articles.0.statut']);
+
+        $this->assertFalse($article->fresh()->statut);
+    }
+
+    public function testUpdateArticleInexistantEstRefuse(): void
+    {
+        $this->json('PUT', '/api/v2/articles', ['articles' => [[
+            'id' => 999999,
+            'emplacement_id' => Emplacement::factory()->create()->id,
+            'statut' => true,
+        ]]], ['Sis-Key' => 1])->assertStatus(422)->assertJsonValidationErrors(['articles.0.id']);
+    }
+
+    public function testCreateArticleDansUnEmplacementInactifEstRefuse(): void
+    {
+        $type = MaterielType::factory()->create(['est_numerote' => false]);
+        $inactif = Emplacement::factory()->create(['statut' => false]);
+
+        $this->json('POST', '/api/v2/articles', ['articles' => [[
+            'materiel_type_id' => $type->id,
+            'quantite' => 1,
+            'emplacement_id' => $inactif->id,
+        ]]], ['Sis-Key' => 1])->assertStatus(422);
+
+        $this->assertDatabaseMissing('articles', ['emplacement_id' => $inactif->id]);
+    }
+
+    public function testDeplacerUnArticleDansUnEmplacementInactifEstRefuse(): void
+    {
+        $actif = Emplacement::factory()->create();
+        $inactif = Emplacement::factory()->create(['statut' => false]);
+        $article = Article::factory()->create(['emplacement_id' => $actif->id, 'sapeur_id' => null]);
+
+        $this->json('PUT', '/api/v2/articles', ['articles' => [[
+            'id' => $article->id,
+            'emplacement_id' => $inactif->id,
+            'statut' => true,
+        ]]], ['Sis-Key' => 1])->assertStatus(422);
+
+        $this->assertSame($actif->id, $article->fresh()->emplacement_id);
+    }
+
+    public function testReenregistrerUnArticleDejaDansUnEmplacementInactifEstAccepte(): void
+    {
+        // Données historiques : seul un déplacement vers un emplacement inactif est refusé.
+        $inactif = Emplacement::factory()->create(['statut' => false]);
+        $article = Article::factory()->create(['emplacement_id' => $inactif->id, 'sapeur_id' => null]);
+
+        $this->json('PUT', '/api/v2/articles', ['articles' => [[
+            'id' => $article->id,
+            'emplacement_id' => $inactif->id,
+            'remarque' => 'modifiée',
+            'statut' => true,
+        ]]], ['Sis-Key' => 1])->assertStatus(200);
+    }
+
+    public function testRetourArticlesDansUnEmplacementInactifEstRefuse(): void
+    {
+        $inactif = Emplacement::factory()->create(['statut' => false]);
+        $article = Article::factory()->create(['sapeur_id' => Sapeur::factory()->create()->id, 'emplacement_id' => null]);
+
+        $this->json('POST', "/api/v2/emplacements/{$inactif->id}/articles", [
+            'date' => '2026-10-29',
+            'articleIds' => [$article->id],
+        ], ['Sis-Key' => 1])->assertStatus(422);
+
+        $this->assertNull($article->fresh()->emplacement_id);
+    }
+
+    public function testCreateVehiculeSousUnEmplacementParentInactifEstRefuse(): void
+    {
+        $type = $this->vehiculeType();
+        $parentInactif = Emplacement::factory()->create(['statut' => false]);
+
+        $this->json('POST', '/api/v2/articles', ['articles' => [[
+            'materiel_type_id' => $type->id,
+            'quantite' => 1,
+            'numero' => 'V1',
+            'designation' => 'Tonne-pompe',
+            'emplacement' => ['couleur_id' => Couleur::factory()->create()->id, 'parent_id' => $parentInactif->id],
+        ]]], ['Sis-Key' => 1])->assertStatus(422);
+
+        $this->assertDatabaseMissing('emplacements', ['parent_id' => $parentInactif->id]);
+    }
+
+    public function testEditVehiculeRefuseNeModifiePasLarticle(): void
+    {
+        // Le refus d'un contrôle sur l'emplacement lié (ici un cycle) ne doit pas
+        // laisser l'article à moitié modifié.
+        $type = $this->vehiculeType();
+        $couleur = Couleur::factory()->create();
+        $article = Article::factory()->create([
+            'materiel_type_id' => $type->id,
+            'emplacement_id' => null,
+            'sapeur_id' => null,
+            'remarque' => 'avant',
+        ]);
+        $emplacement = Emplacement::factory()->create(['article_id' => $article->id, 'couleur_id' => $couleur->id]);
+
+        $this->json('PUT', '/api/v2/articles', ['articles' => [[
+            'id' => $article->id,
+            'remarque' => 'après',
+            'statut' => true,
+            'emplacement' => ['couleur_id' => $couleur->id, 'parent_id' => $emplacement->id],
+        ]]], ['Sis-Key' => 1])->assertStatus(422);
+
+        $this->assertSame('avant', $article->fresh()->remarque);
     }
 }

@@ -434,4 +434,64 @@ class EmplacementTest extends TestCase
         $this->dupliquerEnfants($source->id, ['cible_id' => 999999999])->assertStatus(422)->assertJsonValidationErrors('cible_id');
         $this->dupliquerEnfants(999999999, ['cible_id' => $cible->id])->assertStatus(404);
     }
+
+
+    public function testUpdateEmplacementInexistantRenvoieUne404(): void
+    {
+        $this->json('PUT', '/api/v2/emplacements/999999', $this->basePayload(), ['Sis-Key' => 1])->assertNotFound();
+    }
+
+    public function testDeleteEmplacementInexistantRenvoieUne404(): void
+    {
+        $this->json('DELETE', '/api/v2/emplacements/999999', [], ['Sis-Key' => 1])->assertNotFound();
+    }
+
+    public function testCreerUnEmplacementActifSousUnParentInactifEstRefuse(): void
+    {
+        $parent = Emplacement::factory()->create(['statut' => false]);
+
+        $this->json('POST', '/api/v2/emplacements', $this->basePayload(['parent_id' => $parent->id]), ['Sis-Key' => 1])
+            ->assertStatus(422);
+
+        $this->assertDatabaseMissing('emplacements', ['parent_id' => $parent->id]);
+    }
+
+    public function testCreerUnEmplacementInactifSousUnParentInactifEstAccepte(): void
+    {
+        $parent = Emplacement::factory()->create(['statut' => false]);
+
+        $this->json('POST', '/api/v2/emplacements', $this->basePayload(['parent_id' => $parent->id, 'statut' => false]), ['Sis-Key' => 1])
+            ->assertStatus(201);
+    }
+
+    public function testDeplacerUnEmplacementActifSousUnParentInactifEstRefuse(): void
+    {
+        $parent = Emplacement::factory()->create(['statut' => false]);
+        $emplacement = Emplacement::factory()->create();
+
+        $payload = $this->basePayload(['parent_id' => $parent->id, 'couleur_id' => $emplacement->couleur_id]);
+        $this->json('PUT', "/api/v2/emplacements/{$emplacement->id}", $payload, ['Sis-Key' => 1])->assertStatus(422);
+
+        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'parent_id' => null]);
+    }
+
+    public function testReactiverUnEmplacementSousUnParentInactifEstRefuse(): void
+    {
+        $parent = Emplacement::factory()->create(['statut' => false]);
+        $emplacement = Emplacement::factory()->create(['parent_id' => $parent->id, 'statut' => false]);
+
+        $payload = $this->basePayload(['parent_id' => $parent->id, 'couleur_id' => $emplacement->couleur_id, 'statut' => true]);
+        $this->json('PUT', "/api/v2/emplacements/{$emplacement->id}", $payload, ['Sis-Key' => 1])->assertStatus(422);
+    }
+
+    public function testReenregistrerUnEmplacementActifDejaSousUnParentInactifEstAccepte(): void
+    {
+        // Données historiques : la règle ne bloque qu'un changement de parent ou
+        // une réactivation, pas la simple ré-édition d'une situation existante.
+        $parent = Emplacement::factory()->create(['statut' => false]);
+        $emplacement = Emplacement::factory()->create(['parent_id' => $parent->id]);
+
+        $payload = $this->basePayload(['parent_id' => $parent->id, 'couleur_id' => $emplacement->couleur_id, 'designation' => 'Renommé']);
+        $this->json('PUT', "/api/v2/emplacements/{$emplacement->id}", $payload, ['Sis-Key' => 1])->assertStatus(200);
+    }
 }

@@ -34,6 +34,11 @@ class EmplacementBusiness
     $emplacement['remarque'] ??= '';
     $emplacement['tri'] = ($order ?? 0) + 1;
 
+    self::assertParentActif(
+      isset($emplacement['parent_id']) ? (int) $emplacement['parent_id'] : null,
+      (bool) ($emplacement['statut'] ?? true),
+    );
+
     $hangar = $emplacement['hangar'] ?? null;
     unset($emplacement['hangar']);
 
@@ -126,23 +131,60 @@ class EmplacementBusiness
   }
 
   /**
+   * Un article ne peut être rangé (création, déplacement, retour) que dans un
+   * emplacement actif : un emplacement inactif ne peut de toute façon pas être
+   * désactivé tant qu'il contient du matériel (assertCanBeDeactivated).
+   */
+  public static function assertEmplacementActif(int $id): void
+  {
+    $emplacement = Emplacement::find($id);
+    if ($emplacement !== null && !$emplacement->statut) {
+      throw new ArrayException([], "L'emplacement « {$emplacement->designation} » est inactif, aucun matériel ne peut y être rangé");
+    }
+  }
+
+  /**
+   * Un emplacement actif ne peut pas être placé sous un parent inactif. Seul un
+   * changement est contrôlé (création, nouveau parent, réactivation) : une
+   * situation historique déjà en place peut être ré-enregistrée telle quelle.
+   */
+  public static function assertParentActif(?int $parentId, bool $statut, ?Emplacement $existant = null): void
+  {
+    if ($parentId === null || !$statut) {
+      return;
+    }
+    if ($existant !== null && $existant->parent_id === $parentId && $existant->statut === true) {
+      return;
+    }
+
+    $parent = Emplacement::find($parentId);
+    if ($parent !== null && !$parent->statut) {
+      throw new ArrayException([], "L'emplacement parent « {$parent->designation} » est inactif");
+    }
+  }
+
+  /**
    * Edit an existing emplacement
    * @param integer $id ID of the emplacement to edit
    * @param array $data Properties of the emplacement to modify
    */
   public static function editEmplacement($id, $data)
   {
-    $emplacement = Emplacement::find($id);
+    $emplacement = Emplacement::findOrFail($id);
     if ($emplacement->article_id !== null) {
       throw new ArrayException([], "Cet emplacement est géré depuis la fiche du véhicule lié");
     }
+    $parentId = array_key_exists('parent_id', $data)
+      ? ($data['parent_id'] !== null ? (int) $data['parent_id'] : null)
+      : $emplacement->parent_id;
     if (array_key_exists('parent_id', $data)) {
-      self::assertNoCycle((int) $id, $data['parent_id'] !== null ? (int) $data['parent_id'] : null);
+      self::assertNoCycle((int) $id, $parentId);
     }
     $statutVoulu = array_key_exists('statut', $data) ? (bool) $data['statut'] : true;
     if (!$statutVoulu && $emplacement->statut === true) {
       self::assertCanBeDeactivated((int) $id);
     }
+    self::assertParentActif($parentId, $statutVoulu, $emplacement);
     $data['remarque'] ??= '';
 
     // Un sous-objet hangar n'est présent que lorsque l'édition vient de la gestion des
@@ -228,13 +270,14 @@ class EmplacementBusiness
    */
   public static function deleteEmplacement($id)
   {
+    $emplacement = Emplacement::findOrFail($id);
     if (Article::where('emplacement_id', $id)->exists()) {
       throw new ArrayException([], "Veuillez d'abord supprimer les article de cet emplacement");
     }
     if (Emplacement::where('parent_id', $id)->exists()) {
       throw new ArrayException([], "Veuillez d'abord supprimer ou déplacer les sous-emplacements de cet emplacement");
     }
-    if (Emplacement::find($id)->article_id !== null) {
+    if ($emplacement->article_id !== null) {
       throw new ArrayException([], "Cet emplacement est lié à un véhicule, il ne peut être supprimé qu'en supprimant le véhicule");
     }
     return Emplacement::whereId($id)->delete();

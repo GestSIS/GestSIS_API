@@ -11,6 +11,7 @@ use App\Models\Intervention;
 use App\Models\InterventionVehicule;
 use App\Models\MaterielCategorie;
 use App\Models\MaterielType;
+use App\Models\Sapeur;
 use App\Models\TuyauDiametre;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -336,5 +337,73 @@ class MaterielTypeTest extends TestCase
         $this->json('GET', '/api/v2/lavages', [], ['Sis-Key' => 1])->assertStatus(404);
         $this->json('POST', '/api/v2/lavages', [], ['Sis-Key' => 1])->assertStatus(404);
         $this->json('DELETE', '/api/v2/lavages', [], ['Sis-Key' => 1])->assertStatus(404);
+    }
+
+
+    /**
+     * Basculer un type vers ou depuis le type véhicule change la nature de ses
+     * articles (emplacement lié ou non) : refusé tant que des articles existent.
+     */
+    public function testPasserUnTypeEnVehiculeAvecDesArticlesEstRefuse(): void
+    {
+        $payload = $this->basePayload(MaterielTypeBusiness::TYPE_NONE);
+        $type = MaterielType::factory()->create(['materiel_categorie_id' => $payload['materiel_categorie_id'], 'type' => MaterielTypeBusiness::TYPE_NONE]);
+        Article::factory()->create(['materiel_type_id' => $type->id]);
+
+        $response = $this->json('PUT', "/api/v2/materiel-types/{$type->id}", [...$payload, 'type' => MaterielTypeBusiness::TYPE_VEHICULE], ['Sis-Key' => 1]);
+
+        $response->assertStatus(422);
+        $this->assertDatabaseHas('materiel_types', ['id' => $type->id, 'type' => MaterielTypeBusiness::TYPE_NONE, 'est_emplacement' => false]);
+    }
+
+    public function testRetirerLeTypeVehiculeAvecDesArticlesEstRefuse(): void
+    {
+        $payload = $this->basePayload(MaterielTypeBusiness::TYPE_NONE);
+        $type = MaterielType::factory()->create([
+            'materiel_categorie_id' => $payload['materiel_categorie_id'],
+            'type' => MaterielTypeBusiness::TYPE_VEHICULE,
+            'est_emplacement' => true,
+        ]);
+        Article::factory()->create(['materiel_type_id' => $type->id]);
+
+        $response = $this->json('PUT', "/api/v2/materiel-types/{$type->id}", $payload, ['Sis-Key' => 1]);
+
+        $response->assertStatus(422);
+        $this->assertDatabaseHas('materiel_types', ['id' => $type->id, 'type' => MaterielTypeBusiness::TYPE_VEHICULE, 'est_emplacement' => true]);
+    }
+
+    public function testChangerLeTypeVehiculeSansArticleEstAccepte(): void
+    {
+        $payload = $this->basePayload(MaterielTypeBusiness::TYPE_NONE);
+        $type = MaterielType::factory()->create(['materiel_categorie_id' => $payload['materiel_categorie_id'], 'type' => MaterielTypeBusiness::TYPE_NONE]);
+
+        $this->json('PUT', "/api/v2/materiel-types/{$type->id}", [...$payload, 'type' => MaterielTypeBusiness::TYPE_VEHICULE], ['Sis-Key' => 1])
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('materiel_types', ['id' => $type->id, 'type' => MaterielTypeBusiness::TYPE_VEHICULE, 'est_emplacement' => true]);
+    }
+
+    public function testRetirerEstAttribuableAvecDesArticlesAttribuesEstRefuse(): void
+    {
+        $payload = $this->basePayload(MaterielTypeBusiness::TYPE_NONE);
+        $type = MaterielType::factory()->create(['materiel_categorie_id' => $payload['materiel_categorie_id'], 'est_attribuable' => true]);
+        Article::factory()->create(['materiel_type_id' => $type->id, 'sapeur_id' => Sapeur::factory()->create()->id, 'emplacement_id' => null]);
+
+        $response = $this->json('PUT', "/api/v2/materiel-types/{$type->id}", [...$payload, 'est_attribuable' => false], ['Sis-Key' => 1]);
+
+        $response->assertStatus(422);
+        $this->assertDatabaseHas('materiel_types', ['id' => $type->id, 'est_attribuable' => true]);
+    }
+
+    public function testRetirerEstAttribuableSansArticleAttribueEstAccepte(): void
+    {
+        $payload = $this->basePayload(MaterielTypeBusiness::TYPE_NONE);
+        $type = MaterielType::factory()->create(['materiel_categorie_id' => $payload['materiel_categorie_id'], 'est_attribuable' => true]);
+        Article::factory()->create(['materiel_type_id' => $type->id, 'sapeur_id' => null]);
+
+        $this->json('PUT', "/api/v2/materiel-types/{$type->id}", [...$payload, 'est_attribuable' => false], ['Sis-Key' => 1])
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('materiel_types', ['id' => $type->id, 'est_attribuable' => false]);
     }
 }

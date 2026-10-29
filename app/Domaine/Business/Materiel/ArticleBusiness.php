@@ -48,6 +48,7 @@ class ArticleBusiness
     if ($estEmplacement) {
       throw new ArrayException([], "Un véhicule ne peut pas être retourné dans un emplacement de cette manière");
     }
+    EmplacementBusiness::assertEmplacementActif($emplacementId);
 
     Article::whereIn('id', $articleIds)->update(['sapeur_id' => null, 'emplacement_id' => $emplacementId, 'retour' => $date]);
     return Article::whereIn('id', $articleIds)->get();
@@ -88,10 +89,15 @@ class ArticleBusiness
     // fetch types equivalents
     $indexedTypes = MaterielType::all()->keyBy('id');
 
+    // sapeur_id / emplacement_id sont facultatifs dans la requête : absents, ils valent null.
+    $articles = array_map(fn ($article) => [
+      ...$article,
+      'sapeur_id' => $article['sapeur_id'] ?? null,
+      'emplacement_id' => $article['emplacement_id'] ?? null,
+    ], $articles);
+
     // Controller qu'un article appartiennent soit à un sapeur soit à un emplacement
     foreach ($articles as $article) {
-      $article['sapeur_id'] ??= null;
-      $article['emplacement_id'] ??= null;
       $type = $indexedTypes[$article['materiel_type_id']];
 
       // Un article qui est lui-même un emplacement (ex: véhicule) n'est ni attribué
@@ -118,6 +124,14 @@ class ArticleBusiness
       if ($type->est_numerote && trim($article['numero'] ?? '') === '') {
         throw new ArrayException([], message: "Article de type '{$type->designation}' nécessite un numéro");
       }
+
+      if (!$type->est_emplacement && $article['emplacement_id'] !== null) {
+        EmplacementBusiness::assertEmplacementActif((int) $article['emplacement_id']);
+      }
+      if ($type->est_emplacement) {
+        $parentId = $article['emplacement']['parent_id'] ?? null;
+        EmplacementBusiness::assertParentActif($parentId !== null ? (int) $parentId : null, true);
+      }
     }
 
     // Controller numérotation correcte
@@ -126,13 +140,13 @@ class ArticleBusiness
     return DB::transaction(fn() => collect($articles)->map(function ($article) use ($indexedTypes) {
       $type = $indexedTypes[$article['materiel_type_id']];
       return [
-        'quantite' => $type->est_numerote ? 1 : $article['quantite'],
+        'quantite' => $type->est_numerote ? 1 : ($article['quantite'] ?? 1),
         'materiel_type_id' => $article['materiel_type_id'],
         'taille' => $type->est_taillee ? trim($article['taille'] ?? '') : '',
         'remarque' => $article['remarque'] ?? '',
         'emplacement_id' => $type->est_emplacement ? null : $article['emplacement_id'],
-        'sapeur_id' => $type->est_emplacement ? null : ($article['sapeur_id'] ?? null),
-        'attribution' => ($article['sapeur_id'] ?? null) === null ? null : $article['attribution'],
+        'sapeur_id' => $type->est_emplacement ? null : $article['sapeur_id'],
+        'attribution' => $article['sapeur_id'] === null ? null : $article['attribution'],
         'retour' => null,
         'numero' => $type->est_numerote ? $article['numero'] : '',
         // 'uuid' => uniqid(), // TODO: en avons-nous vraiment besoin ? Utiliser le numéro ou le UUID pour les codebar ?
@@ -221,11 +235,23 @@ class ArticleBusiness
       if ($type->est_numerote && trim($article['numero'] ?? '') === '') {
         throw new ArrayException([], message: "Article de type '{$type->designation}' nécessite un numéro");
       }
+
+      // Seul un déplacement est contrôlé : un article déjà rangé dans un
+      // emplacement inactif (données historiques) reste modifiable.
+      if (
+        !$type->est_emplacement &&
+        $article['emplacement_id'] !== null &&
+        (int) $article['emplacement_id'] !== $existant->emplacement_id
+      ) {
+        EmplacementBusiness::assertEmplacementActif((int) $article['emplacement_id']);
+      }
       return $article;
     })->all();
 
     // Controller numérotation correcte
-    $articles = collect($articles)->map(function ($article) use ($indexedTypes) {
+    // Transaction : un refus sur l'emplacement lié d'un article (cycle, parent
+    // inactif…) ne doit laisser aucun article du lot à moitié modifié.
+    $articles = DB::transaction(fn () => collect($articles)->map(function ($article) use ($indexedTypes) {
       $type = $indexedTypes[$article['materiel_type_id']];
       return [
         'id' => $article['id'],
@@ -245,7 +271,7 @@ class ArticleBusiness
         'designation' => $article['designation'] ?? '',
         'immatriculation' => $article['immatriculation'] ?? '',
         'date_peremption' => $type->est_perimable ? ($article['date_peremption'] ?? null) : null,
-        'statut' => $article['statut'] ?? true,
+        'statut' => $article['statut'],
         'emplacement' => $article['emplacement'] ?? null,
       ];
     })->map(function ($article) use ($indexedTypes) {
@@ -278,6 +304,11 @@ class ArticleBusiness
         if (!$statutEmplacementVoulu && $emplacementRepresentee->statut === true) {
           EmplacementBusiness::assertCanBeDeactivated($emplacementRepresentee->id);
         }
+        EmplacementBusiness::assertParentActif(
+          $nouveauParentId !== null ? (int) $nouveauParentId : null,
+          $statutEmplacementVoulu,
+          $emplacementRepresentee,
+        );
 
         $emplacementRepresentee->update([
           'designation' => $existing->designation,
@@ -291,7 +322,7 @@ class ArticleBusiness
       }
 
       return $article['id'];
-    });
+    }));
 
     return Article::whereIn('id', $articles)->with('emplacementRepresentee')->get();
   }
