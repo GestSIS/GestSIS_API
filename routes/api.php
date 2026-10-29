@@ -262,9 +262,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Sapeurs
     Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,exercice.lecture,intervention.lecture,organisation.modification,comptabilite.lecture,cours.lecture,materiel.lecture,fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation,fiche_travail.lecture'], function () {
-        Route::apiResource('sapeurs', SapeurController::class)->only(['index', 'show']);
-
-        Route::get('sapeurs/{id}/fiche', [SapeurController::class, 'fiche']);
+        Route::apiResource('sapeurs', SapeurController::class)->only(['index']);
 
         Route::get('statistiques/{id}/civilite', [SapeurStatistiqueController::class, 'civilite']);
         Route::get('statistiques/{id}/fonction', [SapeurStatistiqueController::class, 'fonction']);
@@ -274,6 +272,10 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture'], function () {
+        // Détail complet (n° AVS, IBAN, adresse…) : réservé à la gestion des sapeurs.
+        Route::apiResource('sapeurs', SapeurController::class)->only(['show']);
+        Route::get('sapeurs/{id}/fiche', [SapeurController::class, 'fiche']);
+
         Route::apiResource('sapeurs.permis', SapeurPermisController::class)->only(['index']);
         Route::apiResource('sapeurs.telephones', SapeurTelephoneController::class)->only(['index']);
         Route::apiResource('sapeurs.fonctions', SapeurFonctionController::class)->only(['index']);
@@ -305,7 +307,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::apiResource('sapeurs.mutations', SapeurMutationController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('sapeurs.cours', SapeurCoursController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('cours-sapeurs', CoursSapeurController::class)->only(['store']);
-        Route::apiResource('sapeurs.photo', SapeurPhotoController::class)->only(['store', 'delete']);
+        Route::apiResource('sapeurs.photo', SapeurPhotoController::class)->only(['store']);
         Route::delete('sapeurs/{sapeurId}/photo', [SapeurPhotoController::class, 'destroy'])->name('api.v2.sapeur.photo-destroy');
 
         // Route spécial pour les civils et autres afin de changer leur statut
@@ -373,7 +375,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
         // Convocations
         Route::get('convocation/{id}', [ConvocationsController::class, 'convocationPdf']);
-        Route::apiResource('convocation-param', ConvocationParamController::class)->only(['index', 'store']);
+        Route::apiResource('convocation-param', ConvocationParamController::class)->only(['index']);
 
         // Statistiques
         Route::get('statistiques/{id}/presence-exercice', [SapeurExerciceController::class, 'stat']);
@@ -397,6 +399,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
     Route::group(['middleware' => 'jwtTokenRole:exercice.modification'], function () {
         Route::apiResource('exercices', ExerciceController::class)->only(['store', 'update']);
+        Route::apiResource('convocation-param', ConvocationParamController::class)->only(['store']);
         Route::get('sapeurs-convocation', [SapeurController::class, 'convocationSms'])->name('sapeurs-convocation');
     });
     Route::group(['middleware' => 'jwtTokenRole:exercice.validation'], function () {
@@ -422,7 +425,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::apiResource('travail-types', TravailTypeController::class)->only(['index']);
     });
     Route::group(['middleware' => 'jwtTokenRole:fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation,fiche_travail.lecture'], function () {
-        Route::apiResource('travaux', TravailController::class)->only(['index']);
         Route::get('travaux/{exerciceComptableId}', [TravailController::class, 'index'])->name('api.v2.travaux.index');
     });
     Route::group(['middleware' => 'jwtTokenRole:fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation'], function () {
