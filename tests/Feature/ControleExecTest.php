@@ -147,7 +147,7 @@ class ControleExecTest extends TestCase
             'remarque_globale' => 'après',
             'date_echeance' => '2027-02-01',
             'taches' => [
-                ['tache_id' => $controle->taches->first()->id, 'statut' => 'OK', 'remarque' => null],
+                ['id' => $exec->execTaches->first()->id, 'statut' => 'OK', 'remarque' => null],
             ],
         ]);
 

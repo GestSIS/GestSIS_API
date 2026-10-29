@@ -37,7 +37,11 @@ class ControleExecBusiness
         $tachesById = $controle->taches->keyBy('id');
         $tachesData = $data['taches'] ?? [];
 
-        self::validateAllTachesPresent($tachesById, $tachesData);
+        self::validateIdsPresents(
+            $tachesById->keys(),
+            collect($tachesData)->pluck('tache_id'),
+            "Toutes les tâches du contrôle doivent être renseignées avant soumission",
+        );
 
         $dateEcheance = self::resolveDateEcheance($controle, $data['date_echeance'] ?? null);
 
@@ -54,7 +58,7 @@ class ControleExecBusiness
 
             self::enregistrerResultats($exec, $tachesById, $tachesData);
 
-            return $exec->load(['controle', 'execTaches.tache', 'executeur']);
+            return $exec->load(['controle', 'execTaches', 'executeur']);
         });
     }
 
@@ -83,38 +87,65 @@ class ControleExecBusiness
     }
 
     /**
-     * Modifie une exécution existante : date, remarque globale et résultats
-     * des tâches. Le contrôle et l'article restent fixes.
+     * Modifie une exécution existante : date, remarque globale et résultats.
+     * Le contrôle et l'article restent fixes.
+     *
+     * Les résultats sont modifiés en place, ligne par ligne (identifiée par son
+     * id), et validés selon le type et les bornes figés au moment de
+     * l'exécution : la configuration actuelle des tâches du contrôle (tâche
+     * renommée, retypée, supprimée ou ajoutée depuis) n'intervient pas. On ne
+     * peut ni ajouter ni retirer de ligne.
      *
      * @param array{
      *   executed_at: string,
      *   remarque_globale: ?string,
      *   date_echeance: ?string,
-     *   taches: ?array<int, array{tache_id: int, statut: ?string, value_measured: ?float, remarque: ?string}>
+     *   taches: ?array<int, array{id: int, statut: ?string, value_measured: ?float, remarque: ?string}>
      * } $data
      */
     public static function updateExec(int $id, array $data): ControleExec
     {
-        $exec = ControleExec::with('controle.taches')->findOrFail($id);
+        $exec = ControleExec::with(['controle', 'execTaches'])->findOrFail($id);
 
-        $tachesById = $exec->controle->taches->keyBy('id');
+        $lignesById = $exec->execTaches->keyBy('id');
         $tachesData = $data['taches'] ?? [];
 
-        self::validateAllTachesPresent($tachesById, $tachesData);
+        self::validateIdsPresents(
+            $lignesById->keys(),
+            collect($tachesData)->pluck('id'),
+            "Tous les résultats de ce contrôle doivent être renseignés avant soumission",
+        );
 
         $dateEcheance = self::resolveDateEcheance($exec->controle, $data['date_echeance'] ?? null);
 
-        return DB::transaction(function () use ($exec, $data, $dateEcheance, $tachesById, $tachesData): ControleExec {
+        return DB::transaction(function () use ($exec, $data, $dateEcheance, $lignesById, $tachesData): ControleExec {
             $exec->update([
                 'executed_at'      => $data['executed_at'],
                 'date_echeance'    => $dateEcheance,
                 'remarque_globale' => $data['remarque_globale'] ?? null,
             ]);
 
-            $exec->execTaches()->delete();
-            self::enregistrerResultats($exec, $tachesById, $tachesData);
+            foreach ($tachesData as $tacheData) {
+                /** @var ControleExecTache $ligne */
+                $ligne = $lignesById[$tacheData['id']];
 
-            return $exec->load(['controle', 'execTaches.tache', 'executeur']);
+                [$statut, $valueMeasured, $valueInRange] = self::processResultat(
+                    $ligne->nom_snapshot,
+                    $ligne->type_snapshot,
+                    $ligne->value_min_snapshot !== null ? (float) $ligne->value_min_snapshot : null,
+                    $ligne->value_max_snapshot !== null ? (float) $ligne->value_max_snapshot : null,
+                    $tacheData,
+                );
+
+                $ligne->update([
+                    'statut'         => $statut,
+                    'value_measured' => $valueMeasured,
+                    'value_in_range' => $valueInRange,
+                    'remarque'       => $tacheData['remarque'] ?? null,
+                ]);
+            }
+
+            return $exec->load(['controle', 'execTaches', 'executeur']);
         });
     }
 
@@ -150,12 +181,21 @@ class ControleExecBusiness
             /** @var ControleTache $tache */
             $tache = $tachesById[$tacheData['tache_id']];
 
-            [$statut, $valueMeasured, $valueInRange] = self::processTacheResult($tache, $tacheData);
+            [$statut, $valueMeasured, $valueInRange] = self::processResultat(
+                $tache->nom,
+                $tache->type,
+                $tache->value_min !== null ? (float) $tache->value_min : null,
+                $tache->value_max !== null ? (float) $tache->value_max : null,
+                $tacheData,
+            );
 
             ControleExecTache::create([
                 'controle_exec_id'    => $exec->id,
                 'tache_id'            => $tache->id,
                 'task_order_snapshot' => $tache->order,
+                'nom_snapshot'        => $tache->nom,
+                'type_snapshot'       => $tache->type,
+                'unit_snapshot'       => $tache->type === 'NUMERIC' ? $tache->unit : null,
                 'statut'              => $statut,
                 'value_measured'      => $valueMeasured,
                 'value_min_snapshot'  => $tache->type === 'NUMERIC' ? $tache->value_min : null,
@@ -167,14 +207,18 @@ class ControleExecBusiness
     }
 
     /**
-     * @param array<int, array{tache_id: int, statut: ?string, value_measured: ?float, remarque: ?string}> $tacheData
+     * Traite un résultat soumis selon le type et les bornes de la tâche :
+     * ceux de la tâche actuelle à la création, ceux figés sur la ligne en
+     * modification.
+     *
+     * @param array{statut?: ?string, value_measured?: ?float} $tacheData
      * @return array{0: ?string, 1: ?float, 2: ?bool}
      */
-    private static function processTacheResult(ControleTache $tache, array $tacheData): array
+    private static function processResultat(string $nomTache, string $type, ?float $min, ?float $max, array $tacheData): array
     {
-        if ($tache->type === 'BOOLEAN') {
+        if ($type === 'BOOLEAN') {
             if (!isset($tacheData['statut']) || !in_array($tacheData['statut'], ['OK', 'KO', 'NA'], true)) {
-                throw new ArrayException([], "Statut invalide pour la tâche BOOLEAN « {$tache->nom} » (attendu : OK, KO ou NA)");
+                throw new ArrayException([], "Statut invalide pour la tâche BOOLEAN « {$nomTache} » (attendu : OK, KO ou NA)");
             }
 
             return [$tacheData['statut'], null, null];
@@ -182,14 +226,10 @@ class ControleExecBusiness
 
         // NUMERIC
         if (!isset($tacheData['value_measured'])) {
-            throw new ArrayException([], "Valeur mesurée obligatoire pour la tâche NUMERIC « {$tache->nom} »");
+            throw new ArrayException([], "Valeur mesurée obligatoire pour la tâche NUMERIC « {$nomTache} »");
         }
 
-        $valueInRange = self::computeInRange(
-            (float) $tacheData['value_measured'],
-            $tache->value_min !== null ? (float) $tache->value_min : null,
-            $tache->value_max !== null ? (float) $tache->value_max : null,
-        );
+        $valueInRange = self::computeInRange((float) $tacheData['value_measured'], $min, $max);
 
         return [null, (float) $tacheData['value_measured'], $valueInRange];
     }
@@ -209,16 +249,16 @@ class ControleExecBusiness
     }
 
     /**
-     * @param Collection<int, ControleTache> $tachesById
-     * @param array<int, array{tache_id: int}> $tachesData
+     * Les ids soumis doivent correspondre exactement aux ids attendus (ni
+     * manquant, ni en trop, ni en double).
+     *
+     * @param Collection<int, int> $attendus
+     * @param Collection<int, mixed> $soumis
      */
-    private static function validateAllTachesPresent(Collection $tachesById, array $tachesData): void
+    private static function validateIdsPresents(Collection $attendus, Collection $soumis, string $message): void
     {
-        $expectedIds = $tachesById->keys()->sort()->values();
-        $providedIds = collect($tachesData)->pluck('tache_id')->sort()->values();
-
-        if ($expectedIds->toArray() !== $providedIds->toArray()) {
-            throw new ArrayException([], "Toutes les tâches du contrôle doivent être renseignées avant soumission");
+        if ($attendus->sort()->values()->toArray() !== $soumis->sort()->values()->toArray()) {
+            throw new ArrayException([], $message);
         }
     }
 

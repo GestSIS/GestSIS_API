@@ -11,7 +11,7 @@ class ControleExecController extends Controller
 {
     public function indexForArticle(int $articleId): JsonResponse
     {
-        $execs = ControleExec::with(['controle', 'execTaches.tache', 'executeur'])
+        $execs = ControleExec::with(['controle', 'execTaches', 'executeur'])
             ->where('article_id', $articleId)
             ->orderByDesc('executed_at')
             ->get()
@@ -83,7 +83,7 @@ class ControleExecController extends Controller
             // (ControleExecBusiness::resolveDateEcheance), qui connaît le contrôle.
             'date_echeance'           => 'nullable|date_format:Y-m-d',
             'taches'                  => 'nullable|array',
-            'taches.*.tache_id'       => 'required|integer',
+            'taches.*.id'             => 'required|integer',
             'taches.*.statut'         => 'nullable|string|in:OK,KO,NA',
             'taches.*.value_measured' => 'nullable|numeric',
             'taches.*.remarque'       => 'nullable|string',
