@@ -12,7 +12,8 @@ use RuntimeException;
 
 class DbsSeed extends Command
 {
-    private const CATEGORIE = 'Protection Respiratoire';
+    private const CATEGORIE = 'APR';
+    private const CATEGORIE_MODELE_COULEUR = 'Protection Respiratoire';
 
     private const TYPE_MASQUE = 'Masque Dräger';
     private const TYPE_SOUPAPE = 'Soupape à la demande Dräger';
@@ -23,7 +24,7 @@ class DbsSeed extends Command
      *
      * @var string
      */
-    protected $signature = 'dbs:seed-custom {--sis=* : Limiter à ces SIS}';
+    protected $signature = 'dbs:seed-custom {--sis=* : Limiter à ces SIS} {--avec-types : Créer aussi les types de matériel APR absents}';
 
     /**
      * The console command description.
@@ -106,9 +107,10 @@ class DbsSeed extends Command
      * visa de ces feuilles sont les champs de l'exécution.
      *
      * Les types sont retrouvés par leur désignation et un contrôle déjà présent sous ce
-     * nom n'est pas modifié.
+     * nom n'est pas modifié. Un type absent n'est créé qu'avec --avec-types, dans la
+     * catégorie APR créée au besoin ; sans cette option, il reste à rattacher à la main.
      *
-     * @throws RuntimeException si la catégorie des types à créer n'existe pas
+     * @throws RuntimeException si le SIS n'a aucune couleur pour créer la catégorie
      */
     private function creerControlesApr(): void
     {
@@ -132,12 +134,16 @@ class DbsSeed extends Command
                     'updated_at' => now(),
                 ]);
 
-                DB::table('controle_materiel_types')->insert([
-                    'controle_id' => $controleId,
-                    'materiel_type_id' => $this->typeId($controle['type']),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                $typeId = $this->typeId($controle['type']);
+
+                if ($typeId !== null) {
+                    DB::table('controle_materiel_types')->insert([
+                        'controle_id' => $controleId,
+                        'materiel_type_id' => $typeId,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
 
                 foreach ($controle['taches'] as $index => $tache) {
                     $this->creerTache($controleId, $index + 1, $tache);
@@ -165,17 +171,19 @@ class DbsSeed extends Command
             'updated_at' => now(),
         ]);
 
-        if (isset($tache['composant'])) {
+        $typeId = isset($tache['composant']) ? $this->typeId($tache['composant']) : null;
+
+        if ($typeId !== null) {
             DB::table('controle_tache_materiel_types')->insert([
                 'controle_tache_id' => $tacheId,
-                'materiel_type_id' => $this->typeId($tache['composant']),
+                'materiel_type_id' => $typeId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
         }
     }
 
-    private function typeId(string $designation): int
+    private function typeId(string $designation): ?int
     {
         $typeId = DB::table('materiel_types')->where('designation', $designation)->value('id');
 
@@ -183,21 +191,46 @@ class DbsSeed extends Command
             return $typeId;
         }
 
-        $categorieId = DB::table('materiel_categories')->where('designation', self::CATEGORIE)->value('id');
+        if (!$this->option('avec-types')) {
+            $this->warn("Type absent, à rattacher à la main : {$designation}");
 
-        if ($categorieId === null) {
-            throw new RuntimeException('Catégorie de matériel introuvable : ' . self::CATEGORIE);
+            return null;
         }
 
         return DB::table('materiel_types')->insertGetId([
             'tri' => DB::table('materiel_types')->max('tri') + 1,
-            'materiel_categorie_id' => $categorieId,
+            'materiel_categorie_id' => $this->categorieId(),
             'type' => 0,
             'est_emplacement' => false,
             'designation' => $designation,
             'est_numerote' => true,
             'est_attribuable' => $designation === self::TYPE_MASQUE,
             'est_taillee' => false,
+        ]);
+    }
+
+    private function categorieId(): int
+    {
+        $categorieId = DB::table('materiel_categories')->where('designation', self::CATEGORIE)->value('id');
+
+        if ($categorieId !== null) {
+            return $categorieId;
+        }
+
+        $couleurId = DB::table('materiel_categories')->where('designation', self::CATEGORIE_MODELE_COULEUR)->value('couleur_id')
+            ?? DB::table('couleurs')->min('id');
+
+        if ($couleurId === null) {
+            throw new RuntimeException('Aucune couleur pour créer la catégorie ' . self::CATEGORIE);
+        }
+
+        return DB::table('materiel_categories')->insertGetId([
+            'designation' => self::CATEGORIE,
+            'parent_id' => null,
+            'tri' => DB::table('materiel_categories')->max('tri') + 1,
+            'couleur_id' => $couleurId,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 
