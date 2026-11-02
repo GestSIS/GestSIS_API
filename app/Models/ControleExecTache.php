@@ -10,9 +10,11 @@ class ControleExecTache extends Model
     protected $fillable = [
         'controle_exec_id',
         'tache_id',
+        'article_id',
         'task_order_snapshot',
         'nom_snapshot',
         'type_snapshot',
+        'obligatoire_snapshot',
         'unit_snapshot',
         'statut',
         'value_measured',
@@ -27,6 +29,8 @@ class ControleExecTache extends Model
         return [
             'controle_exec_id'   => 'integer',
             'tache_id'           => 'integer',
+            'article_id'         => 'integer',
+            'obligatoire_snapshot' => 'boolean',
             'task_order_snapshot'=> 'integer',
             'value_measured'     => 'decimal:4',
             'value_min_snapshot' => 'decimal:4',
@@ -43,5 +47,13 @@ class ControleExecTache extends Model
     public function tache(): BelongsTo
     {
         return $this->belongsTo(ControleTache::class, 'tache_id');
+    }
+
+    /**
+     * Article scanné pour une tâche COMPOSANT.
+     */
+    public function article(): BelongsTo
+    {
+        return $this->belongsTo(Article::class);
     }
 }

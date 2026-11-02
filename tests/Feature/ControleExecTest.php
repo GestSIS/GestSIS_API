@@ -210,9 +210,8 @@ class ControleExecTest extends TestCase
             $controle->id,
             '2026-03-01',
             'PERIODIQUE',
-            'Contrôle groupé',
             [
-                ['article_id' => $articleA->id, 'date_echeance' => '2028-03-01', 'taches' => [['tache_id' => $tacheId, 'statut' => 'OK', 'remarque' => null]]],
+                ['article_id' => $articleA->id, 'remarque_globale' => 'Sangle usée', 'date_echeance' => '2028-03-01', 'taches' => [['tache_id' => $tacheId, 'statut' => 'OK', 'remarque' => null]]],
                 ['article_id' => $articleB->id, 'date_echeance' => '2028-03-01', 'taches' => [['tache_id' => $tacheId, 'statut' => 'KO', 'remarque' => null]]],
             ],
             $sapeur->id,
@@ -223,12 +222,13 @@ class ControleExecTest extends TestCase
             'controle_id' => $controle->id,
             'article_id' => $articleA->id,
             'executed_at' => '2026-03-01 00:00:00',
-            'remarque_globale' => 'Contrôle groupé',
+            'remarque_globale' => 'Sangle usée',
         ]);
         $this->assertDatabaseHas('controle_execs', [
             'controle_id' => $controle->id,
             'article_id' => $articleB->id,
             'executed_at' => '2026-03-01 00:00:00',
+            'remarque_globale' => null,
         ]);
     }
 
@@ -246,7 +246,6 @@ class ControleExecTest extends TestCase
                 $controle->id,
                 '2026-03-01',
                 'PERIODIQUE',
-                null,
                 [
                     ['article_id' => $articleValide->id, 'date_echeance' => '2028-03-01', 'taches' => [['tache_id' => $tacheId, 'statut' => 'OK', 'remarque' => null]]],
                     // Statut invalide pour cet article : doit faire échouer tout le lot.

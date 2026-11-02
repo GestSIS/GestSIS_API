@@ -7,6 +7,8 @@ use App\Models\Article;
 use App\Models\BatterieType;
 use App\Models\Controle;
 use App\Models\ControleMaterielType;
+use App\Models\ControleTache;
+use App\Models\ControleTacheMaterielType;
 use App\Models\Intervention;
 use App\Models\InterventionVehicule;
 use App\Models\MaterielCategorie;
@@ -271,6 +273,21 @@ class MaterielTypeTest extends TestCase
 
         $response->assertStatus(422);
         $this->assertStringContainsString('Contrôle test', $response->json('message'));
+        $this->assertDatabaseHas('materiel_types', ['id' => $type->id, 'est_numerote' => true]);
+    }
+
+    public function testRetirerLaNumerotationDunTypeDeComposantEstRefuse(): void
+    {
+        $payload = $this->basePayload(MaterielTypeBusiness::TYPE_NONE, ['est_numerote' => false]);
+        $type = MaterielType::factory()->numerote()->create(['materiel_categorie_id' => $payload['materiel_categorie_id']]);
+        $controle = Controle::create(['nom' => 'Contrôle APR', 'recurrence_type' => 'NON_PERIODIQUE']);
+        $tache = ControleTache::create(['controle_id' => $controle->id, 'order' => 1, 'nom' => 'Pulmo', 'type' => 'COMPOSANT']);
+        ControleTacheMaterielType::create(['controle_tache_id' => $tache->id, 'materiel_type_id' => $type->id]);
+
+        $response = $this->json('PUT', "/api/v2/materiel-types/{$type->id}", $payload, ['Sis-Key' => 1]);
+
+        $response->assertStatus(422);
+        $this->assertStringContainsString('Contrôle APR', $response->json('message'));
         $this->assertDatabaseHas('materiel_types', ['id' => $type->id, 'est_numerote' => true]);
     }
 

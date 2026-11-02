@@ -12,6 +12,7 @@ use App\Models\Article;
 use App\Models\BatterieType;
 use App\Models\Controle;
 use App\Models\ControleExec;
+use App\Models\ControleExecTache;
 use App\Models\Emplacement;
 use App\Models\InterventionVehicule;
 use App\Models\MaterielType;
@@ -344,6 +345,9 @@ class ArticleBusiness
     }
     if (ControleExec::whereIn('article_id', $articleIds)->exists()) {
       throw new ArrayException([], "Impossible de supprimer un article ayant des contrôles enregistrés, désactivez-le plutôt");
+    }
+    if (ControleExecTache::whereIn('article_id', $articleIds)->exists()) {
+      throw new ArrayException([], "Impossible de supprimer un article utilisé comme composant dans un contrôle, désactivez-le plutôt");
     }
 
     return DB::transaction(function () use ($articleIds, $emplacementIds) {

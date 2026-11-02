@@ -29,7 +29,7 @@ class ControleExecBusiness
     public static function createExec(int $controleId, int $articleId, array $data, int $sapeurId): ControleExec
     {
         $article = Article::findOrFail($articleId);
-        $controle = Controle::with(['taches', 'materielTypes'])->findOrFail($controleId);
+        $controle = Controle::with(['taches.materielTypes', 'materielTypes'])->findOrFail($controleId);
 
         self::validateArticleRattacheAuControle($controle, $article);
         self::validateTriggerType($data['trigger_type'], $controle->recurrence_type);
@@ -42,6 +42,7 @@ class ControleExecBusiness
             collect($tachesData)->pluck('tache_id'),
             "Toutes les tâches du contrôle doivent être renseignées avant soumission",
         );
+        self::validateComposants($tachesById, $tachesData, $articleId);
 
         $dateEcheance = self::resolveDateEcheance($controle, $data['date_echeance'] ?? null);
 
@@ -58,26 +59,29 @@ class ControleExecBusiness
 
             self::enregistrerResultats($exec, $tachesById, $tachesData);
 
-            return $exec->load(['controle', 'execTaches', 'executeur']);
+            return $exec->load(['controle', 'execTaches.article', 'executeur']);
         });
     }
 
     /**
      * Soumet une exécution pour plusieurs articles à la fois (même date
-     * d'exécution partagée par toutes) — tout ou rien : si un seul article
+     * d'exécution partagée par toutes, remarque propre à chaque article) — tout ou rien : si un seul article
      * échoue la validation, aucune exécution n'est enregistrée.
      *
-     * @param array<int, array{article_id: int, date_echeance: ?string, taches: ?array<int, array{tache_id: int, statut: ?string, value_measured: ?float, remarque: ?string}>}> $executions
+     * @param array<int, array{article_id: int, remarque_globale?: ?string, date_echeance: ?string, taches: ?array<int, array{tache_id: int, statut: ?string, value_measured: ?float, article_id?: ?int, remarque: ?string}>}> $executions
      * @return ControleExec[]
      */
-    public static function createExecsMultiple(int $controleId, string $executedAt, string $triggerType, ?string $remarqueGlobale, array $executions, int $sapeurId): array
+    public static function createExecsMultiple(int $controleId, string $executedAt, string $triggerType, array $executions, int $sapeurId): array
     {
-        return DB::transaction(function () use ($controleId, $executedAt, $triggerType, $remarqueGlobale, $executions, $sapeurId): array {
+        // Un article scanné comme composant ne peut pas l'être sur une autre ligne du lot.
+        self::validateArticlesUniques(collect($executions)->flatMap(fn (array $execution) => $execution['taches'] ?? [])->all());
+
+        return DB::transaction(function () use ($controleId, $executedAt, $triggerType, $executions, $sapeurId): array {
             return array_map(
                 fn (array $execution) => self::createExec($controleId, $execution['article_id'], [
                     'executed_at'      => $executedAt,
                     'trigger_type'     => $triggerType,
-                    'remarque_globale' => $remarqueGlobale,
+                    'remarque_globale' => $execution['remarque_globale'] ?? null,
                     'date_echeance'    => $execution['date_echeance'] ?? null,
                     'taches'           => $execution['taches'] ?? [],
                 ], $sapeurId),
@@ -100,12 +104,12 @@ class ControleExecBusiness
      *   executed_at: string,
      *   remarque_globale: ?string,
      *   date_echeance: ?string,
-     *   taches: ?array<int, array{id: int, statut: ?string, value_measured: ?float, remarque: ?string}>
+     *   taches: ?array<int, array{id: int, statut: ?string, value_measured: ?float, article_id?: ?int, remarque: ?string}>
      * } $data
      */
     public static function updateExec(int $id, array $data): ControleExec
     {
-        $exec = ControleExec::with(['controle', 'execTaches'])->findOrFail($id);
+        $exec = ControleExec::with(['controle', 'execTaches.tache.materielTypes'])->findOrFail($id);
 
         $lignesById = $exec->execTaches->keyBy('id');
         $tachesData = $data['taches'] ?? [];
@@ -115,25 +119,45 @@ class ControleExecBusiness
             collect($tachesData)->pluck('id'),
             "Tous les résultats de ce contrôle doivent être renseignés avant soumission",
         );
+        self::validateArticlesUniques($tachesData);
+
+        $articlesParLigne = [];
+        foreach ($tachesData as $tacheData) {
+            /** @var ControleExecTache $ligne */
+            $ligne = $lignesById[$tacheData['id']];
+            if ($ligne->type_snapshot === 'COMPOSANT') {
+                $articlesParLigne[$ligne->id] = self::resoudreArticleLigne($ligne, $tacheData, $exec->article_id);
+            }
+        }
 
         $dateEcheance = self::resolveDateEcheance($exec->controle, $data['date_echeance'] ?? null);
 
-        return DB::transaction(function () use ($exec, $data, $dateEcheance, $lignesById, $tachesData): ControleExec {
+        return DB::transaction(function () use ($exec, $data, $dateEcheance, $lignesById, $tachesData, $articlesParLigne): ControleExec {
             $exec->update([
                 'executed_at'      => $data['executed_at'],
                 'date_echeance'    => $dateEcheance,
                 'remarque_globale' => $data['remarque_globale'] ?? null,
             ]);
 
+            // Les lignes s'écrivent une à une : vider d'abord les composants permet
+            // d'échanger deux articles sans heurter l'unicité (exécution, article).
+            ControleExecTache::whereIn('id', array_keys($articlesParLigne))->update(['article_id' => null]);
+
             foreach ($tachesData as $tacheData) {
                 /** @var ControleExecTache $ligne */
                 $ligne = $lignesById[$tacheData['id']];
+
+                if ($ligne->type_snapshot === 'COMPOSANT') {
+                    ControleExecTache::whereKey($ligne->id)->update(['article_id' => $articlesParLigne[$ligne->id]]);
+                    continue;
+                }
 
                 [$statut, $valueMeasured, $valueInRange] = self::processResultat(
                     $ligne->nom_snapshot,
                     $ligne->type_snapshot,
                     $ligne->value_min_snapshot !== null ? (float) $ligne->value_min_snapshot : null,
                     $ligne->value_max_snapshot !== null ? (float) $ligne->value_max_snapshot : null,
+                    $ligne->obligatoire_snapshot,
                     $tacheData,
                 );
 
@@ -145,8 +169,46 @@ class ControleExecBusiness
                 ]);
             }
 
-            return $exec->load(['controle', 'execTaches', 'executeur']);
+            return $exec->load(['controle', 'execTaches.article', 'executeur']);
         });
+    }
+
+    /**
+     * Article à enregistrer sur une ligne COMPOSANT. Un article inchangé n'est pas
+     * revérifié : on doit pouvoir corriger une exécution ancienne dont l'article est
+     * depuis inactif ou dont le type n'est plus accepté. Un nouvel article suit les
+     * règles de la création, ce qui suppose que la tâche existe encore comme composant.
+     *
+     * @param array{article_id?: int|string|null} $tacheData
+     */
+    private static function resoudreArticleLigne(ControleExecTache $ligne, array $tacheData, int $articleControleId): ?int
+    {
+        $articleId = isset($tacheData['article_id']) ? (int) $tacheData['article_id'] : null;
+
+        if ($articleId === null) {
+            if ($ligne->obligatoire_snapshot) {
+                throw new ArrayException([], "Le composant « {$ligne->nom_snapshot} » est obligatoire");
+            }
+
+            return null;
+        }
+
+        if ($articleId === $ligne->article_id) {
+            return $articleId;
+        }
+
+        if ($ligne->tache?->type !== 'COMPOSANT') {
+            throw new ArrayException([], "Le composant « {$ligne->nom_snapshot} » a été retiré de la configuration : son article ne peut plus être remplacé");
+        }
+
+        self::validateArticleComposant(
+            $ligne->tache->materielTypes->pluck('materiel_type_id')->all(),
+            $articleId,
+            $articleControleId,
+            $ligne->nom_snapshot,
+        );
+
+        return $articleId;
     }
 
     /**
@@ -180,29 +242,108 @@ class ControleExecBusiness
         foreach ($tachesData as $tacheData) {
             /** @var ControleTache $tache */
             $tache = $tachesById[$tacheData['tache_id']];
+            $estComposant = $tache->type === 'COMPOSANT';
 
-            [$statut, $valueMeasured, $valueInRange] = self::processResultat(
-                $tache->nom,
-                $tache->type,
-                $tache->value_min !== null ? (float) $tache->value_min : null,
-                $tache->value_max !== null ? (float) $tache->value_max : null,
-                $tacheData,
-            );
+            [$statut, $valueMeasured, $valueInRange] = $estComposant
+                ? [null, null, null]
+                : self::processResultat(
+                    $tache->nom,
+                    $tache->type,
+                    $tache->value_min !== null ? (float) $tache->value_min : null,
+                    $tache->value_max !== null ? (float) $tache->value_max : null,
+                    $tache->obligatoire,
+                    $tacheData,
+                );
 
             ControleExecTache::create([
-                'controle_exec_id'    => $exec->id,
-                'tache_id'            => $tache->id,
-                'task_order_snapshot' => $tache->order,
-                'nom_snapshot'        => $tache->nom,
-                'type_snapshot'       => $tache->type,
-                'unit_snapshot'       => $tache->type === 'NUMERIC' ? $tache->unit : null,
-                'statut'              => $statut,
-                'value_measured'      => $valueMeasured,
-                'value_min_snapshot'  => $tache->type === 'NUMERIC' ? $tache->value_min : null,
-                'value_max_snapshot'  => $tache->type === 'NUMERIC' ? $tache->value_max : null,
-                'value_in_range'      => $valueInRange,
-                'remarque'            => $tacheData['remarque'] ?? null,
+                'controle_exec_id'     => $exec->id,
+                'tache_id'             => $tache->id,
+                'article_id'           => $estComposant ? ($tacheData['article_id'] ?? null) : null,
+                'task_order_snapshot'  => $tache->order,
+                'nom_snapshot'         => $tache->nom,
+                'type_snapshot'        => $tache->type,
+                'obligatoire_snapshot' => $tache->obligatoire,
+                'unit_snapshot'        => $tache->type === 'NUMERIC' ? $tache->unit : null,
+                'statut'               => $statut,
+                'value_measured'       => $valueMeasured,
+                'value_min_snapshot'   => $tache->type === 'NUMERIC' ? $tache->value_min : null,
+                'value_max_snapshot'   => $tache->type === 'NUMERIC' ? $tache->value_max : null,
+                'value_in_range'       => $valueInRange,
+                'remarque'             => $estComposant ? null : ($tacheData['remarque'] ?? null),
             ]);
+        }
+    }
+
+    /**
+     * Vérifie les articles soumis pour les tâches COMPOSANT : obligatoire
+     * renseigné, article valide, et aucun article utilisé deux fois.
+     *
+     * @param Collection<int, ControleTache> $tachesById
+     * @param array<int, array{tache_id: int, article_id?: ?int}> $tachesData
+     */
+    private static function validateComposants(Collection $tachesById, array $tachesData, int $articleControleId): void
+    {
+        self::validateArticlesUniques($tachesData);
+
+        foreach ($tachesData as $tacheData) {
+            /** @var ControleTache $tache */
+            $tache = $tachesById[$tacheData['tache_id']];
+            if ($tache->type !== 'COMPOSANT') {
+                continue;
+            }
+
+            $articleId = $tacheData['article_id'] ?? null;
+            if ($articleId === null) {
+                if ($tache->obligatoire) {
+                    throw new ArrayException([], "Le composant « {$tache->nom} » est obligatoire");
+                }
+                continue;
+            }
+
+            self::validateArticleComposant(
+                $tache->materielTypes->pluck('materiel_type_id')->all(),
+                (int) $articleId,
+                $articleControleId,
+                $tache->nom,
+            );
+        }
+    }
+
+    /**
+     * @param int[] $typesAcceptes
+     */
+    private static function validateArticleComposant(array $typesAcceptes, int $articleId, int $articleControleId, string $nomTache): void
+    {
+        $article = Article::find($articleId);
+
+        if ($article === null) {
+            throw new ArrayException([], "L'article choisi pour le composant « {$nomTache} » n'existe pas");
+        }
+        if ($articleId === $articleControleId) {
+            throw new ArrayException([], "L'article contrôlé ne peut pas être utilisé comme composant « {$nomTache} »");
+        }
+        if (!$article->statut) {
+            throw new ArrayException([], "L'article choisi pour le composant « {$nomTache} » est inactif");
+        }
+        if (!in_array($article->materiel_type_id, $typesAcceptes, true)) {
+            throw new ArrayException([], "Le type de l'article choisi n'est pas accepté par le composant « {$nomTache} »");
+        }
+    }
+
+    /**
+     * Un article ne sert qu'une fois dans un même enregistrement.
+     *
+     * @param array<int, array{article_id?: ?int}> $tachesData
+     */
+    private static function validateArticlesUniques(array $tachesData): void
+    {
+        $articleIds = collect($tachesData)
+            ->pluck('article_id')
+            ->filter(fn ($articleId) => $articleId !== null)
+            ->map(fn ($articleId) => (int) $articleId);
+
+        if ($articleIds->count() !== $articleIds->unique()->count()) {
+            throw new ArrayException([], "Un même article ne peut pas être utilisé plusieurs fois comme composant");
         }
     }
 
@@ -214,7 +355,7 @@ class ControleExecBusiness
      * @param array{statut?: ?string, value_measured?: ?float} $tacheData
      * @return array{0: ?string, 1: ?float, 2: ?bool}
      */
-    private static function processResultat(string $nomTache, string $type, ?float $min, ?float $max, array $tacheData): array
+    private static function processResultat(string $nomTache, string $type, ?float $min, ?float $max, bool $obligatoire, array $tacheData): array
     {
         if ($type === 'BOOLEAN') {
             if (!isset($tacheData['statut']) || !in_array($tacheData['statut'], ['OK', 'KO', 'NA'], true)) {
@@ -226,6 +367,9 @@ class ControleExecBusiness
 
         // NUMERIC
         if (!isset($tacheData['value_measured'])) {
+            if (!$obligatoire) {
+                return [null, null, null];
+            }
             throw new ArrayException([], "Valeur mesurée obligatoire pour la tâche NUMERIC « {$nomTache} »");
         }
 

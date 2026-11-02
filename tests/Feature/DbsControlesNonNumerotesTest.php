@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Article;
 use App\Models\Controle;
 use App\Models\ControleMaterielType;
+use App\Models\ControleTache;
+use App\Models\ControleTacheMaterielType;
 use App\Models\MaterielType;
 use App\Support\Sis;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -62,6 +64,21 @@ class DbsControlesNonNumerotesTest extends TestCase
             ->expectsTable(['Contrôle', 'Type de matériel', 'Problème', 'Articles concernés'], [
                 ['Contrôle veste test', 'Veste test', 'articles sans numéro', 1],
                 ['Entretien bottes test', 'Bottes test', 'type non numéroté', 2],
+            ])
+            ->assertExitCode(0);
+    }
+
+    public function testListeAussiLesTypesAcceptesParUnComposant(): void
+    {
+        $nonNumerote = MaterielType::factory()->create(['designation' => 'Pulmo test', 'est_numerote' => false]);
+        Article::factory()->count(2)->create(['materiel_type_id' => $nonNumerote->id, 'numero' => '']);
+        $controle = Controle::create(['nom' => 'Contrôle APR test', 'recurrence_type' => 'NON_PERIODIQUE']);
+        $tache = ControleTache::create(['controle_id' => $controle->id, 'order' => 1, 'nom' => 'Pulmo', 'type' => 'COMPOSANT']);
+        ControleTacheMaterielType::create(['controle_tache_id' => $tache->id, 'materiel_type_id' => $nonNumerote->id]);
+
+        $this->artisan('dbs:controles-non-numerotes', ['--sis' => [self::SIS]])
+            ->expectsTable(['Contrôle', 'Type de matériel', 'Problème', 'Articles concernés'], [
+                ['Contrôle APR test', 'Pulmo test', 'type non numéroté', 2],
             ])
             ->assertExitCode(0);
     }

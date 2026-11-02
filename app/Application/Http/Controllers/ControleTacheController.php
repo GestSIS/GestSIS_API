@@ -2,17 +2,20 @@
 
 namespace App\Application\Http\Controllers;
 
+use App\Domaine\Business\Materiel\ControleBusiness;
 use App\Domaine\Exceptions\ArrayException;
 use App\Models\Controle;
 use App\Models\ControleTache;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ControleTacheController extends Controller
 {
     public function index(int $controleId): JsonResponse
     {
-        $taches = ControleTache::where('controle_id', $controleId)
+        $taches = ControleTache::with('materielTypes')
+            ->where('controle_id', $controleId)
             ->orderBy('order')
             ->get();
 
@@ -27,7 +30,10 @@ class ControleTacheController extends Controller
             'nom'         => 'required|string|min:1',
             'description' => 'nullable|string',
             'order'       => 'required|integer|min:1',
-            'type'        => 'required|string|in:BOOLEAN,NUMERIC',
+            'type'        => 'required|string|in:BOOLEAN,NUMERIC,COMPOSANT',
+            'obligatoire' => 'nullable|boolean',
+            'materiel_type_ids'   => 'exclude_unless:type,COMPOSANT|required|array|min:1',
+            'materiel_type_ids.*' => 'exclude_unless:type,COMPOSANT|integer|exists:materiel_types,id',
             'unit'        => 'nullable|string',
             'value_min'   => 'nullable|numeric',
             'value_max'   => 'nullable|numeric',
@@ -35,9 +41,16 @@ class ControleTacheController extends Controller
 
         $this->validateNumericFields($data);
 
-        $tache = ControleTache::create(array_merge($data, ['controle_id' => $controleId]));
+        ControleBusiness::validateTypesComposant([$data]);
 
-        return response()->json(['data' => $tache], 201);
+        $tache = DB::transaction(function () use ($data, $controleId): ControleTache {
+            $tache = ControleTache::create(['controle_id' => $controleId, ...ControleBusiness::payloadTache($data)]);
+            ControleBusiness::syncTypesAcceptes($tache, $data);
+
+            return $tache;
+        });
+
+        return response()->json(['data' => $tache->load('materielTypes')], 201);
     }
 
     public function update(Request $request, int $controleId, int $id): JsonResponse
@@ -46,7 +59,10 @@ class ControleTacheController extends Controller
             'nom'         => 'required|string|min:1',
             'description' => 'nullable|string',
             'order'       => 'required|integer|min:1',
-            'type'        => 'required|string|in:BOOLEAN,NUMERIC',
+            'type'        => 'required|string|in:BOOLEAN,NUMERIC,COMPOSANT',
+            'obligatoire' => 'nullable|boolean',
+            'materiel_type_ids'   => 'exclude_unless:type,COMPOSANT|required|array|min:1',
+            'materiel_type_ids.*' => 'exclude_unless:type,COMPOSANT|integer|exists:materiel_types,id',
             'unit'        => 'nullable|string',
             'value_min'   => 'nullable|numeric',
             'value_max'   => 'nullable|numeric',
@@ -54,11 +70,16 @@ class ControleTacheController extends Controller
 
         $this->validateNumericFields($data);
 
+        ControleBusiness::validateTypesComposant([$data]);
+
         $tache = ControleTache::where('controle_id', $controleId)->findOrFail($id);
 
-        $tache->update($data);
+        DB::transaction(function () use ($tache, $data): void {
+            $tache->update(ControleBusiness::payloadTache($data));
+            ControleBusiness::syncTypesAcceptes($tache, $data);
+        });
 
-        return response()->json(['data' => $tache]);
+        return response()->json(['data' => $tache->load('materielTypes')]);
     }
 
     public function destroy(int $controleId, int $id): JsonResponse

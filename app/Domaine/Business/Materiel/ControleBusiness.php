@@ -35,6 +35,7 @@ class ControleBusiness
         self::validateDureePreavis($data['recurrence_type'], $data['duree_preavis'] ?? null);
         self::validateNbExecutionMax($data['recurrence_type'], $data['nb_execution_max'] ?? null, $data['nb_execution_preavis'] ?? null);
         self::validateTypesNumerotes($data['materiel_type_ids'] ?? []);
+        self::validateTypesComposant($data['taches'] ?? []);
 
         return DB::transaction(function () use ($data): Controle {
             $controle = Controle::create([
@@ -52,7 +53,7 @@ class ControleBusiness
             self::syncTaches($controle, $data['taches'] ?? []);
             self::syncMaterielTypes($controle, $data['materiel_type_ids'] ?? []);
 
-            return Controle::with(['taches', 'materielTypes.materielType'])->findOrFail($controle->id);
+            return Controle::with(['taches.materielTypes.materielType', 'materielTypes.materielType'])->findOrFail($controle->id);
         });
     }
 
@@ -77,6 +78,7 @@ class ControleBusiness
         self::validateDureePreavis($data['recurrence_type'], $data['duree_preavis'] ?? null);
         self::validateNbExecutionMax($data['recurrence_type'], $data['nb_execution_max'] ?? null, $data['nb_execution_preavis'] ?? null);
         self::validateTypesNumerotes($data['materiel_type_ids'] ?? []);
+        self::validateTypesComposant($data['taches'] ?? []);
 
         return DB::transaction(function () use ($id, $data): Controle {
             $controle = Controle::findOrFail($id);
@@ -96,7 +98,7 @@ class ControleBusiness
             self::syncTaches($controle, $data['taches'] ?? []);
             self::syncMaterielTypes($controle, $data['materiel_type_ids'] ?? []);
 
-            return Controle::with(['taches', 'materielTypes.materielType'])->findOrFail($id);
+            return Controle::with(['taches.materielTypes.materielType', 'materielTypes.materielType'])->findOrFail($id);
         });
     }
 
@@ -110,7 +112,7 @@ class ControleBusiness
     }
 
     /**
-     * @param array<int, array{id?: int, order: int, nom: string, description: ?string, type: string, unit: ?string, value_min: ?float, value_max: ?float}> $tachesData
+     * @param array<int, array{id?: int, order: int, nom: string, description: ?string, type: string, obligatoire?: ?bool, unit: ?string, value_min: ?float, value_max: ?float, materiel_type_ids?: int[]}> $tachesData
      */
     private static function syncTaches(Controle $controle, array $tachesData): void
     {
@@ -123,25 +125,86 @@ class ControleBusiness
         $query->delete();
 
         foreach ($tachesData as $tacheData) {
-            $isNumeric = $tacheData['type'] === 'NUMERIC';
-            $payload = [
-                'controle_id' => $controle->id,
-                'order'       => $tacheData['order'],
-                'nom'         => $tacheData['nom'],
-                'description' => $tacheData['description'] ?? null,
-                'type'        => $tacheData['type'],
-                'unit'        => $isNumeric ? ($tacheData['unit'] ?? null) : null,
-                'value_min'   => $isNumeric ? ($tacheData['value_min'] ?? null) : null,
-                'value_max'   => $isNumeric ? ($tacheData['value_max'] ?? null) : null,
-            ];
+            $payload = ['controle_id' => $controle->id, ...self::payloadTache($tacheData)];
 
             if (($tacheData['id'] ?? null) !== null) {
-                ControleTache::where('controle_id', $controle->id)
-                    ->whereId($tacheData['id'])
-                    ->update($payload);
+                $tache = ControleTache::where('controle_id', $controle->id)->whereId($tacheData['id'])->first();
+                if ($tache === null) {
+                    continue;
+                }
+                $tache->update($payload);
             } else {
-                ControleTache::create($payload);
+                $tache = ControleTache::create($payload);
             }
+
+            self::syncTypesAcceptes($tache, $tacheData);
+        }
+    }
+
+    /**
+     * Colonnes normalisées d'une tâche : unité et plage n'ont de sens que pour
+     * une tâche NUMERIC ; seules les tâches COMPOSANT et NUMERIC peuvent être
+     * facultatives (ex : la pression d'une seconde bouteille).
+     *
+     * Publique : réutilisée par ControleTacheController.
+     *
+     * @param array<string, mixed> $tacheData
+     * @return array<string, mixed>
+     */
+    public static function payloadTache(array $tacheData): array
+    {
+        $isNumeric = $tacheData['type'] === 'NUMERIC';
+
+        return [
+            'order'       => $tacheData['order'],
+            'nom'         => $tacheData['nom'],
+            'description' => $tacheData['description'] ?? null,
+            'type'        => $tacheData['type'],
+            'obligatoire' => in_array($tacheData['type'], ['COMPOSANT', 'NUMERIC'], true) ? ($tacheData['obligatoire'] ?? true) : true,
+            'unit'        => $isNumeric ? ($tacheData['unit'] ?? null) : null,
+            'value_min'   => $isNumeric ? ($tacheData['value_min'] ?? null) : null,
+            'value_max'   => $isNumeric ? ($tacheData['value_max'] ?? null) : null,
+        ];
+    }
+
+    /**
+     * Les types acceptés par une tâche COMPOSANT doivent être numérotés : ses
+     * articles sont désignés par leur numéro au scanner.
+     *
+     * Publique : réutilisée par ControleTacheController.
+     *
+     * @param array<int, array<string, mixed>> $tachesData
+     */
+    public static function validateTypesComposant(array $tachesData): void
+    {
+        $typeIds = collect($tachesData)
+            ->where('type', 'COMPOSANT')
+            ->flatMap(fn (array $tacheData) => $tacheData['materiel_type_ids'] ?? [])
+            ->unique()
+            ->values()
+            ->all();
+
+        self::validateTypesNumerotes($typeIds);
+    }
+
+    /**
+     * Remplace les types acceptés d'une tâche COMPOSANT ; une tâche d'un autre
+     * type n'en a aucun.
+     *
+     * Publique : réutilisée par ControleTacheController.
+     *
+     * @param array<string, mixed> $tacheData
+     */
+    public static function syncTypesAcceptes(ControleTache $tache, array $tacheData): void
+    {
+        $tache->materielTypes()->delete();
+
+        if ($tacheData['type'] !== 'COMPOSANT') {
+            return;
+        }
+
+        foreach (array_unique($tacheData['materiel_type_ids'] ?? []) as $typeId) {
+            $tache->materielTypes()->create(['materiel_type_id' => $typeId]);
         }
     }
 

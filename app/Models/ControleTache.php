@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ControleTache extends Model
 {
@@ -13,6 +14,7 @@ class ControleTache extends Model
         'nom',
         'description',
         'type',
+        'obligatoire',
         'unit',
         'value_min',
         'value_max',
@@ -23,6 +25,7 @@ class ControleTache extends Model
         return [
             'controle_id' => 'integer',
             'order'       => 'integer',
+            'obligatoire' => 'boolean',
             'value_min'   => 'decimal:4',
             'value_max'   => 'decimal:4',
         ];
@@ -31,5 +34,13 @@ class ControleTache extends Model
     public function controle(): BelongsTo
     {
         return $this->belongsTo(Controle::class);
+    }
+
+    /**
+     * Types d'articles acceptés par une tâche COMPOSANT.
+     */
+    public function materielTypes(): HasMany
+    {
+        return $this->hasMany(ControleTacheMaterielType::class);
     }
 }

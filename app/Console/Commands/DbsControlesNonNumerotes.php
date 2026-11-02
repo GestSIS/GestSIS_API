@@ -51,17 +51,27 @@ class DbsControlesNonNumerotes extends Command
      */
     private function lignesAProbleme(): array
     {
-        return DB::table('controle_materiel_types')
+        $colonnes = [
+            'controles.nom as controle',
+            'materiel_types.id as type_id',
+            'materiel_types.designation as type',
+            'materiel_types.est_numerote',
+        ];
+
+        $typesControles = DB::table('controle_materiel_types')
             ->join('controles', 'controles.id', '=', 'controle_materiel_types.controle_id')
             ->join('materiel_types', 'materiel_types.id', '=', 'controle_materiel_types.materiel_type_id')
-            ->orderBy('controles.nom')
-            ->orderBy('materiel_types.designation')
-            ->get([
-                'controles.nom as controle',
-                'materiel_types.id as type_id',
-                'materiel_types.designation as type',
-                'materiel_types.est_numerote',
-            ])
+            ->get($colonnes);
+
+        $typesComposants = DB::table('controle_tache_materiel_types')
+            ->join('controle_taches', 'controle_taches.id', '=', 'controle_tache_materiel_types.controle_tache_id')
+            ->join('controles', 'controles.id', '=', 'controle_taches.controle_id')
+            ->join('materiel_types', 'materiel_types.id', '=', 'controle_tache_materiel_types.materiel_type_id')
+            ->get($colonnes);
+
+        return $typesControles->concat($typesComposants)
+            ->unique(fn (object $ligne): string => "{$ligne->controle}|{$ligne->type_id}")
+            ->sortBy(fn (object $ligne): string => "{$ligne->controle}|{$ligne->type}")
             ->map(function (object $ligne): ?array {
                 $articles = DB::table('articles')->where('materiel_type_id', $ligne->type_id);
 

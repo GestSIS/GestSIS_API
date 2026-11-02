@@ -11,14 +11,14 @@ class ControleController extends Controller
 {
     public function index(): JsonResponse
     {
-        $controles = Controle::with(['taches', 'materielTypes.materielType'])->get();
+        $controles = Controle::with(['taches.materielTypes.materielType', 'materielTypes.materielType'])->get();
 
         return response()->json(['data' => $controles]);
     }
 
     public function show(int $id): JsonResponse
     {
-        $controle = Controle::with(['taches', 'materielTypes.materielType'])->findOrFail($id);
+        $controle = Controle::with(['taches.materielTypes.materielType', 'materielTypes.materielType'])->findOrFail($id);
 
         return response()->json(['data' => $controle]);
     }
@@ -55,7 +55,10 @@ class ControleController extends Controller
             'taches.*.order'         => 'required_with:taches|integer|min:1',
             'taches.*.nom'           => 'required_with:taches|string|min:1',
             'taches.*.description'   => 'nullable|string',
-            'taches.*.type'          => 'required_with:taches|string|in:BOOLEAN,NUMERIC',
+            'taches.*.type'          => 'required_with:taches|string|in:BOOLEAN,NUMERIC,COMPOSANT',
+            'taches.*.obligatoire'   => 'nullable|boolean',
+            'taches.*.materiel_type_ids'   => 'exclude_unless:taches.*.type,COMPOSANT|required|array|min:1',
+            'taches.*.materiel_type_ids.*' => 'exclude_unless:taches.*.type,COMPOSANT|integer|exists:materiel_types,id',
             'taches.*.unit'          => 'nullable|string',
             'taches.*.value_min'     => 'nullable|numeric',
             'taches.*.value_max'     => 'nullable|numeric',
@@ -83,7 +86,10 @@ class ControleController extends Controller
             'taches.*.order'         => 'required_with:taches|integer|min:1',
             'taches.*.nom'           => 'required_with:taches|string|min:1',
             'taches.*.description'   => 'nullable|string',
-            'taches.*.type'          => 'required_with:taches|string|in:BOOLEAN,NUMERIC',
+            'taches.*.type'          => 'required_with:taches|string|in:BOOLEAN,NUMERIC,COMPOSANT',
+            'taches.*.obligatoire'   => 'nullable|boolean',
+            'taches.*.materiel_type_ids'   => 'exclude_unless:taches.*.type,COMPOSANT|required|array|min:1',
+            'taches.*.materiel_type_ids.*' => 'exclude_unless:taches.*.type,COMPOSANT|integer|exists:materiel_types,id',
             'taches.*.unit'          => 'nullable|string',
             'taches.*.value_min'     => 'nullable|numeric',
             'taches.*.value_max'     => 'nullable|numeric',

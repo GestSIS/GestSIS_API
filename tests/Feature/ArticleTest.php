@@ -6,6 +6,7 @@ use App\Domaine\Business\Materiel\MaterielTypeBusiness;
 use App\Models\Article;
 use App\Models\Controle;
 use App\Models\ControleExec;
+use App\Models\ControleExecTache;
 use App\Models\Couleur;
 use App\Models\Emplacement;
 use App\Models\MaterielType;
@@ -537,6 +538,31 @@ class ArticleTest extends TestCase
 
         $response->assertStatus(422);
         $response->assertJsonStructure(['message']);
+        $this->assertDatabaseHas('articles', ['id' => $article->id]);
+    }
+
+    public function testDeleteArticleRefuseSilEstReferenceCommeComposant(): void
+    {
+        $controle = Controle::create(['nom' => 'Contrôle test', 'recurrence_type' => 'NON_PERIODIQUE']);
+        $article = Article::factory()->create();
+        $exec = ControleExec::create([
+            'controle_id' => $controle->id,
+            'article_id' => Article::factory()->create()->id,
+            'executed_at' => '2026-01-01',
+            'executed_by' => Sapeur::factory()->create()->id,
+            'trigger_type' => 'NON_PERIODIQUE',
+        ]);
+        ControleExecTache::create([
+            'controle_exec_id' => $exec->id,
+            'article_id' => $article->id,
+            'task_order_snapshot' => 1,
+            'nom_snapshot' => 'Pulmo',
+            'type_snapshot' => 'COMPOSANT',
+        ]);
+
+        $this->json('DELETE', '/api/v2/articles', ['articleIds' => [$article->id]], ['Sis-Key' => 1])
+            ->assertStatus(422)->assertJsonStructure(['message']);
+
         $this->assertDatabaseHas('articles', ['id' => $article->id]);
     }
 

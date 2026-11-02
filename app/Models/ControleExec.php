@@ -52,9 +52,19 @@ class ControleExec extends Model
     public function isConforme(): bool
     {
         return $this->execTaches->every(function (ControleExecTache $t): bool {
+            // Un composant référence un article, il n'a pas de résultat à évaluer.
+            if ($t->type_snapshot === 'COMPOSANT') {
+                return true;
+            }
+
             if ($t->statut !== null) {
                 return $t->statut !== 'KO';
             }
+            // Une mesure facultative laissée vide n'a rien à évaluer.
+            if ($t->value_measured === null && !$t->obligatoire_snapshot) {
+                return true;
+            }
+
             return $t->value_in_range === true;
         });
     }

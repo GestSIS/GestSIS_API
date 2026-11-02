@@ -37,6 +37,9 @@ class MaterielTypeTableSeeder extends Seeder
             ['id' => 20, 'tri' => 20, 'materiel_categorie_id' => 32, 'type' => 3, 'est_emplacement' => true, 'designation' => 'Véhicule transport', 'est_numerote' => true, 'est_attribuable' => false, 'est_taillee' => false],
             ['id' => 21, 'tri' => 21, 'materiel_categorie_id' => 32, 'type' => 3, 'est_emplacement' => true, 'designation' => 'Véhicule première intervention', 'est_numerote' => true, 'est_attribuable' => false, 'est_taillee' => false],
             ['id' => 22, 'tri' => 22, 'materiel_categorie_id' => 32, 'type' => 3, 'est_emplacement' => true, 'designation' => 'Véhicule pionnier', 'est_numerote' => true, 'est_attribuable' => false, 'est_taillee' => false],
+            ['id' => 23, 'tri' => 23, 'materiel_categorie_id' => 29, 'type' => 0, 'est_emplacement' => false, 'designation' => 'Masque Dräger', 'est_numerote' => true, 'est_attribuable' => true, 'est_taillee' => false],
+            ['id' => 24, 'tri' => 24, 'materiel_categorie_id' => 29, 'type' => 0, 'est_emplacement' => false, 'designation' => 'Soupape à la demande Dräger', 'est_numerote' => true, 'est_attribuable' => false, 'est_taillee' => false],
+            ['id' => 25, 'tri' => 25, 'materiel_categorie_id' => 29, 'type' => 0, 'est_emplacement' => false, 'designation' => 'Appareil à air comprimé Dräger', 'est_numerote' => true, 'est_attribuable' => false, 'est_taillee' => false],
         ]);
     }
 }

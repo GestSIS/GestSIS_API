@@ -32,6 +32,12 @@ class ArticleTableSeeder extends Seeder
             ['materiel_type_id' => 15, 'emplacement_id' => 13, 'uuid' => 'S2387667wd6615', 'numero' => '', 'taille' => '', 'remarque' => '', 'est_etiquete' => false, 'achat' => '2011', 'created_at' => '2025-01-01'],
             ['materiel_type_id' => 16, 'emplacement_id' => 13, 'uuid' => 'S2387667wd6616', 'numero' => '', 'taille' => 'S', 'remarque' => '', 'est_etiquete' => false, 'achat' => '2011', 'created_at' => '2025-01-01'],
             ['materiel_type_id' => 17, 'emplacement_id' => 13, 'uuid' => 'S2387667wd6617', 'numero' => '', 'taille' => 'S', 'remarque' => '', 'est_etiquete' => false, 'achat' => '2011', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 23, 'emplacement_id' => 13, 'uuid' => 'seed-MAS-001', 'numero' => 'MAS-001', 'taille' => '', 'remarque' => '', 'est_etiquete' => true, 'achat' => '2024', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 23, 'emplacement_id' => 13, 'uuid' => 'seed-MAS-002', 'numero' => 'MAS-002', 'taille' => '', 'remarque' => '', 'est_etiquete' => true, 'achat' => '2024', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 24, 'emplacement_id' => 13, 'uuid' => 'seed-PUL-001', 'numero' => 'PUL-001', 'taille' => '', 'remarque' => '', 'est_etiquete' => true, 'achat' => '2024', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 24, 'emplacement_id' => 13, 'uuid' => 'seed-PUL-002', 'numero' => 'PUL-002', 'taille' => '', 'remarque' => '', 'est_etiquete' => true, 'achat' => '2024', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 25, 'emplacement_id' => 13, 'uuid' => 'seed-APR-001', 'numero' => 'APR-001', 'taille' => '', 'remarque' => '', 'est_etiquete' => true, 'achat' => '2024', 'created_at' => '2025-01-01'],
+            ['materiel_type_id' => 25, 'emplacement_id' => 13, 'uuid' => 'seed-APR-002', 'numero' => 'APR-002', 'taille' => '', 'remarque' => '', 'est_etiquete' => true, 'achat' => '2024', 'created_at' => '2025-01-01'],
         ]);
 
     }

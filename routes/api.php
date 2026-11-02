@@ -760,6 +760,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,materiel.lecture'], function () {
         Route::apiResource('controles', ControleController::class)->only(['index', 'show']);
         Route::get('articles/{article}/controle-execs', [ControleExecController::class, 'indexForArticle']);
+        Route::get('articles/{article}/controle-composants', [ControleExecController::class, 'composantsForArticle']);
     });
 
     Route::group(['middleware' => 'jwtTokenRole:materiel.modification'], function () {

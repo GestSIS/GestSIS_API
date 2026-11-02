@@ -99,9 +99,10 @@ class MaterielTypeBusiness
 
     if (!$data['est_numerote']) {
       $controles = Controle::whereHas('materielTypes', fn (Builder $query) => $query->where('materiel_type_id', $id))
+        ->orWhereHas('taches.materielTypes', fn (Builder $query) => $query->where('materiel_type_id', $id))
         ->pluck('nom');
       if ($controles->isNotEmpty()) {
-        throw new ArrayException([], "Impossible de retirer la numérotation : ce type est contrôlé ({$controles->join(', ')})");
+        throw new ArrayException([], "Impossible de retirer la numérotation : ce type est contrôlé ou utilisé comme composant ({$controles->join(', ')})");
       }
     }
 
