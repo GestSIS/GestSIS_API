@@ -30,6 +30,7 @@ class ControleTableSeeder extends Seeder
             ['id' => 4, 'nom' => 'APR - Masque', 'description' => 'Feuille de contrôle Dräger pour masques avec surpression.', 'recurrence_type' => 'NON_PERIODIQUE', 'recurrence_value' => null, 'duree_preavis' => null, 'nb_execution_max' => null, 'nb_execution_preavis' => null, 'externe' => false, 'reparateur' => null, 'created_at' => now(), 'updated_at' => now()],
             ['id' => 5, 'nom' => 'APR - Soupape à la demande', 'description' => 'Feuille de contrôle Dräger pour soupape à la demande avec surpression.', 'recurrence_type' => 'NON_PERIODIQUE', 'recurrence_value' => null, 'duree_preavis' => null, 'nb_execution_max' => null, 'nb_execution_preavis' => null, 'externe' => false, 'reparateur' => null, 'created_at' => now(), 'updated_at' => now()],
             ['id' => 6, 'nom' => 'APR - Appareil', 'description' => 'Feuille de contrôle Dräger pour appareils à air comprimé.', 'recurrence_type' => 'NON_PERIODIQUE', 'recurrence_value' => null, 'duree_preavis' => null, 'nb_execution_max' => null, 'nb_execution_preavis' => null, 'externe' => false, 'reparateur' => null, 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 7, 'nom' => 'Remplissage bouteille', 'description' => 'Remplissage bouteille', 'recurrence_type' => 'NON_PERIODIQUE', 'recurrence_value' => null, 'duree_preavis' => null, 'nb_execution_max' => null, 'nb_execution_preavis' => null, 'externe' => false, 'reparateur' => null, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         DB::table('controle_taches')->insert([

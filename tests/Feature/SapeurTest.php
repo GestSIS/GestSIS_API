@@ -229,6 +229,46 @@ class SapeurTest extends TestCase
         $this->assertEquals('756.1234.5678.97', $sapeur->fresh()->no_avs);
     }
 
+    public function testUpdateSapeurRefuseUnIbanInvalide()
+    {
+        $sapeur = Sapeur::factory()->create([
+            'localite_id' => $this->localiteId,
+            'iban' => 'CH93 0076 2011 6238 5295 7',
+        ]);
+
+        $response = $this->json('PUT', '/api/v2/sapeurs/' . $sapeur->id, [
+            'iban' => 'CH93 0076 2011 6238 5295 8', // clé de contrôle erronée
+        ]);
+
+        $response->assertStatus(422)->assertJsonPath('errors', ['iban' => 'IBAN invalide.']);
+        $this->assertEquals('CH93 0076 2011 6238 5295 7', $sapeur->fresh()->iban);
+    }
+
+    public function testUpdateSapeurAccepteUnIbanValide()
+    {
+        $sapeur = Sapeur::factory()->create(['localite_id' => $this->localiteId]);
+
+        $response = $this->json('PUT', '/api/v2/sapeurs/' . $sapeur->id, [
+            'iban' => 'CH93 0076 2011 6238 5295 7',
+        ]);
+
+        $response->assertStatus(200);
+        $this->assertEquals('CH93 0076 2011 6238 5295 7', $sapeur->fresh()->iban);
+    }
+
+    public function testUpdateSapeurAccepteUnIbanVide()
+    {
+        $sapeur = Sapeur::factory()->create([
+            'localite_id' => $this->localiteId,
+            'iban' => 'CH93 0076 2011 6238 5295 7',
+        ]);
+
+        $response = $this->json('PUT', '/api/v2/sapeurs/' . $sapeur->id, ['iban' => null]);
+
+        $response->assertStatus(200);
+        $this->assertEquals('', $sapeur->fresh()->iban);
+    }
+
     public function testUpdateSapeurReturnsErrorWhenNotFound()
     {
         $data = Sapeur::factory()->make()->toArray();

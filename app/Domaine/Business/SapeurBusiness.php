@@ -181,6 +181,25 @@ class SapeurBusiness
     }
 
     /**
+     * Valide la structure et la clé de contrôle d'un IBAN, avec la même bibliothèque que l'export
+     * de paiement ISO 20022 (PaiementBusiness) : un IBAN accepté ici mais refusé là-bas bloquerait
+     * tout le fichier de paiement du décompte. Un IBAN vide est considéré valide (champ optionnel).
+     */
+    public static function estIbanValide(?string $iban): bool
+    {
+        if (trim((string) $iban) === '') {
+            return true;
+        }
+
+        try {
+            new IBAN($iban);
+            return true;
+        } catch (InvalidArgumentException) {
+            return false;
+        }
+    }
+
+    /**
      * Valide le format et la clé de contrôle d'un numéro AVS suisse : préfixe 756 + 9 chiffres
      * + 1 chiffre de contrôle, calculé selon l'algorithme EAN-13 (somme pondérée 1/3, mod 10).
      * Un numéro vide est considéré valide (le champ est optionnel pour un sapeur/civil).
@@ -234,12 +253,8 @@ class SapeurBusiness
             throw new NotReportableException(['no_avs' => 'Une inscription existe déjà avec ce numéro AVS.']);
         }
 
-        // Même contrôle que l'export de paiement ISO 20022 (PaiementBusiness) : un IBAN accepté ici
-        // mais invalide là-bas bloquerait plus tard tout le fichier de paiement du décompte.
-        try {
-            new IBAN($data['iban']);
-        } catch (InvalidArgumentException) {
-            throw new NotReportableException(['iban' => 'IBAN invalide.']);
+        if (!self::estIbanValide($data['iban'])) {
+            throw new NotReportableException(['iban' => 'IBAN invalide.'], 'IBAN invalide.');
         }
 
         // Sans ce contrôle, addTelephone() lèverait une erreur générique (clé `numero`, en anglais)
@@ -317,6 +332,10 @@ class SapeurBusiness
     {
         if (array_key_exists('no_avs', $data) && !self::estAvsValide($data['no_avs'])) {
             throw new NotReportableException(['no_avs' => 'Numéro AVS invalide.']);
+        }
+
+        if (array_key_exists('iban', $data) && !self::estIbanValide($data['iban'])) {
+            throw new NotReportableException(['iban' => 'IBAN invalide.'], 'IBAN invalide.');
         }
 
         $data = self::normalizeNullableFields($data);
