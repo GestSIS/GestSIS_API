@@ -5,6 +5,7 @@ namespace App\Application\Http\Controllers;
 use App\Domaine\Business\RecrutementTokenBusiness;
 use App\Models\RecrutementToken;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Date;
 
 class RecrutementTokenController extends Controller
 {
@@ -27,10 +28,15 @@ class RecrutementTokenController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'duree_heures' => 'required|integer|min:1|max:24',
+            'expire_at' => [
+                'required',
+                'date',
+                'after:now',
+                'before_or_equal:' . Date::now()->addDays(RecrutementTokenBusiness::DUREE_MAX_JOURS)->toIso8601String(),
+            ],
         ]);
 
-        [$tokenEnClair, $token] = RecrutementTokenBusiness::genererToken($data['duree_heures']);
+        [$tokenEnClair, $token] = RecrutementTokenBusiness::genererToken(Date::parse($data['expire_at']));
 
         return response()->json(['data' => [
             'token' => $tokenEnClair,

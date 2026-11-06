@@ -14,6 +14,7 @@ use App\Models\Sapeur;
 use App\Models\SapeurTelephone;
 use App\Models\TelephoneType;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Date;
 use Tests\TestCase;
 
 class RecrutementTest extends TestCase
@@ -77,16 +78,32 @@ class RecrutementTest extends TestCase
 
     public function testGenererTokenRetourneLeJetonEnClairUneFois()
     {
-        $response = $this->json('POST', '/api/v2/recrutement/token', ['duree_heures' => 12]);
+        $response = $this->json('POST', '/api/v2/recrutement/token', ['expire_at' => Date::now()->addHours(12)->toIso8601String()]);
 
         $response->assertStatus(201)->assertJsonStructure(['data' => ['token', 'expire_at']]);
         $this->assertNotEmpty($response->json('data.token'));
         $this->assertCount(1, RecrutementToken::all());
     }
 
-    public function testGenererTokenRefuseDureeSuperieureA24Heures()
+    public function testGenererTokenAccepteSeptJours()
     {
-        $response = $this->json('POST', '/api/v2/recrutement/token', ['duree_heures' => 25]);
+        $response = $this->json('POST', '/api/v2/recrutement/token', ['expire_at' => Date::now()->addDays(7)->toIso8601String()]);
+
+        $response->assertStatus(201);
+        $this->assertCount(1, RecrutementToken::all());
+    }
+
+    public function testGenererTokenRefuseExpirationPasse()
+    {
+        $response = $this->json('POST', '/api/v2/recrutement/token', ['expire_at' => Date::now()->subHour()->toIso8601String()]);
+
+        $response->assertStatus(422)->assertJsonStructure(['message']);
+        $this->assertCount(0, RecrutementToken::all());
+    }
+
+    public function testGenererTokenRefuseDureeSuperieureA7Jours()
+    {
+        $response = $this->json('POST', '/api/v2/recrutement/token', ['expire_at' => Date::now()->addDays(7)->addHour()->toIso8601String()]);
 
         // Convention du projet : les erreurs de validation Laravel sont réécrites en 200 + clé "error"
         $response->assertStatus(422)->assertJsonStructure(['message']);
@@ -95,10 +112,10 @@ class RecrutementTest extends TestCase
 
     public function testResetInvalideLAncienJeton()
     {
-        $premiere = $this->json('POST', '/api/v2/recrutement/token', ['duree_heures' => 12]);
+        $premiere = $this->json('POST', '/api/v2/recrutement/token', ['expire_at' => Date::now()->addHours(12)->toIso8601String()]);
         $premierToken = $premiere->json('data.token');
 
-        $this->json('POST', '/api/v2/recrutement/token', ['duree_heures' => 6]);
+        $this->json('POST', '/api/v2/recrutement/token', ['expire_at' => Date::now()->addHours(6)->toIso8601String()]);
 
         $this->assertFalse(RecrutementTokenBusiness::verifierToken($premierToken));
         $this->assertCount(1, RecrutementToken::all());
@@ -106,7 +123,7 @@ class RecrutementTest extends TestCase
 
     public function testShowTokenNeRevelePasLeJetonEnClair()
     {
-        $this->json('POST', '/api/v2/recrutement/token', ['duree_heures' => 12]);
+        $this->json('POST', '/api/v2/recrutement/token', ['expire_at' => Date::now()->addHours(12)->toIso8601String()]);
 
         $response = $this->json('GET', '/api/v2/recrutement/token');
 
@@ -116,7 +133,7 @@ class RecrutementTest extends TestCase
 
     public function testDestroyInvalideLeJetonActif()
     {
-        $this->json('POST', '/api/v2/recrutement/token', ['duree_heures' => 12]);
+        $this->json('POST', '/api/v2/recrutement/token', ['expire_at' => Date::now()->addHours(12)->toIso8601String()]);
         $this->json('DELETE', '/api/v2/recrutement/token')->assertStatus(204);
 
         $this->assertCount(0, RecrutementToken::all());
@@ -126,7 +143,7 @@ class RecrutementTest extends TestCase
 
     public function testShowPublicIndiqueUnJetonValide()
     {
-        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(Date::now()->addHours(12));
 
         $response = $this->json('GET', "/api/v2/recrutement/test/{$tokenEnClair}");
 
@@ -139,7 +156,7 @@ class RecrutementTest extends TestCase
 
     public function testShowPublicIndiqueUnJetonExpire()
     {
-        [$tokenEnClair, $token] = RecrutementTokenBusiness::genererToken(12);
+        [$tokenEnClair, $token] = RecrutementTokenBusiness::genererToken(Date::now()->addHours(12));
         $token->update(['expire_at' => now()->subHour()]);
 
         $response = $this->json('GET', "/api/v2/recrutement/test/{$tokenEnClair}");
@@ -149,7 +166,7 @@ class RecrutementTest extends TestCase
 
     public function testStorePublicCreeUneRecrueAvecSesTelephones()
     {
-        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(Date::now()->addHours(12));
 
         $response = $this->json('POST', "/api/v2/recrutement/test/{$tokenEnClair}", $this->formulaireRecrue());
 
@@ -164,7 +181,7 @@ class RecrutementTest extends TestCase
 
     public function testStorePublicCreeUneRecrueAvecSesPermis()
     {
-        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(Date::now()->addHours(12));
 
         $response = $this->json(
             'POST',
@@ -186,7 +203,7 @@ class RecrutementTest extends TestCase
 
     public function testStorePublicBloqueUnPermisEnDouble()
     {
-        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(Date::now()->addHours(12));
 
         $response = $this->json(
             'POST',
@@ -225,7 +242,7 @@ class RecrutementTest extends TestCase
 
     public function testStorePublicFonctionneSansPermis()
     {
-        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(Date::now()->addHours(12));
 
         $response = $this->json('POST', "/api/v2/recrutement/test/{$tokenEnClair}", $this->formulaireRecrue());
 
@@ -242,7 +259,7 @@ class RecrutementTest extends TestCase
 
     public function testStorePublicBloqueUnAvsAuFormatInvalide()
     {
-        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(Date::now()->addHours(12));
 
         $response = $this->json(
             'POST',
@@ -260,7 +277,7 @@ class RecrutementTest extends TestCase
             'localite_id' => $this->localiteId,
             'no_avs' => '756.1234.5678.97',
         ]);
-        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(Date::now()->addHours(12));
 
         $response = $this->json('POST', "/api/v2/recrutement/test/{$tokenEnClair}", $this->formulaireRecrue());
 
@@ -274,7 +291,7 @@ class RecrutementTest extends TestCase
             'localite_id' => $this->localiteId,
             'no_avs' => '7561234567897', // même AVS, sans ponctuation
         ]);
-        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(Date::now()->addHours(12));
 
         $response = $this->json('POST', "/api/v2/recrutement/test/{$tokenEnClair}", $this->formulaireRecrue());
 
@@ -283,7 +300,7 @@ class RecrutementTest extends TestCase
 
     public function testStorePublicRenvoieUnMessageParChampEtRienPourUnChampObligatoire()
     {
-        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(Date::now()->addHours(12));
 
         $response = $this->json(
             'POST',
@@ -306,7 +323,7 @@ class RecrutementTest extends TestCase
 
     public function testStorePublicRefuseUnChampTropLongSansErreurServeur()
     {
-        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(Date::now()->addHours(12));
 
         $response = $this->json(
             'POST',
@@ -319,7 +336,7 @@ class RecrutementTest extends TestCase
 
     public function testStorePublicRefuseUnIbanInvalide()
     {
-        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(Date::now()->addHours(12));
 
         $response = $this->json(
             'POST',
@@ -333,7 +350,7 @@ class RecrutementTest extends TestCase
 
     public function testStorePublicRefuseUnPermisObtenuDansLeFutur()
     {
-        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(Date::now()->addHours(12));
 
         $response = $this->json(
             'POST',
@@ -350,7 +367,7 @@ class RecrutementTest extends TestCase
 
     public function testStorePublicRefuseUnTelephoneEnDoubleSurLaBonneLigne()
     {
-        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(Date::now()->addHours(12));
 
         $response = $this->json(
             'POST',

@@ -3,11 +3,15 @@
 namespace App\Domaine\Business;
 
 use App\Models\RecrutementToken;
+use DateTimeInterface;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 
 class RecrutementTokenBusiness
 {
+    /** Durée de validité maximale d'un jeton, en jours. */
+    public const DUREE_MAX_JOURS = 7;
+
     private static function estExpire(RecrutementToken $token): bool
     {
         return Date::now()->greaterThan($token->expire_at);
@@ -31,14 +35,14 @@ class RecrutementTokenBusiness
      *
      * @return array{0: string, 1: RecrutementToken} Le jeton en clair (à afficher une seule fois) et le modèle créé.
      */
-    public static function genererToken(int $dureeHeures): array
+    public static function genererToken(DateTimeInterface $expireAt): array
     {
         RecrutementToken::query()->delete();
 
         $tokenEnClair = Str::random(48);
         $token = RecrutementToken::create([
             'token' => hash('sha256', $tokenEnClair),
-            'expire_at' => Date::now()->addHours($dureeHeures),
+            'expire_at' => $expireAt,
         ]);
 
         return [$tokenEnClair, $token];
