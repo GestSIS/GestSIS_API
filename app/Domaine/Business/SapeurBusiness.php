@@ -24,6 +24,7 @@ use App\Models\Quittance;
 use App\Models\Sapeur;
 use App\Models\SapeurTelephone;
 use App\Models\Travail;
+use App\Support\Telephone;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -261,7 +262,7 @@ class SapeurBusiness
         // que le formulaire public ne saurait pas rattacher à la bonne ligne.
         $numeros = [];
         foreach ($data['telephones'] ?? [] as $index => $telephone) {
-            $numero = self::numeroNormalise($telephone['numero']);
+            $numero = Telephone::normaliser($telephone['numero']);
             if (in_array($numero, $numeros, true)) {
                 throw new NotReportableException(
                     ["telephones.{$index}.numero" => 'Ce numéro est saisi plusieurs fois.'],
@@ -712,16 +713,11 @@ class SapeurBusiness
         return self::majStatutActifSapeur($sapeurId, Mutation::where('sapeur_id', $sapeurId)->get());
     }
 
-    private static function numeroNormalise($numero): string
-    {
-        return trim(preg_replace('/\s+/', ' ', $numero));
-    }
-
     public static function addTelephone(int $sapeurId, $data)
     {
-        $numero = self::numeroNormalise($data['numero']);
+        $numero = Telephone::normaliser($data['numero']);
         $existeDeja = SapeurTelephone::where('sapeur_id', $sapeurId)->get()
-            ->contains(fn($tel) => self::numeroNormalise($tel->numero) === $numero);
+            ->contains(fn($tel) => Telephone::normaliser($tel->numero) === $numero);
         if ($existeDeja) {
             throw new ArrayException(['numero' => 'Duplicated numero']);
         }
@@ -732,10 +728,10 @@ class SapeurBusiness
 
     public static function updateTelephone(int $sapeurId, $data)
     {
-        $numero = self::numeroNormalise($data['numero']);
+        $numero = Telephone::normaliser($data['numero']);
         $existeDeja = SapeurTelephone::where('sapeur_id', $sapeurId)->get()
             ->reject(fn($t) => $t->id === $data['id'])
-            ->contains(fn($tel) => self::numeroNormalise($tel->numero) === $numero);
+            ->contains(fn($tel) => Telephone::normaliser($tel->numero) === $numero);
         if ($existeDeja) {
             throw new ArrayException(['numéro' => 'Numéro à double'], 'Numéro déjà existant');
         }

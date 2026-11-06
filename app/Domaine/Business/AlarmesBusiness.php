@@ -2,6 +2,8 @@
 
 namespace App\Domaine\Business;
 
+use App\Support\Telephone;
+
 class AlarmesBusiness
 {
     public static function resoudreAlarmes($alarmes, $sapeurs): array
@@ -12,7 +14,7 @@ class AlarmesBusiness
             $key = strtolower("{$sapeur->nom} {$sapeur->prenom}");
             $indexedSapeursByNomPrenom[$key] = $sapeur;
             foreach ($sapeur->telephones as $telephone) {
-                $numero = self::normaliserTelephone($telephone->numero);
+                $numero = Telephone::normaliser($telephone->numero);
 
                 // Edge case lorsqu'un unique numéro est partagé par plusieurs sapeurs
                 if (array_key_exists($numero, $indexedSapeursByPhone) && $indexedSapeursByPhone[$numero] !== $sapeur->id) {
@@ -32,7 +34,7 @@ class AlarmesBusiness
                 $phones = explode(",", $f->phone ?? "");
                 $resolved = false;
                 foreach ($phones as $phone) {
-                    $numero = self::normaliserTelephone($phone);
+                    $numero = Telephone::normaliser($phone);
                     if ($numero !== "" && array_key_exists($numero, $indexedSapeursByPhone) && $indexedSapeursByPhone[$numero] !== null) {
                         $f->id = $indexedSapeursByPhone[$numero];
                         $tmp[] = $f;
@@ -64,14 +66,5 @@ class AlarmesBusiness
 
             return $alarme;
         })->all();
-    }
-
-    private static function normaliserTelephone(string $phone): string
-    {
-        $tmp = str_replace(" ", "", trim($phone));
-        if ($tmp !== "" && str_starts_with($tmp, "0")) {
-            return "+41" . substr($tmp, 1);
-        }
-        return $tmp;
     }
 }

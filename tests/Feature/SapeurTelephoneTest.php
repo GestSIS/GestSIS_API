@@ -79,6 +79,31 @@ class SapeurTelephoneTest extends TestCase
     }
 
     /**
+     * Un numéro déjà enregistré dans un autre format (« 079 … » contre « +41 79 … ») est un doublon
+     */
+    public function testAddTelephoneRefuseUnDoublonSaisiDansUnAutreFormat()
+    {
+        $sapeur = Sapeur::factory()->create();
+        SapeurTelephone::create([
+            'sapeur_id' => $sapeur->id,
+            'numero' => '079 123 45 67',
+            'telephone_type_id' => 1,
+            'rta' => false,
+            'priorite' => 1,
+        ]);
+
+        $response = $this->json('POST', "/api/v2/sapeurs/{$sapeur->id}/telephones", [
+            'numero' => '+41 79 123 45 67',
+            'telephone_type_id' => 1,
+            'rta' => false,
+            'priorite' => 2,
+        ]);
+
+        $response->assertStatus(422);
+        $this->assertCount(1, SapeurTelephone::where('sapeur_id', $sapeur->id)->get());
+    }
+
+    /**
      * Test add telephone returns error when sapeur not found
      */
     public function testAddTelephoneReturnsErrorWhenSapeurNotFound()
