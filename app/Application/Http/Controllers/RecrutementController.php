@@ -62,28 +62,36 @@ class RecrutementController extends Controller
             throw new NotReportableException([], 'Page introuvable', status: 404);
         }
 
+        // Seuls deux messages sont personnalisés ci-dessous ; les autres viennent de lang/fr. La validation
+        // HTML du formulaire bloque déjà ces cas, ils ne servent qu'en cas d'appel direct à l'API.
         $data = $request->validate([
-            'nom' => 'required|string|min:2',
-            'prenom' => 'required|string|min:2',
-            'rue' => 'required|string|min:3',
-            'no_rue' => 'required|string',
-            'date_naissance' => 'required|date|before:' . date('Y-m-d'),
+            'nom' => 'required|string|min:2|max:255',
+            'prenom' => 'required|string|min:2|max:255',
+            'rue' => 'required|string|min:3|max:255',
+            'no_rue' => 'required|string|max:255',
+            'date_naissance' => 'required|date|before:today',
             'localite_id' => 'required|integer|exists:localites,id',
             'civilite_id' => 'required|integer|exists:civilites,id',
-            'no_avs' => 'required|string',
+            'no_avs' => 'required|string|max:255',
             'cotisation_avs' => 'boolean',
             'profession' => 'required|string|max:80',
             'employeur' => 'required|string|max:150',
             'lieu_de_travail' => 'required|string|max:100',
-            'email' => 'required|email',
+            'email' => 'required|email|max:255',
             'iban' => 'required|string|max:100',
             'telephones' => 'required|array|min:1',
-            'telephones.*.numero' => 'required|string',
+            'telephones.*.numero' => 'required|string|max:255',
             'telephones.*.telephone_type_id' => 'required|integer|exists:telephone_types,id',
             'telephones.*.priorite' => 'required|integer',
             'permis' => 'array',
             'permis.*.permis_type_id' => 'required|integer|exists:permis_types,id|distinct',
-            'permis.*.date' => 'required|date',
+            'permis.*.date' => 'required|date|before_or_equal:today',
+        ], [
+            // Champ obligatoire manquant : pas de message, le formulaire le met simplement en rouge.
+            'required' => '',
+            // Le formulaire accepte la date du jour, que `before:today` refuse ; le message générique
+            // afficherait « antérieure au today ».
+            'date_naissance.before' => 'La date de naissance doit être dans le passé.',
         ]);
 
         $recrue = SapeurBusiness::createRecrue($data);

@@ -281,6 +281,92 @@ class RecrutementTest extends TestCase
         $response->assertStatus(422)->assertJsonStructure(['message']);
     }
 
+    public function testStorePublicRenvoieUnMessageParChampEtRienPourUnChampObligatoire()
+    {
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+
+        $response = $this->json(
+            'POST',
+            "/api/v2/recrutement/test/{$tokenEnClair}",
+            $this->formulaireRecrue([
+                'nom' => 'D',
+                'date_naissance' => now()->addDay()->format('Y-m-d'),
+                'email' => 'pas-un-email',
+                'iban' => '',
+            ]),
+        );
+
+        $response->assertStatus(422)
+            ->assertJsonPath('errors.nom.0', 'Le texte de nom doit contenir au moins 2 caractères.')
+            ->assertJsonPath('errors.date_naissance.0', 'La date de naissance doit être dans le passé.')
+            ->assertJsonPath('errors.email.0', 'Le champ adresse e-mail doit être une adresse e-mail valide.')
+            ->assertJsonPath('errors.iban.0', ''); // champ obligatoire : présent mais sans message
+        $this->assertStringNotContainsString('validation.', $response->json('message'));
+    }
+
+    public function testStorePublicRefuseUnChampTropLongSansErreurServeur()
+    {
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+
+        $response = $this->json(
+            'POST',
+            "/api/v2/recrutement/test/{$tokenEnClair}",
+            $this->formulaireRecrue(['nom' => str_repeat('a', 256)]),
+        );
+
+        $response->assertStatus(422)->assertJsonValidationErrors(['nom']);
+    }
+
+    public function testStorePublicRefuseUnIbanInvalide()
+    {
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+
+        $response = $this->json(
+            'POST',
+            "/api/v2/recrutement/test/{$tokenEnClair}",
+            $this->formulaireRecrue(['iban' => 'CH93 0076 2011 6238 5295 8']), // clé de contrôle erronée
+        );
+
+        $response->assertStatus(422)->assertJsonPath('errors', ['iban' => 'IBAN invalide.']);
+        $this->assertCount(0, Sapeur::where('no_avs', '756.1234.5678.97')->get());
+    }
+
+    public function testStorePublicRefuseUnPermisObtenuDansLeFutur()
+    {
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+
+        $response = $this->json(
+            'POST',
+            "/api/v2/recrutement/test/{$tokenEnClair}",
+            $this->formulaireRecrue([
+                'permis' => [
+                    ['permis_type_id' => $this->permisTypeId, 'date' => now()->addDay()->format('Y-m-d')],
+                ],
+            ]),
+        );
+
+        $response->assertStatus(422)->assertJsonValidationErrors(['permis.0.date']);
+    }
+
+    public function testStorePublicRefuseUnTelephoneEnDoubleSurLaBonneLigne()
+    {
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(12);
+
+        $response = $this->json(
+            'POST',
+            "/api/v2/recrutement/test/{$tokenEnClair}",
+            $this->formulaireRecrue([
+                'telephones' => [
+                    ['numero' => '079 123 45 67', 'telephone_type_id' => $this->telephoneTypeId, 'priorite' => 1],
+                    ['numero' => '079  123 45 67 ', 'telephone_type_id' => $this->telephoneTypeId, 'priorite' => 2],
+                ],
+            ]),
+        );
+
+        $response->assertStatus(422)->assertJsonPath('errors', ['telephones.1.numero' => 'Ce numéro est saisi plusieurs fois.']);
+        $this->assertCount(0, Sapeur::where('no_avs', '756.1234.5678.97')->get());
+    }
+
     // --- Validation / rejet (fourrier) ---
 
     public function testValiderBasculeLaRecrueEnSapeurEtCreeUneMutation()

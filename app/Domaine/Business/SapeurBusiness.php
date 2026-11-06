@@ -27,6 +27,8 @@ use App\Models\Travail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
+use Z38\SwissPayment\IBAN;
 
 class SapeurBusiness
 {
@@ -230,6 +232,27 @@ class SapeurBusiness
 
         if (self::avsDejaUtilise($data['no_avs'])) {
             throw new NotReportableException(['no_avs' => 'Une inscription existe déjà avec ce numéro AVS.']);
+        }
+
+        // Même contrôle que l'export de paiement ISO 20022 (PaiementBusiness) : un IBAN accepté ici
+        // mais invalide là-bas bloquerait plus tard tout le fichier de paiement du décompte.
+        try {
+            new IBAN($data['iban']);
+        } catch (InvalidArgumentException) {
+            throw new NotReportableException(['iban' => 'IBAN invalide.']);
+        }
+
+        // Sans ce contrôle, addTelephone() lèverait une erreur générique (clé `numero`, en anglais)
+        // que le formulaire public ne saurait pas rattacher à la bonne ligne.
+        $numeros = [];
+        foreach ($data['telephones'] ?? [] as $index => $telephone) {
+            $numero = self::numeroNormalise($telephone['numero']);
+            if (in_array($numero, $numeros, true)) {
+                throw new NotReportableException(
+                    ["telephones.{$index}.numero" => 'Ce numéro est saisi plusieurs fois.'],
+                );
+            }
+            $numeros[] = $numero;
         }
 
         $data = self::normalizeNullableFields($data);
