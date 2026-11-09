@@ -229,9 +229,9 @@ class SapeurBusiness
      * Vérifie si un numéro AVS est déjà utilisé par un sapeur existant (tout type confondu),
      * en comparant les numéros normalisés (chiffres uniquement).
      */
-    public static function avsDejaUtilise(string $noAvs): bool
+    public static function avsDejaUtilise(?string $noAvs): bool
     {
-        $normalise = self::normaliserAvs($noAvs);
+        $normalise = self::normaliserAvs((string) $noAvs);
         if ($normalise === '') {
             return false;
         }
@@ -246,6 +246,9 @@ class SapeurBusiness
      */
     public static function createRecrue($data)
     {
+        // N° AVS et IBAN sont facultatifs dans le formulaire public : absents, ils sont enregistrés vides.
+        $data += ['no_avs' => null, 'iban' => null];
+
         if (!self::estAvsValide($data['no_avs'])) {
             throw new NotReportableException(['no_avs' => 'Numéro AVS invalide.']);
         }

@@ -309,7 +309,7 @@ class RecrutementTest extends TestCase
                 'nom' => 'D',
                 'date_naissance' => now()->addDay()->format('Y-m-d'),
                 'email' => 'pas-un-email',
-                'iban' => '',
+                'profession' => '',
             ]),
         );
 
@@ -317,7 +317,7 @@ class RecrutementTest extends TestCase
             ->assertJsonPath('errors.nom.0', 'Le texte de nom doit contenir au moins 2 caractères.')
             ->assertJsonPath('errors.date_naissance.0', 'La date de naissance doit être dans le passé.')
             ->assertJsonPath('errors.email.0', 'Le champ adresse e-mail doit être une adresse e-mail valide.')
-            ->assertJsonPath('errors.iban.0', ''); // champ obligatoire : présent mais sans message
+            ->assertJsonPath('errors.profession.0', ''); // champ obligatoire : présent mais sans message
         $this->assertStringNotContainsString('validation.', $response->json('message'));
     }
 
@@ -332,6 +332,47 @@ class RecrutementTest extends TestCase
         );
 
         $response->assertStatus(422)->assertJsonValidationErrors(['nom']);
+    }
+
+    public function testStorePublicAccepteAvsEtIbanVides()
+    {
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(Date::now()->addHours(12));
+
+        $this->json(
+            'POST',
+            "/api/v2/recrutement/test/{$tokenEnClair}",
+            $this->formulaireRecrue(['no_avs' => '', 'iban' => '']),
+        )->assertStatus(201);
+
+        $recrue = Sapeur::where('email', $this->formulaireRecrue()['email'])->firstOrFail();
+        $this->assertSame('', $recrue->no_avs);
+        $this->assertSame('', $recrue->iban);
+    }
+
+    public function testStorePublicAccepteAvsEtIbanAbsents()
+    {
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(Date::now()->addHours(12));
+
+        $formulaire = $this->formulaireRecrue();
+        unset($formulaire['no_avs'], $formulaire['iban']);
+
+        $this->json('POST', "/api/v2/recrutement/test/{$tokenEnClair}", $formulaire)->assertStatus(201);
+    }
+
+    public function testStorePublicAccepteDeuxRecruesSansAvs()
+    {
+        [$tokenEnClair] = RecrutementTokenBusiness::genererToken(Date::now()->addHours(12));
+
+        $this->json(
+            'POST',
+            "/api/v2/recrutement/test/{$tokenEnClair}",
+            $this->formulaireRecrue(['no_avs' => '']),
+        )->assertStatus(201);
+        $this->json(
+            'POST',
+            "/api/v2/recrutement/test/{$tokenEnClair}",
+            $this->formulaireRecrue(['no_avs' => '', 'email' => 'autre.recrue@example.com']),
+        )->assertStatus(201);
     }
 
     public function testStorePublicRefuseUnIbanInvalide()
