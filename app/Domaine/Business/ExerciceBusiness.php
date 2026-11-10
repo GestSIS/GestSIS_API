@@ -17,7 +17,6 @@ use App\Models\Fonction;
 use App\Models\Localite;
 use App\Models\Sapeur;
 use App\Models\Sms;
-use App\Models\SmsNumero;
 use App\Models\Travail;
 use Carbon\Carbon;
 use Ds\Set;
@@ -155,8 +154,8 @@ class ExerciceBusiness
         DB::transaction(function () use ($exerciceId) {
             ExerciceSapeur::where('exercice_id', '=', $exerciceId)->delete();
             TravauxBusiness::supprimerLies('exercice_id', $exerciceId);
-            SmsNumero::whereIn('sms_id', Sms::where('exercice_id', '=', $exerciceId)->select('id'))->delete();
-            Sms::where('exercice_id', '=', $exerciceId)->delete();
+            // Garde la trace des SMS envoyés : détachés avant que le ON DELETE CASCADE ne les supprime
+            Sms::where('exercice_id', '=', $exerciceId)->update(['exercice_id' => null]);
             Exercice::whereId($exerciceId)->delete();
         });
 
