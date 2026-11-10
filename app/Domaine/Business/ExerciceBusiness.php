@@ -17,6 +17,7 @@ use App\Models\Fonction;
 use App\Models\Localite;
 use App\Models\Sapeur;
 use App\Models\Sms;
+use App\Models\SmsNumero;
 use App\Models\Travail;
 use Carbon\Carbon;
 use Ds\Set;
@@ -145,10 +146,24 @@ class ExerciceBusiness
             throw new InvalidActionException([], "Impossible de supprimer un exercice déjà imputé");
         }
 
-        ExerciceSapeur::where('exercice_id', '=', $exerciceId)->delete();
-        TravauxBusiness::supprimerLies('exercice_id', $exerciceId);
-        Sms::where('exercice_id', '=', $exerciceId)->delete();
-        Exercice::whereId($exerciceId)->delete();
+        $justificatifs = ExerciceSapeur::where('exercice_id', '=', $exerciceId)
+            ->whereNotNull('justificatif_path')
+            ->where('justificatif_path', '<>', '')
+            ->pluck('justificatif_path')
+            ->all();
+
+        DB::transaction(function () use ($exerciceId) {
+            ExerciceSapeur::where('exercice_id', '=', $exerciceId)->delete();
+            TravauxBusiness::supprimerLies('exercice_id', $exerciceId);
+            SmsNumero::whereIn('sms_id', Sms::where('exercice_id', '=', $exerciceId)->select('id'))->delete();
+            Sms::where('exercice_id', '=', $exerciceId)->delete();
+            Exercice::whereId($exerciceId)->delete();
+        });
+
+        // Après le commit : un fichier supprimé ne serait pas restauré par un rollback
+        if ($justificatifs !== []) {
+            Storage::delete($justificatifs);
+        }
     }
 
     public static function validateExerciceById($exerciceId)
