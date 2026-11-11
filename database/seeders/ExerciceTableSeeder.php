@@ -21,11 +21,14 @@ class ExerciceTableSeeder extends Seeder
         // Le sapeur 1 correspond à l'utilisateur de base : on garantit sa présence à quelques exercices
         $exercicesAvecSapeur1 = $exercices->shuffle()->take(5)->pluck('id')->all();
 
-        $exercices->each(function (Exercice $exercice) use ($sapeurs, $exercicesAvecSapeur1) {
-            if ($sapeurs->isEmpty()) {
-                return;
-            }
+        if ($sapeurs->isEmpty()) {
+            return;
+        }
 
+        $exerciceSapeurs = [];
+        $now = now();
+
+        foreach ($exercices as $exercice) {
             $assignedSapeurs = $sapeurs->shuffle()->take(fake()->numberBetween(5, 15));
             if (in_array($exercice->id, $exercicesAvecSapeur1) && $sapeurs->contains(1) && !$assignedSapeurs->contains(1)) {
                 $assignedSapeurs->push(1);
@@ -33,17 +36,23 @@ class ExerciceTableSeeder extends Seeder
 
             foreach ($assignedSapeurs as $sapeurId) {
                 $present = fake()->boolean(80);
-                ExerciceSapeur::create([
+                $exerciceSapeurs[] = [
                     'exercice_id' => $exercice->id,
                     'sapeur_id' => $sapeurId,
-                    'convoque' => true,
-                    'present' => $present,
-                    'remplace' => false,
-                    'absent' => !$present,
-                ]);
+                    'convoque' => 1,
+                    'present' => (int) $present,
+                    'remplace' => 0,
+                    'absent' => (int) !$present,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
             }
+        }
 
+        ExerciceSapeur::insert($exerciceSapeurs);
+
+        foreach ($exercices as $exercice) {
             ExerciceBusiness::updateStatut($exercice->id);
-        });
+        }
     }
 }

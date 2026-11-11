@@ -22,6 +22,9 @@ class SmsTableSeeder extends Seeder
         $sapeurs = Sapeur::pluck('id');
         $exerciceIds = Exercice::where('exercice_comptable_id', $exerciceComptable->id)->pluck('id');
 
+        $smsNumeros = [];
+        $now = now();
+
         for ($i = 0; $i < 10; $i++) {
             $differe = fake()->boolean(50);
             $dateProgramme = Carbon::parse(
@@ -39,12 +42,16 @@ class SmsTableSeeder extends Seeder
             for ($j = 0; $j < $destinataires; $j++) {
                 $sapeurId = $sapeurs->isNotEmpty() && fake()->boolean(70) ? $sapeurs->random() : null;
 
-                SmsNumero::create([
+                $smsNumeros[] = [
                     'sms_id' => $sms->id,
                     'sapeur_id' => $sapeurId,
                     'numero' => fake()->numerify('+4179#######'),
-                ]);
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
             }
         }
+
+        SmsNumero::insert($smsNumeros);
     }
 }

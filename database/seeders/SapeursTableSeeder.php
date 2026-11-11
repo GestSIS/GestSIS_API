@@ -44,42 +44,47 @@ class SapeursTableSeeder extends Seeder
             'M' => 10,
         ];
 
+        $telephones = [];
+        $gradesSapeur = [];
+        $fonctionsSapeur = [];
+        $groupesSapeur = [];
+        $coursSapeur = [];
+        $permis = [];
+
         foreach ($sapeurs as $sapeur) {
             // Téléphones (1 ou 2 par sapeur)
-            DB::table('sapeur_telephone')->insert([
-                ['sapeur_id' => $sapeur->id, 'telephone_type_id' => 1, 'numero' => fake()->numerify('0## ### ## ##'), 'priorite' => 1, 'rta' => false],
-                ['sapeur_id' => $sapeur->id, 'telephone_type_id' => 2, 'numero' => fake()->numerify('07# ### ## ##'), 'priorite' => 2, 'rta' => fake()->boolean(60)],
-            ]);
+            $telephones[] = ['sapeur_id' => $sapeur->id, 'telephone_type_id' => 1, 'numero' => fake()->numerify('0## ### ## ##'), 'priorite' => 1, 'rta' => false];
+            $telephones[] = ['sapeur_id' => $sapeur->id, 'telephone_type_id' => 2, 'numero' => fake()->numerify('07# ### ## ##'), 'priorite' => 2, 'rta' => fake()->boolean(60)];
 
             // Grade actuel
             if ($grades->isNotEmpty()) {
-                DB::table('grade_sapeur')->insert([
+                $gradesSapeur[] = [
                     'sapeur_id' => $sapeur->id,
                     'grade_id' => $grades->random(),
                     'date' => fake()->dateTimeBetween('-10 years', '-1 year')->format('Y-m-d'),
                     'remarque' => '',
-                ]);
+                ];
             }
 
             // Fonction actuelle
             if ($fonctions->isNotEmpty()) {
-                DB::table('fonction_sapeur')->insert([
+                $fonctionsSapeur[] = [
                     'sapeur_id' => $sapeur->id,
                     'fonction_id' => $fonctions->random(),
                     'debut' => fake()->dateTimeBetween('-10 years', '-1 year')->format('Y-m-d'),
                     'fin' => null,
                     'remarque' => '',
-                ]);
+                ];
             }
 
             // 1 à 3 groupes par sapeur
             if ($groupes->isNotEmpty()) {
                 $assignedGroupes = $groupes->shuffle()->take(fake()->numberBetween(1, 3));
                 foreach ($assignedGroupes as $groupeId) {
-                    DB::table('groupe_sapeur')->insert([
+                    $groupesSapeur[] = [
                         'sapeur_id' => $sapeur->id,
                         'groupe_id' => $groupeId,
-                    ]);
+                    ];
                 }
             }
 
@@ -87,28 +92,35 @@ class SapeursTableSeeder extends Seeder
             if ($cours->isNotEmpty() && fake()->boolean(70)) {
                 $assignedCours = $cours->shuffle()->take(fake()->numberBetween(1, 2));
                 foreach ($assignedCours as $coursId) {
-                    DB::table('cours_sapeur')->insert([
+                    $coursSapeur[] = [
                         'sapeur_id' => $sapeur->id,
                         'cours_id' => $coursId,
                         'duree' => fake()->randomElement([1, 2, 3]),
                         'date' => fake()->dateTimeBetween('-8 years', '-6 months')->format('Y-m-d'),
                         'localite_id' => $localites->random(),
-                    ]);
+                    ];
                 }
             }
 
             // Permis : forte probabilité pour le B, plus faible pour les autres (C1/C1 118, etc.)
             foreach ($permisProbabilities as $type => $probability) {
                 if (isset($permisTypes[$type]) && fake()->boolean($probability)) {
-                    DB::table('permis')->insert([
+                    $permis[] = [
                         'sapeur_id' => $sapeur->id,
                         'permis_type_id' => $permisTypes[$type],
                         'date' => fake()->dateTimeBetween('-15 years', '-1 year')->format('Y-m-d'),
                         'created_at' => now(),
                         'updated_at' => now(),
-                    ]);
+                    ];
                 }
             }
         }
+
+        DB::table('sapeur_telephone')->insert($telephones);
+        DB::table('grade_sapeur')->insert($gradesSapeur);
+        DB::table('fonction_sapeur')->insert($fonctionsSapeur);
+        DB::table('groupe_sapeur')->insert($groupesSapeur);
+        DB::table('cours_sapeur')->insert($coursSapeur);
+        DB::table('permis')->insert($permis);
     }
 }

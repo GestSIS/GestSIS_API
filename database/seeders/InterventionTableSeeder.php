@@ -15,11 +15,16 @@ class InterventionTableSeeder extends Seeder
     {
         $sapeurs = Sapeur::pluck('id');
 
-        Intervention::factory(15)->create()->each(function (Intervention $intervention) use ($sapeurs) {
-            if ($sapeurs->isEmpty()) {
-                return;
-            }
+        $interventions = Intervention::factory(15)->create();
 
+        if ($sapeurs->isEmpty()) {
+            return;
+        }
+
+        $interventionSapeurs = [];
+        $now = now();
+
+        foreach ($interventions as $intervention) {
             $debut = Carbon::parse($intervention->date_debut . ' ' . $intervention->heure_debut);
             $fin = Carbon::parse($intervention->date_fin . ' ' . $intervention->heure_fin);
 
@@ -41,18 +46,21 @@ class InterventionTableSeeder extends Seeder
                     $presenceFin = $presenceDebut->copy()->addHour();
                 }
 
-                DB::table('intervention_sapeur')->insert([
+                $interventionSapeurs[] = [
                     'sapeur_id' => $sapeurId,
                     'intervention_id' => $intervention->id,
                     'debut' => $presenceDebut->format('Y-m-d H:i:s'),
                     'fin' => $presenceFin->format('Y-m-d H:i:s'),
                     'piquet' => false,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
             }
+        }
 
-            $intervention->update(['statut' => InterventionBusiness::INTERVENTION_STATUT_SAISI]);
-        });
+        DB::table('intervention_sapeur')->insert($interventionSapeurs);
+
+        Intervention::whereKey($interventions->modelKeys())
+            ->update(['statut' => InterventionBusiness::INTERVENTION_STATUT_SAISI]);
     }
 }
