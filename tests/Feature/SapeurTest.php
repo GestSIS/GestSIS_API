@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Localite;
 use App\Models\Sapeur;
+use App\Models\SapeurTelephone;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
@@ -95,6 +96,31 @@ class SapeurTest extends TestCase
             ->assertJsonPath('data.id', $sapeur->id)
             ->assertJsonPath('data.nom', $sapeur->nom)
             ->assertJsonPath('data.prenom', $sapeur->prenom);
+    }
+
+    /**
+     * La fiche inclut les numéros de téléphone du sapeur (et seulement les siens)
+     */
+    public function testShowSapeurIncludesTelephones()
+    {
+        $sapeur = Sapeur::factory()->create(['localite_id' => $this->localiteId]);
+        $autreSapeur = Sapeur::factory()->create(['localite_id' => $this->localiteId]);
+        $telephone = SapeurTelephone::factory()->create([
+            'sapeur_id' => $sapeur->id,
+            'telephone_type_id' => 1,
+        ]);
+        SapeurTelephone::factory()->create([
+            'sapeur_id' => $autreSapeur->id,
+            'telephone_type_id' => 1,
+        ]);
+
+        $response = $this->json('GET', '/api/v2/sapeurs/' . $sapeur->id);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonCount(1, 'data.telephones')
+            ->assertJsonPath('data.telephones.0.id', $telephone->id)
+            ->assertJsonPath('data.telephones.0.numero', $telephone->numero);
     }
 
     public function testShowSapeurReturnsErrorWhenNotFound()

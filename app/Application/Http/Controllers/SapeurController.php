@@ -173,9 +173,13 @@ class SapeurController extends Controller
         return response()->json(['data' => SapeurBusiness::updateNonSapeurStatut($sapeurId, $data)]);
     }
 
+    /**
+     * Fiche d'un sapeur, numéros de téléphone inclus (affichés dans l'en-tête de la fiche
+     * côté APP, sans requête séparée).
+     */
     public function show(int $id)
     {
-        if (!$sapeur = Sapeur::find($id)) {
+        if (!$sapeur = Sapeur::with('telephones')->find($id)) {
             return response()->json(['message' => 'Sapeur non trouvé'], 404);
         }
         return response()->json(['data' => $this->serializeSapeur($sapeur)]);
