@@ -763,7 +763,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('articles/{article}/controle-composants', [ControleExecController::class, 'composantsForArticle']);
     });
 
-    Route::group(['middleware' => 'jwtTokenRole:materiel.modification'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:materiel.controle'], function () {
         // Exécution d'un contrôle par article (trigger_type dans le body : PERIODIQUE, NON_PERIODIQUE)
         Route::post('controles/{controle}/articles/{article}/execs', [ControleExecController::class, 'store']);
         Route::post('controles/{controle}/execs-multiple', [ControleExecController::class, 'storeMultiple']);
