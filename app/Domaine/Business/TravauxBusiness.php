@@ -79,6 +79,9 @@ class TravauxBusiness
 
         self::controlerModifiable($travail, $sapeurId, $hasValidationExercice, $hasValidationIntervention);
 
+        // Le sapeur d'une fiche est fixé à la création (où la saisie pour un tiers est contrôlée)
+        unset($data['sapeur_id']);
+
         // Le nouvel événement lié doit lui aussi accepter la fiche
         $data = self::controlerLien($data, TravailType::findOrFail($data['travail_type_id']));
         $nouvelEvenementValide = self::statutEvenement($data['exercice_id'], $data['intervention_id'], $hasValidationExercice, $hasValidationIntervention);

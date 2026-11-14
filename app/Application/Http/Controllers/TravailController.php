@@ -125,7 +125,6 @@ class TravailController extends Controller
             'designation' => 'required|string|min:1',
             'date' => 'required|date',
             'quantite' => 'required|numeric',
-            'sapeur_id' => 'required|integer|exists:sapeurs,id',
             'travail_type_id' => 'required|integer|exists:travail_types,id',
             'exercice_id' => 'nullable|integer|exists:exercices,id',
             'intervention_id' => 'nullable|integer|exists:interventions,id',

@@ -218,6 +218,37 @@ class TravailLienTest extends TestCase
         TravauxBusiness::modifier($travail->id, $this->travail(['exercice_id' => $this->exercice->id]), $this->autreSapeurId);
     }
 
+    public function testModifierNeChangePasLeSapeur()
+    {
+        $travail = $this->ajouter(['exercice_id' => $this->exercice->id]);
+
+        TravauxBusiness::modifier(
+            $travail->id,
+            $this->travail(['exercice_id' => $this->exercice->id, 'sapeur_id' => $this->autreSapeurId, 'quantite' => 3]),
+            $this->sapeurId
+        );
+
+        $travail->refresh();
+        $this->assertSame($this->sapeurId, $travail->sapeur_id);
+        $this->assertEquals(3, $travail->quantite);
+    }
+
+    public function testUpdateIgnoreLeSapeurEnvoye()
+    {
+        $travail = $this->ajouter(['exercice_id' => $this->exercice->id]);
+
+        $request = Request::create("/api/v2/travaux/{$travail->id}", 'PUT', $this->travail([
+            'exercice_id' => $this->exercice->id,
+            'sapeur_id' => $this->autreSapeurId,
+        ]));
+        $request->attributes->add(['sapeurId' => $this->sapeurId, 'permissions' => ['fiche_travail.saisie_commune']]);
+
+        $response = app(TravailController::class)->update($request, $travail->id);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame($this->sapeurId, $travail->fresh()->sapeur_id);
+    }
+
     public function testSupprimerSurEvenementValideSansDroitRefuse()
     {
         $travail = $this->ajouter(['exercice_id' => $this->exercice->id]);
