@@ -12,6 +12,7 @@ use App\Models\SisParam;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class DecompteTest extends TestCase
@@ -814,6 +815,68 @@ class DecompteTest extends TestCase
         $response
             ->assertStatus(422)
             ->assertJsonStructure(['message']);
+    }
+
+    /**
+     * La génération groupée ne doit pas passer par un dossier partagé `tmp/{exerciceComptableId}` :
+     * les ids sont identiques d'un SIS à l'autre, deux générations simultanées se mélangeraient.
+     */
+    public function testCertificatsSalaireNUtilisePasDeDossierPartageEntreSis()
+    {
+        if (trim((string) shell_exec('command -v pdftk')) === '') {
+            $this->markTestSkipped('pdftk indisponible dans cet environnement');
+        }
+        // Binaire du PATH plutôt que PDFTK_BIN_PATH, propre à chaque environnement
+        config(['pdftk.config' => []]);
+
+        Storage::fake();
+
+        AvsParam::updateOrCreate([], [
+            'taux_avs' => "1.0",
+            'taux_ac' => "1.0",
+            'franchise_avs' => 2300,
+            'franchise_imposition' => 5000,
+            'franchise_imposition_cantonale' => 8000,
+        ]);
+        SisParam::updateOrCreate([], ['nom' => 'SIS Test', 'sapeur_id' => 1, 'localite_id' => 1]);
+
+        $exerciceComptableId = DB::table('exercice_comptables')->insertGetId([
+            'annee' => 2099,
+            'designation' => 'test certificat',
+            'debut' => '2099-01-01',
+            'fin' => '2099-12-31',
+            'boucle' => 0,
+        ]);
+        $decompteId = DB::table('decomptes')->insertGetId([
+            'designation' => 'test certificat',
+            'date' => '2099-01-31',
+            'exercice_comptable_id' => $exerciceComptableId,
+            'deduction' => 0,
+            'avs_total' => 0,
+            'ac_total' => 0,
+            'total' => 145,
+        ]);
+        DB::table('paiements')->insert([
+            'decompte_id' => $decompteId,
+            'sapeur_id' => 1,
+            'solde' => 100,
+            'indemnite' => 30,
+            'frais_forfaitaire' => 0,
+            'frais_effectif' => 20,
+            'autre' => 0,
+            'avs_ac' => 5,
+            'total' => 145,
+        ]);
+
+        // Certificat en cours de génération par un autre SIS, pour le même id d'exercice et de sapeur
+        $fichierAutreSis = "tmp/{$exerciceComptableId}/1.pdf";
+        Storage::put($fichierAutreSis, 'certificat autre SIS');
+
+        $response = $this->get("api/v2/exercices-comptable/{$exerciceComptableId}/certificat-salaire");
+
+        $response->assertStatus(200)->assertHeader('Content-Type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF', $response->getContent());
+        $this->assertSame('certificat autre SIS', Storage::get($fichierAutreSis));
     }
 
     /**

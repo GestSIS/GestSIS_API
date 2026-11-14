@@ -16,7 +16,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Storage;
+use Spatie\TemporaryDirectory\TemporaryDirectory;
 use InvalidArgumentException;
 use Z38\SwissPayment\BIC;
 use Z38\SwissPayment\IBAN;
@@ -442,15 +442,14 @@ class PaiementBusiness
                 $totaux[$p->sapeur_id]['frais_forfaitaire'] += $p->frais_forfaitaire;
             }
         }
-        // Emplacement temporaire pour les fichiers
-        Storage::makeDirectory("tmp/" . $exerciceComptableId);
+        $directory = (new TemporaryDirectory())->create();
         // Utilise https://github.com/mikehaertl/php-pdftk
         $merged = new Pdf(null, config('pdftk.config'));
 
         try {
             // Génération du pdf de chaque sapeur
             foreach (Sapeur::whereIn('id', array_keys($totaux))->with(['localite', 'civilite'])->orderBy('nom')->get() as $sapeur) {
-                $path = self::creationPdf($sapeur, $exerciceComptable, $totaux[$sapeur->id], $affichageFrais, true, $sisParam, $avsParam);
+                $path = self::creationPdf($sapeur, $exerciceComptable, $totaux[$sapeur->id], $affichageFrais, $directory->path(), $sisParam, $avsParam);
                 $merged->addFile($path);
             }
 
@@ -476,8 +475,8 @@ class PaiementBusiness
             ]);
             throw $e;
         } finally {
-            // Suppression du dossier même si erreur php
-            Storage::deleteDirectory("tmp/" . $exerciceComptableId);
+            // Suppression du directory même si erreur php
+            $directory->delete();
         }
     }
 
@@ -505,7 +504,7 @@ class PaiementBusiness
         $total = self::totauxPaiementsSapeur($exerciceComptableId, $sapeurId);
 
         $sapeur = Sapeur::with(['localite', 'civilite'])->find($sapeurId);
-        return self::creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, false, $sisParam, $avsParam);
+        return self::creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, null, $sisParam, $avsParam);
     }
 
     /**
@@ -549,9 +548,9 @@ class PaiementBusiness
      * @param ExerciceComptable $exerciceComptable exercice compatble en cours
      * @param array $total tableau contenant les totaux de solde, indeminté, frais et déduction
      * @param bool $affichageFrais true si les frais doivent apparaitre
-     * @param bool $enregistrement true si le fichier doit 'etre enregistré, sortie navigateur sinon
+     * @param string|null $dossier dossier où enregistrer le fichier (le chemin est retourné), null pour retourner le contenu du pdf
      */
-    private static function creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, $enregistrement, $sisParam, $avsParam)
+    private static function creationPdf($sapeur, $exerciceComptable, $total, $affichageFrais, ?string $dossier, $sisParam, $avsParam)
     {
         $localite = $sapeur->localite;
         $civilite = $sapeur->civilite;
@@ -589,8 +588,8 @@ class PaiementBusiness
 
         $pdf = new Pdf(resource_path('certificatSalaire.pdf'), config('pdftk.config'));
 
-        if ($enregistrement) {
-            $path = Storage::path("tmp/" . $exerciceComptable->id . "/" . $sapeur->id . ".pdf");
+        if ($dossier !== null) {
+            $path = $dossier . "/" . $sapeur->id . ".pdf";
             $result = $pdf->fillForm($fields)
                 ->needAppearances()
                 ->saveAs($path);
