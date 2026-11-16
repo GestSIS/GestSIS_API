@@ -12,11 +12,10 @@ use App\Models\Article;
 use App\Models\BatterieType;
 use App\Models\Controle;
 use App\Models\ControleExec;
-use App\Models\ControleExecTache;
 use App\Models\Emplacement;
-use App\Models\InterventionVehicule;
 use App\Models\MaterielType;
 use App\Domaine\Business\SisParamBusiness;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Nette\Utils\Arrays;
@@ -363,32 +362,130 @@ class ArticleBusiness
     return Article::whereIn('id', $articles)->with('emplacementRepresentee')->get();
   }
 
-  public static function deleteArticles(array $articleIds): bool
+  /**
+   * Suppression logique d'articles : ils restent en base avec la date, l'auteur et
+   * la remarque de suppression, et gardent leur dernier emplacement connu. Une
+   * attribution ouverte est close à la date de suppression. Supprimer un véhicule
+   * désactive son emplacement, qui ne doit plus contenir de matériel non supprimé
+   * ni de sous-emplacement actif.
+   *
+   * @param int[] $articleIds
+   * @return Collection<int, Article>
+   * @throws ArrayException si la date est future, si un article est déjà supprimé
+   *   ou si l'emplacement d'un véhicule ne peut pas être désactivé
+   */
+  public static function supprimerArticles(array $articleIds, string $date, ?string $remarque, ?int $auteurSapeurId): Collection
   {
-    $emplacementsLies = Emplacement::whereIn('article_id', $articleIds)->get();
-    $emplacementIds = $emplacementsLies->pluck('id');
+    self::assertDatePasseeOuAujourdhui($date);
+    self::assertAucunSupprime($articleIds, "Certains articles sont déjà supprimés");
 
-    if (Article::whereIn('emplacement_id', $emplacementIds)->exists()) {
-      throw new ArrayException([], "Impossible de supprimer un véhicule tant que du matériel est rangé dans son emplacement");
-    }
-    if (Emplacement::whereIn('parent_id', $emplacementIds)->exists()) {
-      throw new ArrayException([], "Impossible de supprimer un véhicule tant que son emplacement contient des sous-emplacements");
-    }
+    return DB::transaction(function () use ($articleIds, $date, $remarque, $auteurSapeurId) {
+      $articles = Article::whereIn('id', $articleIds)->with('emplacementRepresentee')->get();
+      foreach ($articles as $article) {
+        if ($article->sapeur_id !== null) {
+          AttributionBusiness::cloturer($article, $date, null, $auteurSapeurId);
+        }
 
-    if (InterventionVehicule::whereIn('vehicule_id', $articleIds)->exists()) {
-      throw new ArrayException([], "Impossible de supprimer un véhicule engagé dans une intervention, désactivez-le plutôt");
-    }
-    if (ControleExec::whereIn('article_id', $articleIds)->exists()) {
-      throw new ArrayException([], "Impossible de supprimer un article ayant des contrôles enregistrés, désactivez-le plutôt");
-    }
-    if (ControleExecTache::whereIn('article_id', $articleIds)->exists()) {
-      throw new ArrayException([], "Impossible de supprimer un article utilisé comme composant dans un contrôle, désactivez-le plutôt");
-    }
+        $vehicleLocation = $article->emplacementRepresentee;
+        if ($vehicleLocation !== null) {
+          EmplacementBusiness::assertCanBeDeactivated($vehicleLocation->id);
+          $vehicleLocation->update(['statut' => false]);
+        }
 
-    return DB::transaction(function () use ($articleIds, $emplacementIds) {
-      Emplacement::whereIn('id', $emplacementIds)->delete();
-      return Article::whereIn('id', $articleIds)->delete() > 0;
+        $article->update([
+          'supprime_le' => $date,
+          'supprime_par_sapeur_id' => $auteurSapeurId,
+          'remarque_suppression' => $remarque,
+        ]);
+      }
+
+      return $articles->each->refresh();
     });
+  }
+
+  /**
+   * Suppression logique d'une quantité de pièces d'un lot non numéroté (même type,
+   * même emplacement, même compartiment). Le serveur choisit les pièces : péremption
+   * la plus proche d'abord (sans date en dernier), puis l'ajout le plus ancien.
+   *
+   * @return Collection<int, Article>
+   * @throws ArrayException si le lot contient moins de pièces que la quantité demandée
+   */
+  public static function supprimerLot(int $materielTypeId, int $emplacementId, string $compartiment, int $quantite, string $date, ?string $remarque, ?int $auteurSapeurId): Collection
+  {
+    return DB::transaction(function () use ($materielTypeId, $emplacementId, $compartiment, $quantite, $date, $remarque, $auteurSapeurId) {
+      $pieceIds = Article::nonSupprimes()
+        ->where('materiel_type_id', $materielTypeId)
+        ->where('emplacement_id', $emplacementId)
+        ->where('compartiment', $compartiment)
+        ->orderByRaw('date_peremption IS NULL')
+        ->orderBy('date_peremption')
+        ->orderBy('created_at')
+        ->orderBy('id')
+        ->limit($quantite)
+        ->lockForUpdate()
+        ->pluck('id')
+        ->all();
+
+      if (count($pieceIds) < $quantite) {
+        $available = count($pieceIds);
+        throw new ArrayException([], "Le lot ne contient que {$available} pièce(s), impossible d'en supprimer {$quantite}");
+      }
+
+      return self::supprimerArticles($pieceIds, $date, $remarque, $auteurSapeurId);
+    });
+  }
+
+  /**
+   * Restauration d'articles supprimés : les champs de suppression repassent à NULL.
+   * Un article est rangé dans l'emplacement donné, qui doit être actif ; un véhicule
+   * n'est pas rangé mais son emplacement est réactivé (le parent doit être actif).
+   * Une attribution n'est jamais rouverte.
+   *
+   * @param int[] $articleIds
+   * @return Collection<int, Article>
+   * @throws ArrayException si un article n'est pas supprimé ou si l'emplacement
+   *   (ou le parent de l'emplacement d'un véhicule) est inactif
+   */
+  public static function restaurerArticles(array $articleIds, int $emplacementId): Collection
+  {
+    if (Article::whereIn('id', $articleIds)->nonSupprimes()->exists()) {
+      throw new ArrayException([], "Certains articles ne sont pas supprimés");
+    }
+
+    return DB::transaction(function () use ($articleIds, $emplacementId) {
+      $articles = Article::whereIn('id', $articleIds)->with('emplacementRepresentee')->get();
+      foreach ($articles as $article) {
+        $articleData = [
+          'supprime_le' => null,
+          'supprime_par_sapeur_id' => null,
+          'remarque_suppression' => null,
+        ];
+
+        $vehicleLocation = $article->emplacementRepresentee;
+        if ($vehicleLocation !== null) {
+          EmplacementBusiness::assertParentActif($vehicleLocation->parent_id, true);
+          $vehicleLocation->update(['statut' => true]);
+        } else {
+          EmplacementBusiness::assertEmplacementActif($emplacementId);
+          $articleData['emplacement_id'] = $emplacementId;
+        }
+
+        $article->update($articleData);
+      }
+
+      return $articles->each->refresh();
+    });
+  }
+
+  /**
+   * @throws ArrayException si la date est postérieure à aujourd'hui
+   */
+  private static function assertDatePasseeOuAujourdhui(string $date): void
+  {
+    if (Carbon::parse($date)->startOfDay()->gt(Carbon::today())) {
+      throw new ArrayException([], "La date ne peut pas être dans le futur");
+    }
   }
 
   /**

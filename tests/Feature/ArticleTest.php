@@ -475,12 +475,13 @@ class ArticleTest extends TestCase
 
         $response = $this->json('DELETE', '/api/v2/articles', [
             'articleIds' => [$article->id],
+            'date' => '2026-11-01',
         ], ['Sis-Key' => 1]);
 
         $response->assertStatus(422);
         $response->assertJsonStructure(['message']);
-        $this->assertDatabaseHas('articles', ['id' => $article->id]);
-        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id]);
+        $this->assertDatabaseHas('articles', ['id' => $article->id, 'supprime_le' => null]);
+        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'statut' => true]);
     }
 
     public function testDeleteVehiculeArticleRejectedWhileEmplacementHasSousEmplacement(): void
@@ -493,15 +494,16 @@ class ArticleTest extends TestCase
 
         $response = $this->json('DELETE', '/api/v2/articles', [
             'articleIds' => [$article->id],
+            'date' => '2026-11-01',
         ], ['Sis-Key' => 1]);
 
         $response->assertStatus(422);
         $response->assertJsonStructure(['message']);
-        $this->assertDatabaseHas('articles', ['id' => $article->id]);
-        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id]);
+        $this->assertDatabaseHas('articles', ['id' => $article->id, 'supprime_le' => null]);
+        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'statut' => true]);
     }
 
-    public function testDeleteEmptyVehiculeArticleDeletesArticleAndLinkedEmplacement(): void
+    public function testDeleteEmptyVehiculeArticleSupprimeLogiquementEtDesactiveSonEmplacement(): void
     {
         $type = $this->vehiculeType();
         $couleur = Couleur::factory()->create();
@@ -510,14 +512,15 @@ class ArticleTest extends TestCase
 
         $response = $this->json('DELETE', '/api/v2/articles', [
             'articleIds' => [$article->id],
+            'date' => '2026-11-01',
         ], ['Sis-Key' => 1]);
 
         $response->assertStatus(204);
-        $this->assertDatabaseMissing('articles', ['id' => $article->id]);
-        $this->assertDatabaseMissing('emplacements', ['id' => $emplacement->id]);
+        $this->assertDatabaseHas('articles', ['id' => $article->id, 'supprime_le' => '2026-11-01']);
+        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'statut' => false]);
     }
 
-    public function testDeleteArticleRejectedWhileItHasControles(): void
+    public function testDeleteArticleAyantDesControlesEstSupprimeLogiquement(): void
     {
         $article = Article::factory()->create();
         $controle = Controle::create([
@@ -534,14 +537,15 @@ class ArticleTest extends TestCase
 
         $response = $this->json('DELETE', '/api/v2/articles', [
             'articleIds' => [$article->id],
+            'date' => '2026-11-01',
         ], ['Sis-Key' => 1]);
 
-        $response->assertStatus(422);
-        $response->assertJsonStructure(['message']);
-        $this->assertDatabaseHas('articles', ['id' => $article->id]);
+        $response->assertStatus(204);
+        $this->assertDatabaseHas('articles', ['id' => $article->id, 'supprime_le' => '2026-11-01']);
+        $this->assertDatabaseHas('controle_execs', ['article_id' => $article->id]);
     }
 
-    public function testDeleteArticleRefuseSilEstReferenceCommeComposant(): void
+    public function testDeleteArticleReferenceCommeComposantEstSupprimeLogiquement(): void
     {
         $controle = Controle::create(['nom' => 'Contrôle test', 'recurrence_type' => 'NON_PERIODIQUE']);
         $article = Article::factory()->create();
@@ -560,10 +564,11 @@ class ArticleTest extends TestCase
             'type_snapshot' => 'COMPOSANT',
         ]);
 
-        $this->json('DELETE', '/api/v2/articles', ['articleIds' => [$article->id]], ['Sis-Key' => 1])
-            ->assertStatus(422)->assertJsonStructure(['message']);
+        $this->json('DELETE', '/api/v2/articles', ['articleIds' => [$article->id], 'date' => '2026-11-01'], ['Sis-Key' => 1])
+            ->assertStatus(204);
 
-        $this->assertDatabaseHas('articles', ['id' => $article->id]);
+        $this->assertDatabaseHas('articles', ['id' => $article->id, 'supprime_le' => '2026-11-01']);
+        $this->assertDatabaseHas('controle_exec_taches', ['article_id' => $article->id]);
     }
 
     public function testEditVehiculeArticleWithoutLinkedEmplacementIsRejectedGracefully(): void

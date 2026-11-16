@@ -736,6 +736,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::post('articles', [ArticleController::class, 'create'])->name('articles.create');
         Route::put('articles', [ArticleController::class, 'update'])->name('articles.update');
         Route::delete('articles', [ArticleController::class, 'destroy'])->name('articles.destroy');
+        Route::post('articles/supprimer-lot', [ArticleController::class, 'supprimerLot'])->name('articles.supprimer-lot');
+        Route::post('articles/restaurer', [ArticleController::class, 'restaurer'])->name('articles.restaurer');
     });
 
     Route::group(['middleware' => 'jwtTokenRole:materiel.config'], function () {

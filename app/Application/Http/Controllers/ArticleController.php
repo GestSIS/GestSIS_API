@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\Materiel\ArticleBusiness;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ArticleController extends Controller
@@ -101,16 +102,66 @@ class ArticleController extends Controller
     }
 
     /**
-     * Supprimer des articles
+     * Suppression logique d'articles (date, auteur et remarque enregistrés).
      */
-    public function destroy(Request $request)
+    public function destroy(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'articleIds' => 'required|array',
-            'articleIds.*' => 'required|integer',
+            'articleIds' => 'required|array|min:1',
+            'articleIds.*' => 'required|integer|exists:articles,id',
+            'date' => 'required|date|before_or_equal:today',
+            'remarque' => 'nullable|string',
         ]);
 
-        $articles = ArticleBusiness::deleteArticles($data['articleIds']);
+        ArticleBusiness::supprimerArticles(
+            $data['articleIds'],
+            $data['date'],
+            $data['remarque'] ?? null,
+            $request->attributes->get('sapeurId'),
+        );
         return response()->json(null, 204);
+    }
+
+    /**
+     * Suppression logique d'une quantité de pièces d'un lot non numéroté ;
+     * le serveur choisit les pièces.
+     */
+    public function supprimerLot(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'materiel_type_id' => 'required|integer|exists:materiel_types,id',
+            'emplacement_id' => 'required|integer|exists:emplacements,id',
+            'compartiment' => 'nullable|string',
+            'quantite' => 'required|integer|min:1',
+            'date' => 'required|date|before_or_equal:today',
+            'remarque' => 'nullable|string',
+        ]);
+
+        $articles = ArticleBusiness::supprimerLot(
+            $data['materiel_type_id'],
+            $data['emplacement_id'],
+            $data['compartiment'] ?? '',
+            $data['quantite'],
+            $data['date'],
+            $data['remarque'] ?? null,
+            $request->attributes->get('sapeurId'),
+        );
+        return response()->json(['data' => $articles]);
+    }
+
+    /**
+     * Restauration d'articles supprimés, rangés dans l'emplacement donné
+     * (un véhicule réactive son propre emplacement).
+     */
+    public function restaurer(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'articleIds' => 'required|array|min:1',
+            'articleIds.*' => 'required|integer|exists:articles,id',
+            'emplacement_id' => 'required|integer|exists:emplacements,id',
+        ]);
+
+        $articles = ArticleBusiness::restaurerArticles($data['articleIds'], $data['emplacement_id']);
+        return response()->json(['data' => $articles]);
     }
 }
