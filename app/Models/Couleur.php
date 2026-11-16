@@ -9,5 +9,12 @@ class Couleur extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nom', 'texte', 'fond'];
+    protected $fillable = ['nom', 'texte', 'fond', 'statut'];
+
+    protected function casts(): array
+    {
+        return [
+            'statut' => 'boolean',
+        ];
+    }
 }

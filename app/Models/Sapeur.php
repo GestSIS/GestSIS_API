@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sapeur extends Model
 {
@@ -161,5 +162,13 @@ class Sapeur extends Model
     public function articles()
     {
         return $this->hasMany(Article::class);
+    }
+
+    /**
+     * Historique des attributions de matériel au sapeur (ouvertes et closes).
+     */
+    public function attributions(): HasMany
+    {
+        return $this->hasMany(ArticleAttribution::class);
     }
 }

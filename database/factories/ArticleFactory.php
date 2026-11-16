@@ -19,8 +19,6 @@ class ArticleFactory extends Factory
             'achat' => '',
             'taille' => '',
             'remarque' => '',
-            'attribution' => null,
-            'retour' => null,
             'sapeur_id' => null,
             'emplacement_id' => null,
             'compartiment' => '',
@@ -29,7 +27,14 @@ class ArticleFactory extends Factory
             'designation' => '',
             'immatriculation' => '',
             'chassis' => '',
-            'statut' => true,
         ];
+    }
+
+    /**
+     * Article supprimé logiquement à la date donnée.
+     */
+    public function supprime(string $date = '2026-01-01'): static
+    {
+        return $this->state(['supprime_le' => $date]);
     }
 }
