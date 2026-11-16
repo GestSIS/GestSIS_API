@@ -167,6 +167,26 @@ class ControleTest extends TestCase
         );
     }
 
+    public function testControleNeProposePasLesArticlesSupprimes(): void
+    {
+        $type = MaterielType::factory()->numerote()->create();
+        $controle = ControleBusiness::createControle($this->basePayload([
+            'recurrence_type' => 'PERIODIQUE',
+            'recurrence_value' => 1,
+            'materiel_type_ids' => [$type->id],
+        ]));
+        $actif = Article::factory()->create(['materiel_type_id' => $type->id]);
+        $supprime = Article::factory()->supprime()->create(['materiel_type_id' => $type->id]);
+
+        $response = $this->json('GET', '/api/v2/controles/articles-a-controler', [], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $ids = collect($response->json('data'))->firstWhere('controle_id', $controle->id)['articles'] ?? [];
+        $ids = collect($ids)->pluck('id');
+        $this->assertTrue($ids->contains($actif->id));
+        $this->assertFalse($ids->contains($supprime->id));
+    }
+
     public function testControlePeriodiqueEnRetardNApparaitPasDansLimiteExecutions(): void
     {
         $type = MaterielType::factory()->numerote()->create();

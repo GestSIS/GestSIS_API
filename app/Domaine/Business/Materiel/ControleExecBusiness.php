@@ -322,8 +322,8 @@ class ControleExecBusiness
         if ($articleId === $articleControleId) {
             throw new ArrayException([], "L'article contrôlé ne peut pas être utilisé comme composant « {$nomTache} »");
         }
-        if (!$article->statut) {
-            throw new ArrayException([], "L'article choisi pour le composant « {$nomTache} » est inactif");
+        if ($article->supprime_le !== null) {
+            throw new ArrayException([], "L'article choisi pour le composant « {$nomTache} » est supprimé");
         }
         if (!in_array($article->materiel_type_id, $typesAcceptes, true)) {
             throw new ArrayException([], "Le type de l'article choisi n'est pas accepté par le composant « {$nomTache} »");

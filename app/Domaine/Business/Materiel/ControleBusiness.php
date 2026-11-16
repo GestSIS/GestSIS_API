@@ -406,7 +406,7 @@ class ControleBusiness
             ->unique();
 
         $articlesParType = Article::whereIn('materiel_type_id', $materielTypeIds)
-            ->where('statut', true)
+            ->nonSupprimes()
             ->get(['id', 'materiel_type_id'])
             ->groupBy('materiel_type_id');
 
@@ -488,7 +488,7 @@ class ControleBusiness
             ->unique();
 
         $articlesParType = Article::whereIn('materiel_type_id', $materielTypeIds)
-            ->where('statut', true)
+            ->nonSupprimes()
             ->with(['materielType', 'sapeur', 'emplacement'])
             ->get()
             ->groupBy('materiel_type_id');

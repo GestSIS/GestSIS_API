@@ -709,6 +709,28 @@ class ArticleTest extends TestCase
         $this->assertSame($type->designation, $response->json('data.0.materiel_type.designation'));
     }
 
+    public function testArticlesARecupererExclutLesArticlesSupprimes(): void
+    {
+        $type = MaterielType::factory()->create();
+        $sapeurInactif = Sapeur::factory()->create(['actif' => false]);
+
+        $article = Article::factory()->create([
+            'materiel_type_id' => $type->id,
+            'sapeur_id' => $sapeurInactif->id,
+            'emplacement_id' => null,
+        ]);
+        Article::factory()->supprime()->create([
+            'materiel_type_id' => $type->id,
+            'sapeur_id' => $sapeurInactif->id,
+            'emplacement_id' => null,
+        ]);
+
+        $response = $this->json('GET', '/api/v2/articles/a-recuperer', [], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $this->assertSame([$article->id], collect($response->json('data'))->pluck('id')->all());
+    }
+
     public function testListeArticlesPdfPourSapeurAvecLogo(): void
     {
         $sapeur = $this->creerSapeurAvecArticle();

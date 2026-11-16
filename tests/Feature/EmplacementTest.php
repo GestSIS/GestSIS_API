@@ -277,6 +277,44 @@ class EmplacementTest extends TestCase
         $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'statut' => false]);
     }
 
+    public function testDesactiverEmplacementNeContenantQueDesArticlesSupprimesEstAccepte(): void
+    {
+        $couleur = Couleur::factory()->create();
+        $emplacement = Emplacement::factory()->create(['couleur_id' => $couleur->id, 'statut' => true]);
+        Article::factory()->supprime()->create(['emplacement_id' => $emplacement->id, 'sapeur_id' => null]);
+
+        $payload = $this->basePayload(['couleur_id' => $couleur->id, 'statut' => false]);
+        $response = $this->json('PUT', "/api/v2/emplacements/{$emplacement->id}", $payload, ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'statut' => false]);
+    }
+
+    public function testDesactiverEmplacementAvecSousEmplacementInactifEstAccepte(): void
+    {
+        $couleur = Couleur::factory()->create();
+        $parent = Emplacement::factory()->create(['couleur_id' => $couleur->id, 'statut' => true]);
+        Emplacement::factory()->create(['parent_id' => $parent->id, 'statut' => false]);
+
+        $payload = $this->basePayload(['couleur_id' => $couleur->id, 'statut' => false]);
+        $response = $this->json('PUT', "/api/v2/emplacements/{$parent->id}", $payload, ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('emplacements', ['id' => $parent->id, 'statut' => false]);
+    }
+
+    public function testSupprimerEmplacementNeContenantQueDesArticlesSupprimesMetLeurEmplacementANull(): void
+    {
+        $emplacement = Emplacement::factory()->create();
+        $article = Article::factory()->supprime()->create(['emplacement_id' => $emplacement->id, 'sapeur_id' => null]);
+
+        $response = $this->json('DELETE', "/api/v2/emplacements/{$emplacement->id}", [], ['Sis-Key' => 1]);
+
+        $response->assertStatus(204);
+        $this->assertDatabaseMissing('emplacements', ['id' => $emplacement->id]);
+        $this->assertDatabaseHas('articles', ['id' => $article->id, 'emplacement_id' => null]);
+    }
+
     public function testCanResaveAlreadyInactiveEmplacementStillContainingMateriel(): void
     {
         // Régression : le garde-fou ne doit bloquer que la transition actif -> inactif,

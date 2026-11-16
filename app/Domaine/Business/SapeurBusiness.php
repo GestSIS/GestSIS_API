@@ -7,6 +7,7 @@ use App\Application\Typst\TypstTemplate;
 use App\Application\Typst\TypstToPdfGenerator;
 use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\Exceptions\NotReportableException;
+use App\Domaine\Business\Materiel\ArticleBusiness;
 use App\Models\Article;
 use App\Models\ControleMedical;
 use App\Models\CoursSapeur;
@@ -354,7 +355,7 @@ class SapeurBusiness
             throw new NotReportableException([], "Impossible de supprimer un sapeur lié à une écriture comptable");
         }
 
-        if (Article::where('sapeur_id', $sapeurId)->whereNull('retour')->exists()) {
+        if (Article::where('sapeur_id', $sapeurId)->exists()) {
             throw new NotReportableException([], "Impossible de supprimer un sapeur possédant du matériel personnel non rendu");
         }
 
@@ -932,7 +933,8 @@ class SapeurBusiness
                 "cours" => CoursSapeur::with(['localite', 'cours'])->where('sapeur_id', $sapeurId)->orderBy('date')->get(),
                 "telephones" => SapeurTelephone::with(['telephoneType'])->where('sapeur_id', $sapeurId)->orderBy('priorite')->get(),
                 "permis" => Permis::with(['permisType'])->where('sapeur_id', $sapeurId)->orderBy('date')->get(),
-                "materiel" => Article::with(['materielType'])->where('sapeur_id', $sapeurId)->orderBy('attribution')->get(),
+                "materiel" => ArticleBusiness::avecDateAttribution(Article::with(['materielType', 'attributionOuverte'])->where('sapeur_id', $sapeurId)->get())
+                    ->sortBy('attribution')->values(),
             ],
             $logoPath
         );

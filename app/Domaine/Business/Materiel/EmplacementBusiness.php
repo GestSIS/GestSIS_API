@@ -115,17 +115,17 @@ class EmplacementBusiness
 
   /**
    * Vérifie qu'un emplacement peut passer à `statut = false` : il ne doit contenir
-   * ni matériel rangé directement (Article.emplacement_id), ni sous-emplacement
-   * (Emplacement.parent_id). Utilisé pour la désactivation d'un emplacement
+   * ni matériel non supprimé rangé directement (Article.emplacement_id), ni
+   * sous-emplacement actif (Emplacement.parent_id, statut = true). Utilisé pour la désactivation d'un emplacement
    * classique (editEmplacement) comme de celui représenté par un véhicule
    * (ArticleBusiness::editArticles).
    */
   public static function assertCanBeDeactivated(int $id): void
   {
-    if (Article::where('emplacement_id', $id)->exists()) {
+    if (Article::nonSupprimes()->where('emplacement_id', $id)->exists()) {
       throw new ArrayException([], "Impossible de désactiver cet emplacement tant que du matériel y est rangé");
     }
-    if (Emplacement::where('parent_id', $id)->exists()) {
+    if (Emplacement::where('parent_id', $id)->where('statut', true)->exists()) {
       throw new ArrayException([], "Impossible de désactiver cet emplacement tant qu'il contient des sous-emplacements");
     }
   }
@@ -271,7 +271,8 @@ class EmplacementBusiness
   public static function deleteEmplacement($id)
   {
     $emplacement = Emplacement::findOrFail($id);
-    if (Article::where('emplacement_id', $id)->exists()) {
+    // Les articles supprimés logiquement ne bloquent pas : leur emplacement passe à NULL (FK nullOnDelete).
+    if (Article::nonSupprimes()->where('emplacement_id', $id)->exists()) {
       throw new ArrayException([], "Veuillez d'abord supprimer les article de cet emplacement");
     }
     if (Emplacement::where('parent_id', $id)->exists()) {

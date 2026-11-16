@@ -259,7 +259,7 @@ class MaterielTypeBusiness
   public static function getArticlesSansNumero(): array
   {
     $articlesParType = Article::whereIn('materiel_type_id', MaterielType::where('est_numerote', true)->select('id'))
-      ->where('statut', true)
+      ->nonSupprimes()
       ->whereIn(DB::raw('TRIM(numero)'), self::NUMEROS_ABSENTS)
       ->with(['materielType', 'emplacementRepresentee'])
       ->get()
@@ -280,7 +280,7 @@ class MaterielTypeBusiness
   private static function articlesPerimesQuery($typeIds): Builder
   {
     return Article::whereIn('materiel_type_id', $typeIds)
-      ->where('statut', true)
+      ->nonSupprimes()
       ->whereNotNull('date_peremption')
       ->whereDate('date_peremption', '<=', Carbon::now()->toDateString());
   }

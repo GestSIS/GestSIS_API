@@ -272,7 +272,6 @@ class ArticleBusiness
         'designation' => $article['designation'] ?? '',
         'immatriculation' => $article['immatriculation'] ?? '',
         'date_peremption' => $type->est_perimable ? ($article['date_peremption'] ?? null) : null,
-        'statut' => $article['statut'],
         'emplacement' => $article['emplacement'] ?? null,
       ];
     })->map(function ($article) use ($indexedTypes) {
@@ -357,6 +356,22 @@ class ArticleBusiness
   }
 
   /**
+   * Pose sur chaque article l'attribut `attribution` : date de début de son
+   * attribution ouverte (lue par les gabarits PDF). Suppose `attributionOuverte` chargée.
+   *
+   * @param Collection<int, Article> $articles
+   * @return Collection<int, Article>
+   */
+  public static function avecDateAttribution(Collection $articles): Collection
+  {
+    foreach ($articles as $article) {
+      $article->setAttribute('attribution', $article->attributionOuverte?->debut);
+    }
+
+    return $articles;
+  }
+
+  /**
    * Get list of articles of a given sapeur
    * @param integer $sapeurId ID of the sapeur for which to get articles
    * @return Collection<int, Article>
@@ -436,7 +451,7 @@ class ArticleBusiness
    */
   public static function getArticlesARecuperer()
   {
-    return Article::where('statut', true)
+    return Article::nonSupprimes()
       ->whereNotNull('sapeur_id')
       ->whereHas('sapeur', fn ($q) => $q->where('actif', false))
       ->with(['sapeur', 'materielType'])
@@ -473,9 +488,9 @@ class ArticleBusiness
   {
     $sapeur = Sapeur::findOrFail($sapeurId);
 
-    $articles = Article::where('sapeur_id', '=', $sapeurId)
-      ->with('materielType')
-      ->get()
+    $articles = self::avecDateAttribution(
+      Article::where('sapeur_id', '=', $sapeurId)->with(['materielType', 'attributionOuverte'])->get()
+    )
       ->sortBy('materielType.designation')
       ->values();
     $logoPath = SisParamBusiness::getLogo($sisKey);
