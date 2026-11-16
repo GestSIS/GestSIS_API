@@ -74,13 +74,20 @@ return new class extends Migration
             [self::TYPE_VEHICULE]
         );
 
-        // Attributions en cours : une attribution ouverte par article attribué, sans auteur.
+        // Attributions en cours : une attribution par article attribué, sans auteur.
+        // Elle reste ouverte, sauf pour un article supprimé ci-dessus : elle est alors
+        // close à sa date de suppression (jamais avant son début).
         DB::statement(
             'INSERT INTO article_attributions (article_id, sapeur_id, debut, fin, created_at, updated_at)
-             SELECT id, sapeur_id, COALESCE(attribution, CURDATE()), NULL, NOW(), NOW()
+             SELECT id, sapeur_id, COALESCE(attribution, CURDATE()),
+                    IF(supprime_le IS NULL, NULL, GREATEST(COALESCE(attribution, CURDATE()), supprime_le)),
+                    NOW(), NOW()
              FROM articles
              WHERE sapeur_id IS NOT NULL'
         );
+
+        // Un article supprimé n'a plus de détenteur.
+        DB::statement('UPDATE articles SET sapeur_id = NULL WHERE supprime_le IS NOT NULL AND sapeur_id IS NOT NULL');
 
         Schema::table('articles', function (Blueprint $table) {
             $table->dropColumn(['statut', 'attribution', 'retour']);
@@ -104,6 +111,14 @@ return new class extends Migration
         DB::statement(
             'UPDATE articles a JOIN article_attributions aa ON aa.article_id = a.id AND aa.fin IS NULL
              SET a.attribution = aa.debut'
+        );
+
+        // Article supprimé dont l'attribution a été close par la suppression : il
+        // retrouve son ancien détenteur, comme avant la migration.
+        DB::statement(
+            'UPDATE articles a JOIN article_attributions aa ON aa.article_id = a.id AND aa.fin = GREATEST(aa.debut, a.supprime_le)
+             SET a.sapeur_id = aa.sapeur_id, a.attribution = aa.debut
+             WHERE a.supprime_le IS NOT NULL AND a.sapeur_id IS NULL'
         );
 
         Schema::drop('article_attributions');
