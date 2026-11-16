@@ -13,10 +13,9 @@ class JustificatifController extends Controller
         $justificatif = ControleMedicalBusiness::getJustificatif($controleId);
 
         $headers = [
-            'Content-Type: application/pdf',
-            'Cache-Control: no-cache private',
-            'Content-Description: File Transfer',
-            'Content-Transfer-Encoding: binary'
+            'Cache-Control' => 'no-cache, private',
+            'Content-Description' => 'File Transfer',
+            'Content-Transfer-Encoding' => 'binary'
         ];
         return Storage::download($justificatif['path'], $justificatif['filename'], $headers);
     }

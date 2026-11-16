@@ -700,7 +700,8 @@ class PaiementBusiness
             function () use ($content) {
                 echo $content;
             },
-            $nomFichier
+            $nomFichier,
+            ['Content-Type' => 'application/xml']
         );
     }
 
@@ -725,7 +726,8 @@ class PaiementBusiness
             function () use ($content) {
                 echo $content;
             },
-            'decompte.pdf'
+            'decompte.pdf',
+            ['Content-Type' => 'application/pdf']
         );
     }
 
@@ -861,7 +863,8 @@ class PaiementBusiness
             function () use ($content) {
                 echo $content;
             },
-            'resume-par-sapeur.pdf'
+            'resume-par-sapeur.pdf',
+            ['Content-Type' => 'application/pdf']
         );
     }
 
@@ -887,7 +890,8 @@ class PaiementBusiness
             function () use ($content) {
                 echo $content;
             },
-            'decompte-par-sapeur.pdf'
+            'decompte-par-sapeur.pdf',
+            ['Content-Type' => 'application/pdf']
         );
     }
 }

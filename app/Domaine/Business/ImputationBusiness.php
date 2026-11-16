@@ -1555,7 +1555,8 @@ class ImputationBusiness
             function () use ($content) {
                 echo $content;
             },
-            'justificatif_individuel.pdf'
+            'justificatif_individuel.pdf',
+            ['Content-Type' => 'application/pdf']
         );
     }
 
@@ -1590,7 +1591,8 @@ class ImputationBusiness
             function () use ($content) {
                 echo $content;
             },
-            'justificatif_complet.pdf'
+            'justificatif_complet.pdf',
+            ['Content-Type' => 'application/pdf']
         );
     }
 }

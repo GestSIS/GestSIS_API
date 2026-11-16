@@ -915,7 +915,8 @@ class SapeurBusiness
             function () use ($content) {
                 echo $content;
             },
-            'trombinoscope.pdf'
+            'trombinoscope.pdf',
+            ['Content-Type' => 'application/pdf']
         );
     }
 
@@ -943,7 +944,8 @@ class SapeurBusiness
             function () use ($content) {
                 echo $content;
             },
-            'fiche-sapeur.pdf'
+            'fiche-sapeur.pdf',
+            ['Content-Type' => 'application/pdf']
         );
     }
 }

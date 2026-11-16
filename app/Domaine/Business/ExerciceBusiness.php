@@ -802,7 +802,8 @@ class ExerciceBusiness
             function () use ($content) {
                 echo $content;
             },
-            'convocations.pdf'
+            'convocations.pdf',
+            ['Content-Type' => 'application/pdf']
         );
     }
 
@@ -871,7 +872,8 @@ class ExerciceBusiness
             function () use ($content) {
                 echo $content;
             },
-            'liste-appel.pdf'
+            'liste-appel.pdf',
+            ['Content-Type' => 'application/pdf']
         );
     }
 
@@ -933,7 +935,8 @@ class ExerciceBusiness
             function () use ($content) {
                 echo $content;
             },
-            'liste-presence.pdf'
+            'liste-presence.pdf',
+            ['Content-Type' => 'application/pdf']
         );
     }
 }

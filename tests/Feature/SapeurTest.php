@@ -424,6 +424,7 @@ class SapeurTest extends TestCase
 
         // Should return a response (PDF or error structure)
         $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/pdf');
     }
 
     public function testFicheReturnsResponseForSapeur()
@@ -436,6 +437,7 @@ class SapeurTest extends TestCase
 
         // Should return a response (PDF or error structure)
         $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/pdf');
     }
 
     public function testListeFsspReturnsResponse()

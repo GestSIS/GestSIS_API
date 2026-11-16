@@ -662,7 +662,8 @@ class ArticleBusiness
         function () use ($content) {
             echo $content;
         },
-        'liste-articles.pdf'
+        'liste-articles.pdf',
+        ['Content-Type' => 'application/pdf']
     );
   }
 }

@@ -843,7 +843,8 @@ class InterventionBusiness
             function () use ($content) {
                 echo $content;
             },
-            'rapport-intervention.pdf'
+            'rapport-intervention.pdf',
+            ['Content-Type' => 'application/pdf']
         );
     }
 }

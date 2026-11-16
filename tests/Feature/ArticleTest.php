@@ -711,6 +711,7 @@ class ArticleTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertDownload('liste-articles.pdf');
+        $response->assertHeader('Content-Type', 'application/pdf');
         $this->assertStringStartsWith('%PDF', $response->streamedContent());
     }
 
@@ -724,6 +725,7 @@ class ArticleTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertDownload('liste-articles.pdf');
+        $response->assertHeader('Content-Type', 'application/pdf');
         $this->assertStringStartsWith('%PDF', $response->streamedContent());
     }
 
