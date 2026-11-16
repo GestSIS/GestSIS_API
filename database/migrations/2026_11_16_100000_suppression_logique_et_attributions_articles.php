@@ -44,9 +44,6 @@ return new class extends Migration
             $table->foreignId('emplacement_retour_id')->nullable()->constrained('emplacements')->nullOnDelete();
             $table->foreignId('attribue_par_sapeur_id')->nullable()->constrained('sapeurs')->nullOnDelete();
             $table->foreignId('cloture_par_sapeur_id')->nullable()->constrained('sapeurs')->nullOnDelete();
-            // Vaut article_id tant que l'attribution est ouverte : l'index unique
-            // garantit au plus une attribution ouverte par article.
-            $table->unsignedBigInteger('attribution_ouverte')->nullable()->storedAs('IF(fin IS NULL, article_id, NULL)')->unique();
             $table->timestamps();
         });
 

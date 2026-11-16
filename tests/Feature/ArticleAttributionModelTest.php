@@ -2,10 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Domaine\Business\Materiel\AttributionBusiness;
+use App\Domaine\Exceptions\ArrayException;
 use App\Models\Article;
 use App\Models\ArticleAttribution;
 use App\Models\Sapeur;
-use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
@@ -13,17 +14,17 @@ class ArticleAttributionModelTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function testUneSeuleAttributionOuverteParArticle(): void
+    public function testOuvrirRefuseUneSecondeAttributionOuverte(): void
     {
         $article = Article::factory()->create();
-        ArticleAttribution::factory()->create(['article_id' => $article->id]);
+        AttributionBusiness::ouvrir($article, Sapeur::factory()->create()->id, '2025-01-01', null);
 
-        $this->expectException(QueryException::class);
-
-        ArticleAttribution::factory()->create([
-            'article_id' => $article->id,
-            'sapeur_id' => Sapeur::factory(),
-        ]);
+        try {
+            AttributionBusiness::ouvrir($article, Sapeur::factory()->create()->id, '2025-02-01', null);
+            $this->fail('Une seconde attribution ouverte aurait dû être refusée');
+        } catch (ArrayException) {
+            $this->assertSame(1, $article->attributions()->whereNull('fin')->count());
+        }
     }
 
     public function testDeuxAttributionsClosesPourLeMemeArticleSontAcceptees(): void

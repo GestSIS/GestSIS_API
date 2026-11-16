@@ -22,6 +22,10 @@ class AttributionBusiness
      * Ouvre une attribution de l'article au sapeur à la date donnée et en fait
      * son détenteur (l'article quitte son emplacement).
      *
+     * Garantit au plus une attribution ouverte par article : la ligne de l'article
+     * est verrouillée pendant la vérification et l'écriture, si bien que deux
+     * attributions simultanées du même article sont traitées l'une après l'autre.
+     *
      * @throws ArrayException si la date est future, si l'article est déjà attribué
      *                        ou si la date précède la fin de la dernière attribution close
      */
@@ -30,17 +34,19 @@ class AttributionBusiness
         $startDate = Carbon::parse($date)->startOfDay();
         self::assertPasDansLeFutur($startDate);
 
-        if ($article->attributionOuverte()->exists()) {
-            throw new ArrayException([], "L'article {$article->id} est déjà attribué, rendez-le avant de l'attribuer à nouveau");
-        }
-
-        $lastEnd = $article->attributions()->whereNotNull('fin')->max('fin');
-        if ($lastEnd !== null && $startDate->lt(Carbon::parse($lastEnd))) {
-            $formattedEnd = Carbon::parse($lastEnd)->format('d.m.Y');
-            throw new ArrayException([], "L'attribution ne peut pas commencer avant la fin de la précédente ({$formattedEnd})");
-        }
-
         return DB::transaction(function () use ($article, $sapeurId, $startDate, $auteurSapeurId) {
+            Article::whereKey($article->id)->lockForUpdate()->first();
+
+            if ($article->attributionOuverte()->exists()) {
+                throw new ArrayException([], "L'article {$article->id} est déjà attribué, rendez-le avant de l'attribuer à nouveau");
+            }
+
+            $lastEnd = $article->attributions()->whereNotNull('fin')->max('fin');
+            if ($lastEnd !== null && $startDate->lt(Carbon::parse($lastEnd))) {
+                $formattedEnd = Carbon::parse($lastEnd)->format('d.m.Y');
+                throw new ArrayException([], "L'attribution ne peut pas commencer avant la fin de la précédente ({$formattedEnd})");
+            }
+
             $attribution = ArticleAttribution::create([
                 'article_id' => $article->id,
                 'sapeur_id' => $sapeurId,
