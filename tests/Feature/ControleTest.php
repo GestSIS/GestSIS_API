@@ -116,9 +116,9 @@ class ControleTest extends TestCase
             'materiel_type_ids' => [$type->id],
         ]));
 
-        $articleEnRetard = Article::factory()->create(['materiel_type_id' => $type->id, 'statut' => true]);
-        $articleEnPreavis = Article::factory()->create(['materiel_type_id' => $type->id, 'statut' => true]);
-        $articleOk = Article::factory()->create(['materiel_type_id' => $type->id, 'statut' => true]);
+        $articleEnRetard = Article::factory()->create(['materiel_type_id' => $type->id]);
+        $articleEnPreavis = Article::factory()->create(['materiel_type_id' => $type->id]);
+        $articleOk = Article::factory()->create(['materiel_type_id' => $type->id]);
         $sapeur = Sapeur::factory()->create();
 
         for ($i = 0; $i < 3; $i++) {
@@ -195,7 +195,7 @@ class ControleTest extends TestCase
             'recurrence_value' => 1,
             'materiel_type_ids' => [$type->id],
         ]));
-        $article = Article::factory()->create(['materiel_type_id' => $type->id, 'statut' => true]);
+        $article = Article::factory()->create(['materiel_type_id' => $type->id]);
         $sapeur = Sapeur::factory()->create();
 
         // Passe par la couche métier (plutôt que ControleExec::create direct) pour

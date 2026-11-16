@@ -198,9 +198,9 @@ class ControleComposantTest extends TestCase
 
         return [
             'controle' => $controle,
-            'cacolet' => Article::factory()->create(['materiel_type_id' => $typeCacolet->id, 'statut' => true]),
-            'pulmo' => Article::factory()->create(['materiel_type_id' => $typePulmo->id, 'statut' => true]),
-            'masque' => Article::factory()->create(['materiel_type_id' => $typeMasque->id, 'statut' => true]),
+            'cacolet' => Article::factory()->create(['materiel_type_id' => $typeCacolet->id]),
+            'pulmo' => Article::factory()->create(['materiel_type_id' => $typePulmo->id]),
+            'masque' => Article::factory()->create(['materiel_type_id' => $typeMasque->id]),
             'tPulmo' => $tPulmo,
             'tMasque' => $tMasque,
             'tVisuel' => $tVisuel,
@@ -266,7 +266,7 @@ class ControleComposantTest extends TestCase
     public function testArticleInactifEstRefuse(): void
     {
         $s = $this->scenario();
-        $s['pulmo']->update(['statut' => false]);
+        $s['pulmo']->update(['supprime_le' => now()->subDay()]);
 
         $this->expectException(ArrayException::class);
         $this->creerExec($s, [
@@ -357,8 +357,8 @@ class ControleComposantTest extends TestCase
     public function testCreateExecsMultipleEnregistreLesComposantsParLigne(): void
     {
         $s = $this->scenario();
-        $autreCacolet = Article::factory()->create(['materiel_type_id' => $s['cacolet']->materiel_type_id, 'statut' => true]);
-        $autrePulmo = Article::factory()->create(['materiel_type_id' => $s['pulmo']->materiel_type_id, 'statut' => true]);
+        $autreCacolet = Article::factory()->create(['materiel_type_id' => $s['cacolet']->materiel_type_id]);
+        $autrePulmo = Article::factory()->create(['materiel_type_id' => $s['pulmo']->materiel_type_id]);
 
         $execs = ControleExecBusiness::createExecsMultiple($s['controle']->id, '2026-01-01', 'NON_PERIODIQUE', [
             $this->executionMultiple($s, $s['cacolet'], $s['pulmo']),
@@ -372,7 +372,7 @@ class ControleComposantTest extends TestCase
     public function testCreateExecsMultipleRefuseUnMemeArticleSurDeuxLignes(): void
     {
         $s = $this->scenario();
-        $autreCacolet = Article::factory()->create(['materiel_type_id' => $s['cacolet']->materiel_type_id, 'statut' => true]);
+        $autreCacolet = Article::factory()->create(['materiel_type_id' => $s['cacolet']->materiel_type_id]);
 
         try {
             ControleExecBusiness::createExecsMultiple($s['controle']->id, '2026-01-01', 'NON_PERIODIQUE', [
@@ -462,7 +462,7 @@ class ControleComposantTest extends TestCase
     {
         $s = $this->scenario();
         $exec = $this->execAvecPulmo($s);
-        $autrePulmo = Article::factory()->create(['materiel_type_id' => $s['pulmo']->materiel_type_id, 'statut' => true]);
+        $autrePulmo = Article::factory()->create(['materiel_type_id' => $s['pulmo']->materiel_type_id]);
 
         $exec = $this->modifierExec($exec, [$s['tPulmo']->id => $autrePulmo->id]);
 
@@ -496,7 +496,7 @@ class ControleComposantTest extends TestCase
     {
         $s = $this->scenario();
         $exec = $this->execAvecPulmo($s);
-        $s['pulmo']->update(['statut' => false]);
+        $s['pulmo']->update(['supprime_le' => now()->subDay()]);
 
         $exec = $this->modifierExec($exec, []);
 
@@ -518,7 +518,7 @@ class ControleComposantTest extends TestCase
     {
         $s = $this->scenario();
         $exec = $this->execAvecPulmo($s);
-        $s['pulmo']->update(['statut' => false]);
+        $s['pulmo']->update(['supprime_le' => now()->subDay()]);
 
         $this->json('PUT', "/api/v2/controle-execs/{$exec->id}", [
             'executed_at' => '2026-02-01',
@@ -530,7 +530,7 @@ class ControleComposantTest extends TestCase
     {
         $s = $this->scenario();
         $exec = $this->execAvecPulmo($s);
-        $inactif = Article::factory()->create(['materiel_type_id' => $s['pulmo']->materiel_type_id, 'statut' => false]);
+        $inactif = Article::factory()->create(['materiel_type_id' => $s['pulmo']->materiel_type_id, 'supprime_le' => now()->subDay()]);
 
         $this->expectException(ArrayException::class);
         $this->modifierExec($exec, [$s['tPulmo']->id => $inactif->id]);
@@ -557,7 +557,7 @@ class ControleComposantTest extends TestCase
         $ligne = $exec->execTaches->firstWhere('tache_id', $s['tMasque']->id);
         $s['tMasque']->delete();
         $exec->refresh()->load('execTaches');
-        $autreMasque = Article::factory()->create(['materiel_type_id' => $s['masque']->materiel_type_id, 'statut' => true]);
+        $autreMasque = Article::factory()->create(['materiel_type_id' => $s['masque']->materiel_type_id]);
         $taches = fn (?int $articleId) => $exec->execTaches->map(fn ($l) => match (true) {
             $l->id === $ligne->id => ['id' => $l->id, 'article_id' => $articleId],
             $l->type_snapshot === 'COMPOSANT' => ['id' => $l->id, 'article_id' => $l->article_id],
@@ -615,7 +615,7 @@ class ControleComposantTest extends TestCase
         // Les lignes s'écrivent une à une : sans précaution, la contrainte
         // d'unicité (exécution, article) refuserait un simple échange.
         $s = $this->scenario();
-        $autre = Article::factory()->create(['materiel_type_id' => $s['pulmo']->materiel_type_id, 'statut' => true]);
+        $autre = Article::factory()->create(['materiel_type_id' => $s['pulmo']->materiel_type_id]);
         ControleTacheMaterielType::create(['controle_tache_id' => $s['tMasque']->id, 'materiel_type_id' => $s['pulmo']->materiel_type_id]);
         $exec = $this->creerExec($s, [
             ['tache_id' => $s['tPulmo']->id, 'article_id' => $s['pulmo']->id],
@@ -632,7 +632,7 @@ class ControleComposantTest extends TestCase
     {
         $s = $this->scenario();
         $this->execAvecPulmo($s);
-        $autreCacolet = Article::factory()->create(['materiel_type_id' => $s['cacolet']->materiel_type_id, 'statut' => true, 'numero' => 'C-99']);
+        $autreCacolet = Article::factory()->create(['materiel_type_id' => $s['cacolet']->materiel_type_id, 'numero' => 'C-99']);
         ControleExecBusiness::createExec($s['controle']->id, $autreCacolet->id, [
             'executed_at' => '2026-03-01',
             'trigger_type' => 'NON_PERIODIQUE',
@@ -677,7 +677,7 @@ class ControleComposantTest extends TestCase
 
         return [
             'controle' => $controle,
-            'article' => Article::factory()->create(['materiel_type_id' => $type->id, 'statut' => true]),
+            'article' => Article::factory()->create(['materiel_type_id' => $type->id]),
             'tache' => $tache,
         ];
     }

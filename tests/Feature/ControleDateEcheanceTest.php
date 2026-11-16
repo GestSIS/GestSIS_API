@@ -41,7 +41,7 @@ class ControleDateEcheanceTest extends TestCase
         $type = MaterielType::factory()->create();
         ControleMaterielType::create(['controle_id' => $controle->id, 'materiel_type_id' => $type->id]);
 
-        return Article::factory()->create(['materiel_type_id' => $type->id, 'statut' => true]);
+        return Article::factory()->create(['materiel_type_id' => $type->id]);
     }
 
     public function testCreateExecRefuseeSansDateEcheanceSurUnControlePeriodique(): void

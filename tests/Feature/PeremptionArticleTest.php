@@ -26,17 +26,14 @@ class PeremptionArticleTest extends TestCase
 
         Article::factory()->create([
             'materiel_type_id' => $type->id,
-            'statut' => true,
             'date_peremption' => now()->subDay()->toDateString(),
         ]);
         Article::factory()->create([
             'materiel_type_id' => $type->id,
-            'statut' => true,
             'date_peremption' => now()->toDateString(),
         ]);
         Article::factory()->create([
             'materiel_type_id' => $type->id,
-            'statut' => true,
             'date_peremption' => now()->addMonth()->toDateString(),
         ]);
 
@@ -52,12 +49,11 @@ class PeremptionArticleTest extends TestCase
 
         Article::factory()->create([
             'materiel_type_id' => $type->id,
-            'statut' => false,
+            'supprime_le' => now()->subDay(),
             'date_peremption' => now()->subYear()->toDateString(),
         ]);
         Article::factory()->create([
             'materiel_type_id' => $type->id,
-            'statut' => true,
             'date_peremption' => null,
         ]);
 
@@ -72,7 +68,6 @@ class PeremptionArticleTest extends TestCase
 
         Article::factory()->create([
             'materiel_type_id' => $type->id,
-            'statut' => true,
             'date_peremption' => now()->subYear()->toDateString(),
         ]);
 
@@ -88,12 +83,10 @@ class PeremptionArticleTest extends TestCase
 
         $perime = Article::factory()->create([
             'materiel_type_id' => $typeAvec->id,
-            'statut' => true,
             'date_peremption' => now()->subMonth()->toDateString(),
         ]);
         Article::factory()->create([
             'materiel_type_id' => $typeSans->id,
-            'statut' => true,
             'date_peremption' => now()->addYear()->toDateString(),
         ]);
 

@@ -657,19 +657,16 @@ class ArticleTest extends TestCase
             'materiel_type_id' => $type->id,
             'sapeur_id' => $sapeurInactif->id,
             'emplacement_id' => null,
-            'statut' => true,
         ]);
         Article::factory()->create([
             'materiel_type_id' => $type->id,
             'sapeur_id' => $sapeurActif->id,
             'emplacement_id' => null,
-            'statut' => true,
         ]);
-        Article::factory()->create([
+        Article::factory()->supprime()->create([
             'materiel_type_id' => $type->id,
             'sapeur_id' => $sapeurInactif->id,
             'emplacement_id' => null,
-            'statut' => false,
         ]);
 
         $response = $this->json('GET', '/api/v2/articles/a-recuperer', [], ['Sis-Key' => 1]);

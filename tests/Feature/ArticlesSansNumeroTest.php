@@ -34,13 +34,13 @@ class ArticlesSansNumeroTest extends TestCase
         $emplacement = Emplacement::factory()->create(['designation' => 'Hangar test']);
         $sapeur = Sapeur::factory()->create(['nom' => 'Dupont', 'prenom' => 'Jean']);
         $sansNumero = Article::factory()->create([
-            'materiel_type_id' => $type->id, 'numero' => '', 'statut' => true, 'emplacement_id' => $emplacement->id,
+            'materiel_type_id' => $type->id, 'numero' => '', 'emplacement_id' => $emplacement->id,
         ]);
         $espaces = Article::factory()->create([
-            'materiel_type_id' => $type->id, 'numero' => '   ', 'statut' => true, 'sapeur_id' => $sapeur->id,
+            'materiel_type_id' => $type->id, 'numero' => '   ', 'sapeur_id' => $sapeur->id,
         ]);
-        Article::factory()->create(['materiel_type_id' => $type->id, 'numero' => 'V-1', 'statut' => true]);
-        Article::factory()->create(['materiel_type_id' => $type->id, 'numero' => '10', 'statut' => true]);
+        Article::factory()->create(['materiel_type_id' => $type->id, 'numero' => 'V-1']);
+        Article::factory()->create(['materiel_type_id' => $type->id, 'numero' => '10']);
 
         $resultat = $this->articlesSansNumeroParType();
 
@@ -60,9 +60,9 @@ class ArticlesSansNumeroTest extends TestCase
     public function testIndiqueSiLeTypeEstTailleOuUnVehicule(): void
     {
         $taille = MaterielType::factory()->numerote()->create(['est_taillee' => true]);
-        Article::factory()->create(['materiel_type_id' => $taille->id, 'numero' => '', 'statut' => true]);
+        Article::factory()->create(['materiel_type_id' => $taille->id, 'numero' => '']);
         $vehicule = MaterielType::factory()->numerote()->create(['type' => 3, 'est_emplacement' => true]);
-        Article::factory()->create(['materiel_type_id' => $vehicule->id, 'numero' => '', 'statut' => true]);
+        Article::factory()->create(['materiel_type_id' => $vehicule->id, 'numero' => '']);
 
         $resultat = $this->articlesSansNumeroParType();
 
@@ -74,8 +74,8 @@ class ArticlesSansNumeroTest extends TestCase
     public function testZeroEtTiretComptentCommeNumeroManquant(): void
     {
         $type = MaterielType::factory()->numerote()->create();
-        $zero = Article::factory()->create(['materiel_type_id' => $type->id, 'numero' => '0', 'statut' => true]);
-        $tiret = Article::factory()->create(['materiel_type_id' => $type->id, 'numero' => ' - ', 'statut' => true]);
+        $zero = Article::factory()->create(['materiel_type_id' => $type->id, 'numero' => '0']);
+        $tiret = Article::factory()->create(['materiel_type_id' => $type->id, 'numero' => ' - ']);
 
         $ids = collect($this->articlesSansNumeroParType()[$type->id]['articles'])->pluck('id')->all();
 
@@ -85,9 +85,9 @@ class ArticlesSansNumeroTest extends TestCase
     public function testIgnoreLesArticlesInactifsEtLesTypesNonNumerotes(): void
     {
         $typeNumerote = MaterielType::factory()->numerote()->create();
-        Article::factory()->create(['materiel_type_id' => $typeNumerote->id, 'numero' => '', 'statut' => false]);
+        Article::factory()->create(['materiel_type_id' => $typeNumerote->id, 'numero' => '', 'supprime_le' => now()->subDay()]);
         $typeNonNumerote = MaterielType::factory()->create(['est_numerote' => false]);
-        Article::factory()->create(['materiel_type_id' => $typeNonNumerote->id, 'numero' => '', 'statut' => true]);
+        Article::factory()->create(['materiel_type_id' => $typeNonNumerote->id, 'numero' => '']);
 
         $resultat = $this->articlesSansNumeroParType();
 
@@ -98,7 +98,7 @@ class ArticlesSansNumeroTest extends TestCase
     public function testTypeDontTousLesArticlesSontNumerotesNApparaitPas(): void
     {
         $type = MaterielType::factory()->numerote()->create();
-        Article::factory()->create(['materiel_type_id' => $type->id, 'numero' => 'A-1', 'statut' => true]);
+        Article::factory()->create(['materiel_type_id' => $type->id, 'numero' => 'A-1']);
 
         $this->assertArrayNotHasKey($type->id, $this->articlesSansNumeroParType()->all());
     }
