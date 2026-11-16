@@ -46,12 +46,12 @@ class ArticleSuppressionTest extends TestCase
     /**
      * @param int[] $articleIds
      */
-    private function restaurer(array $articleIds, int $emplacementId): TestResponse
+    private function restaurer(array $articleIds, ?int $emplacementId): TestResponse
     {
-        return $this->json('POST', '/api/v2/articles/restaurer', [
+        return $this->json('POST', '/api/v2/articles/restaurer', array_filter([
             'articleIds' => $articleIds,
             'emplacement_id' => $emplacementId,
-        ], ['Sis-Key' => 1]);
+        ], fn ($value) => $value !== null), ['Sis-Key' => 1]);
     }
 
     /**
@@ -354,5 +354,52 @@ class ArticleSuppressionTest extends TestCase
 
         $this->assertNotNull($vehicule->fresh()->supprime_le);
         $this->assertFalse($emplacement->fresh()->statut);
+    }
+
+    public function testRestaurerVehiculeSansEmplacementEstAccepte(): void
+    {
+        [$vehicule, $emplacement] = $this->vehicule(['supprime_le' => '2026-01-01'], ['statut' => false]);
+
+        $this->restaurer([$vehicule->id], null)->assertStatus(200);
+
+        $this->assertNull($vehicule->fresh()->supprime_le);
+        $this->assertTrue($emplacement->fresh()->statut);
+    }
+
+    public function testRestaurerArticleSansEmplacementEstRefuse(): void
+    {
+        $article = Article::factory()->supprime()->create();
+
+        $this->restaurer([$article->id], null)->assertStatus(422)->assertJsonStructure(['message']);
+
+        $this->assertNotNull($article->fresh()->supprime_le);
+    }
+
+    public function testSupprimerLotDUnTypeNumeroteEstRefuse(): void
+    {
+        $type = MaterielType::factory()->numerote()->create();
+        $emplacement = Emplacement::factory()->create();
+        $lot = ['materiel_type_id' => $type->id, 'emplacement_id' => $emplacement->id];
+        Article::factory()->count(2)->create($lot);
+
+        $this->supprimerLot([...$lot, 'quantite' => 1])->assertStatus(422)->assertJsonStructure(['message']);
+
+        $this->assertSame(0, Article::where('materiel_type_id', $type->id)->whereNotNull('supprime_le')->count());
+    }
+
+    public function testModifierUnArticleSupprimeEstRefuse(): void
+    {
+        $emplacement = Emplacement::factory()->create();
+        $article = Article::factory()->supprime()->create(['emplacement_id' => $emplacement->id, 'remarque' => 'avant']);
+
+        $this->json('PUT', '/api/v2/articles', ['articles' => [[
+            'id' => $article->id,
+            'emplacement_id' => Emplacement::factory()->create()->id,
+            'remarque' => 'après',
+        ]]], ['Sis-Key' => 1])->assertStatus(422)->assertJsonStructure(['message']);
+
+        $article->refresh();
+        $this->assertSame($emplacement->id, $article->emplacement_id);
+        $this->assertSame('avant', $article->remarque);
     }
 }

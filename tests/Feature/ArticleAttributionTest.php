@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Application\Http\Controllers\MonMaterielController;
 use App\Domaine\Business\Materiel\AttributionBusiness;
 use App\Models\Article;
 use App\Models\ArticleAttribution;
@@ -9,6 +10,7 @@ use App\Models\Emplacement;
 use App\Models\MaterielType;
 use App\Models\Sapeur;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
 class ArticleAttributionTest extends TestCase
@@ -322,5 +324,30 @@ class ArticleAttributionTest extends TestCase
             'cloture_par_sapeur_id' => $auteur->id,
         ]);
         $this->assertSame($emplacement->id, $article->fresh()->emplacement_id);
+    }
+
+    public function testArticlesDUnSapeurRenvoientLaDateDAttribution(): void
+    {
+        $sapeur = Sapeur::factory()->create();
+        $article = $this->articleAttribue($sapeur, '2026-02-01');
+
+        $response = $this->json('GET', "/api/v2/sapeurs/{$sapeur->id}/articles", [], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $ligne = collect($response->json('data'))->firstWhere('id', $article->id);
+        $this->assertStringStartsWith('2026-02-01', $ligne['attribution']);
+    }
+
+    public function testMonMaterielRenvoieLaDateDAttribution(): void
+    {
+        $sapeur = Sapeur::factory()->create();
+        $article = $this->articleAttribue($sapeur, '2026-02-01');
+        $request = Request::create('/api/v2/mon-materiel');
+        $request->attributes->set('sapeurId', $sapeur->id);
+
+        $response = app(MonMaterielController::class)->index($request);
+
+        $ligne = collect($response->getData(true)['data'])->firstWhere('id', $article->id);
+        $this->assertStringStartsWith('2026-02-01', $ligne['attribution']);
     }
 }

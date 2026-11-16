@@ -275,6 +275,18 @@ class ControleComposantTest extends TestCase
         ]);
     }
 
+    public function testControlerUnArticleSupprimeEstRefuse(): void
+    {
+        $s = $this->scenario();
+        $s['cacolet']->update(['supprime_le' => now()->subDay()]);
+
+        $this->expectException(ArrayException::class);
+        $this->creerExec($s, [
+            ['tache_id' => $s['tPulmo']->id, 'article_id' => $s['pulmo']->id],
+            ['tache_id' => $s['tMasque']->id],
+        ]);
+    }
+
     public function testArticleDunTypeNonAccepteEstRefuse(): void
     {
         $s = $this->scenario();

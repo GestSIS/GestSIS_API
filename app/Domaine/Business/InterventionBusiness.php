@@ -687,6 +687,12 @@ class InterventionBusiness
             ->pluck('vehicule_id')->toArray();
         $vehicules = array_diff($vehicules, $vehiculeIds);
 
+        // Un véhicule supprimé ne peut plus être engagé ; un véhicule indisponible
+        // (disponible_intervention à faux) reste accepté.
+        if (Article::whereIn('id', $vehicules)->whereNotNull('supprime_le')->exists()) {
+            throw new ArrayException([], "Certains véhicules sont supprimés et ne peuvent pas être engagés en intervention");
+        }
+
         foreach ($vehicules as $vehicule) {
             $newVehicule = new InterventionVehicule();
             $newVehicule->vehicule_id = $vehicule;

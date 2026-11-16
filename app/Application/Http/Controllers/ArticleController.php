@@ -157,10 +157,11 @@ class ArticleController extends Controller
         $data = $request->validate([
             'articleIds' => 'required|array|min:1',
             'articleIds.*' => 'required|integer|exists:articles,id',
-            'emplacement_id' => 'required|integer|exists:emplacements,id',
+            // Ignoré pour un véhicule ; requis pour les autres articles (contrôlé par le métier).
+            'emplacement_id' => 'nullable|integer|exists:emplacements,id',
         ]);
 
-        $articles = ArticleBusiness::restaurerArticles($data['articleIds'], $data['emplacement_id']);
+        $articles = ArticleBusiness::restaurerArticles($data['articleIds'], $data['emplacement_id'] ?? null);
         return response()->json(['data' => $articles]);
     }
 }

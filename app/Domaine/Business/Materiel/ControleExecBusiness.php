@@ -29,6 +29,9 @@ class ControleExecBusiness
     public static function createExec(int $controleId, int $articleId, array $data, int $sapeurId): ControleExec
     {
         $article = Article::findOrFail($articleId);
+        if ($article->supprime_le !== null) {
+            throw new ArrayException([], "L'article est supprimé et ne peut pas être contrôlé");
+        }
         $controle = Controle::with(['taches.materielTypes', 'materielTypes'])->findOrFail($controleId);
 
         self::validateArticleRattacheAuControle($controle, $article);

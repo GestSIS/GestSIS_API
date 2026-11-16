@@ -222,8 +222,21 @@ class ArticleBusiness
       ->all());
   }
 
+  /**
+   * Modification d'articles. Un article supprimé ne peut plus être modifié
+   * (ni déplacé) : il doit d'abord être restauré.
+   *
+   * @param array<int, array<string, mixed>> $articles
+   * @return Collection<int, Article>
+   * @throws ArrayException si un article est supprimé ou si une donnée est invalide
+   */
   public static function editArticles(array $articles): Collection
   {
+    self::assertAucunSupprime(
+      array_column($articles, 'id'),
+      "Certains articles sont supprimés et ne peuvent pas être modifiés, restaurez-les d'abord"
+    );
+
     // fetch types equivalents
     $indexedTypes = MaterielType::all()->keyBy('id');
 
@@ -405,10 +418,16 @@ class ArticleBusiness
    * la plus proche d'abord (sans date en dernier), puis l'ajout le plus ancien.
    *
    * @return Collection<int, Article>
-   * @throws ArrayException si le lot contient moins de pièces que la quantité demandée
+   * @throws ArrayException si le type est numéroté ou si le lot contient moins de
+   *   pièces que la quantité demandée
    */
   public static function supprimerLot(int $materielTypeId, int $emplacementId, string $compartiment, int $quantite, string $date, ?string $remarque, ?int $auteurSapeurId): Collection
   {
+    // Les articles numérotés sont des pièces uniques : on les supprime un par un.
+    if (MaterielType::findOrFail($materielTypeId)->est_numerote) {
+      throw new ArrayException([], "Un article numéroté ne peut pas être supprimé par lot, supprimez-le individuellement");
+    }
+
     return DB::transaction(function () use ($materielTypeId, $emplacementId, $compartiment, $quantite, $date, $remarque, $auteurSapeurId) {
       $pieceIds = Article::nonSupprimes()
         ->where('materiel_type_id', $materielTypeId)
@@ -434,16 +453,17 @@ class ArticleBusiness
 
   /**
    * Restauration d'articles supprimés : les champs de suppression repassent à NULL.
-   * Un article est rangé dans l'emplacement donné, qui doit être actif ; un véhicule
-   * n'est pas rangé mais son emplacement est réactivé (le parent doit être actif).
-   * Une attribution n'est jamais rouverte.
+   * Un article est rangé dans l'emplacement donné, obligatoire et actif ; un véhicule
+   * n'est pas rangé (l'emplacement est ignoré) mais son emplacement est réactivé
+   * (le parent doit être actif). Une attribution n'est jamais rouverte.
    *
    * @param int[] $articleIds
    * @return Collection<int, Article>
-   * @throws ArrayException si un article n'est pas supprimé ou si l'emplacement
-   *   (ou le parent de l'emplacement d'un véhicule) est inactif
+   * @throws ArrayException si un article n'est pas supprimé, si l'emplacement manque
+   *   pour un article qui n'est pas un véhicule, ou si l'emplacement (ou le parent
+   *   de l'emplacement d'un véhicule) est inactif
    */
-  public static function restaurerArticles(array $articleIds, int $emplacementId): Collection
+  public static function restaurerArticles(array $articleIds, ?int $emplacementId): Collection
   {
     if (Article::whereIn('id', $articleIds)->nonSupprimes()->exists()) {
       throw new ArrayException([], "Certains articles ne sont pas supprimés");
@@ -463,6 +483,9 @@ class ArticleBusiness
           EmplacementBusiness::assertParentActif($vehicleLocation->parent_id, true);
           $vehicleLocation->update(['statut' => true]);
         } else {
+          if ($emplacementId === null) {
+            throw new ArrayException([], "Un emplacement est requis pour restaurer un article qui n'est pas un véhicule");
+          }
           EmplacementBusiness::assertEmplacementActif($emplacementId);
           $articleData['emplacement_id'] = $emplacementId;
         }
@@ -501,13 +524,17 @@ class ArticleBusiness
   }
 
   /**
-   * Get list of articles of a given sapeur
+   * Articles détenus par un sapeur, avec la date de début de leur attribution
+   * en cours (attribut `attribution`).
+   *
    * @param integer $sapeurId ID of the sapeur for which to get articles
    * @return Collection<int, Article>
    */
-  public static function getArticlesPourSapeur($sapeurId)
+  public static function getArticlesPourSapeur($sapeurId): Collection
   {
-    return Article::where('sapeur_id', $sapeurId)->with(['emplacementRepresentee'])->get();
+    return self::avecDateAttribution(
+      Article::where('sapeur_id', $sapeurId)->with(['emplacementRepresentee', 'attributionOuverte'])->get()
+    );
   }
 
   /**

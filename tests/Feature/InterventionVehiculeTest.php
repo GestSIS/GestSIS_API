@@ -2,7 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Domaine\Business\Materiel\MaterielTypeBusiness;
+use App\Models\Article;
 use App\Models\Intervention;
+use App\Models\MaterielType;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -104,5 +107,47 @@ class InterventionVehiculeTest extends TestCase
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/vehicules/', ["vehicules" => $vehiculesRemove]);
 
         $response->assertStatus(204);
+    }
+
+    /**
+     * Véhicule (article d'un type véhicule) avec les attributs donnés.
+     *
+     * @param array<string, mixed> $extra
+     */
+    private function vehicule(array $extra = []): Article
+    {
+        $type = MaterielType::factory()->create([
+            'type' => MaterielTypeBusiness::TYPE_VEHICULE,
+            'est_emplacement' => true,
+        ]);
+
+        return Article::factory()->create(array_merge(['materiel_type_id' => $type->id], $extra));
+    }
+
+    public function testAddInterventionVehiculeSupprimeEstRefuse(): void
+    {
+        $vehicule = $this->vehicule(['supprime_le' => '2026-01-01']);
+
+        $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/vehicules', ['vehicules' => [$vehicule->id]], ['Sis-Key' => 1])
+            ->assertStatus(422)
+            ->assertJsonStructure(['message']);
+
+        $this->assertDatabaseMissing('intervention_vehicule', [
+            'intervention_id' => $this->interventionId,
+            'vehicule_id' => $vehicule->id,
+        ]);
+    }
+
+    public function testAddInterventionVehiculeIndisponibleEstAccepte(): void
+    {
+        $vehicule = $this->vehicule(['disponible_intervention' => false]);
+
+        $this->json('POST', '/api/v2/interventions/' . $this->interventionId . '/vehicules', ['vehicules' => [$vehicule->id]], ['Sis-Key' => 1])
+            ->assertStatus(201);
+
+        $this->assertDatabaseHas('intervention_vehicule', [
+            'intervention_id' => $this->interventionId,
+            'vehicule_id' => $vehicule->id,
+        ]);
     }
 }

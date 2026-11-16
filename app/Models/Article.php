@@ -76,7 +76,7 @@ class Article extends Model
      */
     public function scopeNonSupprimes(Builder $query): Builder
     {
-        return $query->whereNull('supprime_le');
+        return $query->whereNull($query->qualifyColumn('supprime_le'));
     }
 
     /**
