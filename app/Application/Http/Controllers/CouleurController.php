@@ -26,6 +26,7 @@ class CouleurController extends Controller
             'nom' => 'string|min:1|required',
             'texte' => 'string|required',
             'fond' => 'string|required',
+            'statut' => 'boolean',
         ]);
 
         $couleur = CouleurBusiness::createCouleur($data);
@@ -38,6 +39,7 @@ class CouleurController extends Controller
             'nom' => 'string|min:1',
             'texte' => 'string|required',
             'fond' => 'string|required',
+            'statut' => 'boolean',
         ]);
 
         $couleur = CouleurBusiness::editCouleur($id, $data);

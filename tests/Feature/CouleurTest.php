@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Couleur;
+use App\Models\Emplacement;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
@@ -56,5 +57,20 @@ class CouleurTest extends TestCase
 
         $response->assertStatus(204);
         $this->assertDatabaseMissing('couleurs', ['id' => $couleur->id]);
+    }
+
+    public function testDesactiverCouleurUtiliseeEstAccepte(): void
+    {
+        $couleur = Couleur::factory()->create();
+        Emplacement::factory()->create(['couleur_id' => $couleur->id]);
+
+        $this->json('PUT', "/api/v2/couleurs/{$couleur->id}", [
+            'nom' => $couleur->nom,
+            'texte' => $couleur->texte,
+            'fond' => $couleur->fond,
+            'statut' => false,
+        ])->assertStatus(200);
+
+        $this->assertDatabaseHas('couleurs', ['id' => $couleur->id, 'statut' => false]);
     }
 }

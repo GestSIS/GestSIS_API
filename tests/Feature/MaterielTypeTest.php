@@ -423,4 +423,80 @@ class MaterielTypeTest extends TestCase
 
         $this->assertDatabaseHas('materiel_types', ['id' => $type->id, 'est_attribuable' => false]);
     }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function payloadPourType(MaterielType $type, bool $statut): array
+    {
+        return [
+            'designation' => $type->designation,
+            'materiel_categorie_id' => $type->materiel_categorie_id,
+            'type' => $type->type,
+            'est_numerote' => (bool) $type->est_numerote,
+            'est_attribuable' => (bool) $type->est_attribuable,
+            'est_taillee' => (bool) $type->est_taillee,
+            'a_batterie' => (bool) $type->a_batterie,
+            'statut' => $statut,
+        ];
+    }
+
+    public function testDesactiverTypeSansArticleEstAccepte(): void
+    {
+        $type = MaterielType::factory()->create([
+            'materiel_categorie_id' => MaterielCategorie::factory()->create()->id,
+            'est_emplacement' => false,
+            'type' => MaterielTypeBusiness::TYPE_NONE,
+        ]);
+
+        $this->json('PUT', "/api/v2/materiel-types/{$type->id}", $this->payloadPourType($type, false), ['Sis-Key' => 1])
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('materiel_types', ['id' => $type->id, 'statut' => false]);
+    }
+
+    public function testDesactiverTypeAvecArticleNonSupprimeEstRefuse(): void
+    {
+        $type = MaterielType::factory()->create([
+            'materiel_categorie_id' => MaterielCategorie::factory()->create()->id,
+            'est_emplacement' => false,
+            'type' => MaterielTypeBusiness::TYPE_NONE,
+        ]);
+        Article::factory()->create(['materiel_type_id' => $type->id]);
+
+        $this->json('PUT', "/api/v2/materiel-types/{$type->id}", $this->payloadPourType($type, false), ['Sis-Key' => 1])
+            ->assertStatus(422)
+            ->assertJsonFragment(['message' => 'Impossible de désactiver un type qui a encore du matériel']);
+
+        $this->assertDatabaseHas('materiel_types', ['id' => $type->id, 'statut' => true]);
+    }
+
+    public function testDesactiverTypeNAyantQueDesArticlesSupprimesEstAccepte(): void
+    {
+        $type = MaterielType::factory()->create([
+            'materiel_categorie_id' => MaterielCategorie::factory()->create()->id,
+            'est_emplacement' => false,
+            'type' => MaterielTypeBusiness::TYPE_NONE,
+        ]);
+        Article::factory()->supprime()->create(['materiel_type_id' => $type->id]);
+
+        $this->json('PUT', "/api/v2/materiel-types/{$type->id}", $this->payloadPourType($type, false), ['Sis-Key' => 1])
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('materiel_types', ['id' => $type->id, 'statut' => false]);
+    }
+
+    public function testCreerArticleDUnTypeInactifEstRefuse(): void
+    {
+        $type = MaterielType::factory()->create(['statut' => false, 'designation' => 'Ancien type']);
+
+        $this->json('POST', '/api/v2/articles', ['articles' => [[
+            'materiel_type_id' => $type->id,
+            'quantite' => 1,
+        ]]], ['Sis-Key' => 1])
+            ->assertStatus(422)
+            ->assertJsonFragment(['message' => "Le type 'Ancien type' est inactif"]);
+
+        $this->assertDatabaseMissing('articles', ['materiel_type_id' => $type->id]);
+    }
 }

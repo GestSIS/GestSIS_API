@@ -127,6 +127,14 @@ class MaterielTypeBusiness
       throw new ArrayException([], "Impossible de rendre ce type non attribuable : des articles de ce type sont attribués à des sapeurs");
     }
 
+    // Un type ne peut être désactivé tant qu'il a du matériel non supprimé.
+    if (
+      array_key_exists('statut', $data) && !$data['statut'] && $existant->statut &&
+      Article::where('materiel_type_id', $id)->nonSupprimes()->exists()
+    ) {
+      throw new ArrayException([], "Impossible de désactiver un type qui a encore du matériel");
+    }
+
     MaterielType::whereId($id)
       ->limit(1)
       ->update($data);

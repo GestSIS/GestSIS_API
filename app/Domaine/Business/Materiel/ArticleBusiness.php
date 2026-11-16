@@ -129,6 +129,10 @@ class ArticleBusiness
     foreach ($articles as $article) {
       $type = $indexedTypes[$article['materiel_type_id']];
 
+      if (!$type->statut) {
+        throw new ArrayException([], message: "Le type '{$type->designation}' est inactif");
+      }
+
       // Un article qui est lui-même un emplacement (ex: véhicule) n'est ni attribué
       // à un sapeur, ni rangé dans un emplacement classique : sa position est portée
       // par le parent_id de l'emplacement qu'il représente.
