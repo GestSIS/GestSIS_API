@@ -189,6 +189,7 @@ class ArticleBusiness
         'designation' => $article['designation'] ?? '',
         'immatriculation' => $article['immatriculation'] ?? '',
         'date_peremption' => $type->est_perimable ? ($article['date_peremption'] ?? null) : null,
+        'disponible_intervention' => $article['disponible_intervention'] ?? true,
         'emplacement' => $article['emplacement'] ?? null,
       ];
     })->flatMap(fn($article) => array_fill(0, $article['quantite'], $article))
@@ -308,6 +309,8 @@ class ArticleBusiness
         'immatriculation' => $article['immatriculation'] ?? '',
         'date_peremption' => $type->est_perimable ? ($article['date_peremption'] ?? null) : null,
         'emplacement' => $article['emplacement'] ?? null,
+        // Absent de la requête : la disponibilité actuelle est conservée.
+        ...(array_key_exists('disponible_intervention', $article) ? ['disponible_intervention' => (bool) $article['disponible_intervention']] : []),
       ];
     })->map(function ($article) use ($indexedTypes) {
       $emplacementData = $article['emplacement'];
@@ -329,19 +332,9 @@ class ArticleBusiness
         $nouveauParentId = $emplacementData['parent_id'] ?? null;
         EmplacementBusiness::assertNoCycle($emplacementRepresentee->id, $nouveauParentId);
 
-        // Le statut de l'article (utilisable en intervention) et celui de son
-        // emplacement (visible/rangeable dans l'inventaire) sont volontairement
-        // indépendants : on peut désactiver un véhicule pour l'écarter des
-        // interventions tout en le laissant dans l'inventaire, ou inversement.
-        // On ne peut par contre pas désactiver l'emplacement tant qu'il contient
-        // du matériel ou des sous-emplacements.
-        $statutEmplacementVoulu = array_key_exists('statut', $emplacementData) ? (bool) $emplacementData['statut'] : true;
-        if (!$statutEmplacementVoulu && $emplacementRepresentee->statut === true) {
-          EmplacementBusiness::assertCanBeDeactivated($emplacementRepresentee->id);
-        }
         EmplacementBusiness::assertParentActif(
           $nouveauParentId !== null ? (int) $nouveauParentId : null,
-          $statutEmplacementVoulu,
+          (bool) $emplacementRepresentee->statut,
           $emplacementRepresentee,
         );
 
@@ -352,7 +345,6 @@ class ArticleBusiness
           'parent_id' => $nouveauParentId,
           'est_etiquete' => $emplacementData['est_etiquete'] ?? false,
           'est_compartimentable' => $emplacementData['est_compartimentable'] ?? false,
-          'statut' => $statutEmplacementVoulu,
         ]);
       }
 

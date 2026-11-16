@@ -276,17 +276,16 @@ class ArticleTest extends TestCase
         ]);
     }
 
-    public function testEditVehiculeArticleStatutIsIndependentFromEmplacementStatut(): void
+    public function testEditVehiculeChangeDisponibiliteSansToucherALEmplacement(): void
     {
-        // On peut désactiver le véhicule (retiré des interventions) sans désactiver
-        // son emplacement (reste visible/rangeable dans l'inventaire), et inversement.
+        // Rendre le véhicule indisponible en intervention ne touche pas à son emplacement.
         $type = $this->vehiculeType();
         $couleur = Couleur::factory()->create();
         $article = Article::factory()->create([
             'materiel_type_id' => $type->id,
             'emplacement_id' => null,
             'sapeur_id' => null,
-            'statut' => true,
+            'disponible_intervention' => true,
         ]);
         $emplacement = Emplacement::factory()->create([
             'article_id' => $article->id,
@@ -297,21 +296,20 @@ class ArticleTest extends TestCase
         $response = $this->json('PUT', '/api/v2/articles', [
             'articles' => [[
                 'id' => $article->id,
-                'statut' => false,
-                'emplacement' => [
-                    'couleur_id' => $couleur->id,
-                    'statut' => true,
-                ],
+                'disponible_intervention' => false,
+                'emplacement' => ['couleur_id' => $couleur->id],
             ]],
         ], ['Sis-Key' => 1]);
 
         $response->assertStatus(200);
-        $this->assertDatabaseHas('articles', ['id' => $article->id, 'statut' => false]);
+        $this->assertDatabaseHas('articles', ['id' => $article->id, 'disponible_intervention' => false]);
         $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'statut' => true]);
     }
 
-    public function testEditVehiculeArticleCannotDeactivateEmplacementContainingMateriel(): void
+    public function testEditVehiculeIgnoreLeStatutDEmplacementRecu(): void
     {
+        // L'emplacement d'un véhicule suit sa suppression/restauration : un statut reçu est ignoré,
+        // même si l'emplacement contient du matériel.
         $type = $this->vehiculeType();
         $couleur = Couleur::factory()->create();
         $article = Article::factory()->create([
@@ -336,39 +334,8 @@ class ArticleTest extends TestCase
             ]],
         ], ['Sis-Key' => 1]);
 
-        $response->assertStatus(422);
-        $response->assertJsonStructure(['message']);
-        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'statut' => true]);
-    }
-
-    public function testEditVehiculeArticleCanDeactivateEmptyEmplacement(): void
-    {
-        $type = $this->vehiculeType();
-        $couleur = Couleur::factory()->create();
-        $article = Article::factory()->create([
-            'materiel_type_id' => $type->id,
-            'emplacement_id' => null,
-            'sapeur_id' => null,
-        ]);
-        $emplacement = Emplacement::factory()->create([
-            'article_id' => $article->id,
-            'couleur_id' => $couleur->id,
-            'statut' => true,
-        ]);
-
-        $response = $this->json('PUT', '/api/v2/articles', [
-            'articles' => [[
-                'id' => $article->id,
-                'statut' => true,
-                'emplacement' => [
-                    'couleur_id' => $couleur->id,
-                    'statut' => false,
-                ],
-            ]],
-        ], ['Sis-Key' => 1]);
-
         $response->assertStatus(200);
-        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'statut' => false]);
+        $this->assertDatabaseHas('emplacements', ['id' => $emplacement->id, 'statut' => true]);
     }
 
     public function testEditVehiculeArticleCannotSetOwnEmplacementAsItsOwnParent(): void
@@ -863,17 +830,15 @@ class ArticleTest extends TestCase
         $this->assertSame(50, Article::where('materiel_type_id', $type->id)->count());
     }
 
-    public function testUpdateArticlesSansStatutEstRefuse(): void
+    public function testUpdateArticlesSansStatutEstAccepte(): void
     {
         $emplacement = Emplacement::factory()->create();
-        $article = Article::factory()->create(['emplacement_id' => $emplacement->id, 'sapeur_id' => null, 'statut' => false]);
+        $article = Article::factory()->create(['emplacement_id' => $emplacement->id, 'sapeur_id' => null]);
 
         $this->json('PUT', '/api/v2/articles', ['articles' => [[
             'id' => $article->id,
             'emplacement_id' => $emplacement->id,
-        ]]], ['Sis-Key' => 1])->assertStatus(422)->assertJsonValidationErrors(['articles.0.statut']);
-
-        $this->assertFalse($article->fresh()->statut);
+        ]]], ['Sis-Key' => 1])->assertStatus(200);
     }
 
     public function testUpdateArticleInexistantEstRefuse(): void

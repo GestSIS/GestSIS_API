@@ -49,6 +49,7 @@ class ArticleController extends Controller
             'articles.*.quantite' => 'integer|min:1|max:50|nullable',
             'articles.*.numero' => 'string|nullable',
             'articles.*.est_etiquete' => 'boolean',
+            'articles.*.disponible_intervention' => 'boolean',
             'articles.*.achat' => 'string|nullable',
             'articles.*.sapeur_id' => 'integer|nullable|exists:sapeurs,id',
             'articles.*.attribution' => 'date|nullable|before_or_equal:today|required_with:articles.*.sapeur_id',
@@ -62,7 +63,6 @@ class ArticleController extends Controller
             'articles.*.emplacement.parent_id' => 'integer|nullable',
             'articles.*.emplacement.est_etiquete' => 'boolean|nullable',
             'articles.*.emplacement.est_compartimentable' => 'boolean|nullable',
-            'articles.*.emplacement.statut' => 'boolean|nullable',
         ]);
 
         $materiels = ArticleBusiness::creerArticles($data['articles'], $request->attributes->get('sapeurId'));
@@ -89,12 +89,11 @@ class ArticleController extends Controller
             'articles.*.designation' => 'string|nullable',
             'articles.*.immatriculation' => 'string|nullable',
             'articles.*.date_peremption' => 'date_format:Y-m-d|nullable',
-            'articles.*.statut' => 'required|boolean',
+            'articles.*.disponible_intervention' => 'boolean',
             'articles.*.emplacement.couleur_id' => 'integer|nullable',
             'articles.*.emplacement.parent_id' => 'integer|nullable',
             'articles.*.emplacement.est_etiquete' => 'boolean|nullable',
             'articles.*.emplacement.est_compartimentable' => 'boolean|nullable',
-            'articles.*.emplacement.statut' => 'boolean|nullable',
         ]);
 
         $articles = ArticleBusiness::editArticles($data['articles']);
