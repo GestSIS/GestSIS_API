@@ -561,7 +561,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
     Route::group(['middleware' => 'jwtTokenRole:intervention.config'], function () {
         Route::apiResource('type-intervention', TypeInterventionController::class)->only(['store', 'update', 'destroy']);
-        Route::apiResource('vehicules', VehiculeController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('materiels', MaterielController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('stat-intervention', StatInterventionController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('intervention-traitement', InterventionTraitementController::class)->only(['store', 'update', 'destroy']);
