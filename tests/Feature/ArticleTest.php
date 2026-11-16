@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Domaine\Business\Materiel\MaterielTypeBusiness;
 use App\Models\Article;
+use App\Models\ArticleAttribution;
 use App\Models\Controle;
 use App\Models\ControleExec;
 use App\Models\ControleExecTache;
@@ -139,7 +140,6 @@ class ArticleTest extends TestCase
             'id' => $article->id,
             'emplacement_id' => $emplacement->id,
             'sapeur_id' => null,
-            'retour' => '2026-06-18',
         ]);
     }
 
@@ -761,17 +761,21 @@ class ArticleTest extends TestCase
     private function creerSapeurAvecArticle(): Sapeur
     {
         $sapeur = Sapeur::factory()->create();
-        Article::factory()->create([
+        $article = Article::factory()->create([
             'materiel_type_id' => MaterielType::factory()->create()->id,
             'sapeur_id' => $sapeur->id,
             'emplacement_id' => null,
-            'attribution' => '2026-01-10',
+        ]);
+        ArticleAttribution::factory()->create([
+            'article_id' => $article->id,
+            'sapeur_id' => $sapeur->id,
+            'debut' => '2026-01-10',
         ]);
 
         return $sapeur;
     }
 
-    public function testAttribuerArticleRemetRetourANull(): void
+    public function testReattribuerUnArticleRenduOuvreUneNouvelleAttribution(): void
     {
         $sapeur = Sapeur::factory()->create();
         $type = MaterielType::factory()->create(['est_attribuable' => true]);
@@ -780,8 +784,11 @@ class ArticleTest extends TestCase
             'materiel_type_id' => $type->id,
             'sapeur_id' => null,
             'emplacement_id' => $emplacement->id,
-            'attribution' => '2025-06-01',
-            'retour' => '2025-12-01',
+        ]);
+        ArticleAttribution::factory()->create([
+            'article_id' => $article->id,
+            'debut' => '2025-06-01',
+            'fin' => '2025-12-01',
         ]);
 
         $response = $this->json('POST', '/api/v2/sapeurs/' . $sapeur->id . '/articles', [
@@ -790,9 +797,9 @@ class ArticleTest extends TestCase
         ], ['Sis-Key' => 1]);
 
         $response->assertStatus(201);
-        $article->refresh();
-        $this->assertSame($sapeur->id, $article->sapeur_id);
-        $this->assertNull($article->retour);
+        $this->assertSame($sapeur->id, $article->fresh()->sapeur_id);
+        $this->assertSame(2, ArticleAttribution::where('article_id', $article->id)->count());
+        $this->assertDatabaseHas('article_attributions', ['article_id' => $article->id, 'sapeur_id' => $sapeur->id, 'fin' => null]);
     }
 
 

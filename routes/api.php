@@ -17,6 +17,7 @@ use App\Application\Http\Controllers\AdminController;
 use App\Application\Http\Controllers\ArticleController;
 use App\Application\Http\Controllers\ArticleEmplacementController;
 use App\Application\Http\Controllers\ArticleSapeurController;
+use App\Application\Http\Controllers\AttributionController;
 use App\Application\Http\Controllers\BatterieTypeController;
 use App\Application\Http\Controllers\CouleurController;
 use App\Application\Http\Controllers\EmplacementController;
@@ -295,6 +296,8 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,materiel.lecture'], function () {
         Route::apiResource('sapeurs.articles', ArticleSapeurController::class)->only(['index']);
         Route::get('sapeurs/{sapeurId}/liste-articles', [ArticleSapeurController::class, 'pdf']);
+        Route::get('articles/{articleId}/attributions', [AttributionController::class, 'indexPourArticle']);
+        Route::get('sapeurs/{sapeurId}/attributions', [AttributionController::class, 'indexPourSapeur']);
     });
 
     // Sapeurs

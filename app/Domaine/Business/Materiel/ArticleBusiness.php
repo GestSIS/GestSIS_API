@@ -34,13 +34,13 @@ class ArticleBusiness
   // const EVENT_TYPE_MAINTENANCE = "MAINTENANCE";
 
   /**
-   * Retour de matériel qui était attribué à un sapeur
-   * @param mixed $date
+   * Retour de matériel qui était attribué à un sapeur : clôt les attributions
+   * ouvertes et range les articles dans l'emplacement.
+   *
    * @param int[] $articleIds
-   * @param int $emplacementId
-   * @return void
+   * @return Collection<int, Article>
    */
-  public static function retourArticles(int $emplacementId, string $date, array $articleIds): Collection
+  public static function retourArticles(int $emplacementId, string $date, array $articleIds, ?int $auteurSapeurId = null): Collection
   {
     $estEmplacement = Article::whereIn('articles.id', $articleIds)
       ->join('materiel_types', 'materiel_types.id', '=', 'articles.materiel_type_id')
@@ -50,21 +50,28 @@ class ArticleBusiness
       throw new ArrayException([], "Un véhicule ne peut pas être retourné dans un emplacement de cette manière");
     }
     EmplacementBusiness::assertEmplacementActif($emplacementId);
+    self::assertAucunSupprime($articleIds, "Certains articles sont supprimés et ne peuvent pas être rangés");
 
-    Article::whereIn('id', $articleIds)->update(['sapeur_id' => null, 'emplacement_id' => $emplacementId, 'retour' => $date]);
+    DB::transaction(function () use ($emplacementId, $date, $articleIds, $auteurSapeurId) {
+      foreach (Article::whereIn('id', $articleIds)->get() as $article) {
+        AttributionBusiness::cloturer($article, $date, $emplacementId, $auteurSapeurId);
+      }
+    });
+
     return Article::whereIn('id', $articleIds)->get();
   }
 
-
   /**
-   * Attribution d'articles'
-   * @param int $sapeurId
-   * @param string $date
+   * Attribution d'articles à un sapeur. Un article déjà attribué est transféré :
+   * son attribution en cours est close à la date de la nouvelle.
+   *
    * @param int[] $articleIds
-   * @return void
+   * @return Collection<int, Article>
    */
-  public static function attribuerArticles(int $sapeurId, string $date, array $articleIds): Collection
+  public static function attribuerArticles(int $sapeurId, string $date, array $articleIds, ?int $auteurSapeurId = null): Collection
   {
+    Sapeur::findOrFail($sapeurId);
+
     // Controle que les articles sont attribuable
     $nonAttribuable = Article::whereIn('articles.id', $articleIds)
       ->join('materiel_types', 'materiel_types.id', '=', 'articles.materiel_type_id')
@@ -75,17 +82,39 @@ class ArticleBusiness
     if (!$nonAttribuable->isEmpty()) {
       throw new ArrayException([$nonAttribuable], message: 'Certains articles ne sont pas attribuable');
     }
+    self::assertAucunSupprime($articleIds, "Certains articles sont supprimés et ne peuvent pas être attribués");
 
-    Article::whereIn('id', $articleIds)->update([
-      'sapeur_id' => $sapeurId,
-      'emplacement_id' => null,
-      'attribution' => $date,
-      'retour' => null,
-    ]);
+    DB::transaction(function () use ($sapeurId, $date, $articleIds, $auteurSapeurId) {
+      foreach (Article::whereIn('id', $articleIds)->get() as $article) {
+        if ($article->sapeur_id !== null) {
+          AttributionBusiness::cloturer($article, $date, null, $auteurSapeurId);
+        }
+        AttributionBusiness::ouvrir($article, $sapeurId, $date, $auteurSapeurId);
+      }
+    });
+
     return Article::whereIn('id', $articleIds)->get();
   }
 
-  public static function creerArticles(array $articles): array
+  /**
+   * @param int[] $articleIds
+   * @throws ArrayException si l'un des articles est supprimé
+   */
+  private static function assertAucunSupprime(array $articleIds, string $message): void
+  {
+    if (Article::whereIn('id', $articleIds)->whereNotNull('supprime_le')->exists()) {
+      throw new ArrayException([], $message);
+    }
+  }
+
+  /**
+   * Création d'articles ; un article créé chez un sapeur ouvre une attribution
+   * à la date `attribution`.
+   *
+   * @param array<int, array<string, mixed>> $articles
+   * @return array<int, Article>
+   */
+  public static function creerArticles(array $articles, ?int $auteurSapeurId = null): array
   {
     // fetch types equivalents
     $indexedTypes = MaterielType::all()->keyBy('id');
@@ -138,17 +167,19 @@ class ArticleBusiness
     // Controller numérotation correcte
     // Transaction : si un article du lot est invalide (ex: couleur manquante pour un
     // emplacement), aucun des articles déjà créés dans ce même lot ne doit rester en base.
-    return DB::transaction(fn() => collect($articles)->map(function ($article) use ($indexedTypes) {
+    return DB::transaction(fn() => collect($articles)->map(function ($article) use ($indexedTypes, $auteurSapeurId) {
       $type = $indexedTypes[$article['materiel_type_id']];
+      $sapeurId = $type->est_emplacement ? null : $article['sapeur_id'];
       return [
         'quantite' => $type->est_numerote ? 1 : ($article['quantite'] ?? 1),
         'materiel_type_id' => $article['materiel_type_id'],
         'taille' => $type->est_taillee ? trim($article['taille'] ?? '') : '',
         'remarque' => $article['remarque'] ?? '',
         'emplacement_id' => $type->est_emplacement ? null : $article['emplacement_id'],
-        'sapeur_id' => $type->est_emplacement ? null : $article['sapeur_id'],
-        'attribution' => $article['sapeur_id'] === null ? null : $article['attribution'],
-        'retour' => null,
+        'sapeur_id' => null,
+        'ajoute_par_sapeur_id' => $auteurSapeurId,
+        'attribution_sapeur_id' => $sapeurId,
+        'attribution' => $sapeurId === null ? null : $article['attribution'],
         'numero' => $type->est_numerote ? $article['numero'] : '',
         // 'uuid' => uniqid(), // TODO: en avons-nous vraiment besoin ? Utiliser le numéro ou le UUID pour les codebar ?
         'achat' => $article['achat'] ?? '',
@@ -163,9 +194,11 @@ class ArticleBusiness
       ];
     })->flatMap(fn($article) => array_fill(0, $article['quantite'], $article))
       ->map(fn($article) => [...$article, 'uuid' => uniqid()])
-      ->map(function ($data) use ($indexedTypes) {
+      ->map(function ($data) use ($indexedTypes, $auteurSapeurId) {
         $emplacementData = $data['emplacement'];
-        unset($data['emplacement']);
+        $attributionSapeurId = $data['attribution_sapeur_id'];
+        $attributionDate = $data['attribution'];
+        unset($data['emplacement'], $data['attribution_sapeur_id'], $data['attribution']);
 
         $type = $indexedTypes[$data['materiel_type_id']];
         if ($type->est_emplacement && ($emplacementData === null || ($emplacementData['couleur_id'] ?? null) === null)) {
@@ -175,6 +208,9 @@ class ArticleBusiness
         $created = Article::create($data);
         if ($type->est_emplacement) {
           EmplacementBusiness::createEmplacementPourArticle($created, $emplacementData);
+        }
+        if ($attributionSapeurId !== null) {
+          AttributionBusiness::ouvrir($created, (int) $attributionSapeurId, $attributionDate, $auteurSapeurId);
         }
 
         return $created->load('emplacementRepresentee');
@@ -189,10 +225,13 @@ class ArticleBusiness
 
     // Controller qu'un article appartiennent soit à un sapeur soit à un emplacement
     $articles = collect($articles)->map(function ($article) use ($indexedTypes) {
-      $article['sapeur_id'] ??= null;
-      $article['emplacement_id'] ??= null;
-
       $existant = Article::find($article['id']);
+
+      // Le détenteur ne change que par attribuer / rendre / supprimer : le sapeur
+      // reçu est ignoré, et un article attribué n'est rangé dans aucun emplacement.
+      $article['sapeur_id'] = $existant->sapeur_id;
+      $article['emplacement_id'] = $existant->sapeur_id === null ? ($article['emplacement_id'] ?? null) : null;
+      unset($article['attribution']);
       $oldType = $indexedTypes[$existant->materiel_type_id];
 
       // Le type de matériel d'un article est verrouillé, sauf pour un article qui est
@@ -260,9 +299,6 @@ class ArticleBusiness
         'taille' => $type->est_taillee ? trim($article['taille'] ?? '') : '',
         'remarque' => $article['remarque'] ?? '',
         'emplacement_id' => $type->est_emplacement ? null : $article['emplacement_id'],
-        'sapeur_id' => $type->est_emplacement ? null : $article['sapeur_id'],
-        'attribution' => $article['sapeur_id'] === null ? null : $article['attribution'],
-        'retour' => null,
         'numero' => $type->est_numerote ? $article['numero'] : '',
         'achat' => $article['achat'] ?? '',
         'compartiment' => $article['compartiment'] ?? '',

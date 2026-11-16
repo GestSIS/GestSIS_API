@@ -9,6 +9,7 @@ use App\Domaine\Exceptions\ArrayException;
 use App\Domaine\Exceptions\NotReportableException;
 use App\Domaine\Business\Materiel\ArticleBusiness;
 use App\Models\Article;
+use App\Models\ArticleAttribution;
 use App\Models\ControleMedical;
 use App\Models\CoursSapeur;
 use App\Models\Ecriture;
@@ -355,8 +356,8 @@ class SapeurBusiness
             throw new NotReportableException([], "Impossible de supprimer un sapeur lié à une écriture comptable");
         }
 
-        if (Article::where('sapeur_id', $sapeurId)->exists()) {
-            throw new NotReportableException([], "Impossible de supprimer un sapeur possédant du matériel personnel non rendu");
+        if (ArticleAttribution::where('sapeur_id', $sapeurId)->exists()) {
+            throw new NotReportableException([], "Impossible de supprimer un sapeur ayant eu du matériel attribué, désactivez-le plutôt");
         }
 
         if (Intervention::where('sapeur_id', $sapeurId)->exists()) {

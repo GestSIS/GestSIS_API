@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\Materiel\ArticleBusiness;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -21,19 +22,22 @@ class ArticleSapeurController extends Controller
     }
 
     /**
-     * Attribution de matériel à un sapeur
-     *
-     * @return \Illuminate\Http\Response
+     * Attribution de matériel à un sapeur (transfert si l'article est déjà attribué)
      */
-    public function store(Request $request, int $sapeurId)
+    public function store(Request $request, int $sapeurId): JsonResponse
     {
         $data = $request->validate([
-            'date' => 'required|date',
+            'date' => 'required|date|before_or_equal:today',
             'articleIds' => 'required|array',
             'articleIds.*' => 'integer|min:1',
         ]);
 
-        $articles = ArticleBusiness::attribuerArticles($sapeurId, $data['date'], $data['articleIds']);
+        $articles = ArticleBusiness::attribuerArticles(
+            $sapeurId,
+            $data['date'],
+            $data['articleIds'],
+            $request->attributes->get('sapeurId'),
+        );
 
         return response()->json(['data' => $articles], 201);
     }
@@ -46,13 +50,18 @@ class ArticleSapeurController extends Controller
     public function destroy(Request $request)
     {
         $data = $request->validate([
-            'date' => 'required|date|required',
+            'date' => 'required|date|before_or_equal:today',
             'emplacementId' => 'integer|min:1|required',
             'articleIds' => 'array|required',
             'articleIds.*' => 'integer|min:1',
         ]);
 
-        $articles = ArticleBusiness::retourArticles($data['emplacementId'], $data['date'], $data['articleIds']);
+        $articles = ArticleBusiness::retourArticles(
+            $data['emplacementId'],
+            $data['date'],
+            $data['articleIds'],
+            $request->attributes->get('sapeurId'),
+        );
 
         return response()->json(null, 204);
     }

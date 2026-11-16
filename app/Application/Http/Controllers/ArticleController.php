@@ -50,7 +50,7 @@ class ArticleController extends Controller
             'articles.*.est_etiquete' => 'boolean',
             'articles.*.achat' => 'string|nullable',
             'articles.*.sapeur_id' => 'integer|nullable|exists:sapeurs,id',
-            'articles.*.attribution' => 'date|nullable|required_with:articles.*.sapeur_id',
+            'articles.*.attribution' => 'date|nullable|before_or_equal:today|required_with:articles.*.sapeur_id',
             'articles.*.emplacement_id' => 'integer|nullable|exists:emplacements,id',
             'articles.*.compartiment' => 'string|nullable',
             'articles.*.chassis' => 'string|nullable',
@@ -64,7 +64,7 @@ class ArticleController extends Controller
             'articles.*.emplacement.statut' => 'boolean|nullable',
         ]);
 
-        $materiels = ArticleBusiness::creerArticles($data['articles']);
+        $materiels = ArticleBusiness::creerArticles($data['articles'], $request->attributes->get('sapeurId'));
         return response()->json(['data' => $materiels]);
     }
 
@@ -82,8 +82,6 @@ class ArticleController extends Controller
             'articles.*.numero' => 'string|nullable',
             'articles.*.est_etiquete' => 'boolean',
             'articles.*.achat' => 'string|nullable',
-            'articles.*.sapeur_id' => 'integer|nullable|exists:sapeurs,id',
-            'articles.*.attribution' => 'date|nullable|required_with:articles.*.sapeur_id',
             'articles.*.emplacement_id' => 'integer|nullable|exists:emplacements,id',
             'articles.*.compartiment' => 'string|nullable',
             'articles.*.chassis' => 'string|nullable',

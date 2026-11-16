@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\Materiel\ArticleBusiness;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -22,18 +23,21 @@ class ArticleEmplacementController extends Controller
 
     /**
      * Attribution de matériel à un emplacement, équivalent à du retour de matériel
-     *
-     * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, int $emplacementId)
+    public function store(Request $request, int $emplacementId): JsonResponse
     {
         $data = $request->validate([
-            'date' => 'required|date',
+            'date' => 'required|date|before_or_equal:today',
             'articleIds' => 'required|array',
             'articleIds.*' => 'integer|min:1',
         ]);
 
-        $articles = ArticleBusiness::retourArticles($emplacementId, $data['date'], $data['articleIds']);
+        $articles = ArticleBusiness::retourArticles(
+            $emplacementId,
+            $data['date'],
+            $data['articleIds'],
+            $request->attributes->get('sapeurId'),
+        );
 
         return response()->json(['data' => $articles], 201);
     }

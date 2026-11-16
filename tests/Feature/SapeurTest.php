@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\ArticleAttribution;
 use App\Models\Localite;
 use App\Models\Sapeur;
 use App\Models\SapeurTelephone;
@@ -319,6 +320,25 @@ class SapeurTest extends TestCase
         // Verify the sapeur was actually deleted
         $getResponse = $this->json('GET', '/api/v2/sapeurs/' . $sapeur->id);
         $getResponse->assertStatus(404);
+    }
+
+    public function testSupprimerSapeurAyantEuDuMaterielEstRefuse()
+    {
+        $sapeur = Sapeur::factory()->create([
+            'localite_id' => $this->localiteId,
+        ]);
+        // Attribution close : le matériel a été rendu, mais l'historique doit être conservé
+        ArticleAttribution::factory()->create([
+            'sapeur_id' => $sapeur->id,
+            'debut' => '2026-01-01',
+            'fin' => '2026-02-01',
+        ]);
+
+        $this->json('DELETE', '/api/v2/sapeurs/' . $sapeur->id)
+            ->assertStatus(422)
+            ->assertJson(['message' => 'Impossible de supprimer un sapeur ayant eu du matériel attribué, désactivez-le plutôt']);
+
+        $this->assertDatabaseHas('sapeurs', ['id' => $sapeur->id]);
     }
 
     public function testDestroySapeurReturnsErrorWhenNotFound()
