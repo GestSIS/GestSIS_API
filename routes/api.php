@@ -402,6 +402,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
     Route::group(['middleware' => 'jwtTokenRole:exercice.modification'], function () {
         Route::apiResource('exercices', ExerciceController::class)->only(['store', 'update']);
+        Route::post('exercices/import', [ExerciceController::class, 'import'])->name('api.v2.exercices.import');
         Route::apiResource('convocation-param', ConvocationParamController::class)->only(['store']);
         Route::get('sapeurs-convocation', [SapeurController::class, 'convocationSms'])->name('sapeurs-convocation');
     });

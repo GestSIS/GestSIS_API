@@ -94,6 +94,21 @@ class ExerciceBusiness
         return $exercice;
     }
 
+    /**
+     * Importe plusieurs exercices dans un exercice comptable, en tout ou rien :
+     * une seule requête (donc une seule connexion à la base) au lieu d'un POST par exercice.
+     *
+     * @param array<int, array<string, mixed>> $exercices
+     * @return array<int, Exercice>
+     */
+    public static function importExercices(int $exerciceComptableId, array $exercices): array
+    {
+        return DB::transaction(fn (): array => array_map(
+            fn (array $data): Exercice => self::createExercice([...$data, 'exercice_comptable_id' => $exerciceComptableId]),
+            $exercices,
+        ));
+    }
+
     private static function updateExerciceById($exerciceId, $data)
     {
         // Ne remplace que les valeurs null explicites : une mise à jour partielle (ex. statut) ne doit pas effacer ces champs

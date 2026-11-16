@@ -111,6 +111,45 @@ class ExerciceTest extends TestCase
         ]);
     }
 
+    public function testImportExercicesCreatesAllInOneRequest()
+    {
+        $source = Exercice::factory()->make();
+        $exercices = [
+            Exercice::factory()->make(['designation' => 'Import A'])->toArray(),
+            Exercice::factory()->make(['designation' => 'Import B', 'lieu' => null])->toArray(),
+        ];
+
+        $response = $this->json('POST', '/api/v2/exercices/import', [
+            'exercice_comptable_id' => $source->exercice_comptable_id,
+            'exercices' => $exercices,
+        ]);
+
+        $response->assertStatus(201)->assertJsonCount(2, 'data');
+        foreach (['Import A', 'Import B'] as $designation) {
+            $this->assertDatabaseHas('exercices', [
+                'designation' => $designation,
+                'exercice_comptable_id' => $source->exercice_comptable_id,
+            ]);
+        }
+    }
+
+    public function testImportExercicesCreatesNothingWhenOneIsInvalid()
+    {
+        $source = Exercice::factory()->make();
+        $exercices = [
+            Exercice::factory()->make(['designation' => 'Import valide'])->toArray(),
+            Exercice::factory()->make(['designation' => 'Import invalide', 'heure' => 'pas une heure'])->toArray(),
+        ];
+
+        $response = $this->json('POST', '/api/v2/exercices/import', [
+            'exercice_comptable_id' => $source->exercice_comptable_id,
+            'exercices' => $exercices,
+        ]);
+
+        $response->assertStatus(422)->assertJsonValidationErrors(['exercices.1.heure']);
+        $this->assertDatabaseMissing('exercices', ['designation' => 'Import valide']);
+    }
+
     /**
      * Test update exercice successfully
      */

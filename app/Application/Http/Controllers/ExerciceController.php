@@ -121,6 +121,25 @@ class ExerciceController extends Controller
         return response()->json(['data' => $exercice], 201);
     }
 
+    public function import(Request $request)
+    {
+        $data = $request->validate([
+            'exercice_comptable_id' => 'integer|exists:exercice_comptables,id|required',
+            'exercices' => 'array|min:1|max:500|required',
+            'exercices.*.date' => 'date|required',
+            'exercices.*.heure' => 'date_format:H:i|required',
+            'exercices.*.lieu' => 'string|nullable',
+            'exercices.*.designation' => 'string|required',
+            'exercices.*.communications' => 'string|nullable',
+            'exercices.*.duree' => 'integer|min:1|max:780|required',
+            'exercices.*.exercice_categorie_id' => 'integer|exists:exercice_categories,id|required',
+            'exercices.*.localite_id' => 'integer|exists:localites,id|required',
+        ]);
+
+        $exercices = ExerciceBusiness::importExercices($data['exercice_comptable_id'], $data['exercices']);
+        return response()->json(['data' => $exercices], 201);
+    }
+
     public function show(int $id)
     {
         $exercice = Exercice::with(['sapeurs'])->findOrFail($id);
