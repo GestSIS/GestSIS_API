@@ -30,7 +30,7 @@
         ..compte.ecritures.map(ecriture => (
           [#formatDate(ecriture.date)],
           [#ecriture.designation],
-          [#ecriture.sapeur_id],
+          [#if ecriture.sapeur_id != none { sapeurs.at(str(ecriture.sapeur_id), default: "-") } else [-]],
           [#ecriture.total],
           {
             if ecriture.decompte_id != none {
