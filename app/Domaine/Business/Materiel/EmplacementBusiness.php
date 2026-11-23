@@ -98,6 +98,25 @@ class EmplacementBusiness
   }
 
   /**
+   * Ids des ancêtres de l'emplacement $id (parent, grand-parent…), sans $id lui-même.
+   * Protégé contre un cycle éventuel dans les parent_id.
+   * @return int[]
+   */
+  public static function ancestorIds(int $id): array
+  {
+    $parentById = Emplacement::all(['id', 'parent_id'])->pluck('parent_id', 'id');
+
+    $ids = [];
+    $currentId = $parentById->get($id);
+    while ($currentId !== null && !in_array($currentId, $ids, true) && $currentId !== $id) {
+      $ids[] = $currentId;
+      $currentId = $parentById->get($currentId);
+    }
+
+    return $ids;
+  }
+
+  /**
    * Vérifie qu'attribuer $newParentId comme parent de l'emplacement $id ne créerait
    * pas de cycle dans la hiérarchie (un emplacement ne peut pas être son propre
    * ancêtre, directement ou via une chaîne de parent_id).

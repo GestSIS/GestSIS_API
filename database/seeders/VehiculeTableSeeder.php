@@ -4,50 +4,64 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class VehiculeTableSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Un véhicule (ou une remorque) est un article dont le type est un emplacement : il n'est
+     * rangé nulle part lui-même, sa position est le parent_id de l'emplacement qu'il représente.
      *
-     * @return void
+     * Crée un article par véhicule, dans l'ordre de la liste (articles 1, 2, 3… : tonne-pompe,
+     * véhicule PR, véhicule hydrocarbures…), et le relie à son emplacement.
+     *
+     * @var array<int, string> id de l'emplacement (EmplacementTableSeeder) => type du véhicule
      */
+    private const VEHICULES = [
+        6 => 'Fourgon Tonne-Pompe',
+        7 => 'Véhicule Protection Respiratoire',
+        8 => 'Véhicule Hydrocarbures',
+        9 => 'Remorque Tonne-Pompe',
+        10 => 'Echelle Remorquable',
+        11 => 'Remorque motopompe type 1',
+        12 => 'Remorque hydrocarbures',
+        13 => 'Remorque inondation',
+        14 => 'Remorque tuyaux',
+        15 => 'Remorque mousse',
+        16 => 'Remorque de transport',
+        18 => 'Véhicule Première Intervention',
+        19 => 'Remorque échelles',
+        20 => 'Remorque motopompe type 2',
+        21 => 'Remorque inondation',
+        23 => 'Véhicule Première Intervention',
+        24 => 'Remorque échelles',
+        25 => 'Remorque motopompe type 2',
+        26 => 'Etagère inondation',
+        28 => 'Remorque Première Intervention',
+        29 => 'Remorque échelles',
+        30 => 'Remorque motopompe type 1',
+        31 => 'Remorque inondation',
+    ];
+
     public function run(): void
     {
-        // Un véhicule est aussi un emplacement (est_emplacement) : il ne se range plus
-        // lui-même dans un emplacement, sa position est portée par le parent_id de
-        // l'emplacement qu'il représente (cf. ci-dessous).
-        DB::table('articles')->insert([
-            ['id' => 1, 'materiel_type_id' => 18, 'numero' => 'JU 1', 'designation' => 'Tonne-Pompe', 'emplacement_id' => null, 'uuid' => uniqid()],
-            ['id' => 2, 'materiel_type_id' => 19, 'numero' => 'JU 2', 'designation' => 'VPM', 'emplacement_id' => null, 'uuid' => uniqid()],
-            ['id' => 3, 'materiel_type_id' => 20, 'numero' => 'JU 3', 'designation' => 'Iveco', 'emplacement_id' => null, 'uuid' => uniqid()],
-            ['id' => 4, 'materiel_type_id' => 20, 'numero' => 'JU 4', 'designation' => 'Mowag', 'emplacement_id' => null, 'uuid' => uniqid()],
-            ['id' => 5, 'materiel_type_id' => 21, 'numero' => 'JU 5', 'designation' => 'VPI (Glovelier)', 'emplacement_id' => null, 'uuid' => uniqid()],
-            ['id' => 6, 'materiel_type_id' => 20, 'numero' => 'JU 6', 'designation' => 'Jeep', 'emplacement_id' => null, 'uuid' => uniqid()],
-            ['id' => 7, 'materiel_type_id' => 21, 'numero' => 'JU 7', 'designation' => 'VPI (Coufaivre)', 'emplacement_id' => null, 'uuid' => uniqid()],
-            ['id' => 8, 'materiel_type_id' => 20, 'numero' => 'JU 8', 'designation' => 'Transport (Glovelier)', 'emplacement_id' => null, 'uuid' => uniqid()],
-        ]);
-
-        // Relie chaque véhicule à l'emplacement (créé par EmplacementTableSeeder) qui
-        // le représentait jusqu'ici par simple convention de nommage, sans lien en
-        // base ; on aligne au passage sa désignation sur celle de l'article, qui en
-        // est désormais la source de vérité.
-        $emplacementParArticle = [
-            1 => 5,  // Tonne-Pompe
-            2 => 6,  // VPM
-            3 => 7,  // Iveco
-            4 => 8,  // Mowag
-            5 => 11, // VPI (Glovelier)
-            6 => 10, // Jeep
-            7 => 9,  // VPI (Coufaivre)
-            8 => 12, // Transport (Glovelier)
-        ];
-
-        foreach ($emplacementParArticle as $articleId => $emplacementId) {
-            DB::table('emplacements')->where('id', $emplacementId)->update([
-                'article_id' => $articleId,
-                'designation' => DB::table('articles')->where('id', $articleId)->value('designation'),
+        $articleId = 0;
+        foreach (self::VEHICULES as $emplacementId => $typeDesignation) {
+            $articleId++;
+            DB::table('articles')->insert([
+                'id' => $articleId,
+                'materiel_type_id' => DB::table('materiel_types')
+                    ->where('designation', $typeDesignation)
+                    ->where('est_emplacement', true)
+                    ->soleValue('id'),
+                'numero' => "JU {$articleId}",
+                'designation' => DB::table('emplacements')->where('id', $emplacementId)->value('designation'),
+                'emplacement_id' => null,
+                'uuid' => (string) Str::uuid(),
+                'created_at' => '2025-01-01',
             ]);
+
+            DB::table('emplacements')->where('id', $emplacementId)->update(['article_id' => $articleId]);
         }
     }
 }

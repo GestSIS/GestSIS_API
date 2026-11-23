@@ -33,6 +33,14 @@ class RoutePermissionsTest extends TestCase
         $this->assertContains('jwtTokenRole:exercice.modification', $this->middlewaresPour('POST', '/api/v2/convocation-param'));
     }
 
+    public function testLaListeDesSapeursEstOuverteALInventaire(): void
+    {
+        // L'écran d'inventaire affiche qui l'a démarré, validé et qui a traité les écarts.
+        $middlewares = implode(' ', $this->middlewaresPour('GET', '/api/v2/sapeurs'));
+
+        $this->assertStringContainsString('materiel.inventaire', $middlewares);
+    }
+
     public function testGetTravauxSansExerciceComptableNExistePas(): void
     {
         // Seul POST travaux (création) existe à cette URL : la liste passe par

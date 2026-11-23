@@ -11,8 +11,8 @@ class ControleTableSeeder extends Seeder
      * Run the database seeds.
      *
      * Suppose MaterielTypeTableSeeder, ArticleTableSeeder, VehiculeTableSeeder et
-     * SapeursTableSeeder déjà joués : les véhicules (materiel_type_id 18-22) ont les id
-     * d'article 1 à 8, les types Dräger sont les materiel_type_id 23 à 25, et le sapeur 2
+     * SapeursTableSeeder déjà joués : les types sont retrouvés par désignation, les articles
+     * 1 à 3 sont la tonne-pompe, le véhicule PR et le véhicule hydrocarbures, et le sapeur 2
      * existe (utilisé par ailleurs comme sapeur de référence pour les seeders de démo).
      *
      * Les contrôles 4 à 6 reprennent les feuilles de contrôle Dräger Schweiz (édition
@@ -22,6 +22,8 @@ class ControleTableSeeder extends Seeder
     public function run(): void
     {
         $sapeurId = 2;
+        $typeId = fn (string $designation): int => DB::table('materiel_types')->where('designation', $designation)->soleValue('id');
+        $vehicules = ['Fourgon Tonne-Pompe', 'Véhicule Première Intervention', 'Véhicule Protection Respiratoire', 'Véhicule Hydrocarbures'];
 
         DB::table('controles')->insert([
             ['id' => 1, 'nom' => 'Contrôle technique véhicule', 'description' => 'Contrôle technique effectué par le garage partenaire.', 'recurrence_type' => 'PERIODIQUE', 'recurrence_value' => 6, 'duree_preavis' => 1, 'nb_execution_max' => null, 'nb_execution_preavis' => null, 'externe' => true, 'reparateur' => 'Garage Girardin', 'created_at' => now(), 'updated_at' => now()],
@@ -66,26 +68,25 @@ class ControleTableSeeder extends Seeder
         ]);
 
         DB::table('controle_tache_materiel_types')->insert([
-            ['controle_tache_id' => 16, 'materiel_type_id' => 24, 'created_at' => now(), 'updated_at' => now()],
-            ['controle_tache_id' => 22, 'materiel_type_id' => 23, 'created_at' => now(), 'updated_at' => now()],
+            ['controle_tache_id' => 16, 'materiel_type_id' => $typeId('Soupape à la demande Dräger'), 'created_at' => now(), 'updated_at' => now()],
+            ['controle_tache_id' => 22, 'materiel_type_id' => $typeId('Masque Dräger'), 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        DB::table('controle_materiel_types')->insert([
-            ['controle_id' => 1, 'materiel_type_id' => 18, 'created_at' => now(), 'updated_at' => now()],
-            ['controle_id' => 1, 'materiel_type_id' => 19, 'created_at' => now(), 'updated_at' => now()],
-            ['controle_id' => 1, 'materiel_type_id' => 20, 'created_at' => now(), 'updated_at' => now()],
-            ['controle_id' => 1, 'materiel_type_id' => 21, 'created_at' => now(), 'updated_at' => now()],
-            ['controle_id' => 2, 'materiel_type_id' => 2, 'created_at' => now(), 'updated_at' => now()],
-            ['controle_id' => 2, 'materiel_type_id' => 4, 'created_at' => now(), 'updated_at' => now()],
-            ['controle_id' => 3, 'materiel_type_id' => 18, 'created_at' => now(), 'updated_at' => now()],
-            ['controle_id' => 3, 'materiel_type_id' => 19, 'created_at' => now(), 'updated_at' => now()],
-            ['controle_id' => 3, 'materiel_type_id' => 20, 'created_at' => now(), 'updated_at' => now()],
-            ['controle_id' => 3, 'materiel_type_id' => 21, 'created_at' => now(), 'updated_at' => now()],
-            ['controle_id' => 3, 'materiel_type_id' => 22, 'created_at' => now(), 'updated_at' => now()],
-            ['controle_id' => 4, 'materiel_type_id' => 23, 'created_at' => now(), 'updated_at' => now()],
-            ['controle_id' => 5, 'materiel_type_id' => 24, 'created_at' => now(), 'updated_at' => now()],
-            ['controle_id' => 6, 'materiel_type_id' => 25, 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        $controleTypes = [
+            ...array_map(fn (string $vehicule): array => [1, $typeId($vehicule)], $vehicules),
+            [2, 2],
+            [2, 4],
+            ...array_map(fn (string $vehicule): array => [3, $typeId($vehicule)], $vehicules),
+            [4, $typeId('Masque Dräger')],
+            [5, $typeId('Soupape à la demande Dräger')],
+            [6, $typeId('Appareil à air comprimé Dräger')],
+        ];
+        DB::table('controle_materiel_types')->insert(array_map(fn (array $lien): array => [
+            'controle_id' => $lien[0],
+            'materiel_type_id' => $lien[1],
+            'created_at' => now(),
+            'updated_at' => now(),
+        ], $controleTypes));
 
         DB::table('controle_execs')->insert([
             ['id' => 1, 'controle_id' => 1, 'article_id' => 1, 'executed_at' => now()->subMonths(7), 'date_echeance' => now()->subMonths(7)->addMonths(6), 'executed_by' => $sapeurId, 'trigger_type' => 'PERIODIQUE', 'remarque_globale' => null, 'created_at' => now(), 'updated_at' => now()],
@@ -97,10 +98,10 @@ class ControleTableSeeder extends Seeder
             // Contrôle technique véhicule, article 1 (Tonne-Pompe) : conforme
             ['controle_exec_id' => 1, 'tache_id' => 1, 'task_order_snapshot' => 1, 'nom_snapshot' => 'Niveau des fluides', 'type_snapshot' => 'BOOLEAN', 'unit_snapshot' => null, 'statut' => 'OK', 'value_measured' => null, 'value_min_snapshot' => null, 'value_max_snapshot' => null, 'value_in_range' => null, 'remarque' => null, 'created_at' => now(), 'updated_at' => now()],
             ['controle_exec_id' => 1, 'tache_id' => 2, 'task_order_snapshot' => 2, 'nom_snapshot' => 'Pression pneus', 'type_snapshot' => 'NUMERIC', 'unit_snapshot' => 'bar', 'statut' => null, 'value_measured' => 2.5, 'value_min_snapshot' => 2, 'value_max_snapshot' => 3, 'value_in_range' => true, 'remarque' => null, 'created_at' => now(), 'updated_at' => now()],
-            // Contrôle technique véhicule, article 2 (VPM) : pression insuffisante
+            // Contrôle technique véhicule, article 2 (véhicule PR) : pression insuffisante
             ['controle_exec_id' => 2, 'tache_id' => 1, 'task_order_snapshot' => 1, 'nom_snapshot' => 'Niveau des fluides', 'type_snapshot' => 'BOOLEAN', 'unit_snapshot' => null, 'statut' => 'OK', 'value_measured' => null, 'value_min_snapshot' => null, 'value_max_snapshot' => null, 'value_in_range' => null, 'remarque' => null, 'created_at' => now(), 'updated_at' => now()],
             ['controle_exec_id' => 2, 'tache_id' => 2, 'task_order_snapshot' => 2, 'nom_snapshot' => 'Pression pneus', 'type_snapshot' => 'NUMERIC', 'unit_snapshot' => 'bar', 'statut' => null, 'value_measured' => 1.8, 'value_min_snapshot' => 2, 'value_max_snapshot' => 3, 'value_in_range' => false, 'remarque' => 'Pression insuffisante, à regonfler', 'created_at' => now(), 'updated_at' => now()],
-            // Contrôle technique véhicule, article 3 (Iveco) : conforme
+            // Contrôle technique véhicule, article 3 (véhicule hydrocarbures) : conforme
             ['controle_exec_id' => 3, 'tache_id' => 1, 'task_order_snapshot' => 1, 'nom_snapshot' => 'Niveau des fluides', 'type_snapshot' => 'BOOLEAN', 'unit_snapshot' => null, 'statut' => 'OK', 'value_measured' => null, 'value_min_snapshot' => null, 'value_max_snapshot' => null, 'value_in_range' => null, 'remarque' => null, 'created_at' => now(), 'updated_at' => now()],
             ['controle_exec_id' => 3, 'tache_id' => 2, 'task_order_snapshot' => 2, 'nom_snapshot' => 'Pression pneus', 'type_snapshot' => 'NUMERIC', 'unit_snapshot' => 'bar', 'statut' => null, 'value_measured' => 2.4, 'value_min_snapshot' => 2, 'value_max_snapshot' => 3, 'value_in_range' => true, 'remarque' => null, 'created_at' => now(), 'updated_at' => now()],
         ]);

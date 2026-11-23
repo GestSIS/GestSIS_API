@@ -85,6 +85,9 @@ use App\Application\Http\Controllers\InterventionSapeursController;
 use App\Application\Http\Controllers\InterventionStatistiqueController;
 use App\Application\Http\Controllers\InterventionTraitementController;
 use App\Application\Http\Controllers\InterventionVehiculesController;
+use App\Application\Http\Controllers\InventaireController;
+use App\Application\Http\Controllers\InventaireEcartController;
+use App\Application\Http\Controllers\InventaireLigneController;
 use App\Application\Http\Controllers\JustificatifController;
 use App\Application\Http\Controllers\LocaliteController;
 use App\Application\Http\Controllers\LocaliteSisController;
@@ -262,7 +265,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Sapeurs
-    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,exercice.lecture,intervention.lecture,organisation.modification,comptabilite.lecture,cours.lecture,materiel.lecture,fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation,fiche_travail.lecture'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,exercice.lecture,intervention.lecture,organisation.modification,comptabilite.lecture,cours.lecture,materiel.lecture,materiel.inventaire,fiche_travail.saisie_perso,fiche_travail.saisie_commune,fiche_travail.validation,fiche_travail.lecture'], function () {
         Route::apiResource('sapeurs', SapeurController::class)->only(['index']);
 
         Route::get('statistiques/{id}/civilite', [SapeurStatistiqueController::class, 'civilite']);
@@ -293,7 +296,7 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('sapeurs/{id}/interventions/{exerciceComptableId}', [SapeurInterventionController::class, 'index']);
     });
 
-    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,materiel.lecture'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,materiel.lecture,materiel.inventaire'], function () {
         Route::apiResource('sapeurs.articles', ArticleSapeurController::class)->only(['index']);
         Route::get('sapeurs/{sapeurId}/liste-articles', [ArticleSapeurController::class, 'pdf']);
         Route::get('articles/{articleId}/attributions', [AttributionController::class, 'indexPourArticle']);
@@ -702,11 +705,11 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
     });
 
     // Matériel
-    Route::group(['middleware' => 'jwtTokenSapeurOrRole:materiel.lecture'], function () {
+    Route::group(['middleware' => 'jwtTokenSapeurOrRole:materiel.lecture,materiel.inventaire'], function () {
         Route::apiResource('materiel-types', MaterielTypeController::class)->only(['index']);
     });
 
-    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,materiel.lecture'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,materiel.lecture,materiel.inventaire'], function () {
         Route::apiResource('materiel-categories', MaterielCategorieController::class)->only(['index']);
         Route::apiResource('couleurs', CouleurController::class)->only(['index']);
     });
@@ -721,7 +724,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::get('articles/a-recuperer', [ArticleController::class, 'aRecuperer']);
         Route::apiResource('articles', ArticleController::class)->only(['index']);
 
-        Route::apiResource('emplacements', EmplacementController::class)->only(['index']);
         Route::apiResource('emplacements.articles', ArticleEmplacementController::class)->only(['index']);
     });
 
@@ -762,10 +764,36 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
 
     // Historique des contrôles d'un article, affiché dans ModalArticleInfo
     // (aussi ouverte depuis la fiche d'un sapeur, avec sapeur.lecture).
-    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,materiel.lecture'], function () {
+    Route::group(['middleware' => 'jwtTokenRole:sapeur.lecture,materiel.lecture,materiel.inventaire'], function () {
         Route::apiResource('controles', ControleController::class)->only(['index', 'show']);
         Route::get('articles/{article}/controle-execs', [ControleExecController::class, 'indexForArticle']);
         Route::get('articles/{article}/controle-composants', [ControleExecController::class, 'composantsForArticle']);
+    });
+
+    Route::group(['middleware' => 'jwtTokenRole:materiel.lecture,materiel.inventaire'], function () {
+        // L'arbre des emplacements sert aussi à l'inventaire (étiquettes, chemins)
+        Route::apiResource('emplacements', EmplacementController::class)->only(['index']);
+        // Consultation des inventaires (liste et détail)
+        Route::apiResource('inventaires', InventaireController::class)->only(['index', 'show']);
+        // Écarts d'un inventaire validé, comparés au stock actuel
+        Route::get('inventaires/{inventaire}/ecarts', [InventaireEcartController::class, 'index']);
+    });
+
+    Route::group(['middleware' => 'jwtTokenRole:materiel.inventaire'], function () {
+        // Démarrage sur un emplacement et ses sous-emplacements, ou abandon d'un inventaire en cours
+        Route::apiResource('inventaires', InventaireController::class)->only(['store', 'destroy']);
+        // Saisie : pièces vérifiées, matériel en plus, lots comptés, nœud conforme
+        Route::apiResource('inventaires.lignes', InventaireLigneController::class)->only(['store', 'update', 'destroy']);
+        Route::get('inventaires/{inventaire}/article-par-numero', [InventaireLigneController::class, 'articleParNumero']);
+        Route::put('inventaires/{inventaire}/lots/{ligne}', [InventaireLigneController::class, 'compterLot']);
+        Route::post('inventaires/{inventaire}/emplacements/{emplacement}/conformes', [InventaireLigneController::class, 'marquerConformes']);
+        // Validation : la saisie est terminée, l'inventaire n'est plus en cours
+        Route::post('inventaires/{id}/valider', [InventaireController::class, 'valider'])->name('api.v2.inventaires.valider');
+    });
+
+    Route::group(['middleware' => 'jwtTokenRole:materiel.modification'], function () {
+        // Traitement d'un écart d'inventaire validé : décision définitive, appliquée au stock
+        Route::post('inventaires/{inventaire}/ecarts/traiter', [InventaireEcartController::class, 'traiter']);
     });
 
     Route::group(['middleware' => 'jwtTokenRole:materiel.controle'], function () {
