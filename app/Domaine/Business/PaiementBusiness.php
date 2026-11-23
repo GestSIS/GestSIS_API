@@ -811,6 +811,10 @@ class PaiementBusiness
             ->orderBy('ecritures.heure')
             ->get();
 
+        if ($ecritures->isEmpty()) {
+            throw new ArrayException([], "Aucun frais décompté pour ce sapeur sur cet exercice comptable : le résumé ne reprend que les écritures incluses dans un décompte.");
+        }
+
         return self::printResumeSapeur($exerciceComptableId, $ecritures, $sisKey);
     }
 
@@ -838,6 +842,10 @@ class PaiementBusiness
             ->orderBy('ecritures.date')
             ->orderBy('ecritures.heure')
             ->get();
+
+        if ($ecritures->isEmpty()) {
+            throw new ArrayException([], "Aucun frais décompté sur cet exercice comptable : le résumé ne reprend que les écritures incluses dans un décompte.");
+        }
 
         return self::printResumeSapeur($exerciceComptableId, $ecritures, $sisKey);
     }
