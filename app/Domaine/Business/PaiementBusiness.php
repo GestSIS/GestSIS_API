@@ -756,6 +756,10 @@ class PaiementBusiness
             ->orderBy('ecritures.heure')
             ->get();
 
+        if ($ecritures->isEmpty()) {
+            throw new ArrayException([], "Aucune écriture pour ce sapeur dans ce décompte.");
+        }
+
         return self::printDecompteSapeur($decompteId, $ecritures, $sisKey, false);
     }
 
@@ -782,6 +786,10 @@ class PaiementBusiness
             ->orderBy('ecritures.date')
             ->orderBy('ecritures.heure')
             ->get();
+
+        if ($ecritures->isEmpty()) {
+            throw new ArrayException([], "Aucune écriture dans ce décompte.");
+        }
 
         return self::printDecompteSapeur($decompteId, $ecritures, $sisKey, true);
     }

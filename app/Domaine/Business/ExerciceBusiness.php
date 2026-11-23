@@ -756,6 +756,9 @@ class ExerciceBusiness
             $sapeurs = array_intersect($sapeurs, $sapeurIds);
         }
         $sapeurs = Sapeur::whereIn('id', $sapeurs)->orderBy('nom')->orderBy('prenom')->get(['id', 'nom', 'prenom', 'civilite_id', 'no_rue', 'rue', 'localite_id']);
+        if ($sapeurs->isEmpty()) {
+            throw new ArrayException([], "Aucun sapeur convoqué à un exercice de cet exercice comptable.");
+        }
 
         $civilitesMap = [];
         $localitesMap = [];
