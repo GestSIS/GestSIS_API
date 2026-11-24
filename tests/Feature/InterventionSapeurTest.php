@@ -163,7 +163,7 @@ class InterventionSapeurTest extends TestCase
         );
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/sapeurs', ['sapeurs' => $ids]);
 
-        $response->assertStatus(204);
+        $response->assertStatus(200)->assertJsonStructure(['data']);
     }
 
     /**
@@ -196,7 +196,7 @@ class InterventionSapeurTest extends TestCase
         );
         $response = $this->json('DELETE', '/api/v2/interventions/' . $this->interventionId . '/sapeurs', ['sapeurs' => [$ids[0]]]);
 
-        $response->assertStatus(204);
+        $response->assertStatus(200)->assertJsonStructure(['data']);
     }
 
 

@@ -56,7 +56,7 @@ class InterventionSapeursController extends Controller
         ]);
 
         $statut = InterventionBusiness::removePresences($interventionId, $data['sapeurs']);
-        return response()->json(null, 204);
+        return response()->json(['data' => $statut]);
     }
 
     public function stat(int $exerciceComptableId)

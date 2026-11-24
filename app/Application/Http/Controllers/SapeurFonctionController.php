@@ -68,7 +68,7 @@ class SapeurFonctionController extends Controller
         }
 
         $res = SapeurBusiness::removeFonction($sapeurId, $fonctionId);
-        return response()->json(null, 204);
+        return response()->json(['data' => $res]);
     }
 
     public function fin(Request $request, int $sapeurId)

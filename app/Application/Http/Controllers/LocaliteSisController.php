@@ -32,6 +32,6 @@ class LocaliteSisController extends Controller
         ]);
 
         $localites = SisParamBusiness::supprimerLocalitesSis($data);
-        return response()->json(null, 204);
+        return response()->json(['data' => $localites]);
     }
 }

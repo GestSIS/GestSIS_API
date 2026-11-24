@@ -67,6 +67,6 @@ class SapeurGradeController extends Controller
         }
 
         $res = SapeurBusiness::removeGrade($sapeurId, $gradeId);
-        return response()->json(null, 204);
+        return response()->json(['data' => $res]);
     }
 }
