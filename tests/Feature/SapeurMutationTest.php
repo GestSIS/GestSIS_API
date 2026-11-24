@@ -2,8 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Domaine\Business\SapeurBusiness;
+use App\Domaine\Business\TravauxParamBusiness;
+use App\Models\Ecriture;
+use App\Models\ExerciceSapeur;
+use App\Models\Intervention;
+use App\Models\InterventionSapeur;
 use App\Models\Localite;
+use App\Models\Mutation;
 use App\Models\Sapeur;
+use App\Models\Travail;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -228,7 +236,9 @@ class SapeurMutationTest extends TestCase
         // Delete it
         $response = $this->json('DELETE', "/api/v2/sapeurs/{$this->sapeurId}/mutations/{$mutationId}");
 
-        $response->assertStatus(204);
+        $response
+            ->assertStatus(200)
+            ->assertJsonPath('data.type', SapeurBusiness::TYPE_SAPEUR);
 
         // Verify it's deleted via GET
         $getResponse = $this->json('GET', "/api/v2/sapeurs/{$this->sapeurId}/mutations");
@@ -243,5 +253,149 @@ class SapeurMutationTest extends TestCase
         $response
             ->assertStatus(404)
             ->assertJsonStructure(['message']);
+    }
+
+    private function onlyMutationId(): int
+    {
+        return Mutation::where('sapeur_id', $this->sapeurId)->sole()->id;
+    }
+
+    /**
+     * @param array<string, mixed> $attributes
+     */
+    private function createExerciceSapeur(array $attributes = []): void
+    {
+        // La factory laisse les colonnes texte à null alors qu'elles sont NOT NULL en base.
+        ExerciceSapeur::factory()->create([
+            'sapeur_id' => $this->sapeurId,
+            'excuse_statut' => 0,
+            'date_excuse' => now(),
+            'remarque' => '',
+            'justificatif_path' => '',
+            'justificatif_filename' => '',
+            'justification' => '',
+            ...$attributes,
+        ]);
+    }
+
+    private function assertLastMutationDeletionRefused(): void
+    {
+        $mutationId = $this->onlyMutationId();
+
+        $response = $this->json('DELETE', "/api/v2/sapeurs/{$this->sapeurId}/mutations/{$mutationId}");
+
+        $response
+            ->assertStatus(422)
+            ->assertJsonStructure(['message']);
+        $this->assertDatabaseHas('mutations', ['id' => $mutationId]);
+        $this->assertDatabaseHas('sapeurs', ['id' => $this->sapeurId, 'type' => SapeurBusiness::TYPE_SAPEUR]);
+    }
+
+    public function testRemoveLastMutationTurnsSapeurIntoRecrue()
+    {
+        $mutationId = $this->onlyMutationId();
+
+        $response = $this->json('DELETE', "/api/v2/sapeurs/{$this->sapeurId}/mutations/{$mutationId}");
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonPath('data.type', SapeurBusiness::TYPE_RECRUE)
+            ->assertJsonPath('data.actif', false);
+        $this->assertDatabaseHas('sapeurs', [
+            'id' => $this->sapeurId,
+            'type' => SapeurBusiness::TYPE_RECRUE,
+            'actif' => 0,
+            'annee_incorporation' => '',
+        ]);
+        $this->assertDatabaseMissing('mutations', ['sapeur_id' => $this->sapeurId]);
+    }
+
+    public function testRemoveLastMutationRefusedWhenSapeurHasExercice()
+    {
+        $this->createExerciceSapeur(['convoque' => false]);
+
+        $this->assertLastMutationDeletionRefused();
+    }
+
+    public function testRemoveLastMutationRefusedWhenSapeurHasIntervention()
+    {
+        $interventionSapeur = new InterventionSapeur();
+        $interventionSapeur->intervention_id = Intervention::factory()->create()->id;
+        $interventionSapeur->sapeur_id = $this->sapeurId;
+        $interventionSapeur->debut = '2024-01-01 12:00';
+        $interventionSapeur->fin = '2024-01-01 13:00';
+        $interventionSapeur->piquet = false;
+        $interventionSapeur->save();
+
+        $this->assertLastMutationDeletionRefused();
+    }
+
+    public function testRemoveLastMutationRefusedWhenSapeurIsChefIntervention()
+    {
+        Intervention::factory()->create(['sapeur_id' => $this->sapeurId]);
+
+        $this->assertLastMutationDeletionRefused();
+    }
+
+    public function testRemoveLastMutationRefusedWhenSapeurHasEcriture()
+    {
+        $intervention = Intervention::factory()->create();
+        Ecriture::create([
+            'designation' => 'test',
+            'total' => 10,
+            'tarif' => 10,
+            'quantite' => 1,
+            'type_unite_id' => 1,
+            'type' => 1,
+            'sapeur_id' => $this->sapeurId,
+            'compte_id' => 1,
+            'ecriture_categorie_id' => 1,
+            'exercice_comptable_id' => $intervention->exercice_comptable_id,
+        ]);
+
+        $this->assertLastMutationDeletionRefused();
+    }
+
+    public function testRemoveLastMutationRefusedWhenSapeurHasTravail()
+    {
+        $typeId = TravauxParamBusiness::ajouterType([
+            'designation' => 'Rédition',
+            'actif' => true,
+            'ecriture_categorie_id' => 1,
+            'type_unite_id' => 2,
+            'lien_exercice' => true,
+            'lien_intervention' => true,
+            'fonctions' => [['type' => 1, 'tarif' => 30.00, 'compte_id' => 1, 'fonction_id' => null]],
+        ])->id;
+        Travail::create([
+            'designation' => 'Rédition',
+            'date' => '2026-10-13',
+            'date_demande' => '2026-10-13',
+            'quantite' => 2,
+            'justification' => 'à vider',
+            'statut' => 0,
+            'sapeur_id' => $this->sapeurId,
+            'auteur_id' => $this->sapeurId,
+            'travail_type_id' => $typeId,
+            'exercice_comptable_id' => Intervention::factory()->create()->exercice_comptable_id,
+        ]);
+
+        $this->assertLastMutationDeletionRefused();
+    }
+
+    public function testRemoveNonLastMutationAllowedWhenSapeurHasExercice()
+    {
+        $this->createExerciceSapeur();
+        $mutationId = $this->json('POST', "/api/v2/sapeurs/{$this->sapeurId}/mutations", [
+            'incorporation' => '2012-01-01',
+            'sortie' => '2014-12-31',
+            'localite_id' => $this->localiteId,
+        ])->json('data.mutation.id');
+
+        $response = $this->json('DELETE', "/api/v2/sapeurs/{$this->sapeurId}/mutations/{$mutationId}");
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonPath('data.type', SapeurBusiness::TYPE_SAPEUR);
     }
 }

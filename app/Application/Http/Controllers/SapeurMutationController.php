@@ -72,6 +72,6 @@ class SapeurMutationController extends Controller
         }
 
         $data = SapeurBusiness::removeMutation($sapeurId, $mutationId);
-        return response()->json(null, 204);
+        return response()->json(['data' => $data]);
     }
 }

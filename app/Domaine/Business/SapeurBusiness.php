@@ -699,23 +699,49 @@ class SapeurBusiness
     }
 
     /**
-     * Supppression d'une mutation
+     * Suppression d'une mutation. Supprimer la dernière mutation annule la validation
+     * de la recrue : le sapeur repasse en recrue, à condition de n'avoir encore aucun
+     * historique (exercice, intervention, écriture ou travail).
      *
-     * @param int $mutationId
+     * @return array{actif: bool, annee_incorporation: int|string, type: int}
      */
-    public static function removeMutation(int $sapeurId, int $mutationId)
+    public static function removeMutation(int $sapeurId, int $mutationId): array
     {
-        // Check at least one mutation
-        // Attention, quand on ajoutera les civils, il faudra enlever cette limitation pour ce type de personnes
-        if (Mutation::where('sapeur_id', $sapeurId)->count() === 0) {
-            throw new ArrayException([
-                "info" => "Au moins une mutation nécessaire",
-            ]);
-        }
-        Mutation::where('sapeur_id', $sapeurId)->findOrFail($mutationId)->delete();
+        $mutation = Mutation::where('sapeur_id', $sapeurId)->findOrFail($mutationId);
+        $isLastMutation = Mutation::where('sapeur_id', $sapeurId)->count() === 1;
 
-        // Update actif statut depending of end of all mutation
-        return self::majStatutActifSapeur($sapeurId, Mutation::where('sapeur_id', $sapeurId)->get());
+        if (
+            $isLastMutation && (
+                ExerciceSapeur::where('sapeur_id', $sapeurId)->exists()
+                || InterventionSapeur::where('sapeur_id', $sapeurId)->exists()
+                || Intervention::where('sapeur_id', $sapeurId)->exists()
+                || Ecriture::where('sapeur_id', $sapeurId)->exists()
+                || Travail::where('sapeur_id', $sapeurId)->exists()
+            )
+        ) {
+            throw new NotReportableException([], "Impossible de supprimer la dernière mutation : le sapeur a des exercices, interventions, écritures ou travaux.");
+        }
+
+        return DB::transaction(function () use ($sapeurId, $mutation, $isLastMutation) {
+            $mutation->delete();
+
+            if (!$isLastMutation) {
+                $statut = self::majStatutActifSapeur($sapeurId, Mutation::where('sapeur_id', $sapeurId)->get());
+                return [...$statut, 'type' => self::TYPE_SAPEUR];
+            }
+
+            $sapeur = Sapeur::findOrFail($sapeurId);
+            $sapeur->type = self::TYPE_RECRUE;
+            $sapeur->actif = false;
+            $sapeur->annee_incorporation = '';
+            $sapeur->save();
+
+            return [
+                'actif' => false,
+                'annee_incorporation' => '',
+                'type' => self::TYPE_RECRUE,
+            ];
+        });
     }
 
     public static function addTelephone(int $sapeurId, $data)
