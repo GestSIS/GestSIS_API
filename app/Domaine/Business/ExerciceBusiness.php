@@ -6,11 +6,13 @@ use App\Application\Typst\TypstTemplate;
 use App\Application\Typst\TypstToPdfGenerator;
 use App\Domaine\Exceptions\InvalidActionException;
 use App\Domaine\Exceptions\ArrayException;
+use App\Domaine\Exceptions\NotReportableException;
 use App\Models\Civilite;
 use App\Models\ConvocationParam;
 use App\Models\ExcuseParam;
 use App\Models\ExcuseType;
 use App\Models\Exercice;
+use App\Models\ExerciceComptable;
 use App\Models\ExerciceCategorie;
 use App\Models\ExerciceSapeur;
 use App\Models\Fonction;
@@ -92,6 +94,51 @@ class ExerciceBusiness
         $exercice->save();
 
         return $exercice;
+    }
+
+    /**
+     * Duplique un exercice à une nouvelle date dans le même exercice comptable.
+     * Seules les convocations des sapeurs encore actifs sont reprises (pas les présences,
+     * excuses, remarques ni travaux).
+     *
+     * @param array{date: string, designation: string, garder_sapeurs: bool} $data
+     * @throws NotReportableException
+     */
+    public static function dupliquerExercice(int $exerciceId, array $data): Exercice
+    {
+        $exercice = Exercice::findOrFail($exerciceId);
+        $exerciceComptable = ExerciceComptable::findOrFail($exercice->exercice_comptable_id);
+        $date = Carbon::parse($data['date'])->toDateString();
+        if ($date < $exerciceComptable->debut || $date > $exerciceComptable->fin) {
+            throw new NotReportableException([], "La date doit être comprise dans l'exercice comptable.");
+        }
+
+        return DB::transaction(function () use ($exercice, $data, $date) {
+            $copy = self::createExercice([
+                ...$exercice->only(['heure', 'lieu', 'localite_id', 'communications', 'duree', 'exercice_categorie_id', 'exercice_comptable_id']),
+                'date' => $date,
+                'designation' => $data['designation'],
+            ]);
+
+            if ($data['garder_sapeurs']) {
+                $sapeurIds = ExerciceSapeur::where('exercice_id', $exercice->id)
+                    ->where('convoque', 1)
+                    ->whereIn('sapeur_id', Sapeur::where('actif', 1)->select('id'))
+                    ->pluck('sapeur_id');
+                $now = now();
+                ExerciceSapeur::insert($sapeurIds->map(fn(int $sapeurId): array => [
+                    'exercice_id' => $copy->id,
+                    'sapeur_id' => $sapeurId,
+                    'convoque' => 1,
+                    'present' => 0,
+                    'remplace' => 0,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ])->all());
+            }
+
+            return $copy;
+        });
     }
 
     /**

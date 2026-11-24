@@ -182,6 +182,18 @@ class ExerciceController extends Controller
         return response()->json(['data' => ['statut' => $statut]]);
     }
 
+    public function dupliquer(Request $request, int $id)
+    {
+        $data = $request->validate([
+            'date' => 'date|required',
+            'designation' => 'string|required',
+            'garder_sapeurs' => 'boolean|required',
+        ]);
+
+        $exercice = ExerciceBusiness::dupliquerExercice($id, $data);
+        return response()->json(['data' => $exercice], 201);
+    }
+
     public function valider($id)
     {
         $exercice = ExerciceBusiness::validateExerciceById($id);
