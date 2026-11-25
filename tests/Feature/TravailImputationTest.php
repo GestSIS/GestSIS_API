@@ -219,17 +219,20 @@ class TravailImputationTest extends TestCase
         $this->assertNull($ecriture->complement);
     }
 
-    public function testImputerTravauxIgnoreFicheLiee()
+    public function testImputerTravauxRefuseFicheLiee()
     {
-        $liee = $this->fiche(['exercice_id' => $this->exercice->id], TravauxBusiness::TRAVAIL_STATUT_VALIDE);
+        $liee = $this->fiche(['intervention_id' => $this->intervention->id], TravauxBusiness::TRAVAIL_STATUT_VALIDE);
         $libre = $this->fiche([], TravauxBusiness::TRAVAIL_STATUT_VALIDE);
 
-        ImputationBusiness::imputerTravaux([$liee->id, $libre->id]);
+        try {
+            ImputationBusiness::imputerTravaux([$liee->id, $libre->id]);
+            $this->fail('ArrayException attendue');
+        } catch (ArrayException) {
+        }
 
         $this->assertSame(TravauxBusiness::TRAVAIL_STATUT_VALIDE, $liee->fresh()->statut);
-        $this->assertSame(0, Ecriture::where('travail_id', $liee->id)->count());
-        $this->assertSame(TravauxBusiness::TRAVAIL_STATUT_IMPUTE, $libre->fresh()->statut);
-        $this->assertSame(2, Ecriture::where('travail_id', $libre->id)->count());
+        $this->assertSame(TravauxBusiness::TRAVAIL_STATUT_VALIDE, $libre->fresh()->statut);
+        $this->assertSame(0, Ecriture::whereIn('travail_id', [$liee->id, $libre->id])->count());
     }
 
     public function testAnnulerImputationTravailRefuseFicheLiee()

@@ -1361,10 +1361,15 @@ class ImputationBusiness
     public static function imputerTravaux($ids)
     {
         // Les fiches liées à un événement s'imputent uniquement avec celui-ci
+        $hasLinkedTravail = Travail::whereIn('id', $ids)
+            ->where(fn ($query) => $query->whereNotNull('exercice_id')->orWhereNotNull('intervention_id'))
+            ->exists();
+        if ($hasLinkedTravail) {
+            throw new ArrayException([], "Une fiche de travail liée à un exercice ou une intervention s'impute avec son événement.");
+        }
+
         $travaux = Travail::whereIn('id', $ids)
             ->where('statut', TravauxBusiness::TRAVAIL_STATUT_VALIDE)
-            ->whereNull('exercice_id')
-            ->whereNull('intervention_id')
             ->get();
 
         if ($travaux->isEmpty()) {
