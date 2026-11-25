@@ -140,7 +140,7 @@ class SapeurBusiness
      * Recalcule les statuts sapeur et civil et l'année d'incorporation à partir des
      * mutations (toutes natures confondues) de la personne.
      */
-    private static function majStatuts(Sapeur $sapeur, $mutations): void
+    public static function majStatuts(Sapeur $sapeur, $mutations): void
     {
         $sapeur->fill(self::statuts($mutations));
         $sapeur->annee_incorporation = self::anneeIncorporation($mutations);
@@ -685,7 +685,7 @@ class SapeurBusiness
         return FonctionSapeur::where('sapeur_id', $sapeurId)->get();
     }
 
-    private static function verifyMutationPeriode($editedMutation, $mutations)
+    public static function verifyMutationPeriode($editedMutation, $mutations)
     {
         $sortie = isset($editedMutation['sortie']) ? Carbon::parse($editedMutation['sortie']) : null;
 
