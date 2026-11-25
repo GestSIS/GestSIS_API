@@ -21,7 +21,7 @@ class SapeurRecomputeActifStatusTest extends TestCase
 
     public function testSapeurAvecMutationEnCoursDevientActif(): void
     {
-        $sapeur = $this->createSapeur(['actif' => 0]);
+        $sapeur = $this->createSapeur(['statut_sapeur' => SapeurBusiness::STATUT_INACTIF]);
         $sapeur->mutations()->create([
             'localite_id' => $sapeur->localite_id,
             'incorporation' => now()->subYear()->toDateString(),
@@ -29,14 +29,14 @@ class SapeurRecomputeActifStatusTest extends TestCase
             'motif' => 'Incorporation',
         ]);
 
-        SapeurBusiness::recomputeSapeurActifStatus();
+        SapeurBusiness::recomputeSapeurStatuts();
 
-        $this->assertDatabaseHas('sapeurs', ['id' => $sapeur->id, 'actif' => 1]);
+        $this->assertDatabaseHas('sapeurs', ['id' => $sapeur->id, 'statut_sapeur' => SapeurBusiness::STATUT_ACTIF]);
     }
 
     public function testSapeurAvecMutationTermineeDevientInactif(): void
     {
-        $sapeur = $this->createSapeur(['actif' => 1]);
+        $sapeur = $this->createSapeur(['statut_sapeur' => SapeurBusiness::STATUT_ACTIF]);
         $sapeur->mutations()->create([
             'localite_id' => $sapeur->localite_id,
             'incorporation' => now()->subYears(2)->toDateString(),
@@ -44,14 +44,14 @@ class SapeurRecomputeActifStatusTest extends TestCase
             'motif' => 'Démission',
         ]);
 
-        SapeurBusiness::recomputeSapeurActifStatus();
+        SapeurBusiness::recomputeSapeurStatuts();
 
-        $this->assertDatabaseHas('sapeurs', ['id' => $sapeur->id, 'actif' => 0]);
+        $this->assertDatabaseHas('sapeurs', ['id' => $sapeur->id, 'statut_sapeur' => SapeurBusiness::STATUT_INACTIF]);
     }
 
     public function testSapeurAvecIncorporationProcheDevientActif(): void
     {
-        $sapeur = $this->createSapeur(['actif' => 0]);
+        $sapeur = $this->createSapeur(['statut_sapeur' => SapeurBusiness::STATUT_INACTIF]);
         $sapeur->mutations()->create([
             'localite_id' => $sapeur->localite_id,
             'incorporation' => now()->addMonths(2)->toDateString(),
@@ -59,14 +59,14 @@ class SapeurRecomputeActifStatusTest extends TestCase
             'motif' => 'Incorporation',
         ]);
 
-        SapeurBusiness::recomputeSapeurActifStatus();
+        SapeurBusiness::recomputeSapeurStatuts();
 
-        $this->assertDatabaseHas('sapeurs', ['id' => $sapeur->id, 'actif' => 1]);
+        $this->assertDatabaseHas('sapeurs', ['id' => $sapeur->id, 'statut_sapeur' => SapeurBusiness::STATUT_ACTIF]);
     }
 
     public function testSapeurAvecIncorporationTropLointaineResteInactif(): void
     {
-        $sapeur = $this->createSapeur(['actif' => 0]);
+        $sapeur = $this->createSapeur(['statut_sapeur' => SapeurBusiness::STATUT_ACTIF]);
         $sapeur->mutations()->create([
             'localite_id' => $sapeur->localite_id,
             'incorporation' => now()->addMonths(6)->toDateString(),
@@ -74,32 +74,89 @@ class SapeurRecomputeActifStatusTest extends TestCase
             'motif' => 'Incorporation',
         ]);
 
-        SapeurBusiness::recomputeSapeurActifStatus();
+        SapeurBusiness::recomputeSapeurStatuts();
 
-        $this->assertDatabaseHas('sapeurs', ['id' => $sapeur->id, 'actif' => 0]);
+        $this->assertDatabaseHas('sapeurs', ['id' => $sapeur->id, 'statut_sapeur' => SapeurBusiness::STATUT_INACTIF]);
     }
 
     public function testSapeurSansMutationDevientInactif(): void
     {
-        $sapeur = $this->createSapeur(['actif' => 1]);
+        $sapeur = $this->createSapeur(['statut_sapeur' => SapeurBusiness::STATUT_ACTIF]);
 
-        SapeurBusiness::recomputeSapeurActifStatus();
+        SapeurBusiness::recomputeSapeurStatuts();
 
-        $this->assertDatabaseHas('sapeurs', ['id' => $sapeur->id, 'actif' => 0]);
+        $this->assertDatabaseHas('sapeurs', [
+            'id' => $sapeur->id,
+            'statut_sapeur' => SapeurBusiness::STATUT_JAMAIS,
+            'statut_civil' => SapeurBusiness::STATUT_JAMAIS,
+        ]);
     }
 
-    public function testCivilAvecMutationEnCoursNestPasModifie(): void
+    public function testCivilAvecMutationCivileEnCoursDevientActif(): void
     {
-        $civil = $this->createSapeur(['actif' => 0, 'type' => SapeurBusiness::TYPE_CIVIL]);
+        $civil = $this->createSapeur([]);
         $civil->mutations()->create([
+            'nature' => SapeurBusiness::NATURE_CIVIL,
             'localite_id' => $civil->localite_id,
             'incorporation' => now()->subYear()->toDateString(),
             'sortie' => null,
-            'motif' => 'Incorporation',
+            'motif' => '',
         ]);
 
-        SapeurBusiness::recomputeSapeurActifStatus();
+        SapeurBusiness::recomputeSapeurStatuts();
 
-        $this->assertDatabaseHas('sapeurs', ['id' => $civil->id, 'actif' => 0]);
+        $this->assertDatabaseHas('sapeurs', [
+            'id' => $civil->id,
+            'statut_sapeur' => SapeurBusiness::STATUT_JAMAIS,
+            'statut_civil' => SapeurBusiness::STATUT_ACTIF,
+        ]);
+    }
+
+    /**
+     * L'anticipation de 3 mois ne vaut que pour les mutations sapeur
+     */
+    public function testCivilAvecDebutProcheResteInactif(): void
+    {
+        $civil = $this->createSapeur(['statut_civil' => SapeurBusiness::STATUT_ACTIF]);
+        $civil->mutations()->create([
+            'nature' => SapeurBusiness::NATURE_CIVIL,
+            'localite_id' => $civil->localite_id,
+            'incorporation' => now()->addMonths(2)->toDateString(),
+            'sortie' => null,
+            'motif' => '',
+        ]);
+
+        SapeurBusiness::recomputeSapeurStatuts();
+
+        $this->assertDatabaseHas('sapeurs', [
+            'id' => $civil->id,
+            'statut_civil' => SapeurBusiness::STATUT_INACTIF,
+        ]);
+    }
+
+    public function testAncienSapeurDevenuCivilResteActifEnTantQueCivil(): void
+    {
+        $sapeur = $this->createSapeur([]);
+        $sapeur->mutations()->create([
+            'localite_id' => $sapeur->localite_id,
+            'incorporation' => now()->subYears(10)->toDateString(),
+            'sortie' => now()->subYear()->toDateString(),
+            'motif' => 'Fin de service',
+        ]);
+        $sapeur->mutations()->create([
+            'nature' => SapeurBusiness::NATURE_CIVIL,
+            'localite_id' => $sapeur->localite_id,
+            'incorporation' => now()->subYear()->addDay()->toDateString(),
+            'sortie' => null,
+            'motif' => '',
+        ]);
+
+        SapeurBusiness::recomputeSapeurStatuts();
+
+        $this->assertDatabaseHas('sapeurs', [
+            'id' => $sapeur->id,
+            'statut_sapeur' => SapeurBusiness::STATUT_INACTIF,
+            'statut_civil' => SapeurBusiness::STATUT_ACTIF,
+        ]);
     }
 }

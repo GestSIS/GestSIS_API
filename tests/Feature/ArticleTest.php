@@ -650,8 +650,8 @@ class ArticleTest extends TestCase
     public function testArticlesARecupererReturnsOnlyActiveArticlesOfInactiveSapeurs(): void
     {
         $type = MaterielType::factory()->create();
-        $sapeurInactif = Sapeur::factory()->create(['actif' => false]);
-        $sapeurActif = Sapeur::factory()->create(['actif' => true]);
+        $sapeurInactif = Sapeur::factory()->inactif()->create();
+        $sapeurActif = Sapeur::factory()->create();
 
         $articleARecuperer = Article::factory()->create([
             'materiel_type_id' => $type->id,
@@ -678,10 +678,26 @@ class ArticleTest extends TestCase
         $this->assertSame($type->designation, $response->json('data.0.materiel_type.designation'));
     }
 
+    public function testArticlesARecupererExclutLesAnciensSapeursRestesCivils(): void
+    {
+        $type = MaterielType::factory()->create();
+        $ancienSapeurCivil = Sapeur::factory()->ancienSapeurCivil()->create();
+        Article::factory()->create([
+            'materiel_type_id' => $type->id,
+            'sapeur_id' => $ancienSapeurCivil->id,
+            'emplacement_id' => null,
+        ]);
+
+        $response = $this->json('GET', '/api/v2/articles/a-recuperer', [], ['Sis-Key' => 1]);
+
+        $response->assertStatus(200);
+        $this->assertNotContains($ancienSapeurCivil->id, collect($response->json('data'))->pluck('sapeur.id'));
+    }
+
     public function testArticlesARecupererExclutLesArticlesSupprimes(): void
     {
         $type = MaterielType::factory()->create();
-        $sapeurInactif = Sapeur::factory()->create(['actif' => false]);
+        $sapeurInactif = Sapeur::factory()->inactif()->create();
 
         $article = Article::factory()->create([
             'materiel_type_id' => $type->id,

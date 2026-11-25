@@ -2,6 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
+use App\Domaine\Business\SapeurBusiness;
 use App\Models\ExerciceComptable;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -17,9 +18,9 @@ class SapeurStatistiqueController extends Controller
                 INNER JOIN mutations as m ON m.sapeur_id = s.id
                 WHERE m.incorporation < ?
                 AND (m.sortie IS NULL OR m.sortie > ?)
-                AND s.type = 0
+                AND m.nature = ?
                 GROUP BY c.id
-            ", [$exerciceComptable->fin, $exerciceComptable->debut]);
+            ", [$exerciceComptable->fin, $exerciceComptable->debut, SapeurBusiness::NATURE_SAPEUR]);
         return response()->json(['data' => $data]);
     }
 
@@ -35,9 +36,9 @@ class SapeurStatistiqueController extends Controller
                 AND (fs.fin IS NULL OR fs.fin >= ?)
                 AND m.incorporation <= ?
                 AND (m.sortie IS NULL OR m.sortie >= ?)
-                AND s.type = 0
+                AND m.nature = ?
                 GROUP BY f.id
-            ", [Carbon::parse($exerciceComptable->fin), Carbon::parse($exerciceComptable->debut), Carbon::parse($exerciceComptable->fin), Carbon::parse($exerciceComptable->debut)]);
+            ", [Carbon::parse($exerciceComptable->fin), Carbon::parse($exerciceComptable->debut), Carbon::parse($exerciceComptable->fin), Carbon::parse($exerciceComptable->debut), SapeurBusiness::NATURE_SAPEUR]);
         return response()->json(['data' => $data]);
     }
 
@@ -57,9 +58,9 @@ class SapeurStatistiqueController extends Controller
                 WHERE gs.row_number = 1
                 AND m.incorporation <= ?
                 AND (m.sortie IS NULL OR m.sortie >= ?)
-                AND s.type = 0
+                AND m.nature = ?
                 GROUP BY g.id
-            ", [Carbon::parse($exerciceComptable->fin), Carbon::parse($exerciceComptable->fin), Carbon::parse($exerciceComptable->debut)]);
+            ", [Carbon::parse($exerciceComptable->fin), Carbon::parse($exerciceComptable->fin), Carbon::parse($exerciceComptable->debut), SapeurBusiness::NATURE_SAPEUR]);
         return response()->json(['data' => $materiels]);
     }
 
@@ -74,9 +75,9 @@ class SapeurStatistiqueController extends Controller
                 WHERE p.date <= ?
                 AND m.incorporation <= ?
                 AND (m.sortie IS NULL OR m.sortie >= ?)
-                AND s.type = 0
+                AND m.nature = ?
                 GROUP BY pt.id
-            ", [Carbon::parse($exerciceComptable->fin), Carbon::parse($exerciceComptable->fin), Carbon::parse($exerciceComptable->debut)]);
+            ", [Carbon::parse($exerciceComptable->fin), Carbon::parse($exerciceComptable->fin), Carbon::parse($exerciceComptable->debut), SapeurBusiness::NATURE_SAPEUR]);
         return response()->json(['data' => $materiels]);
     }
 
@@ -88,9 +89,9 @@ class SapeurStatistiqueController extends Controller
                 INNER JOIN mutations as m ON m.sapeur_id = s.id
                 WHERE m.incorporation < ?
                 AND (m.sortie IS NULL OR m.sortie > ?)
-                AND s.type = 0
+                AND m.nature = ?
                 GROUP BY s.localite_id
-            ", [$exerciceComptable->fin, $exerciceComptable->debut]);
+            ", [$exerciceComptable->fin, $exerciceComptable->debut, SapeurBusiness::NATURE_SAPEUR]);
         return response()->json(['data' => $data]);
     }
 }

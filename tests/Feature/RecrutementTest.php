@@ -174,8 +174,8 @@ class RecrutementTest extends TestCase
 
         $recrue = Sapeur::find($response->json('data.id'));
         $this->assertNotNull($recrue);
-        $this->assertEquals(SapeurBusiness::TYPE_RECRUE, $recrue->type);
-        $this->assertFalse((bool) $recrue->actif);
+        $this->assertSame(SapeurBusiness::STATUT_JAMAIS, $recrue->statut_sapeur);
+        $this->assertSame(SapeurBusiness::STATUT_JAMAIS, $recrue->statut_civil);
         $this->assertCount(1, SapeurTelephone::where('sapeur_id', $recrue->id)->get());
     }
 
@@ -438,8 +438,7 @@ class RecrutementTest extends TestCase
         $response->assertStatus(200);
 
         $recrue->refresh();
-        $this->assertEquals(SapeurBusiness::TYPE_SAPEUR, $recrue->type);
-        $this->assertTrue((bool) $recrue->actif);
+        $this->assertSame(SapeurBusiness::STATUT_ACTIF, $recrue->statut_sapeur);
         $this->assertEquals('2026', $recrue->annee_incorporation);
 
         $mutationsResponse = $this->json('GET', "/api/v2/sapeurs/{$recrue->id}/mutations");
@@ -470,16 +469,4 @@ class RecrutementTest extends TestCase
     }
 
     // --- Filtre type sur /sapeurs ---
-
-    public function testIndexSapeursFiltreParType()
-    {
-        $sapeur = Sapeur::factory()->create(['localite_id' => $this->localiteId, 'type' => SapeurBusiness::TYPE_SAPEUR]);
-        $recrue = SapeurBusiness::createRecrue($this->formulaireRecrue());
-
-        $response = $this->json('GET', '/api/v2/sapeurs?type[]=2');
-
-        $ids = array_column($response->json('data'), 'id');
-        $this->assertContains($recrue->id, $ids);
-        $this->assertNotContains($sapeur->id, $ids);
-    }
 }

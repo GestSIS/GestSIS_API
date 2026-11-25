@@ -29,6 +29,7 @@ class SapeurMutationController extends Controller
             'sortie' => 'date|nullable|after:incorporation',
             'motif' => 'string|nullable',
             'localite_id' => 'required|integer|exists:localites,id',
+            'nature' => 'integer|in:' . SapeurBusiness::NATURE_SAPEUR . ',' . SapeurBusiness::NATURE_CIVIL,
         ]);
 
         $mutation = SapeurBusiness::addMutation($sapeurId, $data);

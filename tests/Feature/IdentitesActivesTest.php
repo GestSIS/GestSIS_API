@@ -33,11 +33,12 @@ class IdentitesActivesTest extends TestCase
 
     public function testListeIdentitesActivesRegroupeParSisFiltreTypeEtActifAvecEmailNullable(): void
     {
-        $actifHsAvecEmail = $this->createSapeur('db_hs', ['actif' => 1, 'type' => SapeurBusiness::TYPE_SAPEUR, 'email' => 'actif-hs@example.com']);
-        $actifHsSansEmail = $this->createSapeur('db_hs', ['actif' => 1, 'type' => SapeurBusiness::TYPE_SAPEUR, 'email' => '']);
-        $inactifHs = $this->createSapeur('db_hs', ['actif' => 0, 'type' => SapeurBusiness::TYPE_SAPEUR, 'email' => 'inactif-hs@example.com']);
-        $recrueActive = $this->createSapeur('db_hs', ['actif' => 1, 'type' => SapeurBusiness::TYPE_RECRUE, 'email' => 'recrue@example.com']);
-        $civilTest = $this->createSapeur('db_test', ['actif' => 1, 'type' => SapeurBusiness::TYPE_CIVIL, 'email' => 'civil-test@example.com']);
+        $sapeurActif = ['actif' => 1, 'statut_sapeur' => SapeurBusiness::STATUT_ACTIF, 'statut_civil' => SapeurBusiness::STATUT_JAMAIS];
+        $actifHsAvecEmail = $this->createSapeur('db_hs', [...$sapeurActif, 'email' => 'actif-hs@example.com']);
+        $actifHsSansEmail = $this->createSapeur('db_hs', [...$sapeurActif, 'email' => '']);
+        $inactifHs = $this->createSapeur('db_hs', ['actif' => 0, 'statut_sapeur' => SapeurBusiness::STATUT_INACTIF, 'statut_civil' => SapeurBusiness::STATUT_JAMAIS, 'email' => 'inactif-hs@example.com']);
+        $recrue = $this->createSapeur('db_hs', ['actif' => 0, 'statut_sapeur' => SapeurBusiness::STATUT_JAMAIS, 'statut_civil' => SapeurBusiness::STATUT_JAMAIS, 'email' => 'recrue@example.com']);
+        $civilTest = $this->createSapeur('db_test', ['actif' => 1, 'statut_sapeur' => SapeurBusiness::STATUT_JAMAIS, 'statut_civil' => SapeurBusiness::STATUT_ACTIF, 'email' => 'civil-test@example.com']);
 
         $response = $this->json('GET', '/api/v2/identites-actives');
 
@@ -48,7 +49,7 @@ class IdentitesActivesTest extends TestCase
         $this->assertSame('actif-hs@example.com', $hs[$actifHsAvecEmail->id]);
         $this->assertArrayHasKey($actifHsSansEmail->id, $hs);
         $this->assertArrayNotHasKey($inactifHs->id, $hs);
-        $this->assertArrayNotHasKey($recrueActive->id, $hs);
+        $this->assertArrayNotHasKey($recrue->id, $hs);
         $this->assertSame('civil-test@example.com', $test[$civilTest->id]);
     }
 }

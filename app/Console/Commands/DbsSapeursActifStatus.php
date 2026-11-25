@@ -20,7 +20,7 @@ class DbsSapeursActifStatus extends Command
      *
      * @var string
      */
-    protected $description = 'Recalcule le status actif/inactif des sapeurs';
+    protected $description = 'Recalcule les statuts sapeur et civil, la fonction principale et le grade principal';
 
     /**
      * Create a new command instance.
@@ -41,7 +41,7 @@ class DbsSapeursActifStatus extends Command
     {
         Sis::each(function ($db) {
             printf("Recompute for sis=" . $db . "\n");
-            SapeurBusiness::recomputeSapeurActifStatus();
+            SapeurBusiness::recomputeSapeurStatuts();
             SapeurBusiness::recomputeSapeurFonctionPrincipale();
             SapeurBusiness::recomputeSapeurGradePrincipal();
 

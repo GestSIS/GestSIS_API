@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\ArticleAttribution;
 use App\Models\Localite;
+use App\Domaine\Business\SapeurBusiness;
 use App\Models\Sapeur;
 use App\Models\SapeurTelephone;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -38,14 +39,29 @@ class SapeurTest extends TestCase
     {
         Sapeur::factory()->create([
             'localite_id' => $this->localiteId,
-            'actif' => 1,
-            'type' => 0,
         ]);
 
         $response = $this->json('GET', '/api/v2/sapeurs');
 
         $response->assertStatus(200);
         $this->assertIsBool($response->json('data.0.actif'));
+    }
+
+    /**
+     * Le type principal reste exposé (affichage, anciennes versions de l'app mobile qui
+     * filtrent sur `type`) : un ancien sapeur resté civil apparaît comme civil.
+     */
+    public function testIndexExposeLesStatutsEtLeTypePrincipal()
+    {
+        $sapeur = Sapeur::factory()->ancienSapeurCivil()->create(['localite_id' => $this->localiteId]);
+
+        $response = $this->json('GET', '/api/v2/sapeurs');
+
+        $response->assertStatus(200);
+        $data = collect($response->json('data'))->firstWhere('id', $sapeur->id);
+        $this->assertSame(SapeurBusiness::STATUT_INACTIF, $data['statut_sapeur']);
+        $this->assertSame(SapeurBusiness::STATUT_ACTIF, $data['statut_civil']);
+        $this->assertSame(SapeurBusiness::TYPE_CIVIL, $data['type']);
     }
 
     public function testIndexSapeurReturnsListOfSapeurs()
@@ -90,7 +106,7 @@ class SapeurTest extends TestCase
                     'nom',
                     'prenom',
                     'fonction_id',
-                    'actif',
+                    'statut_sapeur',
                     'date_naissance'
                 ]
             ])
@@ -138,6 +154,7 @@ class SapeurTest extends TestCase
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "2019-01-29"; // ISO format
         $data['localite_id'] = $this->localiteId; // Use existing localite
+        $data['nature'] = SapeurBusiness::NATURE_SAPEUR;
 
         $response = $this->json('POST', '/api/v2/sapeurs', $data);
 
@@ -153,7 +170,10 @@ class SapeurTest extends TestCase
             ])
             ->assertJsonPath('data.nom', $data['nom'])
             ->assertJsonPath('data.prenom', $data['prenom'])
-            ->assertJsonPath('data.fonction_id', 0);
+            ->assertJsonPath('data.fonction_id', 0)
+            ->assertJsonPath('data.statut_sapeur', SapeurBusiness::STATUT_ACTIF)
+            ->assertJsonPath('data.statut_civil', SapeurBusiness::STATUT_JAMAIS)
+            ->assertJsonPath('data.type', SapeurBusiness::TYPE_SAPEUR);
 
         $sapeurId = $response->json('data.id');
         $this->assertNotNull($sapeurId);
@@ -352,26 +372,11 @@ class SapeurTest extends TestCase
 
     public function testEffectifReturnsActiveFirefighters()
     {
-        // Create active sapeur
-        $sapeurActif = Sapeur::factory()->create([
-            'localite_id' => $this->localiteId,
-            'actif' => 1,
-            'type' => 0, // TYPE_SAPEUR
-        ]);
-
-        // Create inactive sapeur (should not appear)
-        $sapeurInactif = Sapeur::factory()->create([
-            'localite_id' => $this->localiteId,
-            'actif' => 0,
-            'type' => 0,
-        ]);
-
-        // Create active civil (should not appear)
-        $civil = Sapeur::factory()->create([
-            'localite_id' => $this->localiteId,
-            'actif' => 1,
-            'type' => 1, // TYPE_CIVIL
-        ]);
+        $sapeurActif = Sapeur::factory()->create(['localite_id' => $this->localiteId]);
+        $sapeurInactif = Sapeur::factory()->inactif()->create(['localite_id' => $this->localiteId]);
+        $civil = Sapeur::factory()->civil()->create(['localite_id' => $this->localiteId]);
+        // Actif (en tant que civil) mais plus en service : hors effectif
+        $ancienSapeurCivil = Sapeur::factory()->ancienSapeurCivil()->create(['localite_id' => $this->localiteId]);
 
         $response = $this->json('GET', '/api/v2/effectif');
 
@@ -383,33 +388,54 @@ class SapeurTest extends TestCase
                 ]
             ]);
 
-        $responseData = $response->json('data');
-        $ids = array_column($responseData, 'id');
-
-        // Verify only active sapeurs are returned
+        $ids = array_column($response->json('data'), 'id');
         $this->assertContains($sapeurActif->id, $ids);
         $this->assertNotContains($sapeurInactif->id, $ids);
         $this->assertNotContains($civil->id, $ids);
+        $this->assertNotContains($ancienSapeurCivil->id, $ids);
     }
 
-    public function testAutreStatutUpdatesNonSapeurStatus()
+    public function testCreateCivilCreeUneMutationCivile()
     {
-        // Create a civil (type=1), not a sapeur (type=0)
-        $sapeur = Sapeur::factory()->create([
+        $response = $this->json('POST', '/api/v2/sapeurs', [
+            'nature' => SapeurBusiness::NATURE_CIVIL,
+            'nom' => 'Dupont',
+            'prenom' => 'Marie',
+            'rue' => 'Rue du Test',
+            'no_rue' => '1',
+            'incorporation' => '2024-03-01',
             'localite_id' => $this->localiteId,
-            'actif' => 0,
-            'type' => 1, // TYPE_CIVIL
+            'civilite_id' => 1,
         ]);
 
-        $response = $this->json('PUT', '/api/v2/sapeurs/' . $sapeur->id . '/autre-statut', [
-            'actif' => 1,
+        $response
+            ->assertStatus(201)
+            ->assertJsonPath('data.statut_sapeur', SapeurBusiness::STATUT_JAMAIS)
+            ->assertJsonPath('data.statut_civil', SapeurBusiness::STATUT_ACTIF)
+            ->assertJsonPath('data.type', SapeurBusiness::TYPE_CIVIL)
+            ->assertJsonPath('data.annee_incorporation', '');
+        $this->assertDatabaseHas('mutations', [
+            'sapeur_id' => $response->json('data.id'),
+            'nature' => SapeurBusiness::NATURE_CIVIL,
+            'incorporation' => '2024-03-01',
+            'sortie' => null,
+            'localite_id' => $this->localiteId,
+        ]);
+    }
+
+    public function testCreateCivilRefuseSansDateIncorporation()
+    {
+        $response = $this->json('POST', '/api/v2/sapeurs', [
+            'nature' => SapeurBusiness::NATURE_CIVIL,
+            'nom' => 'Dupont',
+            'prenom' => 'Marie',
+            'rue' => 'Rue du Test',
+            'no_rue' => '1',
+            'localite_id' => $this->localiteId,
+            'civilite_id' => 1,
         ]);
 
-        $response->assertStatus(200);
-
-        // Verify status was updated in database
-        $sapeur->refresh();
-        $this->assertEquals(1, $sapeur->actif);
+        $response->assertStatus(422)->assertJsonValidationErrors(['incorporation']);
     }
 
     public function testTrombinoscopeReturnsResponse()
@@ -417,7 +443,6 @@ class SapeurTest extends TestCase
         // Create some sapeurs for the trombinoscope
         Sapeur::factory()->count(3)->create([
             'localite_id' => $this->localiteId,
-            'actif' => 1,
         ]);
 
         $response = $this->json('GET', '/api/v2/trombinoscope', [], ['Sis-Key' => 1]);
@@ -444,7 +469,6 @@ class SapeurTest extends TestCase
     {
         Sapeur::factory()->count(2)->create([
             'localite_id' => $this->localiteId,
-            'actif' => 1,
         ]);
 
         $response = $this->json('GET', '/api/v2/liste-fssp');
@@ -456,7 +480,6 @@ class SapeurTest extends TestCase
     {
         Sapeur::factory()->count(2)->create([
             'localite_id' => $this->localiteId,
-            'actif' => 1,
         ]);
 
         $response = $this->json('GET', '/api/v2/liste-foad');
@@ -481,7 +504,6 @@ class SapeurTest extends TestCase
     {
         Sapeur::factory()->count(2)->create([
             'localite_id' => $this->localiteId,
-            'actif' => 1,
         ]);
 
         $response = $this->json('GET', '/api/v2/sapeurs-convocation');
@@ -489,5 +511,51 @@ class SapeurTest extends TestCase
         $response
             ->assertStatus(200)
             ->assertJsonStructure(['data']);
+    }
+
+    public function testConvocationSmsContientLesSapeursEtCivilsActifs(): void
+    {
+        $sapeur = Sapeur::factory()->create(['localite_id' => $this->localiteId]);
+        $civil = Sapeur::factory()->civil()->create(['localite_id' => $this->localiteId]);
+        $ancienSapeur = Sapeur::factory()->inactif()->create(['localite_id' => $this->localiteId]);
+        $recrue = Sapeur::factory()->recrue()->create(['localite_id' => $this->localiteId]);
+
+        $ids = collect($this->json('GET', '/api/v2/sapeurs-convocation')->assertStatus(200)->json('data'))->pluck('id');
+
+        $this->assertContains($sapeur->id, $ids);
+        $this->assertContains($civil->id, $ids);
+        $this->assertNotContains($ancienSapeur->id, $ids);
+        $this->assertNotContains($recrue->id, $ids);
+    }
+
+    /**
+     * Champ actif calculé, gardé pour les anciennes versions des apps mobiles
+     */
+    public function testIndexCalculeActifDepuisLesStatuts(): void
+    {
+        $sapeur = Sapeur::factory()->create(['localite_id' => $this->localiteId]);
+        $civil = Sapeur::factory()->civil()->create(['localite_id' => $this->localiteId]);
+        $ancienSapeur = Sapeur::factory()->inactif()->create(['localite_id' => $this->localiteId]);
+        $recrue = Sapeur::factory()->recrue()->create(['localite_id' => $this->localiteId]);
+
+        $actifs = collect($this->json('GET', '/api/v2/sapeurs')->assertStatus(200)->json('data'))->pluck('actif', 'id');
+
+        $this->assertTrue($actifs[$sapeur->id]);
+        $this->assertTrue($actifs[$civil->id]);
+        $this->assertFalse($actifs[$ancienSapeur->id]);
+        $this->assertFalse($actifs[$recrue->id]);
+    }
+
+    public function testIndexFiltreActifGardeLesSapeursEtCivilsActifs(): void
+    {
+        $sapeur = Sapeur::factory()->create(['localite_id' => $this->localiteId]);
+        $civil = Sapeur::factory()->civil()->create(['localite_id' => $this->localiteId]);
+        $ancienSapeur = Sapeur::factory()->inactif()->create(['localite_id' => $this->localiteId]);
+
+        $ids = collect($this->json('GET', '/api/v2/sapeurs?actif=true')->assertStatus(200)->json('data'))->pluck('id');
+
+        $this->assertContains($sapeur->id, $ids);
+        $this->assertContains($civil->id, $ids);
+        $this->assertNotContains($ancienSapeur->id, $ids);
     }
 }

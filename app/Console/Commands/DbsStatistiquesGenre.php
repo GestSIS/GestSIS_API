@@ -93,12 +93,12 @@ class DbsStatistiquesGenre extends Command
                 LEFT JOIN (
                     SELECT s2.id as sapeur_id, DATEDIFF(min(m.incorporation), s2.date_naissance) / 365.25 as age
                     FROM sapeurs as s2
-                    INNER JOIN mutations as m ON m.sapeur_id = s2.id
+                    INNER JOIN mutations as m ON m.sapeur_id = s2.id AND m.nature = ?
                     GROUP BY s2.id, s2.date_naissance
                     HAVING min(m.incorporation) > s2.date_naissance
                 ) as age ON age.sapeur_id = s.id
-                WHERE s.type = ?
-                AND (? OR s.actif = 1)
+                WHERE s.statut_sapeur != ?
+                AND (? OR s.statut_sapeur = ?)
                 AND NOT EXISTS (
                     SELECT 1
                     FROM grades as g
@@ -107,7 +107,7 @@ class DbsStatistiquesGenre extends Command
                     AND (gs.id IS NOT NULL OR g.id = s.grade_id)
                 )
                 GROUP BY s.civilite_id
-            ", [SapeurBusiness::TYPE_SAPEUR, $inclureInactifs]);
+            ", [SapeurBusiness::NATURE_SAPEUR, SapeurBusiness::STATUT_JAMAIS, $inclureInactifs, SapeurBusiness::STATUT_ACTIF]);
 
         $statistiques = array_map(fn (): array => $this->statistiquesVides(), self::GENRES);
         foreach ($resultats as $resultat) {

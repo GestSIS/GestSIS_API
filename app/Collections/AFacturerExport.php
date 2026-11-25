@@ -2,8 +2,10 @@
 
 namespace App\Collections;
 
+use App\Domaine\Business\SapeurBusiness;
 use App\Models\Decompte;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -39,7 +41,8 @@ class AFacturerExport implements FromQuery, WithHeadings
         'sapeurs.date_naissance',
         'sapeurs.no_avs',
         'sapeurs.email',
-        'sapeurs.actif',
+        // Personne active, en tant que sapeur ou civil
+        DB::raw('(sapeurs.statut_sapeur = ' . SapeurBusiness::STATUT_ACTIF . ' OR sapeurs.statut_civil = ' . SapeurBusiness::STATUT_ACTIF . ') as actif'),
         'sapeurs.remarque',
         'localites.npa as npa',
         'localites.designation as localite',

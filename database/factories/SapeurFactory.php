@@ -26,26 +26,70 @@ class SapeurFactory extends Factory
             'employeur' => 'Canton du Jura',
             'lieu_de_travail' => $this->faker->city,
             'email' => $this->faker->unique()->safeEmail,
-            'actif' => 1,
             'iban' => $this->faker->iban('CH'),
             'iban_statut' => 1,
             'remarque' => $this->faker->text,
             'porteur' => 0,
             'localite_id' => Localite::inRandomOrder()->first()?->id ?? 1,
             'civilite_id' => Civilite::inRandomOrder()->first()?->id ?? 1,
-            'type' => SapeurBusiness::TYPE_SAPEUR,
+            'statut_sapeur' => SapeurBusiness::STATUT_ACTIF,
+            'statut_civil' => SapeurBusiness::STATUT_JAMAIS,
         ];
+    }
+
+    public function civil(): static
+    {
+        return $this->state([
+            'statut_sapeur' => SapeurBusiness::STATUT_JAMAIS,
+            'statut_civil' => SapeurBusiness::STATUT_ACTIF,
+        ]);
+    }
+
+    /** Ancien sapeur : mutation sapeur close */
+    public function inactif(): static
+    {
+        return $this->state([
+            'statut_sapeur' => SapeurBusiness::STATUT_INACTIF,
+        ]);
+    }
+
+    /** Ancien sapeur resté civil après sa fin de service */
+    public function ancienSapeurCivil(): static
+    {
+        return $this->state([
+            'statut_sapeur' => SapeurBusiness::STATUT_INACTIF,
+            'statut_civil' => SapeurBusiness::STATUT_ACTIF,
+        ]);
+    }
+
+    public function recrue(): static
+    {
+        return $this->state([
+            'statut_sapeur' => SapeurBusiness::STATUT_JAMAIS,
+            'statut_civil' => SapeurBusiness::STATUT_JAMAIS,
+        ]);
     }
 
     public function configure(): static
     {
+        // Une mutation par statut renseigné, ouverte si actif, close l'an passé sinon
         return $this->afterCreating(function (Sapeur $sapeur) {
-            $sapeur->mutations()->create([
-                'localite_id' => $sapeur->localite_id,
-                'incorporation' => $this->faker->dateTimeBetween('-10years', '-1year')->format('Y-m-d'),
-                'sortie' => null,
-                'motif' => 'Incorporation',
-            ]);
+            $natures = [
+                SapeurBusiness::NATURE_SAPEUR => $sapeur->statut_sapeur,
+                SapeurBusiness::NATURE_CIVIL => $sapeur->statut_civil,
+            ];
+            foreach ($natures as $nature => $statut) {
+                if ($statut === SapeurBusiness::STATUT_JAMAIS) {
+                    continue;
+                }
+                $sapeur->mutations()->create([
+                    'nature' => $nature,
+                    'localite_id' => $sapeur->localite_id,
+                    'incorporation' => $this->faker->dateTimeBetween('-10years', '-2year')->format('Y-m-d'),
+                    'sortie' => $statut === SapeurBusiness::STATUT_ACTIF ? null : now()->subYear()->format('Y-m-d'),
+                    'motif' => 'Incorporation',
+                ]);
+            }
         });
     }
 }

@@ -16,8 +16,9 @@ class EmailController extends Controller
             return response()->json(['data' => []]);
         }
 
-        $res = array_filter(Sis::each(fn() => Sapeur::whereIn('type', [SapeurBusiness::TYPE_SAPEUR, SapeurBusiness::TYPE_CIVIL])
-                ->where('email', $email)
+        $res = array_filter(Sis::each(fn() => Sapeur::where('email', $email)
+                ->where(fn($query) => $query->where('statut_sapeur', SapeurBusiness::STATUT_ACTIF)
+                    ->orWhere('statut_civil', SapeurBusiness::STATUT_ACTIF))
                 ->get(['id', 'email'])
                 ->first(fn(Sapeur $sapeur) => self::sameEmail($sapeur->email, $email))?->id));
 
@@ -40,8 +41,9 @@ class EmailController extends Controller
     public function listeIdentitesActives()
     {
         $res = Sis::each(function () {
-            return Sapeur::whereIn('type', [SapeurBusiness::TYPE_SAPEUR, SapeurBusiness::TYPE_CIVIL])
-                ->where('actif', true)
+            // Sapeur ou civil actif (une recrue ne l'est jamais)
+            return Sapeur::where(fn($query) => $query->where('statut_sapeur', SapeurBusiness::STATUT_ACTIF)
+                ->orWhere('statut_civil', SapeurBusiness::STATUT_ACTIF))
                 ->pluck('email', 'id')
                 ->all();
         });

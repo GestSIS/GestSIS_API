@@ -35,9 +35,22 @@ use Z38\SwissPayment\IBAN;
 
 class SapeurBusiness
 {
+    /**
+     * Type principal, calculé (voir typePrincipal())
+     * FIXME: à supprimer une fois les apps mobiles migrées sur statut_sapeur / statut_civil
+     */
     public const TYPE_SAPEUR = 0;
     public const TYPE_CIVIL = 1;
     public const TYPE_RECRUE = 2;
+
+    /** Nature d'une mutation */
+    public const NATURE_SAPEUR = 0;
+    public const NATURE_CIVIL = 1;
+
+    /** Statuts sapeur / civil d'une personne, recalculés depuis ses mutations */
+    public const STATUT_JAMAIS = 0;
+    public const STATUT_ACTIF = 1;
+    public const STATUT_INACTIF = 2;
 
     private const ALLOWED_PHOTO_EXTENSIONS = ['jpg', 'jpeg', 'png'];
 
@@ -63,40 +76,81 @@ class SapeurBusiness
         return $data;
     }
 
-    private static function isActif($mutations)
+    /**
+     * Statuts sapeur et civil recalculés depuis les mutations : jamais (aucune mutation
+     * de cette nature), actif (une mutation en cours) ou inactif. Une mutation sapeur
+     * compte comme active dès 3 mois avant l'incorporation.
+     *
+     * @return array{statut_sapeur: int, statut_civil: int}
+     */
+    private static function statuts($mutations): array
     {
         $now = Carbon::now()->setTime(0, 0);
-        foreach ($mutations as $mutation) {
-            if (
-                (Carbon::parse($mutation->sortie)->gte($now) && Carbon::parse($mutation->incorporation)->subMonths(3)->lte($now)) ||
-                ($mutation->sortie === null && Carbon::parse($mutation->incorporation)->lte($now))
-            ) {
-                return true;
+        $statut = function (int $nature, int $anticipationMonths) use ($mutations, $now) {
+            $mutationsNature = $mutations->where('nature', $nature);
+            if ($mutationsNature->isEmpty()) {
+                return self::STATUT_JAMAIS;
             }
-        }
-        return false;
+            $isRunning = fn($m) => ($m->sortie === null || Carbon::parse($m->sortie)->gte($now))
+                && Carbon::parse($m->incorporation)->subMonths($anticipationMonths)->lte($now);
+            return $mutationsNature->contains($isRunning) ? self::STATUT_ACTIF : self::STATUT_INACTIF;
+        };
+
+        return [
+            'statut_sapeur' => $statut(self::NATURE_SAPEUR, 3),
+            'statut_civil' => $statut(self::NATURE_CIVIL, 0),
+        ];
+    }
+
+    /**
+     * Type principal, pour la compatibilité des anciennes versions des apps mobiles :
+     * sapeur actif > civil actif > ancien sapeur > ancien civil, recrue sinon. Une
+     * personne peut être à la fois sapeur et civil : utiliser statut_sapeur / statut_civil.
+     * FIXME: à supprimer une fois les apps mobiles migrées sur statut_sapeur / statut_civil
+     */
+    public static function typePrincipal(int $statutSapeur, int $statutCivil): int
+    {
+        return match (true) {
+            $statutSapeur === self::STATUT_ACTIF => self::TYPE_SAPEUR,
+            $statutCivil === self::STATUT_ACTIF => self::TYPE_CIVIL,
+            $statutSapeur === self::STATUT_INACTIF => self::TYPE_SAPEUR,
+            $statutCivil === self::STATUT_INACTIF => self::TYPE_CIVIL,
+            default => self::TYPE_RECRUE,
+        };
     }
 
     private static function anneeIncorporation($mutations)
     {
-        return $mutations->map(fn($m) => Carbon::parse($m->incorporation)->year)->min() ?? '';
+        return $mutations->where('nature', self::NATURE_SAPEUR)
+            ->map(fn($m) => Carbon::parse($m->incorporation)->year)->min() ?? '';
     }
 
-    public static function recomputeSapeurActifStatus()
+    /**
+     * Recalcul quotidien des statuts sapeur et civil, qui dépendent de la date du jour
+     */
+    public static function recomputeSapeurStatuts()
     {
-        // TODO: Could be optimised via a single SQL Query
-        // Sub query 1 -> check if one mutation contains the current date
-        $sapeurs = Sapeur::where('type', self::TYPE_SAPEUR)->with('mutations')->get();
+        $sapeurs = Sapeur::with('mutations')->get();
         foreach ($sapeurs as $sapeur) {
-            $sapeur->actif = self::isActif($sapeur->mutations);
-            $sapeur->save();
+            self::majStatuts($sapeur, $sapeur->mutations);
         }
+    }
+
+    /**
+     * Recalcule les statuts sapeur et civil et l'année d'incorporation à partir des
+     * mutations (toutes natures confondues) de la personne.
+     */
+    private static function majStatuts(Sapeur $sapeur, $mutations): void
+    {
+        $sapeur->fill(self::statuts($mutations));
+        $sapeur->annee_incorporation = self::anneeIncorporation($mutations);
+        $sapeur->save();
     }
 
     public static function recomputeSapeurFonctionPrincipale()
     {
         $now = Carbon::now();
-        $sapeurs = Sapeur::where('type', self::TYPE_SAPEUR)->with([
+        $sapeurs = Sapeur::with([
             'fonctions' => function ($query) use ($now) {
                 $query->where('debut', '<=', $now)->where(fn($query) => $query->whereNull('fin')
                     ->orWhere('fin', '>=', $now))
@@ -114,7 +168,7 @@ class SapeurBusiness
     public static function recomputeSapeurGradePrincipal()
     {
         $now = Carbon::now();
-        $sapeurs = Sapeur::where('type', self::TYPE_SAPEUR)->with([
+        $sapeurs = Sapeur::where('statut_sapeur', '!=', self::STATUT_JAMAIS)->with([
             'grades' => function ($query) use ($now) {
                 $query->where('date', '<=', $now)
                     ->join('grades', 'grades.id', '=', 'grade_sapeur.grade_id')
@@ -128,14 +182,34 @@ class SapeurBusiness
         }
     }
 
+    /**
+     * Est ou a été sapeur (au moins une mutation sapeur).
+     */
     private static function isSapeur($sapeurId)
     {
-        return Sapeur::whereId($sapeurId)->where('type', self::TYPE_SAPEUR)->exists();
+        return Sapeur::whereId($sapeurId)->where('statut_sapeur', '!=', self::STATUT_JAMAIS)->exists();
     }
 
+    /**
+     * Sapeur ou recrue, c'est-à-dire pas uniquement civil.
+     */
     private static function isSapeurOuRecrue($sapeurId)
     {
-        return Sapeur::whereId($sapeurId)->whereIn('type', [self::TYPE_SAPEUR, self::TYPE_RECRUE])->exists();
+        return Sapeur::whereId($sapeurId)
+            ->where(fn($query) => $query->where('statut_sapeur', '!=', self::STATUT_JAMAIS)
+                ->orWhere('statut_civil', self::STATUT_JAMAIS))
+            ->exists();
+    }
+
+    /**
+     * Recrue : aucune mutation, ni sapeur ni civile.
+     */
+    private static function isRecrue(int $sapeurId): bool
+    {
+        return Sapeur::whereId($sapeurId)
+            ->where('statut_sapeur', self::STATUT_JAMAIS)
+            ->where('statut_civil', self::STATUT_JAMAIS)
+            ->exists();
     }
 
     public static function createSapeur($data)
@@ -146,19 +220,17 @@ class SapeurBusiness
         }
         $data = self::normalizeNullableFields($data);
         $data['iban_statut'] = 1;
-        $data['actif'] = true;
-        $data['annee_incorporation'] = Carbon::parse($data['incorporation'])->year;
         $data['porteur'] = false;
-        $data['type'] = self::TYPE_SAPEUR;
+        // Statuts et année d'incorporation découlent de la mutation ajoutée ensuite
         $sapeur = Sapeur::create($data);
 
-        //add new sapeur mutation
-        self::addMutation($sapeur->id, [
+        self::insertMutation($sapeur->id, [
+            "nature" => self::NATURE_SAPEUR,
             "localite_id" => $sapeur->localite_id,
             "incorporation" => $data['incorporation'],
             "motif" => ""
         ]);
-        return $sapeur;
+        return $sapeur->refresh();
     }
 
     public static function createCivil($data)
@@ -169,13 +241,17 @@ class SapeurBusiness
         }
         $data = self::normalizeNullableFields($data);
         $data['iban_statut'] = 1;
-        $data['actif'] = true;
         $data['porteur'] = false;
-        $data['type'] = self::TYPE_CIVIL;
         $data['date_naissance'] = Carbon::yesterday();
         $sapeur = Sapeur::create($data);
 
-        return $sapeur;
+        self::insertMutation($sapeur->id, [
+            "nature" => self::NATURE_CIVIL,
+            "localite_id" => $sapeur->localite_id,
+            "incorporation" => $data['incorporation'],
+            "motif" => ""
+        ]);
+        return $sapeur->refresh();
     }
 
     private static function normaliserAvs(string $noAvs): string
@@ -278,9 +354,7 @@ class SapeurBusiness
 
         $data = self::normalizeNullableFields($data);
         $data['iban_statut'] = 1;
-        $data['actif'] = false;
         $data['porteur'] = false;
-        $data['type'] = self::TYPE_RECRUE;
 
         $telephones = $data['telephones'] ?? [];
         $permis = $data['permis'] ?? [];
@@ -307,31 +381,18 @@ class SapeurBusiness
      */
     public static function validateRecrue(int $sapeurId, string $incorporation): Sapeur
     {
-        $recrue = Sapeur::where('type', self::TYPE_RECRUE)->findOrFail($sapeurId);
+        $recrue = Sapeur::where('statut_sapeur', self::STATUT_JAMAIS)
+            ->where('statut_civil', self::STATUT_JAMAIS)
+            ->findOrFail($sapeurId);
 
-        $recrue->type = self::TYPE_SAPEUR;
-        $recrue->actif = true;
-        $recrue->annee_incorporation = Carbon::parse($incorporation)->year;
-        $recrue->save();
-
-        self::addMutation($recrue->id, [
+        self::insertMutation($recrue->id, [
+            "nature" => self::NATURE_SAPEUR,
             "localite_id" => $recrue->localite_id,
             "incorporation" => $incorporation,
             "motif" => "",
         ]);
 
-        return $recrue;
-    }
-
-    public static function updateNonSapeurStatut($sapeurId, $data)
-    {
-        if (self::isSapeur($sapeurId)) {
-            throw new ArrayException([], "Impossible de changer le statut d'un sapeur directement sans passer par une mutation.");
-        }
-
-        $sapeur = Sapeur::findOrFail($sapeurId);
-        $sapeur->update($data);
-        return $sapeur;
+        return $recrue->refresh();
     }
 
     public static function updateSapeurById(int $sapeurId, $data)
@@ -649,66 +710,88 @@ class SapeurBusiness
     }
 
     /**
-     * Recalcule le statut actif et l'année d'incorporation du sapeur à partir de ses mutations
+     * Met à jour les statuts après une modification des mutations et les retourne.
      *
-     * @return array{actif: bool, annee_incorporation: mixed}
+     * @return array{annee_incorporation: mixed, statut_sapeur: int, statut_civil: int, type: int}
      */
-    private static function majStatutActifSapeur(int $sapeurId, $mutations): array
+    private static function majStatutsSapeur(int $sapeurId, $mutations): array
     {
         $sapeur = Sapeur::findOrFail($sapeurId);
-        $sapeur->actif = self::isActif($mutations);
-        $sapeur->annee_incorporation = self::anneeIncorporation($mutations);
-        $sapeur->save();
+        self::majStatuts($sapeur, $mutations);
 
-        return ["actif" => $sapeur->actif, "annee_incorporation" => $sapeur->annee_incorporation];
+        return [
+            "annee_incorporation" => $sapeur->annee_incorporation,
+            "statut_sapeur" => $sapeur->statut_sapeur,
+            "statut_civil" => $sapeur->statut_civil,
+            "type" => self::typePrincipal($sapeur->statut_sapeur, $sapeur->statut_civil),
+        ];
     }
 
+    /**
+     * Ajout d'une mutation sapeur ou civile. Une recrue doit d'abord être validée.
+     */
     public static function addMutation($sapeurId, $data)
     {
-        if (!self::isSapeur($sapeurId)) {
-            throw new ArrayException([], "Impossible d'ajouter une mutation à un civil.");
+        if (self::isRecrue($sapeurId)) {
+            throw new ArrayException([], "Impossible d'ajouter une mutation à une recrue, elle doit d'abord être validée.");
         }
+        return self::insertMutation($sapeurId, $data);
+    }
+
+    /**
+     * Les périodes ne sont contrôlées qu'entre mutations de même nature : une personne
+     * peut être sapeur et civil en même temps.
+     */
+    private static function insertMutation(int $sapeurId, array $data): array
+    {
+        $data['nature'] ??= self::NATURE_SAPEUR;
         $mutations = Mutation::where('sapeur_id', $sapeurId)->get();
-        self::verifyMutationPeriode($data, $mutations);
+        self::verifyMutationPeriode($data, $mutations->where('nature', $data['nature']));
 
         $data['sapeur_id'] = $sapeurId;
         $data['motif'] ??= '';
         $mutation = Mutation::create($data);
 
-        // Update actif statut depending of end of all mutation
         $mutations->push($mutation);
-        return array_merge(["mutation" => $mutation], self::majStatutActifSapeur($sapeurId, $mutations));
+        return array_merge(["mutation" => $mutation], self::majStatutsSapeur($sapeurId, $mutations));
     }
 
+    /**
+     * Modification d'une mutation, sa nature ne change pas.
+     */
     public static function updateMutation(int $sapeurId, $data)
     {
-        //Update mutation
         $mutationId = $data['id'];
+        $mutation = Mutation::where('sapeur_id', $sapeurId)->findOrFail($mutationId);
         $mutations = Mutation::where('sapeur_id', $sapeurId)->get()->reject(fn($m) => $m->id === $mutationId);
-        self::verifyMutationPeriode($data, $mutations);
+        self::verifyMutationPeriode($data, $mutations->where('nature', $mutation->nature));
 
-        $mutation = Mutation::where('sapeur_id', $sapeurId)->findOrFail($data['id']);
         if (array_key_exists('motif', $data)) {
             $data['motif'] ??= '';
         }
         $mutation->update($data);
 
-        // Update actif statut depending of end of all mutation
         $mutations->push($mutation);
-        return array_merge(["mutation" => $mutation], self::majStatutActifSapeur($sapeurId, $mutations));
+        return array_merge(["mutation" => $mutation], self::majStatutsSapeur($sapeurId, $mutations));
     }
 
     /**
      * Suppression d'une mutation. Supprimer la dernière mutation annule la validation
      * de la recrue : le sapeur repasse en recrue, à condition de n'avoir encore aucun
-     * historique (exercice, intervention, écriture ou travail).
+     * historique (exercice, intervention, écriture ou travail). La dernière mutation
+     * d'un civil ne se supprime pas : il faudrait supprimer la personne.
      *
-     * @return array{actif: bool, annee_incorporation: int|string, type: int}
+     * @return array{annee_incorporation: mixed, statut_sapeur: int, statut_civil: int, type: int}
      */
     public static function removeMutation(int $sapeurId, int $mutationId): array
     {
         $mutation = Mutation::where('sapeur_id', $sapeurId)->findOrFail($mutationId);
-        $isLastMutation = Mutation::where('sapeur_id', $sapeurId)->count() === 1;
+        $otherMutations = Mutation::where('sapeur_id', $sapeurId)->where('id', '!=', $mutationId)->get();
+        $isLastMutation = $otherMutations->isEmpty();
+
+        if ($isLastMutation && $mutation->nature === self::NATURE_CIVIL) {
+            throw new NotReportableException([], "Impossible de supprimer la dernière mutation d'un civil.");
+        }
 
         if (
             $isLastMutation && (
@@ -722,25 +805,10 @@ class SapeurBusiness
             throw new NotReportableException([], "Impossible de supprimer la dernière mutation : le sapeur a des exercices, interventions, écritures ou travaux.");
         }
 
-        return DB::transaction(function () use ($sapeurId, $mutation, $isLastMutation) {
+        // Sans mutation restante, les statuts repassent à « jamais » : la personne redevient recrue
+        return DB::transaction(function () use ($sapeurId, $mutation, $otherMutations) {
             $mutation->delete();
-
-            if (!$isLastMutation) {
-                $statut = self::majStatutActifSapeur($sapeurId, Mutation::where('sapeur_id', $sapeurId)->get());
-                return [...$statut, 'type' => self::TYPE_SAPEUR];
-            }
-
-            $sapeur = Sapeur::findOrFail($sapeurId);
-            $sapeur->type = self::TYPE_RECRUE;
-            $sapeur->actif = false;
-            $sapeur->annee_incorporation = '';
-            $sapeur->save();
-
-            return [
-                'actif' => false,
-                'annee_incorporation' => '',
-                'type' => self::TYPE_RECRUE,
-            ];
+            return self::majStatutsSapeur($sapeurId, $otherMutations);
         });
     }
 
@@ -906,8 +974,7 @@ class SapeurBusiness
     {
         $imageDefault = 'icon/user.svg';
 
-        $sapeurs = Sapeur::where('actif', 1)
-            ->where('type', self::TYPE_SAPEUR)
+        $sapeurs = Sapeur::where('statut_sapeur', self::STATUT_ACTIF)
             ->orderBy('nom')
             ->orderBy('prenom')
             ->get(['id', 'nom', 'prenom']);

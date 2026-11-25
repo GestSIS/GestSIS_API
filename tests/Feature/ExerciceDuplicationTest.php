@@ -115,7 +115,7 @@ class ExerciceDuplicationTest extends TestCase
     public function testDuplicateSkipsInactiveSapeurs(): void
     {
         $activeSapeur = Sapeur::factory()->create();
-        $inactiveSapeur = Sapeur::factory()->create(['actif' => 0]);
+        $inactiveSapeur = Sapeur::factory()->inactif()->create();
         $this->addConvocation($activeSapeur->id);
         $this->addConvocation($inactiveSapeur->id);
 
@@ -124,6 +124,22 @@ class ExerciceDuplicationTest extends TestCase
         $response->assertStatus(201);
         $this->assertSame(
             [$activeSapeur->id],
+            ExerciceSapeur::where('exercice_id', $response->json('data.id'))->pluck('sapeur_id')->all(),
+        );
+    }
+
+    public function testDuplicateKeepsActiveCivils(): void
+    {
+        $civil = Sapeur::factory()->civil()->create();
+        $ancienSapeurCivil = Sapeur::factory()->ancienSapeurCivil()->create();
+        $this->addConvocation($civil->id);
+        $this->addConvocation($ancienSapeurCivil->id);
+
+        $response = $this->duplicate();
+
+        $response->assertStatus(201);
+        $this->assertEqualsCanonicalizing(
+            [$civil->id, $ancienSapeurCivil->id],
             ExerciceSapeur::where('exercice_id', $response->json('data.id'))->pluck('sapeur_id')->all(),
         );
     }

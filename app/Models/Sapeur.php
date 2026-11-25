@@ -22,7 +22,6 @@ class Sapeur extends Model
         'employeur',
         'lieu_de_travail',
         'email',
-        'actif',
         'iban',
         'iban_statut',
         'remarque',
@@ -31,14 +30,14 @@ class Sapeur extends Model
         'civilite_id',
         'cotisation_avs',
         'annee_incorporation',
-        'type',
+        'statut_sapeur',
+        'statut_civil',
         'fonction_id',
         'grade_id'
     ];
     protected function casts(): array
     {
         return [
-            'actif' => 'boolean',
             'iban_statut' => 'integer',
             'cotisation_avs' => 'boolean',
             'localite_id' => 'integer',
@@ -46,7 +45,8 @@ class Sapeur extends Model
             'porteur' => 'boolean',
             'fonction_id' => 'integer',
             'grade_id' => 'integer',
-            'type' => 'integer'
+            'statut_sapeur' => 'integer',
+            'statut_civil' => 'integer',
         ];
     }
 

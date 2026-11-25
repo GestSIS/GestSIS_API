@@ -98,7 +98,7 @@ class ExerciceBusiness
 
     /**
      * Duplique un exercice à une nouvelle date dans le même exercice comptable.
-     * Seules les convocations des sapeurs encore actifs sont reprises (pas les présences,
+     * Seules les convocations des sapeurs et civils encore actifs sont reprises (pas les présences,
      * excuses, remarques ni travaux).
      *
      * @param array{date: string, designation: string, garder_sapeurs: bool} $data
@@ -123,7 +123,8 @@ class ExerciceBusiness
             if ($data['garder_sapeurs']) {
                 $sapeurIds = ExerciceSapeur::where('exercice_id', $exercice->id)
                     ->where('convoque', 1)
-                    ->whereIn('sapeur_id', Sapeur::where('actif', 1)->select('id'))
+                    ->whereIn('sapeur_id', Sapeur::where('statut_sapeur', SapeurBusiness::STATUT_ACTIF)
+                        ->orWhere('statut_civil', SapeurBusiness::STATUT_ACTIF)->select('id'))
                     ->pluck('sapeur_id');
                 $now = now();
                 ExerciceSapeur::insert($sapeurIds->map(fn(int $sapeurId): array => [
@@ -875,14 +876,12 @@ class ExerciceBusiness
                     'id',
                     'nom',
                     'prenom',
-                    'actif',
                     'email',
                     'localite_id',
                     'fonction_id',
                     'grade_id',
                     'civilite_id',
                     'date_naissance',
-                    'type',
                     'annee_incorporation',
                     DB::raw("CONCAT(nom, ' ', prenom) AS nom_prenom")
                 ])->toArray();
@@ -945,14 +944,12 @@ class ExerciceBusiness
                     'id',
                     'nom',
                     'prenom',
-                    'actif',
                     'email',
                     'localite_id',
                     'fonction_id',
                     'grade_id',
                     'civilite_id',
                     'date_naissance',
-                    'type',
                     'annee_incorporation',
                     DB::raw("CONCAT(nom, ' ', prenom) AS nom_prenom")
                 ])->toArray();

@@ -2,8 +2,10 @@
 
 namespace App\Collections;
 
+use App\Domaine\Business\SapeurBusiness;
 use App\Models\Sapeur;
 use Illuminate\Support\Enumerable;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -24,7 +26,8 @@ class SapeursExport implements FromCollection, WithHeadings
 
     // Sélection des sapeurs
     if (count($this->ids) == 0) {
-      $query = $query->where('sapeurs.actif', True);
+      // Par défaut : les sapeurs actifs, sans les civils
+      $query = $query->where('sapeurs.statut_sapeur', SapeurBusiness::STATUT_ACTIF);
     } else {
       $query = $query->whereIn('sapeurs.id', $this->ids);
     }
@@ -48,7 +51,8 @@ class SapeursExport implements FromCollection, WithHeadings
         'sapeurs.employeur',
         'sapeurs.lieu_de_travail',
         'sapeurs.email',
-        'sapeurs.actif',
+        // Personne active, en tant que sapeur ou civil
+        DB::raw('(sapeurs.statut_sapeur = ' . SapeurBusiness::STATUT_ACTIF . ' OR sapeurs.statut_civil = ' . SapeurBusiness::STATUT_ACTIF . ') as actif'),
         'sapeurs.iban',
         'sapeurs.remarque',
         'localites.npa as npa',

@@ -96,7 +96,7 @@ class SapeurMutationTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     'mutation' => ['id', 'incorporation', 'sapeur_id', 'sortie', 'motif'],
-                    'actif'
+                    'statut_sapeur'
                 ]
             ])
             ->assertJsonPath('data.mutation.sapeur_id', $this->sapeurId)
@@ -185,7 +185,7 @@ class SapeurMutationTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     'mutation' => ['id', 'localite_id', 'incorporation', 'sapeur_id', 'sortie', 'motif'],
-                    'actif'
+                    'statut_sapeur'
                 ]
             ])
             ->assertJsonPath('data.mutation.id', $mutationId)
@@ -288,7 +288,7 @@ class SapeurMutationTest extends TestCase
             ->assertStatus(422)
             ->assertJsonStructure(['message']);
         $this->assertDatabaseHas('mutations', ['id' => $mutationId]);
-        $this->assertDatabaseHas('sapeurs', ['id' => $this->sapeurId, 'type' => SapeurBusiness::TYPE_SAPEUR]);
+        $this->assertDatabaseHas('sapeurs', ['id' => $this->sapeurId, 'statut_sapeur' => SapeurBusiness::STATUT_ACTIF]);
     }
 
     public function testRemoveLastMutationTurnsSapeurIntoRecrue()
@@ -299,12 +299,11 @@ class SapeurMutationTest extends TestCase
 
         $response
             ->assertStatus(200)
-            ->assertJsonPath('data.type', SapeurBusiness::TYPE_RECRUE)
-            ->assertJsonPath('data.actif', false);
+            ->assertJsonPath('data.type', SapeurBusiness::TYPE_RECRUE);
         $this->assertDatabaseHas('sapeurs', [
             'id' => $this->sapeurId,
-            'type' => SapeurBusiness::TYPE_RECRUE,
-            'actif' => 0,
+            'statut_sapeur' => SapeurBusiness::STATUT_JAMAIS,
+            'statut_civil' => SapeurBusiness::STATUT_JAMAIS,
             'annee_incorporation' => '',
         ]);
         $this->assertDatabaseMissing('mutations', ['sapeur_id' => $this->sapeurId]);
@@ -397,5 +396,125 @@ class SapeurMutationTest extends TestCase
         $response
             ->assertStatus(200)
             ->assertJsonPath('data.type', SapeurBusiness::TYPE_SAPEUR);
+    }
+
+    /**
+     * @param array<string, mixed> $attributes
+     */
+    private function postMutationCivile(int $sapeurId, array $attributes = []): \Illuminate\Testing\TestResponse
+    {
+        return $this->json('POST', "/api/v2/sapeurs/{$sapeurId}/mutations", [
+            'nature' => SapeurBusiness::NATURE_CIVIL,
+            'incorporation' => now()->subMonth()->toDateString(),
+            'localite_id' => $this->localiteId,
+            ...$attributes,
+        ]);
+    }
+
+    /**
+     * Un sapeur en service peut être civil en même temps : pas de conflit entre natures
+     */
+    public function testAddMutationCivileAcceptedWhileSapeurMutationIsOpen()
+    {
+        $response = $this->postMutationCivile($this->sapeurId);
+
+        $response
+            ->assertStatus(201)
+            ->assertJsonPath('data.mutation.nature', SapeurBusiness::NATURE_CIVIL)
+            ->assertJsonPath('data.statut_sapeur', SapeurBusiness::STATUT_ACTIF)
+            ->assertJsonPath('data.statut_civil', SapeurBusiness::STATUT_ACTIF)
+            ->assertJsonPath('data.type', SapeurBusiness::TYPE_SAPEUR);
+        $this->assertDatabaseHas('sapeurs', [
+            'id' => $this->sapeurId,
+            'statut_sapeur' => SapeurBusiness::STATUT_ACTIF,
+            'statut_civil' => SapeurBusiness::STATUT_ACTIF,
+        ]);
+    }
+
+    public function testAddMutationCivileOverlappingAnotherCivileReturns422()
+    {
+        $this->postMutationCivile($this->sapeurId, ['incorporation' => '2020-01-01', 'sortie' => '2022-12-31'])->assertStatus(201);
+
+        $response = $this->postMutationCivile($this->sapeurId, ['incorporation' => '2021-01-01', 'sortie' => '2021-12-31']);
+
+        $response->assertStatus(422);
+        $this->assertSame(1, Mutation::where('sapeur_id', $this->sapeurId)->where('nature', SapeurBusiness::NATURE_CIVIL)->count());
+    }
+
+    public function testAncienSapeurDevenuCivilApparaitCommeCivilActif()
+    {
+        $mutationId = $this->onlyMutationId();
+        $this->json('PUT', "/api/v2/sapeurs/{$this->sapeurId}/mutations/{$mutationId}", [
+            'id' => $mutationId,
+            'incorporation' => '2010-01-01',
+            'sortie' => now()->subMonth()->toDateString(),
+        ])->assertStatus(200);
+
+        $response = $this->postMutationCivile($this->sapeurId, ['incorporation' => now()->subMonth()->addDay()->toDateString()]);
+
+        $response
+            ->assertStatus(201)
+            ->assertJsonPath('data.statut_sapeur', SapeurBusiness::STATUT_INACTIF)
+            ->assertJsonPath('data.statut_civil', SapeurBusiness::STATUT_ACTIF)
+            ->assertJsonPath('data.type', SapeurBusiness::TYPE_CIVIL)
+            // L'année d'incorporation reste celle du service, pas de la période civile
+            ->assertJsonPath('data.annee_incorporation', 2010);
+    }
+
+    /**
+     * Un civil qui devient sapeur garde sa mutation civile ouverte
+     */
+    public function testAddMutationSapeurToCivilKeepsCivilMutationOpen()
+    {
+        $civil = Sapeur::factory()->civil()->create(['localite_id' => $this->localiteId]);
+
+        $response = $this->json('POST', "/api/v2/sapeurs/{$civil->id}/mutations", [
+            'incorporation' => now()->subWeek()->toDateString(),
+            'localite_id' => $this->localiteId,
+        ]);
+
+        $response
+            ->assertStatus(201)
+            ->assertJsonPath('data.statut_sapeur', SapeurBusiness::STATUT_ACTIF)
+            ->assertJsonPath('data.statut_civil', SapeurBusiness::STATUT_ACTIF);
+        $this->assertDatabaseHas('mutations', ['sapeur_id' => $civil->id, 'nature' => SapeurBusiness::NATURE_CIVIL, 'sortie' => null]);
+    }
+
+    public function testAddMutationToRecrueReturns422()
+    {
+        $recrue = Sapeur::factory()->recrue()->create(['localite_id' => $this->localiteId]);
+
+        $response = $this->postMutationCivile($recrue->id);
+
+        $response->assertStatus(422);
+        $this->assertDatabaseMissing('mutations', ['sapeur_id' => $recrue->id]);
+    }
+
+    public function testRemoveLastMutationOfCivilReturns422()
+    {
+        $civil = Sapeur::factory()->civil()->create(['localite_id' => $this->localiteId]);
+        $mutationId = Mutation::where('sapeur_id', $civil->id)->sole()->id;
+
+        $response = $this->json('DELETE', "/api/v2/sapeurs/{$civil->id}/mutations/{$mutationId}");
+
+        $response->assertStatus(422);
+        $this->assertDatabaseHas('mutations', ['id' => $mutationId]);
+    }
+
+    /**
+     * Supprimer la mutation sapeur d'une personne aussi civile la laisse civile, pas recrue
+     */
+    public function testRemoveSapeurMutationKeepsCivilStatus()
+    {
+        $this->postMutationCivile($this->sapeurId)->assertStatus(201);
+        $mutationId = Mutation::where('sapeur_id', $this->sapeurId)->where('nature', SapeurBusiness::NATURE_SAPEUR)->sole()->id;
+
+        $response = $this->json('DELETE', "/api/v2/sapeurs/{$this->sapeurId}/mutations/{$mutationId}");
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonPath('data.statut_sapeur', SapeurBusiness::STATUT_JAMAIS)
+            ->assertJsonPath('data.statut_civil', SapeurBusiness::STATUT_ACTIF)
+            ->assertJsonPath('data.type', SapeurBusiness::TYPE_CIVIL);
     }
 }

@@ -94,7 +94,7 @@ class SapeurPermisTest extends TestCase
      */
     public function testAddPermisSuccessfullyForRecrue()
     {
-        $recrue = Sapeur::factory()->create(['type' => 2]); // TYPE_RECRUE
+        $recrue = Sapeur::factory()->recrue()->create();
 
         $response = $this->json(
             'POST',
@@ -112,7 +112,7 @@ class SapeurPermisTest extends TestCase
      */
     public function testAddPermisReturnsErrorForCivil()
     {
-        $civil = Sapeur::factory()->create(['type' => 1]); // TYPE_CIVIL
+        $civil = Sapeur::factory()->civil()->create();
 
         $response = $this->json(
             'POST',
@@ -123,6 +123,23 @@ class SapeurPermisTest extends TestCase
         $response
             ->assertStatus(422)
             ->assertJsonStructure(['message']);
+    }
+
+    /**
+     * Un ancien sapeur resté civil garde son historique de sapeur : on peut le compléter
+     */
+    public function testAddPermisSuccessfullyForAncienSapeurDevenuCivil()
+    {
+        $sapeur = Sapeur::factory()->ancienSapeurCivil()->create();
+
+        $response = $this->json(
+            'POST',
+            "/api/v2/sapeurs/{$sapeur->id}/permis",
+            ['permis_type_id' => 1, 'date' => '2020-01-01']
+        );
+
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('permis', ['sapeur_id' => $sapeur->id, 'permis_type_id' => 1]);
     }
 
     /**

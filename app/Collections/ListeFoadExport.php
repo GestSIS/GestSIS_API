@@ -25,8 +25,9 @@ class ListeFoadExport implements FromCollection, WithHeadings
   {
     $date = $this->date;
     return Sapeur::query()
-      ->where('sapeurs.type', '=', SapeurBusiness::TYPE_SAPEUR)
       ->leftJoin('mutations', 'sapeurs.id', '=', 'mutations.sapeur_id')
+      // Périodes de service uniquement, pas les mutations civiles
+      ->where('mutations.nature', '=', SapeurBusiness::NATURE_SAPEUR)
       ->leftJoin('sapeur_telephone', 'sapeur_telephone.sapeur_id', '=', 'sapeurs.id')
       ->leftJoin('grades', 'sapeurs.grade_id', '=', 'grades.id')
       ->select([

@@ -34,17 +34,17 @@ class ImputationCoursTest extends TestCase
         // Création de 3 sapeurs
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "2019-01-29";
-        $data['type'] = 0;
+        $data['nature'] = 0;
         $this->sapeurOneId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
 
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "2019-01-29";
-        $data['type'] = 0;
+        $data['nature'] = 0;
         $this->sapeurTwoId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
 
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "2019-01-29";
-        $data['type'] = 0;
+        $data['nature'] = 0;
         $this->sapeurThreeId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
 
         // Création d'un cours de référence

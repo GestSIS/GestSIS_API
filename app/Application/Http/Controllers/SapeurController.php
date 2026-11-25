@@ -19,7 +19,11 @@ class SapeurController extends Controller
         $data = $sapeur->toArray();
         $data['fonction_id'] = $data['fonction_id'] ?? 0;
         $data['grade_id'] = $data['grade_id'] ?? 0;
-        $data['type'] = $data['type'] ?? 0;
+        // FIXME: à supprimer une fois les apps mobiles migrées sur statut_sapeur / statut_civil
+        $data['type'] = SapeurBusiness::typePrincipal($sapeur->statut_sapeur, $sapeur->statut_civil);
+        // FIXME: à supprimer une fois les apps mobiles migrées sur statut_sapeur / statut_civil
+        $data['actif'] = $data['statut_sapeur'] === SapeurBusiness::STATUT_ACTIF
+            || $data['statut_civil'] === SapeurBusiness::STATUT_ACTIF;
 
         return $data;
     }
@@ -28,10 +32,6 @@ class SapeurController extends Controller
     {
         $actif = $request->input('actif', false) === 'true';
         $actifOuAvecMateriel = $request->input('avec-materiel', false) === 'true';
-        $types = $request->validate([
-            'type' => 'array',
-            'type.*' => 'integer|min:0|max:2',
-        ])['type'] ?? null;
 
         $now = Carbon::now();
         $oneMonthFurther = Carbon::now()->addMonths(1);
@@ -45,17 +45,17 @@ class SapeurController extends Controller
             }
         ]);
 
-        if ($types !== null) {
-            $query = $query->whereIn('type', $types);
-        }
+        // Actif : sapeur ou civil actif
+        $estActif = fn($query) => $query->where('statut_sapeur', SapeurBusiness::STATUT_ACTIF)
+            ->orWhere('statut_civil', SapeurBusiness::STATUT_ACTIF);
         if ($actif) {
-            $query = $query->where('actif', '=', 1);
+            $query = $query->where($estActif);
         }
         if ($actifOuAvecMateriel) {
-            $query = $query->where('actif', '=', 1)->orWhereHas('articles');
+            $query = $query->where(fn($query) => $estActif($query)->orWhereHas('articles'));
         }
 
-        $columns = ['id', 'nom', 'prenom', 'civilite_id', 'email', 'suffixe', 'type', 'date_naissance', 'actif', 'fonction_id', 'grade_id', 'localite_id', 'annee_incorporation'];
+        $columns = ['id', 'nom', 'prenom', 'civilite_id', 'email', 'suffixe', 'statut_sapeur', 'statut_civil', 'date_naissance', 'fonction_id', 'grade_id', 'localite_id', 'annee_incorporation'];
         $sapeurs = $query->get([...$columns, DB::raw("CONCAT(nom, ' ', prenom) AS nom_prenom")])
             ->sortBy('nom_prenom')
             ->map(fn($sapeur) => $this->serializeSapeur($sapeur))
@@ -79,8 +79,7 @@ class SapeurController extends Controller
     public function effectif()
     {
         $sapeurs = Sapeur::with('telephones', 'permis', 'fonctions', 'groupes')
-            ->where('actif', '=', '1')
-            ->where('type', '=', SapeurBusiness::TYPE_SAPEUR)
+            ->where('statut_sapeur', SapeurBusiness::STATUT_ACTIF)
             ->get(['id', 'nom', 'prenom', 'email', 'annee_incorporation', 'rue', 'no_rue', 'date_naissance', 'fonction_id', 'grade_id', 'civilite_id', 'localite_id'])
             ->toArray();
         return response()->json(['data' => $sapeurs]);
@@ -106,22 +105,23 @@ class SapeurController extends Controller
     public function convocationSms()
     {
         return response()->json([
+            // Sapeurs et civils actifs : un civil peut aussi être convoqué
             'data' => Sapeur::with('telephones')
-                ->where('actif', '=', '1')
+                ->where(fn($query) => $query->where('statut_sapeur', SapeurBusiness::STATUT_ACTIF)
+                    ->orWhere('statut_civil', SapeurBusiness::STATUT_ACTIF))
                 ->get(['id', 'nom', 'prenom'])->toArray()
         ]);
     }
 
     public function store(Request $request)
     {
-        $type = $request->validate([
-            'type' => 'required|integer|min:0|max:1',
-        ])['type'];
+        // Nature de la première mutation, créée avec la personne
+        $rule = 'required|integer|in:' . SapeurBusiness::NATURE_SAPEUR . ',' . SapeurBusiness::NATURE_CIVIL;
+        $nature = $request->validate(['nature' => $rule])['nature'];
 
-        switch ($type) {
-            case SapeurBusiness::TYPE_SAPEUR:
+        switch ($nature) {
+            case SapeurBusiness::NATURE_SAPEUR:
                 $data = $request->validate([
-                    'type' => 'required|integer|min:0|max:1',
                     'nom' => 'string|min:2',
                     'prenom' => 'string|min:2',
                     'suffixe' => 'string|nullable',
@@ -142,9 +142,8 @@ class SapeurController extends Controller
                 ]);
                 return response()->json(['data' => $this->serializeSapeur(SapeurBusiness::createSapeur($data))], 201);
 
-            case SapeurBusiness::TYPE_CIVIL:
+            case SapeurBusiness::NATURE_CIVIL:
                 $data = $request->validate([
-                    'type' => 'required|integer|min:0|max:1',
                     'nom' => 'required|string|min:2',
                     'prenom' => 'required|string|min:2',
                     'rue' => 'required|string|min:3',
@@ -154,6 +153,7 @@ class SapeurController extends Controller
                     'email' => 'email|nullable',
                     'iban' => 'string|max:100|nullable',
                     'remarque' => 'string|max:300|nullable',
+                    'incorporation' => 'date|required',
                     'localite_id' => 'required|integer|min:1',
                     'civilite_id' => 'required|integer|min:1'
                 ]);
@@ -162,15 +162,7 @@ class SapeurController extends Controller
             default:
         }
 
-        return response()->json(['message' => 'Type invalid'], 422);
-    }
-
-    public function autreStatut(Request $request, $sapeurId)
-    {
-        $data = $request->validate([
-            'actif' => 'required|boolean',
-        ]);
-        return response()->json(['data' => SapeurBusiness::updateNonSapeurStatut($sapeurId, $data)]);
+        return response()->json(['message' => 'Nature invalide'], 422);
     }
 
     /**
@@ -200,7 +192,6 @@ class SapeurController extends Controller
             'employeur' => 'string|max:150|nullable',
             'lieu_de_travail' => 'string|max:100|nullable',
             'email' => 'email|nullable',
-            'actif' => 'integer',
             'iban' => 'string|max:100|nullable',
             'remarque' => 'string|max:300|nullable',
             'porteur' => 'boolean|nullable',

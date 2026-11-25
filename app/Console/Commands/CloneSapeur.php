@@ -110,6 +110,9 @@ class CloneSapeur extends Command
             // et grades, les ids source pouvant ne pas exister dans la cible.
             $newSapeur->fonction_id = null;
             $newSapeur->grade_id = null;
+            // Le clone est incorporé aujourd'hui comme sapeur (mutation créée plus bas), sans période civile
+            $newSapeur->statut_sapeur = SapeurBusiness::STATUT_ACTIF;
+            $newSapeur->statut_civil = SapeurBusiness::STATUT_JAMAIS;
             $newSapeur->save();
 
             $newSapeurId = $newSapeur->id;
@@ -203,6 +206,7 @@ class CloneSapeur extends Command
             // Créer une nouvelle mutation (incorporation aujourd'hui)
             $newMutation = new Mutation();
             $newMutation->sapeur_id = $newSapeurId;
+            $newMutation->nature = SapeurBusiness::NATURE_SAPEUR;
             $newMutation->incorporation = now()->format('Y-m-d');
             $newMutation->sortie = null;
             $newMutation->motif = 'Incorporation';

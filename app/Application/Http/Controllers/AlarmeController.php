@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domaine\Business\AlarmesBusiness;
+use App\Domaine\Business\SapeurBusiness;
 use App\Domaine\Exceptions\ArrayException;
 use App\Models\Sapeur;
 use Exception;
@@ -37,7 +38,7 @@ class AlarmeController extends Controller
                 $alarmes = $response->object();
             }
 
-            $sapeurs = Sapeur::with('telephones')->where('actif', '=', 1)->get(['nom', 'prenom', 'suffixe', 'id']);
+            $sapeurs = Sapeur::with('telephones')->where('statut_sapeur', SapeurBusiness::STATUT_ACTIF)->get(['nom', 'prenom', 'suffixe', 'id']);
             $interventions = AlarmesBusiness::resoudreAlarmes($alarmes, $sapeurs);
             return response()->json(['data' => $interventions]);
         } catch (Exception $e) {

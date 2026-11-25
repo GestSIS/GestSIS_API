@@ -517,7 +517,7 @@ class SapeurCoursTest extends TestCase
     {
         // Arrange
         $sapeur = Sapeur::factory()->create();
-        $civil = Sapeur::factory()->create(['type' => SapeurBusiness::TYPE_CIVIL]);
+        $civil = Sapeur::factory()->civil()->create();
         $data = [
             'sapeur_ids' => [$sapeur->id, $civil->id],
             'date' => '1958-02-07',

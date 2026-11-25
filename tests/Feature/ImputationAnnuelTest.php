@@ -35,7 +35,7 @@ class ImputationAnnuelTest extends TestCase
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "2019-01-29";
         $data['localite_id'] = $this->localiteId;
-        $data['type'] = 0;
+        $data['nature'] = 0;
         $this->sapeurOneId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
         $this->json('POST', "/api/v2/sapeurs/{$this->sapeurOneId}/fonctions", [
             'fonction_id' => 1,
@@ -48,7 +48,7 @@ class ImputationAnnuelTest extends TestCase
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "2019-01-29";
         $data['localite_id'] = $this->localiteId;
-        $data['type'] = 0;
+        $data['nature'] = 0;
         $this->sapeurTwoId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
         $this->json('POST', "/api/v2/sapeurs/{$this->sapeurTwoId}/fonctions", [
             'fonction_id' => 4,
@@ -61,7 +61,7 @@ class ImputationAnnuelTest extends TestCase
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "2019-01-29";
         $data['localite_id'] = $this->localiteId;
-        $data['type'] = 0;
+        $data['nature'] = 0;
         $this->sapeurThreeId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
         $this->json('POST', "/api/v2/sapeurs/{$this->sapeurThreeId}/fonctions", [
             'fonction_id' => 5,
@@ -74,7 +74,7 @@ class ImputationAnnuelTest extends TestCase
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "2019-01-29";
         $data['localite_id'] = $this->localiteId;
-        $data['type'] = 0;
+        $data['nature'] = 0;
         $this->sapeurFourId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
         $this->json('POST', "/api/v2/sapeurs/{$this->sapeurFourId}/fonctions", [
             'fonction_id' => 2,
@@ -140,7 +140,7 @@ class ImputationAnnuelTest extends TestCase
         $data = Sapeur::factory()->make()->toArray();
         $data['incorporation'] = "2019-01-29";
         $data['localite_id'] = $this->localiteId;
-        $data['type'] = 0;
+        $data['nature'] = 0;
         $sapeurId = $this->json('POST', '/api/v2/sapeurs', $data)->json('data.id');
         $this->json('POST', "/api/v2/sapeurs/{$sapeurId}/fonctions", [
             'fonction_id' => 5,

@@ -19,11 +19,15 @@ class EmailValidateTest extends TestCase
         parent::tearDown();
     }
 
-    protected function createSapeur(string $db, string $email): Sapeur
+    /**
+     * @param array<string, mixed> $attributes
+     */
+    protected function createSapeur(string $db, string $email, array $attributes = []): Sapeur
     {
         $sapeur = Sapeur::on($db)->create(array_merge(
             Sapeur::factory()->make()->toArray(),
-            ['actif' => 1, 'type' => SapeurBusiness::TYPE_SAPEUR, 'email' => $email]
+            ['actif' => 1, 'statut_sapeur' => SapeurBusiness::STATUT_ACTIF, 'statut_civil' => SapeurBusiness::STATUT_JAMAIS, 'email' => $email],
+            $attributes,
         ));
 
         $this->createdIds[] = [$db, $sapeur->id];
@@ -72,5 +76,33 @@ class EmailValidateTest extends TestCase
         $exact = $this->createSapeur('db_hs', 'andre.dupont@example-validate.ch');
 
         $this->assertSame(['hs' => $exact->id], $this->validateEmail('andre.dupont@example-validate.ch'));
+    }
+
+    public function testValidateEmailRetourneUnCivilActif(): void
+    {
+        $civil = $this->createSapeur('db_hs', 'civil@example-validate.ch', [
+            'statut_sapeur' => SapeurBusiness::STATUT_JAMAIS,
+            'statut_civil' => SapeurBusiness::STATUT_ACTIF,
+        ]);
+
+        $this->assertSame(['hs' => $civil->id], $this->validateEmail('civil@example-validate.ch'));
+    }
+
+    public function testValidateEmailIgnoreUnAncienSapeurInactif(): void
+    {
+        $this->createSapeur('db_hs', 'ancien@example-validate.ch', [
+            'statut_sapeur' => SapeurBusiness::STATUT_INACTIF,
+        ]);
+
+        $this->assertSame([], $this->validateEmail('ancien@example-validate.ch'));
+    }
+
+    public function testValidateEmailIgnoreUneRecrue(): void
+    {
+        $this->createSapeur('db_hs', 'recrue@example-validate.ch', [
+            'statut_sapeur' => SapeurBusiness::STATUT_JAMAIS,
+        ]);
+
+        $this->assertSame([], $this->validateEmail('recrue@example-validate.ch'));
     }
 }

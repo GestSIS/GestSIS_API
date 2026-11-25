@@ -146,8 +146,7 @@ class RtaBusiness
 
     public static function getReferenceGestSis()
     {
-        return Sapeur::where('actif', true)
-            ->where('type', SapeurBusiness::TYPE_SAPEUR)
+        return Sapeur::where('statut_sapeur', SapeurBusiness::STATUT_ACTIF)
             ->with([
                 'groupes',
                 'telephones' => function ($query) {

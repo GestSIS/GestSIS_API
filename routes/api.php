@@ -316,9 +316,6 @@ Route::group(['prefix' => 'v2', 'middleware' => [HttpLogger::class, DbSelector::
         Route::apiResource('sapeurs.photo', SapeurPhotoController::class)->only(['store']);
         Route::delete('sapeurs/{sapeurId}/photo', [SapeurPhotoController::class, 'destroy'])->name('api.v2.sapeur.photo-destroy');
 
-        // Route spécial pour les civils et autres afin de changer leur statut
-        Route::put('sapeurs/{id}/autre-statut', [SapeurController::class, 'autreStatut']);
-
         Route::post('sapeurs/{id}/fin-fonctions', [SapeurFonctionController::class, 'fin']);
         Route::post('sapeurs/{id}/quitter-groupes', [SapeurGroupeController::class, 'quitter']);
         Route::post('sapeurs/{id}/supprimer-convocations', [ConvocationsController::class, 'supprimerConvocations']);

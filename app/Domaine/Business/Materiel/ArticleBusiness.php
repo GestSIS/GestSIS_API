@@ -4,6 +4,7 @@ namespace App\Domaine\Business\Materiel;
 
 use App\Application\Typst\TypstTemplate;
 use App\Application\Typst\TypstToPdfGenerator;
+use App\Domaine\Business\SapeurBusiness;
 use App\Domaine\Exceptions\ArrayException;
 use App\Exceptions\InternalException;
 use App\Exceptions\BadRequestException;
@@ -600,7 +601,7 @@ class ArticleBusiness
   }
 
   /**
-   * Articles actifs encore attribués à des sapeurs inactifs (matériel à récupérer).
+   * Articles actifs encore attribués à des personnes inactives (matériel à récupérer).
    * Le regroupement par sapeur est fait côté frontend.
    *
    * @return Collection<int, Article>
@@ -609,7 +610,9 @@ class ArticleBusiness
   {
     return Article::nonSupprimes()
       ->whereNotNull('sapeur_id')
-      ->whereHas('sapeur', fn ($q) => $q->where('actif', false))
+      // Ni sapeur ni civil actif
+      ->whereHas('sapeur', fn ($q) => $q->where('statut_sapeur', '!=', SapeurBusiness::STATUT_ACTIF)
+        ->where('statut_civil', '!=', SapeurBusiness::STATUT_ACTIF))
       ->with(['sapeur', 'materielType'])
       ->get();
   }
