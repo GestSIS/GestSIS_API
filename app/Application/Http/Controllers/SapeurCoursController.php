@@ -25,15 +25,15 @@ class SapeurCoursController extends Controller
         }
 
         $data = $request->validate([
-            'date' => 'required|date',
+            'date' => 'required|date_format:Y-m-d',
             'duree' => 'required|numeric|min:0',
             'localite_id' => 'integer|exists:localites,id',
             'cours_id' => 'required|integer|exists:cours,id',
             'fonction_sapeur_id' => 'integer|nullable',
             'fonction_id' => 'integer|nullable',
             'grade_id' => 'integer|nullable',
-            'date_fonction' => 'bail|required_with:fonction_id|date|nullable',
-            'date_grade' => 'bail|required_with:grade_id|date|nullable'
+            'date_fonction' => 'bail|required_with:fonction_id|date_format:Y-m-d|nullable',
+            'date_grade' => 'bail|required_with:grade_id|date_format:Y-m-d|nullable'
         ]);
 
         $cours = SapeurBusiness::addCours($sapeurId, $data);
@@ -55,7 +55,7 @@ class SapeurCoursController extends Controller
         $data = $request->validate([
             'id' => 'integer|exists:cours_sapeur,id',
             'duree' => 'numeric|min:0',
-            'date' => 'date',
+            'date' => 'date_format:Y-m-d',
             'localite_id' => 'integer|exists:localites,id',
         ]);
 

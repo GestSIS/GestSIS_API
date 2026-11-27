@@ -34,14 +34,14 @@ class CoursSapeurController extends Controller
         $data = $request->validate([
             'sapeur_ids' => 'required|array|min:1',
             'sapeur_ids.*' => 'distinct|integer|exists:sapeurs,id',
-            'date' => 'required|date',
+            'date' => 'required|date_format:Y-m-d',
             'duree' => 'required|numeric|min:0',
             'localite_id' => 'integer|exists:localites,id',
             'cours_id' => 'required|integer|exists:cours,id',
             'fonction_id' => 'integer|nullable',
             'grade_id' => 'integer|nullable',
-            'date_fonction' => 'bail|required_with:fonction_id|date|nullable',
-            'date_grade' => 'bail|required_with:grade_id|date|nullable',
+            'date_fonction' => 'bail|required_with:fonction_id|date_format:Y-m-d|nullable',
+            'date_grade' => 'bail|required_with:grade_id|date_format:Y-m-d|nullable',
         ]);
 
         $sapeurIds = $data['sapeur_ids'];
