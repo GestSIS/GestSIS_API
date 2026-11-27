@@ -35,7 +35,7 @@ class JwtTokenValidatorAuth
         }
 
         if (!in_array("admin", $perms["_"])) {
-            return response()->json(["message" => "Permissions insuffisantes"], 401);
+            return response()->json(["message" => "Permissions insuffisantes"], 403);
         }
 
         return $next($request);

@@ -30,18 +30,18 @@ class JwtTokenValidatorRole
 
         $sisKey = $request->header('Sis-Key', Null);
         if (is_null($sisKey)) {
-            return response()->json(["message" => "Sis non sélectionné"], 401);
+            return response()->json(["message" => "Sis non sélectionné"], 400);
         }
 
         if (count($roles) > 0) {
             // Check has role for provided sis
             $perms = (array) $token->data->permissions;
             if (!array_key_exists($sisKey, $perms)) {
-                return response()->json(["message" => "Aucun droit pour ce sis"], 401);
+                return response()->json(["message" => "Aucun droit pour ce sis"], 403);
             }
 
             if (count(array_intersect($roles, $perms[$sisKey])) == 0) {
-                return response()->json(["message" => "Au moins 1 des rôles suivant est requis [" . join(", ", $roles) . "]."], 401);
+                return response()->json(["message" => "Au moins 1 des rôles suivant est requis [" . join(", ", $roles) . "]."], 403);
             }
 
             $request->attributes->add(['permissions' => $perms[$sisKey] ?? []]);

@@ -29,7 +29,7 @@ class JwtTokenValidatorAdmin
         }
 
         if ($token->data->admin !== true) {
-            return response()->json(["message" => "Permissions insuffisantes"], 401);
+            return response()->json(["message" => "Permissions insuffisantes"], 403);
         }
 
         return $next($request);

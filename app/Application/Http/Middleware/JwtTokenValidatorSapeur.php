@@ -30,13 +30,13 @@ class JwtTokenValidatorSapeur
 
         $sisKey = $request->header('Sis-Key', Null);
         if (is_null($sisKey)) {
-            return response()->json(["message" => "Sis non sélectionné"], 401);
+            return response()->json(["message" => "Sis non sélectionné"], 400);
         }
 
         // Check is a valid sapeur for the provided sis
         $sapeurs = (array) $token->data->sapeurs;
         if (!array_key_exists($sisKey, $sapeurs)) {
-            return response()->json(["message" => "Votre compte n'est pas lié à un sapeur de ce SIS"], 401);
+            return response()->json(["message" => "Votre compte n'est pas lié à un sapeur de ce SIS"], 403);
         }
         $request->attributes->add(['sapeurId' => $sapeurs[$sisKey]]);
 

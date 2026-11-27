@@ -30,7 +30,7 @@ class JwtTokenValidatorSapeurOrRole
 
         $sisKey = $request->header('Sis-Key', Null);
         if (is_null($sisKey)) {
-            return response()->json(["message" => "Sis non sélectionné"], 401);
+            return response()->json(["message" => "Sis non sélectionné"], 400);
         }
 
         // Check is a valid sapeur for the provided sis, or has one of the required roles
@@ -38,11 +38,11 @@ class JwtTokenValidatorSapeurOrRole
         $permissions = (array) $token->data->permissions;
         if (!array_key_exists($sisKey, $sapeurs)) {
             if (!array_key_exists($sisKey, $permissions)) {
-                return response()->json(["message" => "Votre compte n'est pas lié à un sapeur de ce SIS"], 401);
+                return response()->json(["message" => "Votre compte n'est pas lié à un sapeur de ce SIS"], 403);
             }
 
             if (count($roles) > 0 && count(array_intersect($roles, (array) $permissions[$sisKey])) == 0) {
-                return response()->json(["message" => "Au moins 1 des rôles suivant est requis [" . join(", ", $roles) . "]."], 401);
+                return response()->json(["message" => "Au moins 1 des rôles suivant est requis [" . join(", ", $roles) . "]."], 403);
             }
         }
 
