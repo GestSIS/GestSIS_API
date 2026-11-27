@@ -649,6 +649,10 @@ class InterventionBusiness
     {
         self::checkIsNotImpute($interventionId);
 
+        // Sapeurs déjà quittancés ou envoyés deux fois (double clic, deux onglets) : ignorés
+        $existingSapeurIds = Quittance::where('intervention_id', $interventionId)->pluck('sapeur_id')->all();
+        $quittances = array_diff(array_unique($quittances), $existingSapeurIds);
+
         foreach ($quittances as $quittance) {
             $newQuittance = new Quittance();
             $newQuittance->sapeur_id = $quittance;
@@ -685,7 +689,7 @@ class InterventionBusiness
         //Check duplicated vehicules
         $vehiculeIds = InterventionVehicule::where('intervention_id', $interventionId)
             ->pluck('vehicule_id')->toArray();
-        $vehicules = array_diff($vehicules, $vehiculeIds);
+        $vehicules = array_diff(array_unique($vehicules), $vehiculeIds);
 
         // Un véhicule supprimé ne peut plus être engagé ; un véhicule indisponible
         // (disponible_intervention à faux) reste accepté.

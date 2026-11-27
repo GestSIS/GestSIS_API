@@ -219,6 +219,17 @@ class InterventionSapeurTest extends TestCase
             ]);
     }
 
+    // Quittance déjà présente ou envoyée deux fois (double clic, deux onglets) : ignorée, pas d'erreur
+    public function testAddInterventionQuittanceIgnoresDuplicates()
+    {
+        $url = '/api/v2/interventions/' . $this->interventionId . '/quittances';
+        $this->json('POST', $url, ['quittances' => [1]])->assertStatus(201);
+
+        $response = $this->json('POST', $url, ['quittances' => [1, 2, 2]]);
+
+        $response->assertStatus(201)->assertJsonCount(2, 'data');
+    }
+
     /**
      * Test remove quittance
      *
