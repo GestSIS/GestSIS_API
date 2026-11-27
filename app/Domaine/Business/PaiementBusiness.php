@@ -692,7 +692,11 @@ class PaiementBusiness
         $bic = $params->bic;
         $iban = $params->iban;
         
-        $nomFichier = preg_replace("([^\w\s\d\-_~,;\[\]\(\).])", "-", Decompte::find($decompteId)->designation) . ".xml";
+        $decompte = Decompte::find($decompteId);
+        if ($decompte === null) {
+            throw new InvalidActionException([], "Décompte introuvable");
+        }
+        $nomFichier = preg_replace("([^\w\s\d\-_~,;\[\]\(\).])", "-", $decompte->designation) . ".xml";
         $content = self::iso20022PourDecompte($decompteId, $nom, $bic, $iban);
 
         // TODO: Refactor est-ce que ce code ne devrait pas se trouver du cote du controller ?
@@ -708,6 +712,9 @@ class PaiementBusiness
     public static function impressionDecompte($decompteId, $sisKey)
     {
         $decompte = Decompte::find($decompteId);
+        if ($decompte === null) {
+            throw new InvalidActionException([], "Décompte introuvable");
+        }
         $ecritures = Ecriture::where('decompte_id', $decompteId)->orderBy('date')->get();
 
         $sapeursMap = Sapeur::get(['id', 'nom', 'prenom'])
@@ -887,6 +894,10 @@ class PaiementBusiness
     private static function printDecompteSapeur($decompteId, $ecritures, string $sisKey, bool $resume = false)
     {
         $decompte = Decompte::with('paiements')->find($decompteId);
+        // Supprimé entre la lecture des écritures et celle-ci (suppression concurrente)
+        if ($decompte === null) {
+            throw new InvalidActionException([], "Décompte introuvable");
+        }
         $decomptes = Decompte::where('exercice_comptable_id', $decompte->exercice_comptable_id)->get();
         $decomptesMap = $decomptes->keyBy('id')->all();
 

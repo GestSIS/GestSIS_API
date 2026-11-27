@@ -12,6 +12,7 @@ use App\Models\SisParam;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -795,6 +796,56 @@ class DecompteTest extends TestCase
         $this->assertEquals(5.0, $total['avs_ac']);
         $this->assertEquals(20.0, $total['frais_effectif']);
         $this->assertEquals(0.0, $total['frais_forfaitaire']);
+    }
+
+    /**
+     * Décompte supprimé pendant l'impression (écritures lues juste avant la suppression) :
+     * erreur métier plutôt qu'une exception sur un décompte null.
+     */
+    public function testImpressionDecompteSupprimeRetourneErreur()
+    {
+        // Etat vu entre la lecture des écritures et celle du décompte, impossible à créer sans
+        // désactiver les clés étrangères
+        Schema::disableForeignKeyConstraints();
+        Ecriture::insert([
+            "designation" => "test",
+            "total" => 1,
+            "tarif" => 1,
+            "type_unite_id" => ImputationBusiness::UNITE_PIECE,
+            "quantite" => 1,
+            "module" => ImputationBusiness::ECRITURE_MODULE_DIVERS,
+            "type" => ImputationBusiness::ECRITURE_CATEGORIE_IMPOSITION_SOLDE,
+            "sapeur_id" => 1,
+            "compte_id" => 1,
+            "exercice_comptable_id" => 2,
+            "ecriture_categorie_id" => 1,
+            "decompte_id" => 999999,
+        ]);
+        Schema::enableForeignKeyConstraints();
+
+        $response = $this->withHeaders(['Sis-Key' => 'test'])->json('GET', "api/v2/decomptes/999999/print-par-sapeur/1");
+
+        $response
+            ->assertStatus(422)
+            ->assertJsonPath('message', 'Décompte introuvable');
+    }
+
+    public function testImpressionDecompteInexistantRetourneErreur()
+    {
+        $response = $this->withHeaders(['Sis-Key' => 'test'])->json('GET', "api/v2/decomptes/999999/print");
+
+        $response
+            ->assertStatus(422)
+            ->assertJsonPath('message', 'Décompte introuvable');
+    }
+
+    public function testIso20022DecompteInexistantRetourneErreur()
+    {
+        $response = $this->withHeaders(['Sis-Key' => 'test'])->json('GET', "api/v2/decomptes/999999/iso20022");
+
+        $response
+            ->assertStatus(422)
+            ->assertJsonPath('message', 'Décompte introuvable');
     }
 
     /**
