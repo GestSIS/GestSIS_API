@@ -23,7 +23,14 @@ class AspsmsBusiness
             'password' => Crypt::encryptString($data['password']),
             'origin' => $data['origin'] ?? 'GestSIS',
         ]);
-        return self::getParams();
+        $params = self::getParams();
+
+        // À l'enregistrement, un compte invalide reste une erreur signalée à l'utilisateur
+        if (isset($params['credit_error'])) {
+            throw new ArrayException([], $params['credit_error']);
+        }
+
+        return $params;
     }
 
     public static function send($data)
@@ -80,12 +87,20 @@ class AspsmsBusiness
             }
             $username = Crypt::decryptString($params->username);
             $password = Crypt::decryptString($params->password);
-
-            return [
+            $result = [
                 'username' => $username,
                 'password' => '********',
-                'credit' => self::checkCredit($username, $password)
             ];
+
+            // Un compte invalide ou sans crédit ne doit pas empêcher d'ouvrir les paramètres pour le corriger
+            try {
+                $result['credit'] = self::checkCredit($username, $password);
+            } catch (ArrayException $e) {
+                $result['credit'] = null;
+                $result['credit_error'] = $e->getMessage();
+            }
+
+            return $result;
         } catch (DecryptException $e) {
             return [];
         }
