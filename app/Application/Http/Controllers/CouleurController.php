@@ -5,6 +5,7 @@ namespace App\Application\Http\Controllers;
 use App\Domaine\Business\Materiel\CouleurBusiness;
 use App\Models\Couleur;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class CouleurController extends Controller
 {
@@ -23,7 +24,7 @@ class CouleurController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'nom' => 'string|min:1|required',
+            'nom' => 'string|min:1|required|unique:couleurs,nom',
             'texte' => 'string|required',
             'fond' => 'string|required',
             'statut' => 'boolean',
@@ -36,7 +37,7 @@ class CouleurController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->validate([
-            'nom' => 'string|min:1',
+            'nom' => ['string', 'min:1', Rule::unique('couleurs', 'nom')->ignore($id)],
             'texte' => 'string|required',
             'fond' => 'string|required',
             'statut' => 'boolean',

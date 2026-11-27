@@ -5,6 +5,7 @@ namespace App\Application\Http\Controllers;
 use App\Domaine\Business\Materiel\BatterieBusiness;
 use App\Models\BatterieType;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class BatterieTypeController extends Controller
 {
@@ -23,7 +24,7 @@ class BatterieTypeController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'nom' => 'string|min:1|required',
+            'nom' => 'string|min:1|required|unique:batterie_types,nom',
         ]);
 
         $batterie = BatterieBusiness::createBatterie($data);
@@ -33,7 +34,7 @@ class BatterieTypeController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->validate([
-            'nom' => 'string|min:1|required',
+            'nom' => ['string', 'min:1', 'required', Rule::unique('batterie_types', 'nom')->ignore($id)],
         ]);
 
         $batterie = BatterieBusiness::editBatterie($id, $data);
